@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-import pyswisseph as swe
+import swisseph as swe
 from datetime import datetime
 import pytz
 from geopy.geocoders import Nominatim
