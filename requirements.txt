@@ -1,2 +1,7 @@
 flask
 gunicorn
+swisseph
+pytz
+geopy
+python-dotenv
+openai
