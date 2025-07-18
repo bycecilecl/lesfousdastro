@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyse astrologique gratuite</title>
+    <style>
+        body {
+            background: #f0f4f8;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            margin-top: 25px;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Entre tes coordonnées de naissance</h2>
+        <form action="/analyse_gratuite" method="POST">
+            <label for="nom">Prénom :</label>
+            <input type="text" name="nom" id="nom" required>
+
+            <label for="date_naissance">Date de naissance :</label>
+            <input type="date" name="date_naissance" id="date_naissance" required>
+
+            <label for="heure_naissance">Heure de naissance :</label>
+            <input type="time" name="heure_naissance" id="heure_naissance" required>
+
+            <label for="lieu_naissance">Lieu de naissance :</label>
+            <input type="text" name="lieu_naissance" id="lieu_naissance" required>
+
+            <input type="submit" value="Recevoir mon analyse ✨">
+        </form>
+    </div>
+</body>
+</html>
