@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Thème astrologique de {{ nom }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #fafafa; color: #333; }
+        h2, h3 { color: #2c3e50; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin-bottom: 6px; }
+        table { border-collapse: collapse; width: 100%; max-width: 700px; margin-bottom: 30px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h2>Thème astrologique de {{ nom }} ({{ date }})</h2>
+
+    <!-- Astrologie occidentale (tropicale) -->
+    <h3>Positions planétaires (astrologie occidentale - tropicale)</h3>
+    <ul>
+        {% for planete, infos in planetes.items() %}
+            <li><strong>{{ planete }}</strong> : 
+                {{ infos.degre_dans_signe }}° en {{ infos.signe }}
+                {# Pas de nakshatra côté occidental #}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Maître de l’Ascendant occidental</h3>
+    {% if maitre_ascendant %}
+    <p>
+        Le maître d’Ascendant est <strong>{{ maitre_ascendant.nom }}</strong>,
+        situé à <strong>{{ maitre_ascendant.degre_dans_signe }}°</strong> en <strong>{{ maitre_ascendant.signe }}</strong>,
+        dans la <strong>Maison {{ maitre_ascendant.maison }}</strong>.
+        {# Suppression du nakshatra côté occidental #}
+    </p>
+    {% else %}
+    <p>Le maître d’Ascendant occidental n’a pas pu être déterminé.</p>
+    {% endif %}
+
+    <h3>Maisons astrologiques tropicales</h3>
+    <ul>
+        {% for maison, info in maisons.items() %}
+            <li>
+                <strong>{{ maison }}</strong> :
+                {% if info.degre_dans_signe is not none and info.signe is not none %}
+                    {{ info.degre_dans_signe }}° en {{ info.signe }}
+                {% else %}
+                    Données non disponibles
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Aspects astrologiques</h3>
+    {% if aspects %}
+    <table>
+        <thead>
+            <tr>
+                <th>Planète 1</th>
+                <th>Planète 2</th>
+                <th>Aspect</th>
+                <th>Distance zodiacale (°)</th>
+                <th>Orbe réel (écart)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for asp in aspects %}
+                <tr>
+                    <td>{{ asp.planete1 }}</td>
+                    <td>{{ asp.planete2 }}</td>
+                    <td>{{ asp.aspect }}</td>
+                    <td>{{ asp.distance }}</td>
+                    <td>{{ asp.orbe }}°</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>Aucun aspect notable trouvé.</p>
+    {% endif %}
+
+    <!-- Astrologie védique (sidérale) -->
+    <h3>Maisons astrologiques védiques (sidérales)</h3>
+    <ul>
+        {% for maison, info in maisons_vediques.items() %}
+            <li>
+                <strong>{{ maison }}</strong> :
+                {% if info.degre_dans_signe is not none and info.signe is not none %}
+                    {{ info.degre_dans_signe }}° en {{ info.signe }}
+                {% else %}
+                    Données non disponibles
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Ascendant sidéral</h3>
+    <p>
+        {{ ascendant_sidereal.degre_dans_signe }}° en <strong>{{ ascendant_sidereal.signe }}</strong>,
+        dans le Nakshatra <em>{{ ascendant_sidereal.nakshatra }}</em>.
+    </p>
+
+    <h3>Maître de l’Ascendant sidéral (védique)</h3>
+    {% if maitre_ascendant_vedique %}
+    <p>
+        Le maître d’Ascendant védique est <strong>{{ maitre_ascendant_vedique.nom }}</strong>,
+        situé à <strong>{{ maitre_ascendant_vedique.degre_dans_signe }}°</strong> en <strong>{{ maitre_ascendant_vedique.signe }}</strong>,
+        dans la <strong>Maison {{ maitre_ascendant_vedique.maison }}</strong>.<br />
+        Il se trouve dans le Nakshatra <em>{{ maitre_ascendant_vedique.nakshatra }}</em>.
+    </p>
+    {% else %}
+    <p>Le maître d’Ascendant védique n’a pas pu être déterminé.</p>
+    {% endif %}
+    
+    <h3>Positions planétaires védiques (sidérales)</h3>
+    <ul>
+        {% for planete, infos in planetes_vediques.items() %}
+            <li><strong>{{ planete }}</strong> : 
+                {{ infos.degre_dans_signe }}° en {{ infos.signe }}
+                {% if infos.nakshatra %}
+                    – Nakshatra : <em>{{ infos.nakshatra }}</em>
+                {% endif %}
+                {% if infos.maison %}
+                    – Maison {{ infos.maison }}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    <h3>Résumé du point astral</h3>
+    <ul>
+    {% for ligne in points_forts %}
+        <li>{{ ligne }}</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
