@@ -1,6 +1,6 @@
 flask
 gunicorn
-swisseph
+pyswisseph
 pytz
 geopy
 python-dotenv
