@@ -1,4 +1,8 @@
 flask
 gunicorn
-weaviate-client>=4.0.0
+pyswisseph
+pytz
+geopy
 python-dotenv
+openai
+weaviate-client>=4.0.0

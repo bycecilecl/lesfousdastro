@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyse astrologique</title>
+    <style>
+        body {
+            background: #fefefe;
+            font-family: Georgia, serif;
+            margin: 0 auto;
+            padding: 40px;
+            max-width: 800px;
+            color: #2c3e50;
+        }
+
+        h1 {
+            text-align: center;
+            color: #3b3b3b;
+        }
+
+        .bloc {
+            background: #f3f3f3;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .button-link {
+            display: inline-block;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            text-decoration: none;
+            color: white;
+            background-color: #2980b9;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        .button-link:hover {
+            background-color: #1f6396;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .footer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Analyse de {{ nom }}</h1>
+    <p class="center"><em>née le {{ date }}</em></p>
+
+    <div class="bloc">
+        <h2>Voici ton analyse personnalisée ✨</h2>
+        <p>{{ analyse|safe }}</p>
+
+        <div class="footer-buttons">
+            <a href="{{ url_for('placements', nom=nom, date=date, heure=heure_naissance, lieu=lieu_naissance) }}"
+               target="_blank"
+               class="button-link">
+               🔭 Voir mes placements astrologiques
+            </a>
+
+            <a href="{{ url_for('formulaire') }}"
+               class="button-link">
+               🔁 Faire une autre analyse
+            </a>
+        </div>
+    </div>
+    {% include 'footer.html' %}
+</body>
+</html>
