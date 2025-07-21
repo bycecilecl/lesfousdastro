@@ -6,3 +6,4 @@ geopy
 python-dotenv
 openai
 weaviate-client>=4.0.0
+xhtml2pdf
