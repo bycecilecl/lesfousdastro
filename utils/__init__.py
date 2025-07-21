@@ -1,0 +1,1 @@
+from utils.utils_points_forts import extraire_points_forts
