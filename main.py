@@ -632,5 +632,7 @@ def analyse_post():
 def mentions_legales():
     return render_template("mentions_legales.html")
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5050)
+if __name__ == "__main__":
+    # Ce bloc ne sera exécuté que quand tu lances localement avec "python main.py"
+    port = int(os.environ.get("PORT", 5050))
+    app.run(debug=True, host="0.0.0.0", port=port)
