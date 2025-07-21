@@ -1,15 +1,63 @@
-from flask import Flask, render_template, request, jsonify
-import swisseph as swe
-from datetime import datetime
-import pytz
+# 🌐 Librairies externes
+from flask import Flask, render_template, request, jsonify, redirect
 from geopy.geocoders import Nominatim
-from analyse_synthetique import extraire_points_forts
-from analyse_gratuite import analyse_gratuite
-from openai_utils import interroger_llm
+from datetime import datetime
+import swisseph as swe
+import pytz
+import uuid
 import os
+import csv
 import openai
 from dotenv import load_dotenv
 
+# 🔧 Fonctions personnalisées (app)
+from openai_utils import interroger_llm
+from utils.astro_utils import corriger_donnees_maisons, valider_donnees_avant_analyse
+from utils.utils_formatage import formater_positions_planetes, formater_aspects
+from utils.utils_points_forts import extraire_points_forts
+from utils.utils_analyse import analyse_gratuite
+from utils.pdf_utils import html_to_pdf
+from analyse_point_astral import analyse_point_astral
+from analyse_gratuite import analyse_gratuite
+
+
+# Ajoutez au début du fichier, après les imports
+try:
+    import swisseph as swe
+except ImportError:
+
+    print("❌ SwissEph non installé. Installez avec: pip install pyephem")
+    exit(1)
+
+# Vérification de la clé API
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    print("❌ OPENAI_API_KEY manquante dans le fichier .env")
+    exit(1)
+openai.api_key = api_key
+
+SIGNES_ZODIAC = ['Bélier', 'Taureau', 'Gémeaux', 'Cancer', 'Lion', 'Vierge',
+                 'Balance', 'Scorpion', 'Sagittaire', 'Capricorne', 'Verseau', 'Poissons']
+
+NAKSHATRAS = [
+    'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra',
+    'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni',
+    'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha',
+    'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha',
+    'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'
+]
+
+ANGLES_ASPECTS = {'conjonction': 0, 'opposition': 180, 'trigone': 120, 'carre': 90, 'sextile': 60}
+ORBES_DEFAUT = {'conjonction': 10, 'opposition': 8, 'trigone': 8, 'carre': 6, 'sextile': 6}
+
+MAITRES_SIGNES = {
+    'Bélier': 'Mars', 'Taureau': 'Vénus', 'Gémeaux': 'Mercure', 'Cancer': 'Lune',
+    'Lion': 'Soleil', 'Vierge': 'Mercure', 'Balance': 'Vénus', 'Scorpion': 'Mars',
+    'Sagittaire': 'Jupiter', 'Capricorne': 'Saturne', 'Verseau': 'Saturne', 'Poissons': 'Jupiter'
+}
+
+print("📁 Répertoire courant :", os.getcwd())
+print("📄 Fichier existe ?", os.path.exists("utilisateurs.csv"))
 
 load_dotenv()  # charge le fichier .env
 
@@ -17,32 +65,43 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__)
 
-def degre_vers_signe(degre):
-    signes = ['Bélier', 'Taureau', 'Gémeaux', 'Cancer', 'Lion', 'Vierge',
-              'Balance', 'Scorpion', 'Sagittaire', 'Capricorne', 'Verseau', 'Poissons']
-    index = int(degre // 30)
-    return signes[index], round(degre % 30, 2)
+def get_maison_planete(degre, cusps):
+    degre = degre % 360  # Normaliser le degré
+    for i in range(12):
+        start = cusps[i] % 360
+        end = cusps[(i + 1) % 12] % 360
+        
+        if start <= end:
+            if start <= degre < end:
+                return i + 1
+        else:  # Passage par 0°
+            if degre >= start or degre < end:
+                return i + 1
+    return 1  # Par défaut maison 1
 
-def angle_diff(angle1, angle2):
-    diff = abs(angle1 - angle2) % 360
+def degre_vers_signe(degre):
+    index = int(degre // 30)
+    if index >= len(SIGNES_ZODIAC):  # Protection contre les débordements
+        index = 0
+    return SIGNES_ZODIAC[index], round(degre % 30, 2)
+
+def angle_diff(a1, a2):
+    """
+    Calcule la différence d'angle absolue entre deux positions (en degrés),
+    en tenant compte du cercle zodiacal (0°–360°).
+    """
+    diff = abs(a1 - a2) % 360
     return diff if diff <= 180 else 360 - diff
 
 def get_nakshatra_name(degree_sidereal):
-    nakshatras = [
-        'Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra',
-        'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni',
-        'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha',
-        'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha',
-        'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'
-    ]
     index = int(degree_sidereal // (360 / 27))
-    return nakshatras[index]
+    if index >= len(NAKSHATRAS):  # Protection
+        index = 0
+    return NAKSHATRAS[index]
 
 def detecter_aspects(positions):
     aspects = []
     noms = list(positions.keys())
-    angles = {'conjonction': 0, 'opposition': 180, 'trigone': 120, 'carre': 90, 'sextile': 60}
-    orbes = {'conjonction': 10, 'opposition': 8, 'trigone': 8, 'carre': 6, 'sextile': 6}
 
     for i in range(len(noms)):
         for j in range(i + 1, len(noms)):
@@ -50,9 +109,9 @@ def detecter_aspects(positions):
             if (p1, p2) in [("Rahu", "Ketu"), ("Ketu", "Rahu")]:
                 continue
             a1, a2 = positions[p1], positions[p2]
-            orb_used = orbes if ("Ascendant" not in (p1, p2)) else {k: max(8, v) for k, v in orbes.items()}
+            orb_used = ORBES_DEFAUT if ("Ascendant" not in (p1, p2)) else {k: max(8, v) for k, v in ORBES_DEFAUT.items()}
 
-            for aspect, angle in angles.items():
+            for aspect, angle in ANGLES_ASPECTS.items():
                 ecart = abs(angle_diff(a1, a2) - angle)
                 if ecart <= orb_used[aspect]:
                     aspects.append({
@@ -68,23 +127,25 @@ def detecter_aspects(positions):
     return aspects
 
 def get_maitre_ascendant(signe_asc):
-    maitres = {
-        'Bélier': 'Mars', 'Taureau': 'Vénus', 'Gémeaux': 'Mercure', 'Cancer': 'Lune',
-        'Lion': 'Soleil', 'Vierge': 'Mercure', 'Balance': 'Vénus', 'Scorpion': 'Mars',
-        'Sagittaire': 'Jupiter', 'Capricorne': 'Saturne', 'Verseau': 'Saturne', 'Poissons': 'Jupiter'
-    }
-    return maitres.get(signe_asc)
+    return MAITRES_SIGNES.get(signe_asc)
 
-def get_maison_planete(degre, cusps):
+def maisons_vediques_fixes(signe_asc_sid):
+    index_asc = SIGNES_ZODIAC.index(signe_asc_sid)
+    maisons = {}
     for i in range(12):
-        start = cusps[i]
-        end = cusps[(i + 1) % 12]
-        if end < start:
-            end += 360
-        pos = degre if degre >= start else degre + 360
-        if start <= pos < end:
-            return i + 1
-    return 12
+        signe_mais = SIGNES_ZODIAC[(index_asc + i) % 12]
+        maisons[f'Maison {i+1}'] = {
+            'signe': signe_mais,
+            'degre': 0.0,
+            'degre_dans_signe': 0.0
+        }
+    return maisons
+
+def maison_vedique_planete_simple(signe_planete, signe_asc_sid):
+    index_asc = SIGNES_ZODIAC.index(signe_asc_sid)
+    index_plan = SIGNES_ZODIAC.index(signe_planete)
+    distance = (index_plan - index_asc) % 12
+    return distance + 1
 
 # --- NOUVELLES FONCTIONS POUR MAISONS VÉDIQUES ---
 
@@ -311,44 +372,60 @@ def formater_aspects(aspects):
 
 # === ROUTES ===
 
-@app.route('/analyse_gratuite', methods=['GET', 'POST'])
-def route_analyse_gratuite():
-    if request.method == 'GET':
-        return "Page accessible uniquement via formulaire POST"
-    else:
-        print("✅ Route /analyse_gratuite appelée")
-        print("📝 Données reçues :", request.form)
+@app.route('/analyse_gratuite', methods=['POST'])
+def analyse_gratuite_post():
+    print("✅ Route /analyse_gratuite appelée")
+    print("📝 Données reçues :", request.form)
 
-        # 1. Calcul du thème
-        data = calcul_theme(
-            nom=request.form['nom'],
-            date_naissance=request.form['date_naissance'],
-            heure_naissance=request.form['heure_naissance'],
-            lieu_naissance=request.form['lieu_naissance']
-        )
+    if 'consentement' not in request.form:
+        return "Consentement obligatoire pour générer l'analyse", 400
 
-        # 2. Récupération de la Lune védique
-        lune_vedique = data['planetes_vediques'].get('Lune', {})
+    # 1. Sauvegarde des données utilisateur
+    donnees_utilisateur = [
+        request.form['nom'],
+        request.form['email'],
+        request.form['date_naissance'],
+        request.form['heure_naissance'],
+        request.form['lieu_naissance']
+    ]
+    chemin_csv = os.path.join(os.path.dirname(__file__), 'utilisateurs.csv')
+    fichier_existe = os.path.exists(chemin_csv)
 
-        # 3. Analyse synthétique (résumé)
-        texte_resume = analyse_gratuite(
-            planetes=data['planetes'],
-            aspects=data['aspects'],
-            lune_vedique=lune_vedique
-        )
+    try:
+        with open(chemin_csv, mode='a', newline='', encoding='utf-8') as fichier:
+            writer = csv.writer(fichier)
+            if not fichier_existe:
+                writer.writerow(['nom', 'email', 'date_naissance', 'heure_naissance', 'lieu_naissance'])
+            writer.writerow(donnees_utilisateur)
+        print("✅ Données utilisateur enregistrées.")
+    except Exception as e:
+        print("❌ Erreur CSV :", e)
 
-        # 4. Conversion liste → chaîne de texte
-        texte_resume_str = "\n".join(texte_resume)
-        if len(texte_resume_str) > 600:
-            texte_resume_str = texte_resume_str[:600] + "..."
-        print("🪐 Résumé de l'analyse :", texte_resume_str)
+    # 2. Calcul du thème
+    data = calcul_theme(
+        nom=request.form['nom'],
+        date_naissance=request.form['date_naissance'],
+        heure_naissance=request.form['heure_naissance'],
+        lieu_naissance=request.form['lieu_naissance']
+    )
 
-        # 5. Préparer positions et aspects détaillés
-        positions_str = formater_positions_planetes(data['planetes'])
-        aspects_str = formater_aspects(data['aspects'])
+    # 3. Analyse gratuite
+    texte_resume = analyse_gratuite(
+        planetes=data['planetes'],
+        aspects=data['aspects'],
+        lune_vedique=data['planetes_vediques'].get('Lune', {})
+    )
 
-        # 6. Construction du prompt pour l'IA
-        prompt = f"""
+    texte_resume_str = "\n".join(texte_resume)
+    if len(texte_resume_str) > 600:
+        texte_resume_str = texte_resume_str[:600] + "..."
+
+    # 4. Préparer les textes à injecter dans le prompt
+    positions_str = formater_positions_planetes(data['planetes'])
+    aspects_str = formater_aspects(data['aspects'])
+
+    # 5. Construction du prompt pour l'IA
+    prompt = f"""
 Tu es une astrologue expérimentée, à la plume fine, directe, drôle et lucide.
 Tu proposes des analyses psychologiques profondes, qui vont à l’essentiel.
 Tu parles à la personne avec respect, sans flatterie, ni fioriture inutile, ni phrases creuses.
@@ -388,51 +465,26 @@ Cette analyse doit donner envie d'en savoir plus, d'explorer plus en profondeur.
 
 Fais une analyse de max 15 lignes.
 """
-        print("📤 Prompt envoyé à l'IA :", prompt)
 
-        # 7. Appel à OpenAI
-        texte_analyse_complete = interroger_llm(prompt)
-        print("✅ Analyse IA reçue :", texte_analyse_complete)
+    print("📤 Prompt envoyé à l'IA :", prompt)
 
-        # 8. Affichage dans le template
-        return render_template(
-            'analyse_gratuite.html',
-            nom=data['nom'],
-            date=data['date'],
-            analyse=texte_analyse_complete,
-            heure_naissance=request.form['heure_naissance'],
-            lieu_naissance=request.form['lieu_naissance']
-        )
-    
-@app.route('/')
-def formulaire():
-    return render_template('formulaire.html')
+    # 6. Appel à OpenAI
+    texte_analyse_complete = interroger_llm(prompt)
+    print("✅ Analyse IA reçue :", texte_analyse_complete)
 
-@app.route('/resultat', methods=['POST'])
-def resultat():
-    email = request.form['email']  # ⬅️ on récupère l’email ici
-    print(f"Email reçu : {email}")  # (optionnel, pour test)
-
-    data = calcul_theme(
-        nom=request.form['nom'],
-        date_naissance=request.form['date_naissance'],
+    # 7. Affichage dans le template
+    return render_template(
+        'analyse_gratuite.html',
+        nom=data['nom'],
+        date=data['date'],
+        analyse=texte_analyse_complete,
         heure_naissance=request.form['heure_naissance'],
         lieu_naissance=request.form['lieu_naissance']
     )
-    return render_template(
-        'resultat.html',
-        nom=data['nom'],
-        date=request.form['date_naissance'],
-        planetes=data['planetes'],
-        maisons=data['maisons'],
-        maisons_vediques=data['maisons_vediques'],
-        aspects=data['aspects'],
-        maitre_ascendant=data['maitre_ascendant'],
-        ascendant_sidereal=data['ascendant_sidereal'],
-        maitre_ascendant_vedique=data['maitre_ascendant_vedique'],
-        planetes_vediques=data['planetes_vediques'],
-        points_forts=data['points_forts']
-    )
+
+@app.route('/')
+def formulaire():
+    return render_template('formulaire.html')
 
 @app.route('/tous_les_placements', methods=['POST'])
 def tous_les_placements():
@@ -516,6 +568,40 @@ def placements():
         points_forts=data['points_forts']
     )
 
+@app.route('/analyse_point_astral', methods=['POST'])
+def analyse_point_astral_post():
+    print("✅ Route /analyse_point_astral appelée")
+
+    if 'consentement' not in request.form:
+        return "Consentement obligatoire pour générer l'analyse", 400
+
+    nom = request.form.get('nom')
+    email = request.form.get('email')
+    date_naissance = request.form.get('date_naissance')
+    heure_naissance = request.form.get('heure_naissance')
+    lieu_naissance = request.form.get('lieu_naissance')
+
+    theme_data = calcul_theme(
+        nom=nom,
+        date_naissance=date_naissance,
+        heure_naissance=heure_naissance,
+        lieu_naissance=lieu_naissance
+    )
+
+    # Tu peux ici ajouter une vérification minimale
+    if not theme_data.get("planetes") or not theme_data.get("aspects"):
+        return render_template("erreur.html", erreurs=["Le thème n’a pas pu être calculé correctement."], nom=nom)
+
+    html_analyse = analyse_point_astral(theme_data, interroger_llm)
+
+    filename = f"point_astral_{uuid.uuid4().hex}.pdf"
+    output_path = f"static/pdfs/{filename}"
+    os.makedirs("static/pdfs", exist_ok=True)
+    html_to_pdf(html_analyse, output_path)
+
+    return render_template("resultat_point_astral.html", 
+                           analyse_html=html_analyse,
+                           pdf_url=f"/static/pdfs/{filename}")
 @app.route('/json', methods=['POST'])
 def resultat_json():
     data = calcul_theme(
@@ -526,4 +612,25 @@ def resultat_json():
     )
     return jsonify(data)
 
+@app.route("/analyse", methods=["POST"])
+def analyse_post():
+    form_data = request.form
+    type_analyse = form_data.get("type_analyse")
 
+    if not form_data.get("consentement"):
+        return "Consentement obligatoire pour générer l'analyse", 400
+
+    if type_analyse == "gratuite":
+        return redirect("/analyse_gratuite", code=307)  # Garde les données POST
+    elif type_analyse == "point_astral":
+        return redirect("/analyse_point_astral", code=307)
+    else:
+        return "Type d’analyse inconnu", 400
+    
+
+@app.route("/mentions-legales")
+def mentions_legales():
+    return render_template("mentions_legales.html")
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5050)
