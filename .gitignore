@@ -1,1 +1,8 @@
 .env
+node_modules
+venv/
+env/
+__pycache__/
+*.pyc
+static/pdfs/clé_api.env
+clé_api.env

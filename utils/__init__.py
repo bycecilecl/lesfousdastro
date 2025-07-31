@@ -1,1 +1,2 @@
 from utils.utils_points_forts import extraire_points_forts
+from .calcul_theme import calcul_theme
