@@ -8,9 +8,19 @@ print(f"Valeur OPENAI_API_KEY: {os.getenv('OPENAI_API_KEY', 'NON_TROUVEE')}")
 print(f"Toutes les variables qui contiennent 'API': {[k for k in os.environ.keys() if 'API' in k]}")
 print("=======================================")
 
-api_key = os.getenv("OPENAI_API_KEY")
+# api_key = os.getenv("OPENAI_API_KEY")
+# if not api_key:
+#     raise ValueError(f"OPENAI_API_KEY non trouvée. Variables disponibles: {list(os.environ.keys())}")
+
+# Railway a parfois des caractères invisibles dans les noms de variables
+api_key = None
+for key, value in os.environ.items():
+    if key.strip() == "OPENAI_API_KEY":
+        api_key = value.strip()
+        break
+
 if not api_key:
-    raise ValueError(f"OPENAI_API_KEY non trouvée. Variables disponibles: {list(os.environ.keys())}")
+    raise ValueError(f"OPENAI_API_KEY non trouvée. Variables: {list(os.environ.keys())}")
 
 client = OpenAI(api_key=api_key)
 
