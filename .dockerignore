@@ -1,0 +1,12 @@
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.DS_Store
+*.pdf
+*.sqlite3
+ephe/
+*.csv
+static/pdfs/
+test_*

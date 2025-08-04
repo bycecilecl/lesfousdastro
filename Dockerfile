@@ -1,37 +1,38 @@
-# Utilise une image officielle Python avec gcc pour compiler pyswisseph
 FROM python:3.10-slim
 
-# Installation des bibliothèques nécessaires à pyswisseph ET WeasyPrint
+# Dépendances système pour WeasyPrint et pyswisseph
 RUN apt-get update && apt-get install -y \
     build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf2.0-dev \
+    libffi-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libjpeg62-turbo-dev \
+    libfontconfig1-dev \
+    libglib2.0-0 \
+    libglib2.0-dev \
+    libgobject-2.0-0 \
+    libgobject-2.0-dev \
+    libgirepository-1.0-1 \
+    libgirepository1.0-dev \
+    gir1.2-pango-1.0 \
+    pkg-config \
     curl \
     wget \
     unzip \
-    libffi-dev \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libcairo2 \
-    libgdk-pixbuf2.0-0 \
-    libglib2.0-0 \
-    libxml2 \
-    libxslt1.1 \
-    libjpeg62-turbo \
-    libfontconfig1 \
-    libgobject-2.0-0 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Crée le dossier de travail
 WORKDIR /app
 
-# Copie les fichiers de l'app dans le conteneur
-COPY . .
-
-# Installe les dépendances Python
+COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Expose le port sur lequel ton app tourne
+COPY . .
+
 EXPOSE 8080
 
-# Commande de démarrage (gunicorn pour Render ou Railway)
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
