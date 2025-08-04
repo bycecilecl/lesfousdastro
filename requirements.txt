@@ -56,3 +56,4 @@ google-auth
 google-auth-oauthlib
 requests
 gspread
+oauth2client==4.1.3
