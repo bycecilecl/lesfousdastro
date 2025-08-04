@@ -28,7 +28,8 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
 
     dt_utc = dt.astimezone(pytz.utc)
 
-    swe.set_ephe_path(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ephe'))
+    #swe.set_ephe_path(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ephe'))
+    swe.set_ephe_path("ephe")
     jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour + dt_utc.minute / 60)
     ayanamsa = swe.get_ayanamsa_ut(jd)
 
