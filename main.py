@@ -48,6 +48,22 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "jcg)c+og9c47o=cufp-%)o6q@$14#8980_(z23a$+t771sn!@*")
 register_routes(app)
 
+# Lire la variable d'environnement
+creds_json_str = os.getenv("GOOGLE_CREDS_JSON")
+
+if creds_json_str:
+    path = "/app/utils/google/credentials.json"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    try:
+        with open(path, "w") as f:
+            f.write(creds_json_str)
+        print("✅ credentials.json généré à partir des variables Railway", flush=True)
+    except Exception as e:
+        print(f"❌ Impossible d’écrire credentials.json : {e}", flush=True)
+else:
+    print("⚠️ GOOGLE_CREDS_JSON est vide ou non défini", flush=True)
+
 
 # === ROUTES ===
 
