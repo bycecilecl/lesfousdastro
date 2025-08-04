@@ -1,7 +1,15 @@
 import os
 from openai import OpenAI
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Debug : vérifier si la variable existe
+api_key = os.getenv("OPENAI_API_KEY")
+print(f"DEBUG: OPENAI_API_KEY present: {api_key is not None}")
+print(f"DEBUG: OPENAI_API_KEY length: {len(api_key) if api_key else 0}")
+
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set or empty")
+
+client = OpenAI(api_key=api_key)
 
 def interroger_llm(prompt):
     try:
