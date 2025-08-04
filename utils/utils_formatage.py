@@ -1,3 +1,4 @@
+
 def formater_positions_planetes(planetes):
     lignes = []
     for nom, infos in planetes.items():

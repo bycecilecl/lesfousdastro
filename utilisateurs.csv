@@ -1,22 +1,20 @@
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon Sur Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon Sur Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon Sur Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon Sur Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon Sur Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon Sur Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Eric,raphaneaueric83@gmail.com,1975-01-24,01:15,Orléans
-Eric,raphaneaueric83@gmail.com,1975-11-24,01:15,Orléans
-Dominique,dominique.lefebvre@gmail.com,1952-02-15,19:30,Paris
-Dominique,dominique.lefebvre@gmail.com,1952-02-15,19:30,Paris
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Cécile,cecilecl@gmail.com,1980-10-11,06:40,Chalon-Sur-Saone
-Carmele,carmele@gmail.com,1987-01-03,14:57,Bordeaux
+id_session;date_heure;prenom;email;date_naissance;heure_naissance;lieu_naissance;analyse;consentement;ip;origin;user_agent;
+5177c812-89ff-4d6f-abf2-2daa2616c4a1;2025-08-03 09:35:49;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36";9b2c9367-79d5-4948-a3b0-23eeb88548e6;2025-08-03 20:48:26;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+19b9ad04-fbbd-4ea5-80f2-00ba59b8e1bf;2025-08-03 20:57:45;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+09eff649-bb16-4ce7-8c59-87007fe75100;2025-08-03 20:59:47;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+22eeb7e8-6a05-4512-af39-6296f2bf60db;2025-08-03 21:03:21;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+a5039b1a-df05-464a-b2d8-3f5c04c3790c;2025-08-03 21:07:43;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+7c84a124-a2bb-42c0-be4a-e279aa515d2c;2025-08-03 21:14:01;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+6a68087e-c891-45b8-9d2d-9fe7dcb75d9f;2025-08-03 21:15:35;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+ff85a14b-2a9c-439e-8307-74dd8403c6c6;2025-08-03 21:17:29;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+bcad0817-e957-4ad3-9f17-a32e9d99bc4f;2025-08-03 21:21:27;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+b4a41b69-34d4-437e-bac8-b7df217acf0f;2025-08-04 00:09:08;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+12bb75ec-fa2a-4f21-971c-473e7016c57b;2025-08-04 08:40:27;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;non;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+76d45092-fc21-4548-8a00-0c6c7e3436ca;2025-08-04 08:44:37;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+4bc8f636-fd3d-492f-8e28-4f507dde246e;2025-08-04 08:45:00;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;non;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+a8e2ae32-d416-4366-b824-a1dd4db9f1d6;2025-08-04 08:49:10;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;non;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+39e8668d-b749-469c-a9e4-c13128dc5bfc;2025-08-04 08:52:53;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;non;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+72df40b2-f427-4da4-9328-67fc2afbbdef;2025-08-04 09:01:01;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;non;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+ef47409c-8782-414b-ac40-f824f8c7dc1f;2025-08-04 13:56:07;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+c5f239ab-e9ba-4993-9a73-911c52ea647c;2025-08-04 14:04:36;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;oui;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+9960dfd1-f67a-4691-8c36-7b8556362ebc;2025-08-04 14:08:25;Cécile;cecilecl@gmail.com;1980-10-11;06:40;Chalon-Sur-Saone;gratuite;non;127.0.0.1;direct;"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"

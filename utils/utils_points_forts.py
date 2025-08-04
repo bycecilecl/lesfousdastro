@@ -1,3 +1,5 @@
+
+
 def est_angulaire(maison):
     return maison in [1, 4, 7, 10]
 
@@ -21,19 +23,35 @@ def detecter_amas(planetes, seuil=3):
             points.append(f"Amas planétaire en {signe} ({', '.join(liste_planetes)})")
     return points
 
-def detecter_aspects_luminaire(planetes, aspects):
-    points = []
+def detecter_aspects_luminaire_detaille(aspects):
     luminaires = ['Soleil', 'Lune']
-    lourdes = ['Saturne', 'Pluton', 'Jupiter', 'Mars']
-    aspects_interessants = ['conjonction', 'carré', 'opposition']
+    priorite_map = {
+        'conjonction': 0,
+        'carré': 1,
+        'opposition': 2,
+        'trigone': 3,
+        'sextile': 4
+    }
 
-    for asp in aspects:
-        p1, p2 = asp.get('planete1'), asp.get('planete2')
-        type_asp = asp.get('aspect', '').lower()
-        if type_asp in aspects_interessants:
-            if (p1 in luminaires and p2 in lourdes) or (p2 in luminaires and p1 in lourdes):
-                points.append(f"Luminaire ({p1 if p1 in luminaires else p2}) en {type_asp} avec planète lourde ({p2 if p2 in lourdes else p1})")
-    return points
+    def priorite(asp):
+        aspect_type = asp.get('aspect', '').lower()
+        orbe = asp.get('orbe', 99)
+        if aspect_type == "conjonction" and orbe <= 6:
+            return 0
+        return priorite_map.get(aspect_type, 5)
+
+    filtres = [asp for asp in aspects if asp['planete1'] in luminaires or asp['planete2'] in luminaires]
+    filtres_trie = sorted(filtres, key=priorite)
+
+    resultats = []
+    for asp in filtres_trie:
+        p1 = asp['planete1']
+        p2 = asp['planete2']
+        asp_type = asp['aspect']
+        orbe = asp.get('orbe', '?')
+        resultats.append(f"{p1} {asp_type} {p2} (orbe {orbe}°)")
+
+    return resultats
 
 def detecter_conjonction_angles(positions, angles_degres, seuil_orbe=5):
     points = []
@@ -61,7 +79,7 @@ def extraire_points_forts(data):
 
     points += detecter_angles_importants(planetes)
     points += detecter_amas(planetes)
-    points += detecter_aspects_luminaire(planetes, aspects)
+    points += detecter_aspects_luminaire_detaille(aspects)
     points += detecter_conjonction_angles(
         {k: v['degre'] for k, v in planetes.items() if 'degre' in v},
         angles_degres

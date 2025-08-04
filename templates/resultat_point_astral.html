@@ -24,20 +24,33 @@
         .pdf-button:hover {
             background-color: #34495e;
         }
+        .footer {
+            font-size: 0.85rem;
+            color: #999;
+            text-align: center;
+            margin-top: 40px;
+        }
     </style>
 </head>
 <body>
     <h1>Ton analyse astrologique est prête</h1>
+
     <div class="analysis">
         {{ analyse_html | safe }}
     </div>
-    <a href="{{ pdf_url }}" class="pdf-button" download>
+
+    {% if pdf_url %}
+    <a href="{{ pdf_url }}" class="pdf-button" download target="_blank">
         📄 Télécharger le PDF
     </a>
-    <p style="font-size: 0.85rem; color: #999; text-align: center; margin-top: 40px;">
-    Analyse générée par Les Fous d’Astro © – Reproduction, copie ou diffusion interdites sans autorisation.
-    </p>
-    {% include 'footer.html' %}
+    {% else %}
+    <p style="color: red;">Le PDF n'a pas pu être généré.</p>
+    {% endif %}
 
+    <div class="footer">
+        Analyse générée par Les Fous d’Astro © – Reproduction, copie ou diffusion interdites sans autorisation.
+    </div>
+
+    {% include 'footer.html' %}
 </body>
 </html>
