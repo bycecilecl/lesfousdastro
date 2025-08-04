@@ -20,7 +20,7 @@ def envoyer_email_avec_analyse(destinataire, sujet, contenu_html, pdf_path=None)
             attachments=attachments
         )
 
-        print(f"✅ Email envoyé à {destinataire}")
+        print(f"✅ Email envoyé à {destinataire}", flush=True)
 
     except Exception as e:
-        print(f"❌ Erreur lors de l'envoi de l'email à {destinataire} : {e}")
+        print(f"❌ Erreur lors de l'envoi de l'email à {destinataire} : {e}", flush=True)
