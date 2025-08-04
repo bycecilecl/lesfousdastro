@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# Dépendances système pour WeasyPrint et pyswisseph
+# Dépendances système pour WeasyPrint
 RUN apt-get update && apt-get install -y \
     build-essential \
     libcairo2-dev \
@@ -10,15 +10,12 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     libxml2-dev \
     libxslt1-dev \
-    libjpeg62-turbo-dev \
+    libjpeg-dev \
     libfontconfig1-dev \
     libglib2.0-0 \
     libglib2.0-dev \
     libgobject-2.0-0 \
-    libgobject-2.0-dev \
     libgirepository-1.0-1 \
-    libgirepository1.0-dev \
-    gir1.2-pango-1.0 \
     pkg-config \
     curl \
     wget \
