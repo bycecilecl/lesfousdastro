@@ -1,19 +1,24 @@
 FROM python:3.10-slim
 
-# Installation des dépendances pour WeasyPrint et pyswisseph en une seule fois
+# Installation des dépendances système pour WeasyPrint et pyswisseph
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     wget \
     unzip \
-    python3-weasyprint \
-    python3-cffi \
-    python3-brotli \
-    libpango-1.0-0 \
-    libharfbuzz0b \
-    libpangoft2-1.0-0 \
-    libgdk-pixbuf2.0-0 \
-    libfontconfig1 \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf2.0-dev \
+    libffi-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libjpeg-dev \
+    libfontconfig1-dev \
+    libglib2.0-0 \
+    libgobject-2.0-0 \
+    libgirepository-1.0-1 \
+    pkg-config \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
