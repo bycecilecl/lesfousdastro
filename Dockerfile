@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     libxslt1.1 \
     libjpeg62-turbo \
     libfontconfig1 \
-    libgobject-2.0-0 \
+    libgobject-2.0-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Crée le dossier de travail
