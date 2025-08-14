@@ -1,8 +1,11 @@
 FROM python:3.12-slim-bookworm
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Logs lisibles + pas de .pyc
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# Dépendances RUNTIME pour WeasyPrint (pas les *-dev) + utilitaires
+# Dépendances RUNTIME (WeasyPrint) + outils de build (temporaires)
 RUN apt-get update -o Acquire::Retries=3 && \
     apt-get install -y --no-install-recommends \
       curl \
@@ -15,23 +18,31 @@ RUN apt-get update -o Acquire::Retries=3 && \
       libxslt1.1 \
       shared-mime-info \
       fonts-dejavu-core \
+      build-essential \
+      gcc \
+      pkg-config \
+      libffi-dev \
+      python3-dev \
       && rm -rf /var/lib/apt/lists/*
 
-# (optionnel) Si un package Python compile des wheels natifs, décommente:
-# RUN apt-get update -o Acquire::Retries=3 && \
-#     apt-get install -y --no-install-recommends build-essential pkg-config libffi-dev && \
-#     rm -rf /var/lib/apt/lists/*
-
-# Copie des éphémérides AVANT l’installation (utile pour tests)
+# Éphémérides (Swisseph) copiées avant l'install
 COPY ephe/ /app/ephe/
 
 WORKDIR /app
+
+# Dépendances Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    # 🧹 purge des outils de build (image plus légère)
+    apt-get purge -y build-essential gcc pkg-config libffi-dev python3-dev && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
 
+# Code de l'app
 COPY . .
+
 EXPOSE 8080
 
-# Gunicorn en prod
+# Lancement prod
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
