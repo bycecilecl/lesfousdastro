@@ -81,7 +81,7 @@ app = Flask(__name__)
 
 
 app.secret_key = os.getenv("SECRET_KEY")
-app.config.from_object(ProductionConfig)
+
 
 # ⬇️ AJOUT : enregistre le blueprint de géocodage
 app.register_blueprint(geocode_bp)
