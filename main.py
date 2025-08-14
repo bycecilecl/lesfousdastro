@@ -18,16 +18,15 @@ from utils.openai_utils import interroger_llm
 from utils.astro_utils import corriger_donnees_maisons, valider_donnees_avant_analyse
 from utils.formatage import formater_positions_planetes, formater_aspects
 from utils.pdf_utils import html_to_pdf
-#from analyse_point_astral import analyse_point_astral
 from routes import register_routes
 from routes.geocode import geocode_bp
+
+
 from analyse_point_astral_avec_sections import analyse_point_astral_avec_sections
 from utils.axes_majeurs import organiser_points_forts, formater_axes_majeurs
 from utils.utils_points_forts import extraire_points_forts  
 from routes.analyse_gratuite_api import gratuite_api_bp
 from utils.email_sender import envoyer_email_point_astral_v2
-
-
 
 
 #from archives.analyse_point_astral_synthetique import analyse_point_astral_synthetique_avec_rag
@@ -77,37 +76,12 @@ def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
     local = naive.replace(tzinfo=ZoneInfo(tzid))
     return local.astimezone(timezone.utc)
 
+
 app = Flask(__name__)
-
-
 app.secret_key = os.getenv("SECRET_KEY")
-
-
 # ⬇️ AJOUT : enregistre le blueprint de géocodage
 app.register_blueprint(geocode_bp)
 app.register_blueprint(gratuite_api_bp)
-
-
-from flask import Flask
-
-app = Flask(__name__)
-
-# # Sécurité : entêtes HTTP
-# @app.after_request
-# def set_security_headers(resp):
-#     resp.headers["X-Frame-Options"] = "DENY"
-#     resp.headers["X-Content-Type-Options"] = "nosniff"
-#     resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-#     resp.headers["Content-Security-Policy"] = (
-#         "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
-#         "script-src 'self'; connect-src 'self'; frame-ancestors 'none';"
-#     )
-#     return resp
-
-# # Ensuite, tes routes
-# @app.route("/")
-# def index():
-#     return "Hello, sécurisé !"
 
 
 # tes routes centralisées
