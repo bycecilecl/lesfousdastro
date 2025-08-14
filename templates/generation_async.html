@@ -1,0 +1,176 @@
+<!-- templates/generation_async.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Génération Point Astral ⏳</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh; padding: 20px; display: flex; align-items: center; justify-content: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            border-radius: 25px; padding: 40px; max-width: 600px; width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); text-align: center;
+        }
+        h1 { color: #1f628e; margin-bottom: 10px; font-size: 2rem; }
+        .subtitle { color: #666; margin-bottom: 30px; font-size: 1.1rem; }
+        .progress-container { margin: 30px 0; }
+        .progress-bar {
+            width: 100%; height: 20px; background: #f0f0f0;
+            border-radius: 10px; overflow: hidden; position: relative;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, #1f628e, #00a8a8);
+            width: 0%; transition: width 1s ease-in-out; border-radius: 10px;
+            position: relative; overflow: hidden;
+        }
+        .progress-fill::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .progress-text { margin-top: 10px; font-weight: bold; color: #1f628e; }
+        .message {
+            font-size: 1.2rem; margin: 20px 0; color: #1f628e;
+            min-height: 1.5em; transition: all 0.5s ease;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid #1f628e;
+            border-radius: 50%; width: 50px; height: 50px;
+            animation: spin 1s linear infinite; margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star {
+            position: absolute; width: 2px; height: 2px; background: white;
+            border-radius: 50%; animation: twinkle 3s infinite alternate;
+        }
+        @keyframes twinkle { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+        .eta { color: #888; font-size: 0.9rem; margin-top: 15px; }
+        .completed { background: #10B981; }
+        .error { background: #EF4444; color: white; padding: 20px; border-radius: 15px; }
+        .back-btn {
+            background: #f8f9fa; color: #1f628e; border: 2px solid #1f628e;
+            padding: 12px 24px; border-radius: 25px; text-decoration: none;
+            font-weight: 600; transition: all 0.3s ease; margin-top: 20px; display: inline-block;
+        }
+        .back-btn:hover { background: #1f628e; color: white; }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <h1>🔮 Point Astral</h1>
+        <p class="subtitle">{{ nom }}, votre analyse personnalisée est en cours de création...</p>
+        
+        <div class="spinner" id="spinner"></div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text"><span id="progress-percent">0</span>%</div>
+        </div>
+        
+        <div class="message" id="message">🚀 Initialisation...</div>
+        <div class="eta" id="eta">⏱️ Temps estimé : 3-5 minutes</div>
+        
+        <div id="error-container" style="display: none;">
+            <div class="error">
+                <h3>❌ Une erreur s'est produite</h3>
+                <p id="error-message"></p>
+                <a href="/" class="back-btn">← Retour au formulaire</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const taskId = '{{ task_id }}';
+        let checkCount = 0;
+        const maxChecks = 300; // 10 minutes max (300 * 2s)
+        
+        // Générer étoiles
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 30; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        function updateProgress() {
+            checkCount++;
+            
+            if (checkCount > maxChecks) {
+                showError("Timeout - La génération prend trop de temps. Veuillez réessayer.");
+                return;
+            }
+            
+            fetch(`/api/status/${taskId}`)
+                .then(r => r.json())
+                .then(data => {
+                    console.log('Status:', data);
+                    
+                    const progressFill = document.getElementById('progress-fill');
+                    const progressPercent = document.getElementById('progress-percent');
+                    const message = document.getElementById('message');
+                    
+                    // Mise à jour progress
+                    progressFill.style.width = data.progress + '%';
+                    progressPercent.textContent = data.progress;
+                    message.textContent = data.message;
+                    
+                    if (data.status === 'completed') {
+                        progressFill.classList.add('completed');
+                        document.getElementById('spinner').style.display = 'none';
+                        document.getElementById('eta').textContent = '✅ Terminé ! Redirection...';
+                        
+                        setTimeout(() => {
+                            window.location.href = `/result/${taskId}`;
+                        }, 2000);
+                        
+                    } else if (data.status === 'error') {
+                        showError(data.message || 'Une erreur inconnue s\'est produite');
+                        
+                    } else {
+                        // Continuer à vérifier
+                        setTimeout(updateProgress, 2000);
+                    }
+                })
+                .catch(e => {
+                    console.error('Erreur check status:', e);
+                    // Réessayer en cas d'erreur réseau
+                    setTimeout(updateProgress, 5000);
+                });
+        }
+        
+        function showError(errorMsg) {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'none';
+            document.getElementById('message').style.display = 'none';
+            document.getElementById('eta').style.display = 'none';
+            
+            document.getElementById('error-message').textContent = errorMsg;
+            document.getElementById('error-container').style.display = 'block';
+        }
+        
+        // Démarrage
+        createStars();
+        setTimeout(updateProgress, 2000); // Premier check après 2s
+    </script>
+</body>
+</html>
