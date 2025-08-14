@@ -27,8 +27,6 @@ from utils.utils_points_forts import extraire_points_forts
 from routes.analyse_gratuite_api import gratuite_api_bp
 from utils.email_sender import envoyer_email_point_astral_v2
 
-from config import ProductionConfig
-
 
 
 
