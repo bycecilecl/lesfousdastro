@@ -11,13 +11,20 @@ RUN apt-get update -o Acquire::Retries=3 && \
       curl \
       wget \
       unzip \
+      # WeasyPrint runtime
       libcairo2 \
       libpango-1.0-0 \
+      libpangoft2-1.0-0 \
+      libharfbuzz0b \
+      libfribidi0 \
+      libfreetype6 \
+      libfontconfig1 \
       libgdk-pixbuf-2.0-0 \
       libxml2 \
       libxslt1.1 \
       shared-mime-info \
       fonts-dejavu-core \
+      # (on garde ces 5 là si tu compiles qqch via pip)
       build-essential \
       gcc \
       pkg-config \
