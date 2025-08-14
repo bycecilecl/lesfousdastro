@@ -1,0 +1,55 @@
+TEMPLATE_RESULTAT = '''
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Point Astral - {{ nom }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .success { color: #28a745; font-size: 18px; margin-bottom: 20px; }
+        .actions { display: flex; gap: 20px; justify-content: center; margin: 30px 0; }
+        .btn { padding: 12px 24px; border: none; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn:hover { opacity: 0.8; }
+        .preview { margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 5px; }
+        .info { color: #666; font-size: 14px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Point Astral généré avec succès</h1>
+            <div class="success">✅ Votre analyse personnalisée est prête !</div>
+        </div>
+
+        <div class="actions">
+            <a href="/apercu_point_astral/{{ nom_fichier }}" target="_blank" class="btn btn-info">
+                👁️ Aperçu HTML
+            </a>
+            <a href="/telecharger_point_astral/{{ nom_fichier }}" class="btn btn-success">
+                📄 Télécharger PDF
+            </a>
+            <a href="/" class="btn btn-primary">
+                🏠 Nouvelle analyse
+            </a>
+        </div>
+
+        <div class="preview">
+            <h3>Informations de l'analyse :</h3>
+            <p><strong>Nom :</strong> {{ infos.nom }}</p>
+            <p><strong>Date de naissance :</strong> {{ infos.date_naissance }}</p>
+            <p><strong>Heure de naissance :</strong> {{ infos.heure_naissance }}</p>
+            <p><strong>Lieu de naissance :</strong> {{ infos.lieu_naissance }}</p>
+        </div>
+
+        <div class="info">
+            <p>💡 <strong>Conseil :</strong> Sauvegardez votre PDF rapidement, les liens expirent après quelques heures.</p>
+        </div>
+    </div>
+</body>
+</html>
+'''

@@ -1,4 +1,44 @@
+# ────────────────────────────────────────────────
+# 🌌 FONCTIONS ASTROLOGIQUES UTILISÉES DANS calcul_theme
+# Ce fichier regroupe les fonctions de calcul de base utilisées
+# pour déterminer maisons, signes, aspects, nakshatras et dominances.
+# Elles sont toutes utilisées dans le flux principal de calcul_theme().
+# ────────────────────────────────────────────────
 
+# get_maison_planete(degre, cusps)
+# ➜ Détermine dans quelle maison se trouve un degré donné en fonction
+#   des cuspides de maisons (liste de 12 valeurs en degrés).
+#   Retourne un entier 1–12 (maison).
+#
+# degre_vers_signe(degre)
+# ➜ Convertit un degré absolu (0–360°) en :
+#   - Nom du signe zodiacal
+#   - Degré dans ce signe (0–29.xx)
+#
+# angle_diff(a1, a2)
+# ➜ Calcule la différence d’angle absolue entre deux positions,
+#   en tenant compte du cercle (0°–360°). Sert pour les aspects.
+#
+# get_nakshatra_name(degree_sidereal)
+# ➜ Détermine le nom du nakshatra (astrologie védique) associé
+#   à un degré sidéral donné.
+#
+# detecter_aspects(positions)
+# ➜ Analyse toutes les paires de planètes et retourne une liste
+#   d’aspects trouvés (conjonction, opposition, trigone, carré, sextile)
+#   avec orbe et distance exacts.
+#
+# get_maitre_ascendant(signe_asc)
+# ➜ Retourne le maître planétaire d’un signe donné (astrologie occidentale).
+#
+# maisons_vediques_fixes(signe_asc_sid)
+# ➜ Crée la structure des 12 maisons védiques fixes en fonction
+#   du signe sidéral de l’Ascendant.
+#
+# maison_vedique_planete_simple(signe_planete, signe_asc_sid)
+# ➜ Calcule la maison védique (1–12) d’une planète à partir
+#   de son signe sidéral et du signe sidéral de l’Ascendant.
+# ────────────────────────────────────────────────
 
 SIGNES_ZODIAC = ['Bélier', 'Taureau', 'Gémeaux', 'Cancer', 'Lion', 'Vierge',
                  'Balance', 'Scorpion', 'Sagittaire', 'Capricorne', 'Verseau', 'Poissons']
@@ -19,7 +59,6 @@ MAITRES_SIGNES = {
     'Lion': 'Soleil', 'Vierge': 'Mercure', 'Balance': 'Vénus', 'Scorpion': 'Mars',
     'Sagittaire': 'Jupiter', 'Capricorne': 'Saturne', 'Verseau': 'Saturne', 'Poissons': 'Jupiter'
 }
-
 
 
 def get_maison_planete(degre, cusps):
@@ -98,13 +137,6 @@ def maisons_vediques_fixes(signe_asc_sid):
         }
     return maisons
 
-# def maison_vedique_planete_simple(signe_planete, signe_asc_sid):
-#     index_asc = SIGNES_ZODIAC.index(signe_asc_sid)
-#     index_plan = SIGNES_ZODIAC.index(signe_planete)
-#     distance = (index_plan - index_asc) % 12
-#     return distance + 1
-
-# --- NOUVELLES FONCTIONS POUR MAISONS VÉDIQUES ---
 
 def maisons_vediques_fixes(signe_asc_sid):
     signes = ['Bélier', 'Taureau', 'Gémeaux', 'Cancer', 'Lion', 'Vierge',

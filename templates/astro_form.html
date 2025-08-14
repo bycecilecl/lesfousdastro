@@ -1,0 +1,2893 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse Astrologique ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Étoiles animées en arrière-plan */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #d3b1c2, #d0c3f0, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            color: #1f628e;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #1f628e, #00a8a8);
+            margin: 10px auto;
+            border-radius: 2px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .gender-row {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+        }
+
+        .gender-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .gender-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .gender-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .gender-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border: 2px solid #c0f0f7;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(192, 240, 247, 0.1);
+            font-weight: 600;
+            color: #1f628e;
+        }
+
+        .gender-option input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border-color: #00a8a8;
+        }
+
+        label {
+            font-weight: 600;
+            color: #1f628e;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="email"] {
+            padding: 12px 16px;
+            border: 2px solid #c0f0f7;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(192, 240, 247, 0.1);
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #00a8a8;
+            box-shadow: 0 0 0 3px rgba(0, 168, 168, 0.1);
+            background: white;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .option-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #c0f0f7, #d3b1c2, #d0c3f0);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .option-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .option-card.selected {
+            border-color: #00a8a8;
+            background: linear-gradient(135deg, rgba(192, 240, 247, 0.3), rgba(211, 177, 194, 0.3));
+        }
+
+        .option-card.free {
+            border: 3px solid #10B981;
+            background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(255,255,255,0.9));
+        }
+
+        .option-card.featured {
+            border: 3px solid #FFD700;
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,255,255,0.9));
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .badge.free {
+            background: linear-gradient(45deg, #10B981, #059669);
+        }
+
+        .badge.popular {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+        }
+
+        .badge.new {
+            background: linear-gradient(45deg, #8B5CF6, #A78BFA);
+        }
+
+        .option-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .option-card h4 {
+            color: #1f628e;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .option-card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .option-card .price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #00a8a8;
+            margin-bottom: 10px;
+        }
+
+        .option-card .price.free {
+            color: #10B981;
+        }
+
+        .option-card .status {
+            margin-top: 10px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status.available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.development {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.coming-soon {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Section packs */
+        .packs-section {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border-radius: 25px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .packs-section .section-title {
+            color: white;
+        }
+
+        .packs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .pack-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px 30px 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .pack-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .pack-card.selected {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .pack-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .pack-content {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .pack-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+
+        .pack-price-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .savings {
+            background: rgba(255, 215, 0, 0.3);
+            color: #FFD700;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .pack-card .status {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Section consultation */
+        .consultation-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin: 30px 0;
+        }
+
+        .consultation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .consultation-card {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+        }
+
+        .consultation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+
+        .consultation-card.ai {
+            background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+        }
+
+        .consultation-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .consultation-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .consultation-description {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .cart-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin: 30px 0;
+            display: none;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(31, 98, 142, 0.1);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #1f628e;
+        }
+
+        .remove-item {
+            color: #ff4757;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .remove-item:hover {
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .consent-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(192, 240, 247, 0.2);
+            border-radius: 15px;
+            border-left: 4px solid #00a8a8;
+        }
+
+        .consent-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .consent-checkbox input[type="checkbox"] {
+            margin-top: 4px;
+            transform: scale(1.2);
+            accent-color: #00a8a8;
+        }
+
+        .consent-checkbox label {
+            font-size: 0.9rem;
+            color: #1f628e;
+            line-height: 1.5;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(31, 98, 142, 0.4);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .options-grid,
+            .packs-grid,
+            .consultation-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .form-container,
+            .packs-section,
+            .consultation-section {
+                padding: 25px;
+            }
+
+            .gender-options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="header">
+            <img src="static/images/logo_les_fous_dastro.webp" alt="Les Fous d'Astro" class="logo">
+            <h1>✨ Analyse Astrologique ✨</h1>
+            <p>Découvrez les secrets des étoiles et votre destinée</p>
+        </div>
+
+        <div class="form-container">
+            <form id="form-analyse" method="POST">
+                <div class="form-section">
+                    <h3 class="section-title">🌟 Vos informations personnelles</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom">Prénom</label>
+                            <input type="text" name="nom" id="nom" required placeholder="Votre prénom">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" id="email" required placeholder="votre.email@example.com">
+                        </div>
+                        <div class="form-group gender-row">
+                            <label>Sexe</label>
+                            <div class="gender-options">
+                                <div class="gender-option">
+                                    <input type="radio" id="female" name="gender" value="female" required>
+                                    <label for="female">👩 Femme</label>
+                                </div>
+                                <div class="gender-option">
+                                    <input type="radio" id="male" name="gender" value="male" required>
+                                    <label for="male">👨 Homme</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">🌙 Vos coordonnées de naissance</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date_naissance">Date de naissance</label>
+                            <input type="date" name="date_naissance" id="date_naissance" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="heure_naissance">Heure de naissance</label>
+                            <input type="time" name="heure_naissance" id="heure_naissance" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="lieu_naissance">Lieu de naissance</label>
+                            <input
+                                type="text"
+                                name="lieu_naissance"
+                                id="lieu_naissance"
+                                required
+                                placeholder="Ville, Pays"
+                                autocomplete="off"
+                                list="suggestions-lieux"
+                            />
+                            <datalist id="suggestions-lieux"></datalist>
+                            <input type="hidden" name="lat" id="lat" />
+                            <input type="hidden" name="lon" id="lon" />
+                            <input type="hidden" name="tzid" id="tzid" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">🔮 Les Analyses Cosmiques</h3>
+                    <div class="options-grid">
+                        <div class="option-card free" onclick="addToCart('gratuite', 'Analyse Gratuite', 0, this)">
+                            <div class="badge free">GRATUIT</div>
+                            <span class="icon">🌟</span>
+                            <h4>Analyse Gratuite</h4>
+                            <p>Lecture rapide, synthétique et immédiate de votre profil astrologique</p>
+                            <div class="price free">Gratuit</div>
+                            <span class="status available">Cliquez pour sélectionner</span>
+                        </div>
+                        
+                        <div class="option-card featured" onclick="addToCart('point_astral', 'Point Astral', 35, this)">
+                            <div class="badge popular">POPULAIRE</div>
+                            <span class="icon">📊</span>
+                            <h4>Point Astral</h4>
+                            <p>Analyse occidentale complète sur 3/4 pages + Nakshatra de la lune</p>
+                            <div class="price">35€</div>
+                            <span class="status development">En développement</span>
+                        </div>
+                        
+                        <div class="option-card" onclick="addToCart('potentiels_defis', 'Mes Potentiels et Défis', 18, this)">
+                            <div class="badge new">NOUVEAU</div>
+                            <span class="icon">💪</span>
+                            <h4>Mes Potentiels et Défis</h4>
+                            <p>Découvrez vos forces cachées et les obstacles à transformer</p>
+                            <div class="price">18€</div>
+                            <span class="status coming-soon">À venir</span>
+                        </div>
+                        
+                        <div class="option-card" onclick="addToCart('mission_ame', 'Mission d\'Âme', 18, this)">
+                            <span class="icon">🎭</span>
+                            <h4>Mission d'Âme</h4>
+                            <p>Astrologie occidentale et védique pour découvrir votre purpose</p>
+                            <div class="price">18€</div>
+                            <span class="status coming-soon">À venir</span>
+                        </div>
+
+                        <div class="option-card" onclick="addToCart('carriere', 'Carrière/Vocation', 18, this)">
+                            <span class="icon">🎯</span>
+                            <h4>Carrière/Vocation</h4>
+                            <p>Quelle voie choisir pour réaliser votre potentiel professionnel</p>
+                            <div class="price">18€</div>
+                            <span class="status coming-soon">À venir</span>
+                        </div>
+                        
+                        <div class="option-card" onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', 18, this)">
+                            <span class="icon">💕</span>
+                            <h4>Mon Profil Amoureux</h4>
+                            <p>Qu'est-ce que je recherche ? Qui m'attire vraiment ?</p>
+                            <div class="price">18€</div>
+                            <span class="status coming-soon">À venir</span>
+                        </div>
+                    </div>
+
+                    <!-- Partie prévisionnelle -->
+                    <div class="predictive-section">
+                        <h3 class="predictive-title">🌙 Analyses Prévisionnelles</h3>
+                        <p class="predictive-subtitle">Découvrez ce que l'avenir vous réserve avec nos analyses temporelles</p>
+                        <div class="options-grid">
+                            <div class="option-card" onclick="addToCart('energies_mois', 'Mes Énergies du Mois', 15, this)">
+                                <span class="icon">🌙</span>
+                                <h4>Mes Énergies du Mois</h4>
+                                <p>Abonnement mensuel pour suivre vos transits personnalisés</p>
+                                <div class="price">15€/mois</div>
+                                <span class="status coming-soon">À venir</span>
+                            </div>
+
+                            <div class="option-card" onclick="addToCart('revolution_solaire', 'Révolution Solaire', 25, this)">
+                                <span class="icon">🎂</span>
+                                <h4>Révolution Solaire</h4>
+                                <p>Votre thème annuel pour anticiper les grandes tendances</p>
+                                <div class="price">25€</div>
+                                <span class="status coming-soon">À venir</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Section Packs -->
+                        <div class="packs-section">
+            <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
+            <p style="text-align: center; color: white; margin-bottom: 20px; opacity: 0.9;">
+                Économisez en combinant plusieurs analyses cosmiques dans nos packs exclusifs
+            </p>
+            <div class="packs-grid">
+                <div class="pack-card" onclick="selectPack('pack_3_modules', 49, this)">
+                    <div class="pack-title">🎯 Pack 3 Modules</div>
+                    <div class="pack-content">3 analyses cosmiques de votre choix (sans Point Astral)</div>
+                    <div class="pack-price">
+                        <span class="original-price">54€</span>
+                        <span class="pack-price-value">49€</span>
+                        <span class="savings">Économisez 5€</span>
+                    </div>
+                    <span class="status coming-soon">À venir</span>
+                </div>
+                
+                <div class="pack-card" onclick="selectPack('pack_decouverte', 64, this)">
+                    <div class="pack-title">🎁 Pack Découverte</div>
+                    <div class="pack-content">Point Astral + 2 analyses cosmiques de votre choix</div>
+                    <div class="pack-price">
+                        <span class="original-price">71€</span>
+                        <span class="pack-price-value">64€</span>
+                        <span class="savings">Économisez 7€</span>
+                    </div>
+                    <span class="status coming-soon">À venir</span>
+                </div>
+
+                <div class="pack-card" onclick="selectPack('pack_complet', 79, this)">
+                    <div class="pack-title">✨ Pack Complet</div>
+                    <div class="pack-content">Point Astral + 3 analyses cosmiques de votre choix</div>
+                    <div class="pack-price">
+                        <span class="original-price">89€</span>
+                        <span class="pack-price-value">79€</span>
+                        <span class="savings">Économisez 10€</span>
+                    </div>
+                    <span class="status coming-soon">À venir</span>
+                </div>
+
+                <div class="pack-card" onclick="selectPack('pack_integral', 95, this)">
+                    <div class="pack-title">🌟 Pack Intégral</div>
+                    <div class="pack-content">Point Astral + 4 analyses cosmiques de votre choix</div>
+                    <div class="pack-price">
+                        <span class="original-price">107€</span>
+                        <span class="pack-price-value">95€</span>
+                        <span class="savings">Économisez 12€</span>
+                    </div>
+                    <span class="status coming-soon">À venir</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panier -->
+        <div class="cart-section" id="cartSection">
+            <h3 class="section-title">🛒 Votre Sélection</h3>
+            <div id="cartItems"></div>
+            
+            <div class="consent-section">
+                <div class="consent-checkbox">
+                    <input type="checkbox" name="consentement" id="consentement" required>
+                    <label for="consentement">
+                        J'accepte que mes données soient utilisées pour générer mon analyse astrologique et recevoir des communications en lien avec ce service. Vos données sont traitées de manière confidentielle.
+                    </label>
+                </div>
+            </div>
+
+            <button type="button" class="submit-btn" id="submitBtn" onclick="processSelectedAnalyses()" disabled>
+                ✨ Sélectionnez une analyse ✨
+            </button>
+        </div>
+
+        <!-- Section Consultations -->
+        <div class="consultation-section">
+            <h2 class="section-title">👥 Consultations Personnalisées</h2>
+            <div class="consultation-grid">
+                <a href="#" class="consultation-card" onclick="window.open('https://votre-site.com/rdv', '_blank')">
+                    <span class="consultation-icon">🔮</span>
+                    <div class="consultation-title">Réserver une Consultation</div>
+                    <div class="consultation-description">Consultation approfondie avec analyse personnalisée en direct</div>
+                </a>
+
+                <div class="consultation-card ai" onclick="openPsychologyChat()">
+                    <span class="consultation-icon">🤖</span>
+                    <div class="consultation-title">Cellule Psychologique IA</div>
+                    <div class="consultation-description">10mn de conversation avec notre IA spécialisée sur vos configurations astrales</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbox d'aide -->
+        <div class="help-chatbox" id="helpChatbox">
+            <div class="chatbox-header" onclick="toggleChatbox()">
+                <span class="chatbox-icon">💬</span>
+                <span class="chatbox-title">Aide & Questions</span>
+                <span class="chatbox-toggle" id="chatboxToggle">▲</span>
+            </div>
+            <div class="chatbox-content" id="chatboxContent">
+                <div class="chatbox-messages" id="chatboxMessages">
+                    <div class="message bot-message">
+                        <div class="message-avatar">🌟</div>
+                        <div class="message-content">
+                            Bonjour ! Je suis votre assistant virtuel. Je peux vous expliquer nos analyses, les prix, le fonctionnement du site... Que souhaitez-vous savoir ?
+                        </div>
+                    </div>
+                </div>
+                <div class="chatbox-input-container">
+                    <input type="text" id="chatboxInput" placeholder="Tapez votre question..." onkeypress="handleChatKeyPress(event)">
+                    <button onclick="sendMessage()" class="send-btn">📤</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Sélection Pack -->
+        <div class="modal-overlay" id="packSelectionModal" onclick="event.target === this && closePackSelectionModal()">
+            <div class="modal-content pack-selection-modal" onclick="event.stopPropagation()">
+                <div class="modal-header pack-header">
+                    <h3 id="packSelectionTitle">🎁 Sélection Pack</h3>
+                    <button class="close-btn" onclick="closePackSelectionModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="pack-selection-intro">
+                        <p id="packSelectionSubtitle">Choisissez vos analyses :</p>
+                        <div class="selection-counter" id="selectionCounter">0/0 analyses sélectionnées</div>
+                    </div>
+                    
+                    <div class="pack-analyses-selection" id="packAnalysesSelection">
+                        <!-- Les analyses seront injectées ici par JavaScript -->
+                    </div>
+                    
+                    <div class="pack-selection-actions">
+                        <button onclick="confirmPackSelection()" class="confirm-pack-btn" id="confirmPackBtn" disabled>
+                            Choisissez vos analyses
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Confirmation de Paiement -->
+        <div class="modal-overlay" id="paymentConfirmationModal" onclick="event.target === this && closePaymentConfirmationModal()">
+            <div class="modal-content payment-modal" onclick="event.stopPropagation()">
+                <div class="modal-header payment-header">
+                    <h3>💳 Confirmation de Commande</h3>
+                    <button class="close-btn" onclick="closePaymentConfirmationModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div id="paymentSummary"></div>
+                    
+                    <div class="payment-methods">
+                        <h4>💰 Choisissez votre mode de paiement</h4>
+                        <div class="payment-options">
+                            <button onclick="confirmPayment()" class="payment-option stripe-option">
+                                <span class="payment-icon">💳</span>
+                                <div class="payment-details">
+                                    <div class="payment-name">Carte Bancaire</div>
+                                    <div class="payment-desc">Paiement sécurisé par Stripe</div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="redirectToPayPal(window.pendingOrder)" class="payment-option paypal-option">
+                                <span class="payment-icon">🅿️</span>
+                                <div class="payment-details">
+                                    <div class="payment-name">PayPal</div>
+                                    <div class="payment-desc">Compte PayPal ou carte</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="security-info">
+                        <p>🔒 <strong>Paiement 100% sécurisé</strong></p>
+                        <p>Vos données bancaires sont protégées et ne transitent jamais par nos serveurs.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Analyse Gratuite -->
+        <div class="modal-overlay" id="freeAnalysisModal" onclick="event.target === this && closeFreeAnalysisModal()">
+            <div class="modal-content free-analysis-modal" onclick="event.stopPropagation()">
+                <div class="modal-header free-header">
+                    <h3>🌟 Votre Analyse Gratuite</h3>
+                    <button class="close-btn" onclick="closeFreeAnalysisModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="analysis-loading" id="loadingSpinner">
+                        <div class="loading-spinner"></div>
+                        <div class="analysis-status" id="analysisStatus">🌟 Préparation de votre analyse...</div>
+                    </div>
+                    
+                    <div class="analysis-result" id="analysisResult" style="display: none;">
+                        <div id="freeAnalysisContent"></div>
+                        <div class="analysis-actions">
+                            <button onclick="exploreMoreAnalyses()" class="explore-btn">
+                                🚀 Découvrir nos analyses complètes
+                            </button>
+                            <button onclick="closeFreeAnalysisModal()" class="later-btn">
+                                Plus tard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Cellule Psychologique -->
+        <div class="modal-overlay" id="psychologyModal" onclick="closePsychologyChat()">
+            <div class="modal-content" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3>🧠 Cellule Psychologique IA</h3>
+                    <button class="close-btn" onclick="closePsychologyChat()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="timer-section">
+                        <div class="timer" id="psychologyTimer">10:00</div>
+                        <div class="timer-label">Temps restant</div>
+                    </div>
+                    <div class="psychology-chat" id="psychologyChat">
+                        <div class="message bot-message">
+                            <div class="message-avatar">🧠</div>
+                            <div class="message-content">
+                                Bonjour ! Je suis votre psychologue astrologique IA. Pendant les 10 prochaines minutes, nous pouvons explorer ensemble vos configurations astrales et leur impact psychologique. Parlez-moi de ce qui vous préoccupe ou intéresse dans votre thème natal.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="psychology-input-container">
+                        <input type="text" id="psychologyInput" placeholder="Partagez vos réflexions..." onkeypress="handlePsychologyKeyPress(event)">
+                        <button onclick="sendPsychologyMessage()" class="send-btn">📤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Variables globales
+        let cart = [];
+        let selectedPack = null;
+        let chatboxOpen = false;
+        let psychologyTimer = null;
+        let psychologyTimeLeft = 600; // 10 minutes en secondes
+
+        // Générer des étoiles animées
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numStars = 50;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (2 + Math.random() * 3) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Gestion du panier
+        function addToCart(id, name, price, element) {
+            if (selectedPack) {
+                alert('Vous avez sélectionné un pack. Désélectionnez-le d\'abord pour ajouter des analyses individuelles.');
+                return;
+            }
+
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) {
+                removeFromCart(id);
+                element.classList.remove('selected');
+            } else {
+                cart.push({ id, name, price });
+                element.classList.add('selected');
+                
+                // Auto-scroll vers le panier après sélection
+                setTimeout(() => {
+                    const cartSection = document.getElementById('cartSection');
+                    if (cartSection && cartSection.style.display !== 'none') {
+                        cartSection.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }
+                }, 300);
+            }
+            updateCartDisplay();
+        }
+
+        function processSelectedAnalyses() {
+            // Vérifier que les informations de base sont remplies
+            const requiredFields = ['nom', 'email', 'date_naissance', 'heure_naissance', 'lieu_naissance', 'gender'];
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                const element = document.querySelector(`[name="${field}"]`);
+                if (!element || !element.value || (element.type === 'radio' && !document.querySelector(`[name="${field}"]:checked`))) {
+                    missingFields.push(field);
+                }
+            });
+
+            if (missingFields.length > 0) {
+                showNotification('⚠️ Veuillez remplir toutes vos informations avant de continuer.', 'warning');
+                document.querySelector(`[name="${missingFields[0]}"]`).scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            // Vérifier les coordonnées géographiques
+            if (!document.getElementById('lat').value || !document.getElementById('lon').value) {
+                showNotification('⚠️ Veuillez sélectionner votre lieu de naissance dans la liste des suggestions.', 'warning');
+                return;
+            }
+
+            // Vérifier le consentement
+            if (!document.getElementById('consentement').checked) {
+                showNotification('⚠️ Veuillez accepter les conditions avant de continuer.', 'warning');
+                return;
+            }
+
+            // Séparer analyses gratuites et payantes
+            const freeAnalyses = [];
+            const paidAnalyses = [];
+            
+            if (selectedPack) {
+                paidAnalyses.push(selectedPack);
+            } else {
+                cart.forEach(item => {
+                    if (item.price === 0) {
+                        freeAnalyses.push(item);
+                    } else {
+                        paidAnalyses.push(item);
+                    }
+                });
+            }
+
+            // Si il y a des analyses gratuites, les traiter d'abord
+            if (freeAnalyses.length > 0) {
+                processFreeAnalyses(freeAnalyses, paidAnalyses);
+            } else if (paidAnalyses.length > 0) {
+                // Seulement du payant, aller au paiement
+                proceedToPayment();
+            } else {
+                showNotification('⚠️ Veuillez sélectionner au moins une analyse.', 'warning');
+            }
+        }
+
+        function processFreeAnalyses(freeAnalyses, paidAnalyses) {
+            // Afficher le modal avec animation de traitement
+            showFreeAnalysisModal();
+            
+            // Préparer les données utilisateur
+            const userData = {
+                nom: document.getElementById('nom').value,
+                email: document.getElementById('email').value,
+                gender: document.querySelector('[name="gender"]:checked').value,
+                date_naissance: document.getElementById('date_naissance').value,
+                heure_naissance: document.getElementById('heure_naissance').value,
+                lieu_naissance: document.getElementById('lieu_naissance').value,
+                lat: document.getElementById('lat').value,
+                lon: document.getElementById('lon').value,
+                tzid: document.getElementById('tzid').value
+            };
+
+            console.log('🚀 Envoi des données:', userData);
+
+            // ⚡ Appel immédiat à l'API (pas d'attente artificielle)
+            fetch('/api/analyse_gratuite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => {
+                console.log('📡 Réponse reçue, status:', response.status);
+                // Mettre à jour le status pendant qu'on parse la réponse
+                document.getElementById('analysisStatus').innerHTML = '🎯 Réception de votre analyse...';
+                return response.json();
+            })
+            .then(data => {
+                console.log('📊 Data complète reçue:', data);
+                
+                if (data.ok) {
+                    console.log('✅ HTML reçu (longueur):', data.html.length);
+                    console.log('🔍 Début HTML:', data.html.substring(0, 200));
+                    console.log('🔍 Fin HTML:', data.html.substring(data.html.length - 200));
+                    
+                    // ⚡ Affichage immédiat du résultat
+                    document.getElementById('analysisStatus').innerHTML = '🎉 Votre analyse est prête !';
+                    document.getElementById('analysisResult').style.display = 'block';
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    document.getElementById('freeAnalysisContent').innerHTML = data.html;
+                    
+                    // Vérifier ce qui est dans le DOM
+                    const content = document.getElementById('freeAnalysisContent');
+                    console.log('🎯 Contenu dans le DOM:', content.innerHTML.length, 'caractères');
+                    console.log('🎯 Hauteur du contenu:', content.scrollHeight, 'px');
+                    
+                    // Si il y a aussi des analyses payantes, proposer de continuer
+                    if (paidAnalyses.length > 0) {
+                        addPaymentContinueButton(paidAnalyses);
+                    }
+                } else {
+                    throw new Error('Erreur dans la réponse de l\'API');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erreur complète:', error);
+                document.getElementById('analysisStatus').innerHTML = '❌ Erreur lors de la génération';
+                document.getElementById('freeAnalysisContent').innerHTML = `
+                    <div style="text-align: center; color: #ff4757;">
+                        <h4>⚠️ Erreur temporaire</h4>
+                        <p>Impossible de générer votre analyse pour le moment. Veuillez réessayer.</p>
+                    </div>
+                `;
+                document.getElementById('analysisResult').style.display = 'block';
+                document.getElementById('loadingSpinner').style.display = 'none';
+            });
+        }
+
+        function addPaymentContinueButton(paidAnalyses) {
+            const actionsDiv = document.querySelector('.analysis-actions');
+            if (actionsDiv) {
+                const continueBtn = document.createElement('button');
+                continueBtn.className = 'explore-btn';
+                continueBtn.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
+                continueBtn.style.color = '#333';
+                continueBtn.innerHTML = '💳 Continuer vers le paiement';
+                continueBtn.onclick = () => {
+                    closeFreeAnalysisModal();
+                    setTimeout(() => proceedToPayment(), 500);
+                };
+                
+                // Insérer avant le bouton "Plus tard"
+                actionsDiv.insertBefore(continueBtn, actionsDiv.lastElementChild);
+            }
+        }
+
+        function showFreeAnalysisModal() {
+            const modal = document.getElementById('freeAnalysisModal');
+            
+            // Reset complet du modal avant d'afficher
+            document.getElementById('analysisStatus').innerHTML = '🌟 Calcul de votre thème natal en cours...';
+            document.getElementById('analysisResult').style.display = 'none';
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('freeAnalysisContent').innerHTML = ''; // Vider le contenu précédent
+            
+            modal.style.display = 'flex';
+            
+            // Messages d'encouragement pendant l'attente RÉELLE
+            setTimeout(() => {
+                const currentStatus = document.getElementById('analysisStatus').innerHTML;
+                if (currentStatus.includes('Calcul')) {
+                    document.getElementById('analysisStatus').innerHTML = '⭐ Analyse de vos aspects planétaires...';
+                }
+            }, 5000);
+
+            setTimeout(() => {
+                const currentStatus = document.getElementById('analysisStatus').innerHTML;
+                if (currentStatus.includes('Analyse')) {
+                    document.getElementById('analysisStatus').innerHTML = '🔮 Génération de votre profil personnalisé...';
+                }
+            }, 12000);
+
+            setTimeout(() => {
+                const currentStatus = document.getElementById('analysisStatus').innerHTML;
+                if (currentStatus.includes('Génération')) {
+                    document.getElementById('analysisStatus').innerHTML = '✨ Finalisation, encore un instant...';
+                }
+            }, 20000);
+        }
+
+        function generateFreeAnalysisResult() {
+            // Cette fonction n'est plus utilisée car on appelle directement l'API
+            // dans processFreeAnalyses()
+        }
+
+        function closeFreeAnalysisModal() {
+            document.getElementById('freeAnalysisModal').style.display = 'none';
+            // Reset du modal pour la prochaine utilisation
+            document.getElementById('analysisStatus').innerHTML = '🌟 Préparation de votre analyse...';
+            document.getElementById('analysisResult').style.display = 'none';
+            document.getElementById('loadingSpinner').style.display = 'block';
+            
+            // Afficher une notification de succès
+            showNotification('✨ Votre analyse gratuite a été générée ! Prêt(e) pour aller plus loin ?', 'success');
+            
+            // Faire défiler vers les autres analyses après un court délai
+            setTimeout(() => {
+                document.querySelector('.options-grid').scrollIntoView({ behavior: 'smooth' });
+            }, 2000);
+        }
+
+        function exploreMoreAnalyses() {
+            closeFreeAnalysisModal();
+            // Mettre en évidence les autres analyses
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.option-card:not(.free)');
+                cards.forEach(card => {
+                    card.style.animation = 'pulse 2s ease-in-out 3';
+                });
+            }, 500);
+        }
+
+        function showNotification(message, type = 'info') {
+            // Créer ou récupérer le conteneur de notifications
+            let notificationContainer = document.getElementById('notificationContainer');
+            if (!notificationContainer) {
+                notificationContainer = document.createElement('div');
+                notificationContainer.id = 'notificationContainer';
+                notificationContainer.className = 'notification-container';
+                document.body.appendChild(notificationContainer);
+            }
+
+            // Créer la notification
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="notification-close">✕</button>
+            `;
+
+            notificationContainer.appendChild(notification);
+
+            // Animation d'entrée
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Suppression automatique après 5 secondes
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            // Retirer la sélection visuelle
+            const cards = document.querySelectorAll('.option-card');
+            cards.forEach(card => {
+                if (card.onclick && card.onclick.toString().includes(id)) {
+                    card.classList.remove('selected');
+                }
+            });
+            updateCartDisplay();
+        }
+
+        function selectPack(packId, price, element) {
+            // Désélectionner les autres packs
+            document.querySelectorAll('.pack-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Vider le panier des analyses individuelles
+            cart = [];
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            if (selectedPack && selectedPack.id === packId) {
+                selectedPack = null;
+                updateCartDisplay();
+                return;
+            }
+
+            selectedPack = { id: packId, price };
+            element.classList.add('selected');
+
+            // Si c'est le pack intégral, pas de choix à faire
+            if (packId === 'pack_integral') {
+                selectedPack.analyses = ['point_astral', 'potentiels_defis', 'mission_ame', 'carriere', 'profil_amoureux'];
+                updateCartDisplay();
+                
+                // Auto-scroll vers le panier
+                setTimeout(() => {
+                    const cartSection = document.getElementById('cartSection');
+                    if (cartSection && cartSection.style.display !== 'none') {
+                        cartSection.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
+                    }
+                }, 300);
+                return;
+            }
+
+            // Pour les autres packs, ouvrir le modal de sélection
+            showPackSelectionModal(packId, price);
+        }
+
+        function showPackSelectionModal(packId, price) {
+            const modal = document.getElementById('packSelectionModal');
+            const title = document.getElementById('packSelectionTitle');
+            const subtitle = document.getElementById('packSelectionSubtitle');
+            const content = document.getElementById('packAnalysesSelection');
+            
+            let maxSelections = 0;
+            let packName = '';
+            let requiresPointAstral = true;
+            
+            if (packId === 'pack_3_modules') {
+                maxSelections = 3;
+                packName = 'Pack 3 Modules';
+                requiresPointAstral = false;
+            } else if (packId === 'pack_decouverte') {
+                maxSelections = 2;
+                packName = 'Pack Découverte';
+                requiresPointAstral = true;
+            } else if (packId === 'pack_complet') {
+                maxSelections = 3;
+                packName = 'Pack Complet';
+                requiresPointAstral = true;
+            } else if (packId === 'pack_integral') {
+                maxSelections = 4;
+                packName = 'Pack Intégral';
+                requiresPointAstral = true;
+            }
+            
+            title.textContent = `🎁 ${packName}`;
+            
+            if (requiresPointAstral) {
+                subtitle.innerHTML = `Point Astral inclus + choisissez <strong>${maxSelections} analyses</strong> supplémentaires :`;
+            } else {
+                subtitle.innerHTML = `Choisissez <strong>${maxSelections} analyses</strong> qui vous intéressent le plus :`;
+            }
+            
+            // Liste des analyses disponibles pour les packs (SEULEMENT les analyses cosmiques)
+            const availableAnalyses = [
+                { id: 'point_astral', name: 'Point Astral', desc: 'Analyse complète + Nakshatra lunaire', required: requiresPointAstral },
+                { id: 'potentiels_defis', name: 'Mes Potentiels et Défis', desc: 'Forces cachées et obstacles à transformer' },
+                { id: 'mission_ame', name: 'Mission d\'Âme', desc: 'Votre purpose selon l\'astrologie védique' },
+                { id: 'carriere', name: 'Carrière/Vocation', desc: 'Votre voie professionnelle idéale' },
+                { id: 'profil_amoureux', name: 'Mon Profil Amoureux', desc: 'Qui vous attire et ce que vous recherchez' }
+            ];
+            
+            let html = '';
+            availableAnalyses.forEach(analysis => {
+                const disabled = analysis.required ? 'disabled checked' : '';
+                const requiredText = analysis.required ? ' <span class="required-text">(Inclus obligatoirement)</span>' : '';
+                
+                html += `
+                    <div class="pack-analysis-option ${analysis.required ? 'required' : ''}">
+                        <input type="checkbox" 
+                               id="pack_${analysis.id}" 
+                               value="${analysis.id}" 
+                               ${disabled}
+                               onchange="updatePackSelection(${maxSelections})">
+                        <label for="pack_${analysis.id}">
+                            <div class="analysis-info">
+                                <div class="analysis-name">${analysis.name}${requiredText}</div>
+                                <div class="analysis-desc">${analysis.desc}</div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            });
+            
+            content.innerHTML = html;
+            
+            // Stocker les infos du pack
+            window.currentPackSelection = {
+                id: packId,
+                price: price,
+                maxSelections: maxSelections,
+                selectedAnalyses: requiresPointAstral ? ['point_astral'] : []
+            };
+            
+            modal.style.display = 'flex';
+        }
+
+        function updatePackSelection(maxSelections) {
+            const checkboxes = document.querySelectorAll('#packAnalysesSelection input[type="checkbox"]');
+            const selected = document.querySelectorAll('#packAnalysesSelection input[type="checkbox"]:checked');
+            const confirmBtn = document.getElementById('confirmPackBtn');
+            const counter = document.getElementById('selectionCounter');
+            
+            // Compter les sélections (en excluant les obligatoires)
+            const userSelections = Array.from(selected).filter(cb => !cb.disabled);
+            const requiredSelections = Array.from(selected).filter(cb => cb.disabled);
+            const totalSelections = userSelections.length + requiredSelections.length;
+            
+            // Mettre à jour le compteur
+            counter.innerHTML = `${totalSelections}/${maxSelections} analyses sélectionnées`;
+            
+            // Désactiver les autres checkboxes si max atteint
+            if (userSelections.length >= maxSelections - requiredSelections.length) {
+                checkboxes.forEach(cb => {
+                    if (!cb.checked && !cb.disabled) {
+                        cb.disabled = true;
+                        cb.parentElement.classList.add('disabled');
+                    }
+                });
+            } else {
+                checkboxes.forEach(cb => {
+                    if (!cb.disabled || (!cb.checked && !cb.parentElement.classList.contains('required'))) {
+                        cb.disabled = false;
+                        cb.parentElement.classList.remove('disabled');
+                    }
+                });
+            }
+            
+            // Activer/désactiver le bouton de confirmation
+            if (totalSelections === maxSelections) {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '✨ Confirmer ma sélection';
+            } else {
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = `Choisissez ${maxSelections - totalSelections} analyse(s) de plus`;
+            }
+            
+            // Mettre à jour les analyses sélectionnées
+            window.currentPackSelection.selectedAnalyses = Array.from(selected).map(cb => cb.value);
+        }
+
+        function confirmPackSelection() {
+            const selection = window.currentPackSelection;
+            
+            // Finaliser la sélection du pack
+            selectedPack = {
+                id: selection.id,
+                price: selection.price,
+                analyses: selection.selectedAnalyses
+            };
+            
+            // Fermer le modal
+            closePackSelectionModal();
+            
+            // Mettre à jour l'affichage
+            updateCartDisplay();
+            
+            // Auto-scroll vers le panier
+            setTimeout(() => {
+                const cartSection = document.getElementById('cartSection');
+                if (cartSection && cartSection.style.display !== 'none') {
+                    cartSection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+            }, 300);
+            
+            // Notification de succès
+            showNotification(`🎉 ${selection.selectedAnalyses.length} analyses sélectionnées pour votre pack !`, 'success');
+        }
+
+        function closePackSelectionModal() {
+            document.getElementById('packSelectionModal').style.display = 'none';
+            window.currentPackSelection = null;
+            
+            // Si aucune sélection n'a été confirmée, désélectionner le pack
+            if (!selectedPack || !selectedPack.analyses) {
+                selectedPack = null;
+                document.querySelectorAll('.pack-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                updateCartDisplay();
+            }
+        }
+
+        function updateCartDisplay() {
+            const cartSection = document.getElementById('cartSection');
+            const cartItems = document.getElementById('cartItems');
+            
+            if (cart.length === 0 && !selectedPack) {
+                cartSection.style.display = 'none';
+                return;
+            }
+
+            cartSection.style.display = 'block';
+            cartItems.innerHTML = '';
+
+            let total = 0;
+
+            if (selectedPack) {
+                const packDiv = document.createElement('div');
+                packDiv.className = 'cart-item';
+                
+                let packDetails = '';
+                if (selectedPack.analyses) {
+                    const analysisNames = {
+                        'point_astral': 'Point Astral',
+                        'potentiels_defis': 'Potentiels et Défis',
+                        'mission_ame': 'Mission d\'Âme',
+                        'carriere': 'Carrière/Vocation',
+                        'profil_amoureux': 'Profil Amoureux',
+                        'energies_mois': 'Énergies du Mois',
+                        'revolution_solaire': 'Révolution Solaire'
+                    };
+                    
+                    const selectedNames = selectedPack.analyses.map(id => analysisNames[id] || id);
+                    packDetails = selectedNames.join(', ');
+                }
+                
+                packDiv.innerHTML = `
+                    <div>
+                        <div><strong>Pack sélectionné</strong></div>
+                        <div style="font-size: 0.9rem; color: #666; margin-top: 4px;">${packDetails}</div>
+                    </div>
+                    <span>
+                        ${selectedPack.price}€
+                        <span class="remove-item" onclick="removePackFromCart()">✕</span>
+                    </span>
+                `;
+                cartItems.appendChild(packDiv);
+                total = selectedPack.price;
+            } else {
+                cart.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'cart-item';
+                    itemDiv.innerHTML = `
+                        <span>${item.name}</span>
+                        <span>
+                            ${item.price === 0 ? 'Gratuit' : item.price + '€'}
+                            <span class="remove-item" onclick="removeFromCart('${item.id}')">✕</span>
+                        </span>
+                    `;
+                    cartItems.appendChild(itemDiv);
+                    total += item.price;
+                });
+            }
+
+            const totalDiv = document.createElement('div');
+            totalDiv.className = 'cart-item';
+            totalDiv.innerHTML = `<span>Total</span><span>${total}€</span>`;
+            cartItems.appendChild(totalDiv);
+            
+            // Mettre à jour le texte du bouton selon le nombre d'analyses
+            updateSubmitButtonText();
+        }
+
+        function updateSubmitButtonText() {
+            const submitBtn = document.getElementById('submitBtn');
+            let totalItems = 0;
+            
+            if (selectedPack) {
+                // Les packs contiennent toujours plusieurs analyses
+                totalItems = 2; // Force le pluriel
+            } else {
+                totalItems = cart.length;
+            }
+            
+            if (totalItems === 0) {
+                submitBtn.textContent = '✨ Sélectionnez une analyse ✨';
+                submitBtn.disabled = true;
+            } else if (totalItems === 1) {
+                submitBtn.textContent = '✨ Obtenir mon analyse ✨';
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.textContent = '✨ Obtenir mes analyses ✨';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function removePackFromCart() {
+            selectedPack = null;
+            document.querySelectorAll('.pack-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            updateCartDisplay();
+        }
+
+        function proceedToPayment() {
+            // Vérifier que les informations de base sont remplies
+            const requiredFields = ['nom', 'email', 'date_naissance', 'heure_naissance', 'lieu_naissance', 'gender'];
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                const element = document.querySelector(`[name="${field}"]`);
+                if (!element || !element.value || (element.type === 'radio' && !document.querySelector(`[name="${field}"]:checked`))) {
+                    missingFields.push(field);
+                }
+            });
+
+            if (missingFields.length > 0) {
+                showNotification('⚠️ Veuillez remplir toutes vos informations avant de procéder au paiement.', 'warning');
+                document.querySelector(`[name="${missingFields[0]}"]`).scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            // Vérifier les coordonnées géographiques
+            if (!document.getElementById('lat').value || !document.getElementById('lon').value) {
+                showNotification('⚠️ Veuillez sélectionner votre lieu de naissance dans la liste des suggestions.', 'warning');
+                return;
+            }
+
+            // Vérifier le consentement
+            if (!document.getElementById('consentement').checked) {
+                showNotification('⚠️ Veuillez accepter les conditions avant de continuer.', 'warning');
+                return;
+            }
+
+            // Préparer les données pour le paiement
+            const orderData = {
+                userInfo: {
+                    nom: document.getElementById('nom').value,
+                    email: document.getElementById('email').value,
+                    gender: document.querySelector('[name="gender"]:checked').value,
+                    birthDate: document.getElementById('date_naissance').value,
+                    birthTime: document.getElementById('heure_naissance').value,
+                    birthPlace: document.getElementById('lieu_naissance').value,
+                    lat: document.getElementById('lat').value,
+                    lon: document.getElementById('lon').value,
+                    tzid: document.getElementById('tzid').value
+                },
+                items: selectedPack ? [selectedPack] : cart.filter(item => item.price > 0),
+                total: calculateTotal(),
+                type: selectedPack ? 'pack' : 'individual'
+            };
+
+            // Afficher le modal de confirmation avant paiement
+            showPaymentConfirmationModal(orderData);
+        }
+
+        function calculateTotal() {
+            if (selectedPack) {
+                return selectedPack.price;
+            }
+            return cart.reduce((total, item) => total + item.price, 0);
+        }
+
+        function showPaymentConfirmationModal(orderData) {
+            const modal = document.getElementById('paymentConfirmationModal');
+            const content = document.getElementById('paymentSummary');
+            
+            let itemsHtml = '';
+            let total = 0;
+
+            if (orderData.type === 'pack') {
+                itemsHtml = `<div class="payment-item">
+                    <span>Pack sélectionné</span>
+                    <span>${orderData.items[0].price}€</span>
+                </div>`;
+                total = orderData.items[0].price;
+            } else {
+                orderData.items.forEach(item => {
+                    itemsHtml += `<div class="payment-item">
+                        <span>${item.name}</span>
+                        <span>${item.price}€</span>
+                    </div>`;
+                    total += item.price;
+                });
+            }
+
+            content.innerHTML = `
+                <div class="order-summary">
+                    <h4>📋 Récapitulatif de votre commande</h4>
+                    <div class="customer-info">
+                        <p><strong>👤 Client :</strong> ${orderData.userInfo.nom}</p>
+                        <p><strong>📧 Email :</strong> ${orderData.userInfo.email}</p>
+                        <p><strong>🎂 Naissance :</strong> ${formatDate(orderData.userInfo.birthDate)} à ${orderData.userInfo.birthTime}</p>
+                        <p><strong>📍 Lieu :</strong> ${orderData.userInfo.birthPlace}</p>
+                    </div>
+                    <div class="items-summary">
+                        ${itemsHtml}
+                        <div class="payment-total">
+                            <span><strong>Total :</strong></span>
+                            <span><strong>${total}€</strong></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Stocker les données pour le paiement
+            window.pendingOrder = orderData;
+            modal.style.display = 'flex';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        function confirmPayment() {
+            const orderData = window.pendingOrder;
+            
+            // Vérifier qu'on a bien des données
+            if (!orderData || !orderData.userInfo) {
+                showNotification('❌ Erreur: données manquantes', 'warning');
+                return;
+            }
+
+            // Fermer le modal de confirmation
+            closePaymentConfirmationModal();
+            
+            // Créer un formulaire temporaire pour envoyer à Stripe
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/checkout';
+            form.style.display = 'none';
+            
+            // Ajouter les champs requis pour ton système Stripe
+            const fields = {
+                'nom': orderData.userInfo.nom,
+                'email': orderData.userInfo.email,
+                'date_naissance': orderData.userInfo.birthDate,
+                'heure_naissance': orderData.userInfo.birthTime,
+                'lieu_naissance': orderData.userInfo.birthPlace,
+                'lat': orderData.userInfo.lat,
+                'lon': orderData.userInfo.lon,
+                'tzid': orderData.userInfo.tzid,
+                'gender': orderData.userInfo.gender,
+                'type_commande': orderData.type, // 'pack' ou 'individual'
+                'items': JSON.stringify(orderData.items),
+                'total': orderData.total
+            };
+            
+            // Créer les inputs cachés
+            Object.keys(fields).forEach(name => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = fields[name] || '';
+                form.appendChild(input);
+            });
+            
+            // Ajouter le formulaire au DOM et le soumettre
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function redirectToPayPal(orderData) {
+            // Similaire à Stripe mais vers PayPal
+            if (!orderData || !orderData.userInfo) {
+                showNotification('❌ Erreur: données manquantes', 'warning');
+                return;
+            }
+
+            // Fermer le modal de confirmation
+            closePaymentConfirmationModal();
+            
+            // Créer un formulaire pour PayPal
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/create-paypal-payment';
+            form.style.display = 'none';
+            
+            // Mêmes champs que Stripe
+            const fields = {
+                'nom': orderData.userInfo.nom,
+                'email': orderData.userInfo.email,
+                'date_naissance': orderData.userInfo.birthDate,
+                'heure_naissance': orderData.userInfo.birthTime,
+                'lieu_naissance': orderData.userInfo.birthPlace,
+                'lat': orderData.userInfo.lat,
+                'lon': orderData.userInfo.lon,
+                'tzid': orderData.userInfo.tzid,
+                'gender': orderData.userInfo.gender,
+                'type_commande': orderData.type,
+                'items': JSON.stringify(orderData.items),
+                'total': orderData.total
+            };
+            
+            Object.keys(fields).forEach(name => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = fields[name] || '';
+                form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function closePaymentConfirmationModal() {
+            document.getElementById('paymentConfirmationModal').style.display = 'none';
+            window.pendingOrder = null;
+        }
+
+        // Chatbox d'aide
+        function toggleChatbox() {
+            const chatbox = document.getElementById('helpChatbox');
+            const content = document.getElementById('chatboxContent');
+            const toggle = document.getElementById('chatboxToggle');
+            
+            chatboxOpen = !chatboxOpen;
+            
+            if (chatboxOpen) {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+                chatbox.classList.add('open');
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▲';
+                chatbox.classList.remove('open');
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatboxInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            // Simulation de réponse IA (tu peux connecter ton vrai système ici)
+            setTimeout(() => {
+                const response = generateHelpResponse(message);
+                addChatMessage(response, 'bot');
+            }, 1000);
+        }
+
+        function addChatMessage(message, sender) {
+            const messagesContainer = document.getElementById('chatboxMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            if (sender === 'bot') {
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">🌟</div>
+                    <div class="message-content">${message}</div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-content">${message}</div>
+                    <div class="message-avatar">👤</div>
+                `;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function generateHelpResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('prix') || lowerMessage.includes('tarif') || lowerMessage.includes('coût')) {
+                return "Nos analyses vont de l'analyse gratuite au Point Astral à 35€. Les packs permettent d'économiser : Pack Découverte 65€, Pack Complet 77€, Pack Intégral 97€.";
+            }
+            
+            if (lowerMessage.includes('pack') || lowerMessage.includes('économie')) {
+                return "Les packs combinent plusieurs analyses à prix réduit. Le Pack Intégral vous fait économiser 30€ et inclut toutes nos analyses cosmiques !";
+            }
+            
+            if (lowerMessage.includes('gratuit') || lowerMessage.includes('free')) {
+                return "L'Analyse Gratuite vous donne un aperçu rapide et synthétique de votre profil astrologique. C'est un excellent moyen de découvrir nos services !";
+            }
+            
+            if (lowerMessage.includes('point astral')) {
+                return "Le Point Astral est notre analyse la plus complète : 3-4 pages détaillées + Nakshatra lunaire. Actuellement en développement, disponible bientôt !";
+            }
+            
+            if (lowerMessage.includes('consultation') || lowerMessage.includes('rendez-vous')) {
+                return "Nous proposons des consultations personnalisées en direct et une Cellule Psychologique IA pour explorer vos configurations astrales.";
+            }
+            
+            return "Je peux vous renseigner sur nos analyses, les prix, les packs, ou le fonctionnement du site. N'hésitez pas à être plus précis dans votre question !";
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Cellule Psychologique
+        function openPsychologyChat() {
+            document.getElementById('psychologyModal').style.display = 'flex';
+            startPsychologyTimer();
+        }
+
+        function closePsychologyChat() {
+            document.getElementById('psychologyModal').style.display = 'none';
+            if (psychologyTimer) {
+                clearInterval(psychologyTimer);
+                psychologyTimer = null;
+            }
+            psychologyTimeLeft = 600;
+            updateTimerDisplay();
+        }
+
+        function startPsychologyTimer() {
+            psychologyTimer = setInterval(() => {
+                psychologyTimeLeft--;
+                updateTimerDisplay();
+                
+                if (psychologyTimeLeft <= 0) {
+                    clearInterval(psychologyTimer);
+                    addPsychologyMessage("Votre session de 10 minutes est terminée. Merci d'avoir utilisé notre Cellule Psychologique !", 'bot');
+                    setTimeout(() => {
+                        closePsychologyChat();
+                    }, 3000);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(psychologyTimeLeft / 60);
+            const seconds = psychologyTimeLeft % 60;
+            document.getElementById('psychologyTimer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function sendPsychologyMessage() {
+            const input = document.getElementById('psychologyInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            addPsychologyMessage(message, 'user');
+            input.value = '';
+
+            // Simulation de réponse IA psychologique
+            setTimeout(() => {
+                const response = generatePsychologyResponse(message);
+                addPsychologyMessage(response, 'bot');
+            }, 1500);
+        }
+
+        function addPsychologyMessage(message, sender) {
+            const chatContainer = document.getElementById('psychologyChat');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            if (sender === 'bot') {
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">🧠</div>
+                    <div class="message-content">${message}</div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-content">${message}</div>
+                    <div class="message-avatar">👤</div>
+                `;
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function generatePsychologyResponse(message) {
+            // Ici tu peux connecter ton vrai système d'IA psychologique
+            const responses = [
+                "C'est une réflexion très intéressante. Dans votre thème natal, cette tendance pourrait être liée à vos aspects planétaires. Pouvez-vous me parler de ce que vous ressentez dans ces situations ?",
+                "Ce que vous décrivez résonne avec certaines configurations astrales typiques. Comment cette énergie se manifeste-t-elle dans votre quotidien ?",
+                "Votre questionnement touche à un aspect profond de la psychologie astrologique. Avez-vous remarqué des cycles ou des patterns dans ce comportement ?",
+                "Cette dynamique que vous évoquez est souvent reliée aux transits planétaires actuels. Comment vous sentez-vous par rapport à ces changements ?",
+                "Votre ressenti s'aligne avec ce que nous observons souvent chez les personnes ayant des configurations similaires. Qu'est-ce qui vous aiderait le plus à comprendre cette facette de vous-même ?"
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function handlePsychologyKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendPsychologyMessage();
+            }
+        }
+
+        // Géocodage (code existant)
+        const input = document.getElementById('lieu_naissance');
+        const datalist = document.getElementById('suggestions-lieux');
+        const latEl = document.getElementById('lat');
+        const lonEl = document.getElementById('lon');
+        const tzidEl = document.getElementById('tzid');
+
+        let lastResults = [];
+        let debounce;
+
+        input.addEventListener('input', () => {
+            const q = input.value.trim();
+            clearTimeout(debounce);
+
+            if (q.length < 2) {
+                datalist.innerHTML = '';
+                return;
+            }
+
+            debounce = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    lastResults = data.results || [];
+                    datalist.innerHTML = lastResults.map(r => `<option value="${r.label}"></option>`).join('');
+                } catch (e) {
+                    console.warn('Geocode error:', e);
+                }
+            }, 250);
+        });
+
+        function fillHiddenFromLabel(label) {
+            const r = lastResults.find(x => x.label === label);
+            if (r) {
+                latEl.value = r.lat;
+                lonEl.value = r.lon;
+                tzidEl.value = r.tzid || '';
+            }
+        }
+
+        input.addEventListener('change', () => fillHiddenFromLabel(input.value));
+        input.addEventListener('blur', () => fillHiddenFromLabel(input.value));
+
+        // Initialisation
+        createStars();
+        updateCartDisplay();
+        updateSubmitButtonText();
+
+    </script>
+
+    <!-- CSS supplémentaire pour les nouvelles fonctionnalités -->
+    <style>
+        /* Chatbox d'aide */
+        .help-chatbox {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            z-index: 1000;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .chatbox-header {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .chatbox-icon {
+            font-size: 1.2rem;
+        }
+
+        .chatbox-title {
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .chatbox-toggle {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .chatbox-content {
+            display: none;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .help-chatbox.open .chatbox-content {
+            display: flex;
+        }
+
+        .chatbox-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 320px;
+        }
+
+        .chatbox-input-container {
+            padding: 15px;
+            border-top: 1px solid rgba(31, 98, 142, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chatbox-input-container input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #c0f0f7;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .user-message {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #c0f0f7, #d3b1c2);
+        }
+
+        .message-content {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 250px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+        }
+
+        /* Modal Cellule Psychologique */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .timer-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 12px;
+        }
+
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #8B5CF6;
+            margin-bottom: 5px;
+        }
+
+        .timer-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .psychology-chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .psychology-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .psychology-input-container input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #c0f0f7;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        /* Notifications */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-left: 4px solid #00a8a8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification-warning {
+            border-left-color: #FFA500;
+            background: #FFF8DC;
+        }
+
+        .notification-success {
+            border-left-color: #10B981;
+            background: #F0FDF4;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            margin-left: 15px;
+        }
+
+        /* Modal Analyse Gratuite */
+        .free-analysis-modal {
+            max-width: 900px;
+            max-height: 95vh;
+            width: 90%;
+        }
+
+        .free-header {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .analysis-loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #10B981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .analysis-status {
+            font-size: 1.2rem;
+            color: #1f628e;
+            font-weight: 600;
+        }
+
+        .analysis-result {
+            padding: 20px;
+            max-height: none;
+            overflow-y: visible;
+            line-height: 1.6;
+        }
+
+        .analysis-summary h4 {
+            color: #1f628e;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .analysis-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(192, 240, 247, 0.1);
+            border-radius: 12px;
+            border-left: 3px solid #00a8a8;
+        }
+
+        .analysis-section h5 {
+            color: #1f628e;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .analysis-section p {
+            color: #4a5568;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .upgrade-section {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(31, 98, 142, 0.1), rgba(0, 168, 168, 0.1));
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .upgrade-section p {
+            margin-bottom: 10px;
+            color: #1f628e;
+        }
+
+        .upgrade-section ul {
+            text-align: left;
+            margin: 15px 0;
+            color: #4a5568;
+        }
+
+        .upgrade-section li {
+            margin-bottom: 5px;
+        }
+
+        .analysis-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .explore-btn {
+            flex: 2;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .explore-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(31, 98, 142, 0.3);
+        }
+
+        .later-btn {
+            flex: 1;
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .later-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,168,168,0.2); }
+            50% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,168,168,0.4); }
+            100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,168,168,0.2); }
+        }
+
+        /* Modal Confirmation de Paiement */
+        .payment-modal {
+            max-width: 600px;
+        }
+
+        .payment-header {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+        }
+
+        .order-summary {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .order-summary h4 {
+            color: #1f628e;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .customer-info {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .customer-info p {
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+
+        .items-summary {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .payment-item:last-child {
+            border-bottom: none;
+        }
+
+        .payment-total {
+            border-top: 2px solid #1f628e;
+            padding-top: 15px;
+            margin-top: 15px;
+            font-size: 1.2rem;
+            color: #1f628e;
+        }
+
+        .payment-methods {
+            margin-bottom: 25px;
+        }
+
+        .payment-methods h4 {
+            color: #1f628e;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .payment-option:hover {
+            border-color: #1f628e;
+            background: rgba(31, 98, 142, 0.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(31, 98, 142, 0.15);
+        }
+
+        .stripe-option:hover {
+            border-color: #635bff;
+            background: rgba(99, 91, 255, 0.05);
+        }
+
+        .paypal-option:hover {
+            border-color: #0070ba;
+            background: rgba(0, 112, 186, 0.05);
+        }
+
+        .payment-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .payment-details {
+            flex: 1;
+        }
+
+        .payment-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1f628e;
+            margin-bottom: 4px;
+        }
+
+        .payment-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .security-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .security-info p {
+            margin-bottom: 5px;
+            color: #065f46;
+        }
+
+        .security-info p:last-child {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Modal Sélection Pack */
+        .pack-selection-modal {
+            max-width: 700px;
+            max-height: 85vh;
+        }
+
+        .pack-header {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+        }
+
+        .pack-selection-intro {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .pack-selection-intro p {
+            font-size: 1.1rem;
+            color: #1f628e;
+            margin-bottom: 10px;
+        }
+
+        .selection-counter {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #666;
+            padding: 8px 16px;
+            background: white;
+            border-radius: 20px;
+            display: inline-block;
+            border: 2px solid #e2e8f0;
+        }
+
+        .pack-analyses-selection {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+        }
+
+        .pack-analysis-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .pack-analysis-option:hover:not(.disabled) {
+            border-color: #1f628e;
+            background: rgba(31, 98, 142, 0.02);
+        }
+
+        .pack-analysis-option.required {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .pack-analysis-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pack-analysis-option input[type="checkbox"] {
+            margin-top: 4px;
+            transform: scale(1.3);
+            accent-color: #1f628e;
+        }
+
+        .pack-analysis-option.required input[type="checkbox"] {
+            accent-color: #FFD700;
+        }
+
+        .pack-analysis-option label {
+            flex: 1;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .pack-analysis-option.disabled label {
+            cursor: not-allowed;
+        }
+
+        .analysis-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .analysis-name {
+            font-weight: bold;
+            color: #1f628e;
+            font-size: 1.1rem;
+        }
+
+        .required-text {
+            color: #FFD700;
+            font-size: 0.85rem;
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        .analysis-desc {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .pack-selection-actions {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .confirm-pack-btn {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 250px;
+        }
+
+        .confirm-pack-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(31, 98, 142, 0.3);
+        }
+
+        .confirm-pack-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Section Analyses Prévisionnelles */
+        .predictive-section {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(167, 139, 250, 0.05));
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .predictive-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8B5CF6, #A78BFA);
+        }
+
+        .predictive-title {
+            color: #8B5CF6;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .predictive-subtitle {
+            text-align: center;
+            color: #6B46C1;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .predictive-section .options-grid {
+            margin-top: 20px;
+        }
+
+        .predictive-section .option-card {
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(139, 92, 246, 0.05));
+        }
+
+        .predictive-section .option-card:hover {
+            border-color: #8B5CF6;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(139, 92, 246, 0.1));
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .predictive-section .option-card .price {
+            color: #8B5CF6;
+        }
+
+        @media (max-width: 768px) {
+            .predictive-section {
+                padding: 20px;
+                margin-top: 30px;
+            }
+
+            .predictive-title {
+                font-size: 1.3rem;
+            }
+
+            .predictive-subtitle {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</body>
+</html>

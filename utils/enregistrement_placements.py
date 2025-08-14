@@ -1,3 +1,29 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# UTIL : enregistrer_placements_utilisateur()
+# Rôle : enregistre les placements astrologiques + infos personnelles
+#        dans un fichier CSV local (`placements.csv`).
+# Entrées :
+#   - data (dict) : données astrologiques calculées (planètes, ascendant, maisons…)
+#   - infos_personnelles (dict) : nom, date/heure/lieu de naissance
+# Détails des données enregistrées :
+#   - ID session unique + horodatage
+#   - Ascendant (signe)
+#   - Signe + maison pour Soleil, Lune, Mercure, Vénus, Mars, Jupiter,
+#     Saturne, Uranus, Neptune, Pluton, Lune Noire
+#   - Maître d’ascendant : nom, signe, maison
+# Dépendances :
+#   - os, csv, datetime, uuid
+# Sortie :
+#   - Ajoute une ligne au fichier CSV (crée l’en-tête si le fichier n’existe pas)
+#   - Log console “✅ Placements astrologiques enregistrés.” ou erreur.
+# Où c’est utilisé :
+#   - Dans les routes Flask après calcul du thème (ex : analyse gratuite)
+# Remarques :
+#   - Valeur par défaut "inconnu" si une info est manquante.
+#   - Fichier local → non persistant en production (prévoir stockage externe).
+# ─────────────────────────────────────────────────────────────────────────────
+
+
 import os
 import csv
 from datetime import datetime

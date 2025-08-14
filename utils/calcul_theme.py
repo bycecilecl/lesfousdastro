@@ -3,57 +3,207 @@ from datetime import datetime
 import pytz
 import os
 import swisseph as swe
-from utils.utils_formatage import formater_positions_planetes, formater_aspects
-
+from timezonefinder import TimezoneFinder
+from utils.formatage import formater_positions_planetes, formater_aspects
 from utils.utils_points_forts import extraire_points_forts
 from utils.astro_utils import valider_donnees_avant_analyse, corriger_donnees_maisons
 from utils.calculs_astrologiques import get_maison_planete, detecter_aspects, get_nakshatra_name, degre_vers_signe, get_maitre_ascendant, maisons_vediques_fixes, maison_vedique_planete_simple
 
-def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
-    geolocator = Nominatim(user_agent="astro-app")
-    try:
-        location = geolocator.geocode(lieu_naissance, timeout=5)
-        lat, lon = (location.latitude, location.longitude) if location else (48.8566, 2.3522)
-    except:
-        lat, lon = 48.8566, 2.3522
+# Initialiser TimezoneFinder une seule fois
+tf = TimezoneFinder()
 
-    tz = pytz.timezone('Europe/Paris')
-    #dt = tz.localize(datetime.strptime(date_naissance + ' ' + heure_naissance, '%Y-%m-%d %H:%M'))
-    # Gestion des deux formats possibles (brut ou déjà concaténé)
+# ────────────────────────────────────────────────
+# FONCTION : get_timezone_for_coordinates_and_date(lat, lon, dt_naive)
+# Objectif :
+#   Retourner l’identifiant de fuseau horaire IANA le plus pertinent pour
+#   des coordonnées géographiques et une date donnée, en gérant quelques
+#   exceptions historiques (ex : Maroc avant 2008 → UTC).
+#
+# Entrées :
+#   - lat (float) : latitude en degrés décimaux
+#   - lon (float) : longitude en degrés décimaux
+#   - dt_naive (datetime) : date/heure SANS tzinfo (naive) de l’événement
+#
+# Sortie :
+#   - str : identifiant de fuseau (ex. "Europe/Paris") ou "UTC" en fallback
+#
+# Détails d’implémentation :
+#   - Utilise timezonefinder (tf.timezone_at) pour déterminer le tzid moderne.
+#   - Cas spécial : si tzid == "Africa/Casablanca" et année < 2008, renvoie "UTC"
+#     (avant 2008 : pas d’heure d’été, UTC+0 stable).
+#   - En cas d’erreur ou d’indétermination, renvoie "UTC" par défaut.
+#
+# Pré-requis :
+#   - Avoir un objet `tf = TimezoneFinder()` initialisé au niveau module.
+# ────────────────────────────────────────────────
+
+def get_timezone_for_coordinates_and_date(lat, lon, dt_naive):
+    """
+    Obtient le fuseau horaire historiquement correct pour des coordonnées et une date donnée.
+    Gère les cas spéciaux comme le Maroc avant 2008.
+    """
     try:
-        dt = tz.localize(datetime.strptime(date_naissance + ' ' + heure_naissance, '%Y-%m-%d %H:%M'))
+        # Obtenir le fuseau moderne
+        tzid = tf.timezone_at(lat=lat, lng=lon)
+        
+        if not tzid:
+            return 'UTC'
+            
+        # Cas spéciaux historiques
+        year = dt_naive.year
+        
+        # Maroc : avant 2008, pas d'heure d'été, toujours UTC+0
+        if tzid == 'Africa/Casablanca' and year < 2008:
+            print(f"📅 Maroc avant 2008 détecté -> UTC+0 fixe")
+            return 'UTC'
+        
+        # Autres cas spéciaux peuvent être ajoutés ici...
+        
+        return tzid
+        
+    except Exception as e:
+        print(f"❌ Erreur détection fuseau: {e}")
+        return 'UTC'
+    
+# ────────────────────────────────────────────────
+# FONCTION : calcul_theme(date_naissance, heure_naissance, lieu_naissance, ...)
+# Objectif :
+#   Calculer l’intégralité des données astrologiques occidentales et védiques
+#   à partir des informations de naissance fournies.
+#
+# Entrées (principales) :
+#   - date_naissance (str ou date) : date de naissance
+#   - heure_naissance (str ou time) : heure locale de naissance
+#   - lieu_naissance (str) : nom de la ville ou coordonnées
+#   - (optionnel) email, nom, autres infos utilisateur
+#
+# Étapes clés :
+#   1. Géocodage du lieu → coordonnées (lat, lon).
+#   2. Détermination du fuseau horaire correct (historique si nécessaire).
+#   3. Conversion de la date/heure locale → UTC.
+#   4. Calcul des positions planétaires tropicales (Swisseph).
+#   5. Calcul des maisons astrologiques.
+#   6. Calcul des aspects entre planètes.
+#   7. Calcul des positions védiques (sidéral, nakshatras, etc.).
+#   8. Identification des points forts (amas, dominances, dignités, tensions…).
+#   9. Détection d’éléments complémentaires (Chiron, Lune Noire, interceptions).
+#
+# Sortie :
+#   - dict complet contenant :
+#       • planetes (occidentales)
+#       • planetes_vediques
+#       • aspects
+#       • maisons
+#       • points_forts
+#       • données enrichies (nakshatra, maître d’ascendant, etc.)
+#
+# Utilisation :
+#   Cette fonction est le cœur du calcul du thème natal, utilisée
+#   dans les routes Flask pour alimenter les analyses (gratuite, Point Astral, etc.).
+# ────────────────────────────────────────────────
+
+
+def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
+                 lat=None, lon=None, dt_naissance_utc=None, tzid=None):
+    
+    print(f"🚀 DÉBUT CALCUL pour {nom}")
+    print(f"   Paramètres reçus: lat={lat}, lon={lon}, tzid={tzid}")
+    
+    # --- ÉTAPE 1: Obtenir les coordonnées ---
+    if lat is None or lon is None:
+        print(f"🌍 Géocodage de '{lieu_naissance}'...")
+        geolocator = Nominatim(user_agent="astro-app")
+        try:
+            location = geolocator.geocode(lieu_naissance, timeout=10)
+            if location:
+                lat, lon = location.latitude, location.longitude
+                print(f"✅ Géocodage réussi: {lat:.6f}, {lon:.6f}")
+            else:
+                print(f"⚠️ Géocodage échoué, utilisation de Paris par défaut")
+                lat, lon = 48.8566, 2.3522
+        except Exception as e:
+            print(f"❌ Erreur géocodage: {e}")
+            lat, lon = 48.8566, 2.3522
+
+    # --- ÉTAPE 2: Parser la date de naissance ---
+    try:
+        naive = datetime.strptime(f"{date_naissance} {heure_naissance}", '%Y-%m-%d %H:%M')
     except ValueError:
-    # Format alternatif : date_naissance contient déjà l’heure
-        dt = tz.localize(datetime.strptime(date_naissance, '%d %B %Y %H:%M'))
+        try:
+            naive = datetime.strptime(date_naissance, '%d %B %Y %H:%M')
+        except ValueError as e:
+            print(f"❌ Format de date non reconnu: {e}")
+            raise
 
-    dt_utc = dt.astimezone(pytz.utc)
+    print(f"📅 Date parsée: {naive}")
 
-    #swe.set_ephe_path(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ephe'))
-    swe.set_ephe_path("ephe")
-    jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour + dt_utc.minute / 60)
+    # --- ÉTAPE 3: Obtenir le fuseau horaire correct ---
+    if dt_naissance_utc is not None:
+        # Cas 1: UTC déjà fourni (priorité absolue)
+        dt_utc = dt_naissance_utc
+        print(f"✅ UTC pré-calculé utilisé: {dt_utc}")
+    else:
+        # Cas 2: Déterminer le fuseau et convertir
+        if tzid is None:
+            tzid = get_timezone_for_coordinates_and_date(lat, lon, naive)
+            print(f"🕐 Fuseau détecté: {tzid}")
+        
+        # Conversion avec le bon fuseau
+        if tzid == 'UTC':
+            dt_local = naive.replace(tzinfo=pytz.UTC)
+            dt_utc = dt_local
+        else:
+            try:
+                tz_local = pytz.timezone(tzid)
+                dt_local = tz_local.localize(naive, is_dst=None)
+                dt_utc = dt_local.astimezone(pytz.UTC)
+            except pytz.AmbiguousTimeError:
+                # Pendant le changement d'heure, prendre l'heure standard
+                tz_local = pytz.timezone(tzid)
+                dt_local = tz_local.localize(naive, is_dst=False)
+                dt_utc = dt_local.astimezone(pytz.UTC)
+            except pytz.NonExistentTimeError:
+                # Heure inexistante (saut DST), prendre l'heure suivante
+                tz_local = pytz.timezone(tzid)
+                dt_local = tz_local.localize(naive, is_dst=True)
+                dt_utc = dt_local.astimezone(pytz.UTC)
+            except Exception as e:
+                print(f"❌ Erreur conversion fuseau '{tzid}': {e}")
+                # Fallback: traiter comme UTC
+                dt_local = naive.replace(tzinfo=pytz.UTC)
+                dt_utc = dt_local
+
+    print(f"🔧 TEMPS FINAL:")
+    print(f"   Heure locale: {dt_local.strftime('%Y-%m-%d %H:%M %Z%z') if hasattr(dt_local, 'strftime') else 'N/A'}")
+    print(f"   Heure UTC: {dt_utc.strftime('%Y-%m-%d %H:%M %Z%z')}")
+
+    # --- ÉTAPE 4: Calculs astrologiques ---
+    swe.set_ephe_path(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ephe'))
+    jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour + dt_utc.minute / 60.0)
+    
+    print(f"🌟 Jour Julien calculé: {jd}")
+    
+    swe.set_sid_mode(swe.SIDM_LAHIRI)
     ayanamsa = swe.get_ayanamsa_ut(jd)
+    
+    print(f"🌙 Ayanamsa (Lahiri): {ayanamsa:.4f}°")
 
+    # Calcul des maisons avec Placidus
     cusps, ascmc = swe.houses(jd, lat, lon, b'P')
-
     cusps_sid = [(cusp - ayanamsa) % 360 for cusp in cusps]
 
     asc_deg = round(ascmc[0], 2)
     signe_asc, deg_asc = degre_vers_signe(asc_deg)
-    nakshatra_asc = get_nakshatra_name((asc_deg - ayanamsa) % 360)
 
     asc_deg_sid = (asc_deg - ayanamsa) % 360
     signe_asc_sid, deg_asc_sid = degre_vers_signe(asc_deg_sid)
     nakshatra_asc_sid = get_nakshatra_name(asc_deg_sid)
 
-    # maisons_tropicales = {}
-    # for i in range(12):
-    #     deg = round(cusps[i], 2)
-    #     signe, deg_signe = degre_vers_signe(deg)
-    #     maisons_tropicales[f'Maison {i+1}'] = {
-    #         'degre': deg,
-    #         'signe': signe,
-    #         'degre_dans_signe': deg_signe
-    #     }
+    print(f"🎯 ASCENDANTS CALCULÉS:")
+    print(f"   Tropical: {asc_deg:.2f}° = {signe_asc} {deg_asc:.2f}°")
+    print(f"   Sidéral: {asc_deg_sid:.2f}° = {signe_asc_sid} {deg_asc_sid:.2f}° (Nakshatra: {nakshatra_asc_sid})")
+
+    # [Le reste du code pour les maisons, planètes, etc. reste identique...]
     
     maisons_tropicales = {}
     signes_detectes = []
@@ -81,12 +231,10 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
         if i + 1 < len(signes_interceptes):
             axes_interceptes.append((signes_interceptes[i], signes_interceptes[i + 1]))
 
-    # Repérage des maisons contenant les signes interceptés
     maisons_interceptées = {}
-
     for i in range(12):
         cusp1 = cusps[i]
-        cusp2 = cusps[(i + 1) % 12]  # maison suivante (avec wrap-around)
+        cusp2 = cusps[(i + 1) % 12]
         if cusp2 < cusp1:
             cusp2 += 360
 
@@ -97,7 +245,6 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
                 maison_label = f"Maison {i+1}"
                 maisons_interceptées[signe] = maison_label
 
-    # ➕ Maintenant que tout est prêt, on crée le dictionnaire final
     interceptions = {
         "signes_interceptes": signes_interceptes,
         "axes_interceptes": axes_interceptes,
@@ -140,6 +287,15 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
         nakshatra = get_nakshatra_name(deg_sid)
         maison_ved = maison_vedique_planete_simple(signe_ved, signe_asc_sid)
 
+        SECTEUR = 360.0 / 27.0
+        offset = deg_sid % SECTEUR
+        pada = int(offset // (SECTEUR / 4)) + 1
+        if pada < 1: 
+            pada = 1
+        elif pada > 4:
+            pada = 4
+        deg_dans_nak = round(offset, 2)
+
         resultats_tropical[nomp] = {
             'degre': deg_trop,
             'signe': signe_trop,
@@ -152,12 +308,16 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
             'signe': signe_ved,
             'degre_dans_signe': deg_signe_ved,
             'nakshatra': nakshatra,
+            'nakshatra_pada': pada,
+            'nakshatra_deg': deg_dans_nak,
             'maison': maison_ved
         }
 
         positions_tropicales[nomp] = deg_trop
         positions_vediques[nomp] = round(deg_sid, 2)
 
+    # [Reste du code identique...]
+    
     # Ajout de Ketu
     rahu_deg_trop = resultats_tropical['Rahu']['degre']
     ketu_deg_trop = (rahu_deg_trop + 180) % 360
@@ -217,7 +377,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
         }
 
     # Ajout de la Lune Noire moyenne
-    deg_lilith = round(swe.calc_ut(jd, 12)[0][0], 2)  # 12 = code de Lilith moyenne
+    deg_lilith = round(swe.calc_ut(jd, 12)[0][0], 2)
     signe_lilith, deg_signe_lilith = degre_vers_signe(deg_lilith)
     maison_lilith = get_maison_planete(deg_lilith, cusps)
 
@@ -229,9 +389,8 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
     }
     positions_tropicales['Lune Noire'] = deg_lilith
 
-
     # Ajout de Chiron
-    deg_chiron = round(swe.calc_ut(jd, 15)[0][0], 2)  # 15 est le code pour Chiron dans swisseph
+    deg_chiron = round(swe.calc_ut(jd, 15)[0][0], 2)
     signe_chiron, deg_signe_chiron = degre_vers_signe(deg_chiron)
     maison_chiron = get_maison_planete(deg_chiron, cusps)
 
@@ -243,8 +402,6 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
     }
     positions_tropicales['Chiron'] = deg_chiron
 
-
-    # 💡 AJOUT NOUVEAU : extraire les points forts
     points_forts = extraire_points_forts({
         'planetes': resultats_tropical,
         'aspects': aspects,
@@ -252,13 +409,11 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
         'planetes_vediques': resultats_vediques
     })
 
-
     ascendant = resultats_tropical.get("Ascendant", {"signe": "inconnu", "degre": "inconnu"})
-
 
     return {
         'nom': nom,
-        'date': dt.strftime('%d %B %Y %H:%M'),
+        'date': dt_local.strftime('%d %B %Y %H:%M') if hasattr(dt_local, 'strftime') else f"{date_naissance} {heure_naissance}",
         'planetes': resultats_tropical,
         'maisons': maisons_tropicales,
         'maisons_vediques': maisons_vediques,
@@ -269,6 +424,5 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance):
         'maitre_ascendant_vedique': maitre_asc_vedique,
         'planetes_vediques': resultats_vediques,
         'interceptions': interceptions,
-        'points_forts': points_forts  # ← on le transmet
+        'points_forts': points_forts
     }
-

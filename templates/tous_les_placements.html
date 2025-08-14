@@ -45,6 +45,21 @@
             color: #2980b9;
             font-weight: bold;
         }
+        .axes {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+            font-family: Georgia, serif;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .axes h3 {
+            color: #495057;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -103,7 +118,7 @@
     </div>
 
     <div class="section">
-        <h2>Maître de l’Ascendant (tropical)</h2>
+        <h2>Maître de l'Ascendant (tropical)</h2>
         {% if maitre_ascendant %}
         <p>{{ maitre_ascendant.nom }} à {{ maitre_ascendant.degre_dans_signe }}° en {{ maitre_ascendant.signe }} (Maison {{ maitre_ascendant.maison }})</p>
         {% else %}
@@ -112,7 +127,7 @@
     </div>
 
     <div class="section">
-        <h2>Maître de l’Ascendant (sidéral)</h2>
+        <h2>Maître de l'Ascendant (sidéral)</h2>
         {% if maitre_ascendant_vedique %}
         <p>{{ maitre_ascendant_vedique.nom }} à {{ maitre_ascendant_vedique.degre_dans_signe }}° en {{ maitre_ascendant_vedique.signe }} (Maison {{ maitre_ascendant_vedique.maison }}) – Nakshatra : <em>{{ maitre_ascendant_vedique.nakshatra }}</em></p>
         {% else %}
@@ -144,10 +159,49 @@
             {% for point in points_forts %}
                 <li>{{ point }}</li>
             {% endfor %}
-        </ul>
+        </ul>   
     </div>
 
-  <a href="{{ url_for('formulaire') }}">← Refaire une analyse</a>
+    {% if axes_majeurs_str %}
+    <div class="section">
+        <h2>Axes majeurs (fil rouge)</h2>
+        <div class="axes">{{ axes_majeurs_str }}</div>
+    </div>
+    {% endif %}
+
+    {% if interceptions %}
+<div class="section">
+    <h2>Interceptions</h2>
+
+    {% if interceptions.signes_interceptes %}
+        <p><strong>Signes interceptés :</strong> {{ interceptions.signes_interceptes | join(', ') }}</p>
+    {% endif %}
+
+    {% if interceptions.maisons_interceptées %}
+        <h3>Maisons où les signes sont interceptés</h3>
+        <ul>
+            {% for signe, maison in interceptions.maisons_interceptées.items() %}
+                <li>{{ signe }} intercepté en {{ maison }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if interceptions.axes_interceptes %}
+        <h3>Axes interceptés</h3>
+        <ul>
+            {% for axe_pair in interceptions.axes_interceptes %}
+                {% if axe_pair is iterable and axe_pair|length == 2 %}
+                    <li>Axe {{ axe_pair[0] }}/{{ axe_pair[1] }}</li>
+                {% else %}
+                    <li>{{ axe_pair }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endif %}
+
+    <a href="{{ url_for('formulaire') }}">← Refaire une analyse</a>
 
 </body>
 </html>

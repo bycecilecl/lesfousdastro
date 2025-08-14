@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ton analyse astrologique</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            padding: 40px;
+            background: #f9f9f9;
+            color: #2c3e50;
+            max-width: 800px;
+            margin: auto;
+        }
+        .pdf-button {
+            margin-top: 30px;
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #2c3e50;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        .pdf-button:hover {
+            background-color: #34495e;
+        }
+        .footer {
+            font-size: 0.85rem;
+            color: #999;
+            text-align: center;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ton analyse astrologique est prête</h1>
+
+    <div class="analysis">
+        {{ analyse_html | safe }}
+    </div>
+
+    {% if pdf_url %}
+    <a href="{{ pdf_url }}" class="pdf-button" download target="_blank">
+        📄 Télécharger le PDF
+    </a>
+    {% else %}
+    <p style="color: red;">Le PDF n'a pas pu être généré.</p>
+    {% endif %}
+
+    <div class="footer">
+        Analyse générée par Les Fous d’Astro © – Reproduction, copie ou diffusion interdites sans autorisation.
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>

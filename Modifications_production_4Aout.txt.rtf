@@ -1,0 +1,81 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 .AppleSystemUIFontMonospaced-Regular;}
+{\colortbl;\red255\green255\blue255;\red151\green0\blue126;\red0\green0\blue0;\red13\green100\blue1;
+\red181\green0\blue19;}
+{\*\expandedcolortbl;;\cssrgb\c66667\c5098\c56863;\csgray\c0;\cssrgb\c0\c45490\c0;
+\cssrgb\c76863\c10196\c8627;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs26 \cf2 from\cf3  pathlib \cf2 import\cf3  Path\
+\
+\cf4 # Contenu du fichier de modifications pour la production Railway\cf3 \
+contenu = \cf5 """\\\
+MODIFICATIONS POUR LA PRODUCTION (RAILWAY)\
+=========================================\
+\
+Objectif : faire fonctionner l'app en production (Railway) sans casser le fonctionnement en local.\
+\
+---\
+\
+1. \uc0\u9989  Google Sheets \'97 gestion des credentials\
+---------------------------------------------\
+- Probl\'e8me : impossible de stocker credentials.json sur Railway.\
+- Solution :\
+  \uc0\u8594  Ajout d'une variable d\'92environnement Railway :\
+     GOOGLE_CREDS_JSON = (contenu complet du credentials.json, minifi\'e9)\
+  \uc0\u8594  G\'e9n\'e9ration dynamique du fichier dans main.py :\
+\
+      creds_json_str = os.getenv("GOOGLE_CREDS_JSON")\
+      if creds_json_str:\
+          path = "/app/utils/google/credentials.json"\
+          os.makedirs(os.path.dirname(path), exist_ok=True)\
+          with open(path, "w") as f:\
+              f.write(creds_json_str)\
+\
+---\
+\
+2. \uc0\u9989  Adaptation du chemin vers credentials.json\
+------------------------------------------------\
+- Fichier : sheet_writer.py\
+- Ancienne ligne :\
+      credentials_path = os.getenv("GOOGLE_CREDENTIALS_PATH")\
+- Nouvelle ligne :\
+      credentials_path = (\
+          "/app/utils/google/credentials.json"\
+          if os.getenv("RAILWAY_ENVIRONMENT")\
+          else os.getenv("GOOGLE_CREDENTIALS_PATH") or "utils/google/credentials.json"\
+      )\
+\
+---\
+\
+3. \uc0\u9989  Envoi d\'92e-mail (Gmail + yagmail)\
+--------------------------------------\
+- Probl\'e8me : erreur 535 (username/password not accepted)\
+- Solution :\
+  \uc0\u8594  G\'e9n\'e9rer un mot de passe d'application via Google (https://myaccount.google.com/apppasswords)\
+  \uc0\u8594  Ajouter dans Railway :\
+      EMAIL_ENVOI = adresse Gmail d'envoi\
+      EMAIL_PASSWORD = mot de passe d'application\
+\
+---\
+\
+4. \uc0\u9989  Affichage des logs dans Railway\
+-------------------------------------\
+- Tous les print() importants en production doivent utiliser :\
+      print("...message...", flush=True)\
+  \uc0\u8594  Cela force l\'92affichage des logs dans Railway Deploy Logs.\
+\
+---\
+\
+\uc0\u10004 \u65039  R\'e9sultat :\
+- En local : rien ne change.\
+- En production : l\'92envoi de mails, l\'92acc\'e8s aux Google Sheets et les logs fonctionnent.\
+"""\cf3 \
+\
+\cf4 # Chemin du fichier \'e0 cr\'e9er\cf3 \
+path = Path(\cf5 "MODIFICATIONS_PRODUCTION_RAILWAY.txt"\cf3 )\
+path.write_text(contenu)\
+\
+\cf4 # Retourner le chemin du fichier\cf3 \
+path.as_posix()}

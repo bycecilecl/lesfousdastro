@@ -2,11 +2,10 @@ import os, csv
 from utils.openai_utils import interroger_llm
 from utils.calcul_theme import calcul_theme
 from utils.utils_analyse import analyse_gratuite
-from utils.utils_formatage import formater_positions_planetes, formater_aspects
+from utils.formatage import formater_positions_planetes, formater_aspects
 from flask import Blueprint, request, render_template
 from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.enregistrement_placements import enregistrer_placements_utilisateur
-from utils.envoi_a_airops import envoyer_a_airops
 from dotenv import load_dotenv
 from utils.google.sheets_writer import ajouter_email_au_sheet
 from utils.email_sender import envoyer_email_avec_analyse
@@ -14,6 +13,18 @@ from utils.email_sender import envoyer_email_avec_analyse
 load_dotenv()
 
 gratuite_bp = Blueprint('gratuite_bp', __name__)
+
+
+# 📌 Route /analyse_gratuite
+# Cette route génère une analyse gratuite en 8 étapes :
+# 1. Vérifie le consentement, enregistre l'utilisateur.
+# 2. Calcule le thème natal avec calcul_theme().
+# 3. Produit un résumé synthétique avec analyse_gratuite().
+# 4. Formate les positions et aspects.
+# 5. Construit le prompt personnalisé pour le LLM.
+# 6. Interroge l'IA et récupère le texte de l'analyse.
+# 7. Ajoute l'email de l'utilisateur au Google Sheet.
+# 8. Envoie l'analyse gratuite par email et l'affiche dans le template.
 
 @gratuite_bp.route('/analyse_gratuite', methods=['POST'])
 def analyse_gratuite_post():
@@ -117,16 +128,6 @@ Fais une analyse de max 15 lignes.
     except Exception as e:
         print(f"❌ Erreur ajout Google Sheet : {e}")
 
-    # # 9. Envoi à AirOps
-    # print("📧 Envoi imminent à AirOps")
-    # try:
-    #     envoyer_a_airops(email=email, prenom=prenom, texte_analyse=texte_analyse_complete)
-    # except Exception as e:
-    #     print(f"❌ Erreur lors de l'envoi à AirOps : {e}")
-
-    # 10. Affichage dans le template
-
-
         # 9. Envoi direct par email
     print("📧 Envoi de l'analyse par email...")
     try:
@@ -143,8 +144,6 @@ Fais une analyse de max 15 lignes.
         envoyer_email_avec_analyse(destinataire=email, sujet=sujet, contenu_html=contenu)
     except Exception as e:
         print(f"❌ Erreur lors de l'envoi du mail : {e}")
-
-
 
     return render_template(
         'analyse_gratuite.html',

@@ -4,6 +4,25 @@ import os
 from pathlib import Path
 from datetime import datetime
 
+# ─────────────────────────────────────────────────────────────────────────────
+# UTIL : html_to_pdf(html_content, output_path)
+# Rôle : Convertit un contenu HTML en PDF et écrit le fichier sur disque
+#        en utilisant WeasyPrint.
+# Entrées :
+#   - html_content (str) : HTML complet (inline CSS ok)
+#   - output_path (str)  : chemin du PDF de sortie (dossiers créés si besoin)
+# Dépendances :
+#   - weasyprint
+#   - chemins relatifs résolus via base_url=os.getcwd()
+# Sortie :
+#   - True si succès, False si erreur (et log console).
+# Où c’est utilisé :
+#   - routes/point_astral.py → génération du PDF final du Point Astral
+#   - main.py → route /telecharger_point_astral/<nom_fichier>
+# Remarques :
+#   - Gère un CSS minimal (@page, body, section/break-inside).
+#   - Idéal quand on génère d’abord un HTML propre puis on le “print” en PDF.
+# ─────────────────────────────────────────────────────────────────────────────
 
 def html_to_pdf(html_content, output_path):
     """
@@ -68,6 +87,24 @@ def html_to_pdf(html_content, output_path):
     except Exception as e:
         print(f"❌ Erreur lors de la génération du PDF : {e}")
         return False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# UTIL : html_to_pdf_bytes(html_content)
+# Rôle : Convertit un contenu HTML en PDF et renvoie les bytes (sans écrire
+#        sur disque). Utile pour un envoi direct (email, stream HTTP).
+# Entrées :
+#   - html_content (str) : HTML complet (inline CSS ok)
+# Dépendances :
+#   - weasyprint
+# Sortie :
+#   - bytes du PDF si succès, None si erreur (et log console).
+# Où c’est utilisé :
+#   - (Optionnel) À brancher si tu veux attacher un PDF en mémoire dans un mail
+#     sans créer de fichier temporaire.
+# Remarques :
+#   - CSS minimal appliqué ; ajoute un CSS plus riche si besoin.
+# ─────────────────────────────────────────────────────────────────────────────
 
 def html_to_pdf_bytes(html_content):
     """

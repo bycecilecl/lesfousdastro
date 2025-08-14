@@ -1,3 +1,26 @@
+from utils.formatage import (
+    ASPECTS_MAJEURS, ASPECTS_MINEURS,
+    formater_positions_planetes,
+    formater_aspects,
+    formater_aspects_significatifs,
+    formater_resume_complet,
+)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# UTIL : formater_positions_planetes(planetes)
+# Rôle :
+#   - Transforme le dict des planètes (nom → {signe, degre, maison})
+#     en un bloc texte lisible, une ligne par planète.
+# Entrée :
+#   - planetes (dict) : ex. {"Soleil": {"signe":"Lion","degre":12.3,"maison":5}, ...}
+# Sortie :
+#   - str : lignes type "Soleil : Lion 12.3° (Maison 5)" séparées par "\n".
+# Remarques :
+#   - Valeurs par défaut si clé absente : signe="inconnu", degre="n/a", maison="n/a".
+#   - Doublon fonctionnel possible avec utils.utils_formatage.formater_positions_planetes :
+#     garde celle-ci pour l’analyse gratuite si c’est celle qui est importée ici.
+# ─────────────────────────────────────────────────────────────────────────────
+
 def formater_positions_planetes(planetes):
     lignes = []
     for nom, infos in planetes.items():
@@ -6,6 +29,22 @@ def formater_positions_planetes(planetes):
         maison = infos.get('maison', 'n/a')
         lignes.append(f"{nom} : {signe} {degre}° (Maison {maison})")
     return "\n".join(lignes)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# UTIL : formater_aspects(aspects)
+# Rôle :
+#   - Convertit la liste d’aspects (planete1/planete2/aspect/orbe)
+#     en un bloc texte lisible, une ligne par aspect.
+# Entrée :
+#   - aspects (list[dict]) : ex. [{"planete1":"Soleil","planete2":"Lune",
+#                                  "aspect":"Conjonction","orbe":2.1}, ...]
+# Sortie :
+#   - str : lignes type "Soleil Conjonction Lune (orbe 2.1°)" séparées par "\n".
+# Remarques :
+#   - Valeurs par défaut si clé absente : "?" pour planètes/aspect, "?" pour orbe.
+#   - Chevauchement possible avec utils.utils_formatage.formater_aspects :
+#     utilises-en une seule dans le flux pour éviter la confusion.
+# ─────────────────────────────────────────────────────────────────────────────
 
 def formater_aspects(aspects):
     lignes = []
@@ -16,6 +55,27 @@ def formater_aspects(aspects):
         orbe = asp.get('orbe', '?')
         lignes.append(f"{p1} {type_asp} {p2} (orbe {orbe}°)")
     return "\n".join(lignes)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LOGIQUE : analyse_gratuite(planetes, aspects, lune_vedique)
+# Rôle :
+#   - Produit une courte liste de “points marquants” pour l’analyse gratuite :
+#       • Conjonctions serrées (< = 5°) impliquant Ascendant / Soleil / Lune
+#       • Présence de ces trois luminaires en maisons angulaires (1, 4, 7, 10)
+#       • Rappel du nakshatra de la Lune (si fourni côté védique)
+# Entrées :
+#   - planetes (dict) : placements occidentaux (inclut "Ascendant", "Soleil", "Lune")
+#   - aspects  (list[dict]) : aspects calculés (planete1, planete2, aspect, orbe)
+#   - lune_vedique (dict|None) : ex. {"nakshatra":"Rohini", ...}
+# Sortie :
+#   - list[str] : phrases prêtes à afficher/envoyer par mail dans l’offre gratuite
+# Paramètres importants :
+#   - seuil_orbe = 5.0 : seuil pour considérer une conjonction “serrée”
+# Remarques :
+#   - Si rien n’est détecté, renvoie un message par défaut indiquant l’absence
+#     d’aspect marquant pour la trinité Asc/Soleil/Lune.
+#   - Fonction utilisée dans la route d’analyse gratuite pour générer le résumé.
+# ─────────────────────────────────────────────────────────────────────────────
 
 def analyse_gratuite(planetes, aspects, lune_vedique):
     resultats = []
