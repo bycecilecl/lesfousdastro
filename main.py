@@ -38,6 +38,8 @@ logging.getLogger('fontTools').setLevel(logging.CRITICAL)
 logging.getLogger('fontTools.subset').setLevel(logging.CRITICAL)
 logging.getLogger('fontTools.ttLib').setLevel(logging.CRITICAL)
 
+
+
 print("🧭 RUN main.py depuis:", __file__)
 
 try:
