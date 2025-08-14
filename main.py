@@ -89,10 +89,11 @@ app.config.from_object(ProductionConfig)
 app.register_blueprint(geocode_bp)
 app.register_blueprint(gratuite_api_bp)
 
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-change-me")
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-from flask import Flask
-
-app = Flask(__name__)
 
 # Sécurité : entêtes HTTP
 @app.after_request

@@ -12,6 +12,8 @@ from utils.calculs_astrologiques import get_maison_planete, detecter_aspects, ge
 # Initialiser TimezoneFinder une seule fois
 tf = TimezoneFinder()
 
+swe.set_ephe_path("/app/ephe")
+
 # ────────────────────────────────────────────────
 # FONCTION : get_timezone_for_coordinates_and_date(lat, lon, dt_naive)
 # Objectif :
