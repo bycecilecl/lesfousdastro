@@ -92,22 +92,22 @@ from flask import Flask
 
 app = Flask(__name__)
 
-# Sécurité : entêtes HTTP
-@app.after_request
-def set_security_headers(resp):
-    resp.headers["X-Frame-Options"] = "DENY"
-    resp.headers["X-Content-Type-Options"] = "nosniff"
-    resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    resp.headers["Content-Security-Policy"] = (
-        "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
-        "script-src 'self'; connect-src 'self'; frame-ancestors 'none';"
-    )
-    return resp
+# # Sécurité : entêtes HTTP
+# @app.after_request
+# def set_security_headers(resp):
+#     resp.headers["X-Frame-Options"] = "DENY"
+#     resp.headers["X-Content-Type-Options"] = "nosniff"
+#     resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+#     resp.headers["Content-Security-Policy"] = (
+#         "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
+#         "script-src 'self'; connect-src 'self'; frame-ancestors 'none';"
+#     )
+#     return resp
 
-# Ensuite, tes routes
-@app.route("/")
-def index():
-    return "Hello, sécurisé !"
+# # Ensuite, tes routes
+# @app.route("/")
+# def index():
+#     return "Hello, sécurisé !"
 
 
 # tes routes centralisées
