@@ -11,7 +11,6 @@ from utils.google.upload_pdf_to_drive import upload_pdf_to_drive
 from utils.axes_majeurs import organiser_points_forts, formater_axes_majeurs
 from utils.utils_points_forts import extraire_points_forts
 from analyse_point_astral_avec_sections import analyse_point_astral_avec_sections
-from utils.email_sender import envoyer_email_point_astral_v2
 from datetime import datetime
 import uuid
 import os
@@ -44,11 +43,6 @@ def afficher_point_astral():
 
     if not infos:
         return "❌ Données manquantes. Veuillez recommencer depuis le formulaire."
-    
-    # 🎯 AJOUT 1 : LOGS DE DEBUG POUR LE GENRE
-    gender = infos.get('gender')
-    print(f"🔍 GENRE RÉCUPÉRÉ DE SESSION: '{gender}'")
-    print(f"🔍 INFOS COMPLÈTES: {infos}")
 
     # 🔹 LOGS DE DEBUG AMÉLIORÉS
     import logging
@@ -87,7 +81,6 @@ def afficher_point_astral():
             lon=float(lon_precise),
             tzid=tzid_precise
         )
-        data['gender'] = gender
     else:
         print("🎯 Fallback géocodage classique")
         data = calcul_theme(
@@ -96,9 +89,7 @@ def afficher_point_astral():
             heure_naissance=infos["heure_naissance"],
             lieu_naissance=infos["lieu_naissance"]
         )
-        data['gender'] = gender
 
-        print(f"🔍 GENRE AJOUTÉ À DATA: '{data.get('gender')}'")
     # 🔹 TEST IMPORT
     print("🔥 TENTATIVE IMPORT analyse_point_astral_avec_sections")
     try:
@@ -147,12 +138,11 @@ def afficher_point_astral():
 
     # Debug minimal avant LLM
     print("🔎 axes_majeurs_str present?", "axes_majeurs_str" in data, bool(data.get("axes_majeurs_str")))
-    print(f"🔍 GENRE FINAL AVANT LLM: '{data.get('gender')}'")
-   
+
+    print("🔥 APPEL DE analyse_point_astral_avec_sections...")
     html_analyse = analyse_point_astral_avec_sections(data, interroger_llm, infos)
 
     # 🔹 Génération de l'analyse
-    print("🔥 APPEL DE analyse_point_astral_avec_sections...")
     print(f"🔥 APPEL DE analyse_point_astral_avec_sections...")
     try:
         html_analyse = analyse_point_astral_avec_sections(data, interroger_llm, infos)
@@ -189,36 +179,26 @@ def afficher_point_astral():
     # 🔹 Upload sur Google Drive
     url_drive = f"/static/pdfs/{filename}"
 
-    # # 🔹 Envoi de l’e-mail avec lien Drive
-    # sujet = f"Ton Point Astral – Les Fous d’Astro"
-    # message_html = f"""
-    # <html>
-    #     <body style="font-family: Arial, sans-serif; color: #333;">
-    #         <h2 style="color: #1f628e;">Bonjour {prenom} ✨</h2>
-    #         <p>Merci pour ta confiance !</p>
-    #         <p>Ton Point Astral est prêt. Tu peux le télécharger ici :</p>
-    #         <p>
-    #             👉<a href="https://tonsite.com{url_drive}" target="_blank"><strong>Télécharger ton Point Astral</strong></a>
-    #         </p>
-    #         <p>À bientôt,<br><strong>L’équipe des Fous d’Astro</strong> 🌟</p>
-    #     </body>
-    # </html>
-    # """
-    # envoyer_email_avec_analyse(
-    #     destinataire=infos["email"],
-    #     sujet=sujet,
-    #     contenu_html=message_html,
-    # )
-
-    # 🔹 Envoi de l'e-mail avec lien Drive - NOUVELLE VERSION
-    from utils.email_sender import envoyer_email_point_astral_v2
-
-    envoyer_email_point_astral_v2(
+    # 🔹 Envoi de l’e-mail avec lien Drive
+    sujet = f"Ton Point Astral – Les Fous d’Astro"
+    message_html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: #1f628e;">Bonjour {prenom} ✨</h2>
+            <p>Merci pour ta confiance !</p>
+            <p>Ton Point Astral est prêt. Tu peux le télécharger ici :</p>
+            <p>
+                👉<a href="https://tonsite.com{url_drive}" target="_blank"><strong>Télécharger ton Point Astral</strong></a>
+            </p>
+            <p>À bientôt,<br><strong>L’équipe des Fous d’Astro</strong> 🌟</p>
+        </body>
+    </html>
+    """
+    envoyer_email_avec_analyse(
         destinataire=infos["email"],
-        prenom=prenom,
-        url_drive=url_drive,
-        #pdf_path=output_path  # Optionnel si tu veux attacher le PDF
-)
+        sujet=sujet,
+        contenu_html=message_html,
+    )
 
     # 🔹 Affichage immédiat de l’analyse
     return render_template("resultat_point_astral.html",

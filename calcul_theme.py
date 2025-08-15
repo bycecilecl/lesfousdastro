@@ -110,19 +110,52 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     print(f"   Paramètres reçus: lat={lat}, lon={lon}, tzid={tzid}")
     
     # --- ÉTAPE 1: Obtenir les coordonnées ---
-    if lat is None or lon is None:
-        print(f"🌍 Géocodage de '{lieu_naissance}'...")
-        geolocator = Nominatim(user_agent="astro-app")
+    # if lat is None or lon is None:
+    #     print(f"🌍 Géocodage de '{lieu_naissance}'...")
+    #     geolocator = Nominatim(user_agent="astro-app")
+    #     try:
+    #         location = geolocator.geocode(lieu_naissance, timeout=10)
+    #         if location:
+    #             lat, lon = location.latitude, location.longitude
+    #             print(f"✅ Géocodage réussi: {lat:.6f}, {lon:.6f}")
+    #         else:
+    #             print(f"⚠️ Géocodage échoué, utilisation de Paris par défaut")
+    #             lat, lon = 48.8566, 2.3522
+    #     except Exception as e:
+    #         print(f"❌ Erreur géocodage: {e}")
+    #         lat, lon = 48.8566, 2.3522
+
+    def _to_float_or_none(x):
+        if x is None:
+            return None
+        x = str(x).strip().replace(",", ".")
         try:
-            location = geolocator.geocode(lieu_naissance, timeout=10)
+            return float(x)
+        except Exception:
+            return None
+
+    lat_f = _to_float_or_none(lat)
+    lon_f = _to_float_or_none(lon)
+
+    if lat_f is not None and lon_f is not None:
+        # ✅ on a des coordonnées précises → pas de géocodage
+        lat, lon = lat_f, lon_f
+        print(f"🎯 Coordonnées fournies: {lat}, {lon}")
+    else:
+        # 🌍 fallback géocodage (Nominatim) avec User-Agent obligatoire en prod
+        print(f"🌍 Géocodage de '{lieu_naissance}'...")
+        ua = os.getenv("GEOCODER_UA", "lesfousdastro/1.0 contact:admin@example.com")
+        geolocator = Nominatim(user_agent=ua)
+        try:
+            location = geolocator.geocode(lieu_naissance, timeout=10, language="fr")
             if location:
-                lat, lon = location.latitude, location.longitude
+                lat, lon = float(location.latitude), float(location.longitude)
                 print(f"✅ Géocodage réussi: {lat:.6f}, {lon:.6f}")
             else:
-                print(f"⚠️ Géocodage échoué, utilisation de Paris par défaut")
+                print("⚠️ Géocodage échoué, utilisation de Paris par défaut")
                 lat, lon = 48.8566, 2.3522
         except Exception as e:
-            print(f"❌ Erreur géocodage: {e}")
+            print(f"❌ Erreur géocodage: {e} → Paris par défaut")
             lat, lon = 48.8566, 2.3522
 
     # --- ÉTAPE 2: Parser la date de naissance ---
@@ -138,10 +171,23 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     print(f"📅 Date parsée: {naive}")
 
     # --- ÉTAPE 3: Obtenir le fuseau horaire correct ---
+    dt_local = None  # ✅ évite UnboundLocalError lors du print final
     if dt_naissance_utc is not None:
         # Cas 1: UTC déjà fourni (priorité absolue)
         dt_utc = dt_naissance_utc
         print(f"✅ UTC pré-calculé utilisé: {dt_utc}")
+
+        # ✅ définir aussi l'heure locale pour le log final
+        try:
+            tzid = tzid or "UTC"
+            if tzid == "UTC":
+                dt_local = dt_utc
+            else:
+                tz_local = pytz.timezone(tzid)
+                dt_local = tz_local.fromutc(dt_utc)
+        except Exception as e:
+            print(f"⚠️ Impossible de reconstruire l'heure locale depuis l'UTC ({e}), on garde UTC")
+            dt_local = dt_utc
     else:
         # Cas 2: Déterminer le fuseau et convertir
         if tzid is None:
@@ -158,21 +204,17 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
                 dt_local = tz_local.localize(naive, is_dst=None)
                 dt_utc = dt_local.astimezone(pytz.UTC)
             except pytz.AmbiguousTimeError:
-                # Pendant le changement d'heure, prendre l'heure standard
                 tz_local = pytz.timezone(tzid)
                 dt_local = tz_local.localize(naive, is_dst=False)
                 dt_utc = dt_local.astimezone(pytz.UTC)
             except pytz.NonExistentTimeError:
-                # Heure inexistante (saut DST), prendre l'heure suivante
                 tz_local = pytz.timezone(tzid)
                 dt_local = tz_local.localize(naive, is_dst=True)
                 dt_utc = dt_local.astimezone(pytz.UTC)
             except Exception as e:
                 print(f"❌ Erreur conversion fuseau '{tzid}': {e}")
-                # Fallback: traiter comme UTC
                 dt_local = naive.replace(tzinfo=pytz.UTC)
                 dt_utc = dt_local
-
     print(f"🔧 TEMPS FINAL:")
     print(f"   Heure locale: {dt_local.strftime('%Y-%m-%d %H:%M %Z%z') if hasattr(dt_local, 'strftime') else 'N/A'}")
     print(f"   Heure UTC: {dt_utc.strftime('%Y-%m-%d %H:%M %Z%z')}")
