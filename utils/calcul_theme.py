@@ -141,54 +141,14 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
 
     # --- ÉTAPE 3: Obtenir le fuseau horaire correct ---
     # --- ÉTAPE 3: Obtenir le fuseau horaire correct ---
-dt_local = None   # ✅ évite UnboundLocalError
-dt_utc = None
+    dt_local = None   # ✅ évite UnboundLocalError
+    dt_utc = None
 
-if dt_naissance_utc is not None:
-    # Cas 1: UTC déjà fourni (priorité absolue)
-    dt_utc = dt_naissance_utc
-    print(f"✅ UTC pré-calculé utilisé: {dt_utc}")
-    # reconstruire une heure locale pour le log (et la suite)
-    try:
-        tzid = tzid or "UTC"
-        if tzid == "UTC":
-            dt_local = dt_utc
-        else:
-            tz_local = pytz.timezone(tzid)
-            dt_local = tz_local.fromutc(dt_utc)
-    except Exception as e:
-        print(f"⚠️ Impossible de reconstruire l'heure locale depuis l'UTC ({e}), fallback UTC")
-        dt_local = dt_utc
-
-    else:
-        # Cas 2: Déterminer le fuseau et convertir
-        if tzid is None:
-            tzid = get_timezone_for_coordinates_and_date(lat, lon, naive)
-            print(f"🕐 Fuseau détecté: {tzid}")
-
-        if tzid == 'UTC':
-            dt_local = naive.replace(tzinfo=pytz.UTC)
-            dt_utc = dt_local
-        else:
-            try:
-                tz_local = pytz.timezone(tzid)
-                dt_local = tz_local.localize(naive, is_dst=None)
-                dt_utc = dt_local.astimezone(pytz.UTC)
-            except pytz.AmbiguousTimeError:
-                tz_local = pytz.timezone(tzid)
-                dt_local = tz_local.localize(naive, is_dst=False)
-                dt_utc = dt_local.astimezone(pytz.UTC)
-            except pytz.NonExistentTimeError:
-                tz_local = pytz.timezone(tzid)
-                dt_local = tz_local.localize(naive, is_dst=True)
-                dt_utc = dt_local.astimezone(pytz.UTC)
-            except Exception as e:
-                print(f"❌ Erreur conversion fuseau '{tzid}': {e} → fallback UTC")
-                dt_local = naive.replace(tzinfo=pytz.UTC)
-                dt_utc = dt_local
-
-    # ✅ Garde-fous au cas où
-    if dt_local is None and dt_utc is not None:
+    if dt_naissance_utc is not None:
+        # Cas 1: UTC déjà fourni (priorité absolue)
+        dt_utc = dt_naissance_utc
+        print(f"✅ UTC pré-calculé utilisé: {dt_utc}")
+        # reconstruire une heure locale pour le log (et la suite)
         try:
             tzid = tzid or "UTC"
             if tzid == "UTC":
@@ -196,19 +156,59 @@ if dt_naissance_utc is not None:
             else:
                 tz_local = pytz.timezone(tzid)
                 dt_local = tz_local.fromutc(dt_utc)
-        except Exception:
+        except Exception as e:
+            print(f"⚠️ Impossible de reconstruire l'heure locale depuis l'UTC ({e}), fallback UTC")
             dt_local = dt_utc
-    if dt_utc is None and dt_local is not None:
-        dt_utc = dt_local.astimezone(pytz.UTC)
-    if dt_local is None and dt_utc is None:
-        # dernier recours: on force UTC sur la date naive
-        dt_local = naive.replace(tzinfo=pytz.UTC)
-        dt_utc = dt_local
 
-    print("🔧 TEMPS FINAL:")
-    local_str = dt_local.strftime('%Y-%m-%d %H:%M %Z%z') if dt_local else 'N/A'
-    print(f"   Heure locale: {local_str}")
-    print(f"   Heure UTC: {dt_utc.strftime('%Y-%m-%d %H:%M %Z%z')}")
+        else:
+            # Cas 2: Déterminer le fuseau et convertir
+            if tzid is None:
+                tzid = get_timezone_for_coordinates_and_date(lat, lon, naive)
+                print(f"🕐 Fuseau détecté: {tzid}")
+
+            if tzid == 'UTC':
+                dt_local = naive.replace(tzinfo=pytz.UTC)
+                dt_utc = dt_local
+            else:
+                try:
+                    tz_local = pytz.timezone(tzid)
+                    dt_local = tz_local.localize(naive, is_dst=None)
+                    dt_utc = dt_local.astimezone(pytz.UTC)
+                except pytz.AmbiguousTimeError:
+                    tz_local = pytz.timezone(tzid)
+                    dt_local = tz_local.localize(naive, is_dst=False)
+                    dt_utc = dt_local.astimezone(pytz.UTC)
+                except pytz.NonExistentTimeError:
+                    tz_local = pytz.timezone(tzid)
+                    dt_local = tz_local.localize(naive, is_dst=True)
+                    dt_utc = dt_local.astimezone(pytz.UTC)
+                except Exception as e:
+                    print(f"❌ Erreur conversion fuseau '{tzid}': {e} → fallback UTC")
+                    dt_local = naive.replace(tzinfo=pytz.UTC)
+                    dt_utc = dt_local
+
+        # ✅ Garde-fous au cas où
+        if dt_local is None and dt_utc is not None:
+            try:
+                tzid = tzid or "UTC"
+                if tzid == "UTC":
+                    dt_local = dt_utc
+                else:
+                    tz_local = pytz.timezone(tzid)
+                    dt_local = tz_local.fromutc(dt_utc)
+            except Exception:
+                dt_local = dt_utc
+        if dt_utc is None and dt_local is not None:
+            dt_utc = dt_local.astimezone(pytz.UTC)
+        if dt_local is None and dt_utc is None:
+            # dernier recours: on force UTC sur la date naive
+            dt_local = naive.replace(tzinfo=pytz.UTC)
+            dt_utc = dt_local
+
+        print("🔧 TEMPS FINAL:")
+        local_str = dt_local.strftime('%Y-%m-%d %H:%M %Z%z') if dt_local else 'N/A'
+        print(f"   Heure locale: {local_str}")
+        print(f"   Heure UTC: {dt_utc.strftime('%Y-%m-%d %H:%M %Z%z')}")
 
     # --- ÉTAPE 4: Calculs astrologiques ---
     swe.set_ephe_path(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ephe'))
