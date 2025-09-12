@@ -470,7 +470,7 @@ def generer_bloc_2(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
     
     Format de sortie attendu :
     4–5 paragraphes TRES APPROFONDIS en français, texte continu (pas de listes), respectant les contraintes ci-dessus. Utilise le tutoiement.
-    """)
+    """
 
     print(prompt)
 
