@@ -48,6 +48,11 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 ARG REQS_REFRESH=2025-09-12_10h05
 COPY requirements.txt .
+
+RUN echo "== requirements.txt ==" && sed -n '1,200p' requirements.txt \
+ && echo "== grep stripe ==" && grep -Rn --include="*requirements*.txt" --include="constraints*.txt" --include="pyproject.toml" --include="setup.cfg" "stripe" . || true \
+ && echo "== pip index versions stripe ==" && pip index versions stripe || true
+ 
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Code de l'app
