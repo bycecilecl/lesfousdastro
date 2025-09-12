@@ -56,4 +56,4 @@ matplotlib>=3.5.0
 numpy>=1.21.0
 paypal-checkout-serversdk==1.0.3
 boto3
-stripe==10.13.0
+stripe==12.5.1
