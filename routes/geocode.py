@@ -50,15 +50,42 @@ def api_geocode():
     q = request.args.get("q", "").strip()
     if not q:
         return jsonify({"error": "missing q"}), 400
+    
 
-    # Nominatim: recherche textuelle mondiale
-    params = {
-        "q": q,
-        "format": "jsonv2",
-        "addressdetails": 1,
-        "limit": 5,          
-        "accept-language": "fr,en"  
-    }
+    q = request.args.get("q", "").strip()
+    if not q:
+        return jsonify({"error": "missing q"}), 400
+
+    # NEW: si l’utilisateur tape un code postal FR à 5 chiffres, on cible le CP.
+    is_fr_postcode = q.isdigit() and len(q) == 5
+
+    if is_fr_postcode:
+        params = {
+            "format": "jsonv2",
+            "addressdetails": 1,
+            "limit": 8,
+            "accept-language": "fr,en",
+            "countrycodes": "fr",
+            "postalcode": q,           # <= clé magique pour Nominatim
+        }
+    else:
+        params = {
+            "q": q,
+            "format": "jsonv2",
+            "addressdetails": 1,
+            "limit": 8,
+            "accept-language": "fr,en",
+            "countrycodes": "fr",      # <= on reste en France (inclut La Réunion)
+        }
+
+        # Nominatim: recherche textuelle mondiale
+        params = {
+            "q": q,
+            "format": "jsonv2",
+            "addressdetails": 1,
+            "limit": 5,          
+            "accept-language": "fr,en"  
+        }
     
     try:
         r = requests.get(f"{NOMINATIM_URL}/search", params=params, headers=HEADERS, timeout=15)
@@ -85,8 +112,25 @@ def api_geocode():
                 or it.get("display_name", "").split(",")[0]
                 or q
             )
+            postcode = address.get("postcode")
+            state_or_dept = address.get("state") or address.get("county")   # ex: "La Réunion" ou "Saône-et-Loire"
             country = address.get("country", "")
-            short_label = f"{city}, {country}" if country else city
+
+            # NEW: label enrichi
+            parts = []
+            # Ville + (CP)
+            if postcode:
+                parts.append(f"{city} ({postcode})")
+            else:
+                parts.append(city)
+            # Région/Département si présent (ex: "La Réunion")
+            if state_or_dept:
+                parts.append(state_or_dept)
+            # Pays
+            if country:
+                parts.append(country)
+
+            short_label = ", ".join(parts)
 
             # Obtenir le fuseau horaire
             tzid = tzid_from_latlon(lat, lon)

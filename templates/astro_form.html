@@ -315,6 +315,14 @@
             color: #10B981;
         }
 
+        .option-card .price .old-price {
+            text-decoration: line-through;
+            opacity: 0.6;
+            font-size: 1rem;
+            margin-right: 5px;
+            color: #999;
+        }
+
         .option-card .status {
             margin-top: 10px;
             padding: 5px 12px;
@@ -405,25 +413,10 @@
             margin-bottom: 15px;
         }
 
-        .original-price {
-            text-decoration: line-through;
-            opacity: 0.7;
-            font-size: 1.1rem;
-        }
-
         .pack-price-value {
             font-size: 2rem;
             font-weight: bold;
             color: #FFD700;
-        }
-
-        .savings {
-            background: rgba(255, 215, 0, 0.3);
-            color: #FFD700;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: bold;
         }
 
         .pack-card .status {
@@ -604,6 +597,746 @@
             transform: none;
         }
 
+        /* Partie prévisionnelle */
+        .predictive-section {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(167, 139, 250, 0.05));
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .predictive-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8B5CF6, #A78BFA);
+        }
+
+        .predictive-title {
+            color: #8B5CF6;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .predictive-subtitle {
+            text-align: center;
+            color: #6B46C1;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .predictive-section .options-grid {
+            margin-top: 20px;
+        }
+
+        .predictive-section .option-card {
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(139, 92, 246, 0.05));
+        }
+
+        .predictive-section .option-card:hover {
+            border-color: #8B5CF6;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(139, 92, 246, 0.1));
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .predictive-section .option-card .price {
+            color: #8B5CF6;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .timer-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 12px;
+        }
+
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #8B5CF6;
+            margin-bottom: 5px;
+        }
+
+        .timer-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .psychology-chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .psychology-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .psychology-input-container input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #c0f0f7;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .user-message {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #c0f0f7, #d3b1c2);
+        }
+
+        .message-content {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 250px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+        }
+
+        /* Modal analyse gratuite */
+        .analysis-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .analysis-modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .analysis-modal-header {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .analysis-modal-body {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #00a8a8;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .analysis-result {
+            display: none;
+        }
+
+        .analysis-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .explore-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .explore-btn:first-child {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+        }
+
+        .explore-btn:last-child {
+            background: #6c757d;
+            color: white;
+        }
+
+        .explore-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Modal confirmation paiement */
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+        }
+
+        .payment-modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .payment-modal-header {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 20px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .payment-modal-body {
+            padding: 30px;
+        }
+
+        .order-summary {
+            margin-bottom: 30px;
+        }
+
+        .customer-info p {
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        .items-summary {
+            margin-top: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .payment-item:last-child {
+            border-bottom: none;
+        }
+
+        .payment-total {
+            border-top: 2px solid #1f628e;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #1f628e;
+        }
+
+        .payment-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap; 
+        }
+
+        #paypal-button-container {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .payment-btn {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .payment-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .stripe-btn {
+            background: linear-gradient(135deg, #6772e5, #5469d4);
+            color: white;
+        }
+
+        .paypal-btn {
+            background: linear-gradient(135deg, #0070ba, #003087);
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Notifications */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-left: 4px solid #00a8a8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification-warning {
+            border-left-color: #FFA500;
+            background: #FFF8DC;
+        }
+
+        .notification-success {
+            border-left-color: #10B981;
+            background: #F0FDF4;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            margin-left: 15px;
+        }
+
+        /* Footer Styles */
+        .site-footer {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+            color: white;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.15"/></svg>');
+            pointer-events: none;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 40px;
+            padding: 50px 20px 30px;
+        }
+
+        .footer-section h4 {
+            color: #c0f0f7;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .footer-section h5 {
+            color: #c0f0f7;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Section À propos */
+        .about-section .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .footer-logo-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .footer-logo h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-description {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .social-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .social-icon {
+            font-size: 1.2rem;
+            filter: grayscale(1) brightness(2);
+        }
+
+        /* Liens */
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-links a:hover {
+            color: #c0f0f7;
+            padding-left: 8px;
+        }
+
+        .footer-links a::before {
+            content: '→';
+            position: absolute;
+            left: -15px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover::before {
+            opacity: 1;
+            left: -10px;
+        }
+
+        /* Contact */
+        .contact-info {
+            margin-bottom: 25px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+        }
+
+        .contact-item a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item a:hover {
+            color: #c0f0f7;
+        }
+
+        .contact-icon {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Newsletter */
+        .newsletter-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .newsletter-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .newsletter-input:focus {
+            outline: none;
+            border-color: #c0f0f7;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .newsletter-btn {
+            padding: 12px 18px;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2);
+            border: none;
+            border-radius: 25px;
+            color: #1f628e;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(192, 240, 247, 0.3);
+        }
+
+        /* Footer Bottom */
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding: 25px 20px;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-bottom-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .copyright {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .legal-notice {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+            margin: 0;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .footer-badges {
+            display: flex;
+            gap: 15px;
+        }
+
+        .security-badge {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -631,6 +1364,194 @@
 
             .gender-options {
                 flex-direction: column;
+            }
+
+            .predictive-section {
+                padding: 20px;
+                margin-top: 30px;
+            }
+
+            .predictive-title {
+                font-size: 1.3rem;
+            }
+
+            .predictive-subtitle {
+                font-size: 0.95rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 40px 20px 20px;
+            }
+            
+            .footer-bottom-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .footer-badges {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .about-section .footer-logo {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .footer-social {
+                justify-content: center;
+            }
+        }
+
+        /* Section témoignages */
+        .testimonials-section {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(192, 240, 247, 0.1));
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .testimonials-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 35px;
+            font-size: 1.1rem;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .testimonial-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1f628e, #00a8a8, #c0f0f7);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-color: rgba(31, 98, 142, 0.2);
+        }
+
+        .testimonial-content {
+            margin-bottom: 20px;
+        }
+
+        .rating-stars {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        .testimonial-content p {
+            color: #333;
+            line-height: 1.6;
+            font-style: italic;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .author-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .author-info strong {
+            display: block;
+            color: #1f628e;
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+
+        .author-info span {
+            color: #666;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .testimonials-cta {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(31, 98, 142, 0.1), rgba(0, 168, 168, 0.05));
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .testimonials-cta h3 {
+            color: #1f628e;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        .testimonials-cta p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(31, 98, 142, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .testimonials-section {
+                padding: 25px;
+                margin: 30px 0;
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
         }
     </style>
@@ -718,45 +1639,47 @@
                             <span class="status available">Cliquez pour sélectionner</span>
                         </div>
                         
-                        <div class="option-card featured" onclick="addToCart('point_astral', 'Point Astral', 35, this)">
-                            <div class="badge popular">POPULAIRE</div>
+                        <div class="option-card featured" onclick="addToCart('point_astral', 'Point Astral', 29, this)">
+                            <div class="badge popular">PRIX LANCEMENT</div>
                             <span class="icon">📊</span>
                             <h4>Point Astral</h4>
                             <p>Analyse occidentale complète sur 3/4 pages + Nakshatra de la lune</p>
-                            <div class="price">35€</div>
+                            <div class="price">
+                                <span class="old-price">35€</span> 29€
+                            </div>
                             <span class="status development">En développement</span>
                         </div>
                         
-                        <div class="option-card" onclick="addToCart('potentiels_defis', 'Mes Potentiels et Défis', 18, this)">
-                            <div class="badge new">NOUVEAU</div>
+                        <div class="option-card" onclick="showComingSoon('Mes Potentiels et Défis')">
+                            <div class="badge new">BIENTÔT</div>
                             <span class="icon">💪</span>
                             <h4>Mes Potentiels et Défis</h4>
                             <p>Découvrez vos forces cachées et les obstacles à transformer</p>
-                            <div class="price">18€</div>
+                            <div class="price">Prix à définir</div>
                             <span class="status coming-soon">À venir</span>
                         </div>
                         
-                        <div class="option-card" onclick="addToCart('mission_ame', 'Mission d\'Âme', 18, this)">
+                        <div class="option-card" onclick="showComingSoon('Mission d\'Âme')">
                             <span class="icon">🎭</span>
                             <h4>Mission d'Âme</h4>
                             <p>Astrologie occidentale et védique pour découvrir votre purpose</p>
-                            <div class="price">18€</div>
+                            <div class="price">Prix à définir</div>
                             <span class="status coming-soon">À venir</span>
                         </div>
 
-                        <div class="option-card" onclick="addToCart('carriere', 'Carrière/Vocation', 18, this)">
+                        <div class="option-card" onclick="showComingSoon('Carrière/Vocation')">
                             <span class="icon">🎯</span>
                             <h4>Carrière/Vocation</h4>
                             <p>Quelle voie choisir pour réaliser votre potentiel professionnel</p>
-                            <div class="price">18€</div>
+                            <div class="price">Prix à définir</div>
                             <span class="status coming-soon">À venir</span>
                         </div>
                         
-                        <div class="option-card" onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', 18, this)">
+                        <div class="option-card" onclick="showComingSoon('Mon Profil Amoureux')">
                             <span class="icon">💕</span>
                             <h4>Mon Profil Amoureux</h4>
                             <p>Qu'est-ce que je recherche ? Qui m'attire vraiment ?</p>
-                            <div class="price">18€</div>
+                            <div class="price">Prix à définir</div>
                             <span class="status coming-soon">À venir</span>
                         </div>
                     </div>
@@ -766,19 +1689,19 @@
                         <h3 class="predictive-title">🌙 Analyses Prévisionnelles</h3>
                         <p class="predictive-subtitle">Découvrez ce que l'avenir vous réserve avec nos analyses temporelles</p>
                         <div class="options-grid">
-                            <div class="option-card" onclick="addToCart('energies_mois', 'Mes Énergies du Mois', 15, this)">
+                            <div class="option-card" onclick="showComingSoon('Mes Énergies du Mois')">
                                 <span class="icon">🌙</span>
                                 <h4>Mes Énergies du Mois</h4>
                                 <p>Abonnement mensuel pour suivre vos transits personnalisés</p>
-                                <div class="price">15€/mois</div>
+                                <div class="price">Prix à définir</div>
                                 <span class="status coming-soon">À venir</span>
                             </div>
 
-                            <div class="option-card" onclick="addToCart('revolution_solaire', 'Révolution Solaire', 25, this)">
+                            <div class="option-card" onclick="showComingSoon('Révolution Solaire')">
                                 <span class="icon">🎂</span>
                                 <h4>Révolution Solaire</h4>
                                 <p>Votre thème annuel pour anticiper les grandes tendances</p>
-                                <div class="price">25€</div>
+                                <div class="price">Prix à définir</div>
                                 <span class="status coming-soon">À venir</span>
                             </div>
                         </div>
@@ -786,54 +1709,136 @@
                 </div>
             </form>
         </div>
+<!-- Section à ajouter dans votre astro_form.html, après la section Analyses Cosmiques -->
 
+<div class="testimonials-section">
+    <h2 class="section-title">💬 Ce qu'ils disent de nos analyses</h2>
+    <p class="testimonials-subtitle">Découvrez pourquoi nos clients recommandent nos analyses astrologiques</p>
+    
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"J'ai voulu tester l'application par curiosité et je suis absolument bluffée ! Une analyse très étonnante..D'une justesse incroyable. J'ai l'impression que l'appli a lu à travers moi pour pointer doigt toutes mes failles, mes atouts, mes challenges, mon fonctionnement et surtout je repars avec des clés de progression ! Je conseille à tous cet outil précieux, impossible d'être déçu, bravo à Cécile pour cette innovation qui va beaucoup m'aider."</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👩</div>
+                <div class="author-info">
+                    <strong>Sarah W.</strong>
+                    <span>Scorpion Ascendant Scorpion</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"Incroyable précision ! L'analyse a mis des mots sur ce que je ressentais depuis des années. Ça m'a aidé à mieux comprendre mes relations et mes blocages professionnels."</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👨</div>
+                <div class="author-info">
+                    <strong>Laura J.</strong>
+                    <span>Scorpion Ascendant Gémeaux</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"J'étais sceptique au début, mais l'analyse gratuite m'a convaincue. Le contenu est riche et bien expliqué, même pour une débutante comme moi."</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👩</div>
+                <div class="author-info">
+                    <strong>Samé</strong>
+                    <span>Capricorne Ascendant Capricorne</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"J'ai été subjugée par l'exactitude des propos. Moi qui ai souvent l'impression de me chercher, ce point a lu en moi comme dans un livre ouvert et en même temps, il a permis de mettre des mots concrets sur des notions que je sentais floues en moi. De nombreux petits conseils parsèment le Point Astral et nous repartons avec des outils concrets. Un point vivement conseillé pour découvrir de manière synthétique son profil astro. Merci Cécile pour ton travail !"</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👨</div>
+                <div class="author-info">
+                    <strong>Caroline S.</strong>
+                    <span>Balance Ascendant Vierge</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"Le service client est au top et l'analyse arrive rapidement. J'ai commandé plusieurs modules, chacun apporte un éclairage différent et complémentaire."</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👨</div>
+                <div class="author-info">
+                    <strong>Aurélie </strong>
+                    <span>Cancer Ascendant Vierge</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"Le service client est au top et l'analyse arrive rapidement. J'ai commandé plusieurs modules, chacun apporte un éclairage différent et complémentaire."</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👨</div>
+                <div class="author-info">
+                    <strong>Aurélie </strong>
+                    <span>Cancer Ascendant Vierge</span>
+                </div>
+            </div>
+        </div>
+    </div>
         <!-- Section Packs -->
-                        <div class="packs-section">
+        <div class="packs-section">
             <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
             <p style="text-align: center; color: white; margin-bottom: 20px; opacity: 0.9;">
                 Économisez en combinant plusieurs analyses cosmiques dans nos packs exclusifs
             </p>
             <div class="packs-grid">
-                <div class="pack-card" onclick="selectPack('pack_3_modules', 49, this)">
+                <div class="pack-card" onclick="showComingSoon('Pack 3 Modules')">
                     <div class="pack-title">🎯 Pack 3 Modules</div>
                     <div class="pack-content">3 analyses cosmiques de votre choix (sans Point Astral)</div>
                     <div class="pack-price">
-                        <span class="original-price">54€</span>
-                        <span class="pack-price-value">49€</span>
-                        <span class="savings">Économisez 5€</span>
+                        <span class="pack-price-value">Prix à définir</span>
                     </div>
                     <span class="status coming-soon">À venir</span>
                 </div>
                 
-                <div class="pack-card" onclick="selectPack('pack_decouverte', 64, this)">
+                <div class="pack-card" onclick="showComingSoon('Pack Découverte')">
                     <div class="pack-title">🎁 Pack Découverte</div>
                     <div class="pack-content">Point Astral + 2 analyses cosmiques de votre choix</div>
                     <div class="pack-price">
-                        <span class="original-price">71€</span>
-                        <span class="pack-price-value">64€</span>
-                        <span class="savings">Économisez 7€</span>
+                        <span class="pack-price-value">Prix à définir</span>
                     </div>
                     <span class="status coming-soon">À venir</span>
                 </div>
 
-                <div class="pack-card" onclick="selectPack('pack_complet', 79, this)">
+                <div class="pack-card" onclick="showComingSoon('Pack Complet')">
                     <div class="pack-title">✨ Pack Complet</div>
                     <div class="pack-content">Point Astral + 3 analyses cosmiques de votre choix</div>
                     <div class="pack-price">
-                        <span class="original-price">89€</span>
-                        <span class="pack-price-value">79€</span>
-                        <span class="savings">Économisez 10€</span>
+                        <span class="pack-price-value">Prix à définir</span>
                     </div>
                     <span class="status coming-soon">À venir</span>
                 </div>
 
-                <div class="pack-card" onclick="selectPack('pack_integral', 95, this)">
+                <div class="pack-card" onclick="showComingSoon('Pack Intégral')">
                     <div class="pack-title">🌟 Pack Intégral</div>
                     <div class="pack-content">Point Astral + 4 analyses cosmiques de votre choix</div>
                     <div class="pack-price">
-                        <span class="original-price">107€</span>
-                        <span class="pack-price-value">95€</span>
-                        <span class="savings">Économisez 12€</span>
+                        <span class="pack-price-value">Prix à définir</span>
                     </div>
                     <span class="status coming-soon">À venir</span>
                 </div>
@@ -863,7 +1868,7 @@
         <div class="consultation-section">
             <h2 class="section-title">👥 Consultations Personnalisées</h2>
             <div class="consultation-grid">
-                <a href="#" class="consultation-card" onclick="window.open('https://votre-site.com/rdv', '_blank')">
+                <a href="https://bycecilecl.com/categorie-produit/services/" class="consultation-card" target="_blank">
                     <span class="consultation-icon">🔮</span>
                     <div class="consultation-title">Réserver une Consultation</div>
                     <div class="consultation-description">Consultation approfondie avec analyse personnalisée en direct</div>
@@ -877,157 +1882,181 @@
             </div>
         </div>
 
-        <!-- Chatbox d'aide -->
-        <div class="help-chatbox" id="helpChatbox">
-            <div class="chatbox-header" onclick="toggleChatbox()">
-                <span class="chatbox-icon">💬</span>
-                <span class="chatbox-title">Aide & Questions</span>
-                <span class="chatbox-toggle" id="chatboxToggle">▲</span>
-            </div>
-            <div class="chatbox-content" id="chatboxContent">
-                <div class="chatbox-messages" id="chatboxMessages">
-                    <div class="message bot-message">
-                        <div class="message-avatar">🌟</div>
-                        <div class="message-content">
-                            Bonjour ! Je suis votre assistant virtuel. Je peux vous expliquer nos analyses, les prix, le fonctionnement du site... Que souhaitez-vous savoir ?
-                        </div>
-                    </div>
-                </div>
-                <div class="chatbox-input-container">
-                    <input type="text" id="chatboxInput" placeholder="Tapez votre question..." onkeypress="handleChatKeyPress(event)">
-                    <button onclick="sendMessage()" class="send-btn">📤</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Sélection Pack -->
-        <div class="modal-overlay" id="packSelectionModal" onclick="event.target === this && closePackSelectionModal()">
-            <div class="modal-content pack-selection-modal" onclick="event.stopPropagation()">
-                <div class="modal-header pack-header">
-                    <h3 id="packSelectionTitle">🎁 Sélection Pack</h3>
-                    <button class="close-btn" onclick="closePackSelectionModal()">✕</button>
-                </div>
-                <div class="modal-body">
-                    <div class="pack-selection-intro">
-                        <p id="packSelectionSubtitle">Choisissez vos analyses :</p>
-                        <div class="selection-counter" id="selectionCounter">0/0 analyses sélectionnées</div>
-                    </div>
-                    
-                    <div class="pack-analyses-selection" id="packAnalysesSelection">
-                        <!-- Les analyses seront injectées ici par JavaScript -->
-                    </div>
-                    
-                    <div class="pack-selection-actions">
-                        <button onclick="confirmPackSelection()" class="confirm-pack-btn" id="confirmPackBtn" disabled>
-                            Choisissez vos analyses
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Confirmation de Paiement -->
-        <div class="modal-overlay" id="paymentConfirmationModal" onclick="event.target === this && closePaymentConfirmationModal()">
-            <div class="modal-content payment-modal" onclick="event.stopPropagation()">
-                <div class="modal-header payment-header">
-                    <h3>💳 Confirmation de Commande</h3>
-                    <button class="close-btn" onclick="closePaymentConfirmationModal()">✕</button>
-                </div>
-                <div class="modal-body">
-                    <div id="paymentSummary"></div>
-                    
-                    <div class="payment-methods">
-                        <h4>💰 Choisissez votre mode de paiement</h4>
-                        <div class="payment-options">
-                            <button onclick="confirmPayment()" class="payment-option stripe-option">
-                                <span class="payment-icon">💳</span>
-                                <div class="payment-details">
-                                    <div class="payment-name">Carte Bancaire</div>
-                                    <div class="payment-desc">Paiement sécurisé par Stripe</div>
-                                </div>
-                            </button>
-                            
-                            <button onclick="redirectToPayPal(window.pendingOrder)" class="payment-option paypal-option">
-                                <span class="payment-icon">🅿️</span>
-                                <div class="payment-details">
-                                    <div class="payment-name">PayPal</div>
-                                    <div class="payment-desc">Compte PayPal ou carte</div>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="security-info">
-                        <p>🔒 <strong>Paiement 100% sécurisé</strong></p>
-                        <p>Vos données bancaires sont protégées et ne transitent jamais par nos serveurs.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Analyse Gratuite -->
-        <div class="modal-overlay" id="freeAnalysisModal" onclick="event.target === this && closeFreeAnalysisModal()">
-            <div class="modal-content free-analysis-modal" onclick="event.stopPropagation()">
-                <div class="modal-header free-header">
-                    <h3>🌟 Votre Analyse Gratuite</h3>
-                    <button class="close-btn" onclick="closeFreeAnalysisModal()">✕</button>
-                </div>
-                <div class="modal-body">
-                    <div class="analysis-loading" id="loadingSpinner">
-                        <div class="loading-spinner"></div>
-                        <div class="analysis-status" id="analysisStatus">🌟 Préparation de votre analyse...</div>
-                    </div>
-                    
-                    <div class="analysis-result" id="analysisResult" style="display: none;">
-                        <div id="freeAnalysisContent"></div>
-                        <div class="analysis-actions">
-                            <button onclick="exploreMoreAnalyses()" class="explore-btn">
-                                🚀 Découvrir nos analyses complètes
-                            </button>
-                            <button onclick="closeFreeAnalysisModal()" class="later-btn">
-                                Plus tard
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Cellule Psychologique -->
-        <div class="modal-overlay" id="psychologyModal" onclick="closePsychologyChat()">
-            <div class="modal-content" onclick="event.stopPropagation()">
-                <div class="modal-header">
-                    <h3>🧠 Cellule Psychologique IA</h3>
-                    <button class="close-btn" onclick="closePsychologyChat()">✕</button>
-                </div>
-                <div class="modal-body">
-                    <div class="timer-section">
-                        <div class="timer" id="psychologyTimer">10:00</div>
-                        <div class="timer-label">Temps restant</div>
-                    </div>
-                    <div class="psychology-chat" id="psychologyChat">
-                        <div class="message bot-message">
-                            <div class="message-avatar">🧠</div>
-                            <div class="message-content">
-                                Bonjour ! Je suis votre psychologue astrologique IA. Pendant les 10 prochaines minutes, nous pouvons explorer ensemble vos configurations astrales et leur impact psychologique. Parlez-moi de ce qui vous préoccupe ou intéresse dans votre thème natal.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="psychology-input-container">
-                        <input type="text" id="psychologyInput" placeholder="Partagez vos réflexions..." onkeypress="handlePsychologyKeyPress(event)">
-                        <button onclick="sendPsychologyMessage()" class="send-btn">📤</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
+    <!-- Modal Analyse Gratuite -->
+    <div class="analysis-modal" id="freeAnalysisModal" onclick="event.target === this && closeFreeAnalysisModal()">
+        <div class="analysis-modal-content" onclick="event.stopPropagation()">
+            <div class="analysis-modal-header">
+                <h3>✨ Génération de votre Analyse Gratuite ✨</h3>
+            </div>
+            <div class="analysis-modal-body">
+                <div class="loading-container" id="loadingSpinner">
+                    <div class="loading-spinner"></div>
+                    <h4 id="analysisStatus">🌟 Préparation de votre analyse...</h4>
+                    <p>Veuillez patienter pendant que nous calculons votre thème natal</p>
+                </div>
+                <div class="analysis-result" id="analysisResult">
+                    <div id="freeAnalysisContent"></div>
+                </div>
+            </div>
+            <div class="analysis-actions">
+                <button class="explore-btn" onclick="exploreMoreAnalyses()">🔍 Explorer plus d'analyses</button>
+                <button class="explore-btn" onclick="closeFreeAnalysisModal()">Plus tard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmation Paiement -->
+    <div class="payment-modal" id="paymentConfirmationModal" onclick="event.target === this && closePaymentConfirmationModal()">
+        <div class="payment-modal-content" onclick="event.stopPropagation()">
+            <div class="payment-modal-header">
+                <h3>💳 Confirmation de votre commande</h3>
+            </div>
+            <div class="payment-modal-body">
+                <div id="paymentSummary"></div>
+                <div class="payment-buttons">
+                    <button class="payment-btn stripe-btn" onclick="confirmPayment()">
+                        Payer avec Stripe
+                    </button>
+                    <!-- <button class="payment-btn paypal-btn" onclick="redirectToPayPal(window.pendingOrder)">
+                        Payer avec PayPal
+                    </button> -->
+                    <div id="paypal-button-container" style="width:100%;"></div>
+                    <button class="payment-btn cancel-btn" onclick="closePaymentConfirmationModal()">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cellule Psychologique -->
+    <div class="modal-overlay" id="psychologyModal" onclick="closePsychologyChat()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>🧠 Cellule Psychologique IA</h3>
+                <button class="close-btn" onclick="closePsychologyChat()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="timer-section">
+                    <div class="timer" id="psychologyTimer">10:00</div>
+                    <div class="timer-label">Temps restant</div>
+                </div>
+                <div class="psychology-chat" id="psychologyChat">
+                    <div class="message bot-message">
+                        <div class="message-avatar">🧠</div>
+                        <div class="message-content">
+                            Bonjour ! Je suis votre psychologue astrologique IA. Pendant les 10 prochaines minutes, nous pouvons explorer ensemble vos configurations astrales et leur impact psychologique. Parlez-moi de ce qui vous préoccupe ou intéresse dans votre thème natal.
+                        </div>
+                    </div>
+                </div>
+                <div class="psychology-input-container">
+                    <input type="text" id="psychologyInput" placeholder="Partagez vos réflexions..." onkeypress="handlePsychologyKeyPress(event)">
+                    <button onclick="sendPsychologyMessage()" class="send-btn">📤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section about-section">
+                    <div class="footer-logo">
+                        <img src="static/images/logo_les_fous_dastro.webp" alt="Les Fous d'Astro" class="footer-logo-img">
+                        <h3>Les Fous d'Astro</h3>
+                    </div>
+                    <p class="footer-description">
+                        Découvrez les mystères de votre thème natal avec nos analyses astrologiques personnalisées. 
+                        Une approche moderne et authentique de l'astrologie pour révéler votre potentiel.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link" title="Facebook">
+                            <span class="social-icon">📘</span>
+                        </a>
+                        <a href="#" class="social-link" title="Instagram">
+                            <span class="social-icon">📷</span>
+                        </a>
+                        <a href="#" class="social-link" title="YouTube">
+                            <span class="social-icon">🎥</span>
+                        </a>
+                        <a href="mailto:contact@lesfousdastro.fr" class="social-link" title="Email">
+                            <span class="social-icon">📧</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section links-section">
+                    <h4>Nos Services</h4>
+                    <ul class="footer-links">
+                        <li><a href="#analyses">Analyse Gratuite</a></li>
+                        <li><a href="#analyses">Point Astral</a></li>
+                        <li><a href="#analyses">Analyses Cosmiques</a></li>
+                        <li><a href="#packs">Packs Découverte</a></li>
+                        <li><a href="#consultations">Consultations</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section links-section">
+                    <h4>Informations</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('legal_bp.conditions_utilisation') }}">Conditions d'utilisation</a></li>
+                        <li><a href="{{ url_for('legal_bp.mentions_legales') }}">Mentions légales</a></li>
+                        <li><a href="{{ url_for('legal_bp.politique_confidentialite') }}">Politique de confidentialité</a></li>
+                        <li><a href="{{ url_for('legal_bp.aide_faq') }}">Aide & FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section contact-section">
+                    <h4>Contact</h4>
+                    <div class="contact-info">
+                        <p class="contact-item">
+                            <span class="contact-icon">📧</span>
+                            <a href="mailto:contact@lesfousdastro.fr">contact@lesfousdastro.fr</a>
+                        </p>
+                        <p class="contact-item">
+                            <span class="contact-icon">🌐</span>
+                            <a href="https://lesfousdastro.fr">lesfousdastro.fr</a>
+                        </p>
+                        <p class="contact-item">
+                            <span class="contact-icon">🏢</span>
+                            France
+                        </p>
+                    </div>
+                    <div class="newsletter">
+                        <h5>Newsletter Cosmique</h5>
+                        <form class="newsletter-form">
+                            <input type="email" placeholder="Votre email..." class="newsletter-input">
+                            <button type="submit" class="newsletter-btn">✨</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p class="copyright">
+                        © 2025 Les Fous d'Astro. Tous droits réservés.
+                    </p>
+                    <p class="legal-notice">
+                        Les analyses astrologiques sont à des fins de divertissement et de développement personnel uniquement.
+                    </p>
+                    <div class="footer-badges">
+                        <span class="security-badge">🔒 Paiements sécurisés</span>
+                        <span class="security-badge">🛡️ Données protégées</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&components=buttons"></script>
     <script>
+        let paypalRendered = false; // évite de rendre 2x si la modale s’ouvre/ferme
         // Variables globales
         let cart = [];
         let selectedPack = null;
-        let chatboxOpen = false;
         let psychologyTimer = null;
         let psychologyTimeLeft = 600; // 10 minutes en secondes
 
@@ -1047,10 +2076,15 @@
             }
         }
 
+        // Fonction pour afficher message "à venir"
+        function showComingSoon(analysisName) {
+            showNotification(`🚀 ${analysisName} arrive bientôt ! Nous travaillons sur cette fonctionnalité pour vous offrir la meilleure expérience.`, 'info');
+        }
+
         // Gestion du panier
         function addToCart(id, name, price, element) {
             if (selectedPack) {
-                alert('Vous avez sélectionné un pack. Désélectionnez-le d\'abord pour ajouter des analyses individuelles.');
+                showNotification('Vous avez sélectionné un pack. Désélectionnez-le d\'abord pour ajouter des analyses individuelles.', 'warning');
                 return;
             }
 
@@ -1141,7 +2175,7 @@
             const userData = {
                 nom: document.getElementById('nom').value,
                 email: document.getElementById('email').value,
-                gender: document.querySelector('[name="gender"]:checked').value,
+                gender: document.querySelector('[name="gender"]:checked').value,  
                 date_naissance: document.getElementById('date_naissance').value,
                 heure_naissance: document.getElementById('heure_naissance').value,
                 lieu_naissance: document.getElementById('lieu_naissance').value,
@@ -1190,7 +2224,7 @@
                         addPaymentContinueButton(paidAnalyses);
                     }
                 } else {
-                    throw new Error('Erreur dans la réponse de l\'API');
+                    throw new Error('Erreur dans la réponse de l\'API: ' + (data.message || 'Erreur inconnue'));
                 }
             })
             .catch(error => {
@@ -1200,6 +2234,9 @@
                     <div style="text-align: center; color: #ff4757;">
                         <h4>⚠️ Erreur temporaire</h4>
                         <p>Impossible de générer votre analyse pour le moment. Veuillez réessayer.</p>
+                        <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">
+                            Erreur: ${error.message}
+                        </p>
                     </div>
                 `;
                 document.getElementById('analysisResult').style.display = 'block';
@@ -1257,11 +2294,6 @@
                     document.getElementById('analysisStatus').innerHTML = '✨ Finalisation, encore un instant...';
                 }
             }, 20000);
-        }
-
-        function generateFreeAnalysisResult() {
-            // Cette fonction n'est plus utilisée car on appelle directement l'API
-            // dans processFreeAnalyses()
         }
 
         function closeFreeAnalysisModal() {
@@ -1339,218 +2371,6 @@
                 }
             });
             updateCartDisplay();
-        }
-
-        function selectPack(packId, price, element) {
-            // Désélectionner les autres packs
-            document.querySelectorAll('.pack-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            // Vider le panier des analyses individuelles
-            cart = [];
-            document.querySelectorAll('.option-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-
-            if (selectedPack && selectedPack.id === packId) {
-                selectedPack = null;
-                updateCartDisplay();
-                return;
-            }
-
-            selectedPack = { id: packId, price };
-            element.classList.add('selected');
-
-            // Si c'est le pack intégral, pas de choix à faire
-            if (packId === 'pack_integral') {
-                selectedPack.analyses = ['point_astral', 'potentiels_defis', 'mission_ame', 'carriere', 'profil_amoureux'];
-                updateCartDisplay();
-                
-                // Auto-scroll vers le panier
-                setTimeout(() => {
-                    const cartSection = document.getElementById('cartSection');
-                    if (cartSection && cartSection.style.display !== 'none') {
-                        cartSection.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'center' 
-                        });
-                    }
-                }, 300);
-                return;
-            }
-
-            // Pour les autres packs, ouvrir le modal de sélection
-            showPackSelectionModal(packId, price);
-        }
-
-        function showPackSelectionModal(packId, price) {
-            const modal = document.getElementById('packSelectionModal');
-            const title = document.getElementById('packSelectionTitle');
-            const subtitle = document.getElementById('packSelectionSubtitle');
-            const content = document.getElementById('packAnalysesSelection');
-            
-            let maxSelections = 0;
-            let packName = '';
-            let requiresPointAstral = true;
-            
-            if (packId === 'pack_3_modules') {
-                maxSelections = 3;
-                packName = 'Pack 3 Modules';
-                requiresPointAstral = false;
-            } else if (packId === 'pack_decouverte') {
-                maxSelections = 2;
-                packName = 'Pack Découverte';
-                requiresPointAstral = true;
-            } else if (packId === 'pack_complet') {
-                maxSelections = 3;
-                packName = 'Pack Complet';
-                requiresPointAstral = true;
-            } else if (packId === 'pack_integral') {
-                maxSelections = 4;
-                packName = 'Pack Intégral';
-                requiresPointAstral = true;
-            }
-            
-            title.textContent = `🎁 ${packName}`;
-            
-            if (requiresPointAstral) {
-                subtitle.innerHTML = `Point Astral inclus + choisissez <strong>${maxSelections} analyses</strong> supplémentaires :`;
-            } else {
-                subtitle.innerHTML = `Choisissez <strong>${maxSelections} analyses</strong> qui vous intéressent le plus :`;
-            }
-            
-            // Liste des analyses disponibles pour les packs (SEULEMENT les analyses cosmiques)
-            const availableAnalyses = [
-                { id: 'point_astral', name: 'Point Astral', desc: 'Analyse complète + Nakshatra lunaire', required: requiresPointAstral },
-                { id: 'potentiels_defis', name: 'Mes Potentiels et Défis', desc: 'Forces cachées et obstacles à transformer' },
-                { id: 'mission_ame', name: 'Mission d\'Âme', desc: 'Votre purpose selon l\'astrologie védique' },
-                { id: 'carriere', name: 'Carrière/Vocation', desc: 'Votre voie professionnelle idéale' },
-                { id: 'profil_amoureux', name: 'Mon Profil Amoureux', desc: 'Qui vous attire et ce que vous recherchez' }
-            ];
-            
-            let html = '';
-            availableAnalyses.forEach(analysis => {
-                const disabled = analysis.required ? 'disabled checked' : '';
-                const requiredText = analysis.required ? ' <span class="required-text">(Inclus obligatoirement)</span>' : '';
-                
-                html += `
-                    <div class="pack-analysis-option ${analysis.required ? 'required' : ''}">
-                        <input type="checkbox" 
-                               id="pack_${analysis.id}" 
-                               value="${analysis.id}" 
-                               ${disabled}
-                               onchange="updatePackSelection(${maxSelections})">
-                        <label for="pack_${analysis.id}">
-                            <div class="analysis-info">
-                                <div class="analysis-name">${analysis.name}${requiredText}</div>
-                                <div class="analysis-desc">${analysis.desc}</div>
-                            </div>
-                        </label>
-                    </div>
-                `;
-            });
-            
-            content.innerHTML = html;
-            
-            // Stocker les infos du pack
-            window.currentPackSelection = {
-                id: packId,
-                price: price,
-                maxSelections: maxSelections,
-                selectedAnalyses: requiresPointAstral ? ['point_astral'] : []
-            };
-            
-            modal.style.display = 'flex';
-        }
-
-        function updatePackSelection(maxSelections) {
-            const checkboxes = document.querySelectorAll('#packAnalysesSelection input[type="checkbox"]');
-            const selected = document.querySelectorAll('#packAnalysesSelection input[type="checkbox"]:checked');
-            const confirmBtn = document.getElementById('confirmPackBtn');
-            const counter = document.getElementById('selectionCounter');
-            
-            // Compter les sélections (en excluant les obligatoires)
-            const userSelections = Array.from(selected).filter(cb => !cb.disabled);
-            const requiredSelections = Array.from(selected).filter(cb => cb.disabled);
-            const totalSelections = userSelections.length + requiredSelections.length;
-            
-            // Mettre à jour le compteur
-            counter.innerHTML = `${totalSelections}/${maxSelections} analyses sélectionnées`;
-            
-            // Désactiver les autres checkboxes si max atteint
-            if (userSelections.length >= maxSelections - requiredSelections.length) {
-                checkboxes.forEach(cb => {
-                    if (!cb.checked && !cb.disabled) {
-                        cb.disabled = true;
-                        cb.parentElement.classList.add('disabled');
-                    }
-                });
-            } else {
-                checkboxes.forEach(cb => {
-                    if (!cb.disabled || (!cb.checked && !cb.parentElement.classList.contains('required'))) {
-                        cb.disabled = false;
-                        cb.parentElement.classList.remove('disabled');
-                    }
-                });
-            }
-            
-            // Activer/désactiver le bouton de confirmation
-            if (totalSelections === maxSelections) {
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = '✨ Confirmer ma sélection';
-            } else {
-                confirmBtn.disabled = true;
-                confirmBtn.textContent = `Choisissez ${maxSelections - totalSelections} analyse(s) de plus`;
-            }
-            
-            // Mettre à jour les analyses sélectionnées
-            window.currentPackSelection.selectedAnalyses = Array.from(selected).map(cb => cb.value);
-        }
-
-        function confirmPackSelection() {
-            const selection = window.currentPackSelection;
-            
-            // Finaliser la sélection du pack
-            selectedPack = {
-                id: selection.id,
-                price: selection.price,
-                analyses: selection.selectedAnalyses
-            };
-            
-            // Fermer le modal
-            closePackSelectionModal();
-            
-            // Mettre à jour l'affichage
-            updateCartDisplay();
-            
-            // Auto-scroll vers le panier
-            setTimeout(() => {
-                const cartSection = document.getElementById('cartSection');
-                if (cartSection && cartSection.style.display !== 'none') {
-                    cartSection.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center' 
-                    });
-                }
-            }, 300);
-            
-            // Notification de succès
-            showNotification(`🎉 ${selection.selectedAnalyses.length} analyses sélectionnées pour votre pack !`, 'success');
-        }
-
-        function closePackSelectionModal() {
-            document.getElementById('packSelectionModal').style.display = 'none';
-            window.currentPackSelection = null;
-            
-            // Si aucune sélection n'a été confirmée, désélectionner le pack
-            if (!selectedPack || !selectedPack.analyses) {
-                selectedPack = null;
-                document.querySelectorAll('.pack-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                updateCartDisplay();
-            }
         }
 
         function updateCartDisplay() {
@@ -1759,6 +2579,7 @@
             // Stocker les données pour le paiement
             window.pendingOrder = orderData;
             modal.style.display = 'flex';
+            setTimeout(() => renderPayPalButtons(orderData), 0);
         }
 
         function formatDate(dateString) {
@@ -1858,98 +2679,112 @@
             form.submit();
         }
 
+
+        function renderPayPalButtons(orderData) {
+        if (paypalRendered) return;
+        const container = document.getElementById('paypal-button-container');
+        
+        // Vérifier que PayPal SDK est chargé ET que le container existe
+        if (!container || !window.paypal) {
+            console.warn('PayPal SDK non prêt ou container manquant');
+            return;
+        }
+        
+        // Vider le container avant de rendre
+        container.innerHTML = '';
+        paypalRendered = true;
+
+        paypal.Buttons({
+            style: { 
+                layout: 'vertical',
+                color: 'blue',
+                shape: 'rect',
+                label: 'paypal'
+            },
+
+            createOrder: async () => {
+                try {
+                    const res = await fetch('/payments/create-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            description: 'Point Astral',
+                            custom_id: orderData?.userInfo?.email || '',
+                            amount: orderData?.total || 29
+                        })
+                    });
+                    
+                    if (!res.ok) {
+                        throw new Error(`HTTP ${res.status}`);
+                    }
+                    
+                    const data = await res.json();
+                    console.log('PayPal order created:', data);
+                    
+                    if (!data.id) {
+                        throw new Error('Pas d\'ID de commande retourné');
+                    }
+                    
+                    return data.id;
+                } catch (err) {
+                    console.error('CreateOrder error:', err);
+                    showNotification('❌ Impossible de créer la commande PayPal: ' + err.message, 'warning');
+                    throw err;
+                }
+            },
+
+            onApprove: async (data) => {
+                try {
+                    const res = await fetch('/payments/capture-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderID: data.orderID,
+                        userInfo: window?.pendingOrder?.userInfo || {},
+                        items: window?.pendingOrder?.items || []
+                    })
+                    });
+
+                    const result = await res.json();
+
+                    if (res.ok && (result.status === 'COMPLETED')) {
+                    // ✅ Succès PayPal → on envoie l’utilisateur sur la page spinner
+                    window.location.href = '/paiement/effectue';
+                    } else {
+                    showNotification('⚠️ Paiement non confirmé. Status: ' + (result.status || res.status), 'warning');
+                    }
+                } catch (err) {
+                    console.error('Capture error:', err);
+                    showNotification('❌ Erreur lors de la confirmation: ' + err.message, 'warning');
+                }
+                },
+
+            onError: (err) => {
+                console.error('PayPal onError:', err);
+                showNotification('❌ Erreur PayPal. Veuillez réessayer.', 'warning');
+            },
+
+            onCancel: (data) => {
+                console.log('PayPal payment cancelled:', data);
+                showNotification('💳 Paiement annulé', 'info');
+            }
+        }).render('#paypal-button-container').catch(err => {
+            console.error('Erreur render PayPal:', err);
+            showNotification('❌ Impossible d\'afficher le bouton PayPal', 'warning');
+        });
+    }
+
         function closePaymentConfirmationModal() {
-            document.getElementById('paymentConfirmationModal').style.display = 'none';
-            window.pendingOrder = null;
+        document.getElementById('paymentConfirmationModal').style.display = 'none';
+        window.pendingOrder = null;
+
+        // Nettoyer PayPal
+        const container = document.getElementById('paypal-button-container');
+        if (container) {
+            container.innerHTML = '';
         }
-
-        // Chatbox d'aide
-        function toggleChatbox() {
-            const chatbox = document.getElementById('helpChatbox');
-            const content = document.getElementById('chatboxContent');
-            const toggle = document.getElementById('chatboxToggle');
-            
-            chatboxOpen = !chatboxOpen;
-            
-            if (chatboxOpen) {
-                content.style.display = 'block';
-                toggle.textContent = '▼';
-                chatbox.classList.add('open');
-            } else {
-                content.style.display = 'none';
-                toggle.textContent = '▲';
-                chatbox.classList.remove('open');
-            }
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chatboxInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-
-            addChatMessage(message, 'user');
-            input.value = '';
-
-            // Simulation de réponse IA (tu peux connecter ton vrai système ici)
-            setTimeout(() => {
-                const response = generateHelpResponse(message);
-                addChatMessage(response, 'bot');
-            }, 1000);
-        }
-
-        function addChatMessage(message, sender) {
-            const messagesContainer = document.getElementById('chatboxMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
-            
-            if (sender === 'bot') {
-                messageDiv.innerHTML = `
-                    <div class="message-avatar">🌟</div>
-                    <div class="message-content">${message}</div>
-                `;
-            } else {
-                messageDiv.innerHTML = `
-                    <div class="message-content">${message}</div>
-                    <div class="message-avatar">👤</div>
-                `;
-            }
-            
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function generateHelpResponse(message) {
-            const lowerMessage = message.toLowerCase();
-            
-            if (lowerMessage.includes('prix') || lowerMessage.includes('tarif') || lowerMessage.includes('coût')) {
-                return "Nos analyses vont de l'analyse gratuite au Point Astral à 35€. Les packs permettent d'économiser : Pack Découverte 65€, Pack Complet 77€, Pack Intégral 97€.";
-            }
-            
-            if (lowerMessage.includes('pack') || lowerMessage.includes('économie')) {
-                return "Les packs combinent plusieurs analyses à prix réduit. Le Pack Intégral vous fait économiser 30€ et inclut toutes nos analyses cosmiques !";
-            }
-            
-            if (lowerMessage.includes('gratuit') || lowerMessage.includes('free')) {
-                return "L'Analyse Gratuite vous donne un aperçu rapide et synthétique de votre profil astrologique. C'est un excellent moyen de découvrir nos services !";
-            }
-            
-            if (lowerMessage.includes('point astral')) {
-                return "Le Point Astral est notre analyse la plus complète : 3-4 pages détaillées + Nakshatra lunaire. Actuellement en développement, disponible bientôt !";
-            }
-            
-            if (lowerMessage.includes('consultation') || lowerMessage.includes('rendez-vous')) {
-                return "Nous proposons des consultations personnalisées en direct et une Cellule Psychologique IA pour explorer vos configurations astrales.";
-            }
-            
-            return "Je peux vous renseigner sur nos analyses, les prix, les packs, ou le fonctionnement du site. N'hésitez pas à être plus précis dans votre question !";
-        }
-
-        function handleChatKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
+        paypalRendered = false;
+    }
 
         // Cellule Psychologique
         function openPsychologyChat() {
@@ -2093,801 +2928,7 @@
         createStars();
         updateCartDisplay();
         updateSubmitButtonText();
-
     </script>
 
-    <!-- CSS supplémentaire pour les nouvelles fonctionnalités -->
-    <style>
-        /* Chatbox d'aide */
-        .help-chatbox {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 350px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.3);
-            z-index: 1000;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .chatbox-header {
-            background: linear-gradient(135deg, #1f628e, #00a8a8);
-            color: white;
-            padding: 15px 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            justify-content: space-between;
-        }
-
-        .chatbox-icon {
-            font-size: 1.2rem;
-        }
-
-        .chatbox-title {
-            font-weight: bold;
-            flex: 1;
-        }
-
-        .chatbox-toggle {
-            font-size: 1rem;
-            transition: transform 0.3s ease;
-        }
-
-        .chatbox-content {
-            display: none;
-            height: 400px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .help-chatbox.open .chatbox-content {
-            display: flex;
-        }
-
-        .chatbox-messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            max-height: 320px;
-        }
-
-        .chatbox-input-container {
-            padding: 15px;
-            border-top: 1px solid rgba(31, 98, 142, 0.1);
-            display: flex;
-            gap: 10px;
-        }
-
-        .chatbox-input-container input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #c0f0f7;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .send-btn {
-            background: linear-gradient(135deg, #1f628e, #00a8a8);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .message {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .user-message {
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 30px;
-            height: 30px;
-            background: linear-gradient(135deg, #1f628e, #00a8a8);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .user-message .message-avatar {
-            background: linear-gradient(135deg, #c0f0f7, #d3b1c2);
-        }
-
-        .message-content {
-            background: #f8f9fa;
-            padding: 10px 15px;
-            border-radius: 15px;
-            max-width: 250px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .user-message .message-content {
-            background: linear-gradient(135deg, #1f628e, #00a8a8);
-            color: white;
-        }
-
-        /* Modal Cellule Psychologique */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 600px;
-            height: 80vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #8B5CF6, #A78BFA);
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background 0.3s ease;
-        }
-
-        .close-btn:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .modal-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-        }
-
-        .timer-section {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(139, 92, 246, 0.1);
-            border-radius: 12px;
-        }
-
-        .timer {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #8B5CF6;
-            margin-bottom: 5px;
-        }
-
-        .timer-label {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .psychology-chat {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-bottom: 15px;
-        }
-
-        .psychology-input-container {
-            display: flex;
-            gap: 10px;
-        }
-
-        .psychology-input-container input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #c0f0f7;
-            border-radius: 12px;
-            font-size: 16px;
-        }
-
-        /* Notifications */
-        .notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 3000;
-            max-width: 400px;
-        }
-
-        .notification {
-            background: white;
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            border-left: 4px solid #00a8a8;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transform: translateX(100%);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .notification-warning {
-            border-left-color: #FFA500;
-            background: #FFF8DC;
-        }
-
-        .notification-success {
-            border-left-color: #10B981;
-            background: #F0FDF4;
-        }
-
-        .notification-close {
-            background: none;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            color: #666;
-            padding: 0;
-            margin-left: 15px;
-        }
-
-        /* Modal Analyse Gratuite */
-        .free-analysis-modal {
-            max-width: 900px;
-            max-height: 95vh;
-            width: 90%;
-        }
-
-        .free-header {
-            background: linear-gradient(135deg, #10B981, #059669);
-        }
-
-        .analysis-loading {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #10B981;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .analysis-status {
-            font-size: 1.2rem;
-            color: #1f628e;
-            font-weight: 600;
-        }
-
-        .analysis-result {
-            padding: 20px;
-            max-height: none;
-            overflow-y: visible;
-            line-height: 1.6;
-        }
-
-        .analysis-summary h4 {
-            color: #1f628e;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-            text-align: center;
-        }
-
-        .analysis-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(192, 240, 247, 0.1);
-            border-radius: 12px;
-            border-left: 3px solid #00a8a8;
-        }
-
-        .analysis-section h5 {
-            color: #1f628e;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
-        }
-
-        .analysis-section p {
-            color: #4a5568;
-            line-height: 1.5;
-            margin: 0;
-        }
-
-        .upgrade-section {
-            margin-top: 25px;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(31, 98, 142, 0.1), rgba(0, 168, 168, 0.1));
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        .upgrade-section p {
-            margin-bottom: 10px;
-            color: #1f628e;
-        }
-
-        .upgrade-section ul {
-            text-align: left;
-            margin: 15px 0;
-            color: #4a5568;
-        }
-
-        .upgrade-section li {
-            margin-bottom: 5px;
-        }
-
-        .analysis-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .explore-btn {
-            flex: 2;
-            background: linear-gradient(135deg, #1f628e, #00a8a8);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 15px 20px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .explore-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(31, 98, 142, 0.3);
-        }
-
-        .later-btn {
-            flex: 1;
-            background: #f8f9fa;
-            color: #6c757d;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 15px 20px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .later-btn:hover {
-            background: #e9ecef;
-            color: #495057;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,168,168,0.2); }
-            50% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,168,168,0.4); }
-            100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,168,168,0.2); }
-        }
-
-        /* Modal Confirmation de Paiement */
-        .payment-modal {
-            max-width: 600px;
-        }
-
-        .payment-header {
-            background: linear-gradient(135deg, #1f628e, #00a8a8);
-        }
-
-        .order-summary {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        .order-summary h4 {
-            color: #1f628e;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .customer-info {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .customer-info p {
-            margin-bottom: 8px;
-            color: #4a5568;
-        }
-
-        .items-summary {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-        }
-
-        .payment-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f1f1;
-        }
-
-        .payment-item:last-child {
-            border-bottom: none;
-        }
-
-        .payment-total {
-            border-top: 2px solid #1f628e;
-            padding-top: 15px;
-            margin-top: 15px;
-            font-size: 1.2rem;
-            color: #1f628e;
-        }
-
-        .payment-methods {
-            margin-bottom: 25px;
-        }
-
-        .payment-methods h4 {
-            color: #1f628e;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .payment-options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .payment-option {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-            width: 100%;
-        }
-
-        .payment-option:hover {
-            border-color: #1f628e;
-            background: rgba(31, 98, 142, 0.05);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(31, 98, 142, 0.15);
-        }
-
-        .stripe-option:hover {
-            border-color: #635bff;
-            background: rgba(99, 91, 255, 0.05);
-        }
-
-        .paypal-option:hover {
-            border-color: #0070ba;
-            background: rgba(0, 112, 186, 0.05);
-        }
-
-        .payment-icon {
-            font-size: 2rem;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-
-        .payment-details {
-            flex: 1;
-        }
-
-        .payment-name {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #1f628e;
-            margin-bottom: 4px;
-        }
-
-        .payment-desc {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .security-info {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .security-info p {
-            margin-bottom: 5px;
-            color: #065f46;
-        }
-
-        .security-info p:last-child {
-            margin-bottom: 0;
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        /* Modal Sélection Pack */
-        .pack-selection-modal {
-            max-width: 700px;
-            max-height: 85vh;
-        }
-
-        .pack-header {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #333;
-        }
-
-        .pack-selection-intro {
-            text-align: center;
-            margin-bottom: 25px;
-            padding: 20px;
-            background: rgba(255, 215, 0, 0.1);
-            border-radius: 12px;
-        }
-
-        .pack-selection-intro p {
-            font-size: 1.1rem;
-            color: #1f628e;
-            margin-bottom: 10px;
-        }
-
-        .selection-counter {
-            font-size: 1rem;
-            font-weight: bold;
-            color: #666;
-            padding: 8px 16px;
-            background: white;
-            border-radius: 20px;
-            display: inline-block;
-            border: 2px solid #e2e8f0;
-        }
-
-        .pack-analyses-selection {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 25px;
-        }
-
-        .pack-analysis-option {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            padding: 15px;
-            margin-bottom: 12px;
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .pack-analysis-option:hover:not(.disabled) {
-            border-color: #1f628e;
-            background: rgba(31, 98, 142, 0.02);
-        }
-
-        .pack-analysis-option.required {
-            border-color: #FFD700;
-            background: rgba(255, 215, 0, 0.1);
-        }
-
-        .pack-analysis-option.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .pack-analysis-option input[type="checkbox"] {
-            margin-top: 4px;
-            transform: scale(1.3);
-            accent-color: #1f628e;
-        }
-
-        .pack-analysis-option.required input[type="checkbox"] {
-            accent-color: #FFD700;
-        }
-
-        .pack-analysis-option label {
-            flex: 1;
-            cursor: pointer;
-            margin: 0;
-        }
-
-        .pack-analysis-option.disabled label {
-            cursor: not-allowed;
-        }
-
-        .analysis-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .analysis-name {
-            font-weight: bold;
-            color: #1f628e;
-            font-size: 1.1rem;
-        }
-
-        .required-text {
-            color: #FFD700;
-            font-size: 0.85rem;
-            font-weight: normal;
-            font-style: italic;
-        }
-
-        .analysis-desc {
-            color: #666;
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
-
-        .pack-selection-actions {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .confirm-pack-btn {
-            background: linear-gradient(135deg, #1f628e, #00a8a8);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 250px;
-        }
-
-        .confirm-pack-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(31, 98, 142, 0.3);
-        }
-
-        .confirm-pack-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Section Analyses Prévisionnelles */
-        .predictive-section {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(167, 139, 250, 0.05));
-            border: 2px solid rgba(139, 92, 246, 0.2);
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .predictive-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #8B5CF6, #A78BFA);
-        }
-
-        .predictive-title {
-            color: #8B5CF6;
-            margin-bottom: 10px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            text-align: center;
-        }
-
-        .predictive-subtitle {
-            text-align: center;
-            color: #6B46C1;
-            font-size: 1rem;
-            margin-bottom: 25px;
-            font-style: italic;
-            opacity: 0.9;
-        }
-
-        .predictive-section .options-grid {
-            margin-top: 20px;
-        }
-
-        .predictive-section .option-card {
-            border: 2px solid rgba(139, 92, 246, 0.3);
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(139, 92, 246, 0.05));
-        }
-
-        .predictive-section .option-card:hover {
-            border-color: #8B5CF6;
-            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(139, 92, 246, 0.1));
-            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2);
-        }
-
-        .predictive-section .option-card .price {
-            color: #8B5CF6;
-        }
-
-        @media (max-width: 768px) {
-            .predictive-section {
-                padding: 20px;
-                margin-top: 30px;
-            }
-
-            .predictive-title {
-                font-size: 1.3rem;
-            }
-
-            .predictive-subtitle {
-                font-size: 0.95rem;
-            }
-        }
-    </style>
 </body>
 </html>

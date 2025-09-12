@@ -1,55 +1,215 @@
-TEMPLATE_RESULTAT = '''
+<!-- templates/point_astral_resultat.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Point Astral - {{ nom }}</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        .header { text-align: center; margin-bottom: 30px; }
-        .success { color: #28a745; font-size: 18px; margin-bottom: 20px; }
-        .actions { display: flex; gap: 20px; justify-content: center; margin: 30px 0; }
-        .btn { padding: 12px 24px; border: none; border-radius: 5px; text-decoration: none; font-weight: bold; cursor: pointer; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-info { background: #17a2b8; color: white; }
-        .btn:hover { opacity: 0.8; }
-        .preview { margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 5px; }
-        .info { color: #666; font-size: 14px; margin-top: 30px; }
+        body {
+            font-family: Georgia, serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* LOGO TOUT EN HAUT */
+        .logo-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .logo {
+            max-width: 200px;
+            max-height: 120px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #1f628e;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #1f628e;
+            margin-bottom: 10px;
+        }
+        .personal-info {
+            text-align: center;
+            margin: 20px auto;
+            font-size: 0.9em;
+            color: #666;
+            max-width: 400px;
+        }
+        
+        .personal-info p {
+            margin: 5px 0;
+            padding: 0;
+        }
+        .actions {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 8px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 0 10px;
+            background: #1f628e;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background: #144a6b;
+        }
+        .content-wrapper {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* STYLES POUR LE CONTENU ANALYSÉ */
+        .content-wrapper h1 {
+            color: #1f628e;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            border-bottom: 2px solid #1f628e;
+            padding-bottom: 15px;
+        }
+        
+        .content-wrapper h2 {
+            color: #1f628e;
+            border-bottom: 2px solid #1f628e;
+            padding-bottom: 8px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .content-wrapper h3 {
+            color: #144a6b;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-left: 4px solid #1f628e;
+            padding-left: 15px;
+        }
+        
+        .content-wrapper p {
+            margin-bottom: 15px;
+            text-align: justify;
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+        
+        .content-wrapper strong {
+            color: #1f628e;
+        }
+        
+        .content-wrapper em {
+            color: #144a6b;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- LOGO TOUT EN HAUT DU DOCUMENT -->
+        <div class="logo-header">
+            <img src="data:image/webp;base64,{{ logo_base64 }}" alt="Logo Les Fous d'Astro" class="logo">
+        </div>
+        
         <div class="header">
-            <h1>Point Astral généré avec succès</h1>
-            <div class="success">✅ Votre analyse personnalisée est prête !</div>
+            <h1>🌟 Point Astral - {{ nom }}</h1>
+            
+            <div class="personal-info">
+                <p style="margin: 5px 0; font-size: 14px; color: #666;">
+                    {{ infos.date_naissance }} — {{ infos.heure_naissance }} — {{ infos.lieu_naissance }}
+                </p>
+            </div>
         </div>
 
+        <!-- Actions de téléchargement -->
         <div class="actions">
-            <a href="/apercu_point_astral/{{ nom_fichier }}" target="_blank" class="btn btn-info">
-                👁️ Aperçu HTML
-            </a>
-            <a href="/telecharger_point_astral/{{ nom_fichier }}" class="btn btn-success">
-                📄 Télécharger PDF
-            </a>
-            <a href="/" class="btn btn-primary">
+            {% if nom_fichier %}
+                <a href="{{ url_for('point_astral_blocs.telecharger_point_astral', nom_fichier=nom_fichier) }}" class="btn">
+                    📄 Télécharger PDF
+                </a>
+            {% else %}
+                <p style="color: #666;">Fichier en cours de génération...</p>
+            {% endif %}
+        </div>
+        <div class="disclaimer" style="background:#f8f9fa;border:1px solid #dee2e6;
+                    padding:16px;margin:20px 0;border-radius:8px;font-size:15px;line-height:1.5;">
+            <p style="margin:0 0 8px 0;">
+                <strong>⚠️ À propos de cette analyse :</strong><br>
+                Ce Point Astral n'est pas fait pour te brosser dans le sens du poil ! Il explore tes zones
+                d'ombre autant que tes forces, dans l'objectif de révéler ton potentiel authentique. Cette
+                analyse peut soulever des aspects inconfortables de ta personnalité, mais ne te laisse pas
+                décourager : chaque ombre révélée est une opportunité de croissance.
+            </p>
+            <p style="margin:0 0 8px 0;">
+                <strong>❗️Important :</strong> Cette analyse reflète les potentiels énergétiques de ton thème natal. Chaque
+                personne exprime ses énergies à des niveaux de conscience différents selon son parcours,
+                sa culture, son environnement et ses choix. Certaines qualités peuvent rester en dormance
+                ou s'exprimer de façon subtile.
+                <br>Il est normal de ne pas te reconnaître dans tous les aspects décrits. L'astrologie révèle des
+                tendances, pas des vérités absolues. Cette analyse est un outil de réflexion, non un
+                diagnostic.
+            </p>
+            <p style="margin:0 0 8px 0;">
+                <strong>♻️Note technique :</strong> Cette analyse est générée automatiquement avec l’aide d’un système d’IA.
+                De petites répétitions ou incohérences peuvent apparaître. Rien ne remplace un échange humain direct
+                pour approfondir ton thème.
+            </p>
+            <p style="margin:0;">
+                <strong>💫 Pour aller plus loin :</strong> 
+                Réserve une consultation personnalisée sur 
+                <a href="https://bycecilecl.com" target="_blank" style="color:#1f628e; text-decoration:none;">
+                    www.bycecilecl.com
+                </a>
+            </p>
+        </div>
+
+        <!-- Contenu HTML généré -->
+        <div class="content-wrapper">
+            {% if html_content %}
+                {{ html_content|safe }}
+            {% else %}
+                <div style="padding: 40px; text-align: center; color: #666;">
+                    <h2>⚠️ Contenu non disponible</h2>
+                    <p>Le contenu HTML n'a pas pu être généré ou est vide.</p>
+                    <p>Veuillez vérifier les logs du serveur pour plus d'informations.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Lien retour -->
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{{ url_for('main.index') }}" class="btn">
                 🏠 Nouvelle analyse
             </a>
-        </div>
-
-        <div class="preview">
-            <h3>Informations de l'analyse :</h3>
-            <p><strong>Nom :</strong> {{ infos.nom }}</p>
-            <p><strong>Date de naissance :</strong> {{ infos.date_naissance }}</p>
-            <p><strong>Heure de naissance :</strong> {{ infos.heure_naissance }}</p>
-            <p><strong>Lieu de naissance :</strong> {{ infos.lieu_naissance }}</p>
-        </div>
-
-        <div class="info">
-            <p>💡 <strong>Conseil :</strong> Sauvegardez votre PDF rapidement, les liens expirent après quelques heures.</p>
         </div>
     </div>
 </body>
 </html>
-'''

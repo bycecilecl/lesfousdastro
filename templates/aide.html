@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aide & FAQ | Les Fous d'Astro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        h1 {
+            color: #ffd700;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .subtitle {
+            color: #e0e6ed;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .faq-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .faq-item {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1.5rem;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .faq-question {
+            color: #ffd700;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            color: #ffed4e;
+        }
+
+        .faq-question::before {
+            content: "✦";
+            margin-right: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .faq-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-answer {
+            color: #e0e6ed;
+            padding-left: 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: #ffd700;
+            font-weight: 500;
+        }
+
+        .contact-box {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .contact-box h3 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .contact-box p {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+            padding: 0.8rem 2rem;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .faq-container {
+                padding: 1.5rem;
+            }
+
+            .faq-question {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✦ Aide & FAQ ✦</h1>
+            <p class="subtitle">Réponses aux questions les plus fréquentes</p>
+        </header>
+
+        <div class="faq-container">
+            <div class="faq-item active">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Comment fonctionne Les Fous d'Astro ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>C'est très simple ! Vous choisissez votre service (analyse gratuite ou point astral), vous renseignez vos informations de naissance (date, heure, lieu), vous payez si nécessaire, et vous recevez immédiatement votre analyse personnalisée par email. Tout se fait en ligne, automatiquement !</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Quelle est la différence entre l'analyse gratuite et le point astral ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>L'<span class="highlight">analyse gratuite</span> vous donne un aperçu de base de votre profil astrologique. Le <span class="highlight">Point Astral</span> est une analyse complète et détaillée de votre thème natal, incluant tous les aspects de votre personnalité, vos potentiels et vos défis selon les astres.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Pourquoi avez-vous besoin de mon heure de naissance exacte ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>L'heure de naissance est cruciale en astrologie car elle détermine votre ascendant et la position exacte des planètes dans les maisons astrologiques. Une différence de quelques minutes peut changer significativement votre thème. Si vous ne connaissez pas votre heure exacte, indiquez l'heure approximative ou 12h00 par défaut.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Combien coûte le Point Astral ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Le Point Astral est actuellement proposé à <span class="highlight">29€</span> au lieu de 35€ (offre de lancement). C'est un tarif exceptionnel pour une analyse complète de votre thème natal !</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Combien de temps pour recevoir mon analyse ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Votre analyse est générée <span class="highlight">immédiatement</span> après votre commande et envoyée automatiquement sur votre adresse email. Vérifiez vos spams si vous ne la recevez pas dans les minutes qui suivent !</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Quels moyens de paiement acceptez-vous ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Nous acceptons les paiements par <span class="highlight">carte bancaire</span> (via Stripe) et <span class="highlight">PayPal</span>. Tous les paiements sont sécurisés et vos informations bancaires ne sont pas stockées sur notre site.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Puis-je modifier mes informations après avoir passé commande ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Comme l'analyse est générée immédiatement, il n'est pas possible de modifier les informations après la commande. Si vous avez fait une erreur, contactez-nous par email et nous pourrons générer une nouvelle analyse avec les bonnes informations.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Proposez-vous des consultations personnalisées ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Oui ! En plus de nos analyses automatisées, je propose des <span class="highlight">consultations personnalisées</span> en tant qu'astrologue professionnelle. Ces séances permettent d'approfondir votre thème et de répondre à vos questions spécifiques. Contactez-moi par email pour plus d'informations.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Vos analyses sont-elles fiables ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Nos analyses sont basées sur des calculs astrologiques précis et générées par intelligence artificielle. Cependant, l'astrologie reste un art d'interprétation à des fins de développement personnel et de divertissement. Les résultats peuvent varier et ne constituent pas des conseils médicaux, juridiques ou financiers.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    Puis-je demander un remboursement ?
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Compte tenu de la nature personnalisée et instantanée de nos services, <span class="highlight">aucun remboursement n'est accordé</span>. Cependant, en cas de problème technique ou de dysfonctionnement, nous nous engageons à générer manuellement une nouvelle analyse pour vous satisfaire.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-box">
+            <h3>✦ Une question ? ✦</h3>
+            <p>Si vous ne trouvez pas la réponse à votre question dans cette FAQ,</p>
+            <p>n'hésitez pas à nous contacter :</p>
+            <p style="margin-top: 1rem;"><strong>📧 contact@lesfousdastro.fr</strong></p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.8;">Nous vous répondons généralement sous 24h !</p>
+        </div>
+
+        <center>
+            <a href="index.html" class="back-btn">← Retour à l'accueil</a>
+        </center>
+    </div>
+
+    <script>
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            
+            // Fermer tous les autres items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Ouvrir/fermer l'item cliqué
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

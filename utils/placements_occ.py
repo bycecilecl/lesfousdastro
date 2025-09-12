@@ -32,28 +32,6 @@ ORDRE_PLANETES_OCC = [
 ]
 
 
-# def _normalize_aspects(aspects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-#     """
-#     Normalise les aspects au format : source / cible / type / orbe (float)
-#     Accepte aussi : planete1 / planete2 / aspect / orbe (string/float)
-#     """
-#     out = []
-#     for a in aspects or []:
-#         src = a.get("source") or a.get("planete1")
-#         dst = a.get("cible") or a.get("planete2")
-#         typ = a.get("type") or a.get("aspect")
-#         orbe_raw = a.get("orbe")
-#         try:
-#             orbe = float(orbe_raw) if orbe_raw is not None else 999.0
-#         except Exception:
-#             orbe = 999.0
-#         if src and dst and typ:
-#             out.append({"source": src, "cible": dst, "type": typ, "orbe": orbe})
-#     return out
-
-
-
-
 def _normalize_aspects(aspects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Normalise les aspects au format : source / cible / type / orbe (float)
@@ -73,102 +51,18 @@ def _normalize_aspects(aspects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             out.append({"source": src, "cible": dst, "type": typ, "orbe": orbe})
     return out
 
-
-def _filtrer_aspects_intelligemment(aspects: List[Dict[str, Any]], max_aspects: int = 12) -> List[Dict[str, Any]]:
-    """
-    🎯 NOUVEAU : Filtre les aspects de manière intelligente pour le LLM
-    
-    Priorités :
-    1. Aspects majeurs (conjonction, opposition, carré, trigone, sextile)
-    2. Orbe serré (< 3°)
-    3. Implique Soleil, Lune, Ascendant
-    4. Limite au nombre max_aspects
-    """
-    
-    # Planètes prioritaires
-    planetes_importantes = ['Soleil', 'Lune', 'Ascendant', 'Mercure', 'Vénus', 'Mars', 'Jupiter', 'Saturne']
-    planetes_critiques = ['Soleil', 'Lune', 'Ascendant']
-    
-    # Aspects majeurs
-    aspects_majeurs = ['conjonction', 'opposition', 'carré', 'trigone', 'sextile']
-    
-    aspects_avec_score = []
-    
-    for aspect in aspects:
-        source = aspect.get('source', '')
-        cible = aspect.get('cible', '')
-        type_aspect = aspect.get('type', '').lower()
-        orbe = aspect.get('orbe', 10)
-        
-        # Calcul du score de priorité
-        score = 0
-        
-        # ✅ Bonus pour aspects majeurs
-        if any(maj in type_aspect for maj in aspects_majeurs):
-            score += 10
-        
-        # ✅ Bonus pour orbe serré
-        if orbe <= 1:
-            score += 8
-        elif orbe <= 2:
-            score += 5
-        elif orbe <= 3:
-            score += 3
-        elif orbe <= 4:
-            score += 1
-        
-        # ✅ Bonus pour planètes importantes
-        if source in planetes_importantes:
-            score += 3
-        if cible in planetes_importantes:
-            score += 3
-            
-        # ✅ Super bonus pour Soleil, Lune, Ascendant
-        if source in planetes_critiques:
-            score += 7
-        if cible in planetes_critiques:
-            score += 7
-        
-        # ✅ Bonus pour aspects de tension (plus révélateurs)
-        if 'carré' in type_aspect or 'opposition' in type_aspect:
-            score += 2
-        
-        # ❌ Malus pour aspects mineurs
-        if any(mineur in type_aspect for mineur in ['quinconce', 'semi-sextile', 'semi-carré']):
-            score -= 5
-        
-        # ❌ Malus pour planètes lentes ensemble (moins personnel)
-        planetes_lentes = ['Uranus', 'Neptune', 'Pluton']
-        if source in planetes_lentes and cible in planetes_lentes:
-            score -= 4
-        
-        aspect['score_priorite'] = score
-        aspects_avec_score.append(aspect)
-    
-    # Trier par score décroissant puis par orbe croissant
-    aspects_avec_score.sort(key=lambda x: (-x['score_priorite'], x['orbe']))
-    
-    # Garder seulement les meilleurs
-    aspects_finaux = aspects_avec_score[:max_aspects]
-    
-    print(f"🎯 Aspects filtrés intelligemment : {len(aspects)} → {len(aspects_finaux)} (gardés les {max_aspects} plus importants)")
-    
-    return aspects_finaux
-
-
 def build_resume_occidental(
     data: Dict[str, Any],
     orbe_max: float = 6.0,
-    max_aspects: int = 12  # 🆕 Réduit de 999 à 12 par défaut
+    max_aspects: int = 999
 ) -> str:
     """
     Construit le bloc 'Occidental' à partir de data (retour de calcul_theme).
-    VERSION OPTIMISÉE avec filtrage intelligent des aspects.
 
     Sections retournées (texte prêt à injecter) :
     - Positions planétaires (occidentales)
     - Maisons astrologiques tropicales
-    - Aspects astrologiques (FILTRÉS INTELLIGEMMENT 🎯)
+    - Aspects astrologiques (tabulé)
     - Résumé des points forts
     """
     planetes = data.get("planetes", {}) or {}
@@ -176,7 +70,7 @@ def build_resume_occidental(
     aspects = _normalize_aspects(data.get("aspects", []))
     points_forts = data.get("points_forts") or []
 
-    # 1) Positions planétaires (occidentales) - INCHANGÉ
+    # 1) Positions planétaires (occidentales)
     lignes_pos = []
     for nom in ORDRE_PLANETES_OCC:
         p = planetes.get(nom)
@@ -191,7 +85,7 @@ def build_resume_occidental(
             lignes_pos.append(f"{nom} : {deg}° en {signe} – Maison {maison}")
     bloc_pos = "Positions planétaires (occidentales)\n" + "\n".join(lignes_pos)
 
-    # 2) Maisons astrologiques tropicales - INCHANGÉ
+    # 2) Maisons astrologiques tropicales (1..12)
     lignes_maisons = []
     for i in range(1, 13):
         m = maisons.get(f"Maison {i}", {}) or {}
@@ -200,52 +94,20 @@ def build_resume_occidental(
         lignes_maisons.append(f"Maison {i} : {deg}° en {signe}")
     bloc_maisons = "Maisons astrologiques tropicales\n" + "\n".join(lignes_maisons)
 
-    # 🎯 3) Aspects astrologiques - NOUVELLE LOGIQUE INTELLIGENTE
-    print(f"🔍 Filtrage aspects : {len(aspects)} aspects bruts")
-    
-    # D'abord filtrer par orbe max (garde les aspects pas trop larges)
-    aspects_orbe_ok = [a for a in aspects if a["orbe"] <= orbe_max]
-    print(f"🔍 Après filtre orbe ≤ {orbe_max}° : {len(aspects_orbe_ok)} aspects")
-    
-    # Puis filtrage intelligent par priorité
-    aspects_filtrés = _filtrer_aspects_intelligemment(aspects_orbe_ok, max_aspects)
-    print(f"🔍 Après filtre intelligent : {len(aspects_filtrés)} aspects gardés")
+    # 3) Aspects astrologiques — triés par orbe croissant + filtre orbe_max
+    aspects_filtrés = [a for a in aspects if a["orbe"] <= orbe_max]
+    aspects_filtrés.sort(key=lambda x: x["orbe"])
+    if max_aspects is not None:
+        aspects_filtrés = aspects_filtrés[:max_aspects]
 
-    # Formatage final (groupé par type pour plus de clarté)
-    if aspects_filtrés:
-        lignes_aspects = []
-        
-        # Grouper par type d'aspect
-        aspects_par_type = {}
-        for a in aspects_filtrés:
-            type_asp = a['type']
-            if type_asp not in aspects_par_type:
-                aspects_par_type[type_asp] = []
-            aspects_par_type[type_asp].append(a)
-        
-        # Afficher par ordre d'importance
-        ordre_types = ['conjonction', 'opposition', 'carré', 'trigone', 'sextile']
-        
-        for type_aspect in ordre_types:
-            if type_aspect in aspects_par_type:
-                lignes_aspects.append(f"\n--- {type_aspect.upper()} ---")
-                for a in aspects_par_type[type_aspect]:
-                    lignes_aspects.append(f"{a['source']}\t{a['type']}\t{a['cible']}\t{a['orbe']:.2f}°")
-        
-        # Autres aspects s'il y en a
-        autres_types = [t for t in aspects_par_type.keys() if t not in ordre_types]
-        if autres_types:
-            lignes_aspects.append(f"\n--- AUTRES ASPECTS ---")
-            for type_aspect in autres_types:
-                for a in aspects_par_type[type_aspect]:
-                    lignes_aspects.append(f"{a['source']}\t{a['type']}\t{a['cible']}\t{a['orbe']:.2f}°")
-        
-        entete = "Aspects astrologiques (sélection des plus significatifs)"
-        bloc_aspects = entete + "\n" + "\n".join(lignes_aspects)
-    else:
-        bloc_aspects = "Aspects astrologiques\nAucun aspect significatif détecté."
+    lignes_aspects = [
+        f"{a['source']}\t{a['type']}\t{a['cible']}\t{a['orbe']:.2f}"
+        for a in aspects_filtrés
+    ]
+    entete = "Planète 1\tAspect\tPlanète 2\tOrbe (°)"
+    bloc_aspects = "Aspects astrologiques\n" + entete + "\n" + "\n".join(lignes_aspects)
 
-    # 4) Résumé des points forts - INCHANGÉ
+    # 4) Résumé des points forts (liste brute telle que fournie)
     if isinstance(points_forts, dict):
         pf_list = []
         for v in points_forts.values():

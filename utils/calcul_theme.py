@@ -4,15 +4,13 @@ import pytz
 import os
 import swisseph as swe
 from timezonefinder import TimezoneFinder
-from utils.formatage import formater_positions_planetes, formater_aspects
+from utils.formatage import formater_positions_planetes
 from utils.utils_points_forts import extraire_points_forts
 from utils.astro_utils import valider_donnees_avant_analyse, corriger_donnees_maisons
 from utils.calculs_astrologiques import get_maison_planete, detecter_aspects, get_nakshatra_name, degre_vers_signe, get_maitre_ascendant, maisons_vediques_fixes, maison_vedique_planete_simple
 
 # Initialiser TimezoneFinder une seule fois
 tf = TimezoneFinder()
-
-swe.set_ephe_path("/app/ephe")
 
 # ────────────────────────────────────────────────
 # FONCTION : get_timezone_for_coordinates_and_date(lat, lon, dt_naive)
@@ -108,23 +106,59 @@ def get_timezone_for_coordinates_and_date(lat, lon, dt_naive):
 def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
                  lat=None, lon=None, dt_naissance_utc=None, tzid=None):
     
-    print(f"🚀 DÉBUT CALCUL pour {nom}")
-    print(f"   Paramètres reçus: lat={lat}, lon={lon}, tzid={tzid}")
+    nom_utilisateur = nom
+    
+    print(f"🚀 Calcul_Theme_DÉBUT CALCUL pour {nom}")
+    print(f"   Calcul_Theme_Paramètres reçus: lat={lat}, lon={lon}, tzid={tzid}")
+    print(f"DEBUT calcul_theme: nom = '{nom}'")
     
     # --- ÉTAPE 1: Obtenir les coordonnées ---
-    if lat is None or lon is None:
-        print(f"🌍 Géocodage de '{lieu_naissance}'...")
-        geolocator = Nominatim(user_agent="astro-app")
+    # if lat is None or lon is None:
+    #     print(f"🌍 Géocodage de '{lieu_naissance}'...")
+    #     geolocator = Nominatim(user_agent="astro-app")
+    #     try:
+    #         location = geolocator.geocode(lieu_naissance, timeout=10)
+    #         if location:
+    #             lat, lon = location.latitude, location.longitude
+    #             print(f"✅ Géocodage réussi: {lat:.6f}, {lon:.6f}")
+    #         else:
+    #             print(f"⚠️ Géocodage échoué, utilisation de Paris par défaut")
+    #             lat, lon = 48.8566, 2.3522
+    #     except Exception as e:
+    #         print(f"❌ Erreur géocodage: {e}")
+    #         lat, lon = 48.8566, 2.3522
+
+    def _to_float_or_none(x):
+        if x is None:
+            return None
+        x = str(x).strip().replace(",", ".")
         try:
-            location = geolocator.geocode(lieu_naissance, timeout=10)
+            return float(x)
+        except Exception:
+            return None
+
+    lat_f = _to_float_or_none(lat)
+    lon_f = _to_float_or_none(lon)
+
+    if lat_f is not None and lon_f is not None:
+        # ✅ on a des coordonnées précises → pas de géocodage
+        lat, lon = lat_f, lon_f
+        print(f"🎯 Calcul_Theme_Coordonnées fournies: {lat}, {lon}")
+    else:
+        # 🌍 fallback géocodage (Nominatim) avec User-Agent obligatoire en prod
+        print(f"🌍 Calcul_Theme_Géocodage de '{lieu_naissance}'...")
+        ua = os.getenv("GEOCODER_UA", "lesfousdastro/1.0 contact:admin@example.com")
+        geolocator = Nominatim(user_agent=ua)
+        try:
+            location = geolocator.geocode(lieu_naissance, timeout=10, language="fr")
             if location:
-                lat, lon = location.latitude, location.longitude
-                print(f"✅ Géocodage réussi: {lat:.6f}, {lon:.6f}")
+                lat, lon = float(location.latitude), float(location.longitude)
+                print(f"✅ Calcul_Theme_Géocodage réussi: {lat:.6f}, {lon:.6f}")
             else:
-                print(f"⚠️ Géocodage échoué, utilisation de Paris par défaut")
+                print("⚠️ Calcul_Theme_Géocodage échoué, utilisation de Paris par défaut")
                 lat, lon = 48.8566, 2.3522
         except Exception as e:
-            print(f"❌ Erreur géocodage: {e}")
+            print(f"❌ Calcul_Theme_Erreur géocodage: {e} → Paris par défaut")
             lat, lon = 48.8566, 2.3522
 
     # --- ÉTAPE 2: Parser la date de naissance ---
@@ -134,96 +168,78 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         try:
             naive = datetime.strptime(date_naissance, '%d %B %Y %H:%M')
         except ValueError as e:
-            print(f"❌ Format de date non reconnu: {e}")
+            print(f"❌ Calcul_Theme_Format de date non reconnu: {e}")
             raise
 
-    print(f"📅 Date parsée: {naive}")
+    print(f"📅 Calcul_Theme_Date parsée: {naive}")
 
     # --- ÉTAPE 3: Obtenir le fuseau horaire correct ---
-    # --- ÉTAPE 3: Obtenir le fuseau horaire correct ---
-    dt_local = None   # ✅ évite UnboundLocalError
-    dt_utc = None
-
+    dt_local = None  # ✅ évite UnboundLocalError lors du print final
     if dt_naissance_utc is not None:
-        # Cas 1: UTC déjà fourni (priorité absolue)
+    # Cas 1: UTC déjà fourni (priorité absolue)
         dt_utc = dt_naissance_utc
-        print(f"✅ UTC pré-calculé utilisé: {dt_utc}")
-        # reconstruire une heure locale pour le log (et la suite)
+        print(f"✅ Calcul_Theme_UTC pré-calculé utilisé: {dt_utc}")
+
+        # ✅ définir aussi l'heure locale pour le log final
         try:
             tzid = tzid or "UTC"
             if tzid == "UTC":
                 dt_local = dt_utc
             else:
                 tz_local = pytz.timezone(tzid)
-                dt_local = tz_local.fromutc(dt_utc)
+                # 🔥 correction ici :
+                dt_local = dt_utc.astimezone(tz_local)
         except Exception as e:
-            print(f"⚠️ Impossible de reconstruire l'heure locale depuis l'UTC ({e}), fallback UTC")
+            print(f"⚠️ Calcul_Theme_Impossible de reconstruire l'heure locale depuis l'UTC ({e}), on garde UTC")
             dt_local = dt_utc
-
-        else:
-            # Cas 2: Déterminer le fuseau et convertir
-            if tzid is None:
-                tzid = get_timezone_for_coordinates_and_date(lat, lon, naive)
-                print(f"🕐 Fuseau détecté: {tzid}")
-
-            if tzid == 'UTC':
-                dt_local = naive.replace(tzinfo=pytz.UTC)
-                dt_utc = dt_local
-            else:
-                try:
-                    tz_local = pytz.timezone(tzid)
-                    dt_local = tz_local.localize(naive, is_dst=None)
-                    dt_utc = dt_local.astimezone(pytz.UTC)
-                except pytz.AmbiguousTimeError:
-                    tz_local = pytz.timezone(tzid)
-                    dt_local = tz_local.localize(naive, is_dst=False)
-                    dt_utc = dt_local.astimezone(pytz.UTC)
-                except pytz.NonExistentTimeError:
-                    tz_local = pytz.timezone(tzid)
-                    dt_local = tz_local.localize(naive, is_dst=True)
-                    dt_utc = dt_local.astimezone(pytz.UTC)
-                except Exception as e:
-                    print(f"❌ Erreur conversion fuseau '{tzid}': {e} → fallback UTC")
-                    dt_local = naive.replace(tzinfo=pytz.UTC)
-                    dt_utc = dt_local
-
-        # ✅ Garde-fous au cas où
-        if dt_local is None and dt_utc is not None:
-            try:
-                tzid = tzid or "UTC"
-                if tzid == "UTC":
-                    dt_local = dt_utc
-                else:
-                    tz_local = pytz.timezone(tzid)
-                    dt_local = tz_local.fromutc(dt_utc)
-            except Exception:
-                dt_local = dt_utc
-        if dt_utc is None and dt_local is not None:
-            dt_utc = dt_local.astimezone(pytz.UTC)
-        if dt_local is None and dt_utc is None:
-            # dernier recours: on force UTC sur la date naive
+    else:
+        # Cas 2: Déterminer le fuseau et convertir
+        if tzid is None:
+            tzid = get_timezone_for_coordinates_and_date(lat, lon, naive)
+            print(f"🕐 Calcul_Theme_Fuseau détecté: {tzid}")
+        
+        # Conversion avec le bon fuseau
+        if tzid == 'UTC':
             dt_local = naive.replace(tzinfo=pytz.UTC)
             dt_utc = dt_local
-
-        print("🔧 TEMPS FINAL:")
-        local_str = dt_local.strftime('%Y-%m-%d %H:%M %Z%z') if dt_local else 'N/A'
-        print(f"   Heure locale: {local_str}")
-        print(f"   Heure UTC: {dt_utc.strftime('%Y-%m-%d %H:%M %Z%z')}")
+        else:
+            try:
+                tz_local = pytz.timezone(tzid)
+                dt_local = tz_local.localize(naive, is_dst=None)
+                dt_utc = dt_local.astimezone(pytz.UTC)
+            except pytz.AmbiguousTimeError:
+                tz_local = pytz.timezone(tzid)
+                dt_local = tz_local.localize(naive, is_dst=False)
+                dt_utc = dt_local.astimezone(pytz.UTC)
+            except pytz.NonExistentTimeError:
+                tz_local = pytz.timezone(tzid)
+                dt_local = tz_local.localize(naive, is_dst=True)
+                dt_utc = dt_local.astimezone(pytz.UTC)
+            except Exception as e:
+                print(f"❌ Erreur conversion fuseau '{tzid}': {e}")
+                dt_local = naive.replace(tzinfo=pytz.UTC)
+                dt_utc = dt_local
+    print(f"🔧 Calcul_Theme_TEMPS FINAL:")
+    print(f"   Calcul_Theme_Heure locale: {dt_local.strftime('%Y-%m-%d %H:%M %Z%z') if hasattr(dt_local, 'strftime') else 'N/A'}")
+    print(f"   Calcul_Theme_Heure UTC: {dt_utc.strftime('%Y-%m-%d %H:%M %Z%z')}")
+    print("🧪 Calcul_Theme_Sanity check:", "aware/local=", dt_local.tzinfo is not None, "aware/utc=", dt_utc.tzinfo is not None)
+    print("🧪 Calcul_Theme_Round-trip OK ?",
+      abs((dt_local.astimezone(pytz.UTC) - dt_utc).total_seconds()) < 1)
 
     # --- ÉTAPE 4: Calculs astrologiques ---
     swe.set_ephe_path(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ephe'))
     jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour + dt_utc.minute / 60.0)
     
-    print(f"🌟 Jour Julien calculé: {jd}")
+    print(f"🌟 Calcul_Theme_Jour Julien calculé: {jd}")
     
     swe.set_sid_mode(swe.SIDM_LAHIRI)
     ayanamsa = swe.get_ayanamsa_ut(jd)
     
-    print(f"🌙 Ayanamsa (Lahiri): {ayanamsa:.4f}°")
+    print(f"🌙 Calcul_Theme_Ayanamsa (Lahiri): {ayanamsa:.4f}°")
 
     # Calcul des maisons avec Placidus
     cusps, ascmc = swe.houses(jd, lat, lon, b'P')
-    cusps_sid = [(cusp - ayanamsa) % 360 for cusp in cusps]
+    #cusps_sid = [(cusp - ayanamsa) % 360 for cusp in cusps]
 
     asc_deg = round(ascmc[0], 2)
     signe_asc, deg_asc = degre_vers_signe(asc_deg)
@@ -232,11 +248,20 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     signe_asc_sid, deg_asc_sid = degre_vers_signe(asc_deg_sid)
     nakshatra_asc_sid = get_nakshatra_name(asc_deg_sid)
 
-    print(f"🎯 ASCENDANTS CALCULÉS:")
-    print(f"   Tropical: {asc_deg:.2f}° = {signe_asc} {deg_asc:.2f}°")
-    print(f"   Sidéral: {asc_deg_sid:.2f}° = {signe_asc_sid} {deg_asc_sid:.2f}° (Nakshatra: {nakshatra_asc_sid})")
+    print(f"🎯 Calcul_Theme_ASCENDANTS CALCULÉS:")
+    print(f"   Calcul_Theme_Tropical: {asc_deg:.2f}° = {signe_asc} {deg_asc:.2f}°")
+    print(f"   Calcul_Theme_Sidéral: {asc_deg_sid:.2f}° = {signe_asc_sid} {deg_asc_sid:.2f}° (Nakshatra: {nakshatra_asc_sid})")
 
     # [Le reste du code pour les maisons, planètes, etc. reste identique...]
+
+    # --- AJOUT: angles (Asc, MC, Desc, FC) en degrés tropicaux ---
+    mc_deg = float(ascmc[1])
+    angles_deg = {
+        "Ascendant": asc_deg,
+        "MC": mc_deg,
+        "Descendant": (asc_deg + 180.0) % 360.0,
+        "FC": (mc_deg + 180.0) % 360.0,
+    }
     
     maisons_tropicales = {}
     signes_detectes = []
@@ -311,7 +336,16 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     }
 
     for nomp, code in zip(planetes, codes):
-        deg_trop = round(swe.calc_ut(jd, code)[0][0], 2)
+       
+       # --- 1) Récupérer aussi la vitesse pour détecter le rétrograde
+        pos, _ = swe.calc_ut(jd, code)            # pos = [longitude, latitude, distance, vitesse_longitude]
+        deg_trop = round(pos[0], 2)                # remplace: swe.calc_ut(jd, code)[0][0]
+        speed = pos[3]
+
+        # --- 2) Déterminer si la planète est rétrograde (que pour ces 5-là)
+        planetes_retro_ok = ["Mercure", "Vénus", "Mars", "Jupiter", "Saturne"]
+        is_retro = (nomp in planetes_retro_ok) and (speed < 0)
+       
         signe_trop, deg_signe_trop = degre_vers_signe(deg_trop)
         maison_trop = get_maison_planete(deg_trop, cusps)
 
@@ -333,7 +367,8 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
             'degre': deg_trop,
             'signe': signe_trop,
             'degre_dans_signe': deg_signe_trop,
-            'maison': maison_trop
+            'maison': maison_trop,
+            'retrograde': is_retro,
         }
 
         resultats_vediques[nomp] = {
@@ -349,7 +384,6 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         positions_tropicales[nomp] = deg_trop
         positions_vediques[nomp] = round(deg_sid, 2)
 
-    # [Reste du code identique...]
     
     # Ajout de Ketu
     rahu_deg_trop = resultats_tropical['Rahu']['degre']
@@ -444,8 +478,41 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
 
     ascendant = resultats_tropical.get("Ascendant", {"signe": "inconnu", "degre": "inconnu"})
 
+    # --- AJOUT: dictionnaire des longitudes planètes/points en degrés tropicaux ---
+    planetes_deg = {}
+    for nom_planete, infos in resultats_tropical.items():
+        # on exclut l'angle "Ascendant" du set planétaire
+        if nom_planete == "Ascendant":
+            continue
+        deg = infos.get("degre")
+        if deg is not None:
+            try:
+                planetes_deg[nom_planete] = float(deg)  # ← ICI la correction
+            except Exception:
+                pass
+
+    def _delta_deg(a: float, b: float) -> float:
+        d = abs((a - b) % 360.0)
+        return d if d <= 180.0 else 360.0 - d
+
+    try:
+        angles_dbg = []
+        for pl, deg in (planetes_deg or {}).items():
+            for angle, dang in (angles_deg or {}).items():
+                ecart = round(_delta_deg(deg, dang), 2)
+                if ecart <= 1.0:
+                    angles_dbg.append(f"→ {pl} ~ {angle} (écart {ecart}°)")
+        if angles_dbg:
+            print("🧭 Conjonctions aux angles détectées (≤1°):")
+            for l in sorted(angles_dbg):
+                print("   ", l)
+    except Exception as e:
+        print("⚠️ SanityCheck angles:", e)
+
+    print(f"FIN calcul_theme: nom = '{nom}'")
+
     return {
-        'nom': nom,
+        'nom': nom_utilisateur,
         'date': dt_local.strftime('%d %B %Y %H:%M') if hasattr(dt_local, 'strftime') else f"{date_naissance} {heure_naissance}",
         'planetes': resultats_tropical,
         'maisons': maisons_tropicales,
@@ -457,5 +524,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         'maitre_ascendant_vedique': maitre_asc_vedique,
         'planetes_vediques': resultats_vediques,
         'interceptions': interceptions,
-        'points_forts': points_forts
+        'points_forts': points_forts,
+        'angles_deg': angles_deg,         
+        'planetes_deg': planetes_deg,     
     }

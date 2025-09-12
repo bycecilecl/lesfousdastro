@@ -1,0 +1,78 @@
+<!-- templates/analyse_blocs.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Point Astral — Version Blocs</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #111834;
+      --text: #e9ecf1;
+      --muted: #b9c2d0;
+      --accent: #7aa2f7;
+      --sep: #2a3357;
+    }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 900px; margin: 24px auto; padding: 0 16px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    h1, h2, h3 {
+      margin: 0 0 12px 0;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    h1 { font-size: 28px; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .content {
+      margin-top: 18px;
+      white-space: pre-wrap; /* ✅ garde les retours à la ligne de ton texte */
+    }
+    hr {
+      border: none; height: 1px; background: var(--sep); margin: 28px 0;
+    }
+    .footer {
+      display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .btn {
+      appearance: none; cursor: pointer;
+      padding: 10px 14px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: #131b3b; color: var(--text);
+      text-decoration: none; font-weight: 600;
+    }
+    .btn:hover { border-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Point Astral — Version Blocs</h1>
+      <div class="muted">Rendu de test (5 appels LLM concaténés)</div>
+
+      <div class="content">
+        {{ texte|replace('\n\n---\n\n', '\n<hr>\n')|replace('\n','<br>')|safe }}
+      </div>
+
+      <div class="footer">
+        <!-- Bouton placeholder : on branchera le PDF plus tard -->
+        <a class="btn" href="#" onclick="alert('Export PDF à venir 🙂'); return false;">Exporter en PDF</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

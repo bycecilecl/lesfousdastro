@@ -39,6 +39,8 @@ def api_analyse_gratuite():
         tzid            = data.get("tzid")
         gender          = data.get("gender")  # "male" | "female" | None
 
+        print(f"DEBUG: nom reçu = '{nom}'")
+
         # 📋 1) Enregistrement utilisateur (comme dans l'ancienne version)
         # Simuler request.form pour la fonction existante
         form_data_simulation = {
@@ -49,7 +51,7 @@ def api_analyse_gratuite():
             'lieu_naissance': lieu_naissance,
             'consentement': 'on'  # Déjà vérifié côté front
         }
-        
+
         try:
             enregistrer_utilisateur_et_envoyer(form_data_simulation)
             print("✅ Utilisateur enregistré")
@@ -66,6 +68,8 @@ def api_analyse_gratuite():
             lon=float(lon) if lon else None,
             tzid=tzid or None
         )
+
+        print(f"DEBUG: theme['nom'] = '{theme.get('nom')}'")
 
         # 📊 3) Enregistrement des placements (comme dans l'ancienne version)
         infos_personnelles = {
@@ -137,7 +141,7 @@ Cette analyse doit donner envie d'en savoir plus, d'explorer plus en profondeur.
 Fais une analyse de max 15 lignes.
 """
 
-        print("📤 Prompt envoyé à l'IA :", prompt[:200] + "...")
+        print("📤 Prompt envoyé à l'IA :", prompt)
 
         # 🤖 6) Appel à l'IA
         texte = interroger_llm(prompt)

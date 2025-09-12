@@ -56,84 +56,6 @@ NOTES :
 ===========================================================
 """
 
-def get_force_planetaire():
-    """
-    Hiérarchie de force/dominance planétaire
-    Plus le score est élevé, plus la planète a d'influence dans une configuration
-    """
-    return {
-        # Planètes de structure/transformation (les plus puissantes)
-        'Saturne': 100,    # Structure, restriction, maître du temps
-        'Pluton': 95,      # Transformation profonde, pouvoir occulte
-        'Mars': 90,        # Action, guerre, énergie brute
-        
-        # Luminaires (importants mais influençables)
-        'Soleil': 85,      # Ego, identité, mais peut être éclipsé
-        'Lune': 75,        # Émotions, instincts, réceptive
-        
-        # Planètes sociales
-        'Jupiter': 80,     # Expansion, philosophie, mais bienveillant
-        'Uranus': 85,      # Révolution, changement brusque
-        'Neptune': 70,     # Dissolution, illusion, spiritualité
-        
-        # Planètes personnelles (plus malléables)
-        'Mercure': 60,     # Mental, communication
-        'Vénus': 65,       # Amour, beauté, harmonie
-        
-        # Points fictifs (influence modérée)
-        'Rahu': 55,        # Nœud Nord, obsession
-        'Ketu': 55,        # Nœud Sud, détachement
-        'Lune Noire': 50,  # Blessures, manques
-        'Chiron': 45,      # Guérison, blessure
-    }
-
-
-def analyser_configuration_dominante(planetes_config):
-    """
-    Détermine quelle planète domine une configuration (amas, conjonction, etc.)
-    et comment elle influence les autres
-    """
-    forces = get_force_planetaire()
-    
-    if not planetes_config or len(planetes_config) < 2:
-        return None
-    
-    # Trier par force décroissante
-    planetes_triees = sorted(planetes_config, 
-                           key=lambda p: forces.get(p, 30), 
-                           reverse=True)
-    
-    dominante = planetes_triees[0]
-    subordonnees = planetes_triees[1:]
-    
-    # Déterminer le type d'influence
-    if dominante == 'Saturne':
-        effet = "bride, discipline, responsabilise"
-    elif dominante == 'Pluton':
-        effet = "transforme en profondeur, intensifie"
-    elif dominante == 'Mars':
-        effet = "dynamise, peut agresser ou défendre"
-    elif dominante == 'Uranus':
-        effet = "libère, révolutionne, rend imprévisible"
-    elif dominante == 'Neptune':
-        effet = "dissout, idéalise, peut créer illusions"
-    elif dominante == 'Jupiter':
-        effet = "amplifie, bénit, philosophise"
-    elif dominante == 'Soleil':
-        effet = "éclaire et révèle"
-    elif dominante == 'Lune':
-        effet = "émotionnalise, maternise"
-    else:
-        effet = "colore et module"
-    
-    return {
-        'dominante': dominante,
-        'subordonnees': subordonnees,
-        'effet': effet,
-        'description': f"{dominante} {effet} {', '.join(subordonnees)}"
-    }
-
-
 def est_angulaire(maison):
     try:
         m = int(maison)
@@ -156,27 +78,24 @@ def detecter_angles_importants(planetes, include_lune_noire=True):
             points.append(f"{nom} en maison angulaire ({maison})")
     return points
 
-def detecter_amas_avec_dominance(data, seuil=3, par="signe", strict=False):
-    """
-    Version améliorée qui détecte les amas ET leur dynamique de dominance
-    """
-    points = []  # 🎯 INITIALISATION OBLIGATOIRE
+def detecter_amas(data, seuil=3, par="signe", strict=False):
+    points = []
     planetes = data.get('planetes', {})
 
-    # Catégories (comme avant)
-    personnelles = ['Soleil', 'Lune', 'Mercure', 'Vénus', 'Mars']
-    sociales = ['Jupiter', 'Saturne'] 
-    generationnelles = ['Uranus', 'Neptune', 'Pluton']
-    classiques = personnelles + sociales + generationnelles
+    # Catégories
+    pers = ['Soleil', 'Lune', 'Mercure', 'Vénus', 'Mars']
+    soc  = ['Jupiter', 'Saturne']
+    gen  = ['Uranus', 'Neptune', 'Pluton']
+    classiques = pers + soc + gen
 
-    EXCLUS = {"Ascendant", "Descendant", "Milieu du Ciel", "Fond du Ciel", "Lune Noire", "Rahu", "Ketu", "Chiron"}
+    # Exclusions possibles (si jamais tu veux strict=True+exclure angles/noeuds)
+    EXCLUS = {"Ascendant","Descendant","Milieu du Ciel","Fond du Ciel","Lune Noire","Rahu","Ketu"}
 
     if strict:
-        planetes_filtrees = {n: i for n, i in planetes.items() if n in classiques}
+        planetes_filtrees = {n:i for n,i in planetes.items() if n in classiques}
     else:
-        planetes_filtrees = {n: i for n, i in planetes.items() if n not in EXCLUS}
+        planetes_filtrees = {n:i for n,i in planetes.items() if n not in EXCLUS}
 
-    # Grouper par signe/maison
     groupes_count = {}
     for nom, infos in planetes_filtrees.items():
         cle = infos.get(par)
@@ -186,95 +105,38 @@ def detecter_amas_avec_dominance(data, seuil=3, par="signe", strict=False):
             cle = (cle or "").strip().replace("\xa0", " ").strip().capitalize()
         groupes_count.setdefault(cle, []).append(nom)
 
-    # Analyse des amas avec dominance
-    for localisation, planetes_liste in groupes_count.items():
-        if len(planetes_liste) < seuil:
-            continue
-            
-        # Validation d'amas (logique existante)
-        pers_dans_amas = [p for p in planetes_liste if p in personnelles]
-        soc_dans_amas = [p for p in planetes_liste if p in sociales]
-        gen_dans_amas = [p for p in planetes_liste if p in generationnelles]
-        
-        nb_personnelles = len(pers_dans_amas)
-        nb_sociales = len(soc_dans_amas)
-        total_planetes = len(planetes_liste)
-        
-        print(f"🔍 Analyse amas {localisation}: {planetes_liste}")
-        print(f"   - Personnelles: {pers_dans_amas} ({nb_personnelles})")
-        print(f"   - Sociales: {soc_dans_amas} ({nb_sociales})")
-        print(f"   - Générationnelles: {gen_dans_amas} ({nb_generationnelles})")
-        
-        # Règles de validation (comme avant)
-        amas_valide = False
-        type_amas = ""
-        
-        if nb_personnelles >= 3:
-            amas_valide = True
-            type_amas = "🌟 Amas personnel fort"
-        elif nb_personnelles >= 2:
-            amas_valide = True
-            type_amas = "🌟 Amas personnel"
-        elif nb_personnelles == 1 and nb_sociales >= 1 and total_planetes >= 3:
-            amas_valide = True
-            type_amas = "Amas mixte"
-        elif nb_personnelles == 0 and nb_sociales >= 2:
-            amas_valide = True
-            type_amas = "Amas générationnel"
-        else:
-            print(f"   ❌ Amas non validé (pas assez de planètes personnelles)")
-            continue
-        
-        if amas_valide:
-            # 🎯 Analyse de dominance
-            dominance = analyser_configuration_dominante(planetes_liste)
-            
-            planetes_str = ", ".join(planetes_liste)
-            if dominance:
-                description = f"- {type_amas} en {localisation} ({planetes_str}) → {dominance['description']}"
-                print(f"   ✅ {dominance['dominante']} domine : {dominance['effet']}")
+    # DEBUG utile
+    if par == "signe":
+        print("DEBUG amas/signes:", [(k, len(v)) for k,v in groupes_count.items() if len(v) >= 2])
+    else:
+        print("DEBUG amas/maisons:", [(k, len(v)) for k,v in groupes_count.items() if len(v) >= 2])
+
+    def categoriser(liste):
+        nb_pers = len([p for p in liste if p in pers])
+        nb_soc  = len([p for p in liste if p in soc])
+        nb_gen  = len([p for p in liste if p in gen])
+        if nb_pers >= 2:
+            return "personnel"
+        if nb_pers >= 1 and (nb_soc + nb_gen) >= 2:
+            return "mixte"
+        if nb_soc >= 1 and nb_gen >= 2:
+            return "social-générationnel"
+        if nb_gen >= 3:
+            return "générationnel"
+        return "standard"
+
+    for groupe, liste in groupes_count.items():
+        if len(liste) >= seuil:
+            typ = categoriser(liste)
+            if typ == "générationnel":
+                points.append(f"Amas générationnel en {groupe} ({', '.join(liste)}) - effet collectif")
+            elif typ == "personnel":
+                points.append(f"🌟 Amas personnel en {groupe} ({', '.join(liste)})")
+            elif typ == "mixte":
+                points.append(f"Amas mixte en {groupe} ({', '.join(liste)})")
             else:
-                description = f"- {type_amas} en {localisation} ({planetes_str})"
-            
-            points.append(description)
-
-    print(f"🔍 DEBUG - detecter_amas_avec_dominance retourne : {points}")
-    return points  # 🎯 RETOUR OBLIGATOIRE
-
-
-def detecter_conjonctions_avec_dominance(aspects, seuil_orbe=5):
-    """
-    Détecte les conjonctions importantes et leur dynamique de dominance
-    """
-    points = []
-    
-    for aspect in aspects:
-        if aspect.get('type', '').lower() != 'conjonction':
-            continue
-            
-        orbe = float(aspect.get('orbe', 99))
-        if orbe > seuil_orbe:
-            continue
-            
-        planete1 = aspect.get('source') or aspect.get('planete1')
-        planete2 = aspect.get('cible') or aspect.get('planete2')
-        
-        if not planete1 or not planete2:
-            continue
-            
-        # Analyse de dominance
-        dominance = analyser_configuration_dominante([planete1, planete2])
-        
-        if dominance:
-            description = f"Conjonction {planete1}-{planete2} (orbe {orbe:.1f}°)"
-            description += f" → {dominance['description']}"
-            points.append(description)
-        else:
-            # Fallback
-            points.append(f"Conjonction {planete1}-{planete2} (orbe {orbe:.1f}°)")
-    
+                points.append(f"Amas planétaire en {groupe} ({', '.join(liste)})")
     return points
-
 
 def evaluer_dignite(planete, signe):
     domiciles = {
@@ -329,12 +191,14 @@ def qualite_maitre_asc(data):
     return f"Maître d'Ascendant ({maitre}) {' et '.join(tags) if tags else 'en position neutre'}"
 
 def etat_luminaires(data):
-    points, planetes, aspects = [], data.get('planetes', {}), data.get('aspects', [])
-    for L in ['Soleil','Lune']:
-        if L in planetes:
-            dig = evaluer_dignite(L, planetes[L].get('signe',''))
-            if dig['score'] != 0:
-                points.append(f"{L} {dig['dignite']} en {planetes[L].get('signe','')}")
+    """
+    Version corrigée - ne traite QUE les aspects Soleil-Lune
+    Les dignités sont déjà traitées dans la section PERSONNELLES de extraire_points_forts()
+    """
+    points = []
+    aspects = data.get('aspects', [])
+    
+    # Traiter SEULEMENT les aspects Soleil-Lune (pas les dignités)
     for a in aspects:
         if {a.get('planete1'), a.get('planete2')} == {'Soleil','Lune'}:
             orbe = a.get('orbe', 0)
@@ -494,212 +358,53 @@ def lister_axes_cardinaux(data):
             result.append(f"{angle} en {signe}")
     return result
 
-def formater_points_forts_avec_dominance(data):
-    """
-    Version améliorée de extraire_points_forts qui intègre les dynamiques de dominance
-    """
-    points = []
-    
-    # 1. Amas avec dominance
-    print("🔍 DEBUG - Appel detecter_amas_avec_dominance par signe")
-    amas_signes = detecter_amas_avec_dominance(data, seuil=3, par="signe")
-    print(f"🔍 DEBUG - Amas signes trouvés : {amas_signes}")
-    amas_maisons = detecter_amas_avec_dominance(data, seuil=3, par="maison")
-    
-    if amas_signes or amas_maisons:
-        points.append("### Amas et configurations")
-        points.extend(amas_signes)
-        points.extend(amas_maisons)
-    
-    # 2. Conjonctions importantes avec dominance
-    aspects = data.get('aspects', [])
-    conjonctions = detecter_conjonctions_avec_dominance(aspects)
-    
-    if conjonctions:
-        points.append("### Conjonctions majeures")
-        points.extend(conjonctions)
-    
-    # 3. Autres points forts (logique existante)
-    # ... le reste de ta logique actuelle
-    
-    return points
-
 def extraire_points_forts(data):
-    """
-    Extrait tous les points forts d'un thème astrologique avec gestion d'erreur
-    et intégration de la dominance planétaire
-    """
-    print("🔍 DEBUG EXTRACTION - Début")
     points = []
-    
-    try:
-        # === RÉCUPÉRATION DES DONNÉES DE BASE ===
-        maisons = data.get('maisons', {})
-        planetes = data.get('planetes', {})
-        aspects = data.get('aspects', [])
-        
-        angles_degres = {
-            'Ascendant': data.get('planetes', {}).get('Ascendant', {}).get('degre'),
-            'Milieu du Ciel': (maisons.get('Maison 10', {}).get('degre') or maisons.get('10', {}).get('degre')),
-            'Descendant': (maisons.get('Maison 7', {}).get('degre') or maisons.get('7', {}).get('degre')),
-            'Fond du Ciel': (maisons.get('Maison 4', {}).get('degre') or maisons.get('4', {}).get('degre')),
-        }
-        angles_degres = {k: v for k, v in angles_degres.items() if v is not None}
+    maisons = data.get('maisons', {})
+    angles_degres = {
+        'Ascendant': data.get('planetes', {}).get('Ascendant', {}).get('degre'),
+        'Milieu du Ciel': (maisons.get('Maison 10', {}).get('degre') or maisons.get('10', {}).get('degre')),
+        'Descendant':     (maisons.get('Maison 7', {}).get('degre')  or maisons.get('7',  {}).get('degre')),
+        'Fond du Ciel':   (maisons.get('Maison 4', {}).get('degre')  or maisons.get('4',  {}).get('degre')),
+    }
+    angles_degres = {k:v for k,v in angles_degres.items() if v is not None}
 
-        # === 1. DIGNITÉS/CHUTES PLANÈTES PERSONNELLES ===
-        print("🔍 DEBUG - Analyse dignités")
-        PERSONNELLES = ('Soleil', 'Lune', 'Mercure', 'Vénus', 'Mars')
-        for p in PERSONNELLES:
-            if p in planetes:
-                signe = (planetes[p].get('signe', '') or '').strip().replace("\xa0", " ").strip().capitalize()
-                dig = evaluer_dignite(p, signe)
-                if dig.get('score', 0) != 0:
-                    points.append(f"{p} {dig['dignite']} en {signe}")
+    planetes = data.get('planetes', {})
+    aspects   = data.get('aspects', [])
 
-        # === 2. PLANÈTES ANGULAIRES ===
-        print("🔍 DEBUG - Planètes angulaires")
-        try:
-            angles_result = detecter_angles_importants(planetes)
-            if angles_result:
-                points.extend(angles_result)
-        except Exception as e:
-            print(f"❌ Erreur planètes angulaires : {e}")
+    # -- Dignités/chutes pour planètes personnelles (ajout Mercure/Vénus/Mars) --
+    PERSONNELLES = ('Soleil', 'Lune', 'Mercure', 'Vénus', 'Mars')
+    for p in PERSONNELLES:
+        if p in planetes:
+            signe = (planetes[p].get('signe','') or '').strip().replace("\xa0"," ").strip().capitalize()
+            dig = evaluer_dignite(p, signe)
+            if dig.get('score', 0) != 0:
+                points.append(f"{p} {dig['dignite']} en {signe}")
 
-        # === 3. ASPECTS AUX LUMINAIRES ===
-        print("🔍 DEBUG - Aspects luminaires")
-        try:
-            aspects_result = detecter_aspects_luminaire_detaille(aspects, stricte=True)
-            if aspects_result:
-                points.extend(aspects_result)
-        except Exception as e:
-            print(f"❌ Erreur aspects luminaires : {e}")
+    points += detecter_angles_importants(planetes)
+    points += detecter_aspects_luminaire_detaille(aspects, stricte=True)
+    points += detecter_conjonction_angles({k:v['degre'] for k,v in planetes.items() if 'degre' in v}, angles_degres)
 
-        # === 3B. CONJONCTIONS AVEC DOMINANCE (NOUVEAU) ===
-        print("🔍 DEBUG - Conjonctions avec dominance")
-        try:
-            conjonctions_result = detecter_conjonctions_avec_dominance(aspects, seuil_orbe=5)
-            if conjonctions_result:
-                points.extend(conjonctions_result)
-                print(f"✅ Conjonctions dominance ajoutées : {conjonctions_result}")
-            else:
-                print("ℹ️ Aucune conjonction avec dominance trouvée")
-        except Exception as e:
-            print(f"❌ Erreur conjonctions dominance : {e}")
+    # Amas (toutes planètes, sinon passe strict=True pour “classiques”)
+    points += detecter_amas(data, seuil=3, par="signe", strict=False)
+    points += detecter_amas(data, seuil=3, par="maison", strict=False)
 
-        # === 4. CONJONCTIONS AUX ANGLES ===
-        print("🔍 DEBUG - Conjonctions angles")
-        try:
-            positions_degres = {k: v['degre'] for k, v in planetes.items() if 'degre' in v}
-            conj_angles_result = detecter_conjonction_angles(positions_degres, angles_degres)
-            if conj_angles_result:
-                points.extend(conj_angles_result)
-        except Exception as e:
-            print(f"❌ Erreur conjonctions angles : {e}")
+    # Maître d’Ascendant
+    points.append(qualite_maitre_asc(data))
 
-        # === 5. AMAS AVEC DOMINANCE (PAR SIGNE) ===
-        print("🔍 DEBUG - Amas par signe avec dominance")
-        try:
-            amas_signes = detecter_amas_avec_dominance(data, seuil=3, par="signe", strict=False)
-            if amas_signes and isinstance(amas_signes, list):
-                points.extend(amas_signes)
-                print(f"✅ Amas signes ajoutés : {len(amas_signes)} éléments")
-            else:
-                print("ℹ️ Aucun amas par signe trouvé")
-        except Exception as e:
-            print(f"❌ Erreur amas signes : {e}")
+    # Luminaires, configs, profils, phénomènes, rétro, réceptions
+    points += etat_luminaires(data)
+    points += detecter_configurations(data)
+    points += profil_elements_modalites(data)
+    points += detecter_cazimi_combust(data)
+    points += lister_axes_cardinaux(data)
 
-        # === 6. AMAS AVEC DOMINANCE (PAR MAISON) ===
-        print("🔍 DEBUG - Amas par maison avec dominance")
-        try:
-            amas_maisons = detecter_amas_avec_dominance(data, seuil=3, par="maison", strict=False)
-            if amas_maisons and isinstance(amas_maisons, list):
-                points.extend(amas_maisons)
-                print(f"✅ Amas maisons ajoutés : {len(amas_maisons)} éléments")
-            else:
-                print("ℹ️ Aucun amas par maison trouvé")
-        except Exception as e:
-            print(f"❌ Erreur amas maisons : {e}")
+    retro = detecter_retrogrades(data)
+    if retro:
+        points.append("Planètes rétrogrades: " + ", ".join(retro))
 
-        # === 7. MAÎTRE D'ASCENDANT ===
-        print("🔍 DEBUG - Maître ascendant")
-        try:
-            maitre_asc = qualite_maitre_asc(data)
-            if maitre_asc:
-                points.append(maitre_asc)
-        except Exception as e:
-            print(f"❌ Erreur maître ascendant : {e}")
-
-        # === 8. ÉTAT DES LUMINAIRES ===
-        print("🔍 DEBUG - État luminaires")
-        try:
-            luminaires_result = etat_luminaires(data)
-            if luminaires_result:
-                points.extend(luminaires_result)
-        except Exception as e:
-            print(f"❌ Erreur luminaires : {e}")
-
-        # === 9. CONFIGURATIONS (T-CARRÉ, GRAND CARRÉ) ===
-        print("🔍 DEBUG - Configurations")
-        try:
-            config_result = detecter_configurations(data)
-            if config_result:
-                points.extend(config_result)
-        except Exception as e:
-            print(f"❌ Erreur configurations : {e}")
-
-        # === 10. PROFIL ÉLÉMENTS/MODALITÉS ===
-        print("🔍 DEBUG - Éléments/modalités")
-        try:
-            profil_result = profil_elements_modalites(data)
-            if profil_result:
-                points.extend(profil_result)
-        except Exception as e:
-            print(f"❌ Erreur profil éléments : {e}")
-
-        # === 11. CAZIMI/COMBUSTION ===
-        print("🔍 DEBUG - Cazimi/combustion")
-        try:
-            cazimi_result = detecter_cazimi_combust(data)
-            if cazimi_result:
-                points.extend(cazimi_result)
-        except Exception as e:
-            print(f"❌ Erreur cazimi : {e}")
-
-        # === 12. AXES CARDINAUX ===
-        print("🔍 DEBUG - Axes cardinaux")
-        try:
-            axes_result = lister_axes_cardinaux(data)
-            if axes_result:
-                points.extend(axes_result)
-        except Exception as e:
-            print(f"❌ Erreur axes cardinaux : {e}")
-
-        # === 13. PLANÈTES RÉTROGRADES ===
-        print("🔍 DEBUG - Rétrogrades")
-        try:
-            retro = detecter_retrogrades(data)
-            if retro:
-                points.append("Planètes rétrogrades: " + ", ".join(retro))
-        except Exception as e:
-            print(f"❌ Erreur rétrogrades : {e}")
-
-        # === 14. RÉCEPTIONS MUTUELLES ===
-        print("🔍 DEBUG - Réceptions mutuelles")
-        try:
-            receptions_result = detecter_receptions(data)
-            if receptions_result:
-                points.extend(receptions_result)
-        except Exception as e:
-            print(f"❌ Erreur réceptions : {e}")
-
-        print(f"🔍 DEBUG EXTRACTION - Fin : {len(points)} points forts totaux")
-        return points
-
-    except Exception as e:
-        print(f"❌ ERREUR CRITIQUE dans extraire_points_forts : {e}")
-        import traceback
-        traceback.print_exc()
-        return []  # Retourne une liste vide en cas d'erreur critique
+    points += detecter_receptions(data)
+    return points
 
 
 

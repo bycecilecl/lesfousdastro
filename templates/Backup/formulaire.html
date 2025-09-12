@@ -356,8 +356,23 @@
                     <div class="form-row">
                         <div class="form-group full-width">
                             <label for="lieu_naissance">Lieu de naissance</label>
-                            <input type="text" name="lieu_naissance" id="lieu_naissance" required placeholder="Ville, Pays" value="{{ infos.get('lieu_naissance', '') }}">
-                        </div>
+                            <input
+                                type="text"
+                                name="lieu_naissance"
+                                id="lieu_naissance"
+                                required
+                                placeholder="Ville, Pays"
+                                value="{{ infos.get('lieu_naissance', '') }}"
+                                autocomplete="off"
+                                list="suggestions-lieux"
+                            />
+                            <datalist id="suggestions-lieux"></datalist>
+
+                            <!-- Champs cachés remplis automatiquement par le JS à l'étape suivante -->
+                            <input type="hidden" name="lat" id="lat" />
+                            <input type="hidden" name="lon" id="lon" />
+                            <input type="hidden" name="tzid" id="tzid" />
+                            </div>
                     </div>
                 </div>
 
@@ -519,5 +534,74 @@
     <img src="{{ url_for('static', filename='images/logo_les_fous_dastro.webp') }}" alt="Les Fous d'Astro" style="width: 150px; border-radius: 50%;">
 </div>
 {% include 'footer.html' %}
+<script>
+  const input = document.getElementById('lieu_naissance');
+  const datalist = document.getElementById('suggestions-lieux');
+  const latEl = document.getElementById('lat');
+  const lonEl = document.getElementById('lon');
+  const tzidEl = document.getElementById('tzid');
+
+  let lastResults = [];
+  let debounce;
+
+  // 1) Appel /api/geocode pendant la saisie
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    clearTimeout(debounce);
+
+    if (q.length < 2) {
+      datalist.innerHTML = '';
+      return;
+    }
+
+    debounce = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        lastResults = data.results || [];
+        datalist.innerHTML = lastResults.map(r => `<option value="${r.label}"></option>`).join('');
+      } catch (e) {
+        console.warn('Geocode error:', e);
+      }
+    }, 250);
+  });
+
+  // 2) Remplir lat/lon/tzid quand une suggestion est choisie
+  function fillHiddenFromLabel(label) {
+    const r = lastResults.find(x => x.label === label);
+    if (r) {
+      latEl.value = r.lat;
+      lonEl.value = r.lon;
+      tzidEl.value = r.tzid || '';
+    }
+  }
+  input.addEventListener('change', () => fillHiddenFromLabel(input.value));
+  input.addEventListener('blur', () => fillHiddenFromLabel(input.value));
+
+  // 3) Sécuriser au submit si l’utilisateur tape sans cliquer une suggestion
+  const form = document.getElementById('form-analyse');
+  form.addEventListener('submit', async () => {
+    if (!latEl.value || !lonEl.value || !tzidEl.value) {
+      const q = input.value.trim();
+      if (q.length >= 2) {
+        try {
+          const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+          if (res.ok) {
+            const data = await res.json();
+            const r = (data.results || [])[0];
+            if (r) {
+              latEl.value = r.lat;
+              lonEl.value = r.lon;
+              tzidEl.value = r.tzid || '';
+            }
+          }
+        } catch (e) {
+          console.warn('Fallback geocode error:', e);
+        }
+      }
+    }
+  });
+</script>
 </body>
 </html>

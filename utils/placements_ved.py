@@ -27,6 +27,22 @@
 
 from typing import Dict, Any, List
 
+# --- Maîtres traditionnels par signe (SIDÉRAL) ---
+SIGN_LORD = {
+    "Bélier": "Mars",
+    "Taureau": "Vénus",
+    "Gémeaux": "Mercure",
+    "Cancer": "Lune",
+    "Lion": "Soleil",
+    "Vierge": "Mercure",
+    "Balance": "Vénus",
+    "Scorpion": "Mars",     # (version classique ; si tu utilises Ketu/Mars, adapte)
+    "Sagittaire": "Jupiter",
+    "Capricorne": "Saturne",
+    "Verseau": "Saturne",   # (classique ; si version moderne, Uranus, mais en védique : Saturne)
+    "Poissons": "Jupiter",
+}
+
 ORDRE_PLANETES_VED = [
     "Ascendant","Soleil","Lune","Mercure","Vénus","Mars","Jupiter","Saturne",
     "Uranus","Neptune","Pluton","Rahu","Ketu"

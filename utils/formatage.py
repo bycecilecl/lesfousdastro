@@ -40,10 +40,13 @@ def formater_positions_planetes(planetes, style="standard"):
         maison = infos.get('maison', 'n/a')
         maison = maison if maison not in (None, "") else "n/a"
 
+        # ✅ suffixe rétrograde si flag présent (rajout)
+        retro = " (rétrograde)" if infos.get("retrograde") else ""
+
         if style == "compact":
-            lignes.append(f"{nom} : {signe} {degre}° — Maison {maison}")
+            lignes.append(f"{nom} : {signe} {degre}° — Maison {maison}{retro}")
         else:  # "standard"
-            lignes.append(f"{nom} : {signe} {degre}° (Maison {maison})")
+            lignes.append(f"{nom} : {signe} {degre}° (Maison {maison}){retro}")
     return "\n".join(lignes)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -121,6 +124,16 @@ def formater_aspects_significatifs(aspects, seuil_orbe=5.0, avec_arrondi=True):
         lignes.append(f"{p1} {t_norm.capitalize()} {p2} (orbe {orbe_affichage}°)")
     return "\n".join(lignes) if lignes else f"Aucun aspect significatif (orbe ≤ {seuil_orbe}°)."
 
+def format_ligne_planete(nom, data):
+    """
+    Formate une ligne lisible pour une planète.
+    Exemple : Mercure : 12.3° en Balance – Maison 3 (rétrograde)
+    """
+    retro = " (rétrograde)" if data.get("retrograde") else ""
+    deg = round(data.get("degre", data.get("longitude", 0)) % 30, 2)
+    signe = data.get("signe", "?")
+    maison = data.get("maison", "?")
+    return f"{nom} : {deg}° en {signe} – Maison {maison}{retro}"
 
 def formater_resume_complet(planetes, aspects, seuil_orbe_significatif=5.0, avec_titres=True):
     blocs = []
@@ -132,6 +145,7 @@ def formater_resume_complet(planetes, aspects, seuil_orbe_significatif=5.0, avec
 
     return "\n".join(blocs)
 
+
 __all__ = [
     "ASPECTS_MAJEURS",
     "ASPECTS_MINEURS",
@@ -139,6 +153,7 @@ __all__ = [
     "formater_aspects",
     "formater_aspects_significatifs",
     "formater_resume_complet",
+    "format_ligne_planete",
 ]
 
 

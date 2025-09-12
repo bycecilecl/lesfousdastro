@@ -1,0 +1,27 @@
+<!-- templates/erreur.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ titre or "Erreur" }}</title>
+  <style>
+    body { font-family: Georgia, serif; background:#f5f5f5; margin:0; padding:40px; }
+    .card { max-width: 800px; margin:0 auto; background:#fff; border-radius:10px; padding:24px; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+    h1 { margin:0 0 12px; color:#b00020; }
+    pre { background:#fffbea; padding:12px; border-radius:6px; overflow:auto; }
+    a.btn { display:inline-block; margin-top:16px; padding:10px 16px; background:#1f628e; color:#fff; text-decoration:none; border-radius:6px; }
+    a.btn:hover { background:#144a6b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>⚠️ {{ titre or "Erreur" }}</h1>
+    <p>{{ message or "Une erreur est survenue." }}</p>
+    {% if details %}
+      <h3>Détails</h3>
+      <pre>{{ details }}</pre>
+    {% endif %}
+    <a class="btn" href="/">↩️ Retour</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement confirmé - Les Fous d'Astro</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            max-width: 500px;
+        }
+        h1 {
+            color: #1f628e;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .spinner {
+            margin: 0 auto 20px auto;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #1f628e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message {
+            color: #666;
+            font-style: italic;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Paiement confirmé !</h1>
+        <p>
+            Merci pour votre confiance !<br>
+            <strong>Votre Point Astral est en cours de création...</strong>
+        </p>
+        <div class="spinner"></div>
+        <p class="message">
+            Merci de patienter quelques minutes.<br>
+            Vous allez être redirigé automatiquement.
+        </p>
+    </div>
+
+    <script>
+        // Redirection automatique après 3 secondes
+        setTimeout(() => {
+            window.location.href = '/point_astral_blocs/complet';
+        }, 3000);
+    </script>
+</body>
+</html>

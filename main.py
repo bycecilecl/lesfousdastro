@@ -1,5 +1,5 @@
 # 🌐 Librairies externes
-from flask import Flask, render_template, request, jsonify, redirect, session, send_file
+from flask import Flask, render_template, request, jsonify, redirect, session, send_file, url_for, abort, Blueprint
 from geopy.geocoders import Nominatim
 from datetime import datetime, timezone
 import swisseph as swe
@@ -9,36 +9,36 @@ import os
 import csv
 import openai
 import atexit
-from utils.rag_utils_optimized import cleanup_weaviate
+
 from dotenv import load_dotenv
 
 # 🔧 Fonctions personnalisées (app)
+from utils.rag_utils_optimized import cleanup_weaviate
 from utils.calcul_theme import calcul_theme
 from utils.openai_utils import interroger_llm
 from utils.astro_utils import corriger_donnees_maisons, valider_donnees_avant_analyse
 from utils.formatage import formater_positions_planetes, formater_aspects
 from utils.pdf_utils import html_to_pdf
+from routes.legales import legal_bp
+from utils.s3_utils import presign_key
+#from utils.prod_hardening import harden_app
+
 from routes import register_routes
 from routes.geocode import geocode_bp
+from routes.paypal import payments_bp
 
 
-from analyse_point_astral_avec_sections import analyse_point_astral_avec_sections
 from utils.axes_majeurs import organiser_points_forts, formater_axes_majeurs
 from utils.utils_points_forts import extraire_points_forts  
 from routes.analyse_gratuite_api import gratuite_api_bp
-from utils.email_sender import envoyer_email_point_astral_v2
+from routes.point_astral_blocs import point_astral_blocs_bp
 
-
-#from archives.analyse_point_astral_synthetique import analyse_point_astral_synthetique_avec_rag
-#from utils.analyse_gratuite import analyse_gratuite
 
 import logging
 logging.getLogger('weasyprint').setLevel(logging.CRITICAL)
 logging.getLogger('fontTools').setLevel(logging.CRITICAL)
 logging.getLogger('fontTools.subset').setLevel(logging.CRITICAL)
 logging.getLogger('fontTools.ttLib').setLevel(logging.CRITICAL)
-
-
 
 print("🧭 RUN main.py depuis:", __file__)
 
@@ -78,19 +78,66 @@ def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
     local = naive.replace(tzinfo=ZoneInfo(tzid))
     return local.astimezone(timezone.utc)
 
-
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
-# ⬇️ AJOUT : enregistre le blueprint de géocodage
+
+# --- Blueprint principal: créer -> définir routes -> enregistrer
+main_bp = Blueprint("main", __name__)
+
+# --- Blueprints tiers d'abord si tu veux, peu importe l'ordre entre eux
 app.register_blueprint(geocode_bp)
 app.register_blueprint(gratuite_api_bp)
+app.register_blueprint(point_astral_blocs_bp)
+app.register_blueprint(payments_bp)
+app.register_blueprint(legal_bp)
+
+
+
+
+@main_bp.route("/")
+def index():
+    mode = os.getenv("PAYPAL_MODE", "sandbox").lower()
+    client_id = (
+        os.getenv("PAYPAL_CLIENT_ID_LIVE")
+        if mode == "live"
+        else os.getenv("PAYPAL_CLIENT_ID_SANDBOX")
+    )
+    print(f"[PayPal] mode={mode} client_id={'***' + (client_id or '')[-6:]}")
+    infos = session.get("infos_utilisateur", {})
+    return render_template(
+        "astro_form.html",   # ← la page qui contient le formulaire et PayPal
+        infos=infos,
+        PAYPAL_CLIENT_ID=client_id,
+        PAYPAL_CURRENCY=os.getenv("PAYPAL_CURRENCY", "EUR"),
+    )
+@main_bp.route("/analyses")
+def analyses():
+    # alias si tu veux que /analyses affiche la même page d’accueil “Analyses cosmiques”
+    return render_template("index.html")
+
+app.register_blueprint(main_bp)
+#app.register_blueprint(main_bp, name='main')
+
+@app.get("/dl/<path:key>")
+def dl_presign(key):
+    try:
+        url = presign_key(key)   # génère une URL S3 présignée à la volée
+        return redirect(url, code=302)
+    except Exception as e:
+        print(f"dl_presign error: {e}")
+        return "Lien indisponible ou expiré. Réessaie depuis ton espace.", 410
 
 
 # tes routes centralisées
+#harden_app(app)
 register_routes(app)
 
+print("=== URL MAP ===")
+print(app.url_map)
 
-
+print("🔎 Main URL MAP")
+for r in app.url_map.iter_rules():
+    print(f"{r.endpoint:45} -> {r.rule}")
 
 # === ROUTES ===
 
@@ -107,12 +154,8 @@ def generer_theme():
     date_naissance = request.form.get('date_naissance')
     heure_naissance = request.form.get('heure_naissance')
     lieu_naissance = request.form.get('lieu_naissance')
-    gender = request.form.get('gender') 
-
 
     theme_data = calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance)
-    theme_data['gender'] = gender 
-    print(f"🔍 GENRE APRÈS PRÉPARATION: '{data.get('gender')}'")
 
     return render_template('resultat.html', data=theme_data)
 
@@ -130,10 +173,35 @@ def generer_theme():
 #     infos = session.get("infos_utilisateur", {})
 #     return render_template('formulaire.html', infos=infos)
 
-@app.route('/', methods=["GET"])
-def formulaire():
-    infos = session.get("infos_utilisateur", {})
-    return render_template('astro_form.html', infos=infos)
+# @app.route('/', methods=["GET"])
+# def formulaire():
+#     infos = session.get("infos_utilisateur", {})
+#     return render_template('astro_form.html', infos=infos)
+
+# @main_bp.route("/")
+# def index():
+#     # affiche templates/index.html (qui étend base.html)
+#     return render_template("index.html")
+
+# @app.get("/")
+# def home():
+#     mode = os.getenv("PAYPAL_MODE", "sandbox").lower()
+#     client_id = (
+#         os.getenv("PAYPAL_CLIENT_ID_LIVE")
+#         if mode == "live"
+#         else os.getenv("PAYPAL_CLIENT_ID_SANDBOX")
+#     )
+#     # Facile à tracer en console
+#     print(f"[PayPal] mode={mode} client_id={'***' + (client_id or '')[-6:]}")
+#     infos = session.get("infos_utilisateur", {})
+#     return render_template(
+#         "astro_form.html",               # ← unifie le nom du template
+#         infos=infos,
+#         PAYPAL_CLIENT_ID=client_id,
+#         PAYPAL_CURRENCY=os.getenv("PAYPAL_CURRENCY", "EUR"),
+#     )
+
+
 
 def preparer_donnees_analyse(data):
     """
@@ -198,16 +266,15 @@ def tous_les_placements():
     date_naissance = request.form.get('date_naissance')   # "1998-03-04"
     heure_naissance = request.form.get('heure_naissance') # "03:15"
     lieu_naissance = request.form.get('lieu_naissance')
-    gender = request.form.get('gender')
 
-    print(f"📍 Lieu saisi : {lieu_naissance}")
+    print(f"📍 Main Lieu saisi : {lieu_naissance}")
 
     # ⬇️ NOUVEAU : on récupère les champs cachés
     lat = request.form.get('lat')
     lon = request.form.get('lon')
     tzid = request.form.get('tzid')
 
-    print(f"🧭 Coords reçues : lat={lat}, lon={lon}, tzid={tzid}")
+    print(f"🧭 Main Coords reçues : lat={lat}, lon={lon}, tzid={tzid}")
 
     # Sécurités légères
     try:
@@ -228,7 +295,7 @@ def tous_les_placements():
     # On tente d'abord avec de nouveaux kwargs (si ton calcul_theme les supporte déjà),
     # sinon on retombe sur l'ancien appel intact.
 
-    print(f"➡️ ENTRÉE CALCUL: lat={lat}, lon={lon}, tzid={tzid}, dt_utc={dt_utc}")
+    print(f"➡️ Main ENTRÉE CALCUL: lat={lat}, lon={lon}, tzid={tzid}, dt_utc={dt_utc}")
     try:
         data = calcul_theme(
             nom=nom,
@@ -253,34 +320,34 @@ def tous_les_placements():
         }
 
         print("=" * 50)
-        print("🔍 DEBUG INTERCEPTIONS")
+        print("🔍 Main DEBUG INTERCEPTIONS")
         print("=" * 50)
-        print("🧩 CLÉS DATA:", sorted(list(data.keys())))
-        print("🔎 Interceptions présentes ?", "interceptions" in data or "axes_interceptes" in data)
+        print("🧩 Main CLÉS DATA:", sorted(list(data.keys())))
+        print("🔎 Main Interceptions présentes ?", "interceptions" in data or "axes_interceptes" in data)
         
-        print("🧪 Aperçu interceptions:", data.get("interceptions") or data.get("axes_interceptes"))
+        print("🧪 Main Aperçu interceptions:", data.get("interceptions") or data.get("axes_interceptes"))
 
         if "interceptions" in data:
             interceptions_data = data["interceptions"]
-            print(f"📋 Type interceptions: {type(interceptions_data)}")
-            print(f"📋 Contenu interceptions: {interceptions_data}")
+            print(f"📋 Main Type interceptions: {type(interceptions_data)}")
+            print(f"📋 Main Contenu interceptions: {interceptions_data}")
             
             if isinstance(interceptions_data, dict):
                 for cle, valeur in interceptions_data.items():
                     print(f"   {cle}: {valeur}")
         else:
-            print("❌ Clé 'interceptions' manquante dans data")
+            print("❌ Main Clé 'interceptions' manquante dans data")
             
             # Chercher d'autres noms possibles
             autres_cles = [cle for cle in data.keys() if 'intercept' in cle.lower()]
             if autres_cles:
-                print(f"🔍 Clés similaires trouvées: {autres_cles}")
+                print(f"🔍 Main Clés similaires trouvées: {autres_cles}")
                 for cle in autres_cles:
                     print(f"   {cle}: {data[cle]}")
             else:
                 print("🔍 Aucune clé contenant 'intercept' trouvée")
         
-        print("🧪 Aperçu complet data keys:")
+        print("🧪 Main Aperçu complet data keys:")
         for cle in sorted(data.keys()):
             valeur = data[cle]
             if isinstance(valeur, dict):
@@ -293,7 +360,7 @@ def tous_les_placements():
     # FIN DU DEBUG
 
 
-        # 🔹 Calcul des axes majeurs - à enlever si ça ne fonctionne pas
+    # 🔹 Calcul des axes majeurs - à enlever si ça ne fonctionne pas
     try:
         # Utiliser la fonction preparer_donnees_analyse qui existe déjà
         data = preparer_donnees_analyse(data)
@@ -322,23 +389,6 @@ def tous_les_placements():
         interceptions=data.get('interceptions', {})
     )
 
-
-# @app.route('/test_placements')
-# def test_placements():
-#     # données factices pour test
-#     data = {
-#         'nom': 'Test',
-#         'planetes': {
-#             'Soleil': {'signe': 'Lion', 'degre': 15.5, 'maison': 5},
-#             'Lune': {'signe': 'Cancer', 'degre': 22.0, 'maison': 4},
-#         },
-#         'aspects': [
-#             {'planete1': 'Soleil', 'planete2': 'Lune', 'aspect': 'Conjonction', 'orbe': 2}
-#         ]
-#     }
-#     positions_str = formater_positions_planetes(data['planetes'])
-#     aspects_str = formater_aspects(data['aspects'])
-#     return render_template('tous_les_placements.html', nom=data['nom'], positions=positions_str, aspects=aspects_str)
 
 
 # -----------------------------------------------------------
@@ -390,7 +440,7 @@ def placements():
         except Exception as e:
             print(f"⚠️ GET /placements: conversion UTC échouée: {e}")
 
-    print(f"➡️ GET /placements → lat={lat}, lon={lon}, tzid={tzid}, dt_utc={dt_utc}")
+    print(f"➡️ Main GET /placements → lat={lat}, lon={lon}, tzid={tzid}, dt_utc={dt_utc}")
 
     # Appel du moteur de thème (on passe les overrides)
     data = calcul_theme(
@@ -448,35 +498,24 @@ def resultat_json():
     )
     return jsonify(data)
 
-
-# 📝 Route POST /analyse
-# -------------------------------------------
-# Reçoit les données du formulaire de choix d’analyse.
-# - Vérifie la présence du consentement utilisateur.
-# - Selon le type choisi :
-#     "gratuite"      → redirige vers /analyse_gratuite
-#     "point_astral"  → redirige vers /analyse_point_astral
-# Redirection en code 307 pour conserver les données POST.
+    
 
 @app.route("/analyse", methods=["POST"])
 def analyse_post():
     form_data = request.form
     type_analyse = form_data.get("type_analyse")
-
-    if not form_data.get("consentement"):
-        return "Consentement obligatoire pour générer l'analyse", 400
-
-    if type_analyse == "gratuite":
-        return redirect("/analyse_gratuite", code=307)  # Garde les données POST
-    elif type_analyse == "point_astral":
-        return redirect("/analyse_point_astral", code=307)
-    else:
-        return "Type d’analyse inconnu", 400
+    version = form_data.get("version_analyse", "classique")
     
-# 📝 Route GET /mentions-legales
-# -------------------------------------------
-# Affiche la page HTML contenant les mentions légales du site.
-# Aucune donnée dynamique, simple rendu de template.
+    if not form_data.get("consentement"):
+        return "Consentement obligatoire", 400
+    
+    if type_analyse == "point_astral":
+        if version == "blocs":
+            return redirect("/analyse_point_astral_blocs", code=307)
+        else:
+            return redirect("/analyse_point_astral", code=307)
+    
+
 
 # 🚀 Point d’entrée principal (si exécution directe de main.py)
 # -------------------------------------------
@@ -484,18 +523,16 @@ def analyse_post():
 # - Affiche dans la console la liste des routes Flask disponibles (debug)
 # - Lance l’application Flask en mode debug, accessible sur toutes les IP locales (0.0.0.0)
     
-@app.route("/mentions-legales")
-def mentions_legales():
-    return render_template("mentions_legales.html")
 
-if __name__ == "__main__":
-    # Ce bloc ne sera exécuté que quand tu lances localement avec "python main.py"
-    port = int(os.environ.get("PORT", 5050))
 
-    print("\n📍 Liste des endpoints Flask enregistrés :")
-    for rule in app.url_map.iter_rules():
-        print(f"{rule.endpoint:35} ➝ {rule.methods} ➝ {rule.rule}")
-    app.run(debug=True, host="0.0.0.0", port=port)
+@app.route("/paiement/effectue")
+def paiement_effectue():
+    return render_template("paiement_effectue.html")
+
+
+
+
+
 
 # 📝 Route POST /analyse_point_astral
 # -------------------------------------------
@@ -512,9 +549,55 @@ if __name__ == "__main__":
 # 9. Retourne la page HTML point_astral_resultat.html avec l’analyse prête à afficher.
 # En cas d’erreur → affiche la page erreur.html avec le message adapté.
 
+# @app.route("/analyse_point_astral", methods=["POST"])
+# def analyse_point_astral_route():
+#     """Route pour générer l'analyse Point Astral"""
+#     try:
+#         form_data = request.form
+        
+#         # Vérification du consentement
+#         if not form_data.get("consentement"):
+#             return "Consentement obligatoire pour générer l'analyse", 400
+
+#         # Récupération des données du formulaire
+#         nom = form_data.get('nom', 'Analyse Anonyme')
+#         date_naissance = form_data.get('date_naissance')
+#         heure_naissance = form_data.get('heure_naissance')
+#         lieu_naissance = form_data.get('lieu_naissance')
+
+#         # Validation des données obligatoires
+#         if not all([nom, date_naissance, heure_naissance, lieu_naissance]):
+#             return "Toutes les informations de naissance sont requises", 400
+
+#         print(f"🚀 Génération Point Astral pour {nom}")
+        
+#         # Stockage des informations en session
+#         infos_personnelles = {
+#             'nom': nom,
+#             'date_naissance': date_naissance,
+#             'heure_naissance': heure_naissance,
+#             'lieu_naissance': lieu_naissance
+#         }
+#         session["infos_utilisateur"] = infos_personnelles
+
+#         # Calcul du thème natal
+#         print("📊 Calcul du thème natal...")
+#         data = calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance)
+        
+#         # Validation des données calculées
+#         if not valider_donnees_avant_analyse(data):
+#             return "Erreur dans le calcul du thème natal. Vérifiez vos données de naissance.", 400
+        
+#         # 🔴 AJOUT ICI : on enrichit data avec les Axes Majeurs (tri + bloc prêt)
+#         data = preparer_donnees_analyse(data)
+#         print("✅ Axes majeurs prêts pour LLM et template.")
+
+        
+        
+        # Génération de l'analyse Point Astral par BLOC
 @app.route("/analyse_point_astral", methods=["POST"])
 def analyse_point_astral_route():
-    """Route pour générer l'analyse Point Astral"""
+    """Route pour générer l'analyse Point Astral - VERSION BLOCS (5 prompts)"""
     try:
         form_data = request.form
         
@@ -523,78 +606,36 @@ def analyse_point_astral_route():
             return "Consentement obligatoire pour générer l'analyse", 400
 
         # Récupération des données du formulaire
-        nom = form_data.get('nom', 'Analyse Anonyme')
-        date_naissance = form_data.get('date_naissance')
-        heure_naissance = form_data.get('heure_naissance')
-        lieu_naissance = form_data.get('lieu_naissance')
-        gender = form_data.get('gender')
-
-        print(f"🔍 GENRE RÉCUPÉRÉ DU FORM: '{gender}'")  # ← NOUVEAU LOG
+        infos_personnelles = {
+            'nom': form_data.get('nom', 'Analyse Anonyme'),
+            'date_naissance': form_data.get('date_naissance'),
+            'heure_naissance': form_data.get('heure_naissance'),
+            'lieu_naissance': form_data.get('lieu_naissance'),
+            'email': form_data.get('email'),
+            'gender': form_data.get('gender'),
+            'lat': form_data.get('lat'),
+            'lon': form_data.get('lon'),
+            'tzid': form_data.get('tzid')
+        }
 
         # Validation des données obligatoires
-        if not all([nom, date_naissance, heure_naissance, lieu_naissance]):
+        if not all([infos_personnelles['nom'], infos_personnelles['date_naissance'], 
+                   infos_personnelles['heure_naissance'], infos_personnelles['lieu_naissance']]):
             return "Toutes les informations de naissance sont requises", 400
 
-        print(f"🚀 Génération Point Astral pour {nom}")
+        print(f"🚀 Main Génération Point Astral BLOCS pour {infos_personnelles['nom']}")
         
-        # Stockage des informations en session
-        infos_personnelles = {
-            'nom': nom,
-            'date_naissance': date_naissance,
-            'heure_naissance': heure_naissance,
-            'lieu_naissance': lieu_naissance,
-            'gender': gender
-        }
+        # Stockage en session
         session["infos_utilisateur"] = infos_personnelles
-
-        # Calcul du thème natal
-        print("📊 Calcul du thème natal...")
-        data = calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance)
-        data['gender'] = gender
-        print(f"🔍 GENRE AJOUTÉ À DATA: '{data.get('gender')}'")
         
-        # Validation des données calculées
-        if not valider_donnees_avant_analyse(data):
-            return "Erreur dans le calcul du thème natal. Vérifiez vos données de naissance.", 400
-        
-        # 🔴 AJOUT ICI : on enrichit data avec les Axes Majeurs (tri + bloc prêt)
-        data = preparer_donnees_analyse(data)
-        data['gender'] = gender 
-        print("✅ Axes majeurs prêts pour LLM et template.")
-
-        # Génération de l'analyse Point Astral
-        print("✨ Génération de l'analyse Point Astral...")
-        html_content = analyse_point_astral_avec_sections(data, interroger_llm, infos_personnelles)
-        
-        # Vérification que l'analyse a été générée correctement
-        if not html_content or len(html_content) < 1000:
-            print("⚠️ Analyse trop courte ou vide détectée")
-            return "Erreur dans la génération de l'analyse. Veuillez réessayer.", 500
-
-        # Génération du nom de fichier
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
-        nom_fichier = f"Point_Astral_{nom.replace(' ', '_')}_{timestamp}"
-
-        # Sauvegarde en session pour téléchargement
-        session[f"html_point_astral_{nom_fichier}"] = html_content
-
-        print(f"✅ Point Astral généré avec succès pour {nom}")
-        print(f"📄 Taille du contenu HTML : {len(html_content)} caractères")
-
-        # Retourner la page de résultat
-        return render_template(
-            'point_astral_resultat.html',
-            nom=nom,
-            html_content=html_content,
-            nom_fichier=nom_fichier,
-            infos=infos_personnelles
-        )
+        # Redirection vers la version blocs
+        return redirect('/point_astral_blocs/complet')
 
     except Exception as e:
-        print(f"❌ Erreur dans analyse_point_astral_route : {e}")
+        print(f"❌ Main Erreur dans analyse_point_astral_route : {e}")
         import traceback
         traceback.print_exc()
-        
+
         return render_template(
             'erreur.html',
             titre="Erreur dans l'analyse Point Astral",
@@ -687,69 +728,17 @@ def apercu_point_astral(nom_fichier):
         return f"Erreur lors de l'aperçu : {str(e)}", 500
 
 
-# 🛡️ Fonction : valider_donnees_avant_analyse_complete(data)
-# ----------------------------------------------------------
-# Rôle :
-# - Vérifie que les données du thème (data) sont complètes et bien formatées avant
-#   de lancer une analyse astrologique approfondie.
-#
-# Étapes de validation :
-# 1. Vérifie que "data" est bien un dictionnaire.
-# 2. Vérifie la présence et le format des 3 planètes essentielles : Soleil, Lune, Ascendant.
-#    - Chaque planète doit être un dictionnaire avec les clés "signe" et "degre".
-# 3. Vérifie que "aspects" est bien une liste.
-# 4. Vérifie que "maisons" est bien un dictionnaire.
-#
-# Retour :
-# - True si toutes les vérifications passent.
-# - False si une vérification échoue (et affiche le message d’erreur correspondant).
-
-# def valider_donnees_avant_analyse_complete(data):
-#     """Validation approfondie des données avant analyse"""
-#     try:
-#         if not isinstance(data, dict):
-#             print("❌ Les données ne sont pas un dictionnaire")
-#             return False
-
-#         # Vérifier les planètes essentielles
-#         planetes = data.get("planetes", {})
-#         planetes_essentielles = ["Soleil", "Lune", "Ascendant"]
-        
-#         for planete in planetes_essentielles:
-#             if planete not in planetes:
-#                 print(f"❌ Planète manquante : {planete}")
-#                 return False
-            
-#             planete_data = planetes[planete]
-#             if not isinstance(planete_data, dict):
-#                 print(f"❌ Données invalides pour {planete}")
-#                 return False
-            
-#             if "signe" not in planete_data or "degre" not in planete_data:
-#                 print(f"❌ Signe ou degré manquant pour {planete}")
-#                 return False
-
-#         # Vérifier les aspects
-#         aspects = data.get("aspects", [])
-#         if not isinstance(aspects, list):
-#             print("❌ Les aspects ne sont pas une liste")
-#             return False
-
-#         # Vérifier les maisons
-#         maisons = data.get("maisons", {})
-#         if not isinstance(maisons, dict):
-#             print("❌ Les maisons ne sont pas un dictionnaire")
-#             return False
-
-#         print("✅ Validation des données réussie")
-#         return True
-
-#     except Exception as e:
-#         print(f"❌ Erreur lors de la validation : {e}")
-#         return False
-    
-
 atexit.register(cleanup_weaviate)
 
+if __name__ == "__main__":
+    # Ce bloc ne sera exécuté que quand tu lances localement avec "python main.py"
+    port = int(os.environ.get("PORT", 5050))
+
+    # ✅ N’afficher qu’une seule fois malgré le reloader Flask
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        print("\n📍 Liste des endpoints Flask enregistrés :")
+        for rule in app.url_map.iter_rules():
+            print(f"{rule.endpoint:35} ➝ {rule.methods} ➝ {rule.rule}")
+    app.run(debug=True, host="0.0.0.0", port=port)
 
 

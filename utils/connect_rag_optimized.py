@@ -57,17 +57,27 @@
 import weaviate
 import weaviate.classes as wvc
 import os
-from dotenv import load_dotenv
 import threading
 import time
 from contextlib import contextmanager
 from typing import Optional
+from weaviate.auth import AuthApiKey
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()
+
+load_dotenv(find_dotenv()) 
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY")
-WEAVIATE_URL = "https://bcuxgmrbqoqhd7nbsaizpa.c0.europe-west3.gcp.weaviate.cloud"
+WEAVIATE_URL = os.getenv("WEAVIATE_URL")
+WEAVIATE_COLLECTION = os.getenv("WEAVIATE_COLLECTION") or "Astro_BDD"
+WEAVIATE_TENANT = os.getenv("WEAVIATE_TENANT") or None
+
+if not WEAVIATE_URL:
+    raise RuntimeError("❌ WEAVIATE_URL manquant dans le fichier .env")
+
+print(f"🔗 Weaviate URL utilisé: {WEAVIATE_URL}")
+print(f"📚 Collection: {WEAVIATE_COLLECTION} | Tenant: {WEAVIATE_TENANT or '(none)'}")
 
 class WeaviateManager:
     """Gestionnaire singleton pour les connexions Weaviate avec pooling"""
@@ -115,28 +125,47 @@ class WeaviateManager:
                 try:
                     self._client = weaviate.connect_to_weaviate_cloud(
                         cluster_url=WEAVIATE_URL,
-                        auth_credentials=wvc.init.Auth.api_key(WEAVIATE_API_KEY),
+                        auth_credentials=AuthApiKey(WEAVIATE_API_KEY),
                         headers={"X-OpenAI-Api-Key": OPENAI_API_KEY},
+                        skip_init_checks=True,  # ← évite l'appel /v1/meta (source de ton 404)
                     )
-                    print("✅ Nouvelle connexion Weaviate établie")
+                    # petit "ping" sain via /v1/schema
+                    try:
+                        _ = self._client.collections.list_all()
+                        print("✅ Nouvelle connexion Weaviate établie (schema OK)")
+                    except Exception as e:
+                        raise RuntimeError(f"Weaviate not ready: {e}")
                 except Exception as e:
                     print(f"❌ Erreur connexion Weaviate: {e}")
                     raise
-            
-            self._last_used = current_time
-            return self._client
-    
+
+                self._last_used = current_time
+                return self._client
+                    
     @contextmanager
-    def get_collection(self, collection_name: str = "BddAstro"):
-        """Context manager pour utiliser une collection"""
+    
+    def get_collection(self, collection_name: str | None = None):
         client = self.get_client()
+        target = collection_name or WEAVIATE_COLLECTION
+
+        # list_all() retourne List[str] en v4
+        available = client.collections.list_all()  # <-- liste de noms (str)
+        if target not in available:
+            print("❌ Collection introuvable:", target)
+            print("📃 Collections disponibles:", available)
+            raise RuntimeError(f"Collection '{target}' absente du schema Weaviate.")
+
+
+        coll = client.collections.get(target)
+
+        # If multi-tenancy enabled, bind tenant
+        if WEAVIATE_TENANT:
+            coll = coll.with_tenant(WEAVIATE_TENANT)
+
         try:
-            collection = client.collections.get(collection_name)
-            yield collection
-        except Exception as e:
-            print(f"❌ Erreur collection {collection_name}: {e}")
-            raise
-        # Pas de fermeture ici - on garde la connexion ouverte
+            yield coll
+        finally:
+            pass  # keep pooled connection open
     
     def close(self):
         """Ferme proprement toutes les connexions"""
@@ -181,7 +210,7 @@ rag_cache = RAGCache(cache_dir="cache/rag", ttl_hours=72)
 
 def interroger_rag_original_weaviate_optimized(question: str) -> str:
     """Version optimisée qui réutilise les connexions"""
-    print(f"🔍 RAG Weaviate: {question[:50]}...")
+    print(f"🔍 Connect_Rag_Opt_RAG Weaviate: {question[:50]}...")
     
     try:
         with weaviate_manager.get_collection("BddAstro") as collection:
@@ -218,11 +247,11 @@ def interroger_rag_original_weaviate_optimized(question: str) -> str:
                 return ""
             
             reponse_finale = "\n\n".join(resultats)
-            print(f"✅ RAG Weaviate: {len(resultats)} résultats, {len(reponse_finale)} chars")
+            print(f"✅ Connect_Rag_Opt_RAG / RAG Weaviate: {len(resultats)} résultats, {len(reponse_finale)} chars")
             return reponse_finale
             
     except Exception as e:
-        print(f"❌ Erreur RAG Weaviate: {e}")
+        print(f"❌ Connect_Rag_Opt_RAG / Erreur RAG Weaviate: {e}")
         return ""
 
 def recherche_exacte_weaviate_optimized(astre: str, donnee: str, valeur: str) -> str:
@@ -240,12 +269,12 @@ def recherche_exacte_weaviate_optimized(astre: str, donnee: str, valeur: str) ->
             return ""
             
     except Exception as e:
-        print(f"❌ Erreur recherche: {e}")
+        print(f"❌ Connect_Rag_Opt_RAG / Erreur recherche: {e}")
         return ""
 
 def generer_corpus_rag_optimise_v2(data_theme) -> str:
     """Version ultra-optimisée qui minimise les connexions"""
-    print(f"\n🔍 === RAG WEAVIATE OPTIMISÉ ===")
+    print(f"\n Connect_Rag_Opt_RAG 🔍 === RAG WEAVIATE OPTIMISÉ ===")
     
     # 1. Préparer toutes les requêtes en une fois
     requetes_batch = []
@@ -271,14 +300,14 @@ def generer_corpus_rag_optimise_v2(data_theme) -> str:
         "psychologie astrologique profonde"
     ])
     
-    print(f"📋 {len(requetes_batch)} requêtes préparées")
+    print(f"📋 Connect_Rag_Opt_RAG {len(requetes_batch)} requêtes préparées")
     
     # 2. Traitement en batch avec UNE SEULE connexion
     resultats = []
     
     try:
         with weaviate_manager.get_collection("BddAstro") as collection:
-            print("🔥 Traitement batch avec connexion unique...")
+            print("🔥 Connect_Rag_Opt_RAG Traitement batch avec connexion unique...")
             
             for i, question in enumerate(requetes_batch[:10]):  # Limiter à 10
                 try:
@@ -316,12 +345,12 @@ def generer_corpus_rag_optimise_v2(data_theme) -> str:
                     continue
     
     except Exception as e:
-        print(f"❌ Erreur batch processing: {e}")
+        print(f"❌ Connect_Rag_Opt_RAG Erreur batch processing: {e}")
         return ""
     
     # 3. Assembler le corpus final
     corpus_final = "\n\n".join(resultats)
-    print(f"✅ Corpus optimisé: {len(corpus_final)} caractères")
+    print(f"✅ Connect_Rag_Opt_RAG Corpus optimisé: {len(corpus_final)} caractères")
     
     return corpus_final[:8000]
 
@@ -340,12 +369,12 @@ def optimiser_requetes_rag_par_batch_v2(questions: List[str]) -> Dict[str, str]:
         else:
             nouvelles_requetes.append(question)
     
-    print(f"📊 Cache: {len(resultats)} hits, {len(nouvelles_requetes)} nouvelles")
+    print(f"📊 Connect_Rag_Opt_RAG Cache: {len(resultats)} hits, {len(nouvelles_requetes)} nouvelles")
     
     # Traiter les nouvelles requêtes avec UNE connexion
     if nouvelles_requetes:
         try:
-            with weaviate_manager.get_collection("BddAstro") as collection:
+            with weaviate_manager.get_collection("Astro_BDD") as collection:
                 for question in nouvelles_requetes[:5]:  # Limiter à 5
                     try:
                         response = collection.query.hybrid(query=question, limit=1)
@@ -356,10 +385,10 @@ def optimiser_requetes_rag_par_batch_v2(questions: List[str]) -> Dict[str, str]:
                                 resultats[question] = interpretation
                                 rag_cache.set(question, interpretation)
                     except Exception as e:
-                        print(f"❌ Erreur pour {question[:30]}: {e}")
+                        print(f"❌ Connect_Rag_Opt_RAG Erreur pour {question[:30]}: {e}")
                         continue
         except Exception as e:
-            print(f"❌ Erreur batch: {e}")
+            print(f"❌ Connect_Rag_Opt_RAG Erreur batch: {e}")
     
     return resultats
 

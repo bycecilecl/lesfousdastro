@@ -40,8 +40,9 @@
 from utils.cache_rag import RAGCache
 from utils.connect_rag_optimized import weaviate_manager
 import weaviate.classes as wvc
-from typing import Dict, List
 import time
+from typing import List, Dict, Iterable
+from collections import defaultdict
 
 # Instance globale du cache
 rag_cache = RAGCache(cache_dir="cache/rag", ttl_hours=72)  # 3 jours
@@ -51,59 +52,62 @@ def interroger_rag_original_weaviate(question: str) -> str:
     Version Weaviate OPTIMISÉE qui réutilise les connexions
     """
     print(f"🔍 RAG Weaviate: {question[:50]}...")
-    
     try:
-        # CHANGEMENT : Utiliser le context manager au lieu de get_weaviate_client()
-        with weaviate_manager.get_collection("BddAstro") as collection:
-            # Recherche hybride (vectorielle + mot-clés)
+        # Utilise la collection par défaut du manager (issue du .env)
+        with weaviate_manager.get_collection() as collection:
             response = collection.query.hybrid(
                 query=question,
-                limit=3,  # Top 3 résultats
-                alpha=0.7,  # 70% vectoriel, 30% mot-clés
-                return_metadata=wvc.query.MetadataQuery(score=True)
+                limit=3,
+                alpha=0.7,
+                return_metadata=wvc.query.MetadataQuery(score=True),
             )
-            
             if not response.objects:
                 print(f"❌ Aucun résultat Weaviate pour: {question}")
                 return ""
-            
-            # Assembler les résultats
+
             resultats = []
             for obj in response.objects:
-                score = getattr(obj.metadata, 'score', 0)
-                
-                # Filtrer par score de confiance
-                if score > 0.6:
-                    # Adapter selon la structure de votre collection BddAstro
-                    interpretation = obj.properties.get('INTERPRETATION', '') or obj.properties.get('interpretation', '')
-                    texte = obj.properties.get('TEXTE', '') or obj.properties.get('texte', '')
-                    
-                    contenu = interpretation
-                    if texte and str(texte) != 'nan' and texte.strip():
-                        contenu += f"\n{texte}"
-                    
-                    if contenu.strip():
-                        resultats.append(contenu)
-                        print(f"  ✅ Score {score:.3f}: {len(contenu)} chars")
-                    else:
-                        print(f"  ❌ Score {score:.3f}: contenu vide")
-                else:
+                score = getattr(obj.metadata, "score", 0.0) or 0.0
+                if score <= 0.6:
                     print(f"  ❌ Score trop faible: {score:.3f}")
-            
+                    continue
+
+                props = obj.properties or {}
+                props_l = {str(k).lower(): v for k, v in props.items()}
+                interpretation = (
+                    props_l.get("interpretation")
+                    or props.get("INTERPRETATION")
+                    or props.get("iNTERPRETATION")
+                )
+                texte = (
+                    props_l.get("texte")
+                    or props.get("TEXTE")
+                )
+
+                contenu = ""
+                if interpretation and str(interpretation).strip():
+                    contenu = str(interpretation).strip()
+                if texte and str(texte).strip().lower() != "nan":
+                    contenu = (contenu + "\n" + str(texte).strip()).strip()
+
+                if contenu:
+                    resultats.append(contenu)
+                    print(f"  ✅ Score {score:.3f}: {len(contenu)} chars")
+                else:
+                    print(f"  ❌ Score {score:.3f}: contenu vide")
+
             if not resultats:
-                print(f"❌ Aucun résultat avec score > 0.6")
+                print("❌ Aucun résultat avec score > 0.6")
                 return ""
-            
+
             reponse_finale = "\n\n".join(resultats)
             print(f"✅ RAG Weaviate: {len(resultats)} résultats, {len(reponse_finale)} chars")
             return reponse_finale
-            
+
     except Exception as e:
         print(f"❌ Erreur RAG Weaviate: {e}")
-        import traceback
-        traceback.print_exc()
+        import traceback; traceback.print_exc()
         return ""
-    # CHANGEMENT : Plus de finally avec close_weaviate_client()
 
 def interroger_rag_avec_cache(question: str, force_refresh: bool = False) -> str:
     """Version optimisée avec cache et fallback LLM"""
@@ -152,25 +156,44 @@ def interroger_rag_avec_cache(question: str, force_refresh: bool = False) -> str
 def recherche_exacte_weaviate(astre: str, donnee: str, valeur: str) -> str:
     """Version optimisée de la recherche exacte"""
     print(f"🎯 Recherche exacte: {astre} {donnee} {valeur}")
-    
     try:
-        # CHANGEMENT : Utiliser le context manager
-        with weaviate_manager.get_collection("BddAstro") as collection:
-            # Utiliser recherche hybride au lieu de fetch_objects
+        with weaviate_manager.get_collection() as collection:
             query = f"{astre} {donnee} {valeur}"
-            response = collection.query.hybrid(query=query, limit=1)
-            
-            if response.objects:
-                obj = response.objects[0]
-                interpretation = obj.properties.get('interpretation', '')
-                return interpretation
-            
-            return ""
-            
+            response = collection.query.hybrid(query=query, limit=1,
+                                               return_metadata=wvc.query.MetadataQuery(score=True))
+            if not response.objects:
+                return ""
+
+            obj = response.objects[0]
+            score = getattr(obj.metadata, "score", 0.0) or 0.0
+            if score <= 0.6:
+                print(f"  ❌ Score trop faible: {score:.3f}")
+                return ""
+
+            props = obj.properties or {}
+            props_l = {str(k).lower(): v for k, v in props.items()}
+            interpretation = (
+                props_l.get("interpretation")
+                or props.get("INTERPRETATION")
+                or props.get("iNTERPRETATION")
+            )
+            texte = (
+                props_l.get("texte")
+                or props.get("TEXTE")
+            )
+
+            contenu = ""
+            if interpretation and str(interpretation).strip():
+                contenu = str(interpretation).strip()
+            if texte and str(texte).strip().lower() != "nan":
+                contenu = (contenu + "\n" + str(texte).strip()).strip()
+
+            print(f"  ✅ Résultat exact: score {score:.3f}, {len(contenu)} chars")
+            return contenu
+
     except Exception as e:
         print(f"❌ Erreur recherche: {e}")
         return ""
-    # CHANGEMENT : Plus de finally avec close_weaviate_client()
 
 def generer_corpus_rag_optimise(data_theme) -> str:
     """
@@ -194,8 +217,14 @@ def generer_corpus_rag_optimise(data_theme) -> str:
     
     # Aspects importants seulement (limité à 5)
     for aspect in data_theme.get('aspects', [])[:5]:
-        if aspect.get('orbe', 10) <= 6:  # Aspects serrés seulement
-            requetes_batch.append(f"{aspect['planete1']} {aspect['aspect']} {aspect['planete2']} aspect")
+        try:
+            orbe = float(str(aspect.get('orbe', 10)).replace(",", "."))
+        except Exception:
+            orbe = 10
+        if orbe <= 6:
+            requetes_batch.append(
+                f"{aspect.get('planete1')} {aspect.get('aspect')} {aspect.get('planete2')} aspect"
+            )
     
     # Questions contextuelles (réduites)
     requetes_batch.extend([
@@ -205,65 +234,166 @@ def generer_corpus_rag_optimise(data_theme) -> str:
     
     print(f"📋 {len(requetes_batch)} requêtes préparées")
     
-    # 2. CHANGEMENT MAJEUR : Traitement en batch avec UNE SEULE connexion
+    # 2) Traitement en batch avec UNE SEULE connexion
     resultats = []
-    
     try:
-        with weaviate_manager.get_collection("BddAstro") as collection:
+        with weaviate_manager.get_collection() as collection:
             print("🔥 Traitement batch avec connexion unique...")
-            
-            for i, question in enumerate(requetes_batch[:10]):  # Limiter à 10
+
+            for i, question in enumerate(requetes_batch[:10], start=1):  # Limiter à 10
+                # 1) Cache d'abord
+                cached = rag_cache.get(question)
+                if cached:
+                    resultats.append(cached[:500])  # limiter la taille
+                    print(f"  💾 Cache hit {i}/{min(10, len(requetes_batch))}")
+                    continue
+
+                # 2) Recherche hybride
                 try:
-                    # Vérifier cache d'abord
-                    cached = rag_cache.get(question)
-                    if cached:
-                        resultats.append(cached[:500])  # Limiter la taille
-                        print(f"  💾 Cache hit {i+1}/{len(requetes_batch[:10])}")
-                        continue
-                    
-                    # Recherche Weaviate
-                    response = collection.query.hybrid(
+                    resp = collection.query.hybrid(
                         query=question,
                         limit=1,
-                        alpha=0.7,
+                        alpha=0.5,
                         return_metadata=wvc.query.MetadataQuery(score=True)
                     )
-                    
-                    if response.objects:
-                        obj = response.objects[0]
-                        score = getattr(obj.metadata, 'score', 0)
-                        
-                        if score > 0.6:
-                            interpretation = obj.properties.get('INTERPRETATION', '') or obj.properties.get('interpretation', '')
-                            if interpretation and len(interpretation) > 50:
-                                contenu_limite = interpretation[:500]
-                                resultats.append(contenu_limite)
-                                rag_cache.set(question, interpretation)
-                                print(f"  ✅ {i+1}/{len(requetes_batch[:10])}: score {score:.3f}, {len(interpretation)} chars")
-                        else:
-                            print(f"  ❌ {i+1}/{len(requetes_batch[:10])}: score trop faible {score:.3f}")
-                    else:
-                        print(f"  ❌ {i+1}/{len(requetes_batch[:10])}: aucun résultat")
-                    
-                    # Petite pause pour éviter la surcharge
-                    if i % 3 == 0 and i > 0:
-                        time.sleep(0.1)
-                        
                 except Exception as e:
-                    print(f"  ❌ Erreur requête {i+1}: {e}")
+                    print(f"  ❌ Erreur requête {i}: {e}")
                     continue
-    
+
+                if not resp.objects:
+                    print(f"  ❌ {i}: aucun résultat")
+                    continue
+
+                obj = resp.objects[0]
+                score = (getattr(obj.metadata, "score", 0.0) or 0.0)
+                if score <= 0.6:
+                    print(f"  ❌ {i}: score trop faible {score:.3f}")
+                    continue
+
+                # 3) Lecture des propriétés avec tolérance de casse
+                props = obj.properties or {}
+                props_l = {str(k).lower(): v for k, v in props.items()}
+
+                interpretation = (
+                    props_l.get("interpretation")
+                    or props.get("INTERPRETATION")
+                    or props.get("iNTERPRETATION")
+                )
+                texte = (
+                    props_l.get("texte")
+                    or props.get("TEXTE")
+                )
+
+                if interpretation and len(str(interpretation).strip()) > 50:
+                    snippet = str(interpretation).strip()[:500]
+                    if texte and str(texte).strip().lower() != "nan":
+                        snippet = (snippet + "\n" + str(texte).strip()[:500]).strip()
+
+                    resultats.append(snippet)
+                    rag_cache.set(question, str(interpretation).strip())
+                    print(f"  ✅ {i}: score {score:.3f}, kept {len(snippet)} chars")
+                else:
+                    print(f"  ❌ {i}: interprétation vide/courte")
+
+                # 4) Micro pause pour éviter surcharge
+                if i % 3 == 0:
+                    time.sleep(0.1)
+
     except Exception as e:
         print(f"❌ Erreur batch processing: {e}")
-        import traceback
-        traceback.print_exc()
+        import traceback; traceback.print_exc()
         return ""
-    
+
     # 3. Assembler le corpus final
     corpus_final = "\n\n".join(resultats)
     print(f"✅ Corpus optimisé: {len(corpus_final)} caractères (de {len(resultats)} résultats)")
     
     return corpus_final[:8000]  # Limiter à 8k
+
+
+def _cap_snippet(txt: str, max_chars: int = 350) -> str:
+    return (txt or "")[:max_chars].rsplit("\n", 1)[0]
+
+def _dedup(snips: Iterable[Dict]) -> List[Dict]:
+    seen = set(); out = []
+    for s in snips:
+        key = (s.get("texte","").strip().lower(), s.get("source","").lower())
+        if key in seen: 
+            continue
+        seen.add(key); out.append(s)
+    return out
+
+def _mmr_diversify(snips: List[Dict], k: int = 8) -> List[Dict]:
+    """Heuristique simple pour éviter les doublons très proches (placeholder)."""
+    # on triche : on prend un sur deux après tri score, ça suffit souvent
+    snips_sorted = sorted(snips, key=lambda x: x.get("score", 0), reverse=True)
+    return snips_sorted[:k] if k <= 2 else snips_sorted[0:1] + snips_sorted[2:k+1:2]
+
+def selectionner_snippets_par_topic(
+    snippets: List[Dict],
+    top_k_par_topic: int = 6,
+    min_score: float = 0.35,
+    max_chars_par_snippet: int = 350
+) -> Dict[str, List[Dict]]:
+    """
+    Regroupe par 'topic' (ex: 'Ascendant','Soleil','Lune','MaîtreAsc', etc.)
+    Garde top‑k par topic, score >= min_score, dédupliqués et raccourcis.
+    Attendu par snippet: {'texte': str, 'source': str, 'score': float, 'topic': str}
+    """
+    buckets = defaultdict(list)
+    for s in snippets:
+        if s.get("score", 0) < min_score:
+            continue
+        topic = s.get("topic") or "general"
+        buckets[topic].append(s)
+
+    out = {}
+    for topic, lst in buckets.items():
+        lst = _dedup(lst)
+        lst = sorted(lst, key=lambda x: x.get("score", 0), reverse=True)
+        lst = _mmr_diversify(lst, k=top_k_par_topic)
+        for s in lst:
+            s["texte"] = _cap_snippet(s.get("texte",""), max_chars_par_snippet)
+        out[topic] = lst
+    return out
+
+def construire_rag_digest(par_topic: Dict[str, List[Dict]], max_chars_total: int = 1600) -> str:
+    """
+    Concatène les snippets par topic en un texte court.
+    - Garde les en-têtes [Topic]
+    - Une ligne par snippet: "- texte (src:..., score:..)"
+    - Tronque proprement à max_chars_total
+    """
+    blocs = []
+    for topic, lst in par_topic.items():
+        if not lst:
+            continue
+        blocs.append(f"[{topic}]")
+        for s in lst:
+            src = s.get("source", "")
+            score = round(s.get("score", 0), 2)
+            t = s.get("texte", "").replace("\n", " ").strip()
+            if not t:
+                continue
+            blocs.append(f"- {t} (src:{src}, score:{score})")
+
+    if not blocs:
+        return ""
+
+    joined = "\n".join(blocs)
+    # coupe proprement
+    return joined[:max_chars_total].rsplit("\n", 1)[0]
+
+
+def digest_pour_bloc(par_topic: Dict[str, List[Dict]], topics: List[str], max_chars: int = 1200) -> str:
+    """
+    Construit un digest restreint à une liste de topics pour un bloc donné.
+    Exemple 
+    Bloc 1: topics = ["Ascendant", "Maison I", "MaîtreAsc"]
+    Bloc 2 : ["Ascendant", "Soleil", "Lune"]
+    """
+    subset = {k: par_topic.get(k, []) for k in topics}
+    return construire_rag_digest(subset, max_chars_total=max_chars)
 
 def convertir_maison(maison_num):
     """Convertit numéro de maison en chiffres romains"""
@@ -283,7 +413,7 @@ def optimiser_requetes_rag_par_batch(questions: List[str]) -> Dict[str, str]:
     # Identifier les requêtes déjà en cache
     nouvelles_requetes = []
     for question in questions:
-        if len(question) < 50:  # Skip les questions trop courtes
+        if len(question) < 30:  # Skip les questions trop courtes
             continue
         cached = rag_cache.get(question)
         if cached:
@@ -296,24 +426,49 @@ def optimiser_requetes_rag_par_batch(questions: List[str]) -> Dict[str, str]:
     # CHANGEMENT : Traiter les nouvelles requêtes avec UNE connexion au lieu de ThreadPoolExecutor
     if nouvelles_requetes:
         try:
-            with weaviate_manager.get_collection("BddAstro") as collection:
+            # ⚠️ Sans argument → utilise la collection par défaut (WEAVIATE_COLLECTION du .env)
+            with weaviate_manager.get_collection() as collection:
                 for question in nouvelles_requetes[:5]:  # Limiter à 5 pour éviter timeout
                     try:
-                        response = collection.query.hybrid(query=question, limit=1)
-                        if response.objects:
-                            obj = response.objects[0]
-                            interpretation = obj.properties.get('interpretation', '')
-                            if interpretation:
-                                resultats[question] = interpretation
-                                rag_cache.set(question, interpretation)
-                                print(f"  ✅ Nouvelle requête traitée: {question[:30]}")
+                        resp = collection.query.hybrid(
+                            query=question,
+                            limit=1,
+                            alpha=0.7,
+                            return_metadata=wvc.query.MetadataQuery(score=True),
+                        )
+
+                        if not resp.objects:
+                            print(f"❌ Aucun résultat pour: {question[:40]}…")
+                            continue
+
+                        obj = resp.objects[0]
+                        score = getattr(obj.metadata, "score", 0.0) or 0.0
+                        if score <= 0.6:
+                            print(f"❌ Score trop faible ({score:.3f}) pour: {question[:40]}…")
+                            continue
+
+                        props = obj.properties or {}
+                        props_l = {str(k).lower(): v for k, v in props.items()}
+                        interpretation = (
+                            props_l.get("interpretation")
+                            or props.get("INTERPRETATION")
+                            or props.get("iNTERPRETATION")
+                        )
+
+                        if interpretation and len(str(interpretation).strip()) > 0:
+                            resultats[question] = str(interpretation).strip()
+                            rag_cache.set(question, resultats[question])
+                            print(f"  ✅ Nouvelle requête traitée: {question[:30]}…")
+                        else:
+                            print(f"❌ Interprétation vide pour: {question[:40]}…")
+
                     except Exception as e:
-                        print(f"❌ Erreur pour {question[:30]}: {e}")
+                        print(f"❌ Erreur pour {question[:30]}…: {e}")
                         resultats[question] = f"❌ Erreur: {e}"
                         continue
         except Exception as e:
             print(f"❌ Erreur batch processing: {e}")
-    
+
     return resultats
 
 # Fonction de test optimisée

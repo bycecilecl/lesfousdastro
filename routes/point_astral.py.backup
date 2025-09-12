@@ -77,8 +77,8 @@ def afficher_point_astral():
             date_naissance=infos["date_naissance"],
             heure_naissance=infos["heure_naissance"],
             lieu_naissance=infos["lieu_naissance"],
-            lat=float(lat_precise),
-            lon=float(lon_precise),
+            lat=lat_precise,   # laisser brut : calcul_theme normalise
+            lon=lon_precise,
             tzid=tzid_precise
         )
     else:
@@ -90,14 +90,14 @@ def afficher_point_astral():
             lieu_naissance=infos["lieu_naissance"]
         )
 
-    # 🔹 TEST IMPORT
-    print("🔥 TENTATIVE IMPORT analyse_point_astral_avec_sections")
-    try:
-        from analyse_point_astral_avec_sections import analyse_point_astral_avec_sections
-        print("🔥 ✅ IMPORT REUSSI")
-    except Exception as e:
-        print(f"🔥 ❌ ERREUR IMPORT: {e}")
-        return f"Erreur d'import: {e}"
+    # # 🔹 TEST IMPORT
+    # print("🔥 TENTATIVE IMPORT analyse_point_astral_avec_sections")
+    # try:
+    #     from analyse_point_astral_avec_sections import analyse_point_astral_avec_sections
+    #     print("🔥 ✅ IMPORT REUSSI")
+    # except Exception as e:
+    #     print(f"🔥 ❌ ERREUR IMPORT: {e}")
+    #     return f"Erreur d'import: {e}"
     
     # === Fallback : fabriquer axes_majeurs_str si absent ===
     if not data.get("axes_majeurs_str"):
@@ -123,7 +123,7 @@ def afficher_point_astral():
                 print("⚠️ extraire_points_forts a échoué:", e)
                 points_forts_list = []
 
-    # 3) organiser → Axes Majeurs + formatage
+        # 3) organiser → Axes Majeurs + formatage
         try:
             axes = organiser_points_forts(points_forts_list)
             axes_str = formater_axes_majeurs(axes)
@@ -143,22 +143,18 @@ def afficher_point_astral():
     html_analyse = analyse_point_astral_avec_sections(data, interroger_llm, infos)
 
     # 🔹 Génération de l'analyse
-    print(f"🔥 APPEL DE analyse_point_astral_avec_sections...")
+    print("🔥 APPEL DE analyse_point_astral_avec_sections...")
     try:
         html_analyse = analyse_point_astral_avec_sections(data, interroger_llm, infos)
         print(f"🔥 ✅ HTML généré: {len(html_analyse)} caractères")
-        
-        # VERIFIER LE CONTENU
         if "section" in html_analyse:
             print("🔥 ✅ SECTIONS DETECTEES dans le HTML")
         else:
             print("🔥 ❌ AUCUNE SECTION DETECTEE dans le HTML")
             print(f"🔥 Début HTML: {html_analyse[:200]}")
-            
     except Exception as e:
         print(f"🔥 ❌ ERREUR lors de la génération: {e}")
-        import traceback
-        traceback.print_exc()
+        import traceback; traceback.print_exc()
         return f"Erreur: {e}"
 
     # 🔹 Génération du PDF

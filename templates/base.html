@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Les Fous d'Astro{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; }
+    nav {
+      background: #1f628e;
+      padding: 10px 20px;
+    }
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    nav ul li {
+      margin: 0 15px;
+    }
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav ul li a:hover {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 1200px;   /* élargi */
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    footer {
+      width: 100%;
+      background: #f6f7fb;
+      border-top: 1px solid #e5e7eb;
+      padding: 20px 0;
+      margin-top: 40px;
+      text-align: center;
+      color: #555;
+      font-size: 14px;
+    }
+    footer .inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a href="{{ url_for('main.index') }}">Analyses cosmiques</a></li>
+      <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank">Consultations</a></li>
+      <li><a href="#">Formations</a></li>
+      <li><a href="#">Ateliers</a></li>
+      <li><a href="https://bycecilecl.com/category/les-fous-dastro/" target="_blank">Articles</a></li>
+      <li><a href="https://bycecilecl.com/" target="_blank">ByCecileCL</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    {% block scripts %}{% endblock %}
+  </main>
+
+  <footer>
+    <div class="inner">
+      © Les Fous d’Astro — Tous droits réservés
+    </div>
+  </footer>
+</body>
+</html>

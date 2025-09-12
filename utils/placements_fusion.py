@@ -37,8 +37,8 @@ def build_resume_fusion(data: Dict[str, Any], orbe_max: float = 6.0) -> str:
     # Occidental — on passe uniquement les kwargs supportés par ta fonction
     bloc_occ = build_resume_occidental(
         data,
-        orbe_max=4.0,
-        max_aspects=10
+        orbe_max=orbe_max,
+        max_aspects=999
     )
 
     # Védique — signature simple

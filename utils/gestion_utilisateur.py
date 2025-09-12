@@ -3,7 +3,6 @@ import csv
 import uuid
 from datetime import datetime
 from flask import request
-from utils.envoi_a_zapier import envoyer_a_zapier
 
 def enregistrer_utilisateur_et_envoyer(form_data):
     # Chemin du CSV (à la racine du projet)
@@ -59,9 +58,3 @@ def enregistrer_utilisateur_et_envoyer(form_data):
         print("✅ Données utilisateur enregistrées.")
     except Exception as e:
         print("❌ Erreur CSV :", e)
-
-    # Envoi à Zapier
-    try:
-        envoyer_a_zapier(form_data)
-    except Exception as e:
-        print("❌ Erreur Zapier :", e)
