@@ -6,6 +6,16 @@ from dotenv import load_dotenv
 # Charge les variables d’environnement (.env)
 load_dotenv()
 
+
+try:
+    import gspread
+except ModuleNotFoundError:
+    gspread = None
+
+def ajouter_email_au_sheet(*args, **kwargs):
+    if gspread is None:
+        raise ImportError("gspread non installé en environnement courant")
+
 # ✅ Détermine dynamiquement le bon chemin vers credentials.json
 credentials_path = (
     "/app/utils/google/credentials.json"
