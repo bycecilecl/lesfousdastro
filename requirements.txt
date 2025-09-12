@@ -52,9 +52,6 @@ zopfli==0.2.3.post1
 yagmail
 requests>=2.31
 timezonefinder>=6.5
-pytz>=2024.1
-geopy
-timezonefinder
 matplotlib>=3.5.0
 numpy>=1.21.0
 paypal-checkout-serversdk==1.0.3
