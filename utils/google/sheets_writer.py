@@ -1,22 +1,14 @@
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+# utils/google/sheets_writer.py
 import os
 from dotenv import load_dotenv
-
-# Charge les variables d’environnement (.env)
 load_dotenv()
-
 
 try:
     import gspread
-except ModuleNotFoundError:
+except Exception as e:
     gspread = None
+    _IMPORT_ERR = e
 
-def ajouter_email_au_sheet(*args, **kwargs):
-    if gspread is None:
-        raise ImportError("gspread non installé en environnement courant")
-
-# ✅ Détermine dynamiquement le bon chemin vers credentials.json
 credentials_path = (
     "/app/utils/google/credentials.json"
     if os.getenv("RAILWAY_ENVIRONMENT")
@@ -24,17 +16,9 @@ credentials_path = (
 )
 
 def ajouter_email_au_sheet(email, nom="Inconnu"):
-    # Scopes d’accès aux Google Sheets et Drive
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    if gspread is None:
+        raise ImportError(f"Google Sheets indisponible: {_IMPORT_ERR}")
 
-    # Crée l’objet d’identification
-    creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
-    client = gspread.authorize(creds)
-
-    # Ouvre ton Google Sheet
-    sheet = client.open("mailing_list_astro").sheet1  # Change le nom si besoin
-
-    # Ajoute une ligne
+    client = gspread.service_account(filename=credentials_path)  # utilise google-auth
+    sheet = client.open("mailing_list_astro").sheet1
     sheet.append_row([email, nom])
-
-    print(f"✅ Ajouté dans Google Sheet : {nom} - {email}", flush=True)

@@ -58,4 +58,5 @@ paypal-checkout-serversdk==1.0.3
 boto3
 stripe==12.5.1
 gspread==6.1.4
-google-auth>=2.30.0
+python-dotenv>=1.0.1
+google-auth>=2.0.0
