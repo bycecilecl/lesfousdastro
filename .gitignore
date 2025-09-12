@@ -1,3 +1,10 @@
-.env
-utils/google/credentials.json
-credentials.json
+# virtualenvs locaux
+env/
+.env/
+.venv/
+venv/
+
+# python artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
