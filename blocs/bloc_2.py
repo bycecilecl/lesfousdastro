@@ -216,45 +216,48 @@ def build_resume_bloc2(theme: Dict, contexte: Dict) -> Dict[str, str]:
     m4_str            = ", ".join(M4_planetes) if M4_planetes else "Aucune"
     lun_special_str   = "\n".join(_fmt_aspect(a) for a in lune_special) or "—"
 
+    # ⚠️ Pré-calculer ces 3 chaînes pour ne pas mettre de .join() dans l'f-string
+    soleil_aspects_str  = "\n".join(_fmt_aspect(a) for a in exclure_aspects_aux_noeuds(soleil_aspects)) or "—"
+    saturne_aspects_str = "\n".join(_fmt_aspect(a) for a in exclure_aspects_aux_noeuds(saturne_aspects)) or "—"
+    mc_aspects_str      = "\n".join(_fmt_aspect(a) for a in mc_aspects) or "—"
 
-    resume = f"""\
-Lune : {lune_sign} — Maison {lune_house}
-Aspects forts à la Lune (≤{ORBE_MAX_LUNE}°) :
-{lune_aspects_str}
+    resume = dedent(f"""
+    Lune : {lune_sign} — Maison {lune_house}
+    Aspects forts à la Lune (≤{ORBE_MAX_LUNE}°) :
+    {lune_aspects_str}
 
-Maître de la Lune : {lune_ruler or 'N/A'} en {ruler_sign} — Maison {ruler_house}
-Aspects forts du Maître de la Lune :
-{ruler_aspects_str}
+    Maître de la Lune : {lune_ruler or 'N/A'} en {ruler_sign} — Maison {ruler_house}
+    Aspects forts du Maître de la Lune :
+    {ruler_aspects_str}
 
-Maison IV : planètes en IV → {m4_str}
-Aspects forts à l’IC (si présent) :
-{ic_aspects_str}
+    Maison IV : planètes en IV → {m4_str}
+    Aspects forts à l’IC (si présent) :
+    {ic_aspects_str}
 
-Conjonctions exactes IC :
-{(contexte.get("conjonctions_ic") or "—")}
+    Conjonctions exactes IC :
+    {(contexte.get("conjonctions_ic") or "—")}
 
-Conjonctions exactes MC :
-{(contexte.get("conjonctions_mc") or "—")}
+    Conjonctions exactes MC :
+    {(contexte.get("conjonctions_mc") or "—")}
 
-Aspects Lune ↔︎ Nœuds/Lilith/Chiron :
-{lun_special_str}
+    Aspects Lune ↔︎ Nœuds/Lilith/Chiron :
+    {lun_special_str}
 
-Soleil (père/autorité) : {soleil_sign} — Maison {soleil_house}
-Aspects forts au Soleil :
-{ "\n".join(_fmt_aspect(a) for a in exclure_aspects_aux_noeuds(soleil_aspects)) or "—" }
+    Soleil (père/autorité) : {soleil_sign} — Maison {soleil_house}
+    Aspects forts au Soleil :
+    {soleil_aspects_str}
 
-Saturne (structure/autorité intériorisée) : {saturne_sign} — Maison {saturne_house}
-Aspects forts à Saturne :
-{ "\n".join(_fmt_aspect(a) for a in exclure_aspects_aux_noeuds(saturne_aspects)) or "—" }
+    Saturne (structure/autorité intériorisée) : {saturne_sign} — Maison {saturne_house}
+    Aspects forts à Saturne :
+    {saturne_aspects_str}
 
-Maison X : planètes en X → {", ".join(M10_planetes) if M10_planetes else "Aucune"}
-Aspects forts au MC (si présent) :
-{ "\n".join(_fmt_aspect(a) for a in mc_aspects) or "—" }
+    Maison X : planètes en X → {", ".join(M10_planetes) if M10_planetes else "Aucune"}
+    Aspects forts au MC (si présent) :
+    {mc_aspects_str}
 
-Points sur la cuspide du MC (≤1.5°) :
-{points_mc_str}
-
-""".strip()
+    Points sur la cuspide du MC (≤1.5°) :
+    {points_mc_str}
+    """).strip()
 
     # Points prioritaires pour guider le texte (top 4)
     def weight(a):

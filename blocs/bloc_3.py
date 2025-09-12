@@ -99,7 +99,7 @@ def generer_bloc_3(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
     # ✅ Conjonctions au MC (optionnel mais recommandé)
     conj_mc = (ctx.get("conjonctions_mc") or "").strip()
 
-        # ➕ Axes interceptés (et planètes contenues dans ces signes)
+    # ➕ Axes interceptés (et planètes contenues dans ces signes)
     axes_int = _extraire_axes_interceptes(contexte)  # {'signes': [...], 'maisons_par_signe': {...}}
     signes_int = axes_int.get("signes") or []
     maisons_int = axes_int.get("maisons_par_signe") or {}
@@ -202,7 +202,7 @@ def generer_bloc_3(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
     - ⚠️ N'INVENTE AUCUN PLACEMENT. Tout ce que tu cites doit se trouver dans la liste des placements.
 
     Format : 4–5 paragraphes en français, texte continu, tutoiement.
-    """)
+    """).strip()
 
     print(prompt)
 
