@@ -8,3 +8,5 @@ venv/
 __pycache__/
 *.py[cod]
 *.egg-info/
+# secrets
+utils/google/credentials.json
