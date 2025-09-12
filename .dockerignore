@@ -1,12 +1,44 @@
+# Venv & caches
 env/
+.venv/
+venv/
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.DS_Store
-*.pdf
+*.py[cod]
+*.egg-info/
+*.pytest_cache/
+.mypy_cache/
+
+# VCS & IDE
+.git/
+.gitignore
+.gitattributes
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+
+# Logs & artefacts
+*.log
 *.sqlite3
-#ephe
-*.csv
-static/pdfs/
-test_*
+*.db
+*.pid
+
+# Build / front (si jamais)
+node_modules/
+dist/
+build/
+
+# Secrets (ne JAMAIS dans l'image)
+.env
+.env.*         # .env.development, etc.
+*.pem
+*.key
+*.crt
+*.p12
+*.json         # ex: clés GCP (si tu dois les garder en repo, mieux vaut non)
+
+# Fichiers générés runtime
+generated_pdfs/
+uploads/
+tmp/
