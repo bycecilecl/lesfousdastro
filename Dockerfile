@@ -46,6 +46,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
+ARG REQS_REFRESH=2025-09-12_10h05
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Code de l'app
 COPY . .
 
