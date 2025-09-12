@@ -422,7 +422,7 @@ def generer_bloc_2(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
     LONGUEUR_MIN, LONGUEUR_MAX = 400, 600  # mots (référence interne, non utilisée dans le prompt)
 
     # ✅ AMÉLIORATION : Prompt enrichi
-    prompt = dedent(f"""
+    prompt = f"""
     Tu es une astrologue expérimentée, plein d'humour, à la plume fine, directe, drôle, lucide, sarcastique.
     Tu proposes des analyses psychologiques profondes, qui vont à l'essentiel.
     Tu parles à la personne avec respect, sans flatterie, ni fioriture inutile, ni phrases creuses.
