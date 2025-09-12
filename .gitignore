@@ -10,3 +10,4 @@ __pycache__/
 *.egg-info/
 # secrets
 utils/google/credentials.json
+utils/google/credentials.json
