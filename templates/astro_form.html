@@ -1922,7 +1922,12 @@
                     <!-- <button class="payment-btn paypal-btn" onclick="redirectToPayPal(window.pendingOrder)">
                         Payer avec PayPal
                     </button> -->
-                    <div id="paypal-button-container" style="width:100%;"></div>
+                    <!-- en com 17.09  <div id="paypal-button-container" style="width:100%;"></div> -->
+                     <!-- Ajouté le 17.09 -->
+                     <button class="payment-btn paypal-btn" onclick="selectPayPal()">
+                        Payer avec PayPal
+                        </button>
+                        <div id="paypal-button-container" style="width:100%; display:none;"></div>
                     <button class="payment-btn cancel-btn" onclick="closePaymentConfirmationModal()">
                         Annuler
                     </button>
@@ -2051,14 +2056,22 @@
             </div>
         </div>
     </footer>
-    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&components=buttons"></script>
+    <!-- com le 17.09 <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&components=buttons"></script> -->
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&components=buttons"
+        onload="onPayPalSDKLoaded()"></script>
     <script>
         let paypalRendered = false; // évite de rendre 2x si la modale s’ouvre/ferme
+        let paypalSDKReady = false;   // NOUVEAU 17.09
         // Variables globales
         let cart = [];
         let selectedPack = null;
         let psychologyTimer = null;
         let psychologyTimeLeft = 600; // 10 minutes en secondes
+
+        function onPayPalSDKLoaded() {
+        console.log('PayPal SDK chargé');
+        paypalSDKReady = true;
+    }
 
         // Générer des étoiles animées
         function createStars() {
@@ -2579,7 +2592,7 @@
             // Stocker les données pour le paiement
             window.pendingOrder = orderData;
             modal.style.display = 'flex';
-            setTimeout(() => renderPayPalButtons(orderData), 0);
+            //setTimeout(() => renderPayPalButtons(orderData), 0);
         }
 
         function formatDate(dateString) {
@@ -2680,22 +2693,29 @@
         }
 
 
-        function renderPayPalButtons(orderData) {
-        if (paypalRendered) return;
-        const container = document.getElementById('paypal-button-container');
-        
-        // Vérifier que PayPal SDK est chargé ET que le container existe
-        if (!container || !window.paypal) {
-            console.warn('PayPal SDK non prêt ou container manquant');
-            return;
+        function selectPayPal() {
+            const container = document.getElementById('paypal-button-container');
+            container.style.display = 'block';        // on montre le conteneur
+            renderPayPalButtons(window.pendingOrder); // on rend les boutons PayPal
         }
-        
-        // Vider le container avant de rendre
-        container.innerHTML = '';
-        paypalRendered = true;
 
+        function renderPayPalButtons(orderData) {
+    if (paypalRendered) return;
+
+    const container = document.getElementById('paypal-button-container');
+    if (!container || !window.paypal) {
+        console.warn('PayPal SDK non prêt ou container manquant');
+        return;
+    }
+
+    // Nettoyage + flag anti double rendu
+    container.innerHTML = '';
+    container.style.display = 'block';
+    paypalRendered = true;
+
+    try {
         paypal.Buttons({
-            style: { 
+            style: {
                 layout: 'vertical',
                 color: 'blue',
                 shape: 'rect',
@@ -2713,22 +2733,14 @@
                             amount: orderData?.total || 29
                         })
                     });
-                    
-                    if (!res.ok) {
-                        throw new Error(`HTTP ${res.status}`);
-                    }
-                    
+
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const data = await res.json();
-                    console.log('PayPal order created:', data);
-                    
-                    if (!data.id) {
-                        throw new Error('Pas d\'ID de commande retourné');
-                    }
-                    
+                    if (!data.id) throw new Error("Pas d'ID de commande retourné par PayPal");
                     return data.id;
                 } catch (err) {
                     console.error('CreateOrder error:', err);
-                    showNotification('❌ Impossible de créer la commande PayPal: ' + err.message, 'warning');
+                    showNotification('⚠️ Impossible de créer la commande PayPal : ' + err.message, 'warning');
                     throw err;
                 }
             },
@@ -2736,28 +2748,26 @@
             onApprove: async (data) => {
                 try {
                     const res = await fetch('/payments/capture-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        orderID: data.orderID,
-                        userInfo: window?.pendingOrder?.userInfo || {},
-                        items: window?.pendingOrder?.items || []
-                    })
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            orderID: data.orderID,
+                            userInfo: window?.pendingOrder?.userInfo || {},
+                            items: window?.pendingOrder?.items || []
+                        })
                     });
 
                     const result = await res.json();
-
-                    if (res.ok && (result.status === 'COMPLETED')) {
-                    // ✅ Succès PayPal → on envoie l’utilisateur sur la page spinner
-                    window.location.href = '/paiement/effectue';
+                    if (res.ok && result.status === 'COMPLETED') {
+                        window.location.href = '/paiement/effectue';
                     } else {
-                    showNotification('⚠️ Paiement non confirmé. Status: ' + (result.status || res.status), 'warning');
+                        showNotification('⚠️ Paiement non confirmé. Status: ' + (result.status || res.status), 'warning');
                     }
                 } catch (err) {
                     console.error('Capture error:', err);
                     showNotification('❌ Erreur lors de la confirmation: ' + err.message, 'warning');
                 }
-                },
+            },
 
             onError: (err) => {
                 console.error('PayPal onError:', err);
@@ -2768,23 +2778,27 @@
                 console.log('PayPal payment cancelled:', data);
                 showNotification('💳 Paiement annulé', 'info');
             }
-        }).render('#paypal-button-container').catch(err => {
-            console.error('Erreur render PayPal:', err);
-            showNotification('❌ Impossible d\'afficher le bouton PayPal', 'warning');
-        });
+        })
+        .render('#paypal-button-container');
+    } catch (err) {
+        console.error('Erreur render PayPal:', err);
+        container.style.display = 'none';
+        paypalRendered = false;
+        showNotification('❌ Impossible d\'afficher le bouton PayPal', 'warning');
     }
+}
 
         function closePaymentConfirmationModal() {
-        document.getElementById('paymentConfirmationModal').style.display = 'none';
-        window.pendingOrder = null;
+            document.getElementById('paymentConfirmationModal').style.display = 'none';
+            window.pendingOrder = null;
 
-        // Nettoyer PayPal
-        const container = document.getElementById('paypal-button-container');
-        if (container) {
-            container.innerHTML = '';
+            const container = document.getElementById('paypal-button-container');
+            if (container) {
+                container.innerHTML = '';
+                container.style.display = 'none'; // IMPORTANT
+            }
+            paypalRendered = false;
         }
-        paypalRendered = false;
-    }
 
         // Cellule Psychologique
         function openPsychologyChat() {

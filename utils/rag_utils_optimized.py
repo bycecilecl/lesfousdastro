@@ -43,6 +43,8 @@ import weaviate.classes as wvc
 import time
 from typing import List, Dict, Iterable
 from collections import defaultdict
+from utils.feature_flags import rag_enabled
+import logging
 
 # Instance globale du cache
 rag_cache = RAGCache(cache_dir="cache/rag", ttl_hours=72)  # 3 jours
@@ -195,120 +197,87 @@ def recherche_exacte_weaviate(astre: str, donnee: str, valeur: str) -> str:
         print(f"❌ Erreur recherche: {e}")
         return ""
 
+logger = logging.getLogger(__name__)
+
 def generer_corpus_rag_optimise(data_theme) -> str:
     """
-    Version ULTRA-OPTIMISÉE qui utilise une seule connexion pour tout
+    Génère un corpus RAG (Weaviate) si activé.
+    - Si ENABLE_RAG=false -> retourne "" immédiatement (pas de connexion).
+    - Si ENABLE_RAG=true -> essaye, et en cas d'erreur retourne "" (graceful fallback).
     """
-    print(f"\n🔍 === RAG WEAVIATE OPTIMISÉ ===")
-    
-    # 1. Préparer toutes les requêtes en une fois
-    requetes_batch = []
-    
-    # Questions par planète/signe/maison
-    for planete, placement in data_theme.get('planetes', {}).items():
-        signe = placement.get('signe')
-        maison = placement.get('maison')
-        
-        if signe:
-            requetes_batch.append(f"{planete} en {signe} signification")
-        if maison:
-            maison_rom = convertir_maison(maison)
-            requetes_batch.append(f"{planete} en maison {maison} interprétation")
-    
-    # Aspects importants seulement (limité à 5)
-    for aspect in data_theme.get('aspects', [])[:5]:
-        try:
-            orbe = float(str(aspect.get('orbe', 10)).replace(",", "."))
-        except Exception:
-            orbe = 10
-        if orbe <= 6:
-            requetes_batch.append(
-                f"{aspect.get('planete1')} {aspect.get('aspect')} {aspect.get('planete2')} aspect"
-            )
-    
-    # Questions contextuelles (réduites)
-    requetes_batch.extend([
-        "développement personnel astrologie",
-        "psychologie astrologique profonde"
-    ])
-    
-    print(f"📋 {len(requetes_batch)} requêtes préparées")
-    
-    # 2) Traitement en batch avec UNE SEULE connexion
-    resultats = []
+    # 0) Feature flag
+    if not rag_enabled():
+        logger.info("RAG désactivé par configuration (ENABLE_RAG=false).")
+        return ""
+
+    # Le reste du code RAG est protégé
     try:
+        # import à l’intérieur pour éviter tout import si désactivé
+        from utils.connect_rag_optimized import weaviate_manager
+        import time
+
+        requetes_batch = []
+
+        # (extrait minimal : garde ta logique si tu veux)
+        for planete, placement in (data_theme or {}).get('planetes', {}).items():
+            signe = placement.get('signe')
+            maison = placement.get('maison')
+            if signe:
+                requetes_batch.append(f"{planete} en {signe} signification")
+            if maison:
+                requetes_batch.append(f"{planete} en maison {maison} interprétation")
+
+        for aspect in (data_theme or {}).get('aspects', [])[:5]:
+            try:
+                orbe = float(str(aspect.get('orbe', 10)).replace(",", "."))
+            except Exception:
+                orbe = 10
+            if orbe <= 6:
+                requetes_batch.append(
+                    f"{aspect.get('planete1')} {aspect.get('aspect')} {aspect.get('planete2')} aspect"
+                )
+
+        requetes_batch.extend([
+            "développement personnel astrologie",
+            "psychologie astrologique profonde"
+        ])
+
+        resultats = []
         with weaviate_manager.get_collection() as collection:
-            print("🔥 Traitement batch avec connexion unique...")
+            if collection is None:
+                logger.warning("RAG non disponible (collection None).")
+                return ""
 
-            for i, question in enumerate(requetes_batch[:10], start=1):  # Limiter à 10
-                # 1) Cache d'abord
-                cached = rag_cache.get(question)
-                if cached:
-                    resultats.append(cached[:500])  # limiter la taille
-                    print(f"  💾 Cache hit {i}/{min(10, len(requetes_batch))}")
-                    continue
-
-                # 2) Recherche hybride
+            for i, q in enumerate(requetes_batch[:10], start=1):
                 try:
                     resp = collection.query.hybrid(
-                        query=question,
-                        limit=1,
-                        alpha=0.5,
-                        return_metadata=wvc.query.MetadataQuery(score=True)
+                        query=q, limit=1, alpha=0.5
                     )
                 except Exception as e:
-                    print(f"  ❌ Erreur requête {i}: {e}")
+                    logger.warning(f"RAG requête KO ({i}): {e}")
                     continue
 
-                if not resp.objects:
-                    print(f"  ❌ {i}: aucun résultat")
+                objs = getattr(resp, "objects", None) or []
+                if not objs:
                     continue
-
-                obj = resp.objects[0]
-                score = (getattr(obj.metadata, "score", 0.0) or 0.0)
-                if score <= 0.6:
-                    print(f"  ❌ {i}: score trop faible {score:.3f}")
-                    continue
-
-                # 3) Lecture des propriétés avec tolérance de casse
-                props = obj.properties or {}
-                props_l = {str(k).lower(): v for k, v in props.items()}
-
-                interpretation = (
-                    props_l.get("interpretation")
-                    or props.get("INTERPRETATION")
-                    or props.get("iNTERPRETATION")
-                )
-                texte = (
-                    props_l.get("texte")
-                    or props.get("TEXTE")
-                )
-
-                if interpretation and len(str(interpretation).strip()) > 50:
-                    snippet = str(interpretation).strip()[:500]
-                    if texte and str(texte).strip().lower() != "nan":
-                        snippet = (snippet + "\n" + str(texte).strip()[:500]).strip()
-
+                obj = objs[0]
+                props = getattr(obj, "properties", {}) or {}
+                snippet = None
+                for k in ("interpretation", "INTERPRETATION", "texte", "TEXTE"):
+                    v = props.get(k)
+                    if v and isinstance(v, str) and len(v.strip()) > 50:
+                        snippet = v.strip()[:500]
+                        break
+                if snippet:
                     resultats.append(snippet)
-                    rag_cache.set(question, str(interpretation).strip())
-                    print(f"  ✅ {i}: score {score:.3f}, kept {len(snippet)} chars")
-                else:
-                    print(f"  ❌ {i}: interprétation vide/courte")
-
-                # 4) Micro pause pour éviter surcharge
                 if i % 3 == 0:
                     time.sleep(0.1)
 
+        corpus_final = "\n\n".join(resultats)
+        return corpus_final[:8000]
     except Exception as e:
-        print(f"❌ Erreur batch processing: {e}")
-        import traceback; traceback.print_exc()
+        logger.warning(f"RAG en échec (graceful fallback): {e}")
         return ""
-
-    # 3. Assembler le corpus final
-    corpus_final = "\n\n".join(resultats)
-    print(f"✅ Corpus optimisé: {len(corpus_final)} caractères (de {len(resultats)} résultats)")
-    
-    return corpus_final[:8000]  # Limiter à 8k
 
 
 def _cap_snippet(txt: str, max_chars: int = 350) -> str:

@@ -16,7 +16,8 @@ from utils.pdf_utils import html_to_pdf
 from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.s3_utils import upload_file_and_presign
 from email.mime.text import MIMEText
-
+import logging
+logger = logging.getLogger(__name__)
 
 # # 1) Essayer d'importer l'overlay (fond Canva)
 # try:
@@ -210,6 +211,9 @@ def point_astral_blocs_complet():
     if not infos:
         return "❌ Données manquantes. Veuillez recommencer depuis le formulaire."
     
+    warnings_list = []
+    contexte = {}
+    
     task_id = session.get('current_task_id')
     print(f"Début analyse Point Astral avec progression - Task ID: {task_id}")
     print(f"🔍 DEBUG SESSION COMPLÈTE: {infos}")
@@ -398,17 +402,18 @@ def point_astral_blocs_complet():
         if maitre_attendu and ligne_maitre and (maitre_attendu not in ligne_maitre):
             print("⚠️ VED MISMATCH : la ligne ne correspond pas au maître sidéral attendu.")
 
-        # 4) RAG IDENTIQUE à l'ancien système
-        rag_snippets = None
+
+        # 4) --- RAG non bloquant ---
         try:
-            rag_snippets = generer_corpus_rag_optimise(data_theme)
-            if rag_snippets and len(rag_snippets) > 8000:
+            rag_snippets = generer_corpus_rag_optimise(data_theme) or ""
+            if len(rag_snippets) > 8000:
                 rag_snippets = rag_snippets[:8000]
-            print(f"✅ Point_Astral_Bloc RAG chargé: {len(rag_snippets) if rag_snippets else 0} caractères")
+            print(f"✅ Point_Astral_Bloc RAG chargé: {len(rag_snippets)} caractères")
         except Exception as e:
             print(f"⚠️ RAG indisponible: {e}")
-            import traceback
-            traceback.print_exc()
+            rag_snippets = ""
+            warnings_list.append("RAG indisponible (désactivé ou en erreur).")
+    
 
         # 5) Axes majeurs IDENTIQUE à l'ancien système
         try:
@@ -454,6 +459,7 @@ def point_astral_blocs_complet():
             "axes_majeurs_str": axes_majeurs_str,
             "data_theme": data_theme,
             "rag_snippets": rag_snippets,
+            "corpus_rag": rag_snippets,       # compat si ailleurs tu lis "corpus_rag"
             "placements": placements_str,
             "points_forts": axes_majeurs_str or "",
             "aspects": data_theme.get("aspects") or [],
@@ -673,9 +679,13 @@ def point_astral_blocs_complet():
         html_to_pdf(html_pdf, pdf_path)
         print(f"✅ PDF généré: {pdf_path}")
 
-        pdf_url = url_for("point_astral_blocs.telecharger_point_astral",
-                          nom_fichier=nom_fichier, _external=True)
-        
+        # URL locale (fallback)
+        pdf_url = url_for(
+            "point_astral_blocs.telecharger_point_astral",
+            nom_fichier=nom_fichier,
+            _external=True
+        )
+        # --- Upload S3 (non bloquant pour la suite) ---
         try:
             s3_info = upload_file_and_presign(
                 pdf_path,
@@ -685,78 +695,52 @@ def point_astral_blocs_complet():
             download_url = s3_info.get("url") or s3_info.get("presigned_url")
             if not download_url:
                 raise KeyError(f"URL présignée manquante: {s3_info!r}")
-
             print(f"✅ Upload S3 OK → {download_url}")
-
         except Exception as e:
             print(f"❌ Upload S3 KO ({e}) → fallback local")
-            download_url = pdf_url
+            download_url = None
 
-        # # === Upload S3 + lien présigné (fallback local si échec) ===
-        # try:
-        #     s3_info = upload_file_and_presign(
-        #         pdf_path,
-        #         key_prefix="point_astral",
-        #         content_type="application/pdf"
-        #     )
-        #     download_url = url_for("dl_presign", key=s3_info["key"], _external=True)
-        #     print(f"✅ Upload S3 OK: s3://{s3_info['bucket']}/{s3_info['key']}")
-        #     print(f"🔗 URL courte envoyée dans l’email: {download_url}")
-        # except Exception as e:
-        #     print(f"❌ Upload S3 KO: {e} → fallback sur l’URL locale")
-        #     download_url = pdf_url
+        # --- D) Choisir l’URL finale à renvoyer ---
+        pdf_final_url = download_url or pdf_url  # S3 si dispo, sinon local
+        if not download_url:
+            warnings_list.append("Upload S3 indisponible, lien local utilisé.")
 
-        # --- E) Envoi de l’email (si adresse fournie) ---
-        from utils.email_sender import envoyer_email_avec_analyse
-        if infos.get("email"):
-            destinataire = infos["email"]
-            prenom = (infos.get("nom") or "").split()[0] or "toi"
-            sujet = f"Ton Point Astral est prêt ✨"
-
-            # Plain text
-            body_txt = (
-                f"Bonjour {prenom},\n\n"
-                "Merci pour ta commande ! Ton Point Astral est prêt ✨\n\n"
-                "Télécharge ton PDF ici :\n"
-                f"{download_url}\n\n"
-                "Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.\n\n"
-                "A bientôt,\n"
-                "Les Fous d’Astro – By Cécile CL"
-            )
-
-            # HTML (clic direct)
-            body_html = (
-                f"<p>Bonjour {prenom},</p>"
-                "<p>Merci pour ta commande ! Ton Point Astral est prêt ✨</p>"
-                f"<p>📄 <a href=\"{download_url}\" target=\"_blank\">Télécharge ton PDF ici</a></p>"
-                "<p>Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.</p>"
-                "<p>A bientôt,<br>Les Fous d’Astro – By Cécile CL</p>"
-            )
-
-            # Pas de pièce jointe par défaut
-            envoyer_email_avec_analyse(
-                destinataire=destinataire,
-                sujet=sujet,
-                contenu_txt=body_txt,
-                contenu_html=body_html,
-                pdf_path=None
-            )
-
-            # Anti-doublon (facultatif mais utile)
-            key_unique = f"mail_sent::{nom_fichier}"
-            if not session.get(key_unique):
-                envoyer_email_avec_analyse(
-                    destinataire=infos["email"],
-                    sujet="✨ Ton Point Astral est prêt",
-                    contenu_html=body_txt,   # texte brut OK
-                    pdf_path=None        # ⬅️ PAS DE PJ
+        # --- E) Envoi d’email NON bloquant ---
+        try:
+            dest_email = (infos.get("email") or "").strip()
+            if dest_email:
+                prenom = (infos.get("nom") or "").split()[0] or "toi"
+                sujet_email = "✨ Ton Point Astral est prêt"
+                body_txt = (
+                    f"Bonjour {prenom},\n\n"
+                    "Merci pour ta commande ! Ton Point Astral est prêt ✨\n\n"
+                    "Télécharge ton PDF ici :\n"
+                    f"{pdf_final_url}\n\n"
+                    "Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.\n\n"
+                    "À bientôt,\n"
+                    "Les Fous d’Astro – By Cécile CL"
                 )
-                session[key_unique] = True
+                body_html = (
+                    f"<p>Bonjour {prenom},</p>"
+                    "<p>Merci pour ta commande ! Ton Point Astral est prêt ✨</p>"
+                    f"<p>📄 <a href=\"{pdf_final_url}\" target=\"_blank\">Télécharge ton PDF ici</a></p>"
+                    "<p>Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.</p>"
+                    "<p>À bientôt,<br>Les Fous d’Astro – By Cécile CL</p>"
+                )
+                # Utilise ton sender existant (sans PJ, non bloquant)
+                from utils.email_sender import envoyer_email_avec_analyse
+                envoyer_email_avec_analyse(
+                    destinataire=dest_email,
+                    sujet=sujet_email,
+                    contenu_txt=body_txt,
+                    contenu_html=body_html,
+                    pdf_path=None
+                )
+        except Exception as e:
+            logger.warning(f"Email non envoyé (réseau/SMTP) : {e}")
+            warnings_list.append(f"Email non envoyé : {e}")
 
-        print("🎬 Point_Astral_Bloc FIN ANALYSE POINT ASTRAL BLOCS")
-        print(f"🧪 DEBUG html_content: {len(html_content)} chars")
-
-        # 12) Rendu final (avec la carte aussi à l'écran si dispo)
+        # --- F) Rendu HTML (pas de JSON ici, on reste sur le template) ---
         return render_template(
             'point_astral_resultat.html',
             nom=infos["nom"],
@@ -765,6 +749,8 @@ def point_astral_blocs_complet():
             infos=infos,
             logo_base64=logo_base64,
             carte_astrale_url=carte_astrale_url,
+            pdf_url=pdf_final_url,         # <-- pour bouton "Télécharger"
+            warnings=warnings_list         # <-- optionnel à afficher dans le template
         )
         
     # ⬇️⬇️⬇️  CE BLOC MANQUAIT : il ferme le try PRINCIPAL  ⬇️⬇️⬇️
@@ -1014,36 +1000,47 @@ def generer_html_final_harmonise_pdf_only(
     </div>
 
         <div class="disclaimer" style="background:#f8f9fa;border:1px solid #dee2e6;
-                    padding:16px;margin:20px 0;border-radius:8px;font-size:13px;line-height:1.5;">
+            padding:16px;margin:20px 0;border-radius:8px;font-size:13px;line-height:1.5;">
             <p style="margin:0 0 8px 0;">
                 <strong>⚠️ À propos de cette analyse :</strong><br>
-                Ce Point Astral n'est pas fait pour te brosser dans le sens du poil ! Il explore tes zones
-                d'ombre autant que tes forces, dans l'objectif de révéler ton potentiel authentique. Cette
-                analyse peut soulever des aspects inconfortables de ta personnalité, mais ne te laisse pas
-                décourager : chaque ombre révélée est une opportunité de croissance.
+                Ce Point Astral n'est pas fait pour te brosser dans le sens du poil ! 
+                Il explore tes zones d'ombre autant que tes forces, dans l'objectif de révéler ton potentiel authentique. 
+                Cette analyse peut soulever des aspects inconfortables de ta personnalité, 
+                mais ne te laisse pas décourager : chaque ombre révélée est une opportunité de croissance.
             </p>
+
             <p style="margin:0 0 8px 0;">
-                <strong>❗️Important :</strong> Cette analyse reflète les potentiels énergétiques de ton thème natal. Chaque
-                personne exprime ses énergies à des niveaux de conscience différents selon son parcours,
-                sa culture, son environnement et ses choix. Certaines qualités peuvent rester en dormance
-                ou s'exprimer de façon subtile.
-                <br>Il est normal de ne pas te reconnaître dans tous les aspects décrits. L'astrologie révèle des
-                tendances, pas des vérités absolues. Cette analyse est un outil de réflexion, non un
-                diagnostic.
+                <strong>❗️Important :</strong> Cette analyse reflète les potentiels énergétiques de ton thème natal. 
+                <u>Chaque personne exprime ses énergies à des niveaux de conscience différents</u> selon son parcours, 
+                sa culture, son environnement et ses choix. Certaines qualités peuvent rester en dormance, 
+                s’exprimer de façon subtile, ou même par <em>compensation</em> (tu peux incarner l’inverse de ce qui est inscrit).
+                <br>Il est normal de ne pas te reconnaître dans tous les aspects décrits. 
+                L’astrologie révèle des tendances, pas des vérités absolues. 
+                Cette analyse est un outil de réflexion, qui peut parfois résonner plus tard dans ta vie plutôt qu’aujourd’hui.
             </p>
+
             <p style="margin:0 0 8px 0;">
-                <strong>♻️Note technique :</strong> Cette analyse est générée automatiquement avec l’aide d’un système d’IA.
-                De petites répétitions ou incohérences peuvent apparaître. Rien ne remplace un échange humain direct
+                <strong>🌙 À propos du Nakshatra :</strong> En astrologie védique, la Lune est reliée à un « nakshatra », 
+                une constellation symbolique associée à une divinité ou une énergie. 
+                Ce n’est pas une croyance religieuse, mais une image archétypale pour comprendre ton monde intérieur. 
+                Par exemple, si ton nakshatra est <em>Swati</em>, il est lié au dieu du vent (Vayu) et reflète indépendance, 
+                mouvement et quête de liberté. Cela donne une couleur particulière à ta sensibilité et à ta manière de ressentir.
+            </p>
+
+            <p style="margin:0 0 8px 0;">
+                <strong>♻️ Note technique :</strong> Cette analyse est générée automatiquement avec l’aide d’un système d’IA. 
+                De petites répétitions ou incohérences peuvent apparaître. Rien ne remplace un échange humain direct 
                 pour approfondir ton thème.
             </p>
+
             <p style="margin:0;">
                 <strong>💫 Pour aller plus loin :</strong> 
                 Réserve une consultation personnalisée sur 
                 <a href="https://bycecilecl.com" target="_blank" style="color:#1f628e; text-decoration:none;">
-                    www.bycecilecl.com
+                www.bycecilecl.com
                 </a>
             </p>
-        </div>
+            </div>
 
         <main>
             {texte_structure}
