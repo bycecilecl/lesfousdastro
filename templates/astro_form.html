@@ -1804,12 +1804,12 @@
         <div class="packs-section">
             <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
             <p style="text-align: center; color: white; margin-bottom: 20px; opacity: 0.9;">
-                Économisez en combinant plusieurs analyses cosmiques dans nos packs exclusifs
+                Économise en combinant plusieurs analyses cosmiques dans nos packs exclusifs
             </p>
             <div class="packs-grid">
                 <div class="pack-card" onclick="showComingSoon('Pack 3 Modules')">
                     <div class="pack-title">🎯 Pack 3 Modules</div>
-                    <div class="pack-content">3 analyses cosmiques de votre choix (sans Point Astral)</div>
+                    <div class="pack-content">3 analyses cosmiques de ton choix (sans Point Astral)</div>
                     <div class="pack-price">
                         <span class="pack-price-value">Prix à définir</span>
                     </div>
@@ -1818,7 +1818,7 @@
                 
                 <div class="pack-card" onclick="showComingSoon('Pack Découverte')">
                     <div class="pack-title">🎁 Pack Découverte</div>
-                    <div class="pack-content">Point Astral + 2 analyses cosmiques de votre choix</div>
+                    <div class="pack-content">Point Astral + 2 analyses cosmiques de ton choix</div>
                     <div class="pack-price">
                         <span class="pack-price-value">Prix à définir</span>
                     </div>
@@ -1827,7 +1827,7 @@
 
                 <div class="pack-card" onclick="showComingSoon('Pack Complet')">
                     <div class="pack-title">✨ Pack Complet</div>
-                    <div class="pack-content">Point Astral + 3 analyses cosmiques de votre choix</div>
+                    <div class="pack-content">Point Astral + 3 analyses cosmiques de ton choix</div>
                     <div class="pack-price">
                         <span class="pack-price-value">Prix à définir</span>
                     </div>
@@ -1836,7 +1836,7 @@
 
                 <div class="pack-card" onclick="showComingSoon('Pack Intégral')">
                     <div class="pack-title">🌟 Pack Intégral</div>
-                    <div class="pack-content">Point Astral + 4 analyses cosmiques de votre choix</div>
+                    <div class="pack-content">Point Astral + 4 analyses cosmiques de ton choix</div>
                     <div class="pack-price">
                         <span class="pack-price-value">Prix à définir</span>
                     </div>
@@ -1847,7 +1847,7 @@
 
         <!-- Panier -->
         <div class="cart-section" id="cartSection">
-            <h3 class="section-title">🛒 Votre Sélection</h3>
+            <h3 class="section-title">🛒 Ta Sélection</h3>
             <div id="cartItems"></div>
             
             <div class="consent-section">
@@ -1860,7 +1860,7 @@
             </div>
 
             <button type="button" class="submit-btn" id="submitBtn" onclick="processSelectedAnalyses()" disabled>
-                ✨ Sélectionnez une analyse ✨
+                ✨ Sélectionne une analyse ✨
             </button>
         </div>
 
@@ -1888,13 +1888,13 @@
     <div class="analysis-modal" id="freeAnalysisModal" onclick="event.target === this && closeFreeAnalysisModal()">
         <div class="analysis-modal-content" onclick="event.stopPropagation()">
             <div class="analysis-modal-header">
-                <h3>✨ Génération de votre Analyse Gratuite ✨</h3>
+                <h3>✨ Génération de ton Analyse Gratuite ✨</h3>
             </div>
             <div class="analysis-modal-body">
                 <div class="loading-container" id="loadingSpinner">
                     <div class="loading-spinner"></div>
-                    <h4 id="analysisStatus">🌟 Préparation de votre analyse...</h4>
-                    <p>Veuillez patienter pendant que nous calculons votre thème natal</p>
+                    <h4 id="analysisStatus">🌟 Préparation de ton analyse...</h4>
+                    <p>Merci de patienter pendant que nous calculons ton thème natal</p>
                 </div>
                 <div class="analysis-result" id="analysisResult">
                     <div id="freeAnalysisContent"></div>
@@ -1911,7 +1911,7 @@
     <div class="payment-modal" id="paymentConfirmationModal" onclick="event.target === this && closePaymentConfirmationModal()">
         <div class="payment-modal-content" onclick="event.stopPropagation()">
             <div class="payment-modal-header">
-                <h3>💳 Confirmation de votre commande</h3>
+                <h3>💳 Confirmation de ta commande</h3>
             </div>
             <div class="payment-modal-body">
                 <div id="paymentSummary"></div>
@@ -1924,10 +1924,7 @@
                     </button> -->
                     <!-- en com 17.09  <div id="paypal-button-container" style="width:100%;"></div> -->
                      <!-- Ajouté le 17.09 -->
-                     <button class="payment-btn paypal-btn" onclick="selectPayPal()">
-                        Payer avec PayPal
-                        </button>
-                        <div id="paypal-button-container" style="width:100%; display:none;"></div>
+                    <div id="paypal-button-container" style="width:100%;"></div>
                     <button class="payment-btn cancel-btn" onclick="closePaymentConfirmationModal()">
                         Annuler
                     </button>
@@ -1974,8 +1971,8 @@
                         <h3>Les Fous d'Astro</h3>
                     </div>
                     <p class="footer-description">
-                        Découvrez les mystères de votre thème natal avec nos analyses astrologiques personnalisées. 
-                        Une approche moderne et authentique de l'astrologie pour révéler votre potentiel.
+                        Découvre les mystères de ton thème natal avec nos analyses astrologiques personnalisées. 
+                        Une approche moderne et authentique de l'astrologie pour révéler ton potentiel.
                     </p>
                     <div class="footer-social">
                         <a href="#" class="social-link" title="Facebook">
@@ -2057,21 +2054,104 @@
         </div>
     </footer>
     <!-- com le 17.09 <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&components=buttons"></script> -->
-    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&components=buttons"
-        onload="onPayPalSDKLoaded()"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&intent=capture&components=buttons"></script>
     <script>
         let paypalRendered = false; // évite de rendre 2x si la modale s’ouvre/ferme
-        let paypalSDKReady = false;   // NOUVEAU 17.09
         // Variables globales
         let cart = [];
         let selectedPack = null;
         let psychologyTimer = null;
         let psychologyTimeLeft = 600; // 10 minutes en secondes
 
-        function onPayPalSDKLoaded() {
-        console.log('PayPal SDK chargé');
-        paypalSDKReady = true;
-    }
+        function ensurePayPalButtons(order) {
+        const container = document.getElementById('paypal-button-container');
+        console.log('ensurePayPalButtons()', { hasPaypal: !!window.paypal, paypalRendered, order });
+
+        if (!container) {
+            console.error('Container PayPal introuvable (#paypal-button-container).');
+            return;
+        }
+
+        if (!window.paypal || !window.paypal.Buttons) {
+            console.warn('PayPal SDK pas prêt, nouvelle tentative dans 150ms…');
+            setTimeout(() => ensurePayPalButtons(order), 150);
+            return;
+        }
+
+        if (paypalRendered) {
+            console.log('⚠️ Bouton PayPal déjà rendu, on ne refait pas.');
+            container.style.display = 'block';
+            return;
+        }
+
+        paypalRendered = true;
+        container.innerHTML = '';
+        container.style.display = 'block';
+        console.log('🚀 Rendu du bouton PayPal…');
+
+        try {
+            paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                shape: 'pill',
+                label: 'paypal',
+                tagline: false
+            },
+
+            createOrder: (data, actions) => {
+                const total = Number(order?.total ?? 0);
+                console.log('🛒 PayPal.createOrder appelé, total =', total, '€');
+                return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                    value: total.toFixed(2),
+                    currency_code: "{{ PAYPAL_CURRENCY }}"
+                    },
+                    description: order?.description || "Point Astral"
+                }]
+                });
+            },
+
+            onApprove: async (data, actions) => {
+                console.log('✅ PayPal.onApprove déclenché', data);
+                try {
+                const details = await actions.order.capture();
+                console.log('🎉 Paiement capturé avec succès ! Détails =', details);
+                window.location.href = '/paiement/effectue';
+                } catch (err) {
+                console.error('❌ Erreur lors de la capture PayPal:', err);
+                showNotification('Erreur lors du traitement du paiement.', 'warning');
+                }
+            },
+
+            onError: (err) => {
+                console.error('🔥 PayPal.onError', err);
+                showNotification('⚠️ Paiement PayPal indisponible, réessaie ou choisis Stripe.', 'warning');
+            },
+
+            onCancel: (data) => {
+                console.log('ℹ️ PayPal.onCancel', data);
+                showNotification('💳 Paiement annulé.', 'info');
+            }
+
+            })
+            .render('#paypal-button-container')
+            .then(() => console.log('✔️ Boutons PayPal rendus'))
+            .catch(err => {
+            console.error('❌ Échec render PayPal:', err);
+            paypalRendered = false;
+            container.style.display = 'none';
+            showNotification('Impossible d’afficher PayPal pour le moment.', 'warning');
+            });
+
+        } catch (err) {
+            console.error('💥 Exception init PayPal:', err);
+            paypalRendered = false;
+            container.style.display = 'none';
+            showNotification('Erreur lors de l’initialisation PayPal.', 'warning');
+        }
+        }
+
 
         // Générer des étoiles animées
         function createStars() {
@@ -2592,7 +2672,7 @@
             // Stocker les données pour le paiement
             window.pendingOrder = orderData;
             modal.style.display = 'flex';
-            //setTimeout(() => renderPayPalButtons(orderData), 0);
+            ensurePayPalButtons(orderData);
         }
 
         function formatDate(dateString) {
@@ -2648,145 +2728,145 @@
             form.submit();
         }
 
-        function redirectToPayPal(orderData) {
-            // Similaire à Stripe mais vers PayPal
-            if (!orderData || !orderData.userInfo) {
-                showNotification('❌ Erreur: données manquantes', 'warning');
-                return;
-            }
+        // function redirectToPayPal(orderData) {
+        //     // Similaire à Stripe mais vers PayPal
+        //     if (!orderData || !orderData.userInfo) {
+        //         showNotification('❌ Erreur: données manquantes', 'warning');
+        //         return;
+        //     }
 
-            // Fermer le modal de confirmation
-            closePaymentConfirmationModal();
+        //     // Fermer le modal de confirmation
+        //     closePaymentConfirmationModal();
             
-            // Créer un formulaire pour PayPal
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/create-paypal-payment';
-            form.style.display = 'none';
+        //     // Créer un formulaire pour PayPal
+        //     const form = document.createElement('form');
+        //     form.method = 'POST';
+        //     form.action = '/create-paypal-payment';
+        //     form.style.display = 'none';
             
-            // Mêmes champs que Stripe
-            const fields = {
-                'nom': orderData.userInfo.nom,
-                'email': orderData.userInfo.email,
-                'date_naissance': orderData.userInfo.birthDate,
-                'heure_naissance': orderData.userInfo.birthTime,
-                'lieu_naissance': orderData.userInfo.birthPlace,
-                'lat': orderData.userInfo.lat,
-                'lon': orderData.userInfo.lon,
-                'tzid': orderData.userInfo.tzid,
-                'gender': orderData.userInfo.gender,
-                'type_commande': orderData.type,
-                'items': JSON.stringify(orderData.items),
-                'total': orderData.total
-            };
+        //     // Mêmes champs que Stripe
+        //     const fields = {
+        //         'nom': orderData.userInfo.nom,
+        //         'email': orderData.userInfo.email,
+        //         'date_naissance': orderData.userInfo.birthDate,
+        //         'heure_naissance': orderData.userInfo.birthTime,
+        //         'lieu_naissance': orderData.userInfo.birthPlace,
+        //         'lat': orderData.userInfo.lat,
+        //         'lon': orderData.userInfo.lon,
+        //         'tzid': orderData.userInfo.tzid,
+        //         'gender': orderData.userInfo.gender,
+        //         'type_commande': orderData.type,
+        //         'items': JSON.stringify(orderData.items),
+        //         'total': orderData.total
+        //     };
             
-            Object.keys(fields).forEach(name => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = name;
-                input.value = fields[name] || '';
-                form.appendChild(input);
-            });
+        //     Object.keys(fields).forEach(name => {
+        //         const input = document.createElement('input');
+        //         input.type = 'hidden';
+        //         input.name = name;
+        //         input.value = fields[name] || '';
+        //         form.appendChild(input);
+        //     });
             
-            document.body.appendChild(form);
-            form.submit();
-        }
+        //     document.body.appendChild(form);
+        //     form.submit();
+        // }
 
 
-        function selectPayPal() {
-            const container = document.getElementById('paypal-button-container');
-            container.style.display = 'block';        // on montre le conteneur
-            renderPayPalButtons(window.pendingOrder); // on rend les boutons PayPal
-        }
+//         //function selectPayPal() {
+//         //    const container = document.getElementById('paypal-button-container');
+//         //    container.style.display = 'block';        // on montre le conteneur
+//         //    renderPayPalButtons(window.pendingOrder); // on rend les boutons PayPal
+//         //}
 
-        function renderPayPalButtons(orderData) {
-    if (paypalRendered) return;
+//         //function renderPayPalButtons(orderData) {
+//     //if (paypalRendered) return;
 
-    const container = document.getElementById('paypal-button-container');
-    if (!container || !window.paypal) {
-        console.warn('PayPal SDK non prêt ou container manquant');
-        return;
-    }
+//     // const container = document.getElementById('paypal-button-container');
+//     // if (!container || !window.paypal) {
+//     //     console.warn('PayPal SDK non prêt ou container manquant');
+//     //     return;
+//     // }
 
-    // Nettoyage + flag anti double rendu
-    container.innerHTML = '';
-    container.style.display = 'block';
-    paypalRendered = true;
+//     // Nettoyage + flag anti double rendu
+//     container.innerHTML = '';
+//     container.style.display = 'block';
+//     paypalRendered = true;
 
-    try {
-        paypal.Buttons({
-            style: {
-                layout: 'vertical',
-                color: 'blue',
-                shape: 'rect',
-                label: 'paypal'
-            },
+//     try {
+//         paypal.Buttons({
+//             style: {
+//                 layout: 'vertical',
+//                 color: 'blue',
+//                 shape: 'rect',
+//                 label: 'paypal'
+//             },
 
-            createOrder: async () => {
-                try {
-                    const res = await fetch('/payments/create-order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            description: 'Point Astral',
-                            custom_id: orderData?.userInfo?.email || '',
-                            amount: orderData?.total || 29
-                        })
-                    });
+//             createOrder: async () => {
+//                 try {
+//                     const res = await fetch('/payments/create-order', {
+//                         method: 'POST',
+//                         headers: { 'Content-Type': 'application/json' },
+//                         body: JSON.stringify({
+//                             description: 'Point Astral',
+//                             custom_id: orderData?.userInfo?.email || '',
+//                             amount: orderData?.total || 29
+//                         })
+//                     });
 
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    const data = await res.json();
-                    if (!data.id) throw new Error("Pas d'ID de commande retourné par PayPal");
-                    return data.id;
-                } catch (err) {
-                    console.error('CreateOrder error:', err);
-                    showNotification('⚠️ Impossible de créer la commande PayPal : ' + err.message, 'warning');
-                    throw err;
-                }
-            },
+//                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+//                     const data = await res.json();
+//                     if (!data.id) throw new Error("Pas d'ID de commande retourné par PayPal");
+//                     return data.id;
+//                 } catch (err) {
+//                     console.error('CreateOrder error:', err);
+//                     showNotification('⚠️ Impossible de créer la commande PayPal : ' + err.message, 'warning');
+//                     throw err;
+//                 }
+//             },
 
-            onApprove: async (data) => {
-                try {
-                    const res = await fetch('/payments/capture-order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            orderID: data.orderID,
-                            userInfo: window?.pendingOrder?.userInfo || {},
-                            items: window?.pendingOrder?.items || []
-                        })
-                    });
+//             onApprove: async (data) => {
+//                 try {
+//                     const res = await fetch('/payments/capture-order', {
+//                         method: 'POST',
+//                         headers: { 'Content-Type': 'application/json' },
+//                         body: JSON.stringify({
+//                             orderID: data.orderID,
+//                             userInfo: window?.pendingOrder?.userInfo || {},
+//                             items: window?.pendingOrder?.items || []
+//                         })
+//                     });
 
-                    const result = await res.json();
-                    if (res.ok && result.status === 'COMPLETED') {
-                        window.location.href = '/paiement/effectue';
-                    } else {
-                        showNotification('⚠️ Paiement non confirmé. Status: ' + (result.status || res.status), 'warning');
-                    }
-                } catch (err) {
-                    console.error('Capture error:', err);
-                    showNotification('❌ Erreur lors de la confirmation: ' + err.message, 'warning');
-                }
-            },
+//                     const result = await res.json();
+//                     if (res.ok && result.status === 'COMPLETED') {
+//                         window.location.href = '/paiement/effectue';
+//                     } else {
+//                         showNotification('⚠️ Paiement non confirmé. Status: ' + (result.status || res.status), 'warning');
+//                     }
+//                 } catch (err) {
+//                     console.error('Capture error:', err);
+//                     showNotification('❌ Erreur lors de la confirmation: ' + err.message, 'warning');
+//                 }
+//             },
 
-            onError: (err) => {
-                console.error('PayPal onError:', err);
-                showNotification('❌ Erreur PayPal. Veuillez réessayer.', 'warning');
-            },
+//             onError: (err) => {
+//                 console.error('PayPal onError:', err);
+//                 showNotification('❌ Erreur PayPal. Veuillez réessayer.', 'warning');
+//             },
 
-            onCancel: (data) => {
-                console.log('PayPal payment cancelled:', data);
-                showNotification('💳 Paiement annulé', 'info');
-            }
-        })
-        .render('#paypal-button-container');
-    } catch (err) {
-        console.error('Erreur render PayPal:', err);
-        container.style.display = 'none';
-        paypalRendered = false;
-        showNotification('❌ Impossible d\'afficher le bouton PayPal', 'warning');
-    }
-}
+//             onCancel: (data) => {
+//                 console.log('PayPal payment cancelled:', data);
+//                 showNotification('💳 Paiement annulé', 'info');
+//             }
+//         })
+//         .render('#paypal-button-container');
+//     } catch (err) {
+//         console.error('Erreur render PayPal:', err);
+//         container.style.display = 'none';
+//         paypalRendered = false;
+//         showNotification('❌ Impossible d\'afficher le bouton PayPal', 'warning');
+//     }
+// }
 
         function closePaymentConfirmationModal() {
             document.getElementById('paymentConfirmationModal').style.display = 'none';
