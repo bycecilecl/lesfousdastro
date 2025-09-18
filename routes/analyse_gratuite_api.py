@@ -8,6 +8,8 @@ from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.enregistrement_placements import enregistrer_placements_utilisateur
 from utils.google.sheets_writer import ajouter_email_au_sheet
 from utils.email_sender import envoyer_email_avec_analyse
+from threading import Thread
+import textwrap
 from dotenv import load_dotenv
 import os
 
@@ -159,31 +161,59 @@ Fais une analyse de max 15 lignes.
 
         # Envoi par email
         print("📧 Envoi de l'analyse par email...")
-        try:
-            sujet = f"Ton analyse astrologique gratuite – {prenom}"
-            contenu = f"""
-            Bonjour {prenom},<br><br>
-            Voici ton analyse astrologique gratuite générée par Les Fous d'Astro 👁️‍🗨️<br><br>
-            <hr>
-            {texte}
-            <hr><br>
-            Si tu veux en savoir plus : Le Point Astral<br>
-            À bientôt,<br>L'équipe des Fous d'Astro ✨
-            """
-            envoyer_email_avec_analyse(destinataire=email, sujet=sujet, contenu_html=contenu)
-            print("✅ Email envoyé avec succès")
-        except Exception as e:
-            print(f"⚠️ Erreur lors de l'envoi du mail : {e}")
+
+        send_emails = os.getenv("SEND_EMAILS", "true").lower() in ("1","true","yes")
+        sujet = f"Ton analyse astrologique gratuite - {prenom}"  # tiret simple
+
+        contenu_txt = textwrap.dedent(f"""
+        Bonjour {prenom},
+
+        Voici ton analyse astrologique gratuite :
+
+        {texte}
+
+        —
+        Les Fous d'Astro
+        """).strip()
+
+        contenu_html = textwrap.dedent(f"""
+        <p>Bonjour {prenom},</p>
+        <p>Voici ton analyse astrologique gratuite :</p>
+        <hr>
+        <div>{texte}</div>
+        <hr>
+        <p>—<br>Les Fous d'Astro</p>
+        """).strip()
+
+
+        if send_emails and email:
+            try:
+                Thread(
+                    target=envoyer_email_avec_analyse,
+                    kwargs=dict(
+                        destinataire=email,
+                        sujet=sujet,
+                        contenu_txt=contenu_txt,
+                        contenu_html=contenu_html,
+                        pdf_path=None
+                    ),
+                    daemon=True
+                ).start()
+                print(f"✉️  Email en file d’envoi pour {email}")
+            except Exception as e:
+                print(f"⚠️ Email non envoyé (thread/SMTP) : {e}")
+        else:
+            print("✉️  Email non envoyé (SEND_EMAILS=false ou email manquant)")
 
         # 🎨 8) Génération du HTML pour le modal
         html = f"""
             <div class="analysis-summary">
-                <h4>🌟 Bonjour {theme['nom']}, voici votre profil astrologique :</h4>
+                <h4>🌟 Bonjour {theme['nom']}, voici ton profil astrologique :</h4>
                 <div style="margin: 20px 0; line-height: 1.6;">{texte}</div>
                 
                 <div style="margin-top: 25px; padding: 20px; background: rgba(31, 98, 142, 0.1); border-radius: 15px; text-align: center;">
-                    <p><strong>🎯 Cette analyse vous plaît ?</strong></p>
-                    <p>Découvrez bien plus avec nos analyses approfondies !</p>
+                    <p><strong>🎯 Cette analyse te plaît ?</strong></p>
+                    <p>Découvre bien plus avec nos analyses approfondies !</p>
                 </div>
             </div>
         """

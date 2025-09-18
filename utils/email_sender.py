@@ -21,51 +21,91 @@
 #   - `attachments` n’est ajouté que si `pdf_path` est fourni.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# import yagmail
 # import os
+# import re
+# import html as htmllib
+# import yagmail
 # from dotenv import load_dotenv
 
 # load_dotenv()
 
-# def envoyer_email_avec_analyse(destinataire, sujet, contenu_html, pdf_path=None):
+# def _html_to_plain(html_str: str) -> str:
+#     """Fallback très simple pour générer un texte brut depuis du HTML."""
+#     if not html_str:
+#         return ""
+#     # unescape & remplacements basiques de sauts de ligne
+#     s = htmllib.unescape(html_str)
+#     s = s.replace("<br>", "\n").replace("<br/>", "\n").replace("<br />", "\n")
+#     # retirer toutes les balises
+#     s = re.sub(r"<[^>]+>", "", s)
+#     # normaliser espaces
+#     s = re.sub(r"[ \t]+\n", "\n", s).strip()
+#     return s
+
+# def envoyer_email_avec_analyse(destinataire: str,
+#                                sujet: str,
+#                                contenu_txt: str | None = None,
+#                                contenu_html: str | None = None,
+#                                pdf_path: str | None = None):
+#     """
+#     Envoie un email multipart/alternative.
+#     - rétro-compatible : si contenu_txt est None mais contenu_html est fourni,
+#       on génère un TXT automatiquement.
+#     """
 #     email_exp = os.getenv("EMAIL_ENVOI")
-#     mdp_app = os.getenv("EMAIL_PASSWORD")
+#     mdp_app   = os.getenv("EMAIL_PASSWORD")
 
 #     try:
 #         yag = yagmail.SMTP(user=email_exp, password=mdp_app)
+
+#         # Fallback si on n'a que du HTML
+#         if contenu_txt is None and contenu_html:
+#             contenu_txt = _html_to_plain(contenu_html)
+
+#         # Sécurité : au moins un contenu
+#         if not (contenu_txt or contenu_html):
+#             contenu_txt = "Bonjour,\n\nVotre document est prêt."
+
+#         contents = []
+#         contents.append(contenu_txt or "")
+#         if contenu_html:
+#             contents.append(yagmail.raw(contenu_html))
 
 #         attachments = [pdf_path] if pdf_path else None
 
 #         yag.send(
 #             to=destinataire,
 #             subject=sujet,
-#             contents=contenu_html,
-#             attachments=attachments
+#             contents=contents,
+#             attachments=attachments,
+#             headers={"From": f"Les Fous d’Astro <{email_exp}>"}
 #         )
-
 #         print(f"✅ Email envoyé à {destinataire}")
 
 #     except Exception as e:
 #         print(f"❌ Erreur lors de l'envoi de l'email à {destinataire} : {e}")
 
+
 import os
+import yagmail
+import logging
 import re
 import html as htmllib
-import yagmail
-from dotenv import load_dotenv
 
-load_dotenv()
+logger = logging.getLogger(__name__)
+
+SMTP_HOST = os.getenv("SMTP_HOST", "node175-eu.n0c.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 465))
+SMTP_USE_SSL = os.getenv("SMTP_USE_SSL", "true").lower() in ("1","true","yes")
+SMTP_USE_STARTTLS = os.getenv("SMTP_USE_STARTTLS", "false").lower() in ("1","true","yes")
+
 
 def _html_to_plain(html_str: str) -> str:
-    """Fallback très simple pour générer un texte brut depuis du HTML."""
     if not html_str:
         return ""
-    # unescape & remplacements basiques de sauts de ligne
     s = htmllib.unescape(html_str)
     s = s.replace("<br>", "\n").replace("<br/>", "\n").replace("<br />", "\n")
-    # retirer toutes les balises
     s = re.sub(r"<[^>]+>", "", s)
-    # normaliser espaces
     s = re.sub(r"[ \t]+\n", "\n", s).strip()
     return s
 
@@ -73,28 +113,34 @@ def envoyer_email_avec_analyse(destinataire: str,
                                sujet: str,
                                contenu_txt: str | None = None,
                                contenu_html: str | None = None,
-                               pdf_path: str | None = None):
-    """
-    Envoie un email multipart/alternative.
-    - rétro-compatible : si contenu_txt est None mais contenu_html est fourni,
-      on génère un TXT automatiquement.
-    """
+                               pdf_path: str | None = None) -> bool:
     email_exp = os.getenv("EMAIL_ENVOI")
     mdp_app   = os.getenv("EMAIL_PASSWORD")
 
-    try:
-        yag = yagmail.SMTP(user=email_exp, password=mdp_app)
+    if not email_exp or not mdp_app:
+        logger.error("🚫 EMAIL_ENVOI ou EMAIL_PASSWORD manquant dans .env")
+        return False
 
-        # Fallback si on n'a que du HTML
+    try:
+        yag = yagmail.SMTP(
+        user=email_exp,
+        password=mdp_app,
+        host=SMTP_HOST,
+        port=SMTP_PORT,
+        smtp_ssl=SMTP_USE_SSL,
+        smtp_starttls=SMTP_USE_STARTTLS,
+        oauth2_file=None,              # ⬅️ coupe l’utilisation du fichier OAuth ~/.yagmail
+    )
+        logger.info("SMTP → host=%s port=%s ssl=%s starttls=%s user=%s",
+                    SMTP_HOST, SMTP_PORT, SMTP_USE_SSL, SMTP_USE_STARTTLS, email_exp)
+        
         if contenu_txt is None and contenu_html:
             contenu_txt = _html_to_plain(contenu_html)
 
-        # Sécurité : au moins un contenu
         if not (contenu_txt or contenu_html):
-            contenu_txt = "Bonjour,\n\nVotre document est prêt."
+            contenu_txt = "Bonjour,\n\nTon document est prêt."
 
-        contents = []
-        contents.append(contenu_txt or "")
+        contents = [contenu_txt]
         if contenu_html:
             contents.append(yagmail.raw(contenu_html))
 
@@ -105,9 +151,10 @@ def envoyer_email_avec_analyse(destinataire: str,
             subject=sujet,
             contents=contents,
             attachments=attachments,
-            headers={"From": f"Les Fous d’Astro <{email_exp}>"}
         )
-        print(f"✅ Email envoyé à {destinataire}")
+        logger.info("✅ Email envoyé à %s", destinataire)
+        return True
 
     except Exception as e:
-        print(f"❌ Erreur lors de l'envoi de l'email à {destinataire} : {e}")
+        logger.exception("❌ Erreur lors de l'envoi de l'email à %s : %s", destinataire, e)
+        return False

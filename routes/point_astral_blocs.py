@@ -17,6 +17,9 @@ from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.s3_utils import upload_file_and_presign
 from email.mime.text import MIMEText
 import logging
+from threading import Thread
+from utils.email_sender import envoyer_email_avec_analyse
+import logging
 logger = logging.getLogger(__name__)
 
 # # 1) Essayer d'importer l'overlay (fond Canva)
@@ -710,7 +713,7 @@ def point_astral_blocs_complet():
             dest_email = (infos.get("email") or "").strip()
             if dest_email:
                 prenom = (infos.get("nom") or "").split()[0] or "toi"
-                sujet_email = "✨ Ton Point Astral est prêt"
+                sujet_email = "Ton Point Astral est prêt"
                 body_txt = (
                     f"Bonjour {prenom},\n\n"
                     "Merci pour ta commande ! Ton Point Astral est prêt ✨\n\n"
@@ -727,17 +730,30 @@ def point_astral_blocs_complet():
                     "<p>Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.</p>"
                     "<p>À bientôt,<br>Les Fous d’Astro – By Cécile CL</p>"
                 )
-                # Utilise ton sender existant (sans PJ, non bloquant)
-                from utils.email_sender import envoyer_email_avec_analyse
-                envoyer_email_avec_analyse(
-                    destinataire=dest_email,
-                    sujet=sujet_email,
-                    contenu_txt=body_txt,
-                    contenu_html=body_html,
-                    pdf_path=None
-                )
+
+                # Flag ON/OFF côté env (.env: SEND_EMAILS=true|false)
+                send_emails = os.getenv("SEND_EMAILS", "true").lower() in ("1", "true", "yes")
+
+                if send_emails:
+                    # Envoi en thread pour ne pas bloquer la réponse HTTP
+                    Thread(
+                        target=envoyer_email_avec_analyse,
+                        kwargs=dict(
+                            destinataire=dest_email,
+                            sujet=sujet_email,
+                            contenu_txt=body_txt,
+                            contenu_html=body_html,
+                            pdf_path=None,  # on envoie l'URL, pas la PJ
+                        ),
+                        daemon=True
+                    ).start()
+                    logger.info("✉️  Email en file d'envoi pour %s", dest_email)
+                else:
+                    logger.info("✉️  Email non envoyé (SEND_EMAILS=false)")
+            else:
+                logger.info("✉️  Email non envoyé (adresse manquante)")
         except Exception as e:
-            logger.warning(f"Email non envoyé (réseau/SMTP) : {e}")
+            logger.warning("Email non envoyé (erreur thread/SMTP) : %s", e)
             warnings_list.append(f"Email non envoyé : {e}")
 
         # --- F) Rendu HTML (pas de JSON ici, on reste sur le template) ---

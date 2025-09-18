@@ -81,6 +81,16 @@ def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
+# ⚙️ Sécurité cookies et URLs
+app.config.update(
+    SESSION_COOKIE_SECURE=True,        # cookies seulement en HTTPS
+    SESSION_COOKIE_HTTPONLY=True,      # inaccessible en JS
+    SESSION_COOKIE_SAMESITE="Lax",
+    REMEMBER_COOKIE_SECURE=True,
+    REMEMBER_COOKIE_HTTPONLY=True,
+    PREFERRED_URL_SCHEME="https",
+)
+
 # --- Blueprint principal: créer -> définir routes -> enregistrer
 main_bp = Blueprint("main", __name__)
 
@@ -91,7 +101,9 @@ app.register_blueprint(point_astral_blocs_bp)
 app.register_blueprint(payments_bp)
 app.register_blueprint(legal_bp)
 
-
+# 5) Headers de sécurité (après enregistrement des routes)
+from security_headers import add_security_headers
+add_security_headers(app)
 
 
 @main_bp.route("/")
