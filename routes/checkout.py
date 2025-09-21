@@ -16,9 +16,12 @@ import stripe
 import os
 import uuid
 import time
+import logging
+logger = logging.getLogger(__name__)
 
 checkout_bp = Blueprint('checkout_bp', __name__)
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+logger.info("[Stripe] key mode = %s", "LIVE" if (stripe.api_key or "").startswith("sk_live_") else "TEST")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ROUTE : POST /checkout
@@ -52,7 +55,9 @@ def checkout():
         "lon": request.form.get("lon", "").strip(),
         "tzid": request.form.get("tzid", "").strip(),
     }
-    
+
+    # 👉 Prix dynamique (par défaut 2900 centimes = 29 €)
+    amount_cents = int(os.getenv("POINT_ASTRAL_PRICE_CENTS", "2900"))
 
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -60,13 +65,13 @@ def checkout():
             'price_data': {
                 'currency': 'eur',
                 'product_data': {'name': 'Point Astral complet'},
-                'unit_amount': 2900,
+                'unit_amount': amount_cents,
             },
             'quantity': 1,
         }],
         mode='payment',
         success_url=url_for('checkout_bp.paiement_effectue', _external=True),
-        cancel_url = url_for('main.index', _external=True)
+        cancel_url=url_for('main.index', _external=True)
     )
 
     return redirect(checkout_session.url, code=303)

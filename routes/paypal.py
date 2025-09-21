@@ -1,19 +1,43 @@
 import os, requests
 from flask import Blueprint, request, jsonify, session
+import logging
 
 payments_bp = Blueprint("payments", __name__)
 
+logger = logging.getLogger(__name__)
+
+# def get_paypal_token():
+#     mode = os.getenv("PAYPAL_MODE", "sandbox").lower()
+#     client_id = os.getenv("PAYPAL_CLIENT_ID_LIVE") if mode == "live" else os.getenv("PAYPAL_CLIENT_ID_SANDBOX")
+#     client_secret = os.getenv("PAYPAL_CLIENT_SECRET_LIVE") if mode == "live" else os.getenv("PAYPAL_CLIENT_SECRET_SANDBOX")
+#     base_url = "https://api-m.paypal.com" if mode == "live" else "https://api-m.sandbox.paypal.com"
+
+#     r = requests.post(
+#         f"{base_url}/v1/oauth2/token",
+#         headers={"Accept": "application/json", "Accept-Language": "en_US"},
+#         data={"grant_type": "client_credentials"},
+#         auth=(client_id, client_secret)
+#     )
+#     r.raise_for_status()
+#     return r.json()["access_token"], base_url
+
 def get_paypal_token():
     mode = os.getenv("PAYPAL_MODE", "sandbox").lower()
+    if mode not in ("live", "sandbox"):
+        mode = "sandbox"
+
     client_id = os.getenv("PAYPAL_CLIENT_ID_LIVE") if mode == "live" else os.getenv("PAYPAL_CLIENT_ID_SANDBOX")
     client_secret = os.getenv("PAYPAL_CLIENT_SECRET_LIVE") if mode == "live" else os.getenv("PAYPAL_CLIENT_SECRET_SANDBOX")
     base_url = "https://api-m.paypal.com" if mode == "live" else "https://api-m.sandbox.paypal.com"
+
+    logger.info("[PayPal] MODE=%s BASE=%s CID=%s…", mode, base_url, (client_id or "")[:8])
 
     r = requests.post(
         f"{base_url}/v1/oauth2/token",
         headers={"Accept": "application/json", "Accept-Language": "en_US"},
         data={"grant_type": "client_credentials"},
-        auth=(client_id, client_secret)
+        auth=(client_id, client_secret),
+        timeout=20,
     )
     r.raise_for_status()
     return r.json()["access_token"], base_url
@@ -21,24 +45,35 @@ def get_paypal_token():
 @payments_bp.route("/payments/create-order", methods=["POST"])
 def create_order():
     token, base_url = get_paypal_token()
+    logger.info("[PayPal] create-order → %s", base_url)
+
+    # 👉 Prix unique pour PayPal & Stripe (env: POINT_ASTRAL_PRICE_CENTS)
+    amount_cents = int(os.getenv("POINT_ASTRAL_PRICE_CENTS", "2900"))
+    amount_eur = f"{amount_cents / 100:.2f}"  # ex: 2900 → "29.00"
+    logger.info("[PayPal] amount=%s EUR (src POINT_ASTRAL_PRICE_CENTS=%s)", amount_eur, amount_cents)
+
+    payload = {
+        "intent": "CAPTURE",
+        "purchase_units": [{
+            "amount": {
+                "currency_code": os.getenv("PAYPAL_CURRENCY", "EUR"),
+                "value": amount_eur
+            }
+        }]
+    }
+
     r = requests.post(
         f"{base_url}/v2/checkout/orders",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
-        json={
-            "intent": "CAPTURE",
-            "purchase_units": [{
-                "amount": {
-                    "currency_code": os.getenv("PAYPAL_CURRENCY", "EUR"),
-                    "value": os.getenv("POINT_ASTRAL_PRICE", "29.00")
-                }
-            }]
-        }
+        json=payload,
+        timeout=20,
     )
     return jsonify(r.json()), r.status_code
 
 @payments_bp.route("/payments/capture-order", methods=["POST"])
 def capture_order():
     token, base_url = get_paypal_token()
+    logger.info("[PayPal] capture-order → %s", base_url)
     payload = request.get_json() or {}
     order_id = payload.get("orderID")
     user_info = payload.get("userInfo")
