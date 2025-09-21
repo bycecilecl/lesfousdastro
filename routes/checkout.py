@@ -44,6 +44,9 @@ logger.info("[Stripe] key mode = %s", "LIVE" if (stripe.api_key or "").startswit
 
 @checkout_bp.route('/checkout', methods=['POST'])
 def checkout():
+    # 🔄 Purge anti-reload car nouveau checkout
+    for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
+        session.pop(k, None)
     session['infos_utilisateur'] = {
         "nom": request.form.get("nom"),
         "email": request.form.get("email"),
@@ -89,13 +92,12 @@ def checkout():
 #     un webhook (event "checkout.session.completed") côté serveur.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# @checkout_bp.route('/paiement-effectue')
-# def paiement_effectue():
-#     # Redirection directe comme avant, mais avec le task_id en session
-#     return redirect(url_for('point_astral_blocs.point_astral_blocs_complet'))
 
 
 @checkout_bp.route('/paiement-effectue')
 def paiement_effectue():
+    # 🔄 Purge anti-reload car paiement Stripe validé
+    for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
+        session.pop(k, None)
     # Page intermédiaire avec popup de patience
     return render_template('paiement_effectue.html')

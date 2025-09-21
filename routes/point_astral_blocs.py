@@ -132,23 +132,18 @@ def point_astral_blocs_complet():
     if not infos:
         return "❌ Données manquantes. Veuillez recommencer depuis le formulaire."
     
-    # --- Anti-reload (prod only) -------------------------------------------
-    ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1","true","yes")
-
+    # --- Anti-reload minimal (TTL 15 min) --------------------------------
+    ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1", "true", "yes")
     if ANTI_RELOAD:
-        key = _fingerprint_infos(infos)
-        last_key = session.get("last_generation_key")
-        last_url = session.get("last_pdf_url")
-        last_at  = float(session.get("last_generation_at", 0))
-
-        # TTL = 15 minutes pour réutiliser le même PDF au lieu de régénérer
-        if last_key == key and last_url and (time.time() - last_at < 15 * 60):
-            logger.info("🚫 Anti-reload: même requête détectée, on réutilise %s", last_url)
-            # A) Si ta page 'paiement_effectue.html' affiche le lien si fourni :
-            return render_template("paiement_effectue.html", pdf_url=last_url, already=True)
-            # B) Sinon, redirige directement vers l’URL du PDF :
-            # return redirect(last_url)
-    # -----------------------------------------------------------------------
+        lock_until = float(session.get("lock_until", 0))
+        if time.time() < lock_until:
+            last_url = session.get("last_pdf_url")
+            if last_url:
+                # Réutilise le PDF déjà généré si reload
+                return render_template("paiement_effectue.html", pdf_url=last_url, already=True)
+            # Pas d'URL mémorisée → on bloque pour éviter une régénération immédiate
+            return "Cette action a déjà été effectuée. Réessaie dans quelques minutes.", 429
+# ---------------------------------------------------------------------
     warnings_list = []
     contexte = {}
     
@@ -534,15 +529,14 @@ def point_astral_blocs_complet():
         if not download_url:
             warnings_list.append("Upload S3 indisponible, lien local utilisé.")
 
-            # --- Mémo anti-reload : on garde l’empreinte et l’URL pour 15 min ------
+        # --- Mémo anti-reload : on garde l'URL et on arme un verrou 15 min ---
         try:
-            session["last_generation_key"] = _fingerprint_infos(infos)
-            session["last_pdf_url"] = pdf_final_url         # l’URL S3 (ou ton lien final)
-            session["last_generation_at"] = time.time()
-            logger.info("✅ Anti-reload: empreinte enregistrée (url=%s)", pdf_final_url)
+            session["last_pdf_url"] = pdf_final_url
+            session["lock_until"] = time.time() + 15 * 60  # 15 minutes
+            logger.info("✅ Anti-reload: URL mémorisée (%s), verrou activé.", pdf_final_url)
         except Exception as e:
             logger.warning("Anti-reload: impossible d'enregistrer l'état : %s", e)
-        # -----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
 
         # --- E) Envoi d’email NON bloquant ---
         try:

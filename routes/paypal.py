@@ -93,6 +93,10 @@ def capture_order():
     # Si succès → on mémorise en session pour la génération derrière
     try:
         if r.status_code == 201 or (isinstance(data, dict) and data.get("status") == "COMPLETED"):
+            # 🔄 Purge anti-reload car nouveau paiement validé
+            for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
+                session.pop(k, None)
+                
             if user_info:
                 session["infos_utilisateur"] = {
                     'nom': user_info.get('nom'),
