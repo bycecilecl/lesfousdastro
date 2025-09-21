@@ -929,6 +929,7 @@ def generer_html_final_harmonise_pdf_only(
             background: #ffffff;
             color: #2c3e50;
             line-height: 1.6;
+            font-size: 15px;
         }}
         .container {{ max-width: 800px; margin: 0 auto; }}
         .header {{
