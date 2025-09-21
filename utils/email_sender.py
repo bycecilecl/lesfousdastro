@@ -86,7 +86,7 @@
 #         print(f"❌ Erreur lors de l'envoi de l'email à {destinataire} : {e}")
 
 
-import os
+import os, json, requests
 import yagmail
 import logging
 import re
@@ -98,6 +98,31 @@ SMTP_HOST = os.getenv("SMTP_HOST", "node175-eu.n0c.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", 465))
 SMTP_USE_SSL = os.getenv("SMTP_USE_SSL", "true").lower() in ("1","true","yes")
 SMTP_USE_STARTTLS = os.getenv("SMTP_USE_STARTTLS", "false").lower() in ("1","true","yes")
+
+
+def _send_with_brevo(to_email: str, subject: str, body_txt: str | None, body_html: str | None):
+    api_key = os.getenv("BREVO_API_KEY", "")
+    sender_email = os.getenv("BREVO_SENDER_EMAIL", "")
+    sender_name = os.getenv("BREVO_SENDER_NAME", "Les Fous d’Astro")
+    if not api_key or not sender_email:
+        raise RuntimeError("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant")
+
+    payload = {
+        "sender": {"email": sender_email, "name": sender_name},
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "textContent": body_txt or "",
+    }
+    if body_html:
+        payload["htmlContent"] = body_html
+
+    r = requests.post(
+        "https://api.brevo.com/v3/smtp/email",
+        headers={"api-key": api_key, "Content-Type": "application/json"},
+        data=json.dumps(payload),
+        timeout=20,
+    )
+    r.raise_for_status()
 
 
 def _html_to_plain(html_str: str) -> str:
@@ -114,6 +139,20 @@ def envoyer_email_avec_analyse(destinataire: str,
                                contenu_txt: str | None = None,
                                contenu_html: str | None = None,
                                pdf_path: str | None = None) -> bool:
+    
+    # ---- NOUVEAU : route vers Brevo en PROD ----
+    if os.getenv("EMAIL_PROVIDER", "smtp").lower() == "brevo":
+        try:
+            if contenu_txt is None and contenu_html:
+                contenu_txt = _html_to_plain(contenu_html)
+            _send_with_brevo(destinataire, sujet, contenu_txt, contenu_html)
+            logger.info("📤 Brevo → email queued to %s", destinataire)
+            return True
+        except Exception as e:
+            logger.exception("❌ Brevo error for %s : %s", destinataire, e)
+            return False
+    # ---- FIN bloc Brevo ----
+    
     email_exp = os.getenv("EMAIL_ENVOI")
     mdp_app   = os.getenv("EMAIL_PASSWORD")
 
