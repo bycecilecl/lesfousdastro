@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paiement confirmé - Les Fous d'Astro</title>
     <style>
+        .download-btn {
+            display: inline-block;
+            background: #1f628e;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: #164a6b;
+            transform: translateY(-2px);
+        }
         body {
             font-family: Georgia, serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -55,18 +71,35 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>✨ Paiement confirmé !</h1>
-        <p>
-            Merci pour ta confiance !<br>
-            <strong>Ton Point Astral est en cours de création...</strong>
-        </p>
-        <div class="spinner"></div>
-        <p class="message">
-            Merci de patienter quelques minutes.<br>
-            Tu seras redirigé automatiquement.
-        </p>
-    </div>
+      <div class="container">
+    {% if already %}
+      <h1>Analyse déjà générée</h1>
+      <p>
+        Ton Point Astral a déjà été généré récemment.<br>
+        Tu peux le récupérer directement :
+      </p>
+      {% if pdf_url %}
+        <a href="{{ pdf_url }}" class="download-btn" target="_blank">
+          📄 Télécharger mon Point Astral (PDF)
+        </a>
+      {% else %}
+        <p class="message">Lien indisponible pour le moment. Réessaie dans quelques minutes.</p>
+      {% endif %}
+      <p class="message" style="margin-top:16px;">
+        Si tu veux une nouvelle analyse, recommence le formulaire avec d'autres infos.
+      </p>
+    {% else %}
+      <h1>✨ Paiement confirmé !</h1>
+      <p>
+        Merci pour ta confiance !<br>
+        <strong>Ton Point Astral est en cours de création...</strong>
+      </p>
+      <div class="spinner"></div>
+      <p class="message">
+        Merci de patienter quelques instants.<br>
+        Tu seras redirigée automatiquement.
+      </p>
+   
 
     <script>
         // Redirection automatique après 3 secondes
@@ -74,5 +107,7 @@
             window.location.href = '/point_astral_blocs/complet';
         }, 3000);
     </script>
+       {% endif %}
+        </div>
 </body>
 </html>

@@ -132,16 +132,23 @@ def point_astral_blocs_complet():
     if not infos:
         return "❌ Données manquantes. Veuillez recommencer depuis le formulaire."
     
+    # Empreinte (fingerprint) unique des infos utilisateur
+    current_fingerprint = _fingerprint_infos(infos)
+    
     # --- Anti-reload minimal (TTL 15 min) --------------------------------
     ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1", "true", "yes")
     if ANTI_RELOAD:
+        last_fingerprint = session.get("last_fingerprint")
         lock_until = float(session.get("lock_until", 0))
-        if time.time() < lock_until:
+
+        if time.time() < lock_until and current_fingerprint == last_fingerprint:
             last_url = session.get("last_pdf_url")
             if last_url:
-                # Réutilise le PDF déjà généré si reload
-                return render_template("paiement_effectue.html", pdf_url=last_url, already=True)
-            # Pas d'URL mémorisée → on bloque pour éviter une régénération immédiate
+                return render_template(
+                    "paiement_effectue.html", 
+                    pdf_url=last_url, 
+                    already=True
+                )
             return "Cette action a déjà été effectuée. Réessaie dans quelques minutes.", 429
 # ---------------------------------------------------------------------
     warnings_list = []
@@ -529,14 +536,14 @@ def point_astral_blocs_complet():
         if not download_url:
             warnings_list.append("Upload S3 indisponible, lien local utilisé.")
 
-        # --- Mémo anti-reload : on garde l'URL et on arme un verrou 15 min ---
+        # --- Mémo anti-reload : on garde fingerprint, URL et verrou ---
         try:
+            session["last_fingerprint"] = current_fingerprint
             session["last_pdf_url"] = pdf_final_url
             session["lock_until"] = time.time() + 15 * 60  # 15 minutes
-            logger.info("✅ Anti-reload: URL mémorisée (%s), verrou activé.", pdf_final_url)
+            logger.info("✅ Anti-reload: fingerprint + URL mémorisés, verrou activé.")
         except Exception as e:
             logger.warning("Anti-reload: impossible d'enregistrer l'état : %s", e)
-        # ---------------------------------------------------------------------
 
         # --- E) Envoi d’email NON bloquant ---
         try:
