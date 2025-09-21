@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, session, send_from_directory, abor
 import inspect
 from datetime import datetime
 import re
-import os
+import os, time, json, hashlib, logging
 import base64
 import uuid
 from utils.calcul_theme import calcul_theme as _calcul_theme
@@ -16,101 +16,19 @@ from utils.pdf_utils import html_to_pdf
 from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.s3_utils import upload_file_and_presign
 from email.mime.text import MIMEText
-import logging
 from threading import Thread
 from utils.email_sender import envoyer_email_avec_analyse
-import logging
+
+
 logger = logging.getLogger(__name__)
 
-# # 1) Essayer d'importer l'overlay (fond Canva)
-# try:
-#     from utils.chart_overlay import draw_overlay_on_background  # type: ignore
-#     _OVERLAY_OK = True
-#     print("✅ Overlay Canva dispo (utils.chart_overlay.draw_overlay_on_background).")
-# except Exception as _e:
-#     _OVERLAY_OK = False
-#     draw_overlay_on_background = None  # type: ignore
-#     print(f"ℹ️ Pas d’overlay Canva: {_e}")
-
-# # 2) Essayer d'importer une wheel matplotlib (plusieurs alias possibles)
-# _WHEEL_FN = None
-# try:
-#     from utils.chart_wheel import draw_natal_chart as _WHEEL_FN  # type: ignore
-#     print("✅ Wheel: utils.chart_wheel.draw_natal_chart")
-# except Exception:
-#     try:
-#         from utils.chart_wheel import generate_natal_chart as _WHEEL_FN  # type: ignore
-#         print("✅ Wheel: utils.chart_wheel.generate_natal_chart")
-#     except Exception:
-#         try:
-#             from utils.chart_wheel import draw_chart_wheel as _WHEEL_FN  # type: ignore
-#             print("✅ Wheel: utils.chart_wheel.draw_chart_wheel")
-#         except Exception as _err_wheel:
-#             print(f"ℹ️ Aucune wheel importable: {_err_wheel}")
-#             _WHEEL_FN = None
-
-# # 3) Fallback 1×1 (permet de continuer le pipeline sans casser le PDF/email)
-# _PNG_1x1 = base64.b64decode(
-#     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO1GQhQAAAAASUVORK5CYII="
-# )
-# def _write_placeholder(path: str):
-#     try:
-#         os.makedirs(os.path.dirname(path), exist_ok=True)
-#         with open(path, "wb") as f:
-#             f.write(_PNG_1x1)
-#         print("🟡 Fallback carte: PNG 1×1 écrit (pas de rendu réel).")
-#     except Exception as e:
-#         print(f"⚠️ Impossible d’écrire le placeholder {path}: {e}")
-
-# # 4) Wrapper unifié exposé sous le NOM attendu: draw_natal_chart(...)
-# def draw_natal_chart(planetes_deg, maisons_deg, asc=None, mc=None, outfile=None, **kwargs):
-#     """
-#     Rendu de la carte : OVERLAY CANVA UNIQUEMENT.
-#     - Conserve tous les paramètres personnalisés
-#     """
-#     if not outfile:
-#         return
-
-#     # On récupère uniquement ce qui est utile à l’overlay
-#     background_path = kwargs.get("background_path", None)  # ← .get() au lieu de .pop()
-#     glyphs_png_map = kwargs.get("glyphs_png_map", None)    # ← .get() au lieu de .pop()
-
-
-#     # On JETTE tous les autres kwargs (c’est eux qui imposaient planet_size_px=24, etc.)
-#     #kwargs.clear()
-
-#     # Valeur par défaut si rien n’est passé
-#     if not background_path:
-#         background_path = "static/images/zodiaque_base.png"
-
-#     # Si pas de fond valide → placeholder
-#     if not os.path.exists(background_path):
-#         print(f"🟡 Pas de background valide ({background_path}) → placeholder 1×1.")
-#         _write_placeholder(outfile)
-#         return outfile
-
-#     try:
-#         # Appel OVERLAY UNIQUEMENT (aucun override parasite)
-#         return draw_overlay_on_background(
-#             background_path=background_path,
-#             outfile=outfile,
-#             planetes_deg=planetes_deg,
-#             maisons_deg=maisons_deg,
-#             asc=asc,
-#             mc=mc,
-#             glyphs_png_map=(glyphs_png_map or {}),
-#             # ⚠️ Forcez les paramètres pour les maisons à l'extérieur :
-#             house_label_on_sign=False,     # Numéros à l'extérieur
-#             draw_house_ring=True,          # Anneau des maisons visible
-#             house_label_offset=30,         # Distance des numéros
-#             house_ring_margin=40,          # Taille de l'anneau externe
-#             cusp_tick_len_px=20,          # Longueur des cuspides
-#             **kwargs  # Autres paramètres personnalisés
-#         )
-#     except Exception as e:
-#         print(f"⚠️ Erreur overlay: {e} → placeholder.")
-#         _write_placeholder(outfile)
-#         return outfile
+def _fingerprint_infos(infos: dict) -> str:
+    """Empreinte stable des infos utilisateur pour idempotence."""
+    try:
+        payload = json.dumps(infos or {}, sort_keys=True, ensure_ascii=False)
+    except Exception:
+        payload = str(infos or {})
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 # ---------- Wrapper sûr pour calcul_theme ----------
 def calcul_theme_safe(**kwargs):
@@ -214,6 +132,23 @@ def point_astral_blocs_complet():
     if not infos:
         return "❌ Données manquantes. Veuillez recommencer depuis le formulaire."
     
+    # --- Anti-reload (prod only) -------------------------------------------
+    ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1","true","yes")
+
+    if ANTI_RELOAD:
+        key = _fingerprint_infos(infos)
+        last_key = session.get("last_generation_key")
+        last_url = session.get("last_pdf_url")
+        last_at  = float(session.get("last_generation_at", 0))
+
+        # TTL = 15 minutes pour réutiliser le même PDF au lieu de régénérer
+        if last_key == key and last_url and (time.time() - last_at < 15 * 60):
+            logger.info("🚫 Anti-reload: même requête détectée, on réutilise %s", last_url)
+            # A) Si ta page 'paiement_effectue.html' affiche le lien si fourni :
+            return render_template("paiement_effectue.html", pdf_url=last_url, already=True)
+            # B) Sinon, redirige directement vers l’URL du PDF :
+            # return redirect(last_url)
+    # -----------------------------------------------------------------------
     warnings_list = []
     contexte = {}
     
@@ -562,115 +497,6 @@ def point_astral_blocs_complet():
         os.makedirs(output_dir, exist_ok=True)
         pdf_path = os.path.join(output_dir, f"{nom_fichier}.pdf")
 
-            
-        # # --- B) Générer la CARTE (PNG) + Data URI ---
-        # charts_dir = os.path.join(current_app.static_folder, "charts")
-        # os.makedirs(charts_dir, exist_ok=True)
-        # carte_png = os.path.join(charts_dir, f"carte_{nom_fichier}.png")
-
-        # # Fond Canva prioritaire (overlay)
-        # fond_canva = os.path.join(current_app.static_folder, "images", "zodiaque_base.png")
-        # if not os.path.exists(fond_canva):
-        #     print("⚠️ Fond Canva manquant, fallback matplotlib.")
-        #     fond_canva = None
-
-        # # Remap planètes -> overlay/wheel
-        # PLANET_KEY_MAP = {
-        #     "Soleil": "Sun", "Lune": "Moon", "Mercure": "Mercury",
-        #     "Vénus": "Venus", "Venus": "Venus", "Mars": "Mars",
-        #     "Jupiter": "Jupiter", "Saturne": "Saturn", "Uranus": "Uranus",
-        #     "Neptune": "Neptune", "Pluton": "Pluto",
-        # }
-        # ALLOWED_PLANETS = {"Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune","Pluto"}
-
-        # def _to_float(x):
-        #     try:
-        #         return float(x)
-        #     except Exception:
-        #         return None
-
-        # def _pluck_lon(v):
-        #     if isinstance(v, (int, float, str)):
-        #         return _to_float(v)
-        #     if isinstance(v, dict):
-        #         for k in ("degre", "deg", "lon", "longitude", "degree"):
-        #             if k in v:
-        #                 return _to_float(v[k])
-        #     return None
-
-        # planets_chart = {}
-        # if isinstance(planetes_deg, dict):
-        #     for k, v in planetes_deg.items():
-        #         key = PLANET_KEY_MAP.get(k, k)
-        #         if key not in ALLOWED_PLANETS:
-        #             continue
-        #         deg = _pluck_lon(v) if isinstance(v, dict) else _to_float(v)
-        #         if deg is not None:
-        #             planets_chart[key] = deg
-
-        # print("ASC:", asc, "| MC:", mc)
-        # print("Maisons (1-12):", [maisons_deg.get(i) for i in range(1, 13)])
-        # print("Planètes:", sorted(planets_chart.keys()))
-
-        # overlay_opts = dict(
-        #     draw_house_ring=False,
-        #     house_label_on_sign=True,
-        #     house_label_offset=10,
-        #     cusp_tick_len_px=16,
-        #     planet_offset_px=36,
-        #     planet_size_px=24,
-        #     planet_text_font_px=42,
-        #     house_font_px=18,
-        #     planet_font_path="static/fonts/AstroSymbols.ttf",
-        #     house_font_path="static/fonts/DejaVuSans.ttf",
-        #     respect_background_orientation=True,
-        # )
-
-        # # --- Génération de la carte avec fallback proprement imbriqué ---
-        # try:
-        #     # 1) Overlay sur fond Canva si dispo
-        #     draw_natal_chart(
-        #         planets_chart,
-        #         maisons_deg,
-        #         asc=asc, mc=mc,
-        #         outfile=carte_png,
-        #         background_path=fond_canva,
-        #         glyphs_png_map=None,
-        #         **overlay_opts
-        #     )
-        #     print("✅ Carte astrale (overlay) générée.")
-        # except Exception as overlay_err:
-        #     print(f"⚠️ Overlay échoué: {overlay_err} → fallback matplotlib")
-        #     try:
-        #         # 2) Fallback matplotlib
-        #         from utils.astro_chart import draw_chart_basic
-        #         maisons_list = [maisons_deg.get(i) for i in range(1, 13)]
-        #         draw_chart_basic(
-        #             asc_deg=float(asc) if asc is not None else 0.0,
-        #             house_cusps_deg=maisons_list,
-        #             output_path=carte_png,
-        #             planets_deg=planets_chart,
-        #             figsize=(5, 5),
-        #             dpi=150,
-        #             show_axes=False,
-        #         )
-        #         print("✅ Carte astrale (matplotlib) générée.")
-        #     except Exception as mpl_err:
-        #         # 3) Dernier recours : placeholder 1x1
-        #         print(f"⚠️ Fallback matplotlib indisponible: {mpl_err} → placeholder")
-        #         _write_placeholder(carte_png)
-
-        # # --- URLs & Data URI ---
-        # rel = os.path.relpath(carte_png, current_app.static_folder).replace("\\", "/")
-        # carte_astrale_url = url_for("static", filename=rel, _external=False)
-        # with open(carte_png, "rb") as f:
-        #     carte_astrale_data_uri = "data:image/png;base64," + base64.b64encode(f.read()).decode("ascii")
-
-        # # Fallback affichage web si pas d’URL fichier
-        # if not carte_astrale_url and carte_astrale_data_uri:
-        #     carte_astrale_url = carte_astrale_data_uri
-        #     print("ℹ️ Fallback: carte_astrale_url = data URI (affichage web).")
-
         # --- C) Construire le HTML PDF (avec carte + disclaimers) ---
         html_pdf = generer_html_final_harmonise_pdf_only(
             texte_structure=html_content,
@@ -707,6 +533,16 @@ def point_astral_blocs_complet():
         pdf_final_url = download_url or pdf_url  # S3 si dispo, sinon local
         if not download_url:
             warnings_list.append("Upload S3 indisponible, lien local utilisé.")
+
+            # --- Mémo anti-reload : on garde l’empreinte et l’URL pour 15 min ------
+        try:
+            session["last_generation_key"] = _fingerprint_infos(infos)
+            session["last_pdf_url"] = pdf_final_url         # l’URL S3 (ou ton lien final)
+            session["last_generation_at"] = time.time()
+            logger.info("✅ Anti-reload: empreinte enregistrée (url=%s)", pdf_final_url)
+        except Exception as e:
+            logger.warning("Anti-reload: impossible d'enregistrer l'état : %s", e)
+        # -----------------------------------------------------------------------
 
         # --- E) Envoi d’email NON bloquant ---
         try:
