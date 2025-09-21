@@ -48,9 +48,14 @@ def create_order():
     logger.info("[PayPal] create-order → %s", base_url)
 
     # 👉 Prix unique pour PayPal & Stripe (env: POINT_ASTRAL_PRICE_CENTS)
+    logger.info("[PayPal] ENV POINT_ASTRAL_PRICE_CENTS=%r",
+                os.environ.get("POINT_ASTRAL_PRICE_CENTS"))
+
     amount_cents = int(os.getenv("POINT_ASTRAL_PRICE_CENTS", "2900"))
     amount_eur = f"{amount_cents / 100:.2f}"  # ex: 2900 → "29.00"
-    logger.info("[PayPal] amount=%s EUR (src POINT_ASTRAL_PRICE_CENTS=%s)", amount_eur, amount_cents)
+
+    logger.info("[PayPal] amount=%s EUR (src POINT_ASTRAL_PRICE_CENTS=%s)",
+                amount_eur, amount_cents)
 
     payload = {
         "intent": "CAPTURE",
