@@ -216,6 +216,15 @@ Fais une analyse de max 15 lignes.
                     <p>Découvre bien plus avec nos analyses approfondies !</p>
                 </div>
             </div>
+            <!-- Disclaimer -->
+            <div style="margin-top:20px; padding-top:12px; border-top:1px solid #ddd; font-size:14px; color:#555;">
+                ⚠️ <strong>Note importante</strong> — Cette analyse gratuite est une
+                <strong>version simplifiée</strong> générée automatiquement à partir de vos
+                données de naissance. Elle donne un aperçu général mais reste
+                <strong>partielle et générique</strong>.<br>
+                Pour une interprétation complète, personnalisée et nuancée,
+                découvrez le <strong>Point Astral</strong> ✨
+            </div>
         """
 
         # 🔍 9) Données de debug pour toi (ajoutées à la réponse mais cachées)
