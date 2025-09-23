@@ -22,6 +22,7 @@ from utils.pdf_utils import html_to_pdf
 from routes.legales import legal_bp
 from utils.s3_utils import presign_key
 #from utils.prod_hardening import harden_app
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from routes import register_routes
 from routes.geocode import geocode_bp
@@ -90,6 +91,9 @@ app.config.update(
     REMEMBER_COOKIE_HTTPONLY=True,
     PREFERRED_URL_SCHEME="https",
 )
+
+# ✅ Indique à Flask les en-têtes du proxy Railway (X-Forwarded-*)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
 # --- Blueprint principal: créer -> définir routes -> enregistrer
 main_bp = Blueprint("main", __name__)
