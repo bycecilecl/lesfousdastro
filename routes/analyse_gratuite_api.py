@@ -225,6 +225,15 @@ Fais une analyse de max 15 lignes.
                 Pour une interprétation complète, personnalisée et nuancée,
                 découvrez le <strong>Point Astral</strong> ✨
             </div>
+            <!-- Exemple Point Astral -->
+            <div style="margin-top:25px; text-align:center;">
+                <a href="/static/Exemple_Point_Astral_Cecile_CL.pdf" target="_blank" 
+                style="display:inline-block; margin-top:10px; padding:12px 20px;
+                        background:#1f628e; color:white; text-decoration:none;
+                        border-radius:8px; font-weight:bold;">
+                📄 Voir un exemple complet de Point Astral
+                </a>
+            </div>
         """
 
         # 🔍 9) Données de debug pour toi (ajoutées à la réponse mais cachées)
