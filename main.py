@@ -95,6 +95,8 @@ app.config.update(
 # ✅ Indique à Flask les en-têtes du proxy Railway (X-Forwarded-*)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
+
+
 # --- Blueprint principal: créer -> définir routes -> enregistrer
 main_bp = Blueprint("main", __name__)
 
@@ -109,6 +111,16 @@ app.register_blueprint(legal_bp)
 from security_headers import add_security_headers
 add_security_headers(app)
 
+@app.before_request
+def enforce_https_and_root():
+    # Forcer HTTPS
+    if not request.is_secure:
+        return redirect(request.url.replace("http://", "https://", 1), code=301)
+
+    # Forcer le domaine racine (sans www)
+    host = request.headers.get("Host", "")
+    if host == "www.lesfousdastro.fr":
+        return redirect(request.url.replace("://www.lesfousdastro.fr", "://lesfousdastro.fr", 1), code=301)
 
 @main_bp.route("/")
 def index():
