@@ -44,28 +44,38 @@ def add_security_headers(app):
                 # Content-Security-Policy (CSP)
         # En local: CSP large (inclut PayPal sandbox). En prod: CSP plus serrée.
         if not _is_production():
-            csp_parts = [
+           csp_parts = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://www.gstatic.com https://www.google.com https://maps.googleapis.com",
-                "connect-src 'self' https://api.openai.com https://maps.googleapis.com https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com",
-                "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com",
-                "img-src 'self' data: https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https:",
+                # JS : Paypal + Google + Maps + StatCounter
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://www.gstatic.com https://www.google.com https://maps.googleapis.com https://www.statcounter.com",
+                # XHR / beacons : OpenAI, Maps, PayPal, StatCounter
+                "connect-src 'self' https://api.openai.com https://maps.googleapis.com https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://statcounter.com https://*.statcounter.com",
+                # iframes autorisés
+                "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://statcounter.com https://*.statcounter.com",
+                # Images : self + data + PayPal + StatCounter (pixel)
+                "img-src 'self' data: https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://c.statcounter.com",
+                # Styles / Fonts
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "font-src 'self' data: https://fonts.gstatic.com",
                 "object-src 'none'",
-                "frame-ancestors 'self'"
+                "frame-ancestors 'self'",
             ]
         else:
             csp_parts = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com",
-                "connect-src 'self' https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com https://api-m.paypal.com",
-                "frame-src 'self' https://www.paypal.com https://*.paypal.com",
-                "img-src 'self' data: https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com",
+                # JS : PayPal + StatCounter
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com https://www.statcounter.com",
+                # XHR / beacons : PayPal + StatCounter
+                "connect-src 'self' https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com https://api-m.paypal.com https://statcounter.com https://*.statcounter.com",
+                # iframes autorisés
+                "frame-src 'self' https://www.paypal.com https://*.paypal.com https://statcounter.com https://*.statcounter.com",
+                # Images : self + data + PayPal + StatCounter (pixel)
+                "img-src 'self' data: https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com https://c.statcounter.com",
+                # Styles / Fonts
                 "style-src 'self' 'unsafe-inline'",
                 "font-src 'self' data:",
                 "object-src 'none'",
-                "frame-ancestors 'self'"
+                "frame-ancestors 'self'",
             ]
 
         # ⚠️ Ici on écrase la CSP pour être sûr d’appliquer celle-ci
