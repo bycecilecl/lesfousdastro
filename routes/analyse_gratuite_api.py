@@ -46,7 +46,11 @@ def api_analyse_gratuite():
 
         # 🔒 Limite : email + IP
         ip = request.headers.get("X-Forwarded-For", request.remote_addr)
-        allowed, info = check_and_log_email_quota(email, ip=ip)
+        try:
+            allowed, info = check_and_log_email_quota(email, ip=ip)
+        except Exception as e:
+            print(f"[QUOTA] KO (fail-open) — email={email} ip={ip} err={e}")
+            allowed, info = True, {"email_count": 0, "ip_count": 0}
 
         email_count = info.get("email_count", 0)
         ip_count = info.get("ip_count", 0)
