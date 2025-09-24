@@ -31,7 +31,7 @@
 #   - Tolère l’absence de certaines clés (retourne des valeurs par défaut lisibles).
 #
 # Où c’est utilisé :
-#   - Préparation de texte “compact et exploitable” pour les prompts LLM (Point Astral).
+#   - Préparation de texte “compact et exploitable” pour les prompts LLM (Flash Astral).
 #   - Peut servir de bloc récapitulatif lisible dans un export ou un email.
 # ─────────────────────────────────────────────────────────────────────────────
 

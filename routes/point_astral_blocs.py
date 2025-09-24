@@ -155,11 +155,11 @@ def point_astral_blocs_complet():
     contexte = {}
     
     task_id = session.get('current_task_id')
-    print(f"Début analyse Point Astral avec progression - Task ID: {task_id}")
+    print(f"Début analyse Flash Astral avec progression - Task ID: {task_id}")
     print(f"🔍 DEBUG SESSION COMPLÈTE: {infos}")
     print(f"🔍 DEBUG CLÉS SESSION: {list(infos.keys()) if infos else 'None'}")
     print(f"\n{'='*60}")
-    print(f"🎬 Point_Astral_Bloc DÉBUT ANALYSE POINT ASTRAL BLOCS (harmonisé)")
+    print(f"🎬 Point_Astral_Bloc DÉBUT ANALYSE FLASH ASTRAL BLOCS (harmonisé)")
     print(f"👤Point_Astral_Bloc Nom: {infos.get('nom', 'Anonyme')}")
     print(f"{'='*60}")
     
@@ -550,10 +550,10 @@ def point_astral_blocs_complet():
             dest_email = (infos.get("email") or "").strip()
             if dest_email:
                 prenom = (infos.get("nom") or "").split()[0] or "toi"
-                sujet_email = "Ton Point Astral est prêt"
+                sujet_email = "Ton FLash Astral est prêt"
                 body_txt = (
                     f"Bonjour {prenom},\n\n"
-                    "Merci pour ta commande ! Ton Point Astral est prêt ✨\n\n"
+                    "Merci pour ta commande ! Ton Flash Astral est prêt ✨\n\n"
                     "Télécharge ton PDF ici :\n"
                     f"{pdf_final_url}\n\n"
                     "Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.\n\n"
@@ -562,7 +562,7 @@ def point_astral_blocs_complet():
                 )
                 body_html = (
                     f"<p>Bonjour {prenom},</p>"
-                    "<p>Merci pour ta commande ! Ton Point Astral est prêt ✨</p>"
+                    "<p>Merci pour ta commande ! Ton Flash Astral est prêt ✨</p>"
                     f"<p>📄 <a href=\"{pdf_final_url}\" target=\"_blank\">Télécharge ton PDF ici</a></p>"
                     "<p>Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.</p>"
                     "<p>À bientôt,<br>Les Fous d’Astro – By Cécile CL</p>"
@@ -757,7 +757,7 @@ def generer_html_final_harmonise_pdf_only(
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Point Astral - {nom}</title>
+    <title>Flash Astral - {nom}</title>
     <style>
         body {{
             font-family: Georgia, serif;
@@ -842,7 +842,7 @@ def generer_html_final_harmonise_pdf_only(
     <div class="header" style="text-align: center; margin-bottom: 20px;">
         {logo_html}
         <h1 style="margin: 0; font-size: 24px; color: #333;">
-            🌟 Point Astral - {nom}
+            🌟 Flash Astral - {nom}
         </h1>
 
         <!-- ↓ AJOUT : centrage sûr -->
@@ -852,15 +852,13 @@ def generer_html_final_harmonise_pdf_only(
             </p>
         </div>
     </div>
-
         <div class="disclaimer" style="background:#f8f9fa;border:1px solid #dee2e6;
             padding:16px;margin:20px 0;border-radius:8px;font-size:13px;line-height:1.5;">
             <p style="margin:0 0 8px 0;">
-                <strong>⚠️ À propos de cette analyse :</strong><br>
-                Ce Point Astral n'est pas fait pour te brosser dans le sens du poil ! 
-                Il explore tes zones d'ombre autant que tes forces, dans l'objectif de révéler ton potentiel authentique. 
-                Cette analyse peut soulever des aspects inconfortables de ta personnalité, 
-                mais ne te laisse pas décourager : chaque ombre révélée est une opportunité de croissance.
+                <strong>⚠️ Le Flash Astral est une lecture automatisée express (≈4 pages).</strong><br>
+                Il n’est en aucun cas <u>comparable</u> avec une analyse manuelle réalisée par mes soins, 
+                où je prends en compte ton vécu, ton niveau de conscience, et où j’apporte une interprétation incarnée et sur mesure.  
+                <br>Le Flash Astral donne un aperçu rapide de tes grands axes ; l’analyse manuelle est une plongée profonde et unique.
             </p>
 
             <p style="margin:0 0 8px 0;">
@@ -895,7 +893,6 @@ def generer_html_final_harmonise_pdf_only(
                 </a>
             </p>
             </div>
-
         <main>
             {texte_structure}
         </main>

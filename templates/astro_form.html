@@ -1648,10 +1648,10 @@
                             <span class="status available">Clique pour sélectionner</span>
                         </div>
                         
-                        <div class="option-card featured" onclick="addToCart('point_astral', 'Point Astral', 29, this)">
+                        <div class="option-card featured" onclick="addToCart('flash_astral', 'Flash Astral', 29, this)">
                             <div class="badge popular">PRIX LANCEMENT</div>
                             <span class="icon">📊</span>
-                            <h4>Point Astral</h4>
+                            <h4>Flash Astral</h4>
                             <p>Analyse occidentale sur 3/4 pages sur les grands axes du thème<br> + Nakshatra de la lune</p>
                             <div class="price">
                                 <span class="old-price">35€</span> 29€
@@ -1743,7 +1743,7 @@
         <div class="testimonial-card">
             <div class="testimonial-content">
                 <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                <p>"Je ne peux que recommander ce point astral. Étant moi même astrologue, je me suis complètement reconnue dans cette analyse mais le plus dingue c'est justement ce qu'il y a à relever, à travailler qui ressort dans ce point astral ! Una analyse qui correspond en tout point à qui je suis et à ce que je dois travailler 😝 .Je ne peux que recommander ce point astral qui n'est autre que le fruit du travail d'une astrologue passionnée. Encore Bravo Cécile pour ton travail 🫶"</p>
+                <p>"Je ne peux que recommander ce flash astral. Étant moi même astrologue, je me suis complètement reconnue dans cette analyse mais le plus dingue c'est justement ce qu'il y a à relever, à travailler qui ressort dans ce flash astral ! Una analyse qui correspond en tout point à qui je suis et à ce que je dois travailler 😝 .Je ne peux que recommander ce flash astral qui n'est autre que le fruit du travail d'une astrologue passionnée. Encore Bravo Cécile pour ton travail 🫶"</p>
             </div>
             <div class="testimonial-author">
                 <div class="author-avatar">👨</div>
@@ -1771,7 +1771,7 @@
         <div class="testimonial-card">
             <div class="testimonial-content">
                 <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                <p>"J'ai été subjugée par l'exactitude des propos. Moi qui ai souvent l'impression de me chercher, ce point a lu en moi comme dans un livre ouvert et en même temps, il a permis de mettre des mots concrets sur des notions que je sentais floues en moi. De nombreux petits conseils parsèment le Point Astral et nous repartons avec des outils concrets. Un point vivement conseillé pour découvrir de manière synthétique son profil astro. Merci Cécile pour ton travail !"</p>
+                <p>"J'ai été subjugée par l'exactitude des propos. Moi qui ai souvent l'impression de me chercher, ce point a lu en moi comme dans un livre ouvert et en même temps, il a permis de mettre des mots concrets sur des notions que je sentais floues en moi. De nombreux petits conseils parsèment le Flash Astral et nous repartons avec des outils concrets. Un point vivement conseillé pour découvrir de manière synthétique son profil astro. Merci Cécile pour ton travail !"</p>
             </div>
             <div class="testimonial-author">
                 <div class="author-avatar">👨</div>
@@ -1819,7 +1819,7 @@
             <div class="packs-grid">
                 <div class="pack-card" onclick="showComingSoon('Pack 3 Modules')">
                     <div class="pack-title">🎯 Pack 3 Modules</div>
-                    <div class="pack-content">3 analyses cosmiques de ton choix (sans Point Astral)</div>
+                    <div class="pack-content">3 analyses cosmiques de ton choix (sans Flash Astral)</div>
                     <div class="pack-price">
                         <span class="pack-price-value">Prix à définir</span>
                     </div>
@@ -1828,7 +1828,7 @@
                 
                 <div class="pack-card" onclick="showComingSoon('Pack Découverte')">
                     <div class="pack-title">🎁 Pack Découverte</div>
-                    <div class="pack-content">Point Astral + 2 analyses cosmiques de ton choix</div>
+                    <div class="pack-content">Flash Astral + 2 analyses cosmiques de ton choix</div>
                     <div class="pack-price">
                         <span class="pack-price-value">Prix à définir</span>
                     </div>
@@ -1837,7 +1837,7 @@
 
                 <div class="pack-card" onclick="showComingSoon('Pack Complet')">
                     <div class="pack-title">✨ Pack Complet</div>
-                    <div class="pack-content">Point Astral + 3 analyses cosmiques de ton choix</div>
+                    <div class="pack-content">Flash Astral + 3 analyses cosmiques de ton choix</div>
                     <div class="pack-price">
                         <span class="pack-price-value">Prix à définir</span>
                     </div>
@@ -1846,7 +1846,7 @@
 
                 <div class="pack-card" onclick="showComingSoon('Pack Intégral')">
                     <div class="pack-title">🌟 Pack Intégral</div>
-                    <div class="pack-content">Point Astral + 4 analyses cosmiques de ton choix</div>
+                    <div class="pack-content">Flash Astral + 4 analyses cosmiques de ton choix</div>
                     <div class="pack-price">
                         <span class="pack-price-value">Prix à définir</span>
                     </div>
@@ -2004,7 +2004,7 @@
                     <h4>Nos Services</h4>
                     <ul class="footer-links">
                         <li><a href="#analyses">Analyse Gratuite</a></li>
-                        <li><a href="#analyses">Point Astral</a></li>
+                        <li><a href="#analyses">Flash Astral</a></li>
                         <li><a href="#analyses">Analyses Cosmiques</a></li>
                         <li><a href="#packs">Packs Découverte</a></li>
                         <li><a href="#consultations">Consultations</a></li>
@@ -2117,7 +2117,7 @@
                     value: total.toFixed(2),
                     currency_code: "{{ PAYPAL_CURRENCY }}"
                     },
-                    description: order?.description || "Point Astral"
+                    description: order?.description || "Flash Astral"
                 }]
                 });
             },
@@ -2497,7 +2497,7 @@
                 let packDetails = '';
                 if (selectedPack.analyses) {
                     const analysisNames = {
-                        'point_astral': 'Point Astral',
+                        'flash_astral': 'Flash Astral',
                         'potentiels_defis': 'Potentiels et Défis',
                         'mission_ame': 'Mission d\'Âme',
                         'carriere': 'Carrière/Vocation',

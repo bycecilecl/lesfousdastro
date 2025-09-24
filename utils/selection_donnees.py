@@ -579,7 +579,7 @@ def construire_payload_analyse_gratuite(data_theme: Dict[str, Any], max_orbe: fl
     }
 
 def construire_payload_point_astral(data_theme: Dict[str, Any], max_orbe: float = 5.0) -> Dict[str, Any]:
-    """Filtrage pour le point astral : idem analyse gratuite + nakshatra(Lune) + nakshatra(maître Asc)."""
+    """Filtrage pour le flash astral : idem analyse gratuite + nakshatra(Lune) + nakshatra(maître Asc)."""
     base = construire_payload_analyse_gratuite(data_theme, max_orbe)
     nk = _extraire_nakshatra_lune_et_maitre_asc(data_theme)
 

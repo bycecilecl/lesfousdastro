@@ -234,7 +234,7 @@ def generer_theme():
 def preparer_donnees_analyse(data):
     """
     Range les 'points_forts' existants en Axes Majeurs et prépare un bloc texte
-    prêt à injecter dans le Point Astral.
+    prêt à injecter dans le Flash Astral.
     """
     # 0) Sécurité : si points_forts manquants, on tente de les extraire
     raw_pf = data.get("points_forts")
@@ -273,7 +273,7 @@ def preparer_donnees_analyse(data):
 # preparer_donnees_analyse(data)
 # ------------------------------------------------------------
 # But :
-#   Préparer les données pour l'analyse complète (Point Astral).
+#   Préparer les données pour l'analyse complète (Flash Astral).
 #   - Vérifie ou extrait les "points forts" depuis le thème.
 #   - Nettoie et normalise la liste.
 #   - Classe ces points forts en "axes majeurs" grâce à organiser_points_forts.
@@ -436,7 +436,7 @@ def tous_les_placements():
 #
 # 🔹 Utilité :
 #   - Utile pour afficher une vue complète du thème sans passer par
-#     l’analyse gratuite ou le Point Astral.
+#     l’analyse gratuite ou le Flash Astral.
 #   - Pratique pour visualiser ou déboguer les calculs bruts.
 # -----------------------------------------------------------
 
@@ -552,80 +552,15 @@ def analyse_post():
 # - Lance l’application Flask en mode debug, accessible sur toutes les IP locales (0.0.0.0)
     
 
-
 @app.route("/paiement/effectue")
 def paiement_effectue():
     return render_template("paiement_effectue.html")
 
-
-
-
-
-
-# 📝 Route POST /analyse_point_astral
-# -------------------------------------------
-# Cette route gère la génération complète d’un Point Astral payant.
-# Étapes :
-# 1. Vérifie le consentement obligatoire.
-# 2. Récupère et valide les données de naissance envoyées via formulaire.
-# 3. Stocke les infos personnelles en session pour affichage ou téléchargement ultérieur.
-# 4. Calcule le thème natal via calcul_theme().
-# 5. Vérifie la validité des données calculées.
-# 6. Prépare et ajoute les "Axes Majeurs" au jeu de données.
-# 7. Génère l’analyse complète via analyse_point_astral_avec_sections() et un appel LLM.
-# 8. Sauvegarde l’analyse HTML en session pour un éventuel export PDF.
-# 9. Retourne la page HTML point_astral_resultat.html avec l’analyse prête à afficher.
-# En cas d’erreur → affiche la page erreur.html avec le message adapté.
-
-# @app.route("/analyse_point_astral", methods=["POST"])
-# def analyse_point_astral_route():
-#     """Route pour générer l'analyse Point Astral"""
-#     try:
-#         form_data = request.form
         
-#         # Vérification du consentement
-#         if not form_data.get("consentement"):
-#             return "Consentement obligatoire pour générer l'analyse", 400
-
-#         # Récupération des données du formulaire
-#         nom = form_data.get('nom', 'Analyse Anonyme')
-#         date_naissance = form_data.get('date_naissance')
-#         heure_naissance = form_data.get('heure_naissance')
-#         lieu_naissance = form_data.get('lieu_naissance')
-
-#         # Validation des données obligatoires
-#         if not all([nom, date_naissance, heure_naissance, lieu_naissance]):
-#             return "Toutes les informations de naissance sont requises", 400
-
-#         print(f"🚀 Génération Point Astral pour {nom}")
-        
-#         # Stockage des informations en session
-#         infos_personnelles = {
-#             'nom': nom,
-#             'date_naissance': date_naissance,
-#             'heure_naissance': heure_naissance,
-#             'lieu_naissance': lieu_naissance
-#         }
-#         session["infos_utilisateur"] = infos_personnelles
-
-#         # Calcul du thème natal
-#         print("📊 Calcul du thème natal...")
-#         data = calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance)
-        
-#         # Validation des données calculées
-#         if not valider_donnees_avant_analyse(data):
-#             return "Erreur dans le calcul du thème natal. Vérifiez vos données de naissance.", 400
-        
-#         # 🔴 AJOUT ICI : on enrichit data avec les Axes Majeurs (tri + bloc prêt)
-#         data = preparer_donnees_analyse(data)
-#         print("✅ Axes majeurs prêts pour LLM et template.")
-
-        
-        
-        # Génération de l'analyse Point Astral par BLOC
+        # Génération de l'analyse FLash Astral par BLOC
 @app.route("/analyse_point_astral", methods=["POST"])
 def analyse_point_astral_route():
-    """Route pour générer l'analyse Point Astral - VERSION BLOCS (5 prompts)"""
+    """Route pour générer l'analyse Flash Astral - VERSION BLOCS (5 prompts)"""
     try:
         form_data = request.form
         
@@ -651,7 +586,7 @@ def analyse_point_astral_route():
                    infos_personnelles['heure_naissance'], infos_personnelles['lieu_naissance']]):
             return "Toutes les informations de naissance sont requises", 400
 
-        print(f"🚀 Main Génération Point Astral BLOCS pour {infos_personnelles['nom']}")
+        print(f"🚀 Main Génération Flash Astral BLOCS pour {infos_personnelles['nom']}")
         
         # Stockage en session
         session["infos_utilisateur"] = infos_personnelles
@@ -666,7 +601,7 @@ def analyse_point_astral_route():
 
         return render_template(
             'erreur.html',
-            titre="Erreur dans l'analyse Point Astral",
+            titre="Erreur dans l'analyse Flash Astral",
             message=f"Une erreur s'est produite lors de la génération : {str(e)}",
             details="Veuillez vérifier vos données de naissance et réessayer."
         ), 500
@@ -674,7 +609,7 @@ def analyse_point_astral_route():
 
 # 📝 Route GET /telecharger_point_astral/<nom_fichier>
 # ----------------------------------------------------
-# Sert à télécharger le Point Astral sous forme de fichier PDF.
+# Sert à télécharger le Flash Astral sous forme de fichier PDF.
 # Étapes :
 # 1. Récupère le HTML de l’analyse en session (clé : "html_point_astral_<nom_fichier>").
 # 2. Si absent → retourne une erreur 404.
@@ -686,7 +621,7 @@ def analyse_point_astral_route():
 
 @app.route("/telecharger_point_astral/<nom_fichier>")
 def telecharger_point_astral(nom_fichier):
-    """Route pour télécharger le PDF du Point Astral"""
+    """Route pour télécharger le PDF du Flash Astral"""
     try:
         # Récupérer le contenu HTML de la session
         html_content = session.get(f"html_point_astral_{nom_fichier}")
@@ -730,7 +665,7 @@ def telecharger_point_astral(nom_fichier):
 
 # 📝 Route GET /apercu_point_astral/<nom_fichier>
 # ------------------------------------------------
-# Sert à afficher un aperçu HTML du Point Astral dans le navigateur.
+# Sert à afficher un aperçu HTML du Flash Astral dans le navigateur.
 # Étapes :
 # 1. Récupère le HTML de l’analyse en session.
 # 2. Si absent → retourne une erreur 404.
@@ -740,7 +675,7 @@ def telecharger_point_astral(nom_fichier):
 
 @app.route("/apercu_point_astral/<nom_fichier>")
 def apercu_point_astral(nom_fichier):
-    """Route pour prévisualiser le Point Astral en HTML"""
+    """Route pour prévisualiser le Flash Astral en HTML"""
     try:
         # Récupérer le contenu HTML de la session
         html_content = session.get(f"html_point_astral_{nom_fichier}")

@@ -124,7 +124,7 @@ def organiser_points_forts(points_forts: list[str]) -> dict:
 #        - Axes cardinaux (signes)
 #   4) Retourne le texte prêt à injecter dans l’analyse.
 # Utilité : Facilite l’intégration lisible et hiérarchisée des axes majeurs
-#           dans le corps du Point Astral.
+#           dans le corps du Flash Astral.
 # ────────────────────────────────────────────────
 
 def formater_axes_majeurs(axes: dict) -> str:

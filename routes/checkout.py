@@ -1,6 +1,6 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # BLUEPRINT : checkout_bp
-# Rôle : gère le paiement Stripe pour le "Point Astral complet".
+# Rôle : gère le paiement Stripe pour le "Flash Astral complet".
 # Dépendances :
 #   - STRIPE_SECRET_KEY (env) : clé secrète Stripe (compte live ou test)
 #   - flask.session : stocke les infos utilisateur avant redirection vers Stripe
@@ -31,8 +31,8 @@ logger.info("[Stripe] key mode = %s", "LIVE" if (stripe.api_key or "").startswit
 #   - nom, email, date_naissance, heure_naissance, lieu_naissance
 # Effets :
 #   - Stocke ces infos dans flask.session['infos_utilisateur'] pour les réutiliser
-#     après paiement (génération du Point Astral).
-#   - Crée stripe.checkout.Session avec 1 ligne "Point Astral complet" à 35 €.
+#     après paiement (génération du Flash Astral).
+#   - Crée stripe.checkout.Session avec 1 ligne "Flash Astral complet" à 35 €.
 #   - Redirige (303) vers checkout_session.url (Stripe Hosted Checkout).
 # URLs :
 #   - success_url → checkout_bp.paiement_effectue (confirmation locale)
@@ -67,7 +67,7 @@ def checkout():
         line_items=[{
             'price_data': {
                 'currency': 'eur',
-                'product_data': {'name': 'Point Astral complet'},
+                'product_data': {'name': 'Flash Astral complet'},
                 'unit_amount': amount_cents,
             },
             'quantity': 1,
@@ -85,7 +85,7 @@ def checkout():
 # Effets :
 #   - Redirige vers point_astral.afficher_point_astral
 #     (qui lira session['infos_utilisateur'], calculera le thème,
-#      générera le Point Astral et l’enverra).
+#      générera le Flash Astral et l’enverra).
 # Remarques :
 #   - Sans webhook, cette confirmation repose uniquement sur la redirection
 #     Stripe : pour une validation anti-fraude/anti-recharge, implémente

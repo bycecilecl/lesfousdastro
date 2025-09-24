@@ -222,16 +222,16 @@ Fais une analyse de max 15 lignes.
                 <strong>version simplifiée</strong> générée automatiquement à partir de vos
                 données de naissance. Elle donne un aperçu général mais reste
                 <strong>partielle et générique</strong>.<br>
-                Pour une interprétation complète, personnalisée et nuancée,
-                découvrez le <strong>Point Astral</strong> ✨
+                Pour une interprétation plus complète et personnalisée,
+                découvrez le <strong>Flash Astral</strong> ✨
             </div>
-            <!-- Exemple Point Astral -->
+            <!-- Exemple FLash Astral -->
             <div style="margin-top:25px; text-align:center;">
-                <a href="/static/Exemple_Point_Astral_Cecile_CL.pdf" target="_blank" 
+                <a href="/static/Exemple_Flash_Astral_Cecile.pdf" target="_blank" 
                 style="display:inline-block; margin-top:10px; padding:12px 20px;
                         background:#1f628e; color:white; text-decoration:none;
                         border-radius:8px; font-weight:bold;">
-                📄 Voir un exemple complet de Point Astral
+                📄 Voir un exemple complet de FLash Astral
                 </a>
             </div>
         """

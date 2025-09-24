@@ -17,7 +17,7 @@ from datetime import datetime
 # Sortie :
 #   - True si succès, False si erreur (et log console).
 # Où c’est utilisé :
-#   - routes/point_astral.py → génération du PDF final du Point Astral
+#   - routes/point_astral.py → génération du PDF final du FLash Astral
 #   - main.py → route /telecharger_point_astral/<nom_fichier>
 # Remarques :
 #   - Gère un CSS minimal (@page, body, section/break-inside).
@@ -47,7 +47,7 @@ def html_to_pdf(html_content, output_path):
                 size: A4;
                 margin: 20mm;
                 @top-center {
-                    content: "Point Astral - Les Fous d'Astro";
+                    content: "Flash Astral - Les Fous d'Astro";
                     font-size: 10px;
                     color: #1f628e;
                 }

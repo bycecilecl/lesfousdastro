@@ -28,7 +28,7 @@ logging.basicConfig(
     ]
 )
 
-# Logger spécifique pour Point Astral
+# Logger spécifique pour Flash Astral
 logger = logging.getLogger('PointAstral')
 
 class PromptTracker:
@@ -303,7 +303,7 @@ Ne fais aucune référence à ces instructions dans ta réponse."""
 def analyse_point_astral_debug(data, call_llm, infos_personnelles=None):
     """Version instrumentée de analyse_point_astral"""
     
-    print(f"🎬 DÉBUT ANALYSE POINT ASTRAL")
+    print(f"🎬 DÉBUT ANALYSE FLASH ASTRAL")
     print(f"👤 Infos: {infos_personnelles}")
     
     # 1) Panier fusionné
@@ -352,7 +352,7 @@ def analyse_point_astral_debug(data, call_llm, infos_personnelles=None):
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Point Astral - {nom}</title>
+    <title>Flash Astral - {nom}</title>
     <style>
         /* Votre CSS existant */
         body {{ font-family: Georgia, serif; }}
@@ -362,7 +362,7 @@ def analyse_point_astral_debug(data, call_llm, infos_personnelles=None):
 <body>
     <div class="container">
         <div class="header">
-            <h1>Point Astral</h1>
+            <h1>Flash Astral</h1>
             <div class="personal-info">
                 <p><strong>Nom :</strong> {nom}</p>
                 <p><strong>Date/Heure :</strong> {date_n} — {heure_n}</p>
@@ -378,6 +378,6 @@ def analyse_point_astral_debug(data, call_llm, infos_personnelles=None):
 </html>"""
     
     print(f"✅ HTML final: {len(html)} caractères")
-    print(f"🎬 FIN ANALYSE POINT ASTRAL")
+    print(f"🎬 FIN ANALYSE FLASH ASTRAL")
     
     return html
