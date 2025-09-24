@@ -46,3 +46,63 @@ def ajouter_email_au_sheet(email, nom="Inconnu"):
     sheet = sh.sheet1
     sheet.append_row([email, nom])
     print(f"✅ Email ajouté à Google Sheet : {email}, {nom}")
+
+    # --- Placements -> Google Sheets (onglet "placements") -----------------------
+
+def _get_spreadsheet(client):
+    """Ouvre la feuille soit par ID (si SHEETS_SPREADSHEET_ID), soit par titre."""
+    spreadsheet_id = os.getenv("SHEETS_SPREADSHEET_ID")
+    spreadsheet_title = os.getenv("SHEETS_SPREADSHEET_TITLE", "mailing_list_astro")
+    return client.open_by_key(spreadsheet_id) if spreadsheet_id else client.open(spreadsheet_title)
+
+def _get_or_create_worksheet(sh, title="placements", rows=1000, cols=40):
+    try:
+        return sh.worksheet(title)
+    except Exception:
+        # crée l’onglet s’il n’existe pas
+        return sh.add_worksheet(title=title, rows=str(rows), cols=str(cols))
+
+def ajouter_placements_au_sheet(donnees: dict):
+    """
+    Push une ligne dans l’onglet 'placements'.
+    -> Crée l’onglet si besoin
+    -> Ajoute l’en-tête si vide
+    -> Log très détaillé pour comprendre ce qui se passe en prod
+    """
+    if not isinstance(donnees, dict) or not donnees:
+        print("❌ [PLACEMENTS] donnees invalide (pas un dict non vide).")
+        return
+
+    client = _get_client()
+    spreadsheet_id = os.getenv("SHEETS_SPREADSHEET_ID")
+    spreadsheet_title = os.getenv("SHEETS_SPREADSHEET_TITLE", "mailing_list_astro")
+
+    # Ouvrir le spreadsheet (ID prioritaire)
+    if spreadsheet_id:
+        print(f"🔎 [PLACEMENTS] Ouverture par ID: {spreadsheet_id}")
+        sh = client.open_by_key(spreadsheet_id)
+    else:
+        print(f"🔎 [PLACEMENTS] Ouverture par Titre: {spreadsheet_title}")
+        sh = client.open(spreadsheet_title)
+
+    # Récupérer ou créer l’onglet 'placements'
+    try:
+        ws = sh.worksheet("placements")
+        print("ℹ️ [PLACEMENTS] Onglet 'placements' trouvé.")
+    except Exception:
+        print("ℹ️ [PLACEMENTS] Onglet 'placements' absent -> création.")
+        ws = sh.add_worksheet(title="placements", rows="1000", cols="50")
+
+    # Lire l’existant pour savoir si on doit écrire l’en-tête
+    existing = ws.get_all_values()
+    headers = list(donnees.keys())
+    print(f"ℹ️ [PLACEMENTS] Colonnes à écrire: {len(headers)} -> {headers[:6]}{' ...' if len(headers)>6 else ''}")
+
+    if not existing:
+        print("ℹ️ [PLACEMENTS] Onglet vide -> écriture de l'en-tête.")
+        ws.append_row(headers)
+
+    # Écrire la ligne
+    row = [str(donnees.get(k, "")) for k in headers]
+    ws.append_row(row)
+    print("✅ [PLACEMENTS] Ligne ajoutée dans Google Sheets (onglet 'placements').")
