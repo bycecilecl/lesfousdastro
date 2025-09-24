@@ -8,6 +8,7 @@ from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.enregistrement_placements import enregistrer_placements_utilisateur
 from utils.google.sheets_writer import ajouter_email_au_sheet
 from utils.email_sender import envoyer_email_avec_analyse
+from utils.email_quota import check_and_log_email_quota
 from threading import Thread
 import textwrap
 from dotenv import load_dotenv
@@ -42,6 +43,26 @@ def api_analyse_gratuite():
         gender          = data.get("gender")  # "male" | "female" | None
 
         print(f"DEBUG: nom reçu = '{nom}'")
+
+        # 🔒 Limite : email + IP
+        ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+        allowed, info = check_and_log_email_quota(email, ip=ip)
+
+        email_count = info.get("email_count", 0)
+        ip_count = info.get("ip_count", 0)
+
+        if not allowed:
+            html_limit = f"""
+                <div style="padding:16px; border-radius:12px; background:#fff3cd; border:1px solid #ffeeba; color:#856404">
+                    <strong>Limite atteinte pour aujourd'hui</strong><br>
+                    Reviens demain ou découvre nos autres analyses !✨
+                </div>
+            """
+            print(f"[QUOTA] Bloqué: email={email} ({email_count}), ip={ip} ({ip_count})")
+            return jsonify({"ok": True, "html": html_limit}), 200
+
+        # Optionnel : log pour savoir qu'on a autorisé et où on en est
+        print(f"[QUOTA] Autorisé: email={email} ({email_count}), ip={ip} ({ip_count})")
 
         # 📋 1) Enregistrement utilisateur (comme dans l'ancienne version)
         # Simuler request.form pour la fonction existante
