@@ -73,28 +73,32 @@ def api_analyse_gratuite():
 
         print(f"DEBUG: theme['nom'] = '{theme.get('nom')}'")
 
-        # 📊 3) Enregistrement des placements (CSV) + (option) push Google Sheets
+        # 📊 3) Enregistrement des placements (CSV) + push Google Sheets
         infos_personnelles = {
             'nom': nom,
             'date_naissance': date_naissance,
             'heure_naissance': heure_naissance,
             'lieu_naissance': lieu_naissance
         }
+
+        print("[PLACEMENTS] Début bloc placements")
         try:
             donnees_placements = enregistrer_placements_utilisateur(theme, infos_personnelles)
-            print(f"✅ Placements enregistrés (CSV) — {len(donnees_placements) if donnees_placements else 0} champs")
+            print(f"[PLACEMENTS] CSV OK — {len(donnees_placements) if donnees_placements else 0} champs")
         except Exception as e:
             donnees_placements = None
-            print(f"⚠️ Erreur enregistrement placements (CSV) : {e}")
+            print(f"[PLACEMENTS] ⚠️ CSV KO — {e}")
 
-        # ➜ (Option PROD) pousser aussi dans Google Sheets / onglet 'placements'
+        # ➜ Envoi vers Google Sheets (onglet 'placements')
         if donnees_placements:
             try:
                 from utils.google.sheets_writer import ajouter_placements_au_sheet
                 ajouter_placements_au_sheet(donnees_placements)
-                print("✅ Placements ajoutés dans Google Sheets (onglet 'placements').")
+                print("[PLACEMENTS] ✅ Sheets OK — ligne ajoutée dans onglet 'placements'")
             except Exception as e:
-                print(f"⚠️ Placements non ajoutés au Google Sheet : {e}")
+                print(f"[PLACEMENTS] ⚠️ Sheets KO — {e}")
+        else:
+            print("[PLACEMENTS] Rien à pousser vers Sheets (donnees_placements=None)")
 
         # 📝 4) Résumé + formats (comme dans l'ancienne version)
         resume_list = analyse_gratuite(
