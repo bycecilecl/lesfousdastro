@@ -73,7 +73,7 @@ def api_analyse_gratuite():
 
         print(f"DEBUG: theme['nom'] = '{theme.get('nom')}'")
 
-        # 📊 3) Enregistrement des placements (comme dans l'ancienne version)
+        # 📊 3) Enregistrement des placements (CSV) + (option) push Google Sheets
         infos_personnelles = {
             'nom': nom,
             'date_naissance': date_naissance,
@@ -81,12 +81,20 @@ def api_analyse_gratuite():
             'lieu_naissance': lieu_naissance
         }
         try:
-            enregistrer_placements_utilisateur(theme, infos_personnelles)
-            print("✅ Placements enregistrés")
+            donnees_placements = enregistrer_placements_utilisateur(theme, infos_personnelles)
+            print(f"✅ Placements enregistrés (CSV) — {len(donnees_placements) if donnees_placements else 0} champs")
         except Exception as e:
-            print(f"⚠️ Erreur enregistrement placements : {e}")
+            donnees_placements = None
+            print(f"⚠️ Erreur enregistrement placements (CSV) : {e}")
 
-        print("🧭 ASCENDANT renvoyé par calcul_theme :", theme.get("ascendant"))
+        # ➜ (Option PROD) pousser aussi dans Google Sheets / onglet 'placements'
+        if donnees_placements:
+            try:
+                from utils.google.sheets_writer import ajouter_placements_au_sheet
+                ajouter_placements_au_sheet(donnees_placements)
+                print("✅ Placements ajoutés dans Google Sheets (onglet 'placements').")
+            except Exception as e:
+                print(f"⚠️ Placements non ajoutés au Google Sheet : {e}")
 
         # 📝 4) Résumé + formats (comme dans l'ancienne version)
         resume_list = analyse_gratuite(
@@ -152,12 +160,19 @@ Fais une analyse de max 15 lignes.
         # 📧 7) Envoi email + Google Sheets (comme dans l'ancienne version)
         prenom = theme['nom'].split()[0]
         
-        # Ajout au Google Sheet
+        # Ajout au Google Sheet — logs détaillés
+        print(f"[LEAD] Tentative d'ajout au Google Sheet — email='{email}', prenom='{prenom}'")
+
         try:
+            if not email or "@" not in email:
+                raise ValueError(f"Email invalide: {email!r}")
+
             ajouter_email_au_sheet(email, prenom)
-            print("✅ Email ajouté au Google Sheet")
+            print("✅ [LEAD] Ajout Google Sheet OK")
         except Exception as e:
-            print(f"⚠️ Erreur ajout Google Sheet : {e}")
+            import traceback
+            print(f"❌ [LEAD] Ajout Google Sheet KO — type={type(e).__name__} — msg={e}")
+            traceback.print_exc()
 
         # Envoi par email
         print("📧 Envoi de l'analyse par email...")

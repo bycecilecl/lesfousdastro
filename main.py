@@ -23,6 +23,8 @@ from routes.legales import legal_bp
 from utils.s3_utils import presign_key
 #from utils.prod_hardening import harden_app
 from werkzeug.middleware.proxy_fix import ProxyFix
+from routes.stripe_webhook import stripe_webhook_bp
+
 
 from routes import register_routes
 from routes.geocode import geocode_bp
@@ -106,6 +108,7 @@ app.register_blueprint(gratuite_api_bp)
 app.register_blueprint(point_astral_blocs_bp)
 app.register_blueprint(payments_bp)
 app.register_blueprint(legal_bp)
+app.register_blueprint(stripe_webhook_bp)
 
 # 5) Headers de sécurité (après enregistrement des routes)
 from security_headers import add_security_headers
