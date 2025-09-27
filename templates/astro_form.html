@@ -1935,6 +1935,10 @@
                     <!-- en com 17.09  <div id="paypal-button-container" style="width:100%;"></div> -->
                      <!-- Ajouté le 17.09 -->
                     <div id="paypal-button-container" style="width:100%;"></div>
+                    <!-- Bouton QA (test gratuit) -->
+                    <button id="qa-run" class="payment-btn" style="display:none;margin-top:8px;">
+                    Générer en mode QA (test)
+                    </button>
                     <button class="payment-btn cancel-btn" onclick="closePaymentConfirmationModal()">
                         Annuler
                     </button>
@@ -3049,5 +3053,72 @@
   alt="Web Analytics"
   referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
   <!-- End of Statcounter -->
+   <script>
+(function () {
+  const url = new URL(window.location.href);
+  const isQA = url.searchParams.get("qa") === "1";
+
+  // Récupère les valeurs du formulaire (adapte les name= si besoin)
+  function getVal(...sels) {
+    for (const sel of sels) {
+      const el = document.querySelector(sel);
+      if (el && el.value) return el.value.trim();
+    }
+    return "";
+  }
+  function collectUserInfo() {
+    // Si ton code met déjà les infos ici, on réutilise
+    if (window.pendingOrder && window.pendingOrder.userInfo) {
+      return window.pendingOrder.userInfo;
+    }
+    return {
+      nom:        getVal("[name='nom']"),
+      birthDate:  getVal("[name='date_naissance']", "[name='birthDate']"),
+      birthTime:  getVal("[name='heure_naissance']", "[name='birthTime']"),
+      birthPlace: getVal("[name='lieu_naissance']", "[name='birthPlace']"),
+      email:      getVal("[name='email']"),
+      gender:     getVal("[name='gender']", "[name='sexe']"),
+      lat:        getVal("[name='lat']"),
+      lon:        getVal("[name='lon']"),
+      tzid:       getVal("[name='tzid']")
+    };
+  }
+
+  async function runQA() {
+    const userInfo = collectUserInfo();
+    if (!userInfo.email) { alert("Mets un email (whitelist) pour le QA."); return; }
+
+    const res = await fetch("/payments/capture-order?qa=1", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-QA": "1" },
+      body: JSON.stringify({ orderID: "TEST-ORDER", userInfo, items: [] })
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok) {
+      // la session est remplie côté serveur → on enchaîne la génération
+      window.location.assign("/point_astral_blocs/complet");
+    } else {
+      alert("Erreur QA: " + (data?.message || res.status));
+      console.error("[QA] capture error", data);
+    }
+  }
+
+  if (isQA) {
+    // 1) masquer les paiements réels
+    const stripeBtn = document.querySelector(".stripe-btn");
+    if (stripeBtn) stripeBtn.style.display = "none";
+    const pp = document.getElementById("paypal-button-container");
+    if (pp) pp.style.display = "none";
+
+    // 2) afficher le bouton QA et brancher le clic
+    const qaBtn = document.getElementById("qa-run");
+    if (qaBtn) {
+      qaBtn.style.display = "inline-block";
+      qaBtn.addEventListener("click", runQA);
+    }
+  }
+})();
+</script>
 </body>
 </html>
