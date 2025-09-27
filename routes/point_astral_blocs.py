@@ -126,20 +126,50 @@ def ping_blocs():
 @point_astral_blocs_bp.route("/complet", methods=["GET"])
 def point_astral_blocs_complet():
     """Workflow complet harmonisé : mêmes données que l'ancien système + approche par blocs"""
+
+    # === DEBUG DÉTAILLÉ SESSION ===
+    logger.info("=== DEBUG SESSION COMPLET START ===")
+    logger.info("Session keys: %s", list(session.keys()))
+    logger.info("Full session: %s", dict(session))
     
     # Récupération des infos depuis la session
     infos = session.get("infos_utilisateur")
+    logger.info("infos_utilisateur raw: %s", infos)
+    logger.info("infos_utilisateur type: %s", type(infos))
+
     if not infos:
-        return "❌ Données manquantes. Veuillez recommencer depuis le formulaire."
+        logger.error("❌ AUCUNE infos_utilisateur en session")
+        logger.info("Session disponible: %s", dict(session))
+        
+        # Chercher des variations possibles
+        possible_keys = [k for k in session.keys() if 'info' in k.lower() or 'user' in k.lower()]
+        logger.info("Clés possibles trouvées: %s", possible_keys)
+        
+        return f"❌ Données manquantes. Session keys: {list(session.keys())}. Possible keys: {possible_keys}. Veuillez recommencer depuis le formulaire."
     
+    logger.info("✅ infos_utilisateur trouvé: %s", infos)
+
         # === Pare-chocs données critiques (avant tout calcul/génération) ===
     order_id = (session.get("last_payment") or {}).get("order_id")
+    logger.info("last_payment: %s", session.get("last_payment"))
+    logger.info("order_id: %s", order_id)
+
     email = (infos.get("email") or "").strip()
     nom = infos.get("nom")
     lieu = infos.get("lieu_naissance")
     lat  = infos.get("lat")
     lon  = infos.get("lon")
     tzid = infos.get("tzid")
+
+    logger.info("=== DONNÉES EXTRAITES ===")
+    logger.info("email: %r", email)
+    logger.info("nom: %r", nom)
+    logger.info("lieu: %r", lieu)
+    logger.info("lat: %r", lat)
+    logger.info("lon: %r", lon)
+    logger.info("tzid: %r", tzid)
+    logger.info("date_naissance: %r", infos.get("date_naissance"))
+    logger.info("heure_naissance: %r", infos.get("heure_naissance"))
 
     # Log d’état complet pour corréler avec /payments/capture-order
     logger.info(
@@ -148,34 +178,74 @@ def point_astral_blocs_complet():
     )
 
     # Champs obligatoires côté astro : lat/lon/tzid (+ date/heure)
-    missing = [k for k, v in {
-        "lat": lat, "lon": lon, "tzid": tzid,
+    required_fields = {
+        "lat": lat, 
+        "lon": lon, 
+        "tzid": tzid,
         "date_naissance": infos.get("date_naissance"),
         "heure_naissance": infos.get("heure_naissance"),
-    }.items() if not v]
+    }
+
+    logger.info("=== VÉRIFICATION CHAMPS REQUIS ===")
+    for field, value in required_fields.items():
+        logger.info("%s: %r (bool: %s)", field, value, bool(value))
+    
+    missing = [k for k, v in required_fields.items() if not v]
 
     if missing:
         logger.warning(
             "[GEN] ABORT — données manquantes=%s — order=%s — infos=%r",
             missing, order_id, infos
         )
+        
+        # Message d'erreur plus détaillé
+        debug_info = {
+            'missing_fields': missing,
+            'all_infos_keys': list(infos.keys()) if infos else [],
+            'session_keys': list(session.keys()),
+            'order_id': order_id,
+            'infos_content': infos
+        }
+        
         return render_template(
             "erreur.html",
-            titre="Données insuffisantes",
+            titre="Données insuffisantes - DEBUG MODE",
             message="Impossible de générer l'analyse.",
-            details=f"Champs manquants : {', '.join(missing)}. "
-                    "Ré-sélectionne le lieu via l’autocomplétion et vérifie date/heure."
+            details=f"DEBUG INFO: {debug_info}"
         ), 400
+    
+    # # Champs obligatoires côté astro : lat/lon/tzid (+ date/heure)
+    # missing = [k for k, v in {
+    #     "lat": lat, "lon": lon, "tzid": tzid,
+    #     "date_naissance": infos.get("date_naissance"),
+    #     "heure_naissance": infos.get("heure_naissance"),
+    # }.items() if not v]
+
+    # if missing:
+    #     logger.warning(
+    #         "[GEN] ABORT — données manquantes=%s — order=%s — infos=%r",
+    #         missing, order_id, infos
+    #     )
+    #     return render_template(
+    #         "erreur.html",
+    #         titre="Données insuffisantes",
+    #         message="Impossible de générer l'analyse.",
+    #         details=f"Champs manquants : {', '.join(missing)}. "
+    #                 "Ré-sélectionne le lieu via l’autocomplétion et vérifie date/heure."
+    #     ), 400
 
     # Protection “appel direct sans paiement” (sauf QA)
     if not session.get("last_payment") and request.args.get("qa") != "1":
         logger.warning("[GEN] ABORT — aucun paiement en session — email=%s nom=%s", email, nom)
+        logger.info("Session pour debug paiement: %s", dict(session))
         return render_template(
             "erreur.html",
             titre="Paiement requis",
             message="Session de paiement introuvable ou expirée.",
             details="Merci de relancer la commande."
         ), 403
+    
+    logger.info("=== DEBUG SESSION COMPLET END ===")
     
     # Empreinte (fingerprint) unique des infos utilisateur
     current_fingerprint = _fingerprint_infos(infos)

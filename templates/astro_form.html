@@ -2691,13 +2691,27 @@
         }
 
         function confirmPayment() {
+            // 🔎 DEBUG
+            console.log('=== DEBUG confirmPayment START ===');
+            console.log('window.pendingOrder:', window.pendingOrder);
+            console.log('typeof window.pendingOrder:', typeof window.pendingOrder);
             const orderData = window.pendingOrder;
             
             // Vérifier qu'on a bien des données
-            if (!orderData || !orderData.userInfo) {
-                showNotification('❌ Erreur: données manquantes', 'warning');
-                return;
+            if (!orderData) {
+                console.error('❌ orderData est null/undefined');
+                console.log('window keys:', Object.keys(window).filter(k => k.includes('order') || k.includes('Order')));
+                showNotification?.('❌ Erreur: orderData manquant (voir console)', 'warning');
+            } else {
+                // ✅ Ajout : voir ce qu'il y a dans orderData si il existe
+                console.log('✅ orderData existe, clés:', Object.keys(orderData));
+                console.log('orderData.userInfo:', orderData?.userInfo);
+                if (orderData?.userInfo) {
+                console.log('userInfo clés:', Object.keys(orderData.userInfo));
+                }
             }
+            console.log('lat/lon/tzid:', orderData?.userInfo?.lat, orderData?.userInfo?.lon, orderData?.userInfo?.tzid);
+            console.log('=== DEBUG confirmPayment END ===');
 
             // Fermer le modal de confirmation
             closePaymentConfirmationModal();
@@ -2737,146 +2751,6 @@
             document.body.appendChild(form);
             form.submit();
         }
-
-        // function redirectToPayPal(orderData) {
-        //     // Similaire à Stripe mais vers PayPal
-        //     if (!orderData || !orderData.userInfo) {
-        //         showNotification('❌ Erreur: données manquantes', 'warning');
-        //         return;
-        //     }
-
-        //     // Fermer le modal de confirmation
-        //     closePaymentConfirmationModal();
-            
-        //     // Créer un formulaire pour PayPal
-        //     const form = document.createElement('form');
-        //     form.method = 'POST';
-        //     form.action = '/create-paypal-payment';
-        //     form.style.display = 'none';
-            
-        //     // Mêmes champs que Stripe
-        //     const fields = {
-        //         'nom': orderData.userInfo.nom,
-        //         'email': orderData.userInfo.email,
-        //         'date_naissance': orderData.userInfo.birthDate,
-        //         'heure_naissance': orderData.userInfo.birthTime,
-        //         'lieu_naissance': orderData.userInfo.birthPlace,
-        //         'lat': orderData.userInfo.lat,
-        //         'lon': orderData.userInfo.lon,
-        //         'tzid': orderData.userInfo.tzid,
-        //         'gender': orderData.userInfo.gender,
-        //         'type_commande': orderData.type,
-        //         'items': JSON.stringify(orderData.items),
-        //         'total': orderData.total
-        //     };
-            
-        //     Object.keys(fields).forEach(name => {
-        //         const input = document.createElement('input');
-        //         input.type = 'hidden';
-        //         input.name = name;
-        //         input.value = fields[name] || '';
-        //         form.appendChild(input);
-        //     });
-            
-        //     document.body.appendChild(form);
-        //     form.submit();
-        // }
-
-
-//         //function selectPayPal() {
-//         //    const container = document.getElementById('paypal-button-container');
-//         //    container.style.display = 'block';        // on montre le conteneur
-//         //    renderPayPalButtons(window.pendingOrder); // on rend les boutons PayPal
-//         //}
-
-//         //function renderPayPalButtons(orderData) {
-//     //if (paypalRendered) return;
-
-//     // const container = document.getElementById('paypal-button-container');
-//     // if (!container || !window.paypal) {
-//     //     console.warn('PayPal SDK non prêt ou container manquant');
-//     //     return;
-//     // }
-
-//     // Nettoyage + flag anti double rendu
-//     container.innerHTML = '';
-//     container.style.display = 'block';
-//     paypalRendered = true;
-
-//     try {
-//         paypal.Buttons({
-//             style: {
-//                 layout: 'vertical',
-//                 color: 'blue',
-//                 shape: 'rect',
-//                 label: 'paypal'
-//             },
-
-//             createOrder: async () => {
-//                 try {
-//                     const res = await fetch('/payments/create-order', {
-//                         method: 'POST',
-//                         headers: { 'Content-Type': 'application/json' },
-//                         body: JSON.stringify({
-//                             description: 'Point Astral',
-//                             custom_id: orderData?.userInfo?.email || '',
-//                             amount: orderData?.total || 29
-//                         })
-//                     });
-
-//                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-//                     const data = await res.json();
-//                     if (!data.id) throw new Error("Pas d'ID de commande retourné par PayPal");
-//                     return data.id;
-//                 } catch (err) {
-//                     console.error('CreateOrder error:', err);
-//                     showNotification('⚠️ Impossible de créer la commande PayPal : ' + err.message, 'warning');
-//                     throw err;
-//                 }
-//             },
-
-//             onApprove: async (data) => {
-//                 try {
-//                     const res = await fetch('/payments/capture-order', {
-//                         method: 'POST',
-//                         headers: { 'Content-Type': 'application/json' },
-//                         body: JSON.stringify({
-//                             orderID: data.orderID,
-//                             userInfo: window?.pendingOrder?.userInfo || {},
-//                             items: window?.pendingOrder?.items || []
-//                         })
-//                     });
-
-//                     const result = await res.json();
-//                     if (res.ok && result.status === 'COMPLETED') {
-//                         window.location.href = '/paiement/effectue';
-//                     } else {
-//                         showNotification('⚠️ Paiement non confirmé. Status: ' + (result.status || res.status), 'warning');
-//                     }
-//                 } catch (err) {
-//                     console.error('Capture error:', err);
-//                     showNotification('❌ Erreur lors de la confirmation: ' + err.message, 'warning');
-//                 }
-//             },
-
-//             onError: (err) => {
-//                 console.error('PayPal onError:', err);
-//                 showNotification('❌ Erreur PayPal. Veuillez réessayer.', 'warning');
-//             },
-
-//             onCancel: (data) => {
-//                 console.log('PayPal payment cancelled:', data);
-//                 showNotification('💳 Paiement annulé', 'info');
-//             }
-//         })
-//         .render('#paypal-button-container');
-//     } catch (err) {
-//         console.error('Erreur render PayPal:', err);
-//         container.style.display = 'none';
-//         paypalRendered = false;
-//         showNotification('❌ Impossible d\'afficher le bouton PayPal', 'warning');
-//     }
-// }
 
         function closePaymentConfirmationModal() {
             document.getElementById('paymentConfirmationModal').style.display = 'none';
