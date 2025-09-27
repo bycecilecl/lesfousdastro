@@ -1,52 +1,32 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# UTIL : enregistrer_placements_utilisateur()
-# Rôle : enregistre les placements astrologiques + infos personnelles
-#        dans un fichier CSV local (`placements.csv`).
-# Entrées :
-#   - data (dict) : données astrologiques calculées (planètes, ascendant, maisons…)
-#   - infos_personnelles (dict) : nom, date/heure/lieu de naissance
-# Détails des données enregistrées :
-#   - ID session unique + horodatage
-#   - Ascendant (signe)
-#   - Signe + maison pour Soleil, Lune, Mercure, Vénus, Mars, Jupiter,
-#     Saturne, Uranus, Neptune, Pluton, Lune Noire
-#   - Maître d’ascendant : nom, signe, maison
-# Dépendances :
-#   - os, csv, datetime, uuid
-# Sortie :
-#   - Ajoute une ligne au fichier CSV (crée l’en-tête si le fichier n’existe pas)
-#   - Log console “✅ Placements astrologiques enregistrés.” ou erreur.
-# Où c’est utilisé :
-#   - Dans les routes Flask après calcul du thème (ex : analyse gratuite)
-# Remarques :
-#   - Valeur par défaut "inconnu" si une info est manquante.
-#   - Fichier local → non persistant en production (prévoir stockage externe).
-# ─────────────────────────────────────────────────────────────────────────────
-
-
 import os
 import csv
 from datetime import datetime
 import uuid
 
 def enregistrer_placements_utilisateur(data, infos_personnelles):
-    chemin_csv = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'placements.csv')
+    placements_csv_env = os.getenv("PLACEMENTS_CSV")
+    base_dir = os.getenv("PLACEMENTS_DIR", "data/placements")
+
+    if placements_csv_env:
+        chemin_csv = placements_csv_env
+        os.makedirs(os.path.dirname(chemin_csv) or ".", exist_ok=True)
+    else:
+        os.makedirs(base_dir, exist_ok=True)
+        chemin_csv = os.path.join(base_dir, "placements.csv")
+
     fichier_existe = os.path.exists(chemin_csv)
 
     planetes = data.get("planetes", {})
     ascendant = data.get("ascendant", {})
-    maisons = data.get("maisons", {})
     maitre_ascendant = data.get("maitre_ascendant", {})
 
     def get_info(nom_planete):
         planete = planetes.get(nom_planete, {})
         return planete.get("signe", "inconnu"), planete.get("maison", "inconnu")
 
-    # ID + horodatage
     id_session = str(uuid.uuid4())
     horodatage = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Structuration des données
     donnees = {
         "id_session": id_session,
         "horodatage": horodatage,
@@ -54,9 +34,7 @@ def enregistrer_placements_utilisateur(data, infos_personnelles):
         "date_naissance": infos_personnelles.get("date_naissance", ""),
         "heure_naissance": infos_personnelles.get("heure_naissance", ""),
         "lieu_naissance": infos_personnelles.get("lieu_naissance", ""),
-
         "ascendant_signe": ascendant.get("signe", "inconnu"),
-
         "soleil_signe": get_info("Soleil")[0],
         "soleil_maison": get_info("Soleil")[1],
         "lune_signe": get_info("Lune")[0],
@@ -79,18 +57,27 @@ def enregistrer_placements_utilisateur(data, infos_personnelles):
         "pluton_maison": get_info("Pluton")[1],
         "lilith_signe": get_info("Lune Noire")[0],
         "lilith_maison": get_info("Lune Noire")[1],
-
         "maitre_ascendant": maitre_ascendant.get("nom", "inconnu"),
         "maitre_asc_signe": maitre_ascendant.get("signe", "inconnu"),
         "maitre_asc_maison": maitre_ascendant.get("maison", "inconnu")
     }
 
     try:
-        with open(chemin_csv, mode='a', newline='', encoding='utf-8') as fichier:
-            writer = csv.DictWriter(fichier, fieldnames=donnees.keys(), delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        with open(chemin_csv, mode="a", newline="", encoding="utf-8") as fichier:
+            writer = csv.DictWriter(
+                fichier,
+                fieldnames=donnees.keys(),
+                delimiter=";",
+                quotechar='"',
+                quoting=csv.QUOTE_MINIMAL
+            )
             if not fichier_existe:
                 writer.writeheader()
             writer.writerow(donnees)
-        print("✅ Placements astrologiques enregistrés.")
+
+        print(f"✅ Placements astrologiques enregistrés → {os.path.abspath(chemin_csv)}")
+        # 👉 On retourne maintenant les données pour Google Sheets
+        return donnees
     except Exception as e:
         print("❌ Erreur lors de l'enregistrement des placements :", e)
+        return None

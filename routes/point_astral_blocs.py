@@ -132,6 +132,51 @@ def point_astral_blocs_complet():
     if not infos:
         return "❌ Données manquantes. Veuillez recommencer depuis le formulaire."
     
+        # === Pare-chocs données critiques (avant tout calcul/génération) ===
+    order_id = (session.get("last_payment") or {}).get("order_id")
+    email = (infos.get("email") or "").strip()
+    nom = infos.get("nom")
+    lieu = infos.get("lieu_naissance")
+    lat  = infos.get("lat")
+    lon  = infos.get("lon")
+    tzid = infos.get("tzid")
+
+    # Log d’état complet pour corréler avec /payments/capture-order
+    logger.info(
+        "[GEN] START order=%s email=%s nom=%s lieu=%r lat=%r lon=%r tzid=%r",
+        order_id, email, nom, lieu, lat, lon, tzid
+    )
+
+    # Champs obligatoires côté astro : lat/lon/tzid (+ date/heure)
+    missing = [k for k, v in {
+        "lat": lat, "lon": lon, "tzid": tzid,
+        "date_naissance": infos.get("date_naissance"),
+        "heure_naissance": infos.get("heure_naissance"),
+    }.items() if not v]
+
+    if missing:
+        logger.warning(
+            "[GEN] ABORT — données manquantes=%s — order=%s — infos=%r",
+            missing, order_id, infos
+        )
+        return render_template(
+            "erreur.html",
+            titre="Données insuffisantes",
+            message="Impossible de générer l'analyse.",
+            details=f"Champs manquants : {', '.join(missing)}. "
+                    "Ré-sélectionne le lieu via l’autocomplétion et vérifie date/heure."
+        ), 400
+
+    # Protection “appel direct sans paiement” (sauf QA)
+    if not session.get("last_payment") and request.args.get("qa") != "1":
+        logger.warning("[GEN] ABORT — aucun paiement en session — email=%s nom=%s", email, nom)
+        return render_template(
+            "erreur.html",
+            titre="Paiement requis",
+            message="Session de paiement introuvable ou expirée.",
+            details="Merci de relancer la commande."
+        ), 403
+    
     # Empreinte (fingerprint) unique des infos utilisateur
     current_fingerprint = _fingerprint_infos(infos)
     
