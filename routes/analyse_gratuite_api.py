@@ -57,9 +57,17 @@ def api_analyse_gratuite():
 
         if not allowed:
             html_limit = f"""
-                <div style="padding:16px; border-radius:12px; background:#fff3cd; border:1px solid #ffeeba; color:#856404">
-                    <strong>Limite atteinte pour aujourd'hui</strong><br>
-                    Reviens demain ou découvre nos autres analyses !✨
+                <div style="padding:20px; border-radius:12px; background:#fff3cd; border:1px solid #ffeeba; color:#856404; text-align:center; font-family:sans-serif;">
+                    <strong>🚫 Limite atteinte</strong><br><br>
+                    👉 Pour continuer ton exploration, découvre ton <strong>Flash Astral complet</strong> :<br>
+                    <ul style="text-align:left; display:inline-block; margin:10px auto; padding:0; list-style:disc;">
+                        <li>Lecture approfondie & psychologiques (4 pages)</li>
+                        <li>PDF personnalisé à télécharger</li>
+                    </ul>
+                    <br>
+                    <a href="/flash_astral" style="display:inline-block; padding:12px 20px; background:#856404; color:#fff; border-radius:8px; text-decoration:none; font-weight:bold;">
+                        💫 Découvrir mon Flash Astral
+                    </a>
                 </div>
             """
             print(f"[QUOTA] Bloqué: email={email} ({email_count}), ip={ip} ({ip_count})")
