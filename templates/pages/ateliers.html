@@ -385,14 +385,13 @@
             <a class="navbar__brand" href="/">Les Fous d'Astro</a>
             <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">☰</button>
             <ul class="navbar__links">
-                <li><a href="{{ url_for('analyses') }}">Guide des Analyses</a></li>
-                <li><a href="{{ url_for('formations') }}">Formations</a></li>
-                <li><a href="{{ url_for('ateliers') }}">Ateliers</a></li>
-                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                <li><a href="{{ url_for('pages_bp.analyses') }}">Guide des Analyses</a></li>
+                <li><a href="{{ url_for('pages_bp.formations') }}">Formations</a></li>
+                <li><a href="{{ url_for('pages_bp.ateliers') }}">Ateliers</a></li>
                 <li><a href="https://bycecilecl.com/category/les-fous-dastro/" target="_blank" rel="noopener">Blog</a></li>
-                <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Consultations</a></li>
+                <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Prestations</a></li>
                 <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
-                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                <li><a href="{{ url_for('pages_bp.contact') }}">Contact</a></li>
             </ul>
         </div>
     </nav>

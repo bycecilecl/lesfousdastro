@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>Formations Astrologiques – Les Fous d'Astro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Formations complètes en astrologie pour devenir autonome dans l'interprétation de ton thème natal et celui des autres.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Étoiles animées */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar__inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar__brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar__toggle {
+            display: none;
+            background: none;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 1.2rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .navbar__links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 8px;
+        }
+
+        .navbar__links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .navbar__links a:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        .navbar__links a.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        /* Contenu principal */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 70px);
+            text-align: center;
+        }
+
+        .construction-icon {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .main-title {
+            color: white;
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: white;
+            font-size: 1.4rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            line-height: 1.6;
+            max-width: 700px;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 50px;
+            margin: 40px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .content-title {
+            color: #1f628e;
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .content-description {
+            color: #333;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .status-badge {
+            background: linear-gradient(45deg, #FFA500, #FFD700);
+            color: #333;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .formation-preview {
+            text-align: left;
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(192, 240, 247, 0.1);
+            border-radius: 15px;
+            border-left: 4px solid #00a8a8;
+        }
+
+        .formation-preview h4 {
+            color: #1f628e;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modules-list {
+            color: #555;
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modules-list li {
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 3px solid #00a8a8;
+        }
+
+        .module-title {
+            font-weight: 600;
+            color: #1f628e;
+            margin-bottom: 5px;
+        }
+
+        .module-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .update-info {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .update-info h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .update-info p {
+            color: #856404;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .notification-signup {
+            background: rgba(192, 240, 247, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .notification-title {
+            color: #1f628e;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .notification-description {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .notification-form {
+            display: flex;
+            gap: 10px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .notification-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #c0f0f7;
+            border-radius: 25px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .notification-input:focus {
+            outline: none;
+            border-color: #00a8a8;
+        }
+
+        .notification-btn {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(31, 98, 142, 0.3);
+        }
+
+        .back-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .back-link {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            color: white;
+            text-decoration: none;
+        }
+
+        .external-link {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+        }
+
+        .external-link:hover {
+            color: #333;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .navbar__toggle {
+                display: block;
+            }
+
+            .navbar__links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+                flex-direction: column;
+                padding: 20px;
+                transform: translateY(-10px);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .nav-open .navbar__links {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .main-content {
+                padding: 40px 15px;
+            }
+
+            .main-title {
+                font-size: 2.5rem;
+            }
+
+            .construction-icon {
+                font-size: 6rem;
+            }
+
+            .content-card {
+                padding: 30px 25px;
+                margin: 30px 0;
+            }
+
+            .content-title {
+                font-size: 1.8rem;
+            }
+
+            .modules-list {
+                grid-template-columns: 1fr;
+            }
+
+            .notification-form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .notification-input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .back-links {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar__inner">
+            <a class="navbar__brand" href="/">Les Fous d'Astro</a>
+            <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">☰</button>
+            <ul class="navbar__links">
+                <ul class="navbar__links">
+                <li><a href="{{ url_for('pages_bp.analyses') }}">Guide des Analyses</a></li>
+                <li><a href="{{ url_for('pages_bp.formations') }}">Formations</a></li>
+                <li><a href="{{ url_for('pages_bp.ateliers') }}">Ateliers</a></li>
+                <li><a href="https://bycecilecl.com/category/les-fous-dastro/" target="_blank" rel="noopener">Blog</a></li>
+                <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Prestations</a></li>
+                <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+                <li><a href="{{ url_for('pages_bp.contact') }}">Contact</a></li>
+            </ul>
+    </nav>
+
+    <div class="main-content">
+        <div class="construction-icon">📚</div>
+        
+        <h1 class="main-title">Formations Astrologiques</h1>
+        
+        <p class="subtitle">
+            Apprends l'astrologie de A à Z et deviens autonome dans l'interprétation de ton thème natal et celui de tes proches
+        </p>
+
+        <div class="content-card">
+            <div class="status-badge">Mise à jour en cours</div>
+            
+            <h2 class="content-title">Formation en cours de refonte</h2>
+            
+            <p class="content-description">
+                Notre formation complète en astrologie existe déjà mais nous la mettons actuellement à jour pour t'offrir une expérience d'apprentissage encore plus riche et moderne. Une nouvelle version améliorée arrive bientôt !
+            </p>
+
+            <div class="update-info">
+                <h4>Pourquoi cette mise à jour ?</h4>
+                <p>Nous enrichissons le contenu avec de nouveaux modules, une approche pédagogique repensée et l'intégration de l'astrologie védique pour une formation plus complète que jamais.</p>
+            </div>
+
+            <div class="notification-signup">
+                <h3 class="notification-title">Sois informé(e) du lancement</h3>
+                <p class="notification-description">
+                    Inscris-toi pour recevoir toutes les infos sur la nouvelle formation dès qu'elle sera disponible
+                </p>
+                <form class="notification-form">
+                    <input type="email" placeholder="Ton email..." class="notification-input" required>
+                    <button type="submit" class="notification-btn">M'inscrire</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Générer des étoiles animées
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numStars = 50;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (2 + Math.random() * 3) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Gestion du formulaire de notification
+        document.querySelector('.notification-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('input[type="email"]').value;
+            if (email) {
+                alert('Merci ! Tu seras prévenu(e) dès la sortie de la nouvelle formation.');
+                this.querySelector('input[type="email"]').value = '';
+            }
+        });
+
+        createStars();
+    </script>
+
+</body>
+</html>
