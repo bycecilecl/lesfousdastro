@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>Ateliers Astrologiques – Les Fous d'Astro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Ateliers d'astrologie pratique et formations en cours de préparation chez Les Fous d'Astro.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Étoiles animées */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar__inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar__brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar__toggle {
+            display: none;
+            background: none;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 1.2rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .navbar__links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 8px;
+        }
+
+        .navbar__links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .navbar__links a:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        .navbar__links a.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        /* Contenu principal */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 70px);
+            text-align: center;
+        }
+
+        .construction-icon {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .main-title {
+            color: white;
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: white;
+            font-size: 1.4rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 50px;
+            margin: 40px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .content-title {
+            color: #1f628e;
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .content-description {
+            color: #333;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .features-preview {
+            text-align: left;
+            margin: 30px 0;
+        }
+
+        .features-preview h4 {
+            color: #1f628e;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .features-list {
+            color: #555;
+            list-style: none;
+            padding: 0;
+        }
+
+        .features-list li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .features-list li::before {
+            content: '🔮';
+            position: absolute;
+            left: 0;
+        }
+
+        .newsletter-signup {
+            background: rgba(192, 240, 247, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .newsletter-title {
+            color: #1f628e;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .newsletter-description {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 10px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #c0f0f7;
+            border-radius: 25px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .newsletter-input:focus {
+            outline: none;
+            border-color: #00a8a8;
+        }
+
+        .newsletter-btn {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(31, 98, 142, 0.3);
+        }
+
+        .back-link {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            color: white;
+            text-decoration: none;
+        }
+
+        .status-badge {
+            background: linear-gradient(45deg, #8B5CF6, #A78BFA);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .navbar__toggle {
+                display: block;
+            }
+
+            .navbar__links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+                flex-direction: column;
+                padding: 20px;
+                transform: translateY(-10px);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .nav-open .navbar__links {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .main-content {
+                padding: 40px 15px;
+            }
+
+            .main-title {
+                font-size: 2.5rem;
+            }
+
+            .construction-icon {
+                font-size: 6rem;
+            }
+
+            .content-card {
+                padding: 30px 25px;
+                margin: 30px 0;
+            }
+
+            .content-title {
+                font-size: 1.8rem;
+            }
+
+            .newsletter-form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .newsletter-input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar__inner">
+            <a class="navbar__brand" href="/">Les Fous d'Astro</a>
+            <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">☰</button>
+            <ul class="navbar__links">
+                <li><a href="{{ url_for('analyses') }}">Guide des Analyses</a></li>
+                <li><a href="{{ url_for('formations') }}">Formations</a></li>
+                <li><a href="{{ url_for('ateliers') }}">Ateliers</a></li>
+                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                <li><a href="https://bycecilecl.com/category/les-fous-dastro/" target="_blank" rel="noopener">Blog</a></li>
+                <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Consultations</a></li>
+                <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="construction-icon">🔮</div>
+        
+        <h1 class="main-title">Ateliers Astrologiques</h1>
+        
+        <p class="subtitle">
+            Des expériences collectives uniques pour approfondir ta pratique de l'astrologie et rencontrer d'autres passionnés
+        </p>
+
+        <div class="content-card">
+            <div class="status-badge">En préparation</div>
+            
+            <h2 class="content-title">Bientôt disponibles !</h2>
+            
+            <p class="content-description">
+                Nous préparons avec soin une série d'ateliers pratiques et interactifs pour te permettre de plonger plus profondément dans l'univers de l'astrologie. Ces rencontres allieront apprentissage, pratique et échanges dans une ambiance conviviale.
+            </p>
+
+            <div class="features-preview">
+                <h4>Ce qui t'attend prochainement :</h4>
+                <ul class="features-list">
+                    <li>Ateliers d'initiation à l'astrologie pour débutants</li>
+                    <li>Sessions d'interprétation de thèmes en groupe</li>
+                    <li>Ateliers spécialisés (relations, carrière, spiritualité)</li>
+                    <li>Rencontres mensuelles de pratique astrologique</li>
+                    <li>Événements spéciaux lors des cycles lunaires</li>
+                    <li>Ateliers combinés astrologie occidentale et védique</li>
+                </ul>
+            </div>
+
+            <div class="newsletter-signup">
+                <h3 class="newsletter-title">Sois prévenu(e) en avant-première</h3>
+                <p class="newsletter-description">
+                    Inscris-toi à notre liste pour être informé(e) dès l'ouverture des inscriptions aux ateliers
+                </p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Ton email..." class="newsletter-input" required>
+                    <button type="submit" class="newsletter-btn">M'inscrire</button>
+                </form>
+            </div>
+        </div>
+
+        <a href="/" class="back-link">Retour à l'accueil</a>
+    </div>
+
+    <script>
+        // Générer des étoiles animées
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numStars = 50;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (2 + Math.random() * 3) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Gestion du formulaire newsletter
+        document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('input[type="email"]').value;
+            if (email) {
+                alert("Merci ! Tu seras prévenu(e) dès l'ouverture des ateliers.");
+                this.querySelector('input[type="email"]').value = '';
+            }
+        });
+
+        createStars();
+        </script>
+
+</body>
+</html>
