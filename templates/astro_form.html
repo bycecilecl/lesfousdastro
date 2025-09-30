@@ -1760,13 +1760,20 @@
                 ☰
             </button>
             <ul class="navbar__links">
-                <li><a href="{{ url_for('analyses') }}">Guide des Analyses</a></li>
+                <li><a href="/analyses">Guide des Analyses</a></li>           <!-- ou url_for('main.analyses') -->
+                <li><a href="/formations">Formations</a></li>                 <!-- pas d'endpoint aujourd'hui -->
+                <li><a href="/ateliers">Ateliers</a></li>                     <!-- pas d'endpoint aujourd'hui -->
+                <li><a href="https://bycecilecl.com/category/les-fous-dastro/" target="_blank" rel="noopener">Blog</a></li>
+                <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Prestations</a></li>
+                <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+                <li><a href="/contact">Contact</a></li>                       <!-- pas d'endpoint aujourd'hui -->
+                <!-- <li><a href="{{ url_for('analyses') }}">Guide des Analyses</a></li>
                 <li><a href="{{ url_for('formations') }}">Formations</a></li>
                 <li><a href="{{ url_for('ateliers') }}">Ateliers</a></li>
                 <li><a href="https://bycecilecl.com/category/les-fous-dastro/" target="_blank" rel="noopener">Blog</a></li>
                 <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Prestations</a></li>
                 <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
-                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                <li><a href="{{ url_for('contact') }}">Contact</a></li> -->
             </ul>
         </div>
     </nav>
@@ -2189,16 +2196,13 @@
                         Une approche moderne et authentique de l'astrologie pour révéler ton potentiel.
                     </p>
                     <div class="footer-social">
-                        <a href="https://www.facebook.com/lesfousdastro" class="social-link" title="Facebook">
+                        <a href="#" class="social-link" title="Facebook">
                             <span class="social-icon">📘</span>
                         </a>
-                        <a href="https://www.instagram.com/bycecilecl" class="social-link" title="Instagram">
+                        <a href="#" class="social-link" title="Instagram">
                             <span class="social-icon">📷</span>
                         </a>
-                        <a href="https://www.instagram.com/lesfousdastro" class="social-link" title="Instagram">
-                            <span class="social-icon">📷</span>
-                        </a>
-                        <a href="https://www.youtube.com/lesfousdastro" class="social-link" title="YouTube">
+                        <a href="#" class="social-link" title="YouTube">
                             <span class="social-icon">🎥</span>
                         </a>
                         <a href="mailto:contact@lesfousdastro.fr" class="social-link" title="Email">
@@ -2208,14 +2212,13 @@
                 </div>
 
                 <div class="footer-section links-section">
-                    <h4>Menu</h4>
+                    <h4>Nos Services</h4>
                     <ul class="footer-links">
-                        <li><a href="{{ url_for('analyses') }}">Guide des Analyses</a></li>
-                        <li><a href="{{ url_for('formations') }}">Formations</a></li>
-                        <li><a href="{{ url_for('ateliers') }}">Ateliers</a></li>
-                        <li><a href="https://bycecilecl.com/category/les-fous-dastro/" target="_blank" rel="noopener">Blog</a></li>
-                        <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Consultations</a></li>
-                        <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+                        <li><a href="#analyses">Analyse Gratuite</a></li>
+                        <li><a href="#analyses">Flash Astral</a></li>
+                        <li><a href="#analyses">Analyses Cosmiques</a></li>
+                        <li><a href="#packs">Packs Découverte</a></li>
+                        <li><a href="#consultations">Consultations</a></li>
                     </ul>
                 </div>
 
