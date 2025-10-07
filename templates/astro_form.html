@@ -1751,6 +1751,7 @@
     </style>
 </head>
 <body>
+    {% include "_sandbox_banner.html" %}
     <!-- Navigation -->
     <nav class="navbar">
         <div class="navbar__inner">
@@ -1781,6 +1782,10 @@
 
         <div class="form-container">
             <form id="form-analyse" method="POST">
+                <!-- ✅ AJOUTER CES 3 LIGNES ICI -->
+                <input type="hidden" id="product_key" name="product_key" value="">
+                <input type="hidden" id="selected_product_label" name="selected_product_label" value="">
+                <input type="hidden" id="selected_product_price" name="selected_product_price" value="">
                 <div class="form-section">
                     <h3 class="section-title">🌟 Tes informations personnelles</h3>
                     <div class="form-row">
@@ -1864,14 +1869,20 @@
                             <!-- <span class="status development">En développement</span> -->
                         </div>
                         
-                        <div class="option-card" onclick="showComingSoon('Mes Potentiels et Défis')">
-                            <div class="badge new">BIENTÔT</div>
+                        <!-- Forces & Défis -->
+                        <div class="option-card featured" onclick="addToCart('forces_defis', 'Mes Potentiels et Défis', 12, this)">
+                            <div class="badge popular">PRIX LANCEMENT</div>
                             <span class="icon">💪</span>
                             <h4>Mes Potentiels et Défis</h4>
-                            <p>Découvre tes forces cachées et les obstacles à transformer</p>
-                            <div class="price">Prix à définir</div>
-                            <span class="status coming-soon">À venir</span>
+                            <p>Découvrez tes forces cachées et les obstacles à transformer</p>
+                            <div class="price">
+                                <span class="old-price">15€</span> 12€
+                            </div>
+                            <span class="status featured">Clique pour sélectionner</span>
                         </div>
+
+                            <!-- Champ caché pour le backend -->
+                            <!-- <input type="hidden" id="product_key" name="product_key" value="flash_astral"> -->
                         
                         <div class="option-card" onclick="showComingSoon('Mission d\'Âme')">
                             <span class="icon">🎭</span>
@@ -2388,33 +2399,55 @@
             showNotification(`🚀 ${analysisName} arrive bientôt ! Nous travaillons sur cette fonctionnalité pour vous offrir la meilleure expérience.`, 'info');
         }
 
-        // Gestion du panier
-        function addToCart(id, name, price, element) {
-            if (selectedPack) {
-                showNotification('Vous avez sélectionné un pack. Désélectionnez-le d\'abord pour ajouter des analyses individuelles.', 'warning');
-                return;
+       function addToCart(id, name, price, element) {
+        if (selectedPack) {
+            showNotification(
+            'Vous avez sélectionné un pack. Désélectionnez-le d\'abord pour ajouter des analyses individuelles.',
+            'warning'
+            );
+            return;
+        }
+
+        const existingItem = cart.find(item => item.id === id);
+
+        if (existingItem) {
+            // désélection
+            removeFromCart(id);
+            element && element.classList.remove('selected');
+
+            if (cart.length === 0) {
+            // si plus rien dans le panier -> on vide les champs cachés
+            document.getElementById('product_key').value = '';
+            document.getElementById('selected_product_label').value = '';
+            document.getElementById('selected_product_price').value = '';
+            } else {
+            // sinon on pointe sur le dernier item restant
+            const last = cart[cart.length - 1];
+            document.getElementById('product_key').value = last.id;
+            document.getElementById('selected_product_label').value = last.name;
+            document.getElementById('selected_product_price').value = last.price;
             }
 
-            const existingItem = cart.find(item => item.id === id);
-            if (existingItem) {
-                removeFromCart(id);
-                element.classList.remove('selected');
-            } else {
-                cart.push({ id, name, price });
-                element.classList.add('selected');
-                
-                // Auto-scroll vers le panier après sélection
-                setTimeout(() => {
-                    const cartSection = document.getElementById('cartSection');
-                    if (cartSection && cartSection.style.display !== 'none') {
-                        cartSection.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'center' 
-                        });
-                    }
-                }, 300);
+        } else {
+            // ajout
+            cart.push({ id, name, price });
+            element && element.classList.add('selected');
+
+            // un seul produit au checkout → on écrase toujours
+            document.getElementById('product_key').value = id;
+            document.getElementById('selected_product_label').value = name;
+            document.getElementById('selected_product_price').value = price;
+
+            // scroll vers le panier
+            setTimeout(() => {
+            const cartSection = document.getElementById('cartSection');
+            if (cartSection && cartSection.style.display !== 'none') {
+                cartSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-            updateCartDisplay();
+            }, 300);
+        }
+
+        updateCartDisplay();
         }
 
         function processSelectedAnalyses() {
@@ -3110,6 +3143,15 @@
         createStars();
         updateCartDisplay();
         updateSubmitButtonText();
+        
+
+        document.getElementById('form-analyse').addEventListener('submit', function (e) {
+            const pk = document.getElementById('product_key').value.trim();
+            if (!pk) {
+                e.preventDefault();
+                showNotification("Choisis d'abord une analyse avant de payer.", 'error');
+            }
+            });
     </script>
 <!-- Statcounter -->
   <script type="text/javascript">
