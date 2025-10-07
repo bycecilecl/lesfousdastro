@@ -9,8 +9,12 @@ import os
 import csv
 import openai
 import atexit
+import time  # <— add
+from flask import current_app, g  # <— add
 
 from dotenv import load_dotenv
+load_dotenv()  # charge le fichier .env
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 🔧 Fonctions personnalisées (app)
 from utils.rag_utils_optimized import cleanup_weaviate
@@ -55,26 +59,11 @@ try:
 except ImportError:
     from backports.zoneinfo import ZoneInfo  # si besoin (pip install backports.zoneinfo)
 
-# Ajoutez au début du fichier, après les imports
-try:
-    import swisseph as swe
-except ImportError:
-
-    print("❌ SwissEph non installé. Installez avec: pip install pyephem")
-    exit(1)
-
-# Vérification de la clé API
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    print("❌ OPENAI_API_KEY manquante dans le fichier .env")
-    exit(1)
-openai.api_key = api_key
 
 print("📁 Répertoire courant :", os.getcwd())
 print("📄 Fichier existe ?", os.path.exists("utilisateurs.csv"))
 
-load_dotenv()  # charge le fichier .env
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
 # --- FLAGS ENV GLOBAUX ---
 PAYMENTS_SANDBOX = env_bool("PAYMENTS_SANDBOX", "off")
@@ -93,25 +82,35 @@ def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
+# ───────────────────────────────
+# 🕒 Mesure du temps de réponse (ajoute ici)
+# ───────────────────────────────
+@app.before_request
+def _start_timer():
+    g._t0 = time.perf_counter()
 
-# ✅ juste ici 👇 avant les blueprints
-def env_on(v): 
-    return (v or "").strip().lower() in ("1","true","on","yes")
+@app.after_request
+def _log_time(resp):
+    try:
+        dt = (time.perf_counter() - g._t0) * 1000
+        current_app.logger.info(
+            "⏱️ %s %s -> %d in %.1f ms",
+            request.method, request.path, resp.status_code, dt
+        )
+    except Exception:
+        pass
+    return resp
 
-PAYMENTS_SANDBOX = env_on(os.getenv("PAYMENTS_SANDBOX"))
-APP_MAINTENANCE = env_on(os.getenv("APP_MAINTENANCE"))
 
 @app.context_processor
 def inject_paypal_config():
-    # sandbox autorisé seulement si maintenance active
-    is_sandbox = PAYMENTS_SANDBOX and APP_MAINTENANCE
+    is_sandbox = PAYMENTS_SANDBOX and APP_MAINT  # <— réutilise les flags existants
     paypal_mode = "sandbox" if is_sandbox else "live"
 
-    if is_sandbox:
-        client_id = os.getenv("PAYPAL_CLIENT_ID_SANDBOX")
-    else:
-        client_id = os.getenv("PAYPAL_CLIENT_ID_LIVE") or os.getenv("PAYPAL_CLIENT_ID")
-
+    client_id = (
+        os.getenv("PAYPAL_CLIENT_ID_SANDBOX") if is_sandbox
+        else (os.getenv("PAYPAL_CLIENT_ID_LIVE") or os.getenv("PAYPAL_CLIENT_ID"))
+    )
     return {
         "PAYPAL_MODE": paypal_mode,
         "PAYPAL_CLIENT_ID": client_id,
@@ -141,7 +140,6 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_
 main_bp = Blueprint("main", __name__)
 
 # >>> Maintenance guard START
-APP_MAINT = (os.getenv("APP_MAINTENANCE", "off") or "").strip().lower() == "on"
 ALLOW_IPS = {ip.strip() for ip in os.getenv("MAINT_ALLOW_IPS", "").split(",") if ip.strip()}
 BYPASS = os.getenv("MAINT_BYPASS_TOKEN", "").strip()
 
@@ -165,10 +163,8 @@ def _maintenance_guard():
     # endpoints safe par nom OU blueprint safe
     if request.endpoint in _MAINT_SAFE_ENDPOINTS:
         return None
-    if request.blueprint in {"stripe_webhook_bp"}:
-        return None  # autorise le webhook Stripe en maintenance
-    if request.blueprint in {"payments_bp"}:
-        return None  # autorise PayPal/IPN si tu en as
+    if request.blueprint in {"stripe_webhook", "payments"}:
+        return None
 
     # IP autorisée
     client_ip = (request.headers.get("X-Forwarded-For", request.remote_addr or "")).split(",")[0].strip()
@@ -232,10 +228,6 @@ def dl_presign(key):
         print(f"dl_presign error: {e}")
         return "Lien indisponible ou expiré. Réessaie depuis ton espace.", 410
 
-
-# tes routes centralisées
-#harden_app(app)
-register_routes(app)
 
 print("=== URL MAP ===")
 print(app.url_map)
