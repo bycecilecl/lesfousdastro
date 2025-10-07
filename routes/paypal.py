@@ -1,7 +1,9 @@
 import os
 import requests
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 import logging
+from requests.auth import HTTPBasicAuth
+
 
 payments_bp = Blueprint("payments", __name__)
 logger = logging.getLogger(__name__)
@@ -49,40 +51,54 @@ def is_qa_request():
     return False
 
 def get_paypal_token():
-    """Récupère un token d'accès PayPal selon le mode."""
-    
-    # ✅ Compat : fallback sur noms sans suffixe _LIVE
-    if PAYMENTS_SANDBOX:
-        client_id = os.getenv("PAYPAL_CLIENT_ID_SANDBOX")
-        client_secret = os.getenv("PAYPAL_CLIENT_SECRET_SANDBOX")
-    else:
-        client_id = (
-            os.getenv("PAYPAL_CLIENT_ID_LIVE") or 
-            os.getenv("PAYPAL_CLIENT_ID")
-        )
-        client_secret = (
-            os.getenv("PAYPAL_CLIENT_SECRET_LIVE") or 
-            os.getenv("PAYPAL_SECRET")
-        )
+    mode = (os.getenv("PAYPAL_MODE") or "sandbox").strip().lower()
+    use_sandbox = mode != "live"
+    base_url = "https://api-m.sandbox.paypal.com" if use_sandbox else "https://api-m.paypal.com"
 
-    if not client_id or not client_secret:
-        raise RuntimeError(f"❌ Credentials PayPal manquants pour mode {PAYPAL_MODE}")
+    client_id = (os.getenv("PAYPAL_CLIENT_ID_SANDBOX") if use_sandbox else os.getenv("PAYPAL_CLIENT")) or os.getenv("PAYPAL_CLIENT_ID") or ""
+    secret    = (os.getenv("PAYPAL_SECRET_SANDBOX")    if use_sandbox else os.getenv("PAYPAL_SECRET"))    or ""
 
-    logger.info(f"🔑 [PayPal] Token request | mode={PAYPAL_MODE} | client_id={client_id[:8]}...")
+    # Log non sensible (ne montre pas le secret)
+    current_app.logger.info(
+        "🔑 [PayPal] Token request | mode=%s | base=%s | client_id=%s… | secret_set=%s",
+        "sandbox" if use_sandbox else "live",
+        base_url,
+        (client_id or "")[:8],
+        bool(secret)
+    )
 
+    if not client_id or not secret:
+        raise RuntimeError("PAYPAL client_id/secret manquants pour le mode sélectionné.")
+
+    headers = {
+        "Accept": "application/json",
+        "Accept-Language": "en_US",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    data = {"grant_type": "client_credentials"}
+
+    r = requests.post(
+        f"{base_url}/v1/oauth2/token",
+        headers=headers,
+        data=data,                         # FORM, pas JSON
+        auth=HTTPBasicAuth(client_id, secret),
+        timeout=10,
+    )
     try:
-        r = requests.post(
-            f"{PAYPAL_BASE_URL}/v1/oauth2/token",
-            headers={"Accept": "application/json", "Accept-Language": "en_US"},
-            data={"grant_type": "client_credentials"},
-            auth=(client_id, client_secret),
-            timeout=20,
-        )
         r.raise_for_status()
-        return r.json()["access_token"], PAYPAL_BASE_URL
-    except requests.exceptions.RequestException as e:
-        logger.error(f"❌ [PayPal] Erreur token: {e}")
+    except requests.HTTPError:
+        try:
+            body = r.json()
+        except Exception:
+            body = r.text
+        current_app.logger.error("❌ [PayPal] Erreur token %s | url=%s | body=%s", r.status_code, r.url, body)
         raise
+
+    token = r.json().get("access_token")
+    if not token:
+        raise RuntimeError("Réponse PayPal sans access_token.")
+
+    return token, base_url
 
 # ─────────────────────────────────────────────────────────────────────────────
 # POST /payments/create-order
@@ -154,6 +170,7 @@ def capture_order():
     payload = request.get_json() or {}
     order_id = payload.get("orderID")
     user_info = payload.get("userInfo")
+    product_key = payload.get("product_key", "flash_astral")
     items = payload.get("items", [])
 
     # ✅ Log avec mode
