@@ -22,7 +22,6 @@ from utils.pdf_utils import html_to_pdf
 from routes.legales import legal_bp
 from utils.s3_utils import presign_key
 #from utils.prod_hardening import harden_app
-from utils.env_flags import env_bool
 from werkzeug.middleware.proxy_fix import ProxyFix
 from routes.stripe_webhook import stripe_webhook_bp
 from routes.pages import pages_bp
@@ -45,6 +44,9 @@ logging.getLogger('weasyprint').setLevel(logging.CRITICAL)
 logging.getLogger('fontTools').setLevel(logging.CRITICAL)
 logging.getLogger('fontTools.subset').setLevel(logging.CRITICAL)
 logging.getLogger('fontTools.ttLib').setLevel(logging.CRITICAL)
+
+def env_bool(name: str, default: str = "off") -> bool:
+    return (os.getenv(name, default) or "").strip().lower() in ("1", "true", "on", "yes")
 
 print("🧭 RUN main.py depuis:", __file__)
 
