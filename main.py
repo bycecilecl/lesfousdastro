@@ -111,6 +111,9 @@ def inject_paypal_config():
         os.getenv("PAYPAL_CLIENT_ID_SANDBOX") if is_sandbox
         else (os.getenv("PAYPAL_CLIENT_ID_LIVE") or os.getenv("PAYPAL_CLIENT_ID"))
     )
+    # ✅ Log pour debug
+    print(f"💳 [PayPal Config] mode={paypal_mode} | sandbox={is_sandbox} | client_id={'SET' if client_id else 'MISSING'}")
+    
     return {
         "PAYPAL_MODE": paypal_mode,
         "PAYPAL_CLIENT_ID": client_id,

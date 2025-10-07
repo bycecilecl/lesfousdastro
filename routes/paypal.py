@@ -51,24 +51,50 @@ def is_qa_request():
     return False
 
 def get_paypal_token():
-    mode = (os.getenv("PAYPAL_MODE") or "sandbox").strip().lower()
-    use_sandbox = mode != "live"
+    # ✅ MÊME logique que main.py et Stripe
+    def _env_on(v):
+        return (v or "").strip().lower() in ("1", "true", "on", "yes")
+    
+    payments_sandbox = _env_on(os.getenv("PAYMENTS_SANDBOX"))
+    app_maint = _env_on(os.getenv("APP_MAINTENANCE"))
+    
+    # PayPal sandbox SEULEMENT si PAYMENTS_SANDBOX=on ET APP_MAINTENANCE=on
+    use_sandbox = payments_sandbox and app_maint
+    
     base_url = "https://api-m.sandbox.paypal.com" if use_sandbox else "https://api-m.paypal.com"
 
-    client_id = (os.getenv("PAYPAL_CLIENT_ID_SANDBOX") if use_sandbox else os.getenv("PAYPAL_CLIENT")) or os.getenv("PAYPAL_CLIENT_ID") or ""
-    secret    = (os.getenv("PAYPAL_SECRET_SANDBOX")    if use_sandbox else os.getenv("PAYPAL_SECRET"))    or ""
+    # ✅ Choix des credentials selon le mode calculé
+    if use_sandbox:
+        client_id = os.getenv("PAYPAL_CLIENT_ID_SANDBOX", "").strip()
+        secret = os.getenv("PAYPAL_SECRET_SANDBOX", "").strip()
+    else:
+        client_id = (
+            os.getenv("PAYPAL_CLIENT_ID_LIVE") or 
+            os.getenv("PAYPAL_CLIENT_ID") or 
+            ""
+        ).strip()
+        secret = (
+            os.getenv("PAYPAL_SECRET_LIVE") or 
+            os.getenv("PAYPAL_SECRET") or 
+            ""
+        ).strip()
 
-    # Log non sensible (ne montre pas le secret)
+    # Log non sensible
     current_app.logger.info(
-        "🔑 [PayPal] Token request | mode=%s | base=%s | client_id=%s… | secret_set=%s",
+        "🔑 [PayPal] Token request | mode=%s | PAYMENTS_SANDBOX=%s | APP_MAINTENANCE=%s | base=%s | client_id=%s… | secret_set=%s",
         "sandbox" if use_sandbox else "live",
+        payments_sandbox,
+        app_maint,
         base_url,
         (client_id or "")[:8],
         bool(secret)
     )
 
     if not client_id or not secret:
-        raise RuntimeError("PAYPAL client_id/secret manquants pour le mode sélectionné.")
+        raise RuntimeError(
+            f"PAYPAL credentials manquants pour mode={'sandbox' if use_sandbox else 'live'}. "
+            f"Vérifie PAYPAL_CLIENT_ID_{'SANDBOX' if use_sandbox else 'LIVE'} et PAYPAL_SECRET_{'SANDBOX' if use_sandbox else 'LIVE'}"
+        )
 
     headers = {
         "Accept": "application/json",
@@ -80,10 +106,11 @@ def get_paypal_token():
     r = requests.post(
         f"{base_url}/v1/oauth2/token",
         headers=headers,
-        data=data,                         # FORM, pas JSON
+        data=data,
         auth=HTTPBasicAuth(client_id, secret),
         timeout=10,
     )
+    
     try:
         r.raise_for_status()
     except requests.HTTPError:
@@ -91,7 +118,10 @@ def get_paypal_token():
             body = r.json()
         except Exception:
             body = r.text
-        current_app.logger.error("❌ [PayPal] Erreur token %s | url=%s | body=%s", r.status_code, r.url, body)
+        current_app.logger.error(
+            "❌ [PayPal] Erreur token %s | url=%s | body=%s", 
+            r.status_code, r.url, body
+        )
         raise
 
     token = r.json().get("access_token")
@@ -99,7 +129,6 @@ def get_paypal_token():
         raise RuntimeError("Réponse PayPal sans access_token.")
 
     return token, base_url
-
 # ─────────────────────────────────────────────────────────────────────────────
 # POST /payments/create-order
 # ─────────────────────────────────────────────────────────────────────────────
