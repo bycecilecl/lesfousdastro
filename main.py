@@ -22,6 +22,7 @@ from utils.pdf_utils import html_to_pdf
 from routes.legales import legal_bp
 from utils.s3_utils import presign_key
 #from utils.prod_hardening import harden_app
+from utils.env_flags import env_bool
 from werkzeug.middleware.proxy_fix import ProxyFix
 from routes.stripe_webhook import stripe_webhook_bp
 from routes.pages import pages_bp
@@ -73,6 +74,10 @@ print("📄 Fichier existe ?", os.path.exists("utilisateurs.csv"))
 load_dotenv()  # charge le fichier .env
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# --- FLAGS ENV GLOBAUX ---
+PAYMENTS_SANDBOX = env_bool("PAYMENTS_SANDBOX", "off")
+APP_MAINT = env_bool("APP_MAINTENANCE", "off")
+
 
 def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
     """
@@ -86,6 +91,37 @@ def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
+
+# ✅ juste ici 👇 avant les blueprints
+def env_on(v): 
+    return (v or "").strip().lower() in ("1","true","on","yes")
+
+PAYMENTS_SANDBOX = env_on(os.getenv("PAYMENTS_SANDBOX"))
+APP_MAINTENANCE = env_on(os.getenv("APP_MAINTENANCE"))
+
+@app.context_processor
+def inject_paypal_config():
+    # sandbox autorisé seulement si maintenance active
+    is_sandbox = PAYMENTS_SANDBOX and APP_MAINTENANCE
+    paypal_mode = "sandbox" if is_sandbox else "live"
+
+    if is_sandbox:
+        client_id = os.getenv("PAYPAL_CLIENT_ID_SANDBOX")
+    else:
+        client_id = os.getenv("PAYPAL_CLIENT_ID_LIVE") or os.getenv("PAYPAL_CLIENT_ID")
+
+    return {
+        "PAYPAL_MODE": paypal_mode,
+        "PAYPAL_CLIENT_ID": client_id,
+        "PAYPAL_CURRENCY": os.getenv("PAYPAL_CURRENCY", "EUR"),
+        "PAYMENTS_SANDBOX": is_sandbox,
+    }
+
+# Rendre les flags visibles dans les templates
+app.jinja_env.globals['PAYMENTS_SANDBOX'] = PAYMENTS_SANDBOX
+app.jinja_env.globals['APP_MAINTENANCE'] = APP_MAINT
+
+
 # ⚙️ Sécurité cookies et URLs
 app.config.update(
     SESSION_COOKIE_SECURE=True,        # cookies seulement en HTTPS
@@ -98,8 +134,6 @@ app.config.update(
 
 # ✅ Indique à Flask les en-têtes du proxy Railway (X-Forwarded-*)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
-
-
 
 # --- Blueprint principal: créer -> définir routes -> enregistrer
 main_bp = Blueprint("main", __name__)
@@ -173,22 +207,12 @@ def enforce_https_and_root():
     if host == "www.lesfousdastro.fr":
         return redirect(request.url.replace("://www.lesfousdastro.fr", "://lesfousdastro.fr", 1), code=301)
 
+
 @main_bp.route("/")
 def index():
-    mode = os.getenv("PAYPAL_MODE", "sandbox").lower()
-    client_id = (
-        os.getenv("PAYPAL_CLIENT_ID_LIVE")
-        if mode == "live"
-        else os.getenv("PAYPAL_CLIENT_ID_SANDBOX")
-    )
-    print(f"[PayPal] mode={mode} client_id={'***' + (client_id or '')[-6:]}")
     infos = session.get("infos_utilisateur", {})
-    return render_template(
-        "astro_form.html",   # ← la page qui contient le formulaire et PayPal
-        infos=infos,
-        PAYPAL_CLIENT_ID=client_id,
-        PAYPAL_CURRENCY=os.getenv("PAYPAL_CURRENCY", "EUR"),
-    )
+    return render_template("astro_form.html", infos=infos)
+
 @main_bp.route("/analyses")
 def analyses():
     # alias si tu veux que /analyses affiche la même page d’accueil “Analyses cosmiques”
