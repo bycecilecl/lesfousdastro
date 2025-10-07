@@ -2144,11 +2144,6 @@
                     <button class="payment-btn stripe-btn" onclick="confirmPayment()">
                         Payer avec Stripe
                     </button>
-                    <!-- <button class="payment-btn paypal-btn" onclick="redirectToPayPal(window.pendingOrder)">
-                        Payer avec PayPal
-                    </button> -->
-                    <!-- en com 17.09  <div id="paypal-button-container" style="width:100%;"></div> -->
-                     <!-- Ajouté le 17.09 -->
                     <div id="paypal-button-container" style="width:100%;"></div>
                     <button class="payment-btn cancel-btn" onclick="closePaymentConfirmationModal()">
                         Annuler
@@ -2278,7 +2273,6 @@
             </div>
         </div>
     </footer>
-    <!-- com le 17.09 <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&components=buttons"></script> -->
     <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&intent=capture&components=buttons"></script>
     <script>
         let paypalRendered = false; // évite de rendre 2x si la modale s’ouvre/ferme
@@ -2342,7 +2336,7 @@
                 try {
                 const details = await actions.order.capture();
                 console.log('🎉 Paiement capturé avec succès ! Détails =', details);
-                window.location.href = '/paiement/effectue';
+                window.location.href = '/paiement-effectue?provider=paypal';  // ✅ BON
                 } catch (err) {
                 console.error('❌ Erreur lors de la capture PayPal:', err);
                 showNotification('Erreur lors du traitement du paiement.', 'warning');
@@ -3137,6 +3131,31 @@
             }
             });
     </script>
+
+    <!-- ✅ Indicateur Sandbox + log console -->
+    {% if PAYPAL_MODE == 'sandbox' %}
+    <div style="
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 8px 12px;
+        border-radius: 8px;
+        z-index: 9999;
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #856404;
+    ">
+    🧪 PayPal Sandbox
+    </div>
+    {% endif %}
+
+    <script>
+    console.log("🔑 PayPal mode:", "{{ PAYPAL_MODE }}", 
+                "| client:", "{{ PAYPAL_CLIENT_ID[:10] }}…");
+</script>
 <!-- Statcounter -->
   <script type="text/javascript">
   var sc_project=12490079; 
