@@ -36,6 +36,7 @@ from utils.axes_majeurs import organiser_points_forts, formater_axes_majeurs
 from utils.utils_points_forts import extraire_points_forts  
 from routes.analyse_gratuite_api import gratuite_api_bp
 from routes.point_astral_blocs import point_astral_blocs_bp
+# from routes.forces_defis_module import forces_defis_module_bp
 
 
 import logging
@@ -103,6 +104,50 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_
 # --- Blueprint principal: créer -> définir routes -> enregistrer
 main_bp = Blueprint("main", __name__)
 
+# >>> Maintenance guard START
+APP_MAINT = (os.getenv("APP_MAINTENANCE", "off") or "").strip().lower() == "on"
+ALLOW_IPS = {ip.strip() for ip in os.getenv("MAINT_ALLOW_IPS", "").split(",") if ip.strip()}
+BYPASS = os.getenv("MAINT_BYPASS_TOKEN", "").strip()
+
+# Endpoints/paths à laisser passer même en maintenance
+_MAINT_SAFE_ENDPOINTS = {
+    "healthz",                      # si tu as une route de santé
+    # ajoute ici le nom exact de la vue webhook si besoin, ex: "stripe_webhook"
+}
+_MAINT_SAFE_PATH_PREFIXES = ("/static/", "/favicon.ico")
+
+@app.before_request
+def _maintenance_guard():
+    # OFF → on ne bloque rien
+    if not APP_MAINT:
+        return None
+
+    # fichiers statiques / favicon
+    if any(request.path.startswith(p) for p in _MAINT_SAFE_PATH_PREFIXES):
+        return None
+
+    # endpoints safe par nom OU blueprint safe
+    if request.endpoint in _MAINT_SAFE_ENDPOINTS:
+        return None
+    if request.blueprint in {"stripe_webhook_bp"}:
+        return None  # autorise le webhook Stripe en maintenance
+    if request.blueprint in {"payments_bp"}:
+        return None  # autorise PayPal/IPN si tu en as
+
+    # IP autorisée
+    client_ip = (request.headers.get("X-Forwarded-For", request.remote_addr or "")).split(",")[0].strip()
+    if client_ip in ALLOW_IPS:
+        return None
+
+    # token bypass (query/header/cookie)
+    token = request.args.get("maint_token") or request.headers.get("X-MAINT-TOKEN") or request.cookies.get("maint_token")
+    if BYPASS and token == BYPASS:
+        return None
+
+    # sinon → page maintenance
+    return render_template("maintenance.html"), 503
+# >>> Maintenance guard END
+
 # --- Blueprints tiers d'abord si tu veux, peu importe l'ordre entre eux
 app.register_blueprint(geocode_bp)
 app.register_blueprint(gratuite_api_bp)
@@ -111,6 +156,7 @@ app.register_blueprint(payments_bp)
 app.register_blueprint(legal_bp)
 app.register_blueprint(stripe_webhook_bp)
 app.register_blueprint(pages_bp)
+# app.register_blueprint(forces_defis_module_bp)
 
 # 5) Headers de sécurité (après enregistrement des routes)
 from security_headers import add_security_headers
@@ -198,41 +244,6 @@ def generer_theme():
 # Si des informations utilisateur existent déjà en session (nom, date, heure, lieu),
 # elles sont passées au template pour préremplir le formulaire.
 # ────────────────────────────────────────────────
-
-
-# => ANCIEN FORMULAIRE
-# @app.route('/')
-# def formulaire():
-#     infos = session.get("infos_utilisateur", {})
-#     return render_template('formulaire.html', infos=infos)
-
-# @app.route('/', methods=["GET"])
-# def formulaire():
-#     infos = session.get("infos_utilisateur", {})
-#     return render_template('astro_form.html', infos=infos)
-
-# @main_bp.route("/")
-# def index():
-#     # affiche templates/index.html (qui étend base.html)
-#     return render_template("index.html")
-
-# @app.get("/")
-# def home():
-#     mode = os.getenv("PAYPAL_MODE", "sandbox").lower()
-#     client_id = (
-#         os.getenv("PAYPAL_CLIENT_ID_LIVE")
-#         if mode == "live"
-#         else os.getenv("PAYPAL_CLIENT_ID_SANDBOX")
-#     )
-#     # Facile à tracer en console
-#     print(f"[PayPal] mode={mode} client_id={'***' + (client_id or '')[-6:]}")
-#     infos = session.get("infos_utilisateur", {})
-#     return render_template(
-#         "astro_form.html",               # ← unifie le nom du template
-#         infos=infos,
-#         PAYPAL_CLIENT_ID=client_id,
-#         PAYPAL_CURRENCY=os.getenv("PAYPAL_CURRENCY", "EUR"),
-#     )
 
 
 
