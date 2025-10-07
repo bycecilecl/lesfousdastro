@@ -40,7 +40,7 @@ from utils.axes_majeurs import organiser_points_forts, formater_axes_majeurs
 from utils.utils_points_forts import extraire_points_forts  
 from routes.analyse_gratuite_api import gratuite_api_bp
 from routes.point_astral_blocs import point_astral_blocs_bp
-# from routes.forces_defis_module import forces_defis_module_bp
+from routes.forces_defis_module import forces_defis_module_bp
 
 
 import logging
@@ -188,7 +188,7 @@ app.register_blueprint(payments_bp)
 app.register_blueprint(legal_bp)
 app.register_blueprint(stripe_webhook_bp)
 app.register_blueprint(pages_bp)
-# app.register_blueprint(forces_defis_module_bp)
+app.register_blueprint(forces_defis_module_bp)
 
 # 5) Headers de sécurité (après enregistrement des routes)
 from security_headers import add_security_headers
