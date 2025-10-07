@@ -93,7 +93,7 @@ def get_paypal_token():
     if not client_id or not secret:
         raise RuntimeError(
             f"PAYPAL credentials manquants pour mode={'sandbox' if use_sandbox else 'live'}. "
-            f"Vérifie PAYPAL_CLIENT_ID_{'SANDBOX' if use_sandbox else 'LIVE'} et PAYPAL_SECRET_{'SANDBOX' if use_sandbox else 'LIVE'}"
+            f"Vérifie PAYPAL_CLIENT_ID_{'SANDBOX' if use_sandbox else 'LIVE'} et PAYPAL_CLIENT_SECRET_{'SANDBOX' if use_sandbox else 'LIVE'}"
         )
 
     headers = {
@@ -143,6 +143,10 @@ def create_order():
     payload_in = request.get_json() or {}
     product_key = payload_in.get("product_key", "flash_astral")  # fallback
     
+    # ✅ STOCKER dans la session pour le récupérer au capture
+    session["pending_paypal_product"] = product_key
+    session.modified = True
+    
     token, base_url = get_paypal_token()
     
     # 💰 Prix depuis env (cohérence avec Stripe)
@@ -162,7 +166,18 @@ def create_order():
             "amount": {
                 "currency_code": currency,
                 "value": amount_eur
-            }
+            },
+            # 👇 Ajout: items pour tracer le produit côté PayPal
+            "items": [{
+                "name": product_key,
+                "description": product_key,
+                "sku": product_key,
+                "quantity": "1",
+                "unit_amount": {
+                    "currency_code": currency,
+                    "value": amount_eur
+                }
+            }]
         }]
     }
 
@@ -175,7 +190,9 @@ def create_order():
         )
         
         if r.status_code == 201:
-            logger.info(f"✅ [PayPal] Order créé: {r.json().get('id')}")
+            order_data = r.json()
+            order_id = order_data.get('id')
+            logger.info(f"✅ [PayPal] Order créé: {order_id} | product={product_key}")
         else:
             logger.error(f"❌ [PayPal] Erreur création: {r.status_code} - {r.text}")
         
@@ -199,11 +216,17 @@ def capture_order():
     payload = request.get_json() or {}
     order_id = payload.get("orderID")
     user_info = payload.get("userInfo")
-    product_key = payload.get("product_key", "flash_astral")
     items = payload.get("items", [])
 
+    # ✅ Récupérer product_key depuis la session (prioritaire)
+    product_key = session.get("pending_paypal_product", "flash_astral")
+    
+    # Alternative: essayer depuis le payload frontend
+    if not product_key or product_key == "flash_astral":
+        product_key = payload.get("product_key", "flash_astral")
+
     # ✅ Log avec mode
-    logger.info(f"🎯 [PayPal] capture-order | order_id={order_id} | mode={PAYPAL_MODE}")
+    logger.info(f"🎯 [PayPal] capture-order | order_id={order_id} | mode={PAYPAL_MODE} | product_from_session={product_key}")
 
     try:
         r = requests.post(
@@ -216,17 +239,29 @@ def capture_order():
         # ✅ Si succès
         if r.status_code == 201 or (isinstance(data, dict) and data.get("status") == "COMPLETED"):
             
-            # ✅ Récupérer product_key depuis la réponse PayPal
+            # ✅ Essayer de récupérer depuis PayPal (mais moins fiable)
             pu = (data.get("purchase_units") or [{}])[0]
-            product_key = pu.get("custom_id") or pu.get("reference_id") or "flash_astral"
-            amount = pu.get("amount", {})
+            product_from_paypal = pu.get("custom_id") or pu.get("reference_id")
             
-            logger.info(f"✅ [PayPal] Paiement capturé | order_id={order_id} | product={product_key}")
+            # ✅ Préférer la session, sinon PayPal
+            if product_from_paypal and product_from_paypal != "flash_astral":
+                product_key = product_from_paypal
+                logger.info(f"✅ [PayPal] product_key récupéré depuis PayPal: {product_key}")
+            else:
+                logger.info(f"✅ [PayPal] product_key utilisé depuis session: {product_key}")
             
+                       # 💶 Montant réel après capture
+            payments_obj = pu.get("payments") or {}
+            captures = payments_obj.get("captures") or []
+            first_cap = captures[0] if captures else {}
+            cap_amount = first_cap.get("amount") or {}
+
+            logger.info(f"✅ [PayPal] Paiement capturé | order_id={order_id} | product={product_key} | amount={cap_amount}")
+
             # 🔄 Purge anti-reload
-            for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
+            for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at", "pending_paypal_product"):
                 session.pop(k, None)
-            
+
             # 📝 Infos utilisateur
             if user_info:
                 session["infos_utilisateur"] = {
@@ -240,7 +275,7 @@ def capture_order():
                     'lon': user_info.get('lon'),
                     'tzid': user_info.get('tzid'),
                 }
-            
+
             # ✅ ✅ ✅ MARQUEURS DE PAIEMENT (comme Stripe) ✅ ✅ ✅
             session["last_payment"] = {
                 "provider": "paypal",
@@ -248,10 +283,12 @@ def capture_order():
                 "items": items,
                 "status": "COMPLETED",
                 "mode": PAYPAL_MODE,
-                "product_key": product_key,        # ✅ depuis la réponse
-                "amount": amount.get("value"),     # ✅ montant
-                "currency": amount.get("currency_code"),  # ✅ devise
+                "product_key": product_key,        # ✅ depuis la session / paypal
+                "amount": cap_amount.get("value"),
+                "currency": cap_amount.get("currency_code"),
             }
+            if not cap_amount:
+                logger.warning("⚠️ [PayPal] amount introuvable dans payments.captures[0].amount")
             session["paiement_valide"] = True
             session["paypal_order_id"] = order_id
             session["selected_product"] = product_key  # ✅ plus de hardcode
