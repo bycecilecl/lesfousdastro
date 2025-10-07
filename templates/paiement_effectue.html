@@ -71,16 +71,16 @@
     </style>
 </head>
 <body>
-      <div class="container">
+  <div class="container">
     {% if already %}
       <h1>Analyse déjà générée</h1>
       <p>
-        Ton Flash Astral a déjà été généré récemment.<br>
+        Ton <strong>{{ produit_titre or 'analyse' }}</strong> a déjà été généré récemment.<br>
         Tu peux le récupérer directement :
       </p>
       {% if pdf_url %}
         <a href="{{ pdf_url }}" class="download-btn" target="_blank">
-          📄 Télécharger mon Flash Astral (PDF)
+          📄 Télécharger mon {{ produit_titre or 'analyse' }} (PDF)
         </a>
       {% else %}
         <p class="message">Lien indisponible pour le moment. Réessaie dans quelques minutes.</p>
@@ -92,22 +92,20 @@
       <h1>✨ Paiement confirmé !</h1>
       <p>
         Merci pour ta confiance !<br>
-        <strong>Ton Flash Astral est en cours de création...</strong>
+        <strong>Ton {{ produit_titre or 'analyse' }} est en cours de création…</strong>
       </p>
       <div class="spinner"></div>
       <p class="message">
         Merci de patienter quelques instants.<br>
-        Tu seras redirigée automatiquement.
+        Tu seras redirigé·e automatiquement.
       </p>
-   
 
-    <script>
-        // Redirection automatique après 3 secondes
-        setTimeout(() => {
-            window.location.href = '/point_astral_blocs/complet';
-        }, 3000);
-    </script>
-       {% endif %}
-        </div>
+      <script>
+        // 👉 Utilise la cible transmise par le backend
+        const nextUrl = {{ (next_url or '/')|tojson }};
+      setTimeout(() => { window.location.href = nextUrl; }, 3000);
+      </script>
+    {% endif %}
+  </div>
 </body>
 </html>
