@@ -211,22 +211,45 @@ def capture_order():
     # 🔐 QA bypass
     if is_qa_request():
         return jsonify({"id": "TEST-CAPTURE-QA", "status": "COMPLETED", "qa": True}), 201
-    
+
     token, base_url = get_paypal_token()
     payload = request.get_json() or {}
     order_id = payload.get("orderID")
     user_info = payload.get("userInfo")
     items = payload.get("items", [])
 
-    # ✅ Récupérer product_key depuis la session (prioritaire)
-    product_key = session.get("pending_paypal_product", "flash_astral")
-    
-    # Alternative: essayer depuis le payload frontend
-    if not product_key or product_key == "flash_astral":
-        product_key = payload.get("product_key", "flash_astral")
+    # ⚙️ Produits autorisés (adapte si besoin)
+    KNOWN_PRODUCTS = {"flash_astral", "forces_defis", "point_astral"}
 
-    # ✅ Log avec mode
-    logger.info(f"🎯 [PayPal] capture-order | order_id={order_id} | mode={PAYPAL_MODE} | product_from_session={product_key}")
+    # 1) Source prioritaire: ce qu’on sait côté app
+    product_key = (
+        session.get("pending_paypal_product")        # posé dans create_order
+        or payload.get("product_key")
+        or session.get("selected_product")
+        or ""
+    )
+
+    # 2) Si la valeur app n'est pas valide, on essaie depuis PayPal
+    #    (mais JAMAIS "default")
+    def pick_from_paypal(order_json: dict) -> str | None:
+        pu = (order_json.get("purchase_units") or [{}])[0]
+        # PayPal peut renvoyer ces champs… ou pas
+        c = pu.get("custom_id")
+        r = pu.get("reference_id")
+        # Parfois dispo dans items[0]
+        items_pp = pu.get("items") or []
+        i0 = items_pp[0] if items_pp else {}
+        sku = i0.get("sku")
+        name = i0.get("name")
+        for cand in (c, r, sku, name):
+            if cand and cand in KNOWN_PRODUCTS and cand != "default":
+                return cand
+        return None
+
+    logger.info(
+        "🎯 [PayPal] capture-order | order_id=%s | mode=%s | product_from_app=%s",
+        order_id, PAYPAL_MODE, product_key
+    )
 
     try:
         r = requests.post(
@@ -236,70 +259,75 @@ def capture_order():
         )
         data = r.json()
 
-        # ✅ Si succès
-        if r.status_code == 201 or (isinstance(data, dict) and data.get("status") == "COMPLETED"):
-            
-            # ✅ Essayer de récupérer depuis PayPal (mais moins fiable)
-            pu = (data.get("purchase_units") or [{}])[0]
-            product_from_paypal = pu.get("custom_id") or pu.get("reference_id")
-            
-            # ✅ Préférer la session, sinon PayPal
-            if product_from_paypal and product_from_paypal != "flash_astral":
-                product_key = product_from_paypal
-                logger.info(f"✅ [PayPal] product_key récupéré depuis PayPal: {product_key}")
-            else:
-                logger.info(f"✅ [PayPal] product_key utilisé depuis session: {product_key}")
-            
-                       # 💶 Montant réel après capture
-            payments_obj = pu.get("payments") or {}
-            captures = payments_obj.get("captures") or []
-            first_cap = captures[0] if captures else {}
-            cap_amount = first_cap.get("amount") or {}
+        ok = (r.status_code == 201) or (isinstance(data, dict) and data.get("status") == "COMPLETED")
+        if not ok:
+            logger.error("❌ [PayPal] Capture échouée: %s - %s", r.status_code, data)
+            return jsonify(data), r.status_code
 
-            logger.info(f"✅ [PayPal] Paiement capturé | order_id={order_id} | product={product_key} | amount={cap_amount}")
+        # 3) Décision finale du product_key
+        paypal_key = pick_from_paypal(data)
+        logger.info("🔎 [PayPal] paypal_key=%s | app_key=%s", paypal_key, product_key)
 
-            # 🔄 Purge anti-reload
-            for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at", "pending_paypal_product"):
-                session.pop(k, None)
-
-            # 📝 Infos utilisateur
-            if user_info:
-                session["infos_utilisateur"] = {
-                    'nom': user_info.get('nom'),
-                    'date_naissance': user_info.get('birthDate'),
-                    'heure_naissance': user_info.get('birthTime'),
-                    'lieu_naissance': user_info.get('birthPlace'),
-                    'email': user_info.get('email'),
-                    'gender': user_info.get('gender'),
-                    'lat': user_info.get('lat'),
-                    'lon': user_info.get('lon'),
-                    'tzid': user_info.get('tzid'),
-                }
-
-            # ✅ ✅ ✅ MARQUEURS DE PAIEMENT (comme Stripe) ✅ ✅ ✅
-            session["last_payment"] = {
-                "provider": "paypal",
-                "order_id": order_id,
-                "items": items,
-                "status": "COMPLETED",
-                "mode": PAYPAL_MODE,
-                "product_key": product_key,        # ✅ depuis la session / paypal
-                "amount": cap_amount.get("value"),
-                "currency": cap_amount.get("currency_code"),
-            }
-            if not cap_amount:
-                logger.warning("⚠️ [PayPal] amount introuvable dans payments.captures[0].amount")
-            session["paiement_valide"] = True
-            session["paypal_order_id"] = order_id
-            session["selected_product"] = product_key  # ✅ plus de hardcode
-            session.modified = True
-            
-            logger.info(f"✅ [PayPal] Marqueurs posés | product={product_key} | mode={PAYPAL_MODE}")
+        if product_key in KNOWN_PRODUCTS:
+            # On garde la clé session/front. On ignore 'default' venant de PayPal.
+            final_product = product_key
+            logger.info("✅ [PayPal] Clé conservée depuis app: %s", final_product)
+        elif paypal_key:
+            final_product = paypal_key
+            logger.info("✅ [PayPal] Clé prise depuis PayPal: %s", final_product)
         else:
-            logger.error(f"❌ [PayPal] Capture échouée: {r.status_code} - {data}")
+            final_product = "flash_astral"
+            logger.warning("⚠️ [PayPal] Aucune clé fiable -> fallback: %s", final_product)
 
+        # 4) Montant réel depuis la capture
+        pu = (data.get("purchase_units") or [{}])[0]
+        payments_obj = pu.get("payments") or {}
+        captures = payments_obj.get("captures") or []
+        first_cap = captures[0] if captures else {}
+        cap_amount = first_cap.get("amount") or {}
+
+        logger.info(
+            "✅ [PayPal] Paiement capturé | order_id=%s | product=%s | amount=%s",
+            order_id, final_product, cap_amount
+        )
+
+        # 5) Purge anti-reload
+        for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at", "pending_paypal_product"):
+            session.pop(k, None)
+
+        # 6) Infos utilisateur
+        if user_info:
+            session["infos_utilisateur"] = {
+                'nom': user_info.get('nom'),
+                'date_naissance': user_info.get('birthDate'),
+                'heure_naissance': user_info.get('birthTime'),
+                'lieu_naissance': user_info.get('birthPlace'),
+                'email': user_info.get('email'),
+                'gender': user_info.get('gender'),
+                'lat': user_info.get('lat'),
+                'lon': user_info.get('lon'),
+                'tzid': user_info.get('tzid'),
+            }
+
+        # 7) Marqueurs de paiement
+        session["last_payment"] = {
+            "provider": "paypal",
+            "order_id": order_id,
+            "items": items,
+            "status": "COMPLETED",
+            "mode": PAYPAL_MODE,
+            "product_key": final_product,
+            "amount": cap_amount.get("value"),
+            "currency": cap_amount.get("currency_code"),
+        }
+        session["paiement_valide"] = True
+        session["paypal_order_id"] = order_id
+        session["selected_product"] = final_product
+        session.modified = True
+
+        logger.info("✅ [PayPal] Marqueurs posés | product=%s | mode=%s", final_product, PAYPAL_MODE)
         return jsonify(data), r.status_code
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"❌ [PayPal] Exception capture: {e}")
+        logger.error("❌ [PayPal] Exception capture: %s", e)
         return jsonify({"error": "Erreur PayPal"}), 500
