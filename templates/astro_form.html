@@ -2928,64 +2928,48 @@
         }
 
         function confirmPayment() {
-            // 🔎 DEBUG
-            console.log('=== DEBUG confirmPayment START ===');
-            console.log('window.pendingOrder:', window.pendingOrder);
-            console.log('typeof window.pendingOrder:', typeof window.pendingOrder);
             const orderData = window.pendingOrder;
-            
-            // Vérifier qu'on a bien des données
-            if (!orderData) {
-                console.error('❌ orderData est null/undefined');
-                console.log('window keys:', Object.keys(window).filter(k => k.includes('order') || k.includes('Order')));
-                showNotification?.('❌ Erreur: orderData manquant (voir console)', 'warning');
-            } else {
-                // ✅ Ajout : voir ce qu'il y a dans orderData si il existe
-                console.log('✅ orderData existe, clés:', Object.keys(orderData));
-                console.log('orderData.userInfo:', orderData?.userInfo);
-                if (orderData?.userInfo) {
-                console.log('userInfo clés:', Object.keys(orderData.userInfo));
-                }
-            }
-            console.log('lat/lon/tzid:', orderData?.userInfo?.lat, orderData?.userInfo?.lon, orderData?.userInfo?.tzid);
-            console.log('=== DEBUG confirmPayment END ===');
 
-            // Fermer le modal de confirmation
+            // 🔒 Sécurité : vérifier qu'un produit est choisi
+            const pk = (document.getElementById('product_key').value || '').trim();
+            if (!pk) {
+                showNotification("⚠️ Choisis d'abord une analyse avant de payer.", 'warning');
+                return;
+            }
+
+            console.log('✅ Confirmation paiement Stripe pour:', pk, orderData);
+
+            // 🧩 Fermer le modal de confirmation
             closePaymentConfirmationModal();
-            
-            // Créer un formulaire temporaire pour envoyer à Stripe
-            const form = document.createElement('form');
-            form.method = 'POST';
+
+            // ✅ Réutiliser le formulaire principal
+            const form = document.getElementById('form-analyse');
             form.action = '/checkout';
-            form.style.display = 'none';
-            
-            // Ajouter les champs requis pour ton système Stripe
-            const fields = {
-                'nom': orderData.userInfo.nom,
-                'email': orderData.userInfo.email,
-                'date_naissance': orderData.userInfo.birthDate,
-                'heure_naissance': orderData.userInfo.birthTime,
-                'lieu_naissance': orderData.userInfo.birthPlace,
-                'lat': orderData.userInfo.lat,
-                'lon': orderData.userInfo.lon,
-                'tzid': orderData.userInfo.tzid,
-                'gender': orderData.userInfo.gender,
-                'type_commande': orderData.type, // 'pack' ou 'individual'
-                'items': JSON.stringify(orderData.items),
-                'total': orderData.total
-            };
-            
-            // Créer les inputs cachés
-            Object.keys(fields).forEach(name => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = name;
-                input.value = fields[name] || '';
-                form.appendChild(input);
-            });
-            
-            // Ajouter le formulaire au DOM et le soumettre
-            document.body.appendChild(form);
+            form.method = 'POST';
+
+            // 📦 Ajouter les infos du panier (pour debug / tracking)
+            let itemsInput = document.getElementById('items_json');
+            if (!itemsInput) {
+                itemsInput = document.createElement('input');
+                itemsInput.type = 'hidden';
+                itemsInput.name = 'items';
+                itemsInput.id = 'items_json';
+                form.appendChild(itemsInput);
+            }
+            itemsInput.value = JSON.stringify(orderData?.items || cart || []);
+
+            // 💰 Ajouter le total de la commande (optionnel mais utile)
+            let totalInput = document.getElementById('order_total');
+            if (!totalInput) {
+                totalInput = document.createElement('input');
+                totalInput.type = 'hidden';
+                totalInput.name = 'total';
+                totalInput.id = 'order_total';
+                form.appendChild(totalInput);
+            }
+            totalInput.value = (orderData?.total ?? 0);
+
+            // 🚀 Soumettre le formulaire vers Stripe
             form.submit();
         }
 
