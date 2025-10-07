@@ -157,88 +157,78 @@ def paiement_effectue():
     # ─────────────────────────────────────────────────────────────────────────
     if provider == "paypal":
         last_payment = session.get("last_payment") or {}
-
-        # On récupère un product_key si dispo, sinon défaut
-        product_key = (
-            last_payment.get("product_key")
-            or request.args.get("product_key")
-            or "flash_astral"
-        )
-        product = PRODUCTS.get(product_key) or PRODUCTS.get("flash_astral")
-
-        # On journalise, mais on NE BLOQUE PAS si les marqueurs ne sont pas posés
+        
+        # ✅ LOG
+        current_app.logger.info(f"🎯 [PAIEMENT-EFFECTUE-PAYPAL] Vérification | "
+                               f"order_id={last_payment.get('order_id')} | "
+                               f"paiement_valide={session.get('paiement_valide')} | "
+                               f"mode={last_payment.get('mode')}")
+        
+        # Vérifier que le paiement PayPal est validé
         if last_payment.get("provider") != "paypal" or not session.get("paiement_valide"):
-            current_app.logger.warning(
-                "⚠️ [PAIEMENT-EFFECTUE-PAYPAL] Aucun marqueur en session "
-                "(capture client). On poursuit vers la page de succès."
-            )
+            current_app.logger.warning("❌ [PAIEMENT-EFFECTUE-PAYPAL] Aucun paiement confirmé")
+            return render_template('paiement_effectue_problem.html',
+                                 message="Aucun paiement PayPal confirmé."), 400
 
-        # Anti-reload : purge d'anciennes clés
-        for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
-            session.pop(k, None)
+        product_key = last_payment.get("product_key") or "flash_astral"
+        product = PRODUCTS.get(product_key) or PRODUCTS.get("flash_astral")
+        
+        current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-PAYPAL] Paiement validé | product={product_key}")
 
+        # Destination après paiement PayPal
         try:
             next_url = url_for(product["success_route"])
         except Exception as e:
             current_app.logger.warning(f"⚠️ [PAIEMENT-EFFECTUE-PAYPAL] Fallback route: {e}")
             next_url = "/forces_defis/complet" if product_key == "forces_defis" else "/point_astral_blocs/complet"
 
+        # Anti-reload : purge d'anciennes clés
+        for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
+            session.pop(k, None)
+
         return render_template('paiement_effectue.html',
-                               next_url=next_url,
-                               produit_titre=product["label"])
+                             next_url=next_url,
+                             produit_titre=product["label"])
 
     # ─────────────────────────────────────────────────────────────────────────
     # ── BRANCHE STRIPE : Vérification via l'API Stripe
     # ─────────────────────────────────────────────────────────────────────────
     
-    # ─────────────────────────────────────────────────────────────────────────
-# ── BRANCHE STRIPE : Vérification via l'API Stripe
-# ─────────────────────────────────────────────────────────────────────────
-
     current_app.logger.info(f"🎯 [PAIEMENT-EFFECTUE-STRIPE] session_id = {session_id}")
-
+    
     if not session_id:
         current_app.logger.warning("❌ [PAIEMENT-EFFECTUE-STRIPE] Pas de session_id")
         return render_template('paiement_effectue_problem.html',
-                            message="Session paiement manquante."), 400
+                             message="Session paiement manquante."), 400
 
     try:
         s = stripe.checkout.Session.retrieve(session_id)
         
         current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-STRIPE] Session récupérée | "
-                            f"id={s.id} | payment_status={s.get('payment_status')} | "
-                            f"livemode={s.get('livemode')}")
+                               f"id={s.id} | payment_status={s.get('payment_status')} | "
+                               f"livemode={s.get('livemode')}")
         
     except stripe.error.InvalidRequestError as e:
         current_app.logger.error(f"❌ [PAIEMENT-EFFECTUE-STRIPE] Session introuvable (mismatch test/live ?): {e}")
         return render_template('paiement_effectue_problem.html',
-                            message="Session introuvable. Vérifiez le mode test/live."), 400
+                             message="Session introuvable. Vérifiez le mode test/live."), 400
     except Exception as e:
         current_app.logger.exception(f"❌ [PAIEMENT-EFFECTUE-STRIPE] Erreur inattendue: {e}")
         return render_template('paiement_effectue_problem.html',
-                            message="Impossible de vérifier le paiement."), 400
+                             message="Impossible de vérifier le paiement."), 400
 
     if s.get("payment_status") != "paid":
         current_app.logger.warning(f"⚠️ [PAIEMENT-EFFECTUE-STRIPE] Paiement non payé: {s.get('payment_status')}")
         return render_template('paiement_effectue_problem.html',
-                            message="Paiement non confirmé."), 402
+                             message="Paiement non confirmé."), 402
 
     product_key = (s.get('metadata') or {}).get('product_key')
-
-    # ✅ ✅ ✅ LOGS DE DEBUG AJOUTÉS ✅ ✅ ✅
-    current_app.logger.info(f"🔍 [DEBUG-STRIPE] product_key extrait des metadata = '{product_key}'")
-
     product = PRODUCTS.get(product_key or "")
-
-    current_app.logger.info(f"🔍 [DEBUG-STRIPE] product trouvé = {product is not None}")
-    if product:
-        current_app.logger.info(f"🔍 [DEBUG-STRIPE] product_label = '{product.get('label')}'")
-        current_app.logger.info(f"🔍 [DEBUG-STRIPE] success_route = '{product.get('success_route')}'")
-
+    
     if not product:
         current_app.logger.error(f"❌ [PAIEMENT-EFFECTUE-STRIPE] Produit inconnu: {product_key}")
         return render_template('paiement_effectue_problem.html',
-                            message="Produit inconnu après paiement."), 400
+                             message="Produit inconnu après paiement."), 400
 
     # ✅ Marqueurs Stripe
     session["last_payment"] = {
@@ -250,40 +240,27 @@ def paiement_effectue():
         "created": s.get("created"),
         "product_key": product_key,
         "livemode": s.get("livemode"),
-        "mode": "SANDBOX" if PAYMENTS_SANDBOX else "LIVE",
+        "mode": "SANDBOX" if PAYMENTS_SANDBOX else "LIVE",  # ✅ Plus clair
     }
     session["selected_product"] = product_key
     session["stripe_session_id"] = session_id
     session["paiement_valide"] = True
     session["paiement_timestamp"] = datetime.utcnow().isoformat()
     session.modified = True
-
+    
     current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-STRIPE] Paiement validé | product={product_key} | mode={session['last_payment']['mode']}")
 
-    # ✅ ✅ ✅ GÉNÉRATION URL AVEC DEBUG ✅ ✅ ✅
+    # Destination après paiement Stripe
     try:
-        current_app.logger.info(f"🔍 [DEBUG-STRIPE] Tentative url_for('{product['success_route']}')")
         next_url = url_for(product["success_route"])
-        current_app.logger.info(f"✅ [DEBUG-STRIPE] URL générée avec succès = '{next_url}'")
-        
     except Exception as e:
-        current_app.logger.error(f"❌ [DEBUG-STRIPE] Erreur url_for: {type(e).__name__}: {e}")
-        current_app.logger.error(f"❌ [DEBUG-STRIPE] Le blueprint '{product['success_route'].split('.')[0]}' est-il enregistré ?")
-        
-        # Fallback avec URL en dur
-        if product_key == "forces_defis":
-            next_url = "/forces_defis/complet"
-            current_app.logger.warning(f"⚠️ [DEBUG-STRIPE] Utilisation fallback URL: {next_url}")
-        else:
-            next_url = "/point_astral_blocs/complet"
-            current_app.logger.warning(f"⚠️ [DEBUG-STRIPE] Utilisation fallback URL: {next_url}")
+        current_app.logger.warning(f"⚠️ [PAIEMENT-EFFECTUE-STRIPE] Fallback route: {e}")
+        next_url = "/forces_defis/complet" if product_key == "forces_defis" else "/point_astral_blocs/complet"
 
     # Anti-reload : purge d'anciennes clés
     for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
         session.pop(k, None)
 
-    current_app.logger.info(f"🎯 [DEBUG-STRIPE] Redirection finale vers: {next_url}")
-
     return render_template('paiement_effectue.html',
-                        next_url=next_url,
-                        produit_titre=product["label"])
+                         next_url=next_url,
+                         produit_titre=product["label"])
