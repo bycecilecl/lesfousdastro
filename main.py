@@ -190,6 +190,15 @@ app.register_blueprint(stripe_webhook_bp)
 app.register_blueprint(pages_bp)
 app.register_blueprint(forces_defis_module_bp)
 
+# ✅ AJOUTER CE DEBUG
+print("\n" + "="*60)
+print("📋 LISTE DES ROUTES ENREGISTRÉES :")
+print("="*60)
+for rule in app.url_map.iter_rules():
+    if 'forces' in str(rule) or 'astral' in str(rule):
+        print(f"  → {rule.endpoint:50s} {rule.rule}")
+print("="*60 + "\n")
+
 # 5) Headers de sécurité (après enregistrement des routes)
 from security_headers import add_security_headers
 add_security_headers(app)
