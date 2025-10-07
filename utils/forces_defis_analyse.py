@@ -1,0 +1,625 @@
+# utils/forces_defis_analyse.py
+from __future__ import annotations
+
+from utils.selection_donnees import construire_selection_point_astral
+from utils.openai_utils import interroger_llm
+from utils.convert_markdown_light import md_light_to_html
+
+# ───────── Imports robustes avec fallbacks (module-level) ─────────
+try:
+    from utils.forces_defis import generer_forces_defis as _GENERER_FORCES_DEFIS  # type: ignore
+except Exception:
+    _GENERER_FORCES_DEFIS = None
+
+try:
+    from utils.forces_defis import extraire_forces_defis_par_maisons  # type: ignore
+except Exception:
+    def extraire_forces_defis_par_maisons(_):
+        return None  # fallback neutre
+
+def _build_bloc_theme_occidental_depuis_selector(theme: dict) -> str:
+    """
+    Reprend EXACTEMENT la construction des placements comme dans point_astral_blocs.py,
+    via construire_selection_point_astral(...). On ne filtre rien, on renvoie le bloc tel quel.
+    """
+    try:
+        bloc = construire_selection_point_astral(theme, max_orbe=5.0)
+        return bloc if isinstance(bloc, str) else ""
+    except Exception:
+        return ""
+    
+
+# --- Helpers extraction aspects (placé au-dessus de _build_contexte_compact) ---
+def _coerce_name(x):
+    """Convertit id/dict/label -> nom lisible ; sinon renvoie la valeur brute."""
+    if x is None:
+        return None
+    if isinstance(x, dict):
+        # noms possibles
+        for k in ("name", "nom", "label", "planet", "body", "point"):
+            if x.get(k):
+                return str(x[k])
+        # id brut
+        for k in ("id", "key", "code"):
+            if x.get(k):
+                return str(x[k])
+        return None
+    if isinstance(x, (str, int)):
+        return str(x)
+    return None
+
+def _extract_names_types_orb(a):
+    """Extrait p1, type, p2, orbe d'un aspect (gère formats très variés)."""
+    # 1) Si string → parser "Soleil Sextile Lune"
+    if isinstance(a, str):
+        import re
+        m = re.search(
+            r"([A-Za-zÀ-ÖØ-öø-ÿ'’\-]+)\s+"
+            r"(Conjonction|Sextile|Trigone|Carr[ée]?|Opposition|Quinconce|"
+            r"Conjunction|Trine|Square|Opposition|Quincunx)"
+            r"\s+([A-Za-zÀ-ÖØ-öø-ÿ'’\-]+)",
+            a, flags=re.I
+        )
+        # orbe éventuel dans le texte
+        orb = None
+        m_orb = re.search(r"orbe\s*([0-9]+(?:\.[0-9]+)?)", a, flags=re.I)
+        if m_orb:
+            try:
+                orb = float(m_orb.group(1))
+            except Exception:
+                pass
+
+        if m:
+            return m.group(1), m.group(2), m.group(3), orb
+        return "?", "?", "?", orb
+
+    if not isinstance(a, dict):
+        return "?", "?", "?", None
+
+    # 2) Type
+    t = (a.get("type") or a.get("aspect") or a.get("relation") or 
+         a.get("aspect_type") or a.get("kind") or "?")
+
+    # 3) P1/P2 : grand tour d’alias
+    p1 = (a.get("p1") or a.get("planet1") or a.get("A") or a.get("a") or 
+          a.get("body1") or a.get("point1") or a.get("planete1") or
+          a.get("from") or a.get("source"))
+    p2 = (a.get("p2") or a.get("planet2") or a.get("B") or a.get("b") or 
+          a.get("body2") or a.get("point2") or a.get("planete2") or
+          a.get("to") or a.get("target"))
+
+    # 3b) Si dicts imbriqués
+    if isinstance(p1, dict): p1 = _coerce_name(p1)
+    if isinstance(p2, dict): p2 = _coerce_name(p2)
+
+    # 3c) Listes ["Soleil","Lune"] ou ["sun","moon"]
+    if not p1 or not p2:
+        planets_list = a.get("planets") or a.get("p") or a.get("bodies") or a.get("points") or a.get("pair") or []
+        if isinstance(planets_list, (list, tuple)) and len(planets_list) >= 2:
+            p1 = p1 or _coerce_name(planets_list[0])
+            p2 = p2 or _coerce_name(planets_list[1])
+
+    # 3d) Dernier recours : label libre
+    if (not p1 or not p2) and (a.get("label") or a.get("description") or a.get("name") or a.get("title") or a.get("text")):
+        label = a.get("label") or a.get("description") or a.get("name") or a.get("title") or a.get("text")
+        import re
+        m = re.search(
+            r"([A-Za-zÀ-ÖØ-öø-ÿ'’\-]+)\s+"
+            r"(Conjonction|Sextile|Trigone|Carr[ée]?|Opposition|Quinconce|"
+            r"Conjunction|Trine|Square|Opposition|Quincunx)"
+            r"\s+([A-Za-zÀ-ÖØ-öø-ÿ'’\-]+)",
+            label, flags=re.I
+        )
+        if m:
+            p1 = p1 or m.group(1)
+            t  = t  if t != "?" else m.group(2)
+            p2 = p2 or m.group(3)
+
+    # 4) Orbe
+    orb = a.get("orb") or a.get("orbe") or a.get("delta") or a.get("d")
+    try:
+        orb = float(orb) if orb is not None else None
+    except Exception:
+        orb = None
+
+    # Normalisation type en FR
+    t_low = (t or "").lower()
+    MAP = {"conjunction": "Conjonction", "trine": "Trigone", "square": "Carré"}
+    if t_low in MAP: t = MAP[t_low]
+    elif t == "?":   t = "?"
+
+    p1 = p1 or "?"
+    p2 = p2 or "?"
+
+    # DEBUG utile
+    if p1 == "?" or p2 == "?":
+        try:
+            print("⚠️ Aspect non parsé correctement :", a)
+            if isinstance(a, dict):
+                print("   Clés disponibles :", list(a.keys()))
+        except Exception:
+            pass
+
+    return p1, t, p2, orb
+
+
+# ───────── Fallback local si pas de générateur dispo ─────────
+def _fallback_generer_forces_defis(data_theme: dict) -> dict:
+    forces, defis = [], []
+    synthese = ""
+
+    aspects = data_theme.get("aspects") or []
+    if isinstance(aspects, list):
+        for a in aspects[:40]:
+            try:
+                a_type = (a.get("type") or a.get("aspect") or "").lower()
+                p1 = a.get("p1") or a.get("planet1") or a.get("A") or "Planète A"
+                p2 = a.get("p2") or a.get("planet2") or a.get("B") or "Planète B"
+                orb = a.get("orb") or a.get("orbe") or ""
+                label = f"{p1} {a_type} {p2}".strip()
+                if a_type in ("trigone", "sextile", "conjonction", "conjunction"):
+                    forces.append(f"• {label} (orbe {orb}) : soutien naturel à mobiliser au quotidien.")
+                elif a_type in ("carré", "carre", "opposition", "quincunx", "quinconce"):
+                    defis.append(f"• {label} (orbe {orb}) : tension formatrice à intégrer avec méthode.")
+            except Exception:
+                continue
+
+    for k in ("chiron", "Chiron"):
+        if k in data_theme:
+            defis.append("• Chiron actif : travail de guérison/réconciliation sur un axe clé.")
+            break
+
+    for k in ("lune_noire", "Lune Noire", "black_moon", "lilith"):
+        if k in data_theme:
+            defis.append("• Lune Noire présente : zones de radicalité ou de tabou à apprivoiser.")
+            break
+
+    noeuds = data_theme.get("noeuds") or data_theme.get("noeuds_lunaires") or {}
+    if isinstance(noeuds, dict) and any(noeuds.values()):
+        defis.append("• Nœuds lunaires marqués : trajectoire karmique/évolutive à harmoniser.")
+
+    if forces or defis:
+        synthese = "Potentiels identifiés à activer et tensions structurantes à transmuter."
+
+    return {"forces": forces, "defis": defis, "synthese_courte": synthese}
+
+def _normalize_aspect_type(t: str) -> str:
+    """Ramène le type d’aspect à un libellé FR canonique (minuscule)."""
+    if not t:
+        return "?"
+    if not isinstance(t, str):
+        t = str(t)  # ← IMPORTANT: évite AttributeError .strip() sur dict
+    tl = t.strip().lower()
+    mapping = {
+        "conjunction": "conjonction",
+        "conjonction": "conjonction",
+        "trine": "trigone",
+        "trigone": "trigone",
+        "sextile": "sextile",
+        "square": "carré",
+        "carre": "carré",
+        "carré": "carré",
+        "opposition": "opposition",
+        "quinconce": "quinconce",
+        "quincunx": "quinconce",
+    }
+    return mapping.get(tl, tl)
+
+def _filtrer_aspects_par_type(aspects_all, max_aspects=None):
+    """
+    Garde les aspects selon des orbes dynamiques :
+      - Conjonction ≤ 9°
+      - Carré / Opposition ≤ 7°
+      - Trigone / Sextile ≤ 5°
+    Puis trie par 'utilité' (durs>souples, luminaires/angles, orbe serré).
+    Retourne une liste de lignes déjà formatées pour le prompt.
+    """
+    ORB_LIMITS = {
+        "conjonction": 9.0,
+        "carré": 7.0,
+        "opposition": 7.0,
+        "trigone": 5.0,
+        "sextile": 5.0,
+        # (optionnel) "quinconce": 3.0,
+    }
+
+    focus = {"soleil", "lune", "mars", "saturne", "pluton", "vénus", "venus", "mercure", "ascendant", "rahu", "ketu", "noeud nord", "nœud nord", "noeud sud", "nœud sud"}
+    hard = {"carré", "opposition"}         # quinconce si tu veux
+    soft = {"trigone", "sextile", "conjonction"}
+
+    keep = []
+
+    for a in (aspects_all or []):
+        # Extraction robuste
+        p1, t, p2, orb = _extract_names_types_orb(a if isinstance(a, dict) else {"label": str(a)})
+        typ = _normalize_aspect_type(t)
+
+        # Essaie aussi de lire l’orbe dans un label si orb manquant
+        if orb is None and isinstance(a, dict):
+            label = a.get("label") or a.get("description") or a.get("name") or a.get("title") or a.get("text") or ""
+            import re
+            m = re.search(r"orbe\s*([0-9]+(?:\.[0-9]+)?)", label, flags=re.I)
+            if m:
+                try:
+                    orb = float(m.group(1))
+                except Exception:
+                    pass
+
+        # On ne garde que si on a un type connu et un orb numérique
+        if typ not in ORB_LIMITS or not isinstance(orb, (int, float)):
+            continue
+
+        if float(orb) > ORB_LIMITS[typ]:
+            continue
+
+        # Score utilité (plus haut = plus prioritaire)
+        tlow = typ.lower()
+        w = 0
+        if tlow in hard: w += 3
+        if tlow in soft: w += 2
+
+        p1l = (p1 or "").lower()
+        p2l = (p2 or "").lower()
+        if p1l in focus: w += 2
+        if p2l in focus: w += 2
+
+        try:
+            w += max(0, int(ORB_LIMITS[typ]) - int(round(float(orb))))  # orbe serré → mieux
+        except Exception:
+            pass
+
+        keep.append({
+            "a": a,
+            "p1": p1 or "?",
+            "p2": p2 or "?",
+            "typ": typ,     # déjà normalisé
+            "orb": float(orb),
+            "w": w
+        })
+
+    # Tri par utilité puis orbe (le plus serré d’abord)
+    keep.sort(key=lambda x: (-x["w"], x["orb"]))
+    if isinstance(max_aspects, int) and max_aspects > 0:
+        keep = keep[:max_aspects]
+
+    # Formatage final
+    def _fmt(row):
+        o = f"{row['orb']:.2f}"
+        # Capitaliser la 1ère lettre du type pour l’affichage
+        typ_disp = row["typ"].capitalize()
+        return f"{row['p1']} {typ_disp} {row['p2']} (orbe {o}°)"
+
+    return [f"- {_fmt(r)}" for r in keep]
+
+# --- Contexte compact pour Forces & Défis ---
+def _build_contexte_compact(theme: dict, max_aspects=20) -> dict:
+    """
+    Rassemble UNIQUEMENT la matière utile :
+    - Axes/signes interceptés + maisons (prioritaires)
+    - Soleil/Lune : signe + maison (+ exil/chute utiles)
+    - Maisons VIII et XII : planètes présentes
+    - Planètes angulaires (I/X)
+    - Rétrogrades clés
+    - Aspects (orbes dynamiques : ≤5° trigone/sextile, ≤7° carré/opposition, ≤9° conjonction)
+    - Amas (stelliums) s’ils existent
+    (AUCUNE donnée védique, pas de dominances globales, pas de nakshatra ici)
+    """
+
+    # 1) Interceptions
+    interceptions = theme.get("interceptions", {})
+    inter_lines = []
+    if isinstance(interceptions, dict) and interceptions:
+        for axe, data in interceptions.items():
+            if isinstance(data, dict):
+                signes  = data.get("signes") or data.get("signs") or []
+                maisonA = data.get("maisonA") or data.get("houseA")
+                maisonB = data.get("maisonB") or data.get("houseB")
+                if signes:
+                    inter_lines.append(
+                        f"- Axe {axe} intercepté : {', '.join(signes)} (Maisons {maisonA} / {maisonB})"
+                    )
+
+    # 2) Soleil / Lune
+    def _fmt_placement(nom):
+        obj = (theme.get("planetes") or {}).get(nom) or theme.get(nom.lower()) or {}
+        signe = obj.get("signe") or obj.get("sign") or obj.get("zodiaque")
+        maison = obj.get("maison") or obj.get("house")
+        return f"{nom} : {signe or '?'} (Maison {maison or '?'})"
+    sol_line  = _fmt_placement("Soleil")
+    lune_line = _fmt_placement("Lune")
+
+    # 3) Maisons VIII & XII : qui s’y trouve ?
+    def _planetes_en_maison(num):
+        out = []
+        for nom, p in (theme.get("planetes") or {}).items():
+            h = p.get("maison") or p.get("house")
+            try:
+                if int(h) == num:
+                    out.append(nom)
+            except Exception:
+                pass
+        return out
+    m8  = _planetes_en_maison(8)
+    m12 = _planetes_en_maison(12)
+
+    # 4) Angulaires (I / X)
+    ang = []
+    for nom, p in (theme.get("planetes") or {}).items():
+        h = p.get("maison") or p.get("house")
+        if str(h) in ("1", "10"):
+            ang.append(f"{nom} (M{h})")
+
+    # 5) Rétrogrades (liste courte)
+    retro = []
+    for nom, p in (theme.get("planetes") or {}).items():
+        if p.get("retro") or p.get("r") or (isinstance(p.get("flags"), list) and "retro" in p["flags"]):
+            retro.append(nom)
+
+    # 6) Aspects — orbes dynamiques + tri utile
+    aspects_all = (theme.get("aspects_significatifs")
+                   or theme.get("aspects")
+                   or [])
+    aspects_lines = _filtrer_aspects_par_type(aspects_all, max_aspects=None)  # tout garder
+    # ou par ex. max_aspects=50 si tu veux un plafond       
+
+    # 7) Amas / stelliums (si dispo)
+    amas_lines = []
+    amas = theme.get("amas") or []
+    if isinstance(amas, list):
+        for a in amas[:3]:
+            try:
+                signe = a.get("signe") or a.get("sign")
+                pls   = ", ".join(a.get("planetes") or [])
+                amas_lines.append(f"- Amas en {signe}: {pls}")
+            except Exception:
+                continue
+
+    # 8) Dignités ciblées utiles ici (ex: Lune en Capricorne, Vénus en Scorpion)
+    dignites_lines = []
+    lune  = (theme.get("planetes") or {}).get("Lune")  or {}
+    venus = (theme.get("planetes") or {}).get("Vénus") or (theme.get("planetes") or {}).get("Venus") or {}
+    if (lune.get("signe") or "").lower().startswith("capri"):
+        dignites_lines.append("- Lune en Capricorne (exil) → froideur/maîtrise émotionnelle à travailler.")
+    if (venus.get("signe") or "").lower().startswith("scorp"):
+        dignites_lines.append("- Vénus en Scorpion (exil) → intensité relationnelle / enjeux de confiance/pouvoir.")
+
+    # — Contexte final compact, ordonné —
+    ctx_lines = []
+
+    # Interceptions en premier si présentes
+    if inter_lines:
+        ctx_lines += ["### Axes interceptés (PRIORITAIRES)"] + inter_lines
+
+    # Clés rapides
+    ctx_lines += ["### Clés rapides",
+                  f"- {sol_line}",
+                  f"- {lune_line}"]
+
+    # VIII / XII / Angulaires / Rétrogrades
+    if m8:
+        ctx_lines.append(f"- Maison VIII : {', '.join(m8)}")
+    if m12:
+        ctx_lines.append(f"- Maison XII : {', '.join(m12)}")
+    if ang:
+        ctx_lines.append(f"- Planètes angulaires (I/X) : {', '.join(ang)}")
+    if retro:
+        ctx_lines.append(f"- Rétrogrades : {', '.join(retro)}")
+
+    # Aspects (un seul titre, bon libellé)
+    if aspects_lines:
+        ctx_lines += ["### Aspects (orbes dynamiques — triés utiles)"] + aspects_lines
+
+    # Amas / Dignités
+    if amas_lines:
+        ctx_lines += ["### Amas (si pertinents)"] + amas_lines
+    if dignites_lines:
+        ctx_lines += ["### Dignités ciblées (utile ici)"] + dignites_lines
+
+    return {
+        "placements_compacts": "\n".join(ctx_lines).strip()
+    }
+
+
+# ───────── Contexte global (même base que Flash) ─────────
+def _build_contexte_global(data_theme) -> dict:
+    # 1) Bloc compact (Clés rapides, Aspects triés, etc.)
+    ctx_compact = _build_contexte_compact(data_theme)
+    placements_compacts = ctx_compact.get("placements_compacts", "")
+
+    # 2) Bloc global complet (toutes les positions/maisons)
+    try:
+        sel = construire_selection_point_astral(data_theme) or {}
+        contexte_global = (
+            sel.get("contexte_global")
+            or sel.get("resume_global")
+            or sel.get("axes_majeurs")
+            or ""
+        )
+        if not isinstance(contexte_global, str):
+            contexte_global = str(contexte_global)
+    except Exception:
+        contexte_global = ""
+
+    # 3) Concat : compact + contexte global (si disponible)
+    if contexte_global.strip():
+        placements_str = f"{placements_compacts}\n\n### Contexte global\n{contexte_global.strip()}"
+    else:
+        placements_str = placements_compacts
+
+    return {
+        "placements_str": placements_str,
+        "axes_majeurs_str": "",
+        "rag_snippets": ""
+    }
+
+# ───────── Directives de genre ─────────
+def _genre_directives(meta: dict) -> str:
+    genre = (meta or {}).get("genre", "neutre")
+    if genre == "femme":
+        return ("- Prends en compte une réception lunaire/Vénus possiblement plus sensible.\n"
+                "- Évite les injonctions dures ; privilégie l’accompagnement et la nuance.")
+    if genre == "homme":
+        return ("- Prends en compte un axe solaire/Mars possiblement plus saillant.\n"
+                "- Évite les stéréotypes ; parle d’alignement et de responsabilité.")
+    return "- Reste neutre, inclusif et respectueux des nuances individuelles."
+
+
+
+# ───────── Entrée principale ─────────
+def analyse_forces_defis(data_theme, meta=None) -> str:
+    """
+    Génère une analyse 1–2 pages, structurée :
+    - Intro brève
+    - Inventaire FORCES (bullet points)
+    - Inventaire DÉFIS (bullet points)
+    - Conclusion actionnable
+    """
+    meta = meta or {"tonalite": "tu", "genre": "neutre"}
+    ctx = _build_contexte_global(data_theme)
+    placements_str = ctx["placements_str"]
+    axes_majeurs_str = ctx["axes_majeurs_str"]
+    rag_snippets = ctx["rag_snippets"]
+
+    # AJOUTE :
+    try:
+        sel = construire_selection_point_astral(data_theme) or {}
+        ctx_global = (
+            sel.get("contexte_global")
+            or sel.get("axes_majeurs")
+            or sel.get("resume_global")
+            or ""
+        )
+        if not isinstance(ctx_global, str):
+            ctx_global = ""
+    except Exception:
+        ctx_global = ""
+
+    bloc_contexte = placements_str if isinstance(placements_str, str) else str(placements_str)
+    if ctx_global.strip():
+        bloc_contexte = f"{bloc_contexte}\n\n### Contexte global\n{ctx_global.strip()}"
+    
+    # === Bloc "thème entier" (identique à la route) ===
+    bloc_theme_occ = _build_bloc_theme_occidental_depuis_selector(data_theme)
+
+    if not placements_str or len(placements_str) < 40:
+        raise ValueError("placements_str insuffisant pour générer l’analyse Forces & Défis.")
+
+    # Matière première (règles locales ou fallback)
+    if callable(_GENERER_FORCES_DEFIS):
+        fd = _GENERER_FORCES_DEFIS(data_theme)  # type: ignore[misc]
+    else:
+        fd = _fallback_generer_forces_defis(data_theme)
+
+    # 🔎 Ajout maisons (VIII, XII, IV, X…) si dispo, sans casser si absent
+    try:
+        fd_maisons = extraire_forces_defis_par_maisons(data_theme)
+        if isinstance(fd_maisons, dict):
+            fd["forces"] = (fd.get("forces") or []) + (fd_maisons.get("forces") or [])
+            fd["defis"]  = (fd.get("defis")  or []) + (fd_maisons.get("defis")  or [])
+    except Exception:
+        pass
+
+    forces_txt = "\n".join(fd.get("forces", [])) or "Aucune force marquante détectée."
+    defis_txt  = "\n".join(fd.get("defis",  [])) or "Aucun défi majeur détecté."
+    synthese   = fd.get("synthese_courte", "")
+
+    genre_rules = _genre_directives(meta)
+
+    prompt = f"""
+
+Tu es une astrologue-psychologue experte (20+ ans), spécialisée en astrologie psychologique (Jung, Alice Bailey).
+
+ANALYSE PAYANTE - Thème : {meta.get("prenom", "la personne")}
+Objectif : Révéler les dynamiques profondes du thème via FORCES et DÉFIS concrets.
+
+═══ RÈGLES DE TRI ═══
+
+Orbes maximales :
+- Conjonction ≤ 9°
+- Carré/Opposition ≤ 7°  
+- Trigone/Sextile ≤ 5°
+
+Classification :
+- Carré/Opposition → DÉFIS
+- Trigone/Sextile → FORCES
+- Conjonction avec Saturne/Mars/Pluton/Lilith → DÉFIS, autres → FORCES
+- Aspects aux Nœuds : suivre la règle de l'aspect (sextile = FORCES, carré = DÉFIS)
+
+Éléments à intégrer :
+✓ Planètes en chute/exil → DÉFIS (ou forces compensatoires)
+✓ Planètes rétrogrades personnelles (Mercure, Vénus, Mars)
+✓ Planètes en Maison VIII et XII
+✓ Amas planétaires
+
+⚠️ NE TE BASE QUE sur le contexte fourni. Pas d'invention, pas de généralités.
+
+═══ STRUCTURE DE SORTIE ═══
+
+**Introduction** (1 paragraphe, 80-100 mots)
+Accroche personnalisée basée sur les placements majeurs du thème.
+
+**## DÉFIS**
+5 puces MINIMUM
+Format : - **Aspect/Placement précis** : Description (200 mots minimum)
+Chaque puce = 1 aspect/placement du contexte + implications psychologiques concrètes
+
+**## FORCES**  
+5 puces MINIMUM
+Format : - **Aspect/Placement précis** : Description (200 mots minimum)
+Chaque puce = 1 aspect/placement du contexte + potentiel d'expression
+
+**Conclusion** (1 paragraphe, 80-100 mots)
+Synthèse intégrative, perspective d'évolution.
+
+═══ STYLE D'ÉCRITURE ═══
+
+✓ Ton : Lucide, direct, bienveillant mais sans complaisance
+✓ Profondeur : Psychologie jungienne, symbolisme archétypal
+✓ Concret : Exemples de vie, situations tangibles
+✓ Humour : Subtil, naît de l'observation juste (pas de blagues forcées)
+✓ Empathie : Reconnaître la difficulté sans dramatiser
+
+✗ À ÉVITER :
+- Phrases vides type "tu es unique", "le cosmos t'appelle"
+- Images farfelues gratuites (pizza cosmique, GPS karmique...)
+- Psychologie de comptoir
+- Prédictions, jugements moraux
+- Ton professoral ou condescendant
+
+Chaque phrase doit servir la compréhension de soi. Pas de remplissage.
+
+═══ DONNÉES DU THÈME ═══
+
+{bloc_theme_occ}
+
+Métadonnées :
+- Tonalité: {meta.get("tonalite","tu")}
+- Genre: {meta.get("genre","neutre")}
+
+"""
+    
+    # 🛠 Voir le prompt entier dans la console
+    print("\n=== PROMPT FORCES & DEFIS ===\n")
+    print(prompt)
+    print("\n=== FIN PROMPT ===\n")
+
+
+    resultat_llm = interroger_llm(prompt)
+
+    # Gérer le cas où interroger_llm retourne un dict
+    if isinstance(resultat_llm, dict):
+        texte = (resultat_llm.get("content") or 
+                resultat_llm.get("text") or 
+                resultat_llm.get("message") or 
+                resultat_llm.get("response") or 
+                str(resultat_llm))
+        
+        print("\n" + "="*60)
+        print("TEXTE EXTRAIT DU LLM (1000 premiers caractères):")
+        print("="*60)
+        print(texte[:1000])
+        print("="*60 + "\n")
+        
+        return texte
+    else:
+        return str(resultat_llm)

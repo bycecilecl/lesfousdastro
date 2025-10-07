@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mes Potentiels & Défis - {{ nom }}</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+ <style>
+  :root{
+    --bg: #f7fbfd;           /* fond très clair pour respirer */
+    --card: #ffffff;         /* cartes blanches lisibles */
+    --ink: #1f2937;          /* texte principal (gris très foncé) */
+    --muted:#64748b;         /* texte secondaire */
+    --brand:#1f628e;         /* Bleu foncé (marque) */
+    --brand-soft:#c0f0f7;    /* Bleu ciel (surbrillance) */
+    --accent:#00a8a8;        /* Bleu vert d’eau (accent / CTA) */
+    --shadow: 0 10px 40px rgba(31,98,142,.22);  /* ombre bleutée douce */
+    --radius: 16px;
+  }
+
+  *{ box-sizing:border-box }
+
+  body{
+    margin:0; padding:24px;
+    /* fond avec ta palette, subtil et lumineux */
+    background: linear-gradient(135deg, #1f628e 0%, #00a8a8 55%, #c0f0f7 115%);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    color: var(--ink);
+  }
+
+  .container{
+    max-width: 860px; margin: 0 auto;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  header{
+    padding: 32px 36px 16px 36px;
+    /* halos + dégradé clair aux couleurs de marque */
+    background:
+      radial-gradient(1200px 400px at 80% -50%, rgba(31,98,142,0.15), transparent 60%),
+      radial-gradient(1000px 400px at -10% -80%, rgba(0,168,168,0.12), transparent 60%),
+      linear-gradient(180deg, #ffffff 0%, #f9fdff 55%, #ffffff 100%);
+    border-bottom: 1px solid #e6f3f7;
+  }
+
+  h1{
+    margin:0 0 6px 0;
+    font-family: "Playfair Display", serif;
+    font-size: 2rem; line-height: 1.15;
+    letter-spacing: 0.2px;
+    color: #0f172a;
+    text-align: center;
+  }
+
+  .sub{
+    text-align:center; color: var(--muted);
+    font-size: .95rem; margin-bottom: 6px;
+  }
+
+  main{
+    padding: 28px 36px 36px 36px;
+  }
+
+  /* Titres de sections "DÉFIS" / "FORCES" */
+  .section-title{
+    font-family: "Playfair Display", serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: .2px;
+    color: #0b1220;
+    margin: 26px 0 12px;
+    padding: 8px 12px;
+    border-left: 4px solid var(--brand);
+    background: var(--brand-soft);
+    border-radius: 10px;
+  }
+
+  /* Paragraphes */
+  p{ margin: 12px 0; color: #0b1220; }
+
+  /* Listes jolies */
+  ul{ list-style: none; padding-left: 0; margin: 14px 0 8px 0; }
+  li{
+    position: relative;
+    margin: 10px 0;
+    padding: 12px 14px 12px 44px;
+    border: 1px solid #e6f3f7;         /* bord bleu ciel */
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 1px 0 rgba(2,6,23,0.03);
+  }
+  li::before{
+    content: "";
+    position: absolute; left: 14px; top: 16px;
+    width: 20px; height: 20px; border-radius: 6px;
+    background: linear-gradient(135deg, var(--brand), var(--accent));
+    box-shadow: 0 0 0 3px var(--brand-soft); /* halo bleu ciel */
+  }
+
+  strong{ font-weight: 700; }
+
+  /* Bouton */
+  .actions{ text-align: center; margin: 24px 0 8px; }
+  .btn{
+    display:inline-block; padding:12px 18px; border-radius:12px;
+    background: linear-gradient(135deg, var(--accent), var(--brand));
+    color:#fff; text-decoration:none; font-weight:600;
+    box-shadow: 0 6px 20px rgba(0,168,168,0.35);
+    transition: transform .12s ease, filter .2s ease;
+  }
+  .btn:hover{ filter: brightness(1.05); transform: translateY(-1px); }
+
+  footer{
+    text-align: center; color:#0b3550; font-size:.92rem; margin-top:18px;
+    opacity:.7;
+  }
+  .home{
+    display:inline-block; margin-top:8px; color:#1f628e; text-decoration:none;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Mes Potentiels & Défis</h1>
+      <div class="sub">{{ nom }}</div>
+    </header>
+
+    <main>
+      <!-- On injecte le HTML converti (titres H2 + listes) -->
+      <div class="content">
+        {{ contenu_html|safe }}
+      </div>
+
+      {% if pdf_url %}
+      <div class="actions">
+        <a class="btn" href="{{ pdf_url }}" target="_blank" rel="noopener">Télécharger le PDF</a>
+      </div>
+      {% endif %}
+    </main>
+  </div>
+
+  <footer>
+    <div><a class="home" href="/">← Retour à l’accueil</a></div>
+  </footer>
+</body>
+</html>
+
+
