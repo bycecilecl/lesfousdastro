@@ -66,7 +66,7 @@ def get_paypal_token():
     # ✅ Choix des credentials selon le mode calculé
     if use_sandbox:
         client_id = os.getenv("PAYPAL_CLIENT_ID_SANDBOX", "").strip()
-        secret = os.getenv("PAYPAL_SECRET_SANDBOX", "").strip()
+        secret = os.getenv("PAYPAL_CLIENT_SECRET_SANDBOX", "").strip()  # ✅ BON NOM
     else:
         client_id = (
             os.getenv("PAYPAL_CLIENT_ID_LIVE") or 
@@ -74,7 +74,7 @@ def get_paypal_token():
             ""
         ).strip()
         secret = (
-            os.getenv("PAYPAL_SECRET_LIVE") or 
+            os.getenv("PAYPAL_CLIENT_SECRET_LIVE") or  # ✅ BON NOM
             os.getenv("PAYPAL_SECRET") or 
             ""
         ).strip()
