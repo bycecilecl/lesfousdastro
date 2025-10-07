@@ -2330,18 +2330,69 @@
                 }]
                 });
             },
-
             onApprove: async (data, actions) => {
                 console.log('✅ PayPal.onApprove déclenché', data);
+
                 try {
-                const details = await actions.order.capture();
-                console.log('🎉 Paiement capturé avec succès ! Détails =', details);
-                window.location.href = '/paiement-effectue?provider=paypal';  // ✅ BON
+                    // 1) Récupérer les infos formulaire
+                    const userInfo = {
+                    nom: document.getElementById('nom').value,
+                    email: document.getElementById('email').value,
+                    gender: document.querySelector('[name="gender"]:checked').value,
+                    birthDate: document.getElementById('date_naissance').value,
+                    birthTime: document.getElementById('heure_naissance').value,
+                    birthPlace: document.getElementById('lieu_naissance').value,
+                    lat: document.getElementById('lat').value,
+                    lon: document.getElementById('lon').value,
+                    tzid: document.getElementById('tzid').value,
+                    };
+
+                    // 2) Quel produit ?
+                    const product_key =
+                    document.getElementById('product_key').value ||
+                    (order?.items?.[0]?.id) ||
+                    'flash_astral';
+
+                    console.log('📦 Envoi au backend:', {
+                    orderID: data.orderID,
+                    product_key,
+                    total: order?.total,
+                    userInfo
+                    });
+
+                    // 3) 👉 Laisser le BACKEND capturer + stocker en session
+                    const response = await fetch('/payments/capture-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderID: data.orderID,
+                        userInfo,
+                        product_key,
+                        items: order?.items || [
+                        {
+                            id: product_key,
+                            name: document.getElementById('selected_product_label').value || 'Analyse',
+                            price: Number(order?.total ?? 0)
+                        }
+                        ]
+                    })
+                    });
+
+                    const result = await response.json();
+                    console.log('🎉 Réponse backend:', result);
+
+                    // 4) Succès → redirection
+                    if (response.ok && (result.status === 'COMPLETED' || result.ok)) {
+                    window.location.href = '/paiement-effectue?provider=paypal';
+                    } else {
+                    console.error('❌ Capture/stockage côté serveur KO:', result);
+                    showNotification('Erreur lors de la confirmation du paiement.', 'warning');
+                    }
                 } catch (err) {
-                console.error('❌ Erreur lors de la capture PayPal:', err);
-                showNotification('Erreur lors du traitement du paiement.', 'warning');
+                    console.error('❌ Erreur onApprove:', err);
+                    showNotification('Erreur lors du traitement du paiement.', 'warning');
                 }
-            },
+                },
 
             onError: (err) => {
                 console.error('🔥 PayPal.onError', err);

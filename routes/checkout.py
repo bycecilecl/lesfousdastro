@@ -190,45 +190,58 @@ def paiement_effectue():
                              next_url=next_url,
                              produit_titre=product["label"])
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # ── BRANCHE STRIPE : Vérification via l'API Stripe
-    # ─────────────────────────────────────────────────────────────────────────
-    
+# ─────────────────────────────────────────────────────────────────────────
+# ── BRANCHE STRIPE : Vérification via l'API Stripe
+# ─────────────────────────────────────────────────────────────────────────
+
     current_app.logger.info(f"🎯 [PAIEMENT-EFFECTUE-STRIPE] session_id = {session_id}")
-    
+
     if not session_id:
         current_app.logger.warning("❌ [PAIEMENT-EFFECTUE-STRIPE] Pas de session_id")
         return render_template('paiement_effectue_problem.html',
-                             message="Session paiement manquante."), 400
+                            message="Session paiement manquante."), 400
 
     try:
         s = stripe.checkout.Session.retrieve(session_id)
         
         current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-STRIPE] Session récupérée | "
-                               f"id={s.id} | payment_status={s.get('payment_status')} | "
-                               f"livemode={s.get('livemode')}")
+                            f"id={s.id} | payment_status={s.get('payment_status')} | "
+                            f"livemode={s.get('livemode')}")
         
     except stripe.error.InvalidRequestError as e:
-        current_app.logger.error(f"❌ [PAIEMENT-EFFECTUE-STRIPE] Session introuvable (mismatch test/live ?): {e}")
+        current_app.logger.error(f"❌ [PAIEMENT-EFFECTUE-STRIPE] Session introuvable: {e}")
         return render_template('paiement_effectue_problem.html',
-                             message="Session introuvable. Vérifiez le mode test/live."), 400
+                            message="Session introuvable. Vérifiez le mode test/live."), 400
     except Exception as e:
-        current_app.logger.exception(f"❌ [PAIEMENT-EFFECTUE-STRIPE] Erreur inattendue: {e}")
+        current_app.logger.exception(f"❌ [PAIEMENT-EFFECTUE-STRIPE] Erreur: {e}")
         return render_template('paiement_effectue_problem.html',
-                             message="Impossible de vérifier le paiement."), 400
+                            message="Impossible de vérifier le paiement."), 400
 
     if s.get("payment_status") != "paid":
-        current_app.logger.warning(f"⚠️ [PAIEMENT-EFFECTUE-STRIPE] Paiement non payé: {s.get('payment_status')}")
+        current_app.logger.warning(f"⚠️ [PAIEMENT-EFFECTUE-STRIPE] Non payé: {s.get('payment_status')}")
         return render_template('paiement_effectue_problem.html',
-                             message="Paiement non confirmé."), 402
+                            message="Paiement non confirmé."), 402
 
+    # ✅✅✅ LOGS DE DEBUG AJOUTÉS ✅✅✅
     product_key = (s.get('metadata') or {}).get('product_key')
+
+    current_app.logger.info(f"🔍 [DEBUG] product_key extrait = '{product_key}'")
+    current_app.logger.info(f"🔍 [DEBUG] PRODUCTS disponibles = {list(PRODUCTS.keys())}")
+
     product = PRODUCTS.get(product_key or "")
-    
+
+    current_app.logger.info(f"🔍 [DEBUG] product trouvé = {product is not None}")
+
+    if product:
+        current_app.logger.info(f"🔍 [DEBUG] product['label'] = '{product.get('label')}'")
+        current_app.logger.info(f"🔍 [DEBUG] product['success_route'] = '{product.get('success_route')}'")
+    else:
+        current_app.logger.error(f"❌ [DEBUG] Produit '{product_key}' introuvable dans PRODUCTS")
+
     if not product:
         current_app.logger.error(f"❌ [PAIEMENT-EFFECTUE-STRIPE] Produit inconnu: {product_key}")
         return render_template('paiement_effectue_problem.html',
-                             message="Produit inconnu après paiement."), 400
+                            message=f"Produit inconnu: {product_key}"), 400
 
     # ✅ Marqueurs Stripe
     session["last_payment"] = {
@@ -240,27 +253,39 @@ def paiement_effectue():
         "created": s.get("created"),
         "product_key": product_key,
         "livemode": s.get("livemode"),
-        "mode": "SANDBOX" if PAYMENTS_SANDBOX else "LIVE",  # ✅ Plus clair
+        "mode": "SANDBOX" if PAYMENTS_SANDBOX else "LIVE",
     }
     session["selected_product"] = product_key
     session["stripe_session_id"] = session_id
     session["paiement_valide"] = True
     session["paiement_timestamp"] = datetime.utcnow().isoformat()
     session.modified = True
-    
-    current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-STRIPE] Paiement validé | product={product_key} | mode={session['last_payment']['mode']}")
 
-    # Destination après paiement Stripe
+    current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-STRIPE] Paiement validé | product={product_key}")
+
+    # Destination
     try:
+        current_app.logger.info(f"🔍 [DEBUG] Tentative url_for('{product['success_route']}')")
         next_url = url_for(product["success_route"])
+        current_app.logger.info(f"✅ [DEBUG] URL générée = '{next_url}'")
+        
     except Exception as e:
-        current_app.logger.warning(f"⚠️ [PAIEMENT-EFFECTUE-STRIPE] Fallback route: {e}")
-        next_url = "/forces_defis/complet" if product_key == "forces_defis" else "/point_astral_blocs/complet"
+        current_app.logger.error(f"❌ [DEBUG] Erreur url_for: {type(e).__name__}: {e}")
+        
+        # Fallback en dur
+        if product_key == "forces_defis":
+            next_url = "/forces_defis/complet"
+        else:
+            next_url = "/point_astral_blocs/complet"
+        
+        current_app.logger.warning(f"⚠️ [DEBUG] Fallback URL = '{next_url}'")
 
-    # Anti-reload : purge d'anciennes clés
+    # Anti-reload
     for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
         session.pop(k, None)
 
+    current_app.logger.info(f"🎯 [DEBUG] Redirection finale vers: {next_url}")
+
     return render_template('paiement_effectue.html',
-                         next_url=next_url,
-                         produit_titre=product["label"])
+                        next_url=next_url,
+                        produit_titre=product["label"])

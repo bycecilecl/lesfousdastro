@@ -29,7 +29,7 @@ from utils.s3_utils import presign_key
 from werkzeug.middleware.proxy_fix import ProxyFix
 from routes.stripe_webhook import stripe_webhook_bp
 from routes.pages import pages_bp
-
+from routes.checkout import checkout_bp
 
 from routes import register_routes
 from routes.geocode import geocode_bp
@@ -189,6 +189,7 @@ app.register_blueprint(legal_bp)
 app.register_blueprint(stripe_webhook_bp)
 app.register_blueprint(pages_bp)
 app.register_blueprint(forces_defis_module_bp)
+app.register_blueprint(checkout_bp)
 
 # ✅ AJOUTER CE DEBUG
 print("\n" + "="*60)
