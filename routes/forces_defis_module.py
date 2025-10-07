@@ -83,6 +83,12 @@ def forces_defis_complet():
     Lit les infos 'infos_utilisateur' en session (posées avant paiement),
     calcule le thème, génère l'analyse Forces & Défis (≈ 1–2 pages) et affiche.
     """
+    # ✅ exiger un paiement valide pour ce produit
+    last = session.get("last_payment") or {}
+    if not session.get("paiement_valide") or last.get("product_key") != "forces_defis":
+        return render_template("paiement_effectue_problem.html",
+                               message="Aucun paiement Forces & Potentiels confirmé."), 400
+    
     infos = session.get("infos_utilisateur")
     if not infos:
         current_app.logger.warning("[FORCES_DEFIS] infos_utilisateur absentes → retour index")
@@ -333,7 +339,8 @@ def format_forces_defis_html(texte_brut: str) -> str:
         conclusion_raw = ""
 
     def _paragraphize(block: str) -> str:
-        paras = [f"<p>{re.sub(r'\\n+', ' ', p).strip()}</p>" for p in re.split(r'\n\s*\n', block) if p.strip()]
+        paras = ["<p>" + re.sub(r"\n+", " ", p).strip() + "</p>" 
+         for p in re.split(r"\n\s*\n", block) if p.strip()]
         return "\n".join(paras) if paras else ""
 
     def _bullets(block: str) -> str:
