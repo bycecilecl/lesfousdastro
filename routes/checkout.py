@@ -11,17 +11,39 @@
 #     (à sécuriser avec un webhook Stripe en prod)
 # ─────────────────────────────────────────────────────────────────────────────
 
-from flask import Blueprint, render_template, session, redirect, url_for, request
+import os, uuid
 import stripe
-import os
-import uuid
-import time
-import logging
-logger = logging.getLogger(__name__)
+from flask import Blueprint, request, session, redirect, url_for, render_template, abort, current_app
+from config.products import PRODUCTS  # ⬅️ nouveau
 
-checkout_bp = Blueprint('checkout_bp', __name__)
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-logger.info("[Stripe] key mode = %s", "LIVE" if (stripe.api_key or "").startswith("sk_live_") else "TEST")
+# 🧪─────────────────────────────────────────────
+# Mode sandbox / production pour Stripe
+# ───────────────────────────────────────────────
+def _env_bool(name, default="off"):
+    return (os.getenv(name, default) or "").strip().lower() in {"1","true","on","yes"}
+
+PAYMENTS_SANDBOX = _env_bool("PAYMENTS_SANDBOX", "off")
+APP_MAINT = _env_bool("APP_MAINTENANCE", "off")
+
+# 🔒 Sécurité : pas de sandbox si le site est public
+if PAYMENTS_SANDBOX and not APP_MAINT:
+    raise RuntimeError("PAYMENTS_SANDBOX=on alors que APP_MAINTENANCE=off — active la maintenance ou désactive le sandbox.")
+
+# 🔑 Sélection automatique de la bonne clé Stripe
+STRIPE_SECRET_KEY = (
+    os.getenv("STRIPE_SECRET_KEY_TEST")
+    if PAYMENTS_SANDBOX
+    else os.getenv("STRIPE_SECRET_KEY")  # ta clé live actuelle
+)
+
+if not STRIPE_SECRET_KEY:
+    raise RuntimeError("❌ Aucune clé Stripe valide trouvée (test ou live).")
+
+stripe.api_key = STRIPE_SECRET_KEY
+print(f"[Stripe] Mode = {'SANDBOX TEST' if PAYMENTS_SANDBOX else 'LIVE'} | Clé utilisée = {STRIPE_SECRET_KEY[:8]}…")
+# 🧪─────────────────────────────────────────────
+
+checkout_bp = Blueprint("checkout_bp", __name__)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ROUTE : POST /checkout
@@ -42,41 +64,66 @@ logger.info("[Stripe] key mode = %s", "LIVE" if (stripe.api_key or "").startswit
 #   - Pense à passer en mode live + clé live en production.
 # ─────────────────────────────────────────────────────────────────────────────
 
-@checkout_bp.route('/checkout', methods=['POST'])
+@checkout_bp.route("/checkout", methods=["POST"])
 def checkout():
-    # 🔄 Purge anti-reload car nouveau checkout
-    for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
-        session.pop(k, None)
+    # 1) Infos utilisateur (inchangé)
     session['infos_utilisateur'] = {
         "nom": request.form.get("nom"),
         "email": request.form.get("email"),
         "gender": request.form.get("gender"),
         "date_naissance": request.form.get("date_naissance"),
         "heure_naissance": request.form.get("heure_naissance"),
-        "lieu_naissance": request.form.get("lieu_naissance"), 
-        "lat": request.form.get("lat", "").strip(),     
-        "lon": request.form.get("lon", "").strip(),
-        "tzid": request.form.get("tzid", "").strip(),
+        "lieu_naissance": request.form.get("lieu_naissance"),
+        "lat": (request.form.get("lat") or "").strip(),
+        "lon": (request.form.get("lon") or "").strip(),
+        "tzid": (request.form.get("tzid") or "").strip(),
     }
 
-    # 👉 Prix dynamique (par défaut 2900 centimes = 29 €)
-    amount_cents = int(os.getenv("POINT_ASTRAL_PRICE_CENTS", "2900"))
+    # 2) Produit choisi — OBLIGATOIRE et VALIDE
+    product_key = (request.form.get("product_key") or "").strip()
+    if not product_key:
+        current_app.logger.warning("[CHECKOUT] product_key manquant")
+        abort(400, description="Produit non spécifié.")
+    product = PRODUCTS.get(product_key)
+    if not product:
+        current_app.logger.warning("[CHECKOUT] product_key inconnu: %s", product_key)
+        abort(400, description="Produit non reconnu.")
 
-    checkout_session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
+    # 3) Sécurité “prix test” (si tu gardes la possibilité de unit_amount)
+    price_cents = product.get("price_cents") or 0
+    if price_cents and price_cents < 500 and (os.getenv("APP_MAINTENANCE","off").strip().lower() != "on"):
+        abort(403)  # empêche 1€ en public
+
+    # 4) Construire line_items selon Price ID ou unit_amount
+    price_id = product.get("price_id")
+    if price_id:
+        line_items = [{'price': price_id, 'quantity': 1}]
+    else:
+        line_items = [{
             'price_data': {
                 'currency': 'eur',
-                'product_data': {'name': 'Flash Astral complet'},
-                'unit_amount': amount_cents,
+                'product_data': {'name': product["label"]},
+                'unit_amount': price_cents,
             },
             'quantity': 1,
-        }],
+        }]
+
+    # 5) Créer la session Stripe (toujours avec metadata.product_key)
+    checkout_session = stripe.checkout.Session.create(
         mode='payment',
-        success_url=url_for('checkout_bp.paiement_effectue', _external=True),
-        cancel_url=url_for('main.index', _external=True)
+        payment_method_types=['card'],
+        line_items=line_items,
+        success_url=url_for('checkout_bp.paiement_effectue', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url=url_for('main.index', _external=True),
+        metadata={
+            "product_key": product_key,
+            "email": session['infos_utilisateur'].get('email', ''),
+        },
+        client_reference_id=(session['infos_utilisateur'].get('email') or str(uuid.uuid4()))
     )
 
+    # Mémorise côté session (utile mais pas source de vérité)
+    session["selected_product"] = product_key
     return redirect(checkout_session.url, code=303)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -96,8 +143,34 @@ def checkout():
 
 @checkout_bp.route('/paiement-effectue')
 def paiement_effectue():
-    # 🔄 Purge anti-reload car paiement Stripe validé
+    session_id = request.args.get('session_id')
+    if not session_id:
+        return render_template('paiement_effectue_problem.html', message="Session paiement manquante."), 400
+
+    try:
+        s = stripe.checkout.Session.retrieve(session_id)
+    except Exception as e:
+        current_app.logger.exception("[PAIEMENT] retrieve session fail: %s", e)
+        return render_template('paiement_effectue_problem.html', message="Impossible de vérifier le paiement."), 400
+
+    if s.get("payment_status") != "paid":
+        return render_template('paiement_effectue_problem.html', message="Paiement non confirmé."), 402
+
+    product_key = s.get('metadata', {}).get('product_key')
+    product = PRODUCTS.get(product_key or "")
+    if not product:
+        return render_template('paiement_effectue_problem.html', message="Produit inconnu après paiement."), 400
+
+    # Construire la destination
+    try:
+        next_url = url_for(product["success_route"])
+    except Exception:
+        # fallback safe si endpoint renommé
+        next_url = "/forces_defis/complet" if product_key == "forces_defis" else "/point_astral_blocs/complet"
+
+    # Purge anti-reload
     for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
         session.pop(k, None)
-    # Page intermédiaire avec popup de patience
-    return render_template('paiement_effectue.html')
+
+    return render_template('paiement_effectue.html',
+                           next_url=next_url, produit_titre=product["label"])
