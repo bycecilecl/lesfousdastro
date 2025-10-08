@@ -214,7 +214,7 @@ def capture_order():
 
     token, base_url = get_paypal_token()
     payload = request.get_json() or {}
-    order_id = payload.get("orderID")
+    order_id = payload.get("orderID") or payload.get("orderId")
     user_info = payload.get("userInfo")
     items = payload.get("items", [])
 

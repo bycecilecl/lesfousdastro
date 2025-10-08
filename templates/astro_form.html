@@ -2273,7 +2273,24 @@
             </div>
         </div>
     </footer>
-    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&intent=capture&components=buttons"></script>
+    {# ---- Jinja prelude: choisir le bon client-id ---- #}
+    {% set mode = (PAYPAL_MODE|lower if PAYPAL_MODE is defined else 'live') %}
+    {% if mode == 'live' %}
+        {# si PAYPAL_CLIENT_ID_LIVE n'est pas fourni, on retombe sur PAYPAL_CLIENT_ID existant #}
+        {% set PAYPAL_CLIENT_ID_EFFECTIVE = (PAYPAL_CLIENT_ID_LIVE if PAYPAL_CLIENT_ID_LIVE is defined and PAYPAL_CLIENT_ID_LIVE else PAYPAL_CLIENT_ID) %}
+    {% else %}
+        {% set PAYPAL_CLIENT_ID_EFFECTIVE = (PAYPAL_CLIENT_ID_SB if PAYPAL_CLIENT_ID_SB is defined and PAYPAL_CLIENT_ID_SB else PAYPAL_CLIENT_ID) %}
+    {% endif %}
+    {% set currency = (PAYPAL_CURRENCY if PAYPAL_CURRENCY is defined else 'EUR') %}
+    <!-- <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&intent=capture&components=buttons"></script> -->
+    <!-- APRÈS (utilise l'ID effectif choisi à l'étape 1) -->
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID_EFFECTIVE }}&currency={{ currency }}&intent=capture&components=buttons"></script>
+
+    <script>
+    console.log("🔑 PayPal mode:", "{{ mode }}",
+                "| client:", "{{ PAYPAL_CLIENT_ID_EFFECTIVE[:10] }}…");
+    </script>
+    
     <script>
         let paypalRendered = false; // évite de rendre 2x si la modale s’ouvre/ferme
         // Variables globales
