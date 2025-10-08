@@ -194,6 +194,12 @@ app.register_blueprint(pages_bp)
 app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
 
+# ========== REDIRECTIONS POUR COMPATIBILITÉ ==========
+@app.route('/flash_astral')
+def redirect_flash_astral():
+    """Redirection vers l'accueil avec scroll vers Flash Astral"""
+    return redirect('/#flash_astral', code=302)
+
 # ✅ AJOUTER CE DEBUG
 print("\n" + "="*60)
 print("📋 LISTE DES ROUTES ENREGISTRÉES :")

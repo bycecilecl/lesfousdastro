@@ -65,7 +65,7 @@ def api_analyse_gratuite():
                         <li>PDF personnalisé à télécharger</li>
                     </ul>
                     <br>
-                    <a href="/flash_astral" style="display:inline-block; padding:12px 20px; background:#856404; color:#fff; border-radius:8px; text-decoration:none; font-weight:bold;">
+                    <a href="/#flash_astral" style="display:inline-block; padding:12px 20px; background:#856404; color:#fff; border-radius:8px; text-decoration:none; font-weight:bold;">
                         💫 Découvrir mon Flash Astral
                     </a>
                 </div>
