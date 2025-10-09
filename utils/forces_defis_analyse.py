@@ -304,6 +304,7 @@ def _filtrer_aspects_par_type(aspects_all, max_aspects=None):
                 except Exception:
                     pass
 
+                
         # On ne garde que si on a un type connu et un orb numérique
         if typ not in ORB_LIMITS or not isinstance(orb, (int, float)):
             continue
