@@ -1,0 +1,58 @@
+PLANETE;MAISON;TYPE;SCORE;COMMENTAIRE
+Soleil;I;force;5;Affirmation de soi, rayonnement, vocation claire. Leadership naturel.
+Soleil;X;force;5;Affirmation de soi, rayonnement, vocation claire. Leadership naturel.
+Soleil;V;force;4.5;Créativité, foi, expansion, joie de vivre. Alignement entre sens et expression.
+Soleil;IX;force;4.5;Créativité, foi, expansion, joie de vivre. Alignement entre sens et expression.
+Soleil;XII;defis;4.5;Crise d'identité, besoin de trouver un sens intérieur. Travail sur la confiance.
+Soleil;VIII;defis;4.5;Crise d'identité, besoin de trouver un sens intérieur. Travail sur la confiance.
+Soleil;XII;mixte;4;Besoin de se retirer du monde pour se trouver. Force spirituelle cachée.
+Lune;IV;force;4.5;Stabilité émotionnelle, vie intérieure riche, lien familial ou créatif nourrissant.
+Lune;V;force;4.5;Stabilité émotionnelle, vie intérieure riche, lien familial ou créatif nourrissant.
+Lune;VII;force;4;Sens relationnel, empathie sociale, capacité à guider.
+Lune;X;force;4;Sens relationnel, empathie sociale, capacité à guider.
+Lune;VIII;defis;5;Émotions profondes, blessures anciennes, hypersensibilité. Besoin de guérison émotionnelle.
+Lune;XII;defis;5;Émotions profondes, blessures anciennes, hypersensibilité. Besoin de guérison émotionnelle.
+Lune;VIII;mixte;4;Sensibilité extrême, mais grand potentiel de guérison.
+Mercure;III;force;4.5;Communication claire, curiosité, esprit analytique. Succès dans les domaines mentaux ou techniques.
+Mercure;VI;force;4.5;Communication claire, curiosité, esprit analytique. Succès dans les domaines mentaux ou techniques.
+Mercure;X;force;4.5;Communication claire, curiosité, esprit analytique. Succès dans les domaines mentaux ou techniques.
+Mercure;XII;defis;4;Difficulté à exprimer ce qu'on pense. Pensée intériorisée ou bloquée.
+Venus;II;force;4.5;Amour, beauté, art, harmonie. Don pour créer des liens et attirer l'abondance.
+Venus;V;force;4.5;Amour, beauté, art, harmonie. Don pour créer des liens et attirer l'abondance.
+Venus;VII;force;4.5;Amour, beauté, art, harmonie. Don pour créer des liens et attirer l'abondance.
+Venus;XII;defis;4.5;Amours cachés, illusions, attachements karmiques. Besoin de purification affective.
+Venus;VIII;defis;4.5;Amours cachés, illusions, attachements karmiques. Besoin de purification affective.
+Venus;XII;mixte;4;Compassion amoureuse, amour inconditionnel.
+Mars;I;force;4.5;Énergie vitale, courage d'agir, ambition constructive. Leadership ou créativité active.
+Mars;X;force;4.5;Énergie vitale, courage d'agir, ambition constructive. Leadership ou créativité active.
+Mars;V;force;4.5;Énergie vitale, courage d'agir, ambition constructive. Leadership ou créativité active.
+Mars;XII;defis;5;Colère refoulée, épuisement, luttes internes. Doit canaliser l'énergie.
+Mars;VIII;defis;5;Colère refoulée, épuisement, luttes internes. Doit canaliser l'énergie.
+Mars;XII;mixte;4;Guerrier intérieur, canal énergétique fort s'il est sublimé.
+Jupiter;II;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
+Jupiter;V;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
+Jupiter;IX;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
+Jupiter;X;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
+Jupiter;XI;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
+Jupiter;XII;defis;3.5;Fuite spirituelle, idéalisme excessif. Nécessite une foi incarnée.
+Saturne;II;force;4.5;Discipline, endurance, réussite lente mais solide. Sens des responsabilités.
+Saturne;VI;force;4.5;Discipline, endurance, réussite lente mais solide. Sens des responsabilités.
+Saturne;X;force;4.5;Discipline, endurance, réussite lente mais solide. Sens des responsabilités.
+Saturne;XII;defis;5;Isolement, peurs profondes, rigidité émotionnelle. Maturité acquise dans l'épreuve.
+Saturne;VIII;defis;5;Isolement, peurs profondes, rigidité émotionnelle. Maturité acquise dans l'épreuve.
+Saturne;XII;mixte;4;Grande sagesse intérieure si acceptée.
+Uranus;IX;force;4;Visionnaire, innovant, réformateur. Succès atypique ou original.
+Uranus;X;force;4;Visionnaire, innovant, réformateur. Succès atypique ou original.
+Uranus;XI;force;4;Visionnaire, innovant, réformateur. Succès atypique ou original.
+Uranus;IV;defis;4;Instabilité émotionnelle, ruptures familiales ou intérieures.
+Uranus;VIII;defis;4;Instabilité émotionnelle, ruptures familiales ou intérieures.
+Neptune;IX;force;4;Spiritualité, imagination, compassion. Intuition ou art inspiré.
+Neptune;XII;force;4;Spiritualité, imagination, compassion. Intuition ou art inspiré.
+Neptune;VI;defis;4.5;Confusion dans le service ou le quotidien. Fatigue chronique, besoin de clarté.
+Neptune;VIII;defis;4.5;Confusion dans le service ou le quotidien. Fatigue chronique, besoin de clarté.
+Pluton;I;force;5;Pouvoir de transformation, charisme intense, influence personnelle ou publique.
+Pluton;X;force;5;Pouvoir de transformation, charisme intense, influence personnelle ou publique.
+Pluton;IV;defis;5;Crises relationnelles ou familiales. Besoin de maîtrise du pouvoir émotionnel.
+Pluton;VII;defis;5;Crises relationnelles ou familiales. Besoin de maîtrise du pouvoir émotionnel.
+Pluton;XII;defis;5;Crises relationnelles ou familiales. Besoin de maîtrise du pouvoir émotionnel.
+Pluton;XII;mixte;4.5;Pouvoir de renaissance, guérison par l'ombre.

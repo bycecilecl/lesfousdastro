@@ -1,0 +1,40 @@
+PLANETE,SIGNE,ETAT,TYPE,SCORE,COMMENTAIRE
+Soleil,Lion,domicile,force,5,Rayonnement naturel et identité claire.
+Soleil,Bélier,exaltation,force,4.5,Volonté directe et pionnière.
+Soleil,Verseau,exil,defis,4,Conflit entre individualisme et collectif.
+Soleil,Balance,chute,defis,4.5,Affirmation de soi moins évidente (besoin d’approbation).
+,,,,,
+Lune,Cancer,domicile,force,5,Sécurité émotionnelle et intuition.
+Lune,Taureau,exaltation,force,4.5,"Sens du confort, stabilité affective."
+Lune,Capricorne,exil,defis,4.5,Retenue émotionnelle (froideur perçue).
+Lune,Scorpion,chute,defis,5,"Émotions intenses, vulnérabilité taboue."
+,,,,,
+Mercure,Gémeaux,domicile,force,4.5,Esprit rapide et adaptable.
+Mercure,Vierge,domicile,force,4.5,"Analyse, précision et méthode."
+Mercure,Vierge,exaltation,force,4.5,Clarté mentale et rigueur.
+Mercure,Sagittaire,exil,defis,3.5,"Jugements rapides, dispersions."
+Mercure,Poissons,chute,defis,4,"Flou mental, perméabilité."
+,,,,,
+Vénus,Taureau,domicile,force,5,"Sens du corps, plaisir, attrait"
+Vénus,Balance,domicile,force,4.5,"Harmonie relationnelle, diplomatie"
+Vénus,Poissons,exaltation,force,5,"Amour inspiré, compassion "
+Vénus,Scorpion,exil,defis,4.5,"Intensité, jalousie, atttachements profonds"
+Vénus,Vierge,chute,defis,4,"Pudeur affective, exigence"
+,,,,,
+Mars,Bélier,domicile,force,5,Élan vital et courage.
+Mars,Scorpion,domicile,force,4.5,"Puissance concentrée, stratégie"
+Mars,Capricorne,exaltation,force,5,"Endurance, efficacité et résultats"
+Mars,Balance,exil,defis,4,Hésitations dans l’initiative (dépendance relationnelle).
+Mars,Cancer,chute,defis,4.5,"Colère intériorisée, réactivité affective"
+,,,,,
+Jupiter,Sagittaire,domicile,force,5,"Foi,vision et expansion"
+Jupiter,Poissons,domicile,force,4.5,"Compassion, intuition, idéal"
+Jupiter,Cancer,exaltation,force,5,"Protection, abondance émotionnelle"
+Jupiter,Gémeaux,exil,defis,3.5,Dispersions conceptuelles.
+Jupiter,Capricorne,chute,defis,4,"Idéal bridé, prudence excessive"
+,,,,,
+Saturne,Capricorne,domicile,force,5,"Structure, responsabilité"
+Saturne,Verseau,domicile,force,4.5,"Structure visionnaire, pensée système"
+Saturne,Balance,exaltation,force,4.5,"Justice, équilibre, autorité posée"
+Saturne,Cancer,exil,defis,4.5,"Peurs d’insécurité, rigidité affective"
+Saturne,Lion,chute,defis,4,"Crainte d’exposition, dureté intérieure"
