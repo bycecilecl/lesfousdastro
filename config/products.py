@@ -32,7 +32,7 @@ def load_products():
         "forces_defis": {
             "label": "Mes Potentiels et Défis",
             "price_id": os.getenv("FORCES_DEFIS_PRICE_ID", "").strip(),  # optionnel
-            "price_cents": _int_env("FORCES_DEFIS_PRICE_CENTS", 1200),
+            "price_cents": _int_env("FORCES_DEFIS_PRICE_CENTS", 50),
             # ⚠️ adapte si ton endpoint diffère ; sinon fallback chemin direct dans checkout
             "success_route": "forces_defis_module.forces_defis_complet",
             "enabled": _bool_env("FORCES_DEFIS_ENABLED", "1"),
