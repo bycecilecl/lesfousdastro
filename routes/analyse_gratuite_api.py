@@ -224,8 +224,14 @@ Fais une analyse de max 15 lignes.
 
         {texte}
 
-        —
-        Les Fous d'Astro
+        🌠 Envie d’aller plus loin ?
+        Découvre ton Flash Astral : une lecture complète, personnalisée et instantanée de ton thème natal.
+        De plus, toute personne ayant réalisé un Flash Astral bénéficie de 10% de réduction sur l’analyse complète du thème natal 💫
+
+        👉 Découvre les offres ici : https://bycecilecl.com/categorie-produit/services/
+
+        À très vite,
+        Les Fous d’Astro – By Cécile CL
         """).strip()
 
         contenu_html = textwrap.dedent(f"""
@@ -234,7 +240,13 @@ Fais une analyse de max 15 lignes.
         <hr>
         <div>{texte}</div>
         <hr>
-        <p>—<br>Les Fous d'Astro</p>
+        <p><strong>🌠 Envie d’aller plus loin ?</strong><br>
+        Découvre ton <strong>Flash Astral</strong> : une lecture complète, personnalisée et instantanée de ton thème natal.</p>
+        <p>De plus, toute personne ayant réalisé un Flash Astral bénéficie de 
+        <strong>10 % de réduction</strong> sur l’analyse complète du thème natal 💫</p>
+        <p>➡️ <a href="https://bycecilecl.com/categorie-produit/services/" target="_blank">
+        Découvre les offres ici</a></p>
+        <p>À très vite,<br>Les Fous d’Astro – By Cécile CL</p>
         """).strip()
 
 

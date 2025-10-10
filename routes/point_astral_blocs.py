@@ -672,6 +672,9 @@ def point_astral_blocs_complet():
                     "Télécharge ton PDF ici :\n"
                     f"{pdf_final_url}\n\n"
                     "Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.\n\n"
+                    "🎁 Bonus : je t’offre 10% de réduction sur l’analyse complète de ton thème natal.\n"
+                    "Découvre les prestations ici : https://bycecilecl.com/categorie-produit/services/\n"
+                    "Et contacte-moi pour bénéficier de ton offre : contact@lesfousdastro.fr\n\n"
                     "À bientôt,\n"
                     "Les Fous d’Astro – By Cécile CL"
                 )
@@ -680,9 +683,16 @@ def point_astral_blocs_complet():
                     "<p>Merci pour ta commande ! Ton Flash Astral est prêt ✨</p>"
                     f"<p>📄 <a href=\"{pdf_final_url}\" target=\"_blank\">Télécharge ton PDF ici</a></p>"
                     "<p>Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.</p>"
+                    "<p>🎁 <strong>Bonus :</strong> je t’offre <strong>10% de réduction</strong> sur "
+                    "l’analyse complète de ton thème natal.</p>"
+                    "<p>➡️ Découvre les prestations ici : "
+                    "<a href=\"https://bycecilecl.com/categorie-produit/services/\" target=\"_blank\">"
+                    "https://bycecilecl.com/categorie-produit/services/</a></p>"
+                    "<p>Et contacte-moi pour bénéficier de ton offre : "
+                    "<a href=\"mailto:contact@lesfousdastro.fr\">contact@lesfousdastro.fr</a></p>"
                     "<p>À bientôt,<br>Les Fous d’Astro – By Cécile CL</p>"
                 )
-
+                
                 # Flag ON/OFF côté env (.env: SEND_EMAILS=true|false)
                 send_emails = os.getenv("SEND_EMAILS", "true").lower() in ("1", "true", "yes")
 
