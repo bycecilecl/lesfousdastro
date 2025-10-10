@@ -263,6 +263,11 @@
             background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,255,255,0.9));
         }
 
+        .option-card.coral {
+            border: 3px solid #FF6B6B;
+            background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,255,255,0.9));
+        }
+
         .badge {
             position: absolute;
             top: 15px;
@@ -281,6 +286,11 @@
         .badge.popular {
             background: linear-gradient(45deg, #FFD700, #FFA500);
             color: #333;
+        }
+
+        .badge.coral {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
         }
 
         .badge.new {
@@ -314,6 +324,10 @@
         }
         .option-card.featured .price {
             font-size: 1.5rem;
+        }
+
+        .option-card.coral .price {
+            color: #FF6B6B;
         }
 
         .option-card .price.free {
@@ -351,9 +365,61 @@
             background: #f8d7da;
             color: #721c24;
         }
+        .option-card .status {
+            margin-top: 15px;
+            padding: 6px 12px;
+            border-radius: 18px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .status.available {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            box-shadow: 0 1px 6px rgba(16, 185, 129, 0.15);
+        }
+
+        .status.available:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .status.coral {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            box-shadow: 0 1px 6px rgba(255, 107, 107, 0.15);
+        }
+
+        .status.coral:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(255, 107, 107, 0.2);
+        }
+
         .status.featured {
-            background: linear-gradient(45deg, #FFD700, #FFA500);
+            background: linear-gradient(135deg, #FFD700, #FFA500);
             color: #333;
+            box-shadow: 0 1px 6px rgba(255, 215, 0, 0.15);
+        }
+
+        .status.featured:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .status.development {
+            background: linear-gradient(135deg, #FFA500, #FF8C00);
+            color: white;
+            box-shadow: 0 1px 6px rgba(255, 165, 0, 0.15);
+        }
+
+        .status.coming-soon {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            box-shadow: 0 1px 6px rgba(108, 117, 125, 0.15);
         }
 
         /* Section packs */
@@ -1857,15 +1923,15 @@
                             <span class="status available">Clique pour sélectionner</span>
                         </div>
                         
-                        <div class="option-card featured" onclick="addToCart('flash_astral', 'Flash Astral', 29, this)">
-                            <div class="badge popular">PRIX LANCEMENT</div>
+                        <div class="option-card coral" onclick="addToCart('flash_astral', 'Flash Astral', 29, this)">
+                            <div class="badge coral">PRIX LANCEMENT</div>
                             <span class="icon">📊</span>
                             <h4>Flash Astral</h4>
                             <p>Analyse occidentale sur 3/4 pages sur les grands axes du thème<br> + Nakshatra de la lune</p>
                             <div class="price">
                                 <span class="old-price">35€</span> 29€
                             </div>
-                            <span class="status featured">Clique pour sélectionner</span>
+                            <span class="status coral">Clique pour sélectionner</span>
                             <!-- <span class="status development">En développement</span> -->
                         </div>
                         
