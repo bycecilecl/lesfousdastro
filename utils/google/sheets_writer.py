@@ -1,5 +1,6 @@
 # utils/google/sheets_writer.py
 import os, json
+from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -44,8 +45,14 @@ def ajouter_email_au_sheet(email, nom="Inconnu"):
         sh = client.open(SPREADSHEET_TITLE)
 
     sheet = sh.sheet1
-    sheet.append_row([email, nom])
-    print(f"✅ Email ajouté à Google Sheet : {email}, {nom}")
+
+     # 🕒 Ajout date/heure
+    now = datetime.now()
+    date = now.strftime("%Y-%m-%d")
+    heure = now.strftime("%H:%M:%S")
+
+    sheet.append_row([email, nom, date, heure])
+    print(f"✅ Email ajouté à Google Sheet : {email}, {nom}, {date}, {heure}")
 
     # --- Placements -> Google Sheets (onglet "placements") -----------------------
 
