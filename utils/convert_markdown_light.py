@@ -4,6 +4,14 @@ def md_light_to_html(text: str) -> str:
     if not text:
         return ""
     
+    # [NOUVEAU] — pré-nettoyage: supprime exactement "### Introduction" et "### Conclusion"
+    # (ligne entière, casse insensible, bords/espaces ok)
+    text = re.sub(
+        r'(?im)^\s*###\s+(Introduction|Conclusion)\s*$',
+        '',
+        text
+    )
+    
     html = []
     in_ul = False
     para_buf = []  # ← on accumule ici les lignes d'un même paragraphe
@@ -41,6 +49,16 @@ def md_light_to_html(text: str) -> str:
             flush_para()
             titre = line[3:].strip()
             html.append(f'<h2 class="section-title">{titre}</h2>')
+            continue
+
+        # [NOUVEAU] Titres ### -> h3
+        if line.startswith('### '):
+            flush_ul()
+            flush_para()
+            titre = line[4:].strip()
+            # NB : on a déjà supprimé les cas "Introduction"/"Conclusion" plus haut
+            if titre:  # par sûreté
+                html.append(f'<h3 class="section-subtitle">{titre}</h3>')
             continue
 
         # Puces -

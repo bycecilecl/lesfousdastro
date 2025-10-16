@@ -295,7 +295,7 @@ Fais une analyse de max 15 lignes.
                 style="display:inline-block; margin-top:10px; padding:12px 20px;
                         background:#1f628e; color:white; text-decoration:none;
                         border-radius:8px; font-weight:bold;">
-                📄 Voir un exemple complet de FLash Astral
+                📄 Voir un exemple complet de Flash Astral
                 </a>
             </div>
         """

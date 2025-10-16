@@ -155,7 +155,7 @@ Utilise des paragraphes en HTML <p>.
     <html lang="fr">
     <head>
         <meta charset="utf-8">
-        <title>FLash Astral - {infos_personnelles['nom']}</title>
+        <title>Flash Astral - {infos_personnelles['nom']}</title>
         <style>
             @page {{
                 size: A4;

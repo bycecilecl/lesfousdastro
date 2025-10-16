@@ -6,6 +6,7 @@ Soleil;IX;force;4.5;Créativité, foi, expansion, joie de vivre. Alignement entr
 Soleil;XII;defis;4.5;Crise d'identité, besoin de trouver un sens intérieur. Travail sur la confiance.
 Soleil;VIII;defis;4.5;Crise d'identité, besoin de trouver un sens intérieur. Travail sur la confiance.
 Soleil;XII;mixte;4;Besoin de se retirer du monde pour se trouver. Force spirituelle cachée.
+Lune;I;Force;5;Sensibilité visible, émotions accessibles, réceptivité marquée, empathie naturelle dans la présentation de soi
 Lune;IV;force;4.5;Stabilité émotionnelle, vie intérieure riche, lien familial ou créatif nourrissant.
 Lune;V;force;4.5;Stabilité émotionnelle, vie intérieure riche, lien familial ou créatif nourrissant.
 Lune;VII;force;4;Sens relationnel, empathie sociale, capacité à guider.
@@ -13,46 +14,66 @@ Lune;X;force;4;Sens relationnel, empathie sociale, capacité à guider.
 Lune;VIII;defis;5;Émotions profondes, blessures anciennes, hypersensibilité. Besoin de guérison émotionnelle.
 Lune;XII;defis;5;Émotions profondes, blessures anciennes, hypersensibilité. Besoin de guérison émotionnelle.
 Lune;VIII;mixte;4;Sensibilité extrême, mais grand potentiel de guérison.
+Mercure;I ;Force;4.5;Communication directe, curiosité visible, mental agile, facilité d'expression, jeunesse dans l'apparence
 Mercure;III;force;4.5;Communication claire, curiosité, esprit analytique. Succès dans les domaines mentaux ou techniques.
 Mercure;VI;force;4.5;Communication claire, curiosité, esprit analytique. Succès dans les domaines mentaux ou techniques.
 Mercure;X;force;4.5;Communication claire, curiosité, esprit analytique. Succès dans les domaines mentaux ou techniques.
 Mercure;XII;defis;4;Difficulté à exprimer ce qu'on pense. Pensée intériorisée ou bloquée.
+Venus;I ;force;5;Charme naturel, beauté physique ou magnétisme, valeurs visibles, grâce dans la présentation, goût esthétique affirmé
 Venus;II;force;4.5;Amour, beauté, art, harmonie. Don pour créer des liens et attirer l'abondance.
+Venus;IV;force;4.5;Foyer harmonieux, amour du nid, beauté domestique, valeurs familiales solides, douceur dans l'intimité
 Venus;V;force;4.5;Amour, beauté, art, harmonie. Don pour créer des liens et attirer l'abondance.
 Venus;VII;force;4.5;Amour, beauté, art, harmonie. Don pour créer des liens et attirer l'abondance.
 Venus;XII;defis;4.5;Amours cachés, illusions, attachements karmiques. Besoin de purification affective.
 Venus;VIII;defis;4.5;Amours cachés, illusions, attachements karmiques. Besoin de purification affective.
 Venus;XII;mixte;4;Compassion amoureuse, amour inconditionnel.
-Mars;I;force;4.5;Énergie vitale, courage d'agir, ambition constructive. Leadership ou créativité active.
+Mars;I;Mixte;4.5;Énergie combative visible, affirmation directe, leadership physique (force) / Impatience, agressivité apparente, conflits déclenchés (défi)
 Mars;X;force;4.5;Énergie vitale, courage d'agir, ambition constructive. Leadership ou créativité active.
+Mars;IV;defis;4.5;Tensions familiales, conflits au foyer, colère héritée, besoin de pacifier les racines, énergie explosive dans le privé
 Mars;V;force;4.5;Énergie vitale, courage d'agir, ambition constructive. Leadership ou créativité active.
+Mars;VII;mixte;4.5;Passion relationnelle, désir ardent dans les partenariats (force) / Conflits avec l'autre, agressivité en couple, guerre de pouvoir (défi)
+Mars;X;force;5;Action dans la carrière, ambition guerrière, leadership actif, capacité à se battre pour sa place professionnelle
 Mars;XII;defis;5;Colère refoulée, épuisement, luttes internes. Doit canaliser l'énergie.
 Mars;VIII;defis;5;Colère refoulée, épuisement, luttes internes. Doit canaliser l'énergie.
 Mars;XII;mixte;4;Guerrier intérieur, canal énergétique fort s'il est sublimé.
+Jupiter;I;force;4.5;Optimisme rayonnant, expansion naturelle, générosité visible, confiance en soi, présence imposante
 Jupiter;II;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
+Jupiter;IV;force;4.5;Foyer expansif, chance familiale, générosité domestique, ancrage spirituel, transmission positive des valeurs
 Jupiter;V;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
 Jupiter;IX;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
 Jupiter;X;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
 Jupiter;XI;force;5;Expansion, prospérité, foi. Succès dans les affaires, la transmission ou la carrière.
 Jupiter;XII;defis;3.5;Fuite spirituelle, idéalisme excessif. Nécessite une foi incarnée.
-Saturne;II;force;4.5;Discipline, endurance, réussite lente mais solide. Sens des responsabilités.
-Saturne;VI;force;4.5;Discipline, endurance, réussite lente mais solide. Sens des responsabilités.
-Saturne;X;force;4.5;Discipline, endurance, réussite lente mais solide. Sens des responsabilités.
-Saturne;XII;defis;5;Isolement, peurs profondes, rigidité émotionnelle. Maturité acquise dans l'épreuve.
-Saturne;VIII;defis;5;Isolement, peurs profondes, rigidité émotionnelle. Maturité acquise dans l'épreuve.
-Saturne;XII;mixte;4;Grande sagesse intérieure si acceptée.
+Saturne;I;defis;5;Construction identitaire laborieuse, maturité précoce, sérieux apparent, besoin de légitimer son existence
+Saturne;II;defis;3.5;Peur du manque matériel, construction lente de la sécurité, leçons sur la valeur de soi
+Saturne;III;defis;3;Difficultés d'expression/communication, relations fraternelles tendues, apprentissage rigoureux
+Saturne;IV;defis;4.5;Lourdeur familiale, responsabilités précoces au foyer, construction d'un socle solide nécessaire
+Saturne;V;defis;3.5;Créativité bridée, peur de la spontanéité, enfant intérieur censuré, romance sérieuse
+Saturne;VI;defis;3;Rapport au travail exigeant, santé à surveiller, discipline quotidienne nécessaire
+Saturne;VII;defis;4.5;Leçons karmiques relationnelles, peur de l'engagement, partenaires âgés/matures, unions tardives
+Saturne;VIII;defis;4;Peur de la transformation, difficultés avec l'héritage/dettes, sexualité contrôlée, mort comme enseignement
+Saturne;IX;defis;3;Rapport rigide aux croyances, voyages limités, quête de sens laborieuse, maître intérieur exigeant
+Saturne;X;defis;5;Ambition contrariée, reconnaissance tardive, père absent/exigeant, responsabilités professionnelles lourdes
+Saturne;XI;defis;3;Solitude dans les groupes, amitiés rares mais durables, projets à long terme, distanciation sociale
+Saturne;XII;defis;4;Isolement choisi/subi, karma lourd, peurs inconscientes, travail spirituel exigeant, retraite nécessaire
+Uranus;I;force;4.5;Originalité naturelle, besoin d'indépendance affirmé, expression de soi innovante et non-conformiste
 Uranus;IX;force;4;Visionnaire, innovant, réformateur. Succès atypique ou original.
 Uranus;X;force;4;Visionnaire, innovant, réformateur. Succès atypique ou original.
 Uranus;XI;force;4;Visionnaire, innovant, réformateur. Succès atypique ou original.
 Uranus;IV;defis;4;Instabilité émotionnelle, ruptures familiales ou intérieures.
 Uranus;VIII;defis;4;Instabilité émotionnelle, ruptures familiales ou intérieures.
+Neptune;I;mixte;5;Charme mystérieux, sensibilité artistique, empathie naturelle (force) / Identité floue, difficulté à poser des limites, confusion sur soi (défi)
+Neptune;IV;mixte;5;Sensibilité spirituelle héritée, foyer créatif/artistique, lien subtil avec les ancêtres (force) / Secrets familiaux, parent absent, racines floues, idéalisation du passé (défi)
 Neptune;IX;force;4;Spiritualité, imagination, compassion. Intuition ou art inspiré.
+Neptune;VII;mixte;5;Idéal romantique élevé, amour inconditionnel, fusion amoureuse (force) / Illusions sur le partenaire, sacrifice excessif, confusion relationnelle (défi)
+Neptune;X;mixte;5;Carrière artistique/spirituelle/humanitaire, inspiration professionnelle, vocation transcendante (force) / Confusion sur la direction, manque d'ancrage pro, idéalisation du succès (défi)
 Neptune;XII;force;4;Spiritualité, imagination, compassion. Intuition ou art inspiré.
 Neptune;VI;defis;4.5;Confusion dans le service ou le quotidien. Fatigue chronique, besoin de clarté.
 Neptune;VIII;defis;4.5;Confusion dans le service ou le quotidien. Fatigue chronique, besoin de clarté.
-Pluton;I;force;5;Pouvoir de transformation, charisme intense, influence personnelle ou publique.
-Pluton;X;force;5;Pouvoir de transformation, charisme intense, influence personnelle ou publique.
-Pluton;IV;defis;5;Crises relationnelles ou familiales. Besoin de maîtrise du pouvoir émotionnel.
-Pluton;VII;defis;5;Crises relationnelles ou familiales. Besoin de maîtrise du pouvoir émotionnel.
+Pluton;I;mixte;5;Magnétisme intense, pouvoir personnel, transformation radicale du moi (force) / Contrôle obsessionnel, crises identitaires, besoin de dominer (défi)
+Pluton;IV;defis;5;Secrets familiaux lourds, héritage toxique, racines à transformer, parent puissant/absent, trauma générationnel à guérir
+Pluton;VII;mixte;5;Relations intenses et transformatrices, pouvoir du couple (force) / Luttes de pouvoir, jalousie, manipulation, partenaires destructeurs (défi)
+Pluton;VIII;mixte;5;Pouvoir de régénération profonde, résilience extrême, accès aux mystères de la vie/mort, magnétisme intense (force) / Obsessions, crises existentielles récurrentes, fascination destructrice, besoin de contrôle absolu (défi)
+Pluton;X;force;5;Pouvoir dPouvoir professionnel majeur, influence publique, capacité de transformation collective (force) / Luttes de pouvoir, chutes brutales, ambition dévorante (défi)e transformation, charisme intense, influence personnelle ou publique.
 Pluton;XII;defis;5;Crises relationnelles ou familiales. Besoin de maîtrise du pouvoir émotionnel.
-Pluton;XII;mixte;4.5;Pouvoir de renaissance, guérison par l'ombre.
+Pluton;XII;mixte;4.5;Pouvoir spirituel profond, guérison karmique, alchimie intérieure (force) / Ombres inconscientes, auto-sabotage, isolement choisi/subi (défi)
