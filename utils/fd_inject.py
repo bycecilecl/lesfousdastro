@@ -205,6 +205,13 @@ def detect_aspects_from_csv(theme: dict,
     """
     rows = _read_csv("forces_defis.csv")
     theme_aspects_all = _collect_theme_aspects(theme)
+    
+     # 🔹 Évite les doublons des angles (Ascendant, MC, etc.) — gérés ailleurs
+    ANGLES = {"ascendant", "mc", "milieu du ciel", "fc", "fond du ciel", "dsc", "descendant"}
+    theme_aspects_all = [
+        a for a in theme_aspects_all
+        if _norm(a["p1"]) not in ANGLES and _norm(a["p2"]) not in ANGLES
+    ]
 
     wt = (wanted_type or "").strip().lower()
     if wt == "defi":
@@ -400,39 +407,213 @@ def build_markdown_blocks(theme: dict,
                           limit_defis: int = 10,
                           min_score_etat: float = 4.0,
                           limit_etat: int = 10) -> str:
+    
+    # --- AJOUT CONTEXTE MAISON pour chaque planète ---
+    plan = theme.get("planetes", {})
+    for nom, data in plan.items():
+        maison = data.get("maison") or data.get("house")
+        if maison:
+            # Ex: "Maison 12"
+            data["maison_label"] = f"Maison {int(maison)}"
     defis  = detect_aspects_from_csv(theme, "defis",  min_score_aspect, limit_defis)
     forces = detect_aspects_from_csv(theme, "force",  min_score_aspect, limit_forces)
     mixtes = detect_aspects_from_csv(theme, "mixte",  min_score_aspect, 10)
     etats  = detect_etat_planetes(theme, "etat_planetes.csv",     min_score_etat,  limit_etat)
 
+    print("[FD_INJECT] counts -> defis:", len(defis), "forces:", len(forces), "etats:", len(etats))
+
     lines = []
     if defis:
         lines.append("### DÉFIS détectés (règles CSV)")
         for d in defis:
+            # Contexte maison (p1/p2)
+            p1_name = d['p1'].title()
+            p2_name = d['p2'].title()
+            maison1 = plan.get(p1_name, {}).get('maison_label')
+            maison2 = plan.get(p2_name, {}).get('maison_label')
+            if maison1 or maison2:
+                if maison1 and maison2 and maison1 != maison2:
+                    context = f" ({maison1}, {maison2})"
+                else:
+                    context = f" ({maison1 or maison2})"
+            else:
+                context = ""
+
             orb = f" (orbe {d['orb']:.2f}°)" if isinstance(d.get("orb"), (int, float)) else ""
-            lines.append(f"- **{d['p1'].title()} {d['aspect']} {d['p2'].title()}**{orb} — score {d['score']}: {d['comment']}")
+            lines.append(
+                f"- **{p1_name} {d['aspect']} {p2_name}**{context}{orb} — score {d['score']}: {d['comment']}"
+            )
         lines.append("")
 
     if forces:
         lines.append("### FORCES détectées (règles CSV)")
         for f in forces:
+            # Contexte maison (p1/p2)
+            p1_name = f['p1'].title()
+            p2_name = f['p2'].title()
+            maison1 = plan.get(p1_name, {}).get('maison_label')
+            maison2 = plan.get(p2_name, {}).get('maison_label')
+            if maison1 or maison2:
+                if maison1 and maison2 and maison1 != maison2:
+                    context = f" ({maison1, maison2})"
+                    # Petite correction d'affichage (sans parenthèses tuple) :
+                    context = f" ({maison1}, {maison2})"
+                else:
+                    context = f" ({maison1 or maison2})"
+            else:
+                context = ""
+
             orb = f" (orbe {f['orb']:.2f}°)" if isinstance(f.get("orb"), (int, float)) else ""
-            lines.append(f"- **{f['p1'].title()} {f['aspect']} {f['p2'].title()}**{orb} — score {f['score']}: {f['comment']}")
+            lines.append(
+                f"- **{p1_name} {f['aspect']} {p2_name}**{context}{orb} — score {f['score']}: {f['comment']}"
+            )
         lines.append("")
 
     if mixtes:
         lines.append("### DYNAMIQUES MIXTES détectées (règles CSV)")
         for m in mixtes:
+            # Contexte maison (p1/p2)
+            p1_name = m['p1'].title()
+            p2_name = m['p2'].title()
+            maison1 = plan.get(p1_name, {}).get('maison_label')
+            maison2 = plan.get(p2_name, {}).get('maison_label')
+            if maison1 or maison2:
+                if maison1 and maison2 and maison1 != maison2:
+                    context = f" ({maison1}, {maison2})"
+                else:
+                    context = f" ({maison1 or maison2})"
+            else:
+                context = ""
+
             orb = f" (orbe {m['orb']:.2f}°)" if isinstance(m.get("orb"), (int, float)) else ""
-            lines.append(f"- **{m['p1'].title()} {m['aspect']} {m['p2'].title()}**{orb} — score {m['score']}: {m['comment']}")
+            lines.append(
+                f"- **{p1_name} {m['aspect']} {p2_name}**{context}{orb} — score {m['score']}: {m['comment']}"
+            )
         lines.append("")
 
     if etats:
         lines.append("### ÉTAT DES PLANÈTES (CSV)")
         for e in etats:
-            lines.append(f"- **{e['planete']} {e['etat']}** — score {e['score']}: {e['comment']}")
+            # Contexte maison (planète seule)
+            p_name = e['planete']
+            maison = plan.get(p_name, {}).get('maison_label')
+            context = f" ({maison})" if maison else ""
+            lines.append(f"- **{p_name}{context} {e['etat']}** — score {e['score']}: {e['comment']}")
 
     return "\n".join(lines).strip()
+
+# --- Utils dédoublonnage générique (angles) -----------------
+import re
+def _norm_angle_token(s: str) -> str | None:
+    s = (s or "").lower()
+    # Alias → code court
+    mapping = {
+        "asc": "ASC", "ascendant": "ASC",
+        "dsc": "DSC", "desc": "DSC", "descendant": "DSC",
+        "mc": "MC", "milieu du ciel": "MC", "milieu-du-ciel": "MC",
+        "fc": "FC", "fond du ciel": "FC", "imum coeli": "FC",
+    }
+    return mapping.get(s)
+
+def _extract_planet_angle(desc: str) -> tuple[str | None, str | None]:
+    """
+    Essaie de trouver (planète, angle) dans 'description', indépendamment de l'ordre.
+    Ex: "Ascendant conjonction Mercure" → ("mercure","ASC")
+        "Mercure conjoint ASC (rétrograde)" → ("mercure","ASC")
+    """
+    txt = (desc or "").strip()
+    # candidates tokens (mots + abréviations)
+    tokens = re.findall(r"[A-Za-zÀ-ÖØ-öø-ÿ]+", txt)
+    angle = None
+    planet = None
+
+    # 1) repérer l'angle
+    for t in tokens:
+        code = _norm_angle_token(t)
+        if code:
+            angle = code
+            break
+
+    if not angle:
+        return None, None
+
+    # 2) heuristique planète = 1er token "n’est pas" l’angle ni un mot d’aspect
+    aspect_words = {"conjonction","conjoint","carre","carré","opposition","trigone","sextile"}
+    for t in tokens:
+        low = t.lower()
+        if _norm_angle_token(low) or low in aspect_words:
+            continue
+        # évite "maison" etc.
+        if low in {"maison","retrograde","rétrograde"}:
+            continue
+        planet = low
+        break
+
+    return planet, angle
+
+def _is_retro_desc(desc: str) -> bool:
+    return "retrograde" in (desc or "").lower() or "rétrograde" in (desc or "").lower()
+
+def _dedupe_angle_conjunctions(items: list[dict]) -> list[dict]:
+    """
+    Déduplique les entrées type 'X conjoint ANGLE' / 'ANGLE conjonction X'.
+    Critères de sélection:
+      1) version marquée '(rétrograde)' prioritaire
+      2) orbe la plus serrée si dispo
+      3) score le plus élevé
+      4) commentaire le plus long (fallback)
+    """
+    buckets = {}  # key = (planet_norm, angle_code) -> best item
+    for it in items:
+        desc = it.get("description","")
+        p, a = _extract_planet_angle(desc)
+        if not p or not a:
+            # pas une conjonction d'angle identifiable → garder tel quel
+            buckets.setdefault(("__RAW__", id(it), "__"), it)
+            continue
+
+        key = (p, a)
+        cur = buckets.get(key)
+        if cur is None:
+            buckets[key] = it
+            continue
+
+        # compétition entre cur et it
+        cur_retro = _is_retro_desc(cur.get("description",""))
+        it_retro  = _is_retro_desc(desc)
+
+        # 1) rétro prioritaire
+        if cur_retro != it_retro:
+            buckets[key] = it if it_retro else cur
+            continue
+
+        # 2) orbe la plus serrée (si numérique)
+        cur_orb = cur.get("orb"); it_orb = it.get("orb")
+        if isinstance(cur_orb, (int,float)) and isinstance(it_orb, (int,float)) and cur_orb != it_orb:
+            buckets[key] = it if it_orb < cur_orb else cur
+            continue
+
+        # 3) score le plus élevé
+        cur_sc = cur.get("score") or 0
+        it_sc  = it.get("score")  or 0
+        if it_sc != cur_sc:
+            buckets[key] = it if it_sc > cur_sc else cur
+            continue
+
+        # 4) commentaire le plus long (plus informatif)
+        if len((it.get("comment") or "")) > len((cur.get("comment") or "")):
+            buckets[key] = it
+            continue
+        # sinon on garde cur
+
+    # Recompose la liste
+    out = []
+    for k, v in buckets.items():
+        if k[0] == "__RAW__":
+            out.append(v)
+        else:
+            out.append(v)
+    return out
 
 def detect_conjonctions_angles_simple(theme: dict, orbe_max: float = 8.0, min_score: float = 3.0) -> list:
     """Détecte les conjonctions aux angles en lisant les cuspides des maisons."""
@@ -555,7 +736,8 @@ def detect_conjonctions_angles_simple(theme: dict, orbe_max: float = 8.0, min_sc
                     "comment": comment
                 })
     
-    results.sort(key=lambda x: (-x["score"], x["orb"]))
+    results = _dedupe_angle_conjunctions(results)
+    results.sort(key=lambda x: (-x.get("score",0), x.get("orb", 99.0)))
     return results
 
 # ─────────────────────────────────────────────────────────────
@@ -798,6 +980,58 @@ def build_unified_priorities(theme: dict,
 
     except Exception as e:
         print(f"[FD_INJECT] Erreur placements maisons: {e}")
+
+    # --- FUSION état_planètes (rétro/dignités) -> entrées ANGLES de la même planète ---
+    # 1) indexer les entrées angle par planète
+    angles_index = {}
+    for it in all_priorities:
+        cat = (it.get("categorie") or "").lower()
+        desc = it.get("description") or ""
+        if "(angle)" in cat and "conjoint" in desc:
+            # planète = 1er mot de la description ("Mercure conjoint ASC …")
+            planete_angle = desc.split()[0].strip().title()
+            angles_index.setdefault(planete_angle, []).append(it)
+
+    # 2) parcourir les dignités/rétros et fusionner vers l’angle si même planète
+    to_remove = []
+    for it in all_priorities:
+        cat = (it.get("categorie") or "").lower()
+        if "(dignit" not in cat:  # robuste: "dignité" / "dignite"
+            continue
+
+        # planète = 1er mot avant les ":" dans la description des états
+        # ex: "Mercure : rétrograde + exaltation Vierge"
+        raw_desc = it.get("description") or ""
+        planete_txt = raw_desc.split(":")[0].strip().title() if ":" in raw_desc else raw_desc.split()[0].strip().title()
+        if not planete_txt:
+            continue
+
+        if planete_txt in angles_index:
+            for ang in angles_index[planete_txt]:
+                # Ajouter "(rétrograde)" dans le libellé angle si l’état le mentionne
+                if ("rétro" in raw_desc.lower()) and ("rétro" not in ang["description"].lower()):
+                    ang["description"] += " (rétrograde)"
+
+                # Concaténer les commentaires (on privilégie le COMMENTAIRE, sinon l’intitulé d’état)
+                add = it.get("comment") or raw_desc
+                if add:
+                    if ang.get("comment"):
+                        ang["comment"] += " / " + add
+                    else:
+                        ang["comment"] = add
+
+                # Booster légèrement le score si un état s’ajoute (capé à 5.0)
+                try:
+                    ang["score"] = min(5.0, max(float(ang.get("score", 0)), float(it.get("score", 0))) + 0.3)
+                except Exception:
+                    pass
+
+            # On supprimera la ligne d’état pour éviter le doublon visuel (optionnel)
+            to_remove.append(it)
+
+    # 3) retirer les états déjà fusionnés (si tu veux les garder en plus, commente ce bloc)
+    if to_remove:
+        all_priorities = [x for x in all_priorities if x not in to_remove]
 
     def _cat_key(s: str) -> str:
         s = unicodedata.normalize("NFKD", (s or "")).encode("ascii","ignore").decode("ascii")

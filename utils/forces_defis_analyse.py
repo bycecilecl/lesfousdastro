@@ -792,6 +792,62 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
 
     bloc_configurations = _construire_configurations(data_theme)
 
+    # --- Comptage + limitation à 10 éléments par section ---
+    import re
+
+    try:
+        txt_source = priorities_md if isinstance(priorities_md, str) and priorities_md.strip() else bloc_contexte
+    except NameError:
+        txt_source = bloc_contexte
+    txt_source = txt_source or ""
+    lignes = txt_source.splitlines()
+
+    nb_defis = nb_forces = nb_mixtes = 0
+    current_section = None
+
+    # Conteneurs (pour éventuellement les afficher ou debug)
+    defis_items, forces_items, mixtes_items = [], [], []
+
+    for line in lignes:
+        s = line.strip()
+        low = s.lower()
+
+        # Détection de section
+        if s.startswith("##"):
+            if "défis" in low or "defis" in low:
+                current_section = "defis";  continue
+            if "potentiels" in low:
+                current_section = "forces"; continue
+            if "dynamiques mixtes" in low or "mixtes" in low:
+                current_section = "mixtes"; continue
+            current_section = None
+            continue
+
+        # Comptage et enregistrement des items numérotés
+        if current_section and re.match(r"^\s*\d+\.\s+\*\*", s):
+            if current_section == "defis":
+                defis_items.append(s)
+            elif current_section == "forces":
+                forces_items.append(s)
+            elif current_section == "mixtes":
+                mixtes_items.append(s)
+
+    # ✅ Limite à 10 par catégorie
+    defis_items = defis_items[:10]
+    forces_items = forces_items[:10]
+    mixtes_items = mixtes_items[:10]
+
+    # ✅ Comptages
+    nb_defis = len(defis_items)
+    nb_forces = len(forces_items)
+    nb_mixtes = len(mixtes_items)
+    total_elements = nb_defis + nb_forces + nb_mixtes
+
+    # (Optionnel) log
+    print(f"[COMPTAGE LIMITÉ] Défis={nb_defis} Forces={nb_forces} Mixtes={nb_mixtes} Total={total_elements}")
+
+    
+
     prompt = f"""
 Tu es une astrologue-psychologue experte (20+ ans), spécialisée en astrologie psychologique (Jung, Alice Bailey).
 
@@ -808,37 +864,65 @@ Objectif : Révéler les dynamiques profondes du thème via FORCES et DÉFIS con
 
 ---
 
+🚨 ÉLÉMENTS À ANALYSER (TOTAL : {total_elements})
+- DÉFIS : {nb_defis} éléments
+- FORCES : {nb_forces} éléments  
+- MIXTES : {nb_mixtes} éléments
+
 {bloc_contexte}
 
 ---
 
-**CONSIGNES STRICTES POUR L'ANALYSE :**
 
-1. ✅ Analyse UNIQUEMENT les configurations majeures et les éléments numérotés dans la section ci-dessus
-2. ❌ NE PAS analyser d'autres aspects, même s'ils existent dans le thème
-3. ✅ Traite-les TOUS sans exception (chaque élément doit apparaître dans ton analyse)
-4. ✅ Respecte l'ordre d'importance (commence par les scores les plus élevés)
-5. ❌ NE PAS mentionner Chiron, ou d'autres éléments non prioritaires
 
-╔══ STRUCTURE DE SORTIE ══╗
+╔══ STRUCTURE DE SORTIE OBLIGATOIRE ══╗
 
 **Introduction** (1 paragraphe, 80-100 mots)
 Accroche personnalisée basée sur les **Configurations majeures** (stelliums, angulaires, rétrogrades).
 
-**## DÉFIS**
-7 puces basées UNIQUEMENT sur les éléments marqués [DÉFI] ou [DEFIS] dans la liste ci-dessus.
-Format : - **Aspect/Placement précis** : Description (250 mots minimum obligatoire)
+**## DÉFIS** ({nb_defis} éléments à traiter - ne pas s'arrêter avant)
+Analyse TOUS les {nb_defis} éléments marqués [DÉFI] ou [DEFIS] dans la liste ci-dessus.
+Format : - **Aspect/Placement précis** : Description (250 mots minimum OBLIGATOIRE)
 
-**## POTENTIELS**  
-7 puces basées UNIQUEMENT sur les éléments marqués [FORCE] dans la liste ci-dessus.
-Format : - **Aspect/Placement précis** : Description (250 mots minimum obligatoire)
+**## POTENTIELS** ({nb_forces} éléments à traiter - ne pas s'arrêter avant)
+Analyse TOUS les {nb_forces} éléments marqués [FORCE] dans la liste ci-dessus.
+Format : - **Aspect/Placement précis** : Description (250 mots minimum OBLIGATOIRE)
 
-**## DYNAMIQUES MIXTES**
-5 à 8 puces basées UNIQUEMENT sur les éléments marqués [MIXTE] dans la liste ci-dessus.
+**## DYNAMIQUES MIXTES** ({nb_mixtes} éléments à traiter - ne pas s'arrêter avant)
+Analyse TOUS les {nb_mixtes} éléments marqués [MIXTE] dans la liste ci-dessus.
 Format : - **Aspect/Placement précis** : Description (250 mots minimum - deux faces développées)
 
 **Conclusion** (1 paragraphe, 100-120 mots)
 Synthèse intégrative.
+
+---
+⚠️ VÉRIFICATION FINALE OBLIGATOIRE :
+Avant de terminer, compte tes analyses :
+- DÉFIS analysés : {nb_defis}/{nb_defis} ✓
+- POTENTIELS analysés : {nb_forces}/{nb_forces} ✓
+- MIXTES analysés : {nb_mixtes}/{nb_mixtes} ✓
+TOTAL = {total_elements} éléments
+
+Si un élément manque, ajoute-le MAINTENANT. Ne dis JAMAIS "je continuerai plus tard".
+
+
+═══ CONSIGNES D'ANALYSE ═══
+
+✅ Analyse CHAQUE élément numéroté dans la section ci-dessus
+✅ Respecte l'ordre d'importance (scores décroissants)
+✅ 250 mots minimum par élément
+✅ Développe les mécanismes psychiques avec exemples concrets
+✅ Paragraphes complets (6 lignes minimum)
+
+❌ NE PAS analyser d'aspects non listés
+❌ NE PAS mentionner Chiron ou éléments non prioritaires
+❌ NE PAS résumer ou regrouper les éléments
+❌ NE PAS s'arrêter avant d'avoir traité les {total_elements} éléments
+
+Développe chaque point avec beaucoup de profondeur, 
+en expliquant les mécanismes psychiques ou comportementaux associés. 
+N'hésite pas à donner des exemples concrets ou des situations types.
+Fais des paragraphes complets (6 lignes par point minimum).
 
 ═══ STYLE D'ÉCRITURE ═══
 
@@ -860,6 +944,12 @@ Métadonnées :
 - Tonalité: {meta.get("tonalite","tu")}
 - Genre: {meta.get("genre","neutre")}
 """
+
+    
+    # 🛠 Voir le prompt entier dans la console
+    print("\n=== PROMPT FORCES & DEFIS ===\n")
+    print(prompt)
+    print("\n=== FIN PROMPT ===\n")
 
     texte = ""
     html_core = ""
