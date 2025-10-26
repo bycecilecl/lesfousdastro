@@ -215,19 +215,8 @@ app.register_blueprint(stripe_webhook_bp)
 app.register_blueprint(pages_bp)
 app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
+app.register_blueprint(blog_bp)
 
-# ✅ importe et enregistre le blueprint "blog"
-try:
-    from routes.blog import blog_bp
-    app.register_blueprint(blog_bp)
-    print("✅ blog_bp enregistré")
-except Exception as e:
-    print("❌ blog_bp non enregistré:", e)
-
-# (optionnel) imprimer la table des routes pour vérifier en prod
-print("🔎 URL MAP (prod) :")
-for r in app.url_map.iter_rules():
-    print(" •", r.endpoint, "->", r)
 
 # ========== REDIRECTIONS POUR COMPATIBILITÉ ==========
 @app.route('/flash_astral')
