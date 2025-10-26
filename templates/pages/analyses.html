@@ -302,13 +302,25 @@
             <a class="navbar__brand" href="/">Les Fous d'Astro</a>
             <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">☰</button>
             <ul class="navbar__links">
-                <li><a href="{{ url_for('pages_bp.analyses') }}">Guide des Analyses</a></li>
-                <li><a href="{{ url_for('pages_bp.formations') }}">Formations</a></li>
-                <li><a href="{{ url_for('pages_bp.ateliers') }}">Ateliers</a></li>
-                <li><a href="https://bycecilecl.com/category/les-fous-dastro/" target="_blank" rel="noopener">Blog</a></li>
-                <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Prestations</a></li>
+                <li><a href="{{ url_for('pages_bp.analyses') }}"
+                        class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+
+                <li><a href="{{ url_for('pages_bp.formations') }}"
+                        class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
+
+                <li><a href="{{ url_for('pages_bp.ateliers') }}"
+                        class="{% if request.path == url_for('pages_bp.ateliers') %}active{% endif %}">Ateliers</a></li>
+
+                <li><a href="{{ url_for('blog.blog') }}"
+                        class="{% if request.path == url_for('blog.blog') %}active{% endif %}">Blog</a></li>
+
+                <li><a href="https://bycecilecl.com/categorie-produit/services/"
+                        target="_blank" rel="noopener">Prestations</a></li>
+
+                <li><a href="{{ url_for('pages_bp.contact') }}"
+                        class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
+
                 <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
-                <li><a href="{{ url_for('pages_bp.contact') }}">Contact</a></li>
             </ul>
         </div>
     </nav>
