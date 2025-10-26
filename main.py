@@ -1,5 +1,5 @@
 # 🌐 Librairies externes
-from flask import Flask, render_template, request, jsonify, redirect, session, send_file, url_for, abort, Blueprint
+from flask import Flask, render_template, request, jsonify, redirect, session, send_file, url_for, abort, Blueprint, Response
 from geopy.geocoders import Nominatim
 from datetime import datetime, timezone
 import swisseph as swe
@@ -34,6 +34,7 @@ from routes.checkout import checkout_bp
 from routes import register_routes
 from routes.geocode import geocode_bp
 from routes.paypal import payments_bp
+from routes.blog import blog_bp
 
 
 from utils.axes_majeurs import organiser_points_forts, formater_axes_majeurs
@@ -81,6 +82,23 @@ def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+
+
+@app.route('/sitemap.xml')
+def sitemap():
+    today = datetime.utcnow().strftime('%Y-%m-%d')
+
+    sitemap_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://lesfousdastro.fr/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>"""
+
+    return Response(sitemap_xml, mimetype='application/xml')
 
 # ───────────────────────────────
 # 🕒 Mesure du temps de réponse (ajoute ici)
@@ -183,6 +201,10 @@ def _maintenance_guard():
     return render_template("maintenance.html"), 503
 # >>> Maintenance guard END
 
+@app.route('/robots.txt')
+def robots():
+    return app.send_static_file('robots.txt')
+
 # --- Blueprints tiers d'abord si tu veux, peu importe l'ordre entre eux
 app.register_blueprint(geocode_bp)
 app.register_blueprint(gratuite_api_bp)
@@ -193,6 +215,7 @@ app.register_blueprint(stripe_webhook_bp)
 app.register_blueprint(pages_bp)
 app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
+app.register_blueprint(blog_bp)
 
 # ========== REDIRECTIONS POUR COMPATIBILITÉ ==========
 @app.route('/flash_astral')
