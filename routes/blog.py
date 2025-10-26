@@ -148,8 +148,15 @@ def _rss_fetch_articles(limit: int = 24) -> list[dict]:
                     raw_title = it.findtext("title") or ""
                     title = _strip_html(raw_title).strip() or "Sans titre"
 
-                    # URL de l'article (sert aussi d'URL de base pour normaliser les images)
-                    link = (it.findtext("link") or "").strip() or "#"
+                    # URL de l'article (avec normalisation)
+                    raw_link = (it.findtext("link") or "").strip()
+                    link = _normalize_url(raw_link, "https://bycecilecl.com/") if raw_link else "#"
+
+                    # log pour vérifier
+                    current_app.logger.info(f"🔗 Lien brut trouvé : {raw_link}")
+                    current_app.logger.info(f"🔗 Lien normalisé : {link}")
+
+                    # base pour les images
                     base_for_images = link or "https://bycecilecl.com/"
 
                     # DATE -> ISO
