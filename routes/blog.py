@@ -1,4 +1,4 @@
-# routes/blog.py — HYBRIDE API→RSS + fallback og:image + cache simple
+# routes/blog.py — version finale filtrée "Astrologie" + fallback RSS + og:image
 
 from flask import Blueprint, render_template, current_app
 import re, requests, xml.etree.ElementTree as ET
@@ -14,8 +14,8 @@ WP_BASE = "https://bycecilecl.com/wp-json/wp/v2"
 PER_PAGE = 30
 TIMEOUT = 8
 RETRIES = 2
-ALLOWED_TERM_SLUGS = {"astrologie", "astro"}  # filtre sémantique
-DEFAULT_IMG = "https://lesfousdastro.fr/static/img/blog-placeholder.jpg"  # mets une image chez toi
+ALLOWED_TERM_SLUGS = {"astrologie", "astro"}  # filtrage WordPress
+DEFAULT_IMG = "https://lesfousdastro.fr/static/img/blog-placeholder.jpg"  # ton image par défaut
 
 HEADERS_API = {
     "User-Agent": "Mozilla/5.0 (compatible; LesFousdAstroBot/1.0; +https://lesfousdastro.fr/blog)",
@@ -27,25 +27,26 @@ HEADERS_HTML = {
     "Accept": "text/html,application/xhtml+xml",
 }
 
+# 👉 flux RSS uniquement "astrologie"
 FEEDS = [
     "https://bycecilecl.com/category/astrologie/feed/",
     "https://bycecilecl.com/categorie/astrologie/feed/",
-    "https://bycecilecl.com/feed/",
 ]
 
 NS_CONTENT = "{http://purl.org/rss/1.0/modules/content/}"
-NS_MEDIA   = "{http://search.yahoo.com/mrss/}"
+NS_MEDIA = "{http://search.yahoo.com/mrss/}"
 
 
 # --------- Utils ----------
 def _format_date_fr(date_iso_yyyy_mm_dd: str) -> str:
     try:
         d = datetime.strptime(date_iso_yyyy_mm_dd, "%Y-%m-%d")
-        mois = ["","janvier","février","mars","avril","mai","juin","juillet",
-                "août","septembre","octobre","novembre","décembre"]
+        mois = ["", "janvier", "février", "mars", "avril", "mai", "juin", "juillet",
+                "août", "septembre", "octobre", "novembre", "décembre"]
         return f"{d.day} {mois[d.month]} {d.year}"
     except Exception:
         return date_iso_yyyy_mm_dd
+
 
 def _strip_html(text: str) -> str:
     if not text:
@@ -55,8 +56,9 @@ def _strip_html(text: str) -> str:
     text = text.replace("&nbsp;", " ").replace("\xa0", " ")
     return re.sub(r"\s+", " ", text).strip()
 
+
 def _find_og_image(url: str) -> str | None:
-    """Va chercher <meta property="og:image" ...> sur la page article (timeout court)."""
+    """Cherche la balise <meta property='og:image'> sur la page."""
     if not url or url == "#":
         return None
     try:
@@ -72,7 +74,7 @@ def _find_og_image(url: str) -> str | None:
 
 # --------- API WordPress ----------
 def _has_allowed_term_wp(post: dict) -> bool:
-    """Filtre par slug de tag/catégorie via _embedded/wp:term."""
+    """Filtre sur catégories/tags (slugs autorisés)."""
     emb = post.get("_embedded") or {}
     for group in emb.get("wp:term") or []:
         for term in group or []:
@@ -80,6 +82,7 @@ def _has_allowed_term_wp(post: dict) -> bool:
             if slug in ALLOWED_TERM_SLUGS:
                 return True
     return False
+
 
 def _featured_image_wp(post: dict) -> str | None:
     try:
@@ -90,12 +93,12 @@ def _featured_image_wp(post: dict) -> str | None:
         pass
     return None
 
+
 def _post_to_article_wp(post: dict) -> dict:
     date_iso = (post.get("date") or "")[:10]
     url = post.get("link") or "#"
     image = _featured_image_wp(post)
     if not image:
-        # fallback og:image
         image = _find_og_image(url) or DEFAULT_IMG
     return {
         "title": (post.get("title", {}) or {}).get("rendered", "Sans titre"),
@@ -106,9 +109,10 @@ def _post_to_article_wp(post: dict) -> dict:
         "date_iso": date_iso,
     }
 
+
 @lru_cache(maxsize=1)
 def _fetch_wp_api_posts(cache_key: str) -> list[dict]:
-    """Tente l’API /wp-json. Cache une fois par heure."""
+    """Tente l’API /wp-json/wp/v2/posts?_embed=1 (avec cache horaire)."""
     params = {"per_page": PER_PAGE, "_embed": "1", "orderby": "date", "order": "desc"}
     last_err = None
     for _ in range(RETRIES):
@@ -128,44 +132,42 @@ def _extract_first_image_from_html(html: str) -> str | None:
     if not html:
         return None
     html = unescape(html)
-    # lazy attrs
     for attr in ("data-lazy-src", "data-src", "data-original", "data-orig-file"):
         m = re.search(fr'{attr}=["\']([^"\']+)["\']', html, re.I)
         if m:
             cand = m.group(1).strip()
-            if any(ext in cand.lower() for ext in (".jpg",".jpeg",".png",".webp",".gif")):
+            if any(ext in cand.lower() for ext in (".jpg", ".jpeg", ".png", ".webp", ".gif")):
                 return cand
-    # srcset (plus large)
     m = re.search(r'srcset=["\']([^"\']+)["\']', html, re.I)
     if m:
         best, wbest = None, -1
         for part in m.group(1).split(","):
             part = part.strip()
-            if not part: continue
+            if not part:
+                continue
             bits = part.split()
             url = bits[0]
             w = 0
             if len(bits) > 1 and bits[1].endswith("w"):
-                try: w = int(bits[1][:-1])
-                except: pass
-            if any(ext in url.lower() for ext in (".jpg",".jpeg",".png",".webp",".gif")) and w > wbest:
+                try:
+                    w = int(bits[1][:-1])
+                except:
+                    pass
+            if any(ext in url.lower() for ext in (".jpg", ".jpeg", ".png", ".webp", ".gif")) and w > wbest:
                 best, wbest = url, w
         if best:
             return best
-    # src
     m = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', html, re.I)
     if m:
         cand = m.group(1).strip()
-        if any(ext in cand.lower() for ext in (".jpg",".jpeg",".png",".webp",".gif")):
+        if any(ext in cand.lower() for ext in (".jpg", ".jpeg", ".png", ".webp", ".gif")):
             return cand
     return None
 
-def _post_to_article_rss(item: ET.Element) -> dict:
-    # titre / lien
-    title = _strip_html(item.findtext("title") or "") or "Sans titre"
-    link  = (item.findtext("link") or "").strip() or "#"
 
-    # date
+def _post_to_article_rss(item: ET.Element) -> dict:
+    title = _strip_html(item.findtext("title") or "") or "Sans titre"
+    link = (item.findtext("link") or "").strip() or "#"
     date_iso = ""
     pub = (item.findtext("pubDate") or "").strip()
     try:
@@ -174,7 +176,6 @@ def _post_to_article_rss(item: ET.Element) -> dict:
     except Exception:
         pass
 
-    # contenu → image
     img = None
     content = item.findtext(f"{NS_CONTENT}encoded") or ""
     if content:
@@ -185,15 +186,14 @@ def _post_to_article_rss(item: ET.Element) -> dict:
     if not img:
         enc = item.find("enclosure")
         if enc is not None and enc.get("url"):
-            cand = enc.get("url").strip()
-            if any(ext in cand.lower() for ext in (".jpg",".jpeg",".png",".webp",".gif")):
-                img = cand
+            url = enc.get("url").strip()
+            if any(ext in url.lower() for ext in (".jpg", ".jpeg", ".png", ".webp", ".gif")):
+                img = url
     if not img:
         media = item.find(f"{NS_MEDIA}content")
         if media is not None and media.get("url"):
             img = media.get("url").strip()
     if not img:
-        # dernier secours : og:image sur la page
         img = _find_og_image(link)
 
     image = img or DEFAULT_IMG
@@ -211,7 +211,9 @@ def _post_to_article_rss(item: ET.Element) -> dict:
         "date_iso": date_iso,
     }
 
+
 def _fetch_rss_posts() -> list[dict]:
+    """Lit uniquement les flux RSS Astrologie."""
     for feed in FEEDS:
         try:
             r = requests.get(feed, headers={"User-Agent": HEADERS_API["User-Agent"], "Accept": "application/rss+xml"}, timeout=TIMEOUT)
@@ -231,26 +233,23 @@ def _fetch_rss_posts() -> list[dict]:
 # --------- Route ----------
 @blog_bp.route("/blog", strict_slashes=False)
 def blog():
-    # clé cache horaire (évite de spammer l’API/les flux)
+    """Affiche uniquement les articles astrologie."""
     cache_key = datetime.now(timezone.utc).strftime("%Y-%m-%d-%H")
-
-    # 1) tente l’API
-    api_posts = _fetch_wp_api_posts(cache_key)
     articles = []
-    if api_posts:
-        filtered = [p for p in api_posts if _has_allowed_term_wp(p)]
-        for p in filtered:
-            articles.append(_post_to_article_wp(p))
 
-    # 2) sinon fallback RSS
+    # 1) Tente API
+    api_posts = _fetch_wp_api_posts(cache_key)
+    if api_posts:
+        for p in api_posts:
+            if _has_allowed_term_wp(p):
+                articles.append(_post_to_article_wp(p))
+
+    # 2) Sinon fallback RSS
     if not articles:
         rss_posts = _fetch_rss_posts()
-        for p in rss_posts:
-            # filtre texte: garde les articles dont l’URL contient /category/astrologie/ ou /categorie/astrologie/ ou “astro”
-            if any(s in p["url"].lower() for s in ("/category/astrologie/", "/categorie/astrologie/", "astro")):
-                articles.append(p)
+        articles.extend(rss_posts)
 
-    # tri + coupe
+    # tri + limite
     articles.sort(key=lambda a: a.get("date_iso", ""), reverse=True)
     for a in articles:
         a.pop("date_iso", None)
