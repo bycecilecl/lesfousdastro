@@ -177,12 +177,6 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
 
-        .article-image {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-        }
-
         .article-content {
             padding: 25px;
         }
@@ -343,7 +337,6 @@
         <div class="articles-grid">
             {% for article in articles %}
             <div class="article-card" onclick="window.open('{{ article.url }}', '_blank')">
-                <img src="{{ article.image }}" alt="{{ article.title }}" class="article-image">
                 <div class="article-content">
                     <h2 class="article-title">{{ article.title }}</h2>
                     <p class="article-date">📅 {{ article.date }}</p>
