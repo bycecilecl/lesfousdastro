@@ -319,6 +319,20 @@ body {
 .swiper-slide-zoomed .swiper-zoom-container::after {
   display: none;
 }
+
+.swiper-slide img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  cursor: zoom-in;
+  transition: transform 0.3s ease;
+}
+
+.swiper-slide img.zoomed {
+  transform: scale(2);
+  cursor: zoom-out;
+}
   </style>
 </head>
 <body>
@@ -417,13 +431,23 @@ body {
     });
 
     function closeLightbox() {
-      lb.classList.remove('open');
-      document.body.style.overflow = '';
-    }
+        lb.classList.remove('open');
+        document.body.style.overflow = '';
+        swiper.zoom.out(); // Dézoom automatique
+        }
 
     btnClose.addEventListener('click', closeLightbox);
     lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+    // Après ton code Swiper existant, ajoute :
+    document.querySelectorAll('.swiper-slide img').forEach(img => {
+    img.addEventListener('click', (e) => {
+        e.stopPropagation(); // Empêche de fermer la lightbox
+        img.classList.toggle('zoomed');
+    });
+    });
+
   </script>
 </body>
 </html>
