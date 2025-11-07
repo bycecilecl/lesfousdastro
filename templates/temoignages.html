@@ -146,38 +146,46 @@
 
     /* Grille témoignages adaptée au nouveau fond */
     .tmg-page {
-      max-width: 1100px;
-      margin: 40px auto 60px;
-      padding: 0 16px;
-      color: #fff;
+    max-width: 1100px;
+    margin: 90px auto 60px;      /* espace sous la navbar */
+    padding: 0 16px 40px;
+    color: #fff;
     }
     .tmg-title {
-      font-size: 2.2rem;
-      font-weight: 700;
-      margin-bottom: .4rem;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: .25rem;
     }
     .tmg-sub {
-      color: #e5f7ff;
-      margin-bottom: 1.5rem;
+    color: #e5f7ff;
+    margin-bottom: 1.5rem;
     }
+    
     .tmg-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+    align-items: flex-start;
     }
+
+    /* Carte témoignage */
     .tmg-card {
-      border-radius: 22px;
-      background: #ffffff;
-      padding: 10px;
-      box-shadow: 0 10px 26px rgba(0,0,0,0.18);
-      cursor: zoom-in;
-      overflow: hidden;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 10px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    cursor: zoom-in;
+    overflow: hidden;
+    display: flex;
     }
+
+    /* Image : prend la largeur, hauteur raisonnable */
     .tmg-img {
-      width: 100%;
-      display: block;
-      height: auto;
-      border-radius: 16px;
+    width: 100%;
+    height: auto;
+    max-height: 420px;         /* évite les cartes géantes */
+    object-fit: contain;       /* ne coupe pas le texte du screen */
+    border-radius: 14px;
     }
   </style>
 </head>
