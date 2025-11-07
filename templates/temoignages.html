@@ -182,38 +182,42 @@
   </style>
 </head>
 <body>
-  <div class="tmg-page">
-    <!-- Navigation -->
-    <nav class="navbar">
+  {% include "_sandbox_banner.html" %}
+
+  <!-- Navigation identique -->
+  <nav class="navbar">
     <div class="navbar__inner">
-        <a class="navbar__brand" href="/">Les Fous d'Astro</a>
+      <a class="navbar__brand" href="/">Les Fous d'Astro</a>
 
-        <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">
-            ☰
-        </button>
-        <ul class="navbar__links">
-            <li><a href="{{ url_for('pages_bp.analyses') }}"
-                    class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+      <button class="navbar__toggle" aria-label="Menu" aria-expanded="false"
+              onclick="document.body.classList.toggle('nav-open')">
+        ☰
+      </button>
 
-            <li><a href="{{ url_for('site_bp.temoignages') }}"
-                    class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
+      <ul class="navbar__links">
+        <li><a href="{{ url_for('pages_bp.analyses') }}"
+               class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
 
-            <li><a href="{{ url_for('pages_bp.formations') }}"
-                    class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
+        <li><a href="{{ url_for('site_bp.temoignages') }}"
+               class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
 
-            <li><a href="{{ url_for('blog.blog') }}"
-                    class="{% if request.path == url_for('blog.blog') %}active{% endif %}">Blog</a></li>
+        <li><a href="{{ url_for('pages_bp.formations') }}"
+               class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
 
-            <li><a href="https://bycecilecl.com/categorie-produit/services/"
-                    target="_blank" rel="noopener">Prestations</a></li>
+        <li><a href="{{ url_for('blog.blog') }}"
+               class="{% if request.path == url_for('blog.blog') %}active{% endif %}">Blog</a></li>
 
-            <li><a href="{{ url_for('pages_bp.contact') }}"
-                    class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
+        <li><a href="https://bycecilecl.com/categorie-produit/services/"
+               target="_blank" rel="noopener">Prestations</a></li>
 
-            <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
-        </ul>
+        <li><a href="{{ url_for('pages_bp.contact') }}"
+               class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
+
+        <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+      </ul>
     </div>
-    </nav>
+  </nav>
+    <div class="tmg-page"></div>
     <h1 class="tmg-title">Vos retours 💬</h1>
     <p class="tmg-sub">Screenshots de vos messages. Merci pour votre confiance.</p>
 
