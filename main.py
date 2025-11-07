@@ -30,6 +30,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from routes.stripe_webhook import stripe_webhook_bp
 from routes.pages import pages_bp
 from routes.checkout import checkout_bp
+from routes.site import site_bp
 
 from routes import register_routes
 from routes.geocode import geocode_bp
@@ -216,6 +217,7 @@ app.register_blueprint(pages_bp)
 app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
 app.register_blueprint(blog_bp)
+app.register_blueprint(site_bp)
 
 
 # ========== REDIRECTIONS POUR COMPATIBILITÉ ==========
