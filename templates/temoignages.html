@@ -1,16 +1,17 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Vos retours - Les Fous d'Astro</title>
 
-{% block head %}
   <!-- Swiper CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 
   <style>
-    /* Conteneur de page */
-    .tmg-page { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+    .tmg-page { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     .tmg-title { font-size: 2rem; font-weight: 700; margin-bottom: .25rem; }
     .tmg-sub { color: #666; margin-bottom: 1.5rem; }
 
-    /* Grille responsive */
     .tmg-grid {
       display: grid;
       grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -18,9 +19,7 @@
     }
     @media (min-width: 640px) { .tmg-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (min-width: 1024px) { .tmg-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (min-width: 1280px) { .tmg-grid { grid-template-columns: repeat(4, 1fr); } }
 
-    /* Carte */
     .tmg-card {
       position: relative;
       border-radius: 12px;
@@ -36,22 +35,18 @@
       width: 100%;
       display: block;
       height: auto;
-      aspect-ratio: 4/5;            /* évite le “reflow” au chargement */
+      aspect-ratio: 4/5;
       object-fit: cover;
     }
 
-    /* Badge date en overlay */
     .tmg-badge {
       position: absolute; top: 10px; left: 10px;
       background: rgba(0,0,0,.65); color: #fff;
       font-size: .75rem; padding: .25rem .5rem; border-radius: 999px;
-      backdrop-filter: blur(2px);
     }
 
-    /* Légende sous l'image */
     .tmg-caption { padding: .75rem .9rem; font-size: .95rem; color: #333; }
 
-    /* Lightbox (overlay plein écran) */
     .tmg-lightbox {
       position: fixed; inset: 0;
       background: rgba(0,0,0,.85);
@@ -67,7 +62,6 @@
       box-shadow: 0 4px 10px rgba(0,0,0,.2);
     }
 
-    /* Swiper dimension */
     .swiper { width: min(1000px, 92vw); height: min(82vh, 820px); margin: 8vh auto; }
     .swiper-slide {
       display: grid; place-items: center;
@@ -75,39 +69,28 @@
     }
     .swiper-slide img { width: 100%; height: 100%; object-fit: contain; }
 
-    /* Pagination et flèches visibles sur fond sombre */
     .swiper-button-next, .swiper-button-prev { color: #fff; }
     .swiper-pagination-bullet { background: rgba(255,255,255,.7); }
     .swiper-pagination-bullet-active { background: #fff; }
   </style>
-{% endblock %}
-
-{% block content %}
+</head>
+<body>
   <div class="tmg-page">
-    <h1 class="tmg-title">Vos retours  💬</h1>
+    <h1 class="tmg-title">Vos retours 💬</h1>
     <p class="tmg-sub">Screenshots authentiques de messages reçus. Cliquez pour agrandir et swiper.</p>
 
-    <!-- GRILLE -->
     <div class="tmg-grid" id="tmgGrid">
       {% for it in items %}
-      <figure class="tmg-card" data-index="{{ loop.index0 }}" aria-label="Ouvrir le témoignage">
+      <figure class="tmg-card" data-index="{{ loop.index0 }}">
         <span class="tmg-badge">{{ it.date }}</span>
-        <img
-          class="tmg-img"
-          src="{{ it.src }}"
-          alt="Témoignage : {{ it.caption }}"
-          loading="lazy"
-          decoding="async"
-        >
+        <img class="tmg-img" src="{{ it.src }}" alt="Témoignage : {{ it.caption }}" loading="lazy">
         <figcaption class="tmg-caption">{{ it.caption }}</figcaption>
       </figure>
       {% endfor %}
     </div>
 
-    <!-- LIGHTBOX + SLIDER -->
-    <div class="tmg-lightbox" id="tmgLightbox" role="dialog" aria-modal="true" aria-label="Témoignages">
-      <button class="tmg-close" id="tmgClose" aria-label="Fermer">✕</button>
-
+    <div class="tmg-lightbox" id="tmgLightbox">
+      <button class="tmg-close" id="tmgClose">✕</button>
       <div class="swiper" id="tmgSwiper">
         <div class="swiper-wrapper">
           {% for it in items %}
@@ -116,40 +99,24 @@
           </div>
           {% endfor %}
         </div>
-
-        <!-- Navigation -->
-        <div class="swiper-button-next" aria-label="Suivant"></div>
-        <div class="swiper-button-prev" aria-label="Précédent"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
         <div class="swiper-pagination"></div>
       </div>
     </div>
-
-    <!-- Fallback SEO (si JS désactivé) : liste simple -->
-    <noscript>
-      <ul>
-        {% for it in items %}
-          <li><a href="{{ it.src }}">Témoignage ({{ it.date }}) – {{ it.caption }}</a></li>
-        {% endfor %}
-      </ul>
-    </noscript>
   </div>
 
-  <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
-    // Init Swiper (slider dans la lightbox)
     const swiper = new Swiper('#tmgSwiper', {
       loop: true,
       centeredSlides: true,
       slidesPerView: 1,
-      spaceBetween: 10,
       keyboard: { enabled: true },
       pagination: { el: '.swiper-pagination', clickable: true },
       navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-      // autoplay: { delay: 5000, disableOnInteraction: false }, // active si tu veux
     });
 
-    // Ouverture/fermeture lightbox
     const grid = document.getElementById('tmgGrid');
     const lb = document.getElementById('tmgLightbox');
     const btnClose = document.getElementById('tmgClose');
@@ -160,8 +127,7 @@
       const index = parseInt(fig.getAttribute('data-index'), 10) || 0;
       lb.classList.add('open');
       document.body.style.overflow = 'hidden';
-      // On positionne le slider sur la slide cliquée (index dans la boucle Jinja)
-      swiper.slideToLoop(index, 0); // 0ms pour instantané
+      swiper.slideToLoop(index, 0);
     });
 
     function closeLightbox() {
@@ -172,4 +138,5 @@
     lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
   </script>
-{% endblock %}
+</body>
+</html>
