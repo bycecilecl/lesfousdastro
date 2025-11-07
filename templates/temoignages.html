@@ -6,73 +6,214 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* 👇 même fond que astro_form */
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0b1020;
+      background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* === COPIE des styles NAVBAR depuis astro_form === */
+    .navbar {
+      background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      backdrop-filter: blur(10px);
+    }
+    .navbar::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="0.5" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="0.5" fill="white" opacity="0.1"/><circle cx="50" cy="50" r="0.3" fill="white" opacity="0.15"/></svg>');
+      pointer-events: none;
+    }
+    .navbar__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      position: relative;
+      z-index: 1;
+    }
+    .navbar__brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+      background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    .navbar__brand:hover { transform: scale(1.05); }
+    .navbar__toggle {
+      display: none;
+      background: none;
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      font-size: 1.2rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    .navbar__links {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 8px;
+    }
+    .navbar__links a {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 25px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+      border: 1px solid transparent;
+    }
+    .navbar__links a:hover {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .navbar__links a.active {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border-color: rgba(255,255,255,0.3);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .navbar__links a[target="_blank"]::after {
+      content: ' ↗';
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+    @media (max-width: 768px) {
+      .navbar__toggle { display: block; }
+      .navbar__links {
+        position: absolute;
+        top: 100%; left: 0; right: 0;
+        background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        transform: translateY(-10px);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        gap: 0;
+      }
+      .nav-open .navbar__links {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+      }
+      .navbar__links a {
+        display: block;
+        margin: 8px 0;
+        padding: 15px 20px;
+        border-radius: 12px;
+        text-align: center;
+      }
+      .navbar__inner {
+        padding: 0 15px;
+        height: 60px;
+      }
+      .navbar__brand { font-size: 1.3rem; }
+    }
+
+    /* Grille témoignages adaptée au nouveau fond */
+    .tmg-page {
+      max-width: 1100px;
+      margin: 40px auto 60px;
+      padding: 0 16px;
       color: #fff;
     }
-    .tmg-page { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
-    .tmg-title { font-size: 2rem; font-weight: 700; margin-bottom: .25rem; }
-    .tmg-sub { color: #bbb; margin-bottom: 1.5rem; }
-
+    .tmg-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+    }
+    .tmg-sub {
+      color: #e5f7ff;
+      margin-bottom: 1.5rem;
+    }
     .tmg-grid {
       display: grid;
-      grid-template-columns: repeat(1, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
     }
-    @media (min-width: 640px) { .tmg-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (min-width: 1024px) { .tmg-grid { grid-template-columns: repeat(3, 1fr); } }
-
     .tmg-card {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #fff;
-      color: #111;
-      box-shadow: 0 6px 18px rgba(0,0,0,.35);
+      border-radius: 22px;
+      background: #ffffff;
+      padding: 10px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.18);
       cursor: zoom-in;
+      overflow: hidden;
     }
     .tmg-img {
       width: 100%;
       display: block;
       height: auto;
-      object-fit: cover;
+      border-radius: 16px;
     }
-
-    .tmg-lightbox {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.9);
-      display: none;
-      z-index: 9999;
-    }
-    .tmg-lightbox.open { display: block; }
-
-    .tmg-close {
-      position: absolute; top: 14px; right: 14px;
-      background: #fff; color: #000;
-      border: none; border-radius: 999px;
-      width: 40px; height: 40px;
-      display: grid; place-items: center;
-      cursor: pointer;
-    }
-
-    .swiper { width: min(1000px, 92vw); height: min(82vh, 820px); margin: 8vh auto; }
-    .swiper-slide {
-      display: grid; place-items: center;
-      background: #000;
-    }
-    .swiper-slide img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-    .swiper-button-next, .swiper-button-prev { color: #fff; }
-    .swiper-pagination-bullet { background: rgba(255,255,255,.7); }
-    .swiper-pagination-bullet-active { background: #fff; }
   </style>
 </head>
 <body>
   <div class="tmg-page">
+    <!-- Navigation -->
+    <nav class="navbar">
+    <div class="navbar__inner">
+        <a class="navbar__brand" href="/">Les Fous d'Astro</a>
+
+        <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">
+            ☰
+        </button>
+        <ul class="navbar__links">
+            <li><a href="{{ url_for('pages_bp.analyses') }}"
+                    class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+
+            <li><a href="{{ url_for('site_bp.temoignages') }}"
+                    class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
+
+            <li><a href="{{ url_for('pages_bp.formations') }}"
+                    class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
+
+            <li><a href="{{ url_for('blog.blog') }}"
+                    class="{% if request.path == url_for('blog.blog') %}active{% endif %}">Blog</a></li>
+
+            <li><a href="https://bycecilecl.com/categorie-produit/services/"
+                    target="_blank" rel="noopener">Prestations</a></li>
+
+            <li><a href="{{ url_for('pages_bp.contact') }}"
+                    class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
+
+            <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+        </ul>
+    </div>
+    </nav>
     <h1 class="tmg-title">Vos retours 💬</h1>
     <p class="tmg-sub">Screenshots de vos messages. Merci pour votre confiance.</p>
 
