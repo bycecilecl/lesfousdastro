@@ -38,12 +38,6 @@
       height: auto;
       object-fit: cover;
     }
-    .tmg-badge {
-      position: absolute; top: 10px; left: 10px;
-      background: rgba(0,0,0,.7); color: #fff;
-      font-size: .75rem; padding: .25rem .5rem; border-radius: 999px;
-    }
-    .tmg-caption { padding: .65rem .8rem; font-size: .9rem; }
 
     .tmg-lightbox {
       position: fixed; inset: 0;
@@ -80,17 +74,15 @@
 <body>
   <div class="tmg-page">
     <h1 class="tmg-title">Vos retours 💬</h1>
-    <p class="tmg-sub">Screenshots authentiques de vos messages. Merci pour votre confiance.</p>
-    <p class="tmg-sub">Debug : {{ items|length }} témoignages chargés.</p>
+    <p class="tmg-sub">Screenshots de vos messages. Merci pour votre confiance.</p>
+
 
     <div class="tmg-grid" id="tmgGrid">
       {% for it in items %}
-      <figure class="tmg-card" data-index="{{ loop.index0 }}">
-        <span class="tmg-badge">{{ it.date }}</span>
-        <img class="tmg-img" src="{{ it.src }}" alt="{{ it.caption }}" loading="lazy">
-        <figcaption class="tmg-caption">{{ it.caption }}</figcaption>
-      </figure>
-      {% endfor %}
+    <figure class="tmg-card" data-index="{{ loop.index0 }}">
+        <img class="tmg-img" src="{{ it.src }}" alt="Témoignage" loading="lazy">
+    </figure>
+    {% endfor %}
     </div>
   </div>
 
