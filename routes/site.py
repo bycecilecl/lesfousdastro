@@ -1,4 +1,3 @@
-# routes/site.py
 import os
 from datetime import datetime
 from flask import Blueprint, render_template, current_app, url_for
@@ -7,7 +6,7 @@ site_bp = Blueprint("site_bp", __name__)
 
 @site_bp.route("/temoignages")
 def temoignages():
-    folder = os.path.join(current_app.static_folder, "temoignages")  # <-- adapté
+    folder = os.path.join(current_app.static_folder, "temoignages")
     allowed = (".png", ".jpg", ".jpeg", ".webp")
     items = []
 
@@ -29,4 +28,6 @@ def temoignages():
                 })
 
     items.sort(key=lambda x: x["ts"], reverse=True)
+    print("=== Témoignages trouvés ===")
+    print(items)
     return render_template("temoignages.html", items=items)
