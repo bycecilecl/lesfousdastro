@@ -197,6 +197,85 @@ body {
   border-radius: 14px;
   display: block;
 }
+
+/* === LIGHTBOX === */
+.tmg-lightbox {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.tmg-lightbox.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tmg-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10000;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.tmg-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+#tmgSwiper {
+  width: 90%;
+  max-width: 800px;
+  height: 80vh;
+}
+
+.swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swiper-slide img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 20px !important;
+}
+
+.swiper-pagination-bullet {
+  background: white !important;
+}
   </style>
 </head>
 <body>
@@ -235,10 +314,9 @@ body {
       </ul>
     </div>
   </nav>
-    <div class="tmg-page"></div>
+    <div class="tmg-page">
     <h1 class="tmg-title">Vos retours 💬</h1>
     <p class="tmg-sub">Screenshots de vos messages. Merci pour votre confiance.</p>
-
 
     <div class="tmg-grid" id="tmgGrid">
       {% for it in items %}
