@@ -36,7 +36,7 @@ def load_products():
             "enabled": _bool_env("FORCES_DEFIS_ENABLED", "1"),
         },
         # ✅ NOUVEAU : Module Amour
-        "analyse_amour": {
+        "profil_amoureux": {
             "label": "Analyse Amoureuse complète",
             "price_id": os.getenv("ANALYSE_AMOUR_PRICE_ID", "").strip(),
             "price_cents": _int_env("ANALYSE_AMOUR_PRICE_CENTS", 1900),  # 19€ par défaut
@@ -46,12 +46,12 @@ def load_products():
 
         "pack_essence": {
             "label": "Pack Essence (3 analyses)",
-            "price_cents": 4500,         # le prix du pack (ou 5200 hors promo)
-            "success_route": None,       # pas de route directe, on ne génère pas UNE analyse pour le pack
-            "included_products": [       # 🔥 c’est ça la clé
+            "price_cents": 4500,
+            "success_route": None,
+            "included_products": [
                 "flash_astral",
                 "forces_defis",
-                "analyse_amour",
+                "profil_amoureux",   # 👈 bien celui-là maintenant
             ],
         },
     }
