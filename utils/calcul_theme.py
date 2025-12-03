@@ -312,9 +312,9 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     maisons_vediques = maisons_vediques_fixes(signe_asc_sid)
 
     planetes = ['Soleil', 'Lune', 'Mercure', 'Vénus', 'Mars', 'Jupiter', 'Saturne',
-                'Uranus', 'Neptune', 'Pluton', 'Rahu']
+                'Uranus', 'Neptune', 'Pluton', 'Rahu', 'Junon']
     codes = [swe.SUN, swe.MOON, swe.MERCURY, swe.VENUS, swe.MARS, swe.JUPITER,
-             swe.SATURN, swe.URANUS, swe.NEPTUNE, swe.PLUTO, swe.MEAN_NODE]
+             swe.SATURN, swe.URANUS, swe.NEPTUNE, swe.PLUTO, swe.MEAN_NODE, 19]
 
     positions_tropicales = {'Ascendant': asc_deg}
     positions_vediques = {'Ascendant': asc_deg_sid}
@@ -411,6 +411,32 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     }
     positions_vediques['Ketu'] = round(ketu_deg_ved, 2)
 
+    # Ajout de la Lune Noire moyenne
+    deg_lilith = round(swe.calc_ut(jd, 12)[0][0], 2)
+    signe_lilith, deg_signe_lilith = degre_vers_signe(deg_lilith)
+    maison_lilith = get_maison_planete(deg_lilith, cusps)
+
+    resultats_tropical['Lune Noire'] = {
+        'degre': deg_lilith,
+        'signe': signe_lilith,
+        'degre_dans_signe': deg_signe_lilith,
+        'maison': maison_lilith
+    }
+    positions_tropicales['Lune Noire'] = deg_lilith
+
+    # Ajout de Chiron
+    deg_chiron = round(swe.calc_ut(jd, 15)[0][0], 2)
+    signe_chiron, deg_signe_chiron = degre_vers_signe(deg_chiron)
+    maison_chiron = get_maison_planete(deg_chiron, cusps)
+
+    resultats_tropical['Chiron'] = {
+        'degre': deg_chiron,
+        'signe': signe_chiron,
+        'degre_dans_signe': deg_signe_chiron,
+        'maison': maison_chiron
+    }
+    positions_tropicales['Chiron'] = deg_chiron
+
     aspects = detecter_aspects(positions_tropicales)
 
     nom_maitre_trop = get_maitre_ascendant(signe_asc)
@@ -443,31 +469,6 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
             'maison': maison
         }
 
-    # Ajout de la Lune Noire moyenne
-    deg_lilith = round(swe.calc_ut(jd, 12)[0][0], 2)
-    signe_lilith, deg_signe_lilith = degre_vers_signe(deg_lilith)
-    maison_lilith = get_maison_planete(deg_lilith, cusps)
-
-    resultats_tropical['Lune Noire'] = {
-        'degre': deg_lilith,
-        'signe': signe_lilith,
-        'degre_dans_signe': deg_signe_lilith,
-        'maison': maison_lilith
-    }
-    positions_tropicales['Lune Noire'] = deg_lilith
-
-    # Ajout de Chiron
-    deg_chiron = round(swe.calc_ut(jd, 15)[0][0], 2)
-    signe_chiron, deg_signe_chiron = degre_vers_signe(deg_chiron)
-    maison_chiron = get_maison_planete(deg_chiron, cusps)
-
-    resultats_tropical['Chiron'] = {
-        'degre': deg_chiron,
-        'signe': signe_chiron,
-        'degre_dans_signe': deg_signe_chiron,
-        'maison': maison_chiron
-    }
-    positions_tropicales['Chiron'] = deg_chiron
 
     points_forts = extraire_points_forts({
         'planetes': resultats_tropical,

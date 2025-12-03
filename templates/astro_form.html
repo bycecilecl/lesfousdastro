@@ -290,6 +290,15 @@
             background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,255,255,0.9));
         }
 
+        .option-card.pink {
+            border: 3px solid #FF69B4;
+            background: linear-gradient(135deg, rgba(255,105,180,0.1), rgba(255,255,255,0.9));
+        }
+
+        .option-card.pink .price {
+            color: #FF1493;
+        }
+
         .badge {
             position: absolute;
             top: 15px;
@@ -444,7 +453,7 @@
             box-shadow: 0 1px 6px rgba(108, 117, 125, 0.15);
         }
 
-        /* Section packs */
+         /* Section packs */
         .packs-section {
             background: linear-gradient(135deg, #1f628e, #00a8a8);
             color: white;
@@ -529,6 +538,101 @@
             color: #721c24;
         }
 
+        .pack-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .packs-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 25px !important;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .packs-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+      .essence-special {
+            padding: 30px !important;
+        }
+
+        .pack-layout-3col {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+            min-height: 200px;
+        }
+
+        .pack-image-left {
+            flex-shrink: 0;
+        }
+
+        .pack-image-left img {
+            width: 250px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .pack-modules {
+            flex: 1;
+            text-align: left;
+        }
+
+        .pack-modules .pack-title {
+            margin-bottom: 15px;
+        }
+
+        .pack-modules .pack-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .pack-pricing {
+            flex-shrink: 0;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .pack-modules {
+            flex: 1;
+            text-align: left;
+            padding-left: 50px;
+        }
+
+        .pack-pricing {
+            flex-shrink: 0;
+            text-align: center;
+            min-width: 120px;
+            margin-right: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .pack-layout-3col {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .pack-modules {
+                text-align: center;
+            }
+            
+            .pack-image-left img {
+                width: 200px;
+            }
+        }
+
         /* Section consultation */
         .consultation-section {
             background: rgba(255, 255, 255, 0.95);
@@ -585,6 +689,16 @@
             font-size: 1rem;
             opacity: 0.9;
             line-height: 1.5;
+        }
+
+        .consultation-section {
+            background: linear-gradient(135deg, rgba(192, 240, 247, 0.3), rgba(31, 98, 142, 0.2));
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            margin: 30px 0;
         }
 
         .cart-section {
@@ -2004,15 +2118,53 @@
                             <span class="status coming-soon">À venir</span>
                         </div>
                         
-                        <div class="option-card" onclick="showComingSoon('Mon Profil Amoureux')">
+                        <div class="option-card pink" 
+                            onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', 19, this)">
+                            <div class="badge new">NOUVEAU</div>
                             <span class="icon">💕</span>
                             <h4>Mon Profil Amoureux</h4>
-                            <p>Qu'est-ce que je recherche ? Qui m'attire vraiment ?</p>
-                            <div class="price">Prix à définir</div>
-                            <span class="status coming-soon">À venir</span>
+                            <p style="font-size: 0.85rem; line-height: 1.3;">
+                                • Ma manière d'aimer<br>
+                                • Qui m'attire vraiment ?<br>
+                                • Mon idéal de couple<br>
+                                • Intimité/Sexualité
+                            </p>
+                            <div class="price">
+                                <span class="old-price">25€</span> 19€
+                            </div>
+                            <span class="status available">Clique pour sélectionner</span>
                         </div>
                     </div>
+                <!-- Section Packs -->
+                <div class="packs-section">
+                    <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
+                    <p style="text-align: center; color: white; margin-bottom: 20px; opacity: 0.9;">
+                        Économise en combinant plusieurs analyses cosmiques dans nos packs exclusifs
+                    </p>
 
+
+                    <div class="pack-card essence-special" onclick="selectPack('essence')">
+                        <div class="pack-badge">-20% DÉCEMBRE</div>
+                        <div class="pack-layout-3col">
+                            <div class="pack-image-left">
+                                <img src="/static/images/christmas_gift.webp" alt="Cadeau de Noël">
+                            </div>
+                            <div class="pack-modules">
+                                <div class="pack-title">✨ Pack Essence</div>
+                                <div class="pack-content">
+                                    ✓ Flash Astral<br>
+                                    ✓ Forces & Défis<br>
+                                    ✓ Profil Amoureux
+                                </div>
+                            </div>
+                            <div class="pack-pricing">
+                                <div style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size: 1.2em;">60€</div>
+                                <div style="font-size: 3em; font-weight: bold; color: #FFD700; line-height: 1;">45€</div>
+                                <div style="font-size: 0.9em; color: rgba(255,255,255,0.7); font-style: italic;">(52€ dès janvier)</div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
                     <!-- Partie prévisionnelle -->
                     <div class="predictive-section">
                         <h3 class="predictive-title">🌙 Analyses Prévisionnelles</h3>
@@ -2100,80 +2252,8 @@
                 </div>
             </div>
         </div>
-
-        <!-- <div class="testimonial-card">
-            <div class="testimonial-content">
-                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                <p>"Le service client est au top et l'analyse arrive rapidement. J'ai commandé plusieurs modules, chacun apporte un éclairage différent et complémentaire."</p>
-            </div>
-            <div class="testimonial-author">
-                <div class="author-avatar">👨</div>
-                <div class="author-info">
-                    <strong>Aurélie </strong>
-                    <span>Cancer Ascendant Vierge</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="testimonial-card">
-            <div class="testimonial-content">
-                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                <p>"Le service client est au top et l'analyse arrive rapidement. J'ai commandé plusieurs modules, chacun apporte un éclairage différent et complémentaire."</p>
-            </div>
-            <div class="testimonial-author">
-                <div class="author-avatar">👨</div>
-                <div class="author-info">
-                    <strong>Aurélie </strong>
-                    <span>Cancer Ascendant Vierge</span>
-                </div>
-            </div>
-        </div> -->
     </div>
-        <!-- Section Packs -->
-        <div class="packs-section">
-            <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
-            <p style="text-align: center; color: white; margin-bottom: 20px; opacity: 0.9;">
-                Économise en combinant plusieurs analyses cosmiques dans nos packs exclusifs
-            </p>
-            <div class="packs-grid">
-                <div class="pack-card" onclick="showComingSoon('Pack 3 Modules')">
-                    <div class="pack-title">🎯 Pack 3 Modules</div>
-                    <div class="pack-content">3 analyses cosmiques de ton choix (sans Flash Astral)</div>
-                    <div class="pack-price">
-                        <span class="pack-price-value">Prix à définir</span>
-                    </div>
-                    <span class="status coming-soon">À venir</span>
-                </div>
-                
-                <div class="pack-card" onclick="showComingSoon('Pack Découverte')">
-                    <div class="pack-title">🎁 Pack Découverte</div>
-                    <div class="pack-content">Flash Astral + 2 analyses cosmiques de ton choix</div>
-                    <div class="pack-price">
-                        <span class="pack-price-value">Prix à définir</span>
-                    </div>
-                    <span class="status coming-soon">À venir</span>
-                </div>
-
-                <div class="pack-card" onclick="showComingSoon('Pack Complet')">
-                    <div class="pack-title">✨ Pack Complet</div>
-                    <div class="pack-content">Flash Astral + 3 analyses cosmiques de ton choix</div>
-                    <div class="pack-price">
-                        <span class="pack-price-value">Prix à définir</span>
-                    </div>
-                    <span class="status coming-soon">À venir</span>
-                </div>
-
-                <div class="pack-card" onclick="showComingSoon('Pack Intégral')">
-                    <div class="pack-title">🌟 Pack Intégral</div>
-                    <div class="pack-content">Flash Astral + 4 analyses cosmiques de ton choix</div>
-                    <div class="pack-price">
-                        <span class="pack-price-value">Prix à définir</span>
-                    </div>
-                    <span class="status coming-soon">À venir</span>
-                </div>
-            </div>
-        </div>
-
+        
         <!-- Panier -->
         <div class="cart-section" id="cartSection">
             <h3 class="section-title">🛒 Ta Sélection</h3>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement confirmé ✅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            color: #1f628e;
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+        }
+
+        .subtitle {
+            color: #555;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .analyses-list {
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .analyse-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #c0f0f7;
+            transition: all 0.3s ease;
+        }
+
+        .analyse-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .analyse-label {
+            font-weight: 600;
+            color: #1f628e;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analyse-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .analyse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,168,168,0.4);
+        }
+
+        .analyse-error {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .error-text {
+            color: #856404;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .info-box h3 {
+            color: #1f628e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .provider-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .provider-stripe {
+            background: #635bff;
+            color: white;
+        }
+
+        .provider-paypal {
+            background: #0070ba;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .success-icon {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        <h1>Paiement confirmé !</h1>
+        <p class="subtitle">Tes analyses sont prêtes à être générées</p>
+
+        {% if provider %}
+        <div class="provider-badge provider-{{ provider }}">
+            Paiement via {{ provider|upper }}
+        </div>
+        {% endif %}
+
+        <div class="analyses-list">
+            <h2 style="color: #1f628e; margin-bottom: 20px; font-size: 1.3rem;">📦 Tes analyses :</h2>
+            
+            {% for product_key, data in analyses.items() %}
+            <div class="analyse-item {% if data.status == 'error' %}analyse-error{% endif %}">
+                <div class="analyse-label">
+                    {% if data.status == 'ready' %}
+                        ✨ {{ data.label }}
+                    {% else %}
+                        ⚠️ {{ data.label }}
+                    {% endif %}
+                </div>
+                
+                {% if data.status == 'ready' and data.url %}
+                    <a href="{{ data.url }}" class="analyse-btn">
+                        🚀 Générer cette analyse
+                    </a>
+                {% elif data.status == 'error' %}
+                    <div class="error-text">
+                        ❌ Erreur : {{ data.error or "Route non disponible" }}
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="info-box">
+            <h3>📌 Comment ça marche ?</h3>
+            <p>✓ Clique sur chaque bouton pour générer l'analyse correspondante</p>
+            <p>✓ Les PDFs seront générés à la demande (évite les doublons)</p>
+            <p>✓ Tu recevras un email avec les liens de téléchargement</p>
+            <p>✓ Les liens restent actifs pendant 7 jours</p>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #888; font-size: 0.9rem;">
+                Une question ? Contacte-nous à 
+                <a href="mailto:contact@lesfousdastro.fr" style="color: #1f628e;">contact@lesfousdastro.fr</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
