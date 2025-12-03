@@ -39,8 +39,8 @@ def load_products():
         "profil_amoureux": {
             "label": "Analyse Amoureuse complète",
             "price_id": os.getenv("ANALYSE_AMOUR_PRICE_ID", "").strip(),
-            "price_cents": _int_env("ANALYSE_AMOUR_PRICE_CENTS", 1900),  # 19€ par défaut
-            "success_route": "amour_blocs.amour_complet",
+            "price_cents": _int_env("ANALYSE_AMOUR_PRICE_CENTS", 1900),
+            "success_route": "profil_amoureux_module.profil_amoureux_complet",
             "enabled": _bool_env("ANALYSE_AMOUR_ENABLED", "1"),
         },
 
