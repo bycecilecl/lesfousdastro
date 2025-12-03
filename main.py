@@ -31,6 +31,7 @@ from routes.stripe_webhook import stripe_webhook_bp
 from routes.pages import pages_bp
 from routes.checkout import checkout_bp
 from routes.site import site_bp
+from routes.profil_amoureux_module import profil_amoureux_module
 
 
 from routes import register_routes
@@ -221,6 +222,7 @@ app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
 app.register_blueprint(blog_bp)
 app.register_blueprint(site_bp)
+app.register_blueprint(profil_amoureux_module)
 #app.register_blueprint(gift_api_bp)
 #app.register_blueprint(gift_bp)
 
