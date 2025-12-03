@@ -94,8 +94,7 @@ def checkout():
     
     # 3) 📦 Construction des line_items Stripe
     line_items = []
-    payment_product_keys = []   # ce qui est effectivement payé (peut contenir pack_essence)
-    analysis_product_keys = []  # ce qui sera généré comme analyses
+    product_keys = []  # Pour tracking
     total_cents = 0
     
     for item in cart_items:
@@ -107,30 +106,15 @@ def checkout():
             current_app.logger.warning(f"⚠️ [CHECKOUT] Produit inconnu ignoré: {pk}")
             continue
         
+        product_keys.append(pk)
         price_cents = product.get("price_cents") or 0
         total_cents += price_cents * qty
         price_id = (product.get("price_id") or "").strip()
-
-        # 👉 1) côté paiement : on ajoute tel quel (pack ou module)
-        payment_product_keys.append(pk)
-
-        # 👉 2) côté analyses :
-        included = product.get("included_products")
-        if included:
-            # pack : on ajoute les modules réels à générer
-            for _ in range(qty):
-                analysis_product_keys.extend(included)
-        else:
-            # produit simple
-            for _ in range(qty):
-                analysis_product_keys.append(pk)
         
-        # ⚙️ création du line_item Stripe (comme avant)
-        if price_id:
-            # Éviter les price_id live en mode test
-            if PAYMENTS_SANDBOX and not price_id.startswith("price_test_"):
-                current_app.logger.warning(f"⚠️ [CHECKOUT] Price ID live ignoré en test: {pk}")
-                price_id = ""
+        # Éviter les price_id live en mode test
+        if price_id and PAYMENTS_SANDBOX and not price_id.startswith("price_test_"):
+            current_app.logger.warning(f"⚠️ [CHECKOUT] Price ID live ignoré en test: {pk}")
+            price_id = ""
         
         if price_id:
             line_items.append({'price': price_id, 'quantity': qty})
@@ -148,10 +132,7 @@ def checkout():
         current_app.logger.error("❌ [CHECKOUT] Aucun produit valide dans le panier")
         abort(400, description="Aucun produit valide.")
     
-    current_app.logger.info(
-        f"💰 [CHECKOUT] Total: {total_cents/100:.2f}€ | "
-        f"Payés: {payment_product_keys} | Analyses: {analysis_product_keys}"
-    )
+    current_app.logger.info(f"💰 [CHECKOUT] Total: {total_cents/100:.2f}€ | Produits: {product_keys}")
     
     # 4) Créer la session Stripe
     try:
@@ -162,25 +143,22 @@ def checkout():
             success_url=url_for('checkout_bp.paiement_effectue', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=url_for('main.index', _external=True),
             metadata={
-                # 👉 on enregistre les ANALYSES à générer, pas juste ce qui est payé
-                "product_keys": ",".join(analysis_product_keys),
+                "product_keys": ",".join(product_keys),  # ✅ Liste des produits
                 "email": session['infos_utilisateur'].get('email', ''),
                 "total_cents": str(total_cents),
             },
             client_reference_id=(session['infos_utilisateur'].get('email') or str(uuid.uuid4()))
         )
         
-        current_app.logger.info(
-            f"✅ [CHECKOUT] Session créée | mode={'TEST' if PAYMENTS_SANDBOX else 'LIVE'} | "
-            f"id={checkout_session.id} | payés={payment_product_keys} | analyses={analysis_product_keys}"
-        )
+        current_app.logger.info(f"✅ [CHECKOUT] Session créée | mode={'TEST' if PAYMENTS_SANDBOX else 'LIVE'} | "
+                              f"id={checkout_session.id} | produits={product_keys}")
         
     except stripe.error.StripeError as e:
         current_app.logger.error(f"❌ [CHECKOUT] Erreur Stripe: {e}")
         abort(500, description="Erreur lors de la création du paiement.")
 
     # ✅ Stocker les produits commandés en session
-    session["ordered_products"] = analysis_product_keys
+    session["ordered_products"] = product_keys
     session["cart_items"] = cart_items
     session.modified = True
     

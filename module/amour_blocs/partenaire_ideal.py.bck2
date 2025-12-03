@@ -1,0 +1,598 @@
+# module/amour_blocs/partenaire_ideal.py
+# VERSION ENRICHIE AVEC LOGGING - Portrait intense du partenaire idéal
+
+import logging
+from module.amour_bdd import (
+    get_from_placements,
+    get_from_aspects,
+    df_to_snippets,
+)
+from module.amour_blocs.utils_theme import exporter_theme_complet
+from module.amour_blocs.context_amour import generer_contexte_amour
+# Configuration du logger pour ce fichier
+logger = logging.getLogger(__name__)
+# Si tu n'as pas de config de log globale, ceci permet d'afficher les logs dans la console :
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+
+def _df_to_interpretations_only(df) -> str:
+    """
+    Pour ce module Partenaire idéal, on ne prend QUE la colonne INTERPRÉTATION.
+    """
+    if df is None or df.empty:
+        return ""
+
+    df = df.rename(columns={c: c.strip().lower() for c in df.columns})
+
+    if "interpretation" not in df.columns:
+        logger.warning(f"[PARTENAIRE] Colonne 'interpretation' absente. Colonnes dispo: {list(df.columns)}")
+        return ""
+
+    lignes = []
+    for _, row in df.iterrows():
+        val = str(row["interpretation"]).strip()
+        if val and val.lower() != "nan":
+            lignes.append(f"- {val}")
+    return "\n".join(lignes)
+
+
+def _get_aspects_reels_du_theme(theme: dict) -> list:
+    """
+    Extrait les aspects réels présents dans le thème.
+    Retourne une liste de tuples (planete_1, planete_2, type_aspect, orbe)
+    """
+    aspects_list = theme.get("aspects", [])
+    
+    aspects_reels = []
+    for asp in aspects_list:
+        p1 = asp.get("planete1")
+        p2 = asp.get("planete2")
+        type_asp = asp.get("aspect")
+        orbe = asp.get("orbe", 0)
+        
+        if p1 and p2 and type_asp:
+            aspects_reels.append((p1, p2, type_asp, orbe))
+    
+    logger.debug(f"[PARTENAIRE] {len(aspects_reels)} aspects bruts extraits du thème.")
+    return aspects_reels
+
+
+def _snippets_planetes_partenaires(theme: dict, polarite: str) -> str:
+    """
+    Bloc 1 : Planètes "partenaire" en SIGNE
+    Femme  : Mars + Soleil
+    Homme  : Vénus + Lune
+    """
+    planetes_theme = theme.get("planetes", {}) or theme.get("planètes", {}) or {}
+
+    if polarite == "Femme":
+        combos = [("Mars", "Partenaire"), ("Soleil", "Partenaire")]
+    else:
+        combos = [("Vénus", "Partenaire"), ("Lune", "Partenaire")]
+
+    lignes = []
+    logger.info(f"[PARTENAIRE] Recherche des positions en SIGNE pour : {[c[0] for c in combos]}")
+
+    for nom_planete, bloc in combos:
+        donnees = planetes_theme.get(nom_planete, {}) or {}
+        signe = donnees.get("signe")
+        
+        if not signe:
+            logger.warning(f"[PARTENAIRE] ⚠️ Pas de signe trouvé dans le JSON pour {nom_planete}")
+            continue
+
+        df = get_from_placements(
+            planete=nom_planete,
+            type_donnee="Signe",
+            valeur=signe,
+            bloc=bloc,
+            polarite=polarite,
+        )
+
+        if not df.empty:
+            logger.info(f"[PARTENAIRE] ✅ Trouvé : {nom_planete} en {signe} ({len(df)} interprétations)")
+            txt = _df_to_interpretations_only(df)
+            if txt:
+                lignes.append(f"=== {nom_planete.upper()} EN {signe.upper()} ===")
+                lignes.append(txt)
+        else:
+            logger.warning(f"[PARTENAIRE] ❌ Rien trouvé en BDD pour {nom_planete} en {signe} (Bloc: {bloc})")
+
+    return "\n".join(lignes).strip()
+
+def _filtrer_aspects_partenaires(
+    theme: dict,
+    planetes_ref: list[str],
+    orbe_max: float = 6.0,
+    max_par_planete: int = 2,
+) -> dict[str, list[tuple[str, str, str, float]]]:
+    """
+    Sélectionne les aspects les plus pertinents vers les planètes 'partenaire'
+    (Mars/Soleil ou Vénus/Lune selon la polarité).
+
+    - On garde uniquement :
+      • aspects majeurs (Conjonction, Carré, Opposition, Trigone, Sextile)
+      • orbe <= orbe_max
+      • aspects impliquant des planètes 'relationnelles' quand elles sont là
+        (Pluton, Neptune, Chiron, Saturne, Jupiter, Vénus, Mars, Lune, Soleil)
+
+    - On renvoie au max `max_par_planete` aspects par planète partenaire,
+      pour éviter de noyer le LLM.
+    """
+    aspects_reels = _get_aspects_reels_du_theme(theme)
+    aspects_majeurs = {"Conjonction", "Carre", "Carré", "Opposition", "Trigone", "Sextile"}
+
+    # Planètes dont on "booste" l’importance dans la sélection
+    planetes_relationnelles = {"Pluton", "Neptune", "Chiron", "Saturne", "Jupiter",
+                               "Vénus", "Venus", "Mars", "Lune", "Soleil", "Uranus",}
+
+    # Collecte brute
+    par_planete_ref: dict[str, list[tuple[str, str, str, float]]] = {ref: [] for ref in planetes_ref}
+
+    for (p1, p2, type_asp, orbe) in aspects_reels:
+        if type_asp not in aspects_majeurs:
+            continue
+        if orbe is None or orbe > orbe_max:
+            continue
+
+        for ref in planetes_ref:
+            if ref not in (p1, p2):
+                continue
+
+            autre = p2 if p1 == ref else p1
+
+            # On ne retient que si l'autre planète est relationnelle
+            if autre not in planetes_relationnelles:
+                continue
+
+            par_planete_ref.setdefault(ref, []).append((ref, autre, type_asp, orbe))
+
+    # Tri + sélection limitée
+    resultat: dict[str, list[tuple[str, str, str, float]]] = {}
+
+    for ref, lst in par_planete_ref.items():
+        if not lst:
+            continue
+
+        def score(item):
+            _ref, autre, _, orbe = item
+
+            # Bonus pour certaines planètes (Pluton, Neptune, Chiron surtout)
+            if autre in {"Pluton", "Neptune", "Chiron"}:
+                bonus = -1.0  # plus petit = plus prioritaire
+            elif autre in {"Saturne", "Jupiter"}:
+                bonus = -0.5
+            else:
+                bonus = 0.0
+
+            # On veut d'abord l’orbe serrée, puis la planète "lourde"
+            return (orbe + bonus)
+
+        lst_tries = sorted(lst, key=score)
+
+        # ⚠️ spécial : si deux aspects de "familles" différentes sont serrés,
+        # on en garde deux (ex : Lune–Saturne + Lune–Uranus)
+        selection: list[tuple[str, str, str, float]] = []
+        familles_vues: set[str] = set()
+
+        def famille(autre: str) -> str:
+            if autre == "Saturne":
+                return "saturne"
+            if autre == "Uranus":
+                return "uranus"
+            if autre == "Neptune":
+                return "neptune"
+            if autre == "Pluton":
+                return "pluton"
+            if autre == "Chiron":
+                return "chiron"
+            if autre == "Jupiter":
+                return "jupiter"
+            return "autre"
+
+        for (r, autre, tasp, orb) in lst_tries:
+            fam = famille(autre)
+
+            if not selection:
+                # On prend toujours le plus serré
+                selection.append((r, autre, tasp, orb))
+                familles_vues.add(fam)
+                continue
+
+            if len(selection) >= max_par_planete:
+                break
+
+            # Si c'est une autre "famille" (ex : Saturne + Uranus), on garde aussi
+            if fam not in familles_vues:
+                selection.append((r, autre, tasp, orb))
+                familles_vues.add(fam)
+
+        resultat[ref] = selection
+
+    return resultat
+
+# def _snippets_aspects_planetes_partenaires(theme: dict, polarite: str) -> str:
+#     """
+#     Bloc 2 : TOUS les aspects majeurs aux planètes partenaires
+#     """
+#     if polarite == "Femme":
+#         planetes_ref = ["Mars", "Soleil"]
+#     else:
+#         planetes_ref = ["Vénus", "Lune"]
+    
+#     aspects_reels = _get_aspects_reels_du_theme(theme)
+#     aspects_majeurs = ["Conjonction", "Carre", "Carré", "Opposition", "Trigone", "Sextile"]
+    
+#     lignes = []
+#     aspects_traites = set()  # Éviter les doublons
+    
+#     logger.info(f"[PARTENAIRE] Recherche des aspects majeurs vers {planetes_ref}")
+
+#     for p_ref in planetes_ref:
+#         section_aspects = []
+        
+#         for (p1, p2, type_asp, orbe) in aspects_reels:
+#             # Vérifier si la planète partenaire est concernée
+#             if p_ref not in (p1, p2):
+#                 continue
+            
+#             # Normalisation du nom de l'aspect (au cas où)
+#             if type_asp not in aspects_majeurs:
+#                 continue
+            
+#             autre_planete = p2 if p1 == p_ref else p1
+            
+#             # Éviter les doublons (Mars-Pluton = Pluton-Mars)
+#             key = tuple(sorted([p_ref, autre_planete])) + (type_asp,)
+#             if key in aspects_traites:
+#                 continue
+#             aspects_traites.add(key)
+            
+#             # Chercher l'interprétation dans les 2 sens
+#             df = get_from_aspects(
+#                 planete_1=p_ref,
+#                 planete_2=autre_planete,
+#                 valeur=type_asp,
+#                 bloc="Partenaire",
+#                 polarite=polarite,
+#             )
+            
+#             if df.empty:
+#                 # Essai sens inverse
+#                 df = get_from_aspects(
+#                     planete_1=autre_planete,
+#                     planete_2=p_ref,
+#                     valeur=type_asp,
+#                     bloc="Partenaire",
+#                     polarite=polarite,
+#                 )
+            
+#             if not df.empty:
+#                 logger.info(f"[PARTENAIRE] ✅ Aspect interprété : {p_ref} {type_asp} {autre_planete}")
+#                 txt = _df_to_interpretations_only(df)
+#                 if txt:
+#                     section_aspects.append(f"• {p_ref} {type_asp} {autre_planete} :\n{txt}")
+#             else:
+#                 logger.debug(f"[PARTENAIRE] (Ignoré) Pas de texte en BDD pour {p_ref} {type_asp} {autre_planete}")
+        
+#         if section_aspects:
+#             lignes.append(f"=== ASPECTS À {p_ref.upper()} ===")
+#             lignes.extend(section_aspects)
+    
+#     return "\n".join(lignes).strip()
+
+def _snippets_aspects_planetes_partenaires(theme: dict, polarite: str) -> str:
+    """
+    Bloc 2 : Aspects MAJEURS et PERTINENTS vers les planètes partenaires,
+    filtrés / hiérarchisés.
+
+    Femme  : Mars + Soleil
+    Homme  : Vénus + Lune
+    """
+    if polarite == "Femme":
+        planetes_ref = ["Mars", "Soleil"]
+    else:
+        planetes_ref = ["Vénus", "Lune"]
+
+    # On récupère les aspects filtrés par planète partenaire
+    aspects_sel = _filtrer_aspects_partenaires(theme, planetes_ref)
+
+    lignes = []
+    aspects_traites = set()  # Pour éviter les doublons Mars–Pluton / Pluton–Mars
+
+    logger.info(f"[PARTENAIRE] Aspects sélectionnés (après filtre) : {aspects_sel}")
+
+    for p_ref in planetes_ref:
+        lst = aspects_sel.get(p_ref, [])
+        if not lst:
+            continue
+
+        section_aspects = []
+
+        for (ref, autre_planete, type_asp, orbe) in lst:
+            key = tuple(sorted([ref, autre_planete])) + (type_asp,)
+            if key in aspects_traites:
+                continue
+            aspects_traites.add(key)
+
+            # On cherche le texte en BDD dans les deux sens
+            df = get_from_aspects(
+                planete_1=ref,
+                planete_2=autre_planete,
+                valeur=type_asp,
+                bloc="Partenaire",
+                polarite=polarite,
+            )
+            if df.empty:
+                df = get_from_aspects(
+                    planete_1=autre_planete,
+                    planete_2=ref,
+                    valeur=type_asp,
+                    bloc="Partenaire",
+                    polarite=polarite,
+                )
+
+            if not df.empty:
+                logger.info(f"[PARTENAIRE] ✅ Aspect retenu : {ref} {type_asp} {autre_planete} (orbe {orbe:.1f}°)")
+                txt = _df_to_interpretations_only(df)
+                if txt:
+                    section_aspects.append(
+                        f"• {ref} {type_asp} {autre_planete} (orbe {orbe:.1f}°) :\n{txt}"
+                    )
+            else:
+                logger.debug(f"[PARTENAIRE] (Ignoré) Pas de texte en BDD pour {ref} {type_asp} {autre_planete}")
+
+        if section_aspects:
+            lignes.append(f"=== ASPECTS MAJEURS À {p_ref.upper()} ===")
+            lignes.extend(section_aspects)
+
+    return "\n".join(lignes).strip()
+
+# def _snippets_pluton_partenaire(theme: dict, polarite: str) -> str:
+#     """
+#     Bloc 3 : PLUTON en aspect aux planètes partenaires
+#     """
+#     if polarite == "Femme":
+#         planetes_ref = ["Mars", "Soleil"]
+#     else:
+#         planetes_ref = ["Vénus", "Lune"]
+    
+#     aspects_reels = _get_aspects_reels_du_theme(theme)
+#     # On accepte tout aspect fort
+#     aspects_intenses = ["Conjonction", "Carre", "Carré", "Opposition", "Trigone", "Sextile"]
+    
+#     lignes = []
+    
+#     for (p1, p2, type_asp, orbe) in aspects_reels:
+#         if "Pluton" not in (p1, p2):
+#             continue
+        
+#         autre = p2 if p1 == "Pluton" else p1
+#         if autre not in planetes_ref:
+#             continue
+        
+#         if type_asp not in aspects_intenses:
+#             continue
+        
+#         logger.info(f"[PARTENAIRE] 🔥 PLUTON détecté en aspect à {autre} ({type_asp})")
+        
+#         df = get_from_aspects(planete_1="Pluton", planete_2=autre, valeur=type_asp, bloc="Partenaire", polarite=polarite)
+#         if df.empty:
+#              df = get_from_aspects(planete_1=autre, planete_2="Pluton", valeur=type_asp, bloc="Partenaire", polarite=polarite)
+        
+#         titre = f"=== PLUTON {type_asp.upper()} {autre.upper()} : MAGNÉTISME FATAL ==="
+        
+#         if not df.empty:
+#             txt = _df_to_interpretations_only(df)
+#             if txt:
+#                 lignes.append(titre)
+#                 lignes.append(txt)
+#         else:
+#             # Fallback générique
+#             lignes.append(titre)
+#             lignes.append(
+#                 f"- Pluton en aspect à {autre} intensifie ton attraction : tu es attiré(e) par des "
+#                 f"personnes magnétiques, profondes, parfois dangereuses. L'amour est une transformation."
+#             )
+    
+#     return "\n".join(lignes).strip()
+
+
+# def _snippets_neptune_partenaire(theme: dict, polarite: str) -> str:
+#     """
+#     Bloc 4 : NEPTUNE en aspect aux planètes partenaires
+#     """
+#     if polarite == "Femme":
+#         planetes_ref = ["Mars", "Soleil"]
+#     else:
+#         planetes_ref = ["Vénus", "Lune"]
+    
+#     aspects_reels = _get_aspects_reels_du_theme(theme)
+#     aspects_cibles = ["Conjonction", "Carre", "Carré", "Opposition", "Trigone", "Sextile"]
+    
+#     lignes = []
+    
+#     for (p1, p2, type_asp, orbe) in aspects_reels:
+#         if "Neptune" not in (p1, p2):
+#             continue
+        
+#         autre = p2 if p1 == "Neptune" else p1
+#         if autre not in planetes_ref:
+#             continue
+        
+#         if type_asp not in aspects_cibles:
+#             continue
+        
+#         logger.info(f"[PARTENAIRE] 🌊 NEPTUNE détecté en aspect à {autre} ({type_asp})")
+        
+#         df = get_from_aspects(planete_1="Neptune", planete_2=autre, valeur=type_asp, bloc="Partenaire", polarite=polarite)
+#         if df.empty:
+#              df = get_from_aspects(planete_1=autre, planete_2="Neptune", valeur=type_asp, bloc="Partenaire", polarite=polarite)
+        
+#         titre = f"=== NEPTUNE {type_asp.upper()} {autre.upper()} : IDÉALISATION ==="
+        
+#         if not df.empty:
+#             txt = _df_to_interpretations_only(df)
+#             if txt:
+#                 lignes.append(titre)
+#                 lignes.append(txt)
+#         else:
+#             lignes.append(titre)
+#             lignes.append(
+#                 f"- Neptune en aspect à {autre} colore ton image du partenaire d'un voile de rêve. "
+#                 f"Idéalisation, quête d'âme sœur, ou attraction pour des artistes/mystiques."
+#             )
+    
+#     return "\n".join(lignes).strip()
+
+
+# def _snippets_chiron_partenaire(theme: dict, polarite: str) -> str:
+#     """
+#     Bloc 5 : CHIRON en aspect aux planètes partenaires
+#     """
+#     if polarite == "Femme":
+#         planetes_ref = ["Mars", "Soleil"]
+#     else:
+#         planetes_ref = ["Vénus", "Lune"]
+    
+#     aspects_reels = _get_aspects_reels_du_theme(theme)
+#     aspects_cibles = ["Conjonction", "Carre", "Carré", "Opposition", "Trigone", "Sextile"]
+    
+#     lignes = []
+    
+#     for (p1, p2, type_asp, orbe) in aspects_reels:
+#         if "Chiron" not in (p1, p2):
+#             continue
+        
+#         autre = p2 if p1 == "Chiron" else p1
+#         if autre not in planetes_ref:
+#             continue
+        
+#         if type_asp not in aspects_cibles:
+#             continue
+        
+#         logger.info(f"[PARTENAIRE] 💔 CHIRON détecté en aspect à {autre} ({type_asp})")
+        
+#         df = get_from_aspects(planete_1="Chiron", planete_2=autre, valeur=type_asp, bloc="Partenaire", polarite=polarite)
+#         if df.empty:
+#              df = get_from_aspects(planete_1=autre, planete_2="Chiron", valeur=type_asp, bloc="Partenaire", polarite=polarite)
+        
+#         titre = f"=== CHIRON {type_asp.upper()} {autre.upper()} : BLESSURE & ATTRACTION ==="
+        
+#         if not df.empty:
+#             txt = _df_to_interpretations_only(df)
+#             if txt:
+#                 lignes.append(titre)
+#                 lignes.append(txt)
+#         else:
+#             lignes.append(titre)
+#             lignes.append(
+#                 f"- Chiron en aspect à {autre} lie désir et blessure. Tu attires des miroirs de tes failles "
+#                 f"pour les guérir (ou les répéter)."
+#             )
+    
+#     return "\n".join(lignes).strip()
+
+
+def generer_bloc_partenaire_ideal(theme: dict, call_llm: bool = True, polarite: str = "Femme") -> str:
+    """
+    MODULE 2 : PARTENAIRE IDÉAL - VERSION ENRICHIE
+    """
+    if polarite not in ("Femme", "Homme"):
+        logger.warning(f"[PARTENAIRE] Polarité '{polarite}' inconnue, défaut sur Femme")
+        polarite = "Femme"
+
+    logger.info(f"--- DÉBUT GÉNÉRATION MODULE PARTENAIRE ({polarite}) ---")
+    
+    snippets_sections = []
+
+    # 1) Planètes partenaires en signe
+    txt_planetes = _snippets_planetes_partenaires(theme, polarite)
+    if txt_planetes: snippets_sections.append(txt_planetes)
+
+    # 2) Tous les aspects majeurs
+    txt_aspects = _snippets_aspects_planetes_partenaires(theme, polarite)
+    if txt_aspects: snippets_sections.append(txt_aspects)
+
+    # # 3) Pluton
+    # txt_pluton = _snippets_pluton_partenaire(theme, polarite)
+    # if txt_pluton: snippets_sections.append(txt_pluton)
+
+    # # 4) Neptune
+    # txt_neptune = _snippets_neptune_partenaire(theme, polarite)
+    # if txt_neptune: snippets_sections.append(txt_neptune)
+
+    # # 5) Chiron
+    # txt_chiron = _snippets_chiron_partenaire(theme, polarite)
+    # if txt_chiron: snippets_sections.append(txt_chiron)
+
+    snippets_bruts = "\n\n".join(s for s in snippets_sections if s).strip()
+    
+    logger.info(f"--- FIN EXTRACTION --- Taille snippets: {len(snippets_bruts)} chars")
+
+    # Mode debug (sans LLM)
+    if not call_llm:
+        return (
+            "<pre>MODULE 2 · PARTENAIRE IDÉAL (SNIPPETS ENRICHIS) :\n"
+            + (snippets_bruts or "(rien)")
+            + "</pre>"
+        )
+
+    if not snippets_bruts:
+        logger.warning("[PARTENAIRE] Aucun snippet généré, pas d'appel LLM.")
+        return ""
+
+    # === PROMPT LLM ===
+    genre_txt = "d'homme" if polarite == "Femme" else "de femme"
+    theme_complet = exporter_theme_complet(theme)
+    contexte_amour = generer_contexte_amour(theme)
+    consigne_genre = "Adresse-toi au masculin." if polarite == "Homme" else "Adresse-toi au féminin."
+
+    prompt = f"""
+Tu es une astrologue experte en psychologie des relations. On travaille le MODULE 2 : "Quel type de partenaire t'attire".
+{consigne_genre}
+
+Voici un CONTEXTE GLOBAL du thème de la personne, centré sur sa dynamique émotionnelle et relationnelle :
+
+{contexte_amour}
+
+CONTEXTE :
+Ce module parle UNIQUEMENT du PORTRAIT de l'autre — la personne qui te fait vibrer, ton "type", tes projections.
+On ne parle PAS ici de comment le couple fonctionne (c'est le Module 3).
+
+DONNÉES ASTROLOGIQUES :
+{snippets_bruts}
+
+CONSIGNES :
+À partir de ces éléments, rédige un texte INTENSE et INCARNÉ qui décrit :
+
+1) **Le type {genre_txt} qui t'attire** : son énergie, sa vibe, son charisme, ce qui te fait flasher
+2) **Ce que tu projettes sur l'autre** : tes attentes inconscientes, ce que tu cherches à travers lui/elle
+3) **Les schémas d'attraction** : le genre de profils que tu répètes, pourquoi
+4) **Les forces et les pièges** : ce qui fonctionne dans tes choix vs ce qui te fait tomber dans le panneau
+5) **L'intensité particulière** : si Pluton/Neptune/Chiron sont impliqués, explore le magnétisme fatal, l'idéalisation, ou les blessures qui attirent
+
+STYLE :
+- Parle en "tu", ton direct et cash, pas de langue de bois
+- Psychologique et profond, pas superficiel
+- Pas de bullet points, pas d'emoji
+- Fais une synthèse fluide, pas un collage de phrases
+- Ose nommer les zones d'ombre sans complaisance
+- Environ 400-500 mots
+
+NE PARLE PAS de :
+- Comment le couple fonctionne au quotidien
+- L'engagement, le mariage, la Maison 7
+- Les conflits ou la dynamique relationnelle
+- Ce sera traité dans le Module 3
+"""
+
+
+    print("\n\n===== PROMPT ENVOYÉ AU LLM =====\n")
+    print(prompt)
+    print("\n===== FIN PROMPT =====\n")
+
+    from utils.openai_utils import interroger_llm
+    logger.info("[PARTENAIRE] Appel LLM en cours...")
+    texte = interroger_llm(prompt)
+    logger.info("[PARTENAIRE] Réponse LLM reçue.")
+    return texte

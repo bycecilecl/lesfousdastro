@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-553N1CDR9Q"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-553N1CDR9Q');
+    </script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Cadeau ✨ | Les Fous d'Astro</title>
+    <link rel="icon" type="image/webp" sizes="64x64" href="static/images/logo_les_fous_dastro_favicon64.webp">
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PN5STD34');</script>
+    <!-- End Google Tag Manager -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Étoiles animées en arrière-plan */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            margin-top: 60px;
+            padding-top: 40px;
+            color: white;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #d3b1c2, #d0c3f0, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 30px;
+        }
+
+        .gift-icon {
+            text-align: center;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            color: #1f628e;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #1f628e, #00a8a8);
+            margin: 10px auto;
+            border-radius: 2px;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            color: #1f628e;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="email"] {
+            padding: 12px 16px;
+            border: 2px solid #c0f0f7;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(192, 240, 247, 0.1);
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #00a8a8;
+            box-shadow: 0 0 0 3px rgba(0, 168, 168, 0.1);
+            background: white;
+        }
+
+        .code-input {
+            font-size: 1.2rem !important;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .gender-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .gender-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .gender-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .gender-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border: 2px solid #c0f0f7;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(192, 240, 247, 0.1);
+            font-weight: 600;
+            color: #1f628e;
+        }
+
+        .gender-option input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border-color: #00a8a8;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(31, 98, 142, 0.3);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .info-box {
+            background: rgba(192, 240, 247, 0.2);
+            border-left: 4px solid #00a8a8;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            color: #1f628e;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    
+    <div class="container">
+        <div class="header">
+            <img src="static/images/logo_les_fous_dastro.webp" alt="Les Fous d'Astro" class="logo">
+            <h1>🎁 Utilise ton Code Cadeau</h1>
+            <p>Entre ton code et reçois tes analyses astrologiques</p>
+        </div>
+
+        <div class="form-container">
+            <div class="gift-icon">🎁</div>
+            
+            {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('gift_bp.code_cadeau_submit') }}">
+                <!-- Section Code Cadeau -->
+                <div class="form-section">
+                    <h3 class="section-title">🎟️ Ton Code Cadeau</h3>
+                    <div class="form-group full-width">
+                        <label for="code">Entre ton code cadeau *</label>
+                        <input type="text" 
+                               id="code" 
+                               name="code" 
+                               class="code-input"
+                               placeholder="NOEL-XXXX-XXXX"
+                               required
+                               value="{{ (form.code if form else '') }}">
+                    </div>
+                    <div class="info-box">
+                        💡 <strong>Astuce :</strong> Ton code se trouve dans l'email ou le PDF que tu as reçu. Il ressemble à "NOEL-ESSENCE-2024" par exemple.
+                    </div>
+                </div>
+
+                <!-- Section Informations Personnelles -->
+                <div class="form-section">
+                    <h3 class="section-title">✨ Tes Informations</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom">Nom / Prénom *</label>
+                            <input type="text" 
+                                   id="nom" 
+                                   name="nom" 
+                                   placeholder="Céline Dupont"
+                                   required
+                                   value="{{ (form.nom if form else '') }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">E-mail *</label>
+                            <input type="email" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="ton@email.com"
+                                   required
+                                   value="{{ (form.email if form else '') }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Genre (optionnel)</label>
+                        <div class="gender-options">
+                            <div class="gender-option">
+                                <input type="radio" 
+                                       id="gender_f" 
+                                       name="gender" 
+                                       value="F"
+                                       {% if form and form.gender == 'F' %}checked{% endif %}>
+                                <label for="gender_f">👩 Femme</label>
+                            </div>
+                            <div class="gender-option">
+                                <input type="radio" 
+                                       id="gender_m" 
+                                       name="gender" 
+                                       value="M"
+                                       {% if form and form.gender == 'M' %}checked{% endif %}>
+                                <label for="gender_m">👨 Homme</label>
+                            </div>
+                            <div class="gender-option">
+                                <input type="radio" 
+                                       id="gender_x" 
+                                       name="gender" 
+                                       value="X"
+                                       {% if form and form.gender == 'X' %}checked{% endif %}>
+                                <label for="gender_x">✨ Autre</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Naissance -->
+                <div class="form-section">
+                    <h3 class="section-title">🌟 Ta Naissance</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date_naissance">Date de naissance *</label>
+                            <input type="date" 
+                                   id="date_naissance" 
+                                   name="date_naissance" 
+                                   required
+                                   value="{{ (form.date_naissance if form else '') }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="heure_naissance">Heure de naissance *</label>
+                            <input type="time" 
+                                   id="heure_naissance" 
+                                   name="heure_naissance" 
+                                   required
+                                   value="{{ (form.heure_naissance if form else '') }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="lieu_naissance">Lieu de naissance *</label>
+                        <input type="text" 
+                               id="lieu_naissance" 
+                               name="lieu_naissance" 
+                               list="suggestions-lieux"
+                               placeholder="Paris, France"
+                               required
+                               value="{{ (form.lieu_naissance if form else '') }}">
+                        <datalist id="suggestions-lieux"></datalist>
+                    </div>
+
+                    <!-- Champs cachés pour géolocalisation -->
+                    <input type="hidden" id="lat" name="lat" value="{{ form.lat if form else '' }}">
+                    <input type="hidden" id="lon" name="lon" value="{{ form.lon if form else '' }}">
+                    <input type="hidden" id="tzid" name="tzid" value="{{ form.tzid if form else '' }}">
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    ✨ Valider mon code et recevoir mes analyses ✨
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Créer les étoiles animées
+        function createStars() {
+            const starsContainer = document.querySelector('.stars');
+            const numberOfStars = 100;
+
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Géocodage avec autocomplete
+        const input = document.getElementById('lieu_naissance');
+        const datalist = document.getElementById('suggestions-lieux');
+        const latEl = document.getElementById('lat');
+        const lonEl = document.getElementById('lon');
+        const tzidEl = document.getElementById('tzid');
+
+        let lastResults = [];
+        let debounce;
+
+        input.addEventListener('input', () => {
+            const q = input.value.trim();
+            clearTimeout(debounce);
+
+            if (q.length < 2) {
+                datalist.innerHTML = '';
+                return;
+            }
+
+            debounce = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    lastResults = data.results || [];
+                    datalist.innerHTML = lastResults.map(r => `<option value="${r.label}"></option>`).join('');
+                } catch (e) {
+                    console.warn('Geocode error:', e);
+                }
+            }, 250);
+        });
+
+        function fillHiddenFromLabel(label) {
+            const r = lastResults.find(x => x.label === label);
+            if (r) {
+                latEl.value = r.lat;
+                lonEl.value = r.lon;
+                tzidEl.value = r.tzid || '';
+            }
+        }
+
+        input.addEventListener('change', () => fillHiddenFromLabel(input.value));
+        input.addEventListener('blur', () => fillHiddenFromLabel(input.value));
+
+        // Initialisation
+        createStars();
+    </script>
+
+    <!-- Statcounter -->
+    <script type="text/javascript">
+    var sc_project=12490079; 
+    var sc_invisible=1; 
+    var sc_security="a231e1c7"; 
+    </script>
+    <script type="text/javascript"
+    src="https://www.statcounter.com/counter/counter.js"
+    async></script>
+</body>
+</html>

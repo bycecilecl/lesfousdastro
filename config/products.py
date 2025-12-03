@@ -43,6 +43,17 @@ def load_products():
             "success_route": "amour_blocs.amour_complet",
             "enabled": _bool_env("ANALYSE_AMOUR_ENABLED", "1"),
         },
+
+        "pack_essence": {
+            "label": "Pack Essence (3 analyses)",
+            "price_cents": 4500,         # le prix du pack (ou 5200 hors promo)
+            "success_route": None,       # pas de route directe, on ne génère pas UNE analyse pour le pack
+            "included_products": [       # 🔥 c’est ça la clé
+                "flash_astral",
+                "forces_defis",
+                "analyse_amour",
+            ],
+        },
     }
 
 try:

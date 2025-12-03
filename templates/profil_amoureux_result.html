@@ -1,0 +1,280 @@
+ <!-- templates/profil_amoureux_result.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil Amoureux - {{ nom }}</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* LOGO TOUT EN HAUT */
+        .logo-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .logo {
+            max-width: 200px;
+            max-height: 120px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #e91e63;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #e91e63;
+            margin-bottom: 10px;
+        }
+        .personal-info {
+            text-align: center;
+            margin: 20px auto;
+            font-size: 0.9em;
+            color: #666;
+            max-width: 400px;
+        }
+        
+        .personal-info p {
+            margin: 5px 0;
+            padding: 0;
+        }
+        .actions {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #fff0f5;
+            border-radius: 8px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 0 10px;
+            background: linear-gradient(135deg, #e91e63, #f06292);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #c2185b, #e91e63);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
+        }
+        .content-wrapper {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* STYLES POUR LE CONTENU ANALYSÉ */
+        .content-wrapper h1 {
+            color: #e91e63;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            border-bottom: 2px solid #e91e63;
+            padding-bottom: 15px;
+        }
+        
+        .content-wrapper h2 {
+            color: #e91e63;
+            border-bottom: 2px solid #e91e63;
+            padding-bottom: 8px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .content-wrapper h3 {
+            color: #c2185b;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-left: 4px solid #e91e63;
+            padding-left: 15px;
+        }
+        
+        .content-wrapper p {
+            margin-bottom: 15px;
+            text-align: justify;
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+        
+        .content-wrapper strong {
+            color: #e91e63;
+        }
+        
+        .content-wrapper em {
+            color: #c2185b;
+            font-style: italic;
+        }
+
+        .disclaimer {
+            background: #fff0f5;
+            border: 1px solid #f8bbd0;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .disclaimer p {
+            margin: 0 0 8px 0;
+        }
+
+        .disclaimer a {
+            color: #e91e63;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .disclaimer a:hover {
+            text-decoration: underline;
+        }
+
+        .warnings {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LOGO TOUT EN HAUT DU DOCUMENT -->
+        <div class="logo-header">
+            {% if logo_base64 %}
+                <img src="data:image/webp;base64,{{ logo_base64 }}" alt="Logo Les Fous d'Astro" class="logo">
+            {% endif %}
+        </div>
+        
+        <div class="header">
+            <h1>💕 Mon Profil Amoureux - {{ nom }}</h1>
+            
+            <div class="personal-info">
+                <p style="margin: 5px 0; font-size: 14px; color: #666;">
+                    {{ infos.date_naissance }} — {{ infos.heure_naissance }} — {{ infos.lieu_naissance }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Actions de téléchargement -->
+        <div class="actions">
+            {% if nom_fichier %}
+                <a href="{{ url_for('profil_amoureux_module.telecharger_profil_amoureux_pdf', nom_fichier=nom_fichier) }}" class="btn">
+                    📄 Télécharger mon profil en PDF
+                </a>
+            {% else %}
+                <p style="color: #666;">Fichier en cours de génération...</p>
+            {% endif %}
+        </div>
+
+        <!-- Warnings éventuels -->
+        {% if warnings %}
+        <div class="warnings">
+            <strong>⚠️ Avertissements :</strong>
+            <ul style="margin: 8px 0 0 20px; padding: 0;">
+                {% for w in warnings %}
+                <li>{{ w }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            <p>
+                <strong>💖 À propos de ton Profil Amoureux</strong><br>
+                Cette analyse explore tes énergies amoureuses à travers ton thème astral. 
+                Elle révèle tes besoins affectifs, ta façon d'aimer, ce qui t'attire et les dynamiques relationnelles 
+                inscrites dans ton ciel de naissance.
+            </p>
+
+            <p>
+                <strong>⚠️ Important :</strong> Ce profil est une analyse automatisée qui donne un aperçu de tes potentiels amoureux. 
+                Il ne remplace pas une consultation personnalisée où je peux approfondir ton vécu relationnel, 
+                ton histoire et ton niveau de conscience actuel. Chaque personne vit ses énergies différemment 
+                selon son parcours et ses choix de vie.
+            </p>
+
+            <p>
+                <strong>🌙 Ton profil reflète des tendances, pas des certitudes.</strong> 
+                Certaines descriptions peuvent résonner immédiatement, d'autres prendront du sens plus tard 
+                ou dans certains contextes relationnels. Il est normal de ne pas te reconnaître dans tout ce qui est écrit.
+                L'astrologie propose des clés de compréhension, pas des vérités absolues.
+            </p>
+
+            <p>
+                <strong>♻️ Note technique :</strong> Cette analyse est générée avec l'aide d'un système d'IA entraîné 
+                sur mes connaissances astrologiques. De petites répétitions peuvent apparaître. 
+                Rien ne remplace un échange humain pour explorer en profondeur tes questions amoureuses.
+            </p>
+
+            <p>
+                <strong>💫 Pour aller plus loin :</strong> 
+                Réserve une consultation personnalisée pour approfondir ton profil amoureux sur 
+                <a href="https://bycecilecl.com" target="_blank">
+                    www.bycecilecl.com
+                </a>
+            </p>
+        </div>
+
+        <!-- Contenu HTML généré -->
+        <div class="content-wrapper">
+            {% if html_content %}
+                {{ html_content|safe }}
+            {% else %}
+                <div style="padding: 40px; text-align: center; color: #666;">
+                    <h2>⚠️ Contenu non disponible</h2>
+                    <p>Le contenu HTML n'a pas pu être généré ou est vide.</p>
+                    <p>Veuillez vérifier les logs du serveur pour plus d'informations.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Lien retour -->
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{{ url_for('main.index') }}" class="btn">
+                🏠 Nouvelle analyse
+            </a>
+        </div>
+    </div>
+</body>
+</html>
