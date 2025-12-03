@@ -31,11 +31,14 @@ from routes.stripe_webhook import stripe_webhook_bp
 from routes.pages import pages_bp
 from routes.checkout import checkout_bp
 from routes.site import site_bp
+from routes.gift_codes import gift_bp
 
 from routes import register_routes
 from routes.geocode import geocode_bp
 from routes.paypal import payments_bp
 from routes.blog import blog_bp
+from routes.gift_api import gift_api_bp
+from routes.gift_codes import gift_bp   
 
 
 from utils.axes_majeurs import organiser_points_forts, formater_axes_majeurs
@@ -218,6 +221,8 @@ app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
 app.register_blueprint(blog_bp)
 app.register_blueprint(site_bp)
+app.register_blueprint(gift_api_bp)
+app.register_blueprint(gift_bp)
 
 
 # ========== REDIRECTIONS POUR COMPATIBILITÉ ==========

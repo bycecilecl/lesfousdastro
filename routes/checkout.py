@@ -99,9 +99,10 @@ def checkout():
     total_cents = 0
     
     for item in cart_items:
-        pk = item.get("key")
+        # 👇 Accepte soit "key", soit "id" venant du frontend
+        pk = item.get("key") or item.get("id")
         qty = item.get("quantity", 1)
-        
+
         product = PRODUCTS.get(pk)
         if not product:
             current_app.logger.warning(f"⚠️ [CHECKOUT] Produit inconnu ignoré: {pk}")

@@ -155,7 +155,7 @@ def create_order():
     currency = os.getenv("PAYPAL_CURRENCY", "EUR")
     
     for item in cart_items:
-        pk = item.get("key")
+        pk = item.get("key") or item.get("id")
         qty = item.get("quantity", 1)
         
         product = PRODUCTS.get(pk)
