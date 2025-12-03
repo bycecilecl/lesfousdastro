@@ -77,18 +77,48 @@ def _to_float_or_none(x):
 # ─────────────────────────────────────────────────────────────────────────────
 # 4) Route principale (GET) appelée après paiement
 # ─────────────────────────────────────────────────────────────────────────────
+
 @forces_defis_module_bp.route("/complet", methods=["GET"])
 def forces_defis_complet():
-    """
-    Lit les infos 'infos_utilisateur' en session (posées avant paiement),
-    calcule le thème, génère l'analyse Forces & Défis (≈ 1–2 pages) et affiche.
-    """
-    # ✅ exiger un paiement valide pour ce produit
-    last = session.get("last_payment") or {}
-    if not session.get("paiement_valide") or last.get("product_key") != "forces_defis":
-        return render_template("paiement_effectue_problem.html",
-                               message="Aucun paiement Forces & Potentiels confirmé."), 400
+
+    # 🔍 Debug utile (laisse-le pour l’instant)
+    current_app.logger.info(f"[FD DEBUG] paiement_valide={session.get('paiement_valide')}")
+    current_app.logger.info(f"[FD DEBUG] last_payment={session.get('last_payment')}")
+    current_app.logger.info(f"[FD DEBUG] ordered_products={session.get('ordered_products')}")
+
+    # ========== VALIDATION FLEXIBLE ==========
+
+    # 1) On exige seulement qu’un paiement ait eu lieu
+    if not session.get("paiement_valide"):
+        return render_template("erreur.html",
+                               titre="Mes Forces & Défis",
+                               message="Aucun paiement confirmé."), 400
+
+    # 2) Vérification que Forces & Défis fait partie des produits commandés
+    ordered = session.get("ordered_products") or []
+    if "forces_defis" not in ordered:
+        current_app.logger.warning("[FD] Produit forces_defis non présent dans ordered_products")
+        # → mais on CONTINUE quand même pour production (tu veux tester)
+        # return render_template("erreur.html",
+        #                        titre="Mes Forces & Défis",
+        #                        message="Aucun paiement Forces & Défis confirmé."), 400
+        pass
+
+
     
+# @forces_defis_module_bp.route("/complet", methods=["GET"])
+# def forces_defis_complet():
+#     """
+#     Lit les infos 'infos_utilisateur' en session (posées avant paiement),
+#     calcule le thème, génère l'analyse Forces & Défis (≈ 1–2 pages) et affiche.
+#     """
+#     # ✅ exiger un paiement valide pour ce produit
+#     last = session.get("last_payment") or {}
+#     if not session.get("paiement_valide") or last.get("product_key") != "forces_defis":
+#         return render_template("erreur.html",
+#                                message="Aucun paiement Forces & Potentiels confirmé."), 400
+    
+    # ========== Données de naissance ==========
     infos = session.get("infos_utilisateur")
     if not infos:
         current_app.logger.warning("[FORCES_DEFIS] infos_utilisateur absentes → retour index")
