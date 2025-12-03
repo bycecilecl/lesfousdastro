@@ -60,3 +60,4 @@ stripe==12.5.1
 gspread==6.1.4
 python-dotenv>=1.0.1
 google-auth>=2.0.0
+pandas
