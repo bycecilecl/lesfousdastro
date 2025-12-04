@@ -1,61 +1,50 @@
-import logging
-from flask import Blueprint, render_template, request, session, redirect, url_for, current_app
+# routes/gift_codes.py
 
+from flask import Blueprint, render_template, request, redirect, session, current_app, url_for
+from config.gift_codes import get_gift_code, is_code_used, mark_code_as_used
 from config.products import PRODUCTS
-from config.gift_codes import get_gift_code   # <<< IMPORT
-# Plus besoin de GIFT_CODES_STATIC ici
 
-gift_bp = Blueprint("gift_bp", __name__)
-logger = logging.getLogger(__name__)
+gift_bp = Blueprint("gift_bp", __name__, url_prefix="/carte-cadeau")
 
 
-def expand_to_analysis_products(raw_product_keys):
-    """
-    Transforme ["pack_essence"] en ["flash_astral", "forces_defis", "analyse_amour"]
-    en se basant sur included_products du store PRODUCTS.
-    """
-    analysis_keys = []
-
-    for pk in raw_product_keys:
-        product = PRODUCTS.get(pk)
-        if not product:
-            current_app.logger.warning(f"⚠️ [GIFT] Produit inconnu: {pk}")
-            continue
-
-        included = product.get("included_products")
-        if included:
-            analysis_keys.extend(included)
-        else:
-            analysis_keys.append(pk)
-
-    return analysis_keys
+@gift_bp.route("/", methods=["GET"])
+def entrer_code_cadeau():
+    return render_template("carte_cadeau_form.html")
 
 
-@gift_bp.route("/code-cadeau", methods=["GET"])
-def code_cadeau_form():
-    return render_template("code_cadeau.html")
-
-
-@gift_bp.route("/code-cadeau", methods=["POST"])
-def code_cadeau_submit():
+@gift_bp.route("/valider", methods=["POST"])
+def valider_code_cadeau():
     code = (request.form.get("code") or "").strip().upper()
 
     if not code:
-        return render_template("code_cadeau.html", error="Merci d’entrer un code cadeau.")
+        return render_template("carte_cadeau_form.html",
+                               error="Merci d’entrer un code.")
 
-    # 👉 Recherche du code dans STATIC + JSON dynamique
+    # 1️⃣ Lire le code dans la base CSV
     gift = get_gift_code(code)
+    if not gift:
+        return render_template("carte_cadeau_form.html",
+                            error="Code invalide ou inconnu.")
 
-    if not gift or not gift.get("active", True):
-        logger.warning(f"❌ [GIFT] Code invalide: {code}")
-        return render_template(
-            "code_cadeau.html",
-            error="Ce code est invalide ou expiré.",
-            form=request.form
-        )
+    # Vérifier si déjà utilisé
+    if is_code_used(gift):
+        return render_template("carte_cadeau_form.html",
+                            error="Ce code a déjà été utilisé.")
 
-    # Récupération infos utilisateur
-    infos = {
+    product_key = gift.get("product_key")
+
+    # 2️⃣ Vérifier produit valide
+    if product_key not in PRODUCTS:
+        return render_template("carte_cadeau_form.html",
+                               error="Ce code correspond à un produit inconnu.")
+
+    # 3️⃣ Vérifier si déjà utilisé
+    if is_code_used(code):
+        return render_template("carte_cadeau_form.html",
+                               error="Ce code a déjà été utilisé.")
+
+    # 4️⃣ Sauvegarder infos utilisateur (comme dans /checkout)
+    session['infos_utilisateur'] = {
         "nom": request.form.get("nom"),
         "email": request.form.get("email"),
         "gender": request.form.get("gender"),
@@ -67,33 +56,31 @@ def code_cadeau_submit():
         "tzid": (request.form.get("tzid") or "").strip(),
     }
 
-    session["infos_utilisateur"] = infos
+    # 5️⃣ Déterminer les analyses à générer
+    product_conf = PRODUCTS[product_key]
+    included = product_conf.get("included_products")
 
-    raw_products = gift.get("products") or []
-    analyses = expand_to_analysis_products(raw_products)
+    if included:
+        # Exemple : pack_essence → flash_astral + forces_defis + profil_amoureux
+        products_to_generate = included
+    else:
+        # Exemple : flash_astral seul, profil_amoureux seul
+        products_to_generate = [product_key]
 
-    if not analyses:
-        logger.error(f"❌ [GIFT] Aucun produit analysable pour code {code}")
-        return render_template(
-            "code_cadeau.html",
-            error="Ce code ne permet pas de générer une analyse.",
-            form=request.form
-        )
-
-    logger.info(f"🎁 [GIFT] Code utilisé={code} → analyses={analyses}")
-
-    # On prépare la génération EXACTEMENT comme un paiement réussi
-    session["ordered_products"] = analyses
+    # 6️⃣ Marquer en session comme un paiement validé
+    session["gift_code"] = code
+    session["gift_product"] = product_key
     session["paiement_valide"] = True
+    session["ordered_products"] = products_to_generate
     session["pending_generation"] = {
-        "products": analyses,
-        "provider": "gift",
-        "gift_code": code,
+        "products": products_to_generate,
+        "provider": "gift_code",
+        "code": code,
     }
     session.modified = True
 
-    # Supprimer anciens locks
-    for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
-        session.pop(k, None)
+    # 7️⃣ Marquer le code comme utilisé
+    mark_code_as_used(code)
 
+    # 8️⃣ On passe par le même flux que Stripe/PayPal
     return redirect(url_for("checkout_bp.traiter_analyses"))

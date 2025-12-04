@@ -1,0 +1,3428 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-553N1CDR9Q"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-553N1CDR9Q');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Analyse Astrologique ✨</title>
+   <link rel="icon" type="image/webp" sizes="64x64" href="static/images/logo_les_fous_dastro_favicon64.webp">
+    <meta charset="utf-8">
+    <title>Les Fous d'Astro</title>
+    <!-- tes autres metas / CSS -->
+
+   <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PN5STD34');</script>
+    <!-- End Google Tag Manager -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Étoiles animées en arrière-plan */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            margin-top: 60px;
+            padding-top: 40px;
+            color: white;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #d3b1c2, #d0c3f0, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            color: #1f628e;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #1f628e, #00a8a8);
+            margin: 10px auto;
+            border-radius: 2px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .gender-row {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+        }
+
+        .gender-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .gender-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .gender-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .gender-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border: 2px solid #c0f0f7;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(192, 240, 247, 0.1);
+            font-weight: 600;
+            color: #1f628e;
+        }
+
+        .gender-option input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border-color: #00a8a8;
+        }
+
+        label {
+            font-weight: 600;
+            color: #1f628e;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="email"] {
+            padding: 12px 16px;
+            border: 2px solid #c0f0f7;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(192, 240, 247, 0.1);
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #00a8a8;
+            box-shadow: 0 0 0 3px rgba(0, 168, 168, 0.1);
+            background: white;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .option-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #c0f0f7, #d3b1c2, #d0c3f0);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .option-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .option-card.selected {
+            border-color: #00a8a8;
+            background: linear-gradient(135deg, rgba(192, 240, 247, 0.3), rgba(211, 177, 194, 0.3));
+        }
+
+        .option-card.free {
+            border: 3px solid #10B981;
+            background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(255,255,255,0.9));
+        }
+
+        .option-card.featured {
+            border: 3px solid #FFD700;
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,255,255,0.9));
+        }
+
+        .option-card.coral {
+            border: 3px solid #FF6B6B;
+            background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,255,255,0.9));
+        }
+
+        .option-card.pink {
+            border: 3px solid #FF69B4;
+            background: linear-gradient(135deg, rgba(255,105,180,0.1), rgba(255,255,255,0.9));
+        }
+
+        .option-card.pink .price {
+            color: #FF1493;
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .badge.free {
+            background: linear-gradient(45deg, #10B981, #059669);
+        }
+
+        .badge.popular {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+        }
+
+        .badge.coral {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+        }
+
+        .badge.new {
+            background: linear-gradient(45deg, #8B5CF6, #A78BFA);
+        }
+
+        .option-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .option-card h4 {
+            color: #1f628e;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .option-card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .option-card .price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #00a8a8;
+            margin-bottom: 10px;
+        }
+        .option-card.featured .price {
+            font-size: 1.5rem;
+        }
+
+        .option-card.coral .price {
+            color: #FF6B6B;
+        }
+
+        .option-card .price.free {
+            color: #10B981;
+        }
+
+        .option-card .price .old-price {
+            text-decoration: line-through;
+            opacity: 0.6;
+            font-size: 1.2rem;
+            margin-right: 5px;
+            color: #999;
+        }
+
+        .option-card .status {
+            margin-top: 10px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status.available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.development {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.coming-soon {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .option-card .status {
+            margin-top: 15px;
+            padding: 6px 12px;
+            border-radius: 18px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .status.available {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            box-shadow: 0 1px 6px rgba(16, 185, 129, 0.15);
+        }
+
+        .status.available:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .status.coral {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            box-shadow: 0 1px 6px rgba(255, 107, 107, 0.15);
+        }
+
+        .status.coral:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(255, 107, 107, 0.2);
+        }
+
+        .status.featured {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+            box-shadow: 0 1px 6px rgba(255, 215, 0, 0.15);
+        }
+
+        .status.featured:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .status.development {
+            background: linear-gradient(135deg, #FFA500, #FF8C00);
+            color: white;
+            box-shadow: 0 1px 6px rgba(255, 165, 0, 0.15);
+        }
+
+        .status.coming-soon {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            box-shadow: 0 1px 6px rgba(108, 117, 125, 0.15);
+        }
+
+         /* Section packs */
+        .packs-section {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border-radius: 25px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .packs-section .section-title {
+            color: white;
+        }
+
+        .packs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .pack-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px 30px 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .pack-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .pack-card.selected {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .pack-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .pack-content {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .pack-price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .pack-price-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .pack-card .status {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .pack-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .packs-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 25px !important;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .packs-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+      .essence-special {
+            padding: 30px !important;
+        }
+
+        .pack-layout-3col {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+            min-height: 200px;
+        }
+
+        .pack-image-left {
+            flex-shrink: 0;
+        }
+
+        .pack-image-left img {
+            width: 250px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .pack-modules {
+            flex: 1;
+            text-align: left;
+        }
+
+        .pack-modules .pack-title {
+            margin-bottom: 15px;
+        }
+
+        .pack-modules .pack-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .pack-pricing {
+            flex-shrink: 0;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .pack-modules {
+            flex: 1;
+            text-align: left;
+            padding-left: 50px;
+        }
+
+        .pack-pricing {
+            flex-shrink: 0;
+            text-align: center;
+            min-width: 120px;
+            margin-right: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .pack-layout-3col {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .pack-modules {
+                text-align: center;
+            }
+            
+            .pack-image-left img {
+                width: 200px;
+            }
+        }
+
+        /* Section consultation */
+        .consultation-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin: 30px 0;
+        }
+
+        .consultation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .consultation-card {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+        }
+
+        .consultation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.3);
+            text-decoration: none;
+            color: white;
+        }
+
+        .consultation-card.ai {
+            background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+        }
+
+        .consultation-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .consultation-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .consultation-description {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .consultation-section {
+            background: linear-gradient(135deg, rgba(192, 240, 247, 0.3), rgba(31, 98, 142, 0.2));
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            margin: 30px 0;
+        }
+
+        .cart-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin: 30px 0;
+            display: none;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(31, 98, 142, 0.1);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #1f628e;
+        }
+
+        .remove-item {
+            color: #ff4757;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .remove-item:hover {
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .consent-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(192, 240, 247, 0.2);
+            border-radius: 15px;
+            border-left: 4px solid #00a8a8;
+        }
+
+        .consent-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .consent-checkbox input[type="checkbox"] {
+            margin-top: 4px;
+            transform: scale(1.2);
+            accent-color: #00a8a8;
+        }
+
+        .consent-checkbox label {
+            font-size: 0.9rem;
+            color: #1f628e;
+            line-height: 1.5;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(31, 98, 142, 0.4);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Partie prévisionnelle */
+        .predictive-section {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(167, 139, 250, 0.05));
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .predictive-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8B5CF6, #A78BFA);
+        }
+
+        .predictive-title {
+            color: #8B5CF6;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .predictive-subtitle {
+            text-align: center;
+            color: #6B46C1;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .predictive-section .options-grid {
+            margin-top: 20px;
+        }
+
+        .predictive-section .option-card {
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(139, 92, 246, 0.05));
+        }
+
+        .predictive-section .option-card:hover {
+            border-color: #8B5CF6;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(139, 92, 246, 0.1));
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .predictive-section .option-card .price {
+            color: #8B5CF6;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .timer-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 12px;
+        }
+
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #8B5CF6;
+            margin-bottom: 5px;
+        }
+
+        .timer-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .psychology-chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .psychology-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .psychology-input-container input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #c0f0f7;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .user-message {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #c0f0f7, #d3b1c2);
+        }
+
+        .message-content {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 250px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+        }
+
+        /* Modal analyse gratuite */
+        .analysis-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .analysis-modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .analysis-modal-header {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .analysis-modal-body {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #00a8a8;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .analysis-result {
+            display: none;
+        }
+
+        .analysis-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .explore-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .explore-btn:first-child {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+        }
+
+        .explore-btn:last-child {
+            background: #6c757d;
+            color: white;
+        }
+
+        .explore-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Modal confirmation paiement */
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+        }
+
+        .payment-modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .payment-modal-header {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 20px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .payment-modal-body {
+            padding: 30px;
+        }
+
+        .order-summary {
+            margin-bottom: 30px;
+        }
+
+        .customer-info p {
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        .items-summary {
+            margin-top: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .payment-item:last-child {
+            border-bottom: none;
+        }
+
+        .payment-total {
+            border-top: 2px solid #1f628e;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #1f628e;
+        }
+
+        .payment-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap; 
+        }
+
+        #paypal-button-container {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .payment-btn {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .payment-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .stripe-btn {
+            background: linear-gradient(135deg, #6772e5, #5469d4);
+            color: white;
+        }
+
+        .paypal-btn {
+            background: linear-gradient(135deg, #0070ba, #003087);
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Notifications */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-left: 4px solid #00a8a8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification-warning {
+            border-left-color: #FFA500;
+            background: #FFF8DC;
+        }
+
+        .notification-success {
+            border-left-color: #10B981;
+            background: #F0FDF4;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            margin-left: 15px;
+        }
+
+        /* Footer Styles */
+        .site-footer {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+            color: white;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.15"/></svg>');
+            pointer-events: none;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 40px;
+            padding: 50px 20px 30px;
+        }
+
+        .footer-section h4 {
+            color: #c0f0f7;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .footer-section h5 {
+            color: #c0f0f7;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Section À propos */
+        .about-section .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .footer-logo-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .footer-logo h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-description {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .social-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .social-icon {
+            font-size: 1.2rem;
+            filter: grayscale(1) brightness(2);
+        }
+
+        /* Liens */
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-links a:hover {
+            color: #c0f0f7;
+            padding-left: 8px;
+        }
+
+        .footer-links a::before {
+            content: '→';
+            position: absolute;
+            left: -15px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover::before {
+            opacity: 1;
+            left: -10px;
+        }
+
+        /* Contact */
+        .contact-info {
+            margin-bottom: 25px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+        }
+
+        .contact-item a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item a:hover {
+            color: #c0f0f7;
+        }
+
+        .contact-icon {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Newsletter */
+        .newsletter-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .newsletter-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .newsletter-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .newsletter-input:focus {
+            outline: none;
+            border-color: #c0f0f7;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .newsletter-btn {
+            padding: 12px 18px;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2);
+            border: none;
+            border-radius: 25px;
+            color: #1f628e;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(192, 240, 247, 0.3);
+        }
+
+        /* Footer Bottom */
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding: 25px 20px;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-bottom-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .copyright {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .legal-notice {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+            margin: 0;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .footer-badges {
+            display: flex;
+            gap: 15px;
+        }
+
+        .security-badge {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .options-grid,
+            .packs-grid,
+            .consultation-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .form-container,
+            .packs-section,
+            .consultation-section {
+                padding: 25px;
+            }
+
+            .gender-options {
+                flex-direction: column;
+            }
+
+            .predictive-section {
+                padding: 20px;
+                margin-top: 30px;
+            }
+
+            .predictive-title {
+                font-size: 1.3rem;
+            }
+
+            .predictive-subtitle {
+                font-size: 0.95rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 40px 20px 20px;
+            }
+            
+            .footer-bottom-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .footer-badges {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .about-section .footer-logo {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .footer-social {
+                justify-content: center;
+            }
+        }
+
+        /* Section témoignages */
+        .testimonials-section {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(192, 240, 247, 0.1));
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .testimonials-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 35px;
+            font-size: 1.1rem;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .testimonial-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1f628e, #00a8a8, #c0f0f7);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-color: rgba(31, 98, 142, 0.2);
+        }
+
+        .testimonial-content {
+            margin-bottom: 20px;
+        }
+
+        .rating-stars {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        .testimonial-content p {
+            color: #333;
+            line-height: 1.6;
+            font-style: italic;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .author-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .author-info strong {
+            display: block;
+            color: #1f628e;
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+
+        .author-info span {
+            color: #666;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .testimonials-cta {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(31, 98, 142, 0.1), rgba(0, 168, 168, 0.05));
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .testimonials-cta h3 {
+            color: #1f628e;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        .testimonials-cta p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(31, 98, 142, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .testimonials-section {
+                padding: 25px;
+                margin: 30px 0;
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        /* Navbar Styles - À ajouter dans la section <style> existante */
+        .navbar {
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="0.5" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="0.5" fill="white" opacity="0.1"/><circle cx="50" cy="50" r="0.3" fill="white" opacity="0.15"/></svg>');
+            pointer-events: none;
+        }
+
+        .navbar__inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar__brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .navbar__brand:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar__toggle {
+            display: none;
+            background: none;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 1.2rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar__toggle:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .navbar__links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 8px;
+        }
+
+        .navbar__links li {
+            margin: 0;
+        }
+
+        .navbar__links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(5px);
+            border: 1px solid transparent;
+        }
+
+        .navbar__links a:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .navbar__links a.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .navbar__links a[target="_blank"]::after {
+            content: ' ↗';
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .navbar__toggle {
+                display: block;
+            }
+
+            .navbar__links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                transform: translateY(-10px);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+                gap: 0;
+            }
+
+            .nav-open .navbar__links {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .navbar__links a {
+                display: block;
+                margin: 8px 0;
+                padding: 15px 20px;
+                border-radius: 12px;
+                text-align: center;
+            }
+
+            .navbar__inner {
+                padding: 0 15px;
+                height: 60px;
+            }
+
+            .navbar__brand {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Animation pour l'ouverture du menu mobile */
+        .navbar__links li {
+            animation: slideInFromTop 0.3s ease-out forwards;
+        }
+
+        .navbar__links li:nth-child(1) { animation-delay: 0.1s; }
+        .navbar__links li:nth-child(2) { animation-delay: 0.2s; }
+        .navbar__links li:nth-child(3) { animation-delay: 0.3s; }
+        .navbar__links li:nth-child(4) { animation-delay: 0.4s; }
+        .navbar__links li:nth-child(5) { animation-delay: 0.5s; }
+        .navbar__links li:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PN5STD34"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    {% include "_sandbox_banner.html" %}
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar__inner">
+            <a class="navbar__brand" href="/">Les Fous d'Astro</a>
+
+            <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">
+                ☰
+            </button>
+            <ul class="navbar__links">
+                <li><a href="{{ url_for('pages_bp.analyses') }}"
+                        class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+
+                <li><a href="{{ url_for('site_bp.temoignages') }}"
+                        class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
+
+                <li><a href="{{ url_for('pages_bp.formations') }}"
+                        class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
+
+                <li><a href="{{ url_for('blog.blog') }}"
+                        class="{% if request.path == url_for('blog.blog') %}active{% endif %}">Blog</a></li>
+
+                <li><a href="https://bycecilecl.com/categorie-produit/services/"
+                        target="_blank" rel="noopener">Prestations</a></li>
+
+                <li><a href="{{ url_for('pages_bp.contact') }}"
+                        class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
+
+                <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="header">
+            <img src="static/images/logo_les_fous_dastro.webp" alt="Les Fous d'Astro" class="logo">
+            <h1>✨ Analyses Astrologiques ✨</h1>
+            <p>Découvre les secrets des étoiles et ta destinée</p>
+        </div>
+
+        <div class="form-container">
+            <form id="form-analyse" method="POST">
+                <!-- ✅ AJOUTER CES 3 LIGNES ICI -->
+                <input type="hidden" id="product_key" name="product_key" value="">
+                <input type="hidden" id="selected_product_label" name="selected_product_label" value="">
+                <input type="hidden" id="selected_product_price" name="selected_product_price" value="">
+                <div class="form-section">
+                    <h3 class="section-title">🌟 Tes informations personnelles</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom">Prénom</label>
+                            <input type="text" name="nom" id="nom" required placeholder="Votre prénom">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" id="email" required placeholder="votre.email@example.com">
+                        </div>
+                        <div class="form-group gender-row">
+                            <label>Sexe</label>
+                            <div class="gender-options">
+                                <div class="gender-option">
+                                    <input type="radio" id="female" name="gender" value="female" required>
+                                    <label for="female">👩 Femme</label>
+                                </div>
+                                <div class="gender-option">
+                                    <input type="radio" id="male" name="gender" value="male" required>
+                                    <label for="male">👨 Homme</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">🌙 Tes coordonnées de naissance</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date_naissance">Date de naissance</label>
+                            <input type="date" name="date_naissance" id="date_naissance" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="heure_naissance">Heure de naissance</label>
+                            <input type="time" name="heure_naissance" id="heure_naissance" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="lieu_naissance">Lieu de naissance</label>
+                            <input
+                                type="text"
+                                name="lieu_naissance"
+                                id="lieu_naissance"
+                                required
+                                placeholder="Ville, Pays"
+                                autocomplete="off"
+                                list="suggestions-lieux"
+                            />
+                            <datalist id="suggestions-lieux"></datalist>
+                            <input type="hidden" name="lat" id="lat" />
+                            <input type="hidden" name="lon" id="lon" />
+                            <input type="hidden" name="tzid" id="tzid" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">🔮 Les Analyses Cosmiques</h3>
+                    <div class="options-grid">
+                        <div class="option-card free" onclick="addToCart('gratuite', 'Analyse Gratuite', 0, this)">
+                            <div class="badge free">GRATUIT</div>
+                            <span class="icon">🌟</span>
+                            <h4>Analyse Gratuite</h4>
+                            <p>Lecture rapide, synthétique et immédiate de ton profil astrologique</p>
+                            <div class="price free">Gratuit</div>
+                            <span class="status available">Clique pour sélectionner</span>
+                        </div>
+                        
+                        <div class="option-card coral" onclick="addToCart('flash_astral', 'Flash Astral', 29, this)">
+                            <div class="badge coral">PRIX LANCEMENT</div>
+                            <span class="icon">📊</span>
+                            <h4>Flash Astral</h4>
+                            <p>Analyse occidentale sur 3/4 pages sur les grands axes du thème<br> + Nakshatra de la lune</p>
+                            <div class="price">
+                                <span class="old-price">35€</span> 29€
+                            </div>
+                            <span class="status coral">Clique pour sélectionner</span>
+                            <!-- <span class="status development">En développement</span> -->
+                        </div>
+                        
+                        <!-- Forces & Défis -->
+                        <div class="option-card featured" onclick="addToCart('forces_defis', 'Mes Potentiels et Défis', 12, this)">
+                            <div class="badge popular">PRIX LANCEMENT</div>
+                            <span class="icon">💪</span>
+                            <h4>Mes Potentiels et Défis</h4>
+                            <p>Découvrez tes forces cachées et les obstacles à transformer</p>
+                            <div class="price">
+                                <span class="old-price">15€</span> 12€
+                            </div>
+                            <span class="status featured">Clique pour sélectionner</span>
+                        </div>
+
+                            <!-- Champ caché pour le backend -->
+                            <!-- <input type="hidden" id="product_key" name="product_key" value="flash_astral"> -->
+                        
+                        <div class="option-card" onclick="showComingSoon('Mission d\'Âme')">
+                            <span class="icon">🎭</span>
+                            <h4>Mission d'Âme</h4>
+                            <p>Astrologie occidentale et védique pour découvrir ton chemin</p>
+                            <div class="price">Prix à définir</div>
+                            <span class="status coming-soon">À venir</span>
+                        </div>
+
+                        <div class="option-card" onclick="showComingSoon('Carrière/Vocation')">
+                            <span class="icon">🎯</span>
+                            <h4>Carrière/Vocation</h4>
+                            <p>Quelle voie choisir pour réaliser ton potentiel professionnel</p>
+                            <div class="price">Prix à définir</div>
+                            <span class="status coming-soon">À venir</span>
+                        </div>
+                        
+                        <div class="option-card pink" 
+                            onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', 19, this)">
+                            <div class="badge new">NOUVEAU</div>
+                            <span class="icon">💕</span>
+                            <h4>Mon Profil Amoureux</h4>
+                            <p style="font-size: 0.85rem; line-height: 1.3;">
+                                • Ma manière d'aimer<br>
+                                • Qui m'attire vraiment ?<br>
+                                • Mon idéal de couple<br>
+                                • Intimité/Sexualité
+                            </p>
+                            <div class="price">
+                                <span class="old-price">25€</span> 19€
+                            </div>
+                            <span class="status available">Clique pour sélectionner</span>
+                        </div>
+                    </div>
+                <!-- Section Packs -->
+                <div class="packs-section">
+                    <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
+                    <p style="text-align: center; color: white; margin-bottom: 20px; opacity: 0.9;">
+                        Économise en combinant plusieurs analyses cosmiques dans nos packs exclusifs
+                    </p>
+
+
+                    <div class="pack-card essence-special" onclick="selectPack('essence')">
+                        <div class="pack-badge">-25% DÉCEMBRE</div>
+                        <div class="pack-layout-3col">
+                            <div class="pack-image-left">
+                                <img src="/static/images/christmas_gift.webp" alt="Cadeau de Noël">
+                            </div>
+                            <div class="pack-modules">
+                                <div class="pack-title">✨ Pack Essence</div>
+                                <div class="pack-content">
+                                    ✓ Flash Astral<br>
+                                    ✓ Forces & Défis<br>
+                                    ✓ Profil Amoureux
+                                </div>
+                            </div>
+                            <div class="pack-pricing">
+                                <div style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size: 1.2em;">60€</div>
+                                <div style="font-size: 3em; font-weight: bold; color: #FFD700; line-height: 1;">45€</div>
+                                <div style="font-size: 0.9em; color: rgba(255,255,255,0.7); font-style: italic;">(54€ dès janvier)</div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <!-- Partie prévisionnelle -->
+                    <div class="predictive-section">
+                        <h3 class="predictive-title">🌙 Analyses Prévisionnelles</h3>
+                        <p class="predictive-subtitle">Découvre ce que l'avenir tes réserve avec nos analyses temporelles</p>
+                        <div class="options-grid">
+                            <div class="option-card" onclick="showComingSoon('Mes Énergies du Mois')">
+                                <span class="icon">🌙</span>
+                                <h4>Mes Énergies du Mois</h4>
+                                <p>Abonnement mensuel pour suivre tes transits personnalisés</p>
+                                <div class="price">Prix à définir</div>
+                                <span class="status coming-soon">À venir</span>
+                            </div>
+
+                            <div class="option-card" onclick="showComingSoon('Révolution Solaire')">
+                                <span class="icon">🎂</span>
+                                <h4>Révolution Solaire</h4>
+                                <p>Ton thème annuel pour anticiper les grandes tendances</p>
+                                <div class="price">Prix à définir</div>
+                                <span class="status coming-soon">À venir</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+<!-- Section à ajouter dans votre astro_form.html, après la section Analyses Cosmiques -->
+
+<div class="testimonials-section">
+    <h2 class="section-title">💬 Ce qu'ils disent de nos analyses</h2>
+    <p class="testimonials-subtitle">Découvre pourquoi nos clients recommandent nos analyses astrologiques</p>
+    
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"J'ai voulu tester l'application par curiosité et je suis absolument bluffée ! Une analyse très étonnante..D'une justesse incroyable. J'ai l'impression que l'appli a lu à travers moi pour pointer doigt toutes mes failles, mes atouts, mes challenges, mon fonctionnement et surtout je repars avec des clés de progression ! Je conseille à tous cet outil précieux, impossible d'être déçu, bravo à Cécile pour cette innovation qui va beaucoup m'aider."</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👩</div>
+                <div class="author-info">
+                    <strong>Sarah W.</strong>
+                    <span>Scorpion Ascendant Scorpion</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"Je ne peux que recommander ce flash astral. Étant moi même astrologue, je me suis complètement reconnue dans cette analyse mais le plus dingue c'est justement ce qu'il y a à relever, à travailler qui ressort dans ce flash astral ! Una analyse qui correspond en tout point à qui je suis et à ce que je dois travailler 😝 .Je ne peux que recommander ce flash astral qui n'est autre que le fruit du travail d'une astrologue passionnée. Encore Bravo Cécile pour ton travail 🫶"</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👨</div>
+                <div class="author-info">
+                    <strong>Angélique V.</strong>
+                    <span>Cancer Ascendant Poissons</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"C'était un chouette voyage au confins des astres de notre système solaire. Apprendre sur soi par le biais des planètes et étoiles, merci fou d'astro pour le compte rendu clair! "</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👩</div>
+                <div class="author-info">
+                    <strong>Samé</strong>
+                    <span>Capricorne Ascendant Capricorne</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <p>"J'ai été subjugée par l'exactitude des propos. Moi qui ai souvent l'impression de me chercher, ce point a lu en moi comme dans un livre ouvert et en même temps, il a permis de mettre des mots concrets sur des notions que je sentais floues en moi. De nombreux petits conseils parsèment le Flash Astral et nous repartons avec des outils concrets. Un point vivement conseillé pour découvrir de manière synthétique son profil astro. Merci Cécile pour ton travail !"</p>
+            </div>
+            <div class="testimonial-author">
+                <div class="author-avatar">👨</div>
+                <div class="author-info">
+                    <strong>Caroline S.</strong>
+                    <span>Balance Ascendant Vierge</span>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <!-- Panier -->
+        <div class="cart-section" id="cartSection">
+            <h3 class="section-title">🛒 Ta Sélection</h3>
+            <div id="cartItems"></div>
+            
+            <div class="consent-section">
+                <div class="consent-checkbox">
+                    <input type="checkbox" name="consentement" id="consentement" required>
+                    <label for="consentement">
+                        J'accepte que mes données soient utilisées pour générer mon analyse astrologique et recevoir des communications en lien avec ce service. Vos données sont traitées de manière confidentielle.
+                    </label>
+                </div>
+            </div>
+
+            <button type="button" class="submit-btn" id="submitBtn" onclick="processSelectedAnalyses()" disabled>
+                ✨ Sélectionne une analyse ✨
+            </button>
+        </div>
+
+        <!-- Section Consultations -->
+        <div class="consultation-section">
+            <h2 class="section-title">👥 Consultations Personnalisées</h2>
+            <div class="consultation-grid">
+                <a href="https://bycecilecl.com/categorie-produit/services/" class="consultation-card" target="_blank">
+                    <span class="consultation-icon">🔮</span>
+                    <div class="consultation-title">Réserver une Consultation</div>
+                    <div class="consultation-description">Consultation approfondie avec analyse personnalisée en direct</div>
+                </a>
+
+                <div class="consultation-card ai" onclick="openPsychologyChat()">
+                    <span class="consultation-icon">🤖</span>
+                    <div class="consultation-title">Cellule Psychologique IA</div>
+                    <div class="consultation-description">10mn de conversation avec notre IA spécialisée sur tes configurations astrales</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Analyse Gratuite -->
+    <div class="analysis-modal" id="freeAnalysisModal" onclick="event.target === this && closeFreeAnalysisModal()">
+        <div class="analysis-modal-content" onclick="event.stopPropagation()">
+            <div class="analysis-modal-header">
+                <h3>✨ Génération de ton Analyse Gratuite ✨</h3>
+            </div>
+            <div class="analysis-modal-body">
+                <div class="loading-container" id="loadingSpinner">
+                    <div class="loading-spinner"></div>
+                    <h4 id="analysisStatus">🌟 Préparation de ton analyse...</h4>
+                    <p>Merci de patienter pendant que nous calculons ton thème natal</p>
+                </div>
+                <div class="analysis-result" id="analysisResult">
+                    <div id="freeAnalysisContent"></div>
+                </div>
+            </div>
+            <div class="analysis-actions">
+                <button class="explore-btn" onclick="exploreMoreAnalyses()">🔍 Explorer plus d'analyses</button>
+                <button class="explore-btn" onclick="closeFreeAnalysisModal()">Plus tard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmation Paiement -->
+    <div class="payment-modal" id="paymentConfirmationModal" onclick="event.target === this && closePaymentConfirmationModal()">
+        <div class="payment-modal-content" onclick="event.stopPropagation()">
+            <div class="payment-modal-header">
+                <h3>💳 Confirmation de ta commande</h3>
+            </div>
+            <div class="payment-modal-body">
+                <div id="paymentSummary"></div>
+                <div class="payment-buttons">
+                    <button class="payment-btn stripe-btn" onclick="confirmPayment()">
+                        Payer avec Stripe
+                    </button>
+                    <div id="paypal-button-container" style="width:100%;"></div>
+                    <button class="payment-btn cancel-btn" onclick="closePaymentConfirmationModal()">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cellule Psychologique -->
+    <div class="modal-overlay" id="psychologyModal" onclick="closePsychologyChat()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>🧠 Cellule Psychologique IA</h3>
+                <button class="close-btn" onclick="closePsychologyChat()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="timer-section">
+                    <div class="timer" id="psychologyTimer">10:00</div>
+                    <div class="timer-label">Temps restant</div>
+                </div>
+                <div class="psychology-chat" id="psychologyChat">
+                    <div class="message bot-message">
+                        <div class="message-avatar">🧠</div>
+                        <div class="message-content">
+                            Bonjour ! Je suis votre psychologue astrologique IA. Pendant les 10 prochaines minutes, nous pouvons explorer ensemble vos configurations astrales et leur impact psychologique. Parlez-moi de ce qui vous préoccupe ou intéresse dans votre thème natal.
+                        </div>
+                    </div>
+                </div>
+                <div class="psychology-input-container">
+                    <input type="text" id="psychologyInput" placeholder="Partagez vos réflexions..." onkeypress="handlePsychologyKeyPress(event)">
+                    <button onclick="sendPsychologyMessage()" class="send-btn">📤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section about-section">
+                    <div class="footer-logo">
+                        <img src="static/images/logo_les_fous_dastro.webp" alt="Les Fous d'Astro" class="footer-logo-img">
+                        <h3>Les Fous d'Astro</h3>
+                    </div>
+                    <p class="footer-description">
+                        Découvre les mystères de ton thème natal avec nos analyses astrologiques personnalisées. 
+                        Une approche moderne et authentique de l'astrologie pour révéler ton potentiel.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link" title="Facebook">
+                            <span class="social-icon">📘</span>
+                        </a>
+                        <a href="#" class="social-link" title="Instagram">
+                            <span class="social-icon">📷</span>
+                        </a>
+                        <a href="#" class="social-link" title="YouTube">
+                            <span class="social-icon">🎥</span>
+                        </a>
+                        <a href="mailto:contact@lesfousdastro.fr" class="social-link" title="Email">
+                            <span class="social-icon">📧</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section links-section">
+                    <h4>Nos Services</h4>
+                    <ul class="footer-links">
+                        <li><a href="#analyses">Analyse Gratuite</a></li>
+                        <li><a href="#analyses">Flash Astral</a></li>
+                        <li><a href="#analyses">Analyses Cosmiques</a></li>
+                        <li><a href="#packs">Packs Découverte</a></li>
+                        <li><a href="#consultations">Consultations</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section links-section">
+                    <h4>Informations</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('legal_bp.conditions_utilisation') }}">Conditions d'utilisation</a></li>
+                        <li><a href="{{ url_for('legal_bp.mentions_legales') }}">Mentions légales</a></li>
+                        <li><a href="{{ url_for('legal_bp.politique_confidentialite') }}">Politique de confidentialité</a></li>
+                        <li><a href="{{ url_for('legal_bp.aide_faq') }}">Aide & FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section contact-section">
+                    <h4>Contact</h4>
+                    <div class="contact-info">
+                        <p class="contact-item">
+                            <span class="contact-icon">📧</span>
+                            <a href="mailto:contact@lesfousdastro.fr">contact@lesfousdastro.fr</a>
+                        </p>
+                        <p class="contact-item">
+                            <span class="contact-icon">🌐</span>
+                            <a href="https://lesfousdastro.fr">lesfousdastro.fr</a>
+                        </p>
+                        <p class="contact-item">
+                            <span class="contact-icon">🏢</span>
+                            France
+                        </p>
+                    </div>
+                    <div class="newsletter">
+                        <h5>Newsletter Cosmique</h5>
+                        <form class="newsletter-form">
+                            <input type="email" placeholder="Votre email..." class="newsletter-input">
+                            <button type="submit" class="newsletter-btn">✨</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p class="copyright">
+                        © 2025 Les Fous d'Astro. Tous droits réservés.
+                    </p>
+                    <p class="legal-notice">
+                        Les analyses astrologiques sont à des fins de divertissement et de développement personnel uniquement.
+                    </p>
+                    <div class="footer-badges">
+                        <span class="security-badge">🔒 Paiements sécurisés</span>
+                        <span class="security-badge">🛡️ Données protégées</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {# ---- Jinja prelude: choisir le bon client-id ---- #}
+    {% set mode = (PAYPAL_MODE|lower if PAYPAL_MODE is defined else 'live') %}
+    {% if mode == 'live' %}
+        {# si PAYPAL_CLIENT_ID_LIVE n'est pas fourni, on retombe sur PAYPAL_CLIENT_ID existant #}
+        {% set PAYPAL_CLIENT_ID_EFFECTIVE = (PAYPAL_CLIENT_ID_LIVE if PAYPAL_CLIENT_ID_LIVE is defined and PAYPAL_CLIENT_ID_LIVE else PAYPAL_CLIENT_ID) %}
+    {% else %}
+        {% set PAYPAL_CLIENT_ID_EFFECTIVE = (PAYPAL_CLIENT_ID_SB if PAYPAL_CLIENT_ID_SB is defined and PAYPAL_CLIENT_ID_SB else PAYPAL_CLIENT_ID) %}
+    {% endif %}
+    {% set currency = (PAYPAL_CURRENCY if PAYPAL_CURRENCY is defined else 'EUR') %}
+    <!-- <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&intent=capture&components=buttons"></script> -->
+    <!-- APRÈS (utilise l'ID effectif choisi à l'étape 1) -->
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID_EFFECTIVE }}&currency={{ currency }}&intent=capture&components=buttons"></script>
+
+    <script>
+    console.log("🔑 PayPal mode:", "{{ mode }}",
+                "| client:", "{{ PAYPAL_CLIENT_ID_EFFECTIVE[:10] }}…");
+    </script>
+    
+    <script>
+        let paypalRendered = false; // évite de rendre 2x si la modale s’ouvre/ferme
+        // Variables globales
+        let cart = [];
+        let selectedPack = null;
+        let psychologyTimer = null;
+        let psychologyTimeLeft = 600; // 10 minutes en secondes
+
+        function ensurePayPalButtons(order) {
+        const container = document.getElementById('paypal-button-container');
+        console.log('ensurePayPalButtons()', { hasPaypal: !!window.paypal, paypalRendered, order });
+
+        if (!container) {
+            console.error('Container PayPal introuvable (#paypal-button-container).');
+            return;
+        }
+
+        if (!window.paypal || !window.paypal.Buttons) {
+            console.warn('PayPal SDK pas prêt, nouvelle tentative dans 150ms…');
+            setTimeout(() => ensurePayPalButtons(order), 150);
+            return;
+        }
+
+        if (paypalRendered) {
+            console.log('⚠️ Bouton PayPal déjà rendu, on ne refait pas.');
+            container.style.display = 'block';
+            return;
+        }
+
+        paypalRendered = true;
+        container.innerHTML = '';
+        container.style.display = 'block';
+        console.log('🚀 Rendu du bouton PayPal…');
+
+        try {
+            paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                shape: 'pill',
+                label: 'paypal',
+                tagline: false
+            },
+
+            createOrder: (data, actions) => {
+                const total = Number(order?.total ?? 0);
+                console.log('🛒 PayPal.createOrder appelé, total =', total, '€');
+                return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                    value: total.toFixed(2),
+                    currency_code: "{{ PAYPAL_CURRENCY }}"
+                    },
+                    description: order?.description || "Flash Astral"
+                }]
+                });
+            },
+            onApprove: async (data, actions) => {
+                console.log('✅ PayPal.onApprove déclenché', data);
+
+                try {
+                    // 1) Récupérer les infos formulaire
+                    const userInfo = {
+                    nom: document.getElementById('nom').value,
+                    email: document.getElementById('email').value,
+                    gender: document.querySelector('[name="gender"]:checked').value,
+                    birthDate: document.getElementById('date_naissance').value,
+                    birthTime: document.getElementById('heure_naissance').value,
+                    birthPlace: document.getElementById('lieu_naissance').value,
+                    lat: document.getElementById('lat').value,
+                    lon: document.getElementById('lon').value,
+                    tzid: document.getElementById('tzid').value,
+                    };
+
+                    // 2) Quel produit ?
+                    const product_key =
+                    document.getElementById('product_key').value ||
+                    (order?.items?.[0]?.id) ||
+                    'flash_astral';
+
+                    console.log('📦 Envoi au backend:', {
+                    orderID: data.orderID,
+                    product_key,
+                    total: order?.total,
+                    userInfo
+                    });
+
+                    // 3) 👉 Laisser le BACKEND capturer + stocker en session
+                    const response = await fetch('/payments/capture-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderID: data.orderID,
+                        userInfo,
+                        product_key,
+                        items: order?.items || [
+                        {
+                            id: product_key,
+                            name: document.getElementById('selected_product_label').value || 'Analyse',
+                            price: Number(order?.total ?? 0)
+                        }
+                        ]
+                    })
+                    });
+
+                    const result = await response.json();
+                    console.log('🎉 Réponse backend:', result);
+
+                    // 4) Succès → redirection
+                    if (response.ok && (result.status === 'COMPLETED' || result.ok)) {
+                    window.location.href = '/paiement-effectue?provider=paypal';
+                    } else {
+                    console.error('❌ Capture/stockage côté serveur KO:', result);
+                    showNotification('Erreur lors de la confirmation du paiement.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('❌ Erreur onApprove:', err);
+                    showNotification('Erreur lors du traitement du paiement.', 'warning');
+                }
+                },
+
+            onError: (err) => {
+                console.error('🔥 PayPal.onError', err);
+                showNotification('⚠️ Paiement PayPal indisponible, réessaie ou choisis Stripe.', 'warning');
+            },
+
+            onCancel: (data) => {
+                console.log('ℹ️ PayPal.onCancel', data);
+                showNotification('💳 Paiement annulé.', 'info');
+            }
+
+            })
+            .render('#paypal-button-container')
+            .then(() => console.log('✔️ Boutons PayPal rendus'))
+            .catch(err => {
+            console.error('❌ Échec render PayPal:', err);
+            paypalRendered = false;
+            container.style.display = 'none';
+            showNotification('Impossible d’afficher PayPal pour le moment.', 'warning');
+            });
+
+        } catch (err) {
+            console.error('💥 Exception init PayPal:', err);
+            paypalRendered = false;
+            container.style.display = 'none';
+            showNotification('Erreur lors de l’initialisation PayPal.', 'warning');
+        }
+        }
+
+
+        // Générer des étoiles animées
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numStars = 50;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (2 + Math.random() * 3) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Fonction pour afficher message "à venir"
+        function showComingSoon(analysisName) {
+            showNotification(`🚀 ${analysisName} arrive bientôt ! Nous travaillons sur cette fonctionnalité pour vous offrir la meilleure expérience.`, 'info');
+        }
+
+       function addToCart(id, name, price, element) {
+        if (selectedPack) {
+            showNotification(
+            'Vous avez sélectionné un pack. Désélectionnez-le d\'abord pour ajouter des analyses individuelles.',
+            'warning'
+            );
+            return;
+        }
+
+        const existingItem = cart.find(item => item.id === id);
+
+        if (existingItem) {
+            // désélection
+            removeFromCart(id);
+            element && element.classList.remove('selected');
+
+            if (cart.length === 0) {
+            // si plus rien dans le panier -> on vide les champs cachés
+            document.getElementById('product_key').value = '';
+            document.getElementById('selected_product_label').value = '';
+            document.getElementById('selected_product_price').value = '';
+            } else {
+            // sinon on pointe sur le dernier item restant
+            const last = cart[cart.length - 1];
+            document.getElementById('product_key').value = last.id;
+            document.getElementById('selected_product_label').value = last.name;
+            document.getElementById('selected_product_price').value = last.price;
+            }
+
+        } else {
+            // ajout
+            cart.push({ id, name, price });
+            element && element.classList.add('selected');
+
+            // un seul produit au checkout → on écrase toujours
+            document.getElementById('product_key').value = id;
+            document.getElementById('selected_product_label').value = name;
+            document.getElementById('selected_product_price').value = price;
+
+            // scroll vers le panier
+            setTimeout(() => {
+            const cartSection = document.getElementById('cartSection');
+            if (cartSection && cartSection.style.display !== 'none') {
+                cartSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            }, 300);
+        }
+
+        updateCartDisplay();
+        }
+
+        function processSelectedAnalyses() {
+            // Vérifier que les informations de base sont remplies
+            const requiredFields = ['nom', 'email', 'date_naissance', 'heure_naissance', 'lieu_naissance', 'gender'];
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                const element = document.querySelector(`[name="${field}"]`);
+                if (!element || !element.value || (element.type === 'radio' && !document.querySelector(`[name="${field}"]:checked`))) {
+                    missingFields.push(field);
+                }
+            });
+
+            if (missingFields.length > 0) {
+                showNotification('⚠️ Veuillez remplir toutes vos informations avant de continuer.', 'warning');
+                document.querySelector(`[name="${missingFields[0]}"]`).scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            // Vérifier les coordonnées géographiques
+            if (!document.getElementById('lat').value || !document.getElementById('lon').value) {
+                showNotification('⚠️ Veuillez sélectionner votre lieu de naissance dans la liste des suggestions.', 'warning');
+                return;
+            }
+
+            // Vérifier le consentement
+            if (!document.getElementById('consentement').checked) {
+                showNotification('⚠️ Veuillez accepter les conditions avant de continuer.', 'warning');
+                return;
+            }
+
+            // Séparer analyses gratuites et payantes
+            const freeAnalyses = [];
+            const paidAnalyses = [];
+            
+            if (selectedPack) {
+                paidAnalyses.push(selectedPack);
+            } else {
+                cart.forEach(item => {
+                    if (item.price === 0) {
+                        freeAnalyses.push(item);
+                    } else {
+                        paidAnalyses.push(item);
+                    }
+                });
+            }
+
+            // Si il y a des analyses gratuites, les traiter d'abord
+            if (freeAnalyses.length > 0) {
+                processFreeAnalyses(freeAnalyses, paidAnalyses);
+            } else if (paidAnalyses.length > 0) {
+                // Seulement du payant, aller au paiement
+                proceedToPayment();
+            } else {
+                showNotification('⚠️ Veuillez sélectionner au moins une analyse.', 'warning');
+            }
+        }
+
+        function processFreeAnalyses(freeAnalyses, paidAnalyses) {
+            // Afficher le modal avec animation de traitement
+            showFreeAnalysisModal();
+            
+            // Préparer les données utilisateur
+            const userData = {
+                nom: document.getElementById('nom').value,
+                email: document.getElementById('email').value,
+                gender: document.querySelector('[name="gender"]:checked').value,  
+                date_naissance: document.getElementById('date_naissance').value,
+                heure_naissance: document.getElementById('heure_naissance').value,
+                lieu_naissance: document.getElementById('lieu_naissance').value,
+                lat: document.getElementById('lat').value,
+                lon: document.getElementById('lon').value,
+                tzid: document.getElementById('tzid').value
+            };
+
+            console.log('🚀 Envoi des données:', userData);
+
+            // ⚡ Appel immédiat à l'API (pas d'attente artificielle)
+            fetch('/api/analyse_gratuite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => {
+                console.log('📡 Réponse reçue, status:', response.status);
+                // Mettre à jour le status pendant qu'on parse la réponse
+                document.getElementById('analysisStatus').innerHTML = '🎯 Réception de votre analyse...';
+                return response.json();
+            })
+            .then(data => {
+                console.log('📊 Data complète reçue:', data);
+                
+                if (data.ok) {
+                    console.log('✅ HTML reçu (longueur):', data.html.length);
+                    console.log('🔍 Début HTML:', data.html.substring(0, 200));
+                    console.log('🔍 Fin HTML:', data.html.substring(data.html.length - 200));
+                    
+                    // ⚡ Affichage immédiat du résultat
+                    document.getElementById('analysisStatus').innerHTML = '🎉 Votre analyse est prête !';
+                    document.getElementById('analysisResult').style.display = 'block';
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    document.getElementById('freeAnalysisContent').innerHTML = data.html;
+                    
+                    // Vérifier ce qui est dans le DOM
+                    const content = document.getElementById('freeAnalysisContent');
+                    console.log('🎯 Contenu dans le DOM:', content.innerHTML.length, 'caractères');
+                    console.log('🎯 Hauteur du contenu:', content.scrollHeight, 'px');
+                    
+                    // Si il y a aussi des analyses payantes, proposer de continuer
+                    if (paidAnalyses.length > 0) {
+                        addPaymentContinueButton(paidAnalyses);
+                    }
+                } else {
+                    throw new Error('Erreur dans la réponse de l\'API: ' + (data.message || 'Erreur inconnue'));
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erreur complète:', error);
+                document.getElementById('analysisStatus').innerHTML = '❌ Erreur lors de la génération';
+                document.getElementById('freeAnalysisContent').innerHTML = `
+                    <div style="text-align: center; color: #ff4757;">
+                        <h4>⚠️ Erreur temporaire</h4>
+                        <p>Impossible de générer votre analyse pour le moment. Veuillez réessayer.</p>
+                        <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">
+                            Erreur: ${error.message}
+                        </p>
+                    </div>
+                `;
+                document.getElementById('analysisResult').style.display = 'block';
+                document.getElementById('loadingSpinner').style.display = 'none';
+            });
+        }
+
+        function addPaymentContinueButton(paidAnalyses) {
+            const actionsDiv = document.querySelector('.analysis-actions');
+            if (actionsDiv) {
+                const continueBtn = document.createElement('button');
+                continueBtn.className = 'explore-btn';
+                continueBtn.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
+                continueBtn.style.color = '#333';
+                continueBtn.innerHTML = '💳 Continuer vers le paiement';
+                continueBtn.onclick = () => {
+                    closeFreeAnalysisModal();
+                    setTimeout(() => proceedToPayment(), 500);
+                };
+                
+                // Insérer avant le bouton "Plus tard"
+                actionsDiv.insertBefore(continueBtn, actionsDiv.lastElementChild);
+            }
+        }
+
+        function showFreeAnalysisModal() {
+            const modal = document.getElementById('freeAnalysisModal');
+            
+            // Reset complet du modal avant d'afficher
+            document.getElementById('analysisStatus').innerHTML = '🌟 Calcul de votre thème natal en cours...';
+            document.getElementById('analysisResult').style.display = 'none';
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('freeAnalysisContent').innerHTML = ''; // Vider le contenu précédent
+            
+            modal.style.display = 'flex';
+            
+            // Messages d'encouragement pendant l'attente RÉELLE
+            setTimeout(() => {
+                const currentStatus = document.getElementById('analysisStatus').innerHTML;
+                if (currentStatus.includes('Calcul')) {
+                    document.getElementById('analysisStatus').innerHTML = '⭐ Analyse de vos aspects planétaires...';
+                }
+            }, 5000);
+
+            setTimeout(() => {
+                const currentStatus = document.getElementById('analysisStatus').innerHTML;
+                if (currentStatus.includes('Analyse')) {
+                    document.getElementById('analysisStatus').innerHTML = '🔮 Génération de votre profil personnalisé...';
+                }
+            }, 12000);
+
+            setTimeout(() => {
+                const currentStatus = document.getElementById('analysisStatus').innerHTML;
+                if (currentStatus.includes('Génération')) {
+                    document.getElementById('analysisStatus').innerHTML = '✨ Finalisation, encore un instant...';
+                }
+            }, 20000);
+        }
+
+        function closeFreeAnalysisModal() {
+            document.getElementById('freeAnalysisModal').style.display = 'none';
+            // Reset du modal pour la prochaine utilisation
+            document.getElementById('analysisStatus').innerHTML = '🌟 Préparation de votre analyse...';
+            document.getElementById('analysisResult').style.display = 'none';
+            document.getElementById('loadingSpinner').style.display = 'block';
+            
+            // Afficher une notification de succès
+            showNotification('✨ Votre analyse gratuite a été générée ! Prêt(e) pour aller plus loin ?', 'success');
+            
+            // Faire défiler vers les autres analyses après un court délai
+            setTimeout(() => {
+                document.querySelector('.options-grid').scrollIntoView({ behavior: 'smooth' });
+            }, 2000);
+        }
+
+        function exploreMoreAnalyses() {
+            closeFreeAnalysisModal();
+            // Mettre en évidence les autres analyses
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.option-card:not(.free)');
+                cards.forEach(card => {
+                    card.style.animation = 'pulse 2s ease-in-out 3';
+                });
+            }, 500);
+        }
+
+        function showNotification(message, type = 'info') {
+            // Créer ou récupérer le conteneur de notifications
+            let notificationContainer = document.getElementById('notificationContainer');
+            if (!notificationContainer) {
+                notificationContainer = document.createElement('div');
+                notificationContainer.id = 'notificationContainer';
+                notificationContainer.className = 'notification-container';
+                document.body.appendChild(notificationContainer);
+            }
+
+            // Créer la notification
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="notification-close">✕</button>
+            `;
+
+            notificationContainer.appendChild(notification);
+
+            // Animation d'entrée
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Suppression automatique après 5 secondes
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            // Retirer la sélection visuelle
+            const cards = document.querySelectorAll('.option-card');
+            cards.forEach(card => {
+                if (card.onclick && card.onclick.toString().includes(id)) {
+                    card.classList.remove('selected');
+                }
+            });
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartSection = document.getElementById('cartSection');
+            const cartItems = document.getElementById('cartItems');
+            
+            if (cart.length === 0 && !selectedPack) {
+                cartSection.style.display = 'none';
+                return;
+            }
+
+            cartSection.style.display = 'block';
+            cartItems.innerHTML = '';
+
+            let total = 0;
+
+            if (selectedPack) {
+                const packDiv = document.createElement('div');
+                packDiv.className = 'cart-item';
+                
+                let packDetails = '';
+                if (selectedPack.analyses) {
+                    const analysisNames = {
+                        'flash_astral': 'Flash Astral',
+                        'potentiels_defis': 'Potentiels et Défis',
+                        'mission_ame': 'Mission d\'Âme',
+                        'carriere': 'Carrière/Vocation',
+                        'profil_amoureux': 'Profil Amoureux',
+                        'energies_mois': 'Énergies du Mois',
+                        'revolution_solaire': 'Révolution Solaire'
+                    };
+                    
+                    const selectedNames = selectedPack.analyses.map(id => analysisNames[id] || id);
+                    packDetails = selectedNames.join(', ');
+                }
+                
+                packDiv.innerHTML = `
+                    <div>
+                        <div><strong>Pack sélectionné</strong></div>
+                        <div style="font-size: 0.9rem; color: #666; margin-top: 4px;">${packDetails}</div>
+                    </div>
+                    <span>
+                        ${selectedPack.price}€
+                        <span class="remove-item" onclick="removePackFromCart()">✕</span>
+                    </span>
+                `;
+                cartItems.appendChild(packDiv);
+                total = selectedPack.price;
+            } else {
+                cart.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'cart-item';
+                    itemDiv.innerHTML = `
+                        <span>${item.name}</span>
+                        <span>
+                            ${item.price === 0 ? 'Gratuit' : item.price + '€'}
+                            <span class="remove-item" onclick="removeFromCart('${item.id}')">✕</span>
+                        </span>
+                    `;
+                    cartItems.appendChild(itemDiv);
+                    total += item.price;
+                });
+            }
+
+            const totalDiv = document.createElement('div');
+            totalDiv.className = 'cart-item';
+            totalDiv.innerHTML = `<span>Total</span><span>${total}€</span>`;
+            cartItems.appendChild(totalDiv);
+            
+            // Mettre à jour le texte du bouton selon le nombre d'analyses
+            updateSubmitButtonText();
+        }
+
+        function updateSubmitButtonText() {
+            const submitBtn = document.getElementById('submitBtn');
+            let totalItems = 0;
+            
+            if (selectedPack) {
+                // Les packs contiennent toujours plusieurs analyses
+                totalItems = 2; // Force le pluriel
+            } else {
+                totalItems = cart.length;
+            }
+            
+            if (totalItems === 0) {
+                submitBtn.textContent = '✨ Sélectionnez une analyse ✨';
+                submitBtn.disabled = true;
+            } else if (totalItems === 1) {
+                submitBtn.textContent = '✨ Obtenir mon analyse ✨';
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.textContent = '✨ Obtenir mes analyses ✨';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function removePackFromCart() {
+            selectedPack = null;
+            document.querySelectorAll('.pack-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            updateCartDisplay();
+        }
+
+        function proceedToPayment() {
+            // Vérifier que les informations de base sont remplies
+            const requiredFields = ['nom', 'email', 'date_naissance', 'heure_naissance', 'lieu_naissance', 'gender'];
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                const element = document.querySelector(`[name="${field}"]`);
+                if (!element || !element.value || (element.type === 'radio' && !document.querySelector(`[name="${field}"]:checked`))) {
+                    missingFields.push(field);
+                }
+            });
+
+            if (missingFields.length > 0) {
+                showNotification('⚠️ Veuillez remplir toutes vos informations avant de procéder au paiement.', 'warning');
+                document.querySelector(`[name="${missingFields[0]}"]`).scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            // Vérifier les coordonnées géographiques
+            if (!document.getElementById('lat').value || !document.getElementById('lon').value) {
+                showNotification('⚠️ Veuillez sélectionner votre lieu de naissance dans la liste des suggestions.', 'warning');
+                return;
+            }
+
+            // Vérifier le consentement
+            if (!document.getElementById('consentement').checked) {
+                showNotification('⚠️ Veuillez accepter les conditions avant de continuer.', 'warning');
+                return;
+            }
+
+            // Préparer les données pour le paiement
+            const orderData = {
+                userInfo: {
+                    nom: document.getElementById('nom').value,
+                    email: document.getElementById('email').value,
+                    gender: document.querySelector('[name="gender"]:checked').value,
+                    birthDate: document.getElementById('date_naissance').value,
+                    birthTime: document.getElementById('heure_naissance').value,
+                    birthPlace: document.getElementById('lieu_naissance').value,
+                    lat: document.getElementById('lat').value,
+                    lon: document.getElementById('lon').value,
+                    tzid: document.getElementById('tzid').value
+                },
+                items: selectedPack ? [selectedPack] : cart.filter(item => item.price > 0),
+                total: calculateTotal(),
+                type: selectedPack ? 'pack' : 'individual'
+            };
+
+            // Afficher le modal de confirmation avant paiement
+            showPaymentConfirmationModal(orderData);
+        }
+
+        function calculateTotal() {
+            if (selectedPack) {
+                return selectedPack.price;
+            }
+            return cart.reduce((total, item) => total + item.price, 0);
+        }
+
+        function showPaymentConfirmationModal(orderData) {
+            const modal = document.getElementById('paymentConfirmationModal');
+            const content = document.getElementById('paymentSummary');
+            
+            let itemsHtml = '';
+            let total = 0;
+
+            if (orderData.type === 'pack') {
+                itemsHtml = `<div class="payment-item">
+                    <span>Pack sélectionné</span>
+                    <span>${orderData.items[0].price}€</span>
+                </div>`;
+                total = orderData.items[0].price;
+            } else {
+                orderData.items.forEach(item => {
+                    itemsHtml += `<div class="payment-item">
+                        <span>${item.name}</span>
+                        <span>${item.price}€</span>
+                    </div>`;
+                    total += item.price;
+                });
+            }
+
+            content.innerHTML = `
+                <div class="order-summary">
+                    <h4>📋 Récapitulatif de votre commande</h4>
+                    <div class="customer-info">
+                        <p><strong>👤 Client :</strong> ${orderData.userInfo.nom}</p>
+                        <p><strong>📧 Email :</strong> ${orderData.userInfo.email}</p>
+                        <p><strong>🎂 Naissance :</strong> ${formatDate(orderData.userInfo.birthDate)} à ${orderData.userInfo.birthTime}</p>
+                        <p><strong>📍 Lieu :</strong> ${orderData.userInfo.birthPlace}</p>
+                    </div>
+                    <div class="items-summary">
+                        ${itemsHtml}
+                        <div class="payment-total">
+                            <span><strong>Total :</strong></span>
+                            <span><strong>${total}€</strong></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Stocker les données pour le paiement
+            window.pendingOrder = orderData;
+            modal.style.display = 'flex';
+            ensurePayPalButtons(orderData);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR');
+        }
+
+        function confirmPayment() {
+            const orderData = window.pendingOrder;
+
+            // 🔒 Sécurité : vérifier qu'un produit est choisi
+            const pk = (document.getElementById('product_key').value || '').trim();
+            if (!pk) {
+                showNotification("⚠️ Choisis d'abord une analyse avant de payer.", 'warning');
+                return;
+            }
+
+            console.log('✅ Confirmation paiement Stripe pour:', pk, orderData);
+
+            // 🧩 Fermer le modal de confirmation
+            closePaymentConfirmationModal();
+
+            // ✅ Réutiliser le formulaire principal
+            const form = document.getElementById('form-analyse');
+            form.action = '/checkout';
+            form.method = 'POST';
+
+            // 📦 Ajouter les infos du panier (pour debug / tracking)
+            let itemsInput = document.getElementById('items_json');
+            if (!itemsInput) {
+                itemsInput = document.createElement('input');
+                itemsInput.type = 'hidden';
+                itemsInput.name = 'items';
+                itemsInput.id = 'items_json';
+                form.appendChild(itemsInput);
+            }
+            itemsInput.value = JSON.stringify(orderData?.items || cart || []);
+
+            // 💰 Ajouter le total de la commande (optionnel mais utile)
+            let totalInput = document.getElementById('order_total');
+            if (!totalInput) {
+                totalInput = document.createElement('input');
+                totalInput.type = 'hidden';
+                totalInput.name = 'total';
+                totalInput.id = 'order_total';
+                form.appendChild(totalInput);
+            }
+            totalInput.value = (orderData?.total ?? 0);
+
+            // 🚀 Soumettre le formulaire vers Stripe
+            form.submit();
+        }
+
+        function closePaymentConfirmationModal() {
+            document.getElementById('paymentConfirmationModal').style.display = 'none';
+            window.pendingOrder = null;
+
+            const container = document.getElementById('paypal-button-container');
+            if (container) {
+                container.innerHTML = '';
+                container.style.display = 'none'; // IMPORTANT
+            }
+            paypalRendered = false;
+        }
+
+        // Cellule Psychologique
+        function openPsychologyChat() {
+            document.getElementById('psychologyModal').style.display = 'flex';
+            startPsychologyTimer();
+        }
+
+        function closePsychologyChat() {
+            document.getElementById('psychologyModal').style.display = 'none';
+            if (psychologyTimer) {
+                clearInterval(psychologyTimer);
+                psychologyTimer = null;
+            }
+            psychologyTimeLeft = 600;
+            updateTimerDisplay();
+        }
+
+        function startPsychologyTimer() {
+            psychologyTimer = setInterval(() => {
+                psychologyTimeLeft--;
+                updateTimerDisplay();
+                
+                if (psychologyTimeLeft <= 0) {
+                    clearInterval(psychologyTimer);
+                    addPsychologyMessage("Votre session de 10 minutes est terminée. Merci d'avoir utilisé notre Cellule Psychologique !", 'bot');
+                    setTimeout(() => {
+                        closePsychologyChat();
+                    }, 3000);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(psychologyTimeLeft / 60);
+            const seconds = psychologyTimeLeft % 60;
+            document.getElementById('psychologyTimer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function sendPsychologyMessage() {
+            const input = document.getElementById('psychologyInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            addPsychologyMessage(message, 'user');
+            input.value = '';
+
+            // Simulation de réponse IA psychologique
+            setTimeout(() => {
+                const response = generatePsychologyResponse(message);
+                addPsychologyMessage(response, 'bot');
+            }, 1500);
+        }
+
+        function addPsychologyMessage(message, sender) {
+            const chatContainer = document.getElementById('psychologyChat');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            if (sender === 'bot') {
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">🧠</div>
+                    <div class="message-content">${message}</div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-content">${message}</div>
+                    <div class="message-avatar">👤</div>
+                `;
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function generatePsychologyResponse(message) {
+            // Ici tu peux connecter ton vrai système d'IA psychologique
+            const responses = [
+                "C'est une réflexion très intéressante. Dans votre thème natal, cette tendance pourrait être liée à vos aspects planétaires. Pouvez-vous me parler de ce que vous ressentez dans ces situations ?",
+                "Ce que vous décrivez résonne avec certaines configurations astrales typiques. Comment cette énergie se manifeste-t-elle dans votre quotidien ?",
+                "Votre questionnement touche à un aspect profond de la psychologie astrologique. Avez-vous remarqué des cycles ou des patterns dans ce comportement ?",
+                "Cette dynamique que vous évoquez est souvent reliée aux transits planétaires actuels. Comment vous sentez-vous par rapport à ces changements ?",
+                "Votre ressenti s'aligne avec ce que nous observons souvent chez les personnes ayant des configurations similaires. Qu'est-ce qui vous aiderait le plus à comprendre cette facette de vous-même ?"
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function handlePsychologyKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendPsychologyMessage();
+            }
+        }
+
+        // Géocodage (code existant)
+        const input = document.getElementById('lieu_naissance');
+        const datalist = document.getElementById('suggestions-lieux');
+        const latEl = document.getElementById('lat');
+        const lonEl = document.getElementById('lon');
+        const tzidEl = document.getElementById('tzid');
+
+        let lastResults = [];
+        let debounce;
+
+        input.addEventListener('input', () => {
+            const q = input.value.trim();
+            clearTimeout(debounce);
+
+            if (q.length < 2) {
+                datalist.innerHTML = '';
+                return;
+            }
+
+            debounce = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    lastResults = data.results || [];
+                    datalist.innerHTML = lastResults.map(r => `<option value="${r.label}"></option>`).join('');
+                } catch (e) {
+                    console.warn('Geocode error:', e);
+                }
+            }, 250);
+        });
+
+        function fillHiddenFromLabel(label) {
+            const r = lastResults.find(x => x.label === label);
+            if (r) {
+                latEl.value = r.lat;
+                lonEl.value = r.lon;
+                tzidEl.value = r.tzid || '';
+            }
+        }
+
+        input.addEventListener('change', () => fillHiddenFromLabel(input.value));
+        input.addEventListener('blur', () => fillHiddenFromLabel(input.value));
+
+        // Initialisation
+        createStars();
+        updateCartDisplay();
+        updateSubmitButtonText();
+        
+
+        document.getElementById('form-analyse').addEventListener('submit', function (e) {
+            const pk = document.getElementById('product_key').value.trim();
+            if (!pk) {
+                e.preventDefault();
+                showNotification("Choisis d'abord une analyse avant de payer.", 'error');
+            }
+            });
+    </script>
+
+    <!-- ✅ Indicateur Sandbox + log console -->
+    {% if PAYPAL_MODE == 'sandbox' %}
+    <div style="
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 8px 12px;
+        border-radius: 8px;
+        z-index: 9999;
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #856404;
+    ">
+    🧪 PayPal Sandbox
+    </div>
+    {% endif %}
+
+    <script>
+    console.log("🔑 PayPal mode:", "{{ PAYPAL_MODE }}", 
+                "| client:", "{{ PAYPAL_CLIENT_ID[:10] }}…");
+</script>
+<!-- Statcounter -->
+  <script type="text/javascript">
+  var sc_project=12490079; 
+  var sc_invisible=1; 
+  var sc_security="a231e1c7"; 
+  </script>
+  <script type="text/javascript"
+  src="https://www.statcounter.com/counter/counter.js"
+  async></script>
+  <noscript><div class="statcounter"><a title="Web Analytics"
+  href="https://statcounter.com/" target="_blank"><img
+  class="statcounter"
+  src="https://c.statcounter.com/12490079/0/a231e1c7/1/"
+  alt="Web Analytics"
+  referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+  <!-- End of Statcounter -->
+</body>
+</html>

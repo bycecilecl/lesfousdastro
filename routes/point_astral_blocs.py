@@ -665,7 +665,7 @@ def point_astral_blocs_complet():
             dest_email = (infos.get("email") or "").strip()
             if dest_email:
                 prenom = (infos.get("nom") or "").split()[0] or "toi"
-                sujet_email = "Ton FLash Astral est prêt"
+                sujet_email = "Ton Flash Astral est prêt ✨"
                 body_txt = (
                     f"Bonjour {prenom},\n\n"
                     "Merci pour ta commande ! Ton Flash Astral est prêt ✨\n\n"
