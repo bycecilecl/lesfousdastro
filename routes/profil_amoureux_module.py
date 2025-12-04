@@ -32,19 +32,7 @@ profil_amoureux_module = Blueprint(
     url_prefix="/profil-amoureux"
 )
 
-@profil_amoureux_module.route("/complet")
-def profil_amoureux_complet():
-    # 🔐 Raccourci SANDBOX : on ne génère rien de lourd
-    if is_analysis_sandbox():
-        infos = session.get("infos_utilisateur") or {}
-        current_app.logger.info(
-            f"[SANDBOX] Profil Amoureux non généré pour {infos.get('nom', 'N/A')}"
-        )
-        return render_template(
-            "debug_sandbox.html",
-            titre="Profil Amoureux – Analyse factice (SANDBOX)",
-            infos=infos,
-        )
+
 
 
 def debug_snippets_profil_amoureux(theme, polarite: str) -> str:
@@ -255,6 +243,18 @@ def profil_amoureux_complet():
     5. Upload S3 + envoie l'email
     6. Affiche le résultat HTML
     """
+
+     # 🔐 Raccourci SANDBOX : on ne génère rien de lourd
+    if is_analysis_sandbox():
+        infos = session.get("infos_utilisateur") or {}
+        current_app.logger.info(
+            f"[SANDBOX] Profil Amoureux non généré pour {infos.get('nom', 'N/A')}"
+        )
+        return render_template(
+            "debug_sandbox.html",
+            titre="Profil Amoureux – Analyse factice (SANDBOX)",
+            infos=infos,
+        )
     
     infos = session.get("infos_utilisateur")
     if not infos:
