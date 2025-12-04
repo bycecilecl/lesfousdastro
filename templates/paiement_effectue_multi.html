@@ -231,9 +231,19 @@
         <p class="subtitle">Tes analyses sont prêtes à être générées</p>
 
         {% if provider %}
-        <div class="provider-badge provider-{{ provider }}">
-            Paiement via {{ provider|upper }}
-        </div>
+            {% if provider == 'stripe' %}
+                <div class="provider-badge provider-stripe">
+                    Paiement via STRIPE
+                </div>
+            {% elif provider == 'paypal' %}
+                <div class="provider-badge provider-paypal">
+                    Paiement via PAYPAL
+                </div>
+            {% elif provider == 'gift_code' %}
+                <div class="provider-badge provider-stripe">
+                    Utilisation d’un CODE CADEAU
+                </div>
+            {% endif %}
         {% endif %}
 
         <div class="analyses-list">
@@ -350,8 +360,10 @@
                 progressBar.style.display = 'block';
                 progressFill.style.width = percentage + '%';
                 
+                const inProgress = Math.min(clickedAnalyses, totalAnalyses);
+
                 if (completedCount === 0) {
-                    progressText.textContent = `${clickedAnalyses} / ${totalAnalyses} analyses en cours...`;
+                    progressText.textContent = `${inProgress} / ${totalAnalyses} analyses en cours...`;
                 } else {
                     progressText.textContent = `${completedCount} / ${totalAnalyses} analyses générées`;
                 }
