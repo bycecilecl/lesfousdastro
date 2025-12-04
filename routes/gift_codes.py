@@ -38,11 +38,6 @@ def valider_code_cadeau():
         return render_template("carte_cadeau_form.html",
                                error="Ce code correspond à un produit inconnu.")
 
-    # 3️⃣ Vérifier si déjà utilisé
-    if is_code_used(code):
-        return render_template("carte_cadeau_form.html",
-                               error="Ce code a déjà été utilisé.")
-
     # 4️⃣ Sauvegarder infos utilisateur (comme dans /checkout)
     session['infos_utilisateur'] = {
         "nom": request.form.get("nom"),
