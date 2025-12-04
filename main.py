@@ -89,6 +89,34 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
 
+@app.before_request
+def before_request_handler():
+    """
+    Gère à la fois :
+    - le timer pour les logs de performance
+    - le mode maintenance
+    """
+    # 1️⃣ Timer (toujours activé)
+    g._t0 = time.perf_counter()
+
+    # 2️⃣ Si pas de maintenance → on laisse tout passer
+    if not APP_MAINT:
+        return None
+
+    path = request.path or "/"
+
+    # 3️⃣ Toujours laisser passer les API (WooCommerce, etc.)
+    if path.startswith("/api/"):
+        return None
+
+    # 4️⃣ Toujours laisser passer les fichiers statiques + robots/sitemap/favicon
+    if path.startswith("/static/") or path in ("/favicon.ico", "/robots.txt", "/sitemap.xml"):
+        return None
+
+    # 5️⃣ Tout le reste est bloqué avec la page maintenance
+    return render_template("maintenance.html"), 503
+
+
 @app.route('/sitemap.xml')
 def sitemap():
     today = datetime.utcnow().strftime('%Y-%m-%d')
@@ -108,9 +136,9 @@ def sitemap():
 # ───────────────────────────────
 # 🕒 Mesure du temps de réponse (ajoute ici)
 # ───────────────────────────────
-@app.before_request
-def _start_timer():
-    g._t0 = time.perf_counter()
+# @app.before_request
+# def _start_timer():
+#     g._t0 = time.perf_counter()
 
 @app.after_request
 def _log_time(resp):
@@ -206,27 +234,7 @@ main_bp = Blueprint("main", __name__)
 #     return render_template("maintenance.html"), 503
 # # >>> Maintenance guard END
 
-# 🚧 Maintenance simple : bloque tout sauf API + static
-@app.before_request
-def maintenance_middleware():
-    # 1️⃣ Si maintenance désactivée → on laisse tout passer
-    if not APP_MAINT:
-        return None
 
-    # 2️⃣ Toujours laisser passer les appels API (Woo, Stripe, etc.)
-    if request.path.startswith("/api/"):
-        return None
-
-    # 3️⃣ Toujours laisser passer les fichiers statiques
-    if request.path.startswith("/static/"):
-        return None
-
-    # 4️⃣ Laisser passer favicon & robots
-    if request.path in ("/favicon.ico", "/robots.txt"):
-        return None
-
-    # 5️⃣ Pour le reste → page maintenance
-    return render_template("maintenance.html"), 503
 
 @app.route('/robots.txt')
 def robots():
