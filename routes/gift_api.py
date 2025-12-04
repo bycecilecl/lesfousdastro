@@ -48,7 +48,8 @@ def allocate_gift_code():
 
     data = request.get_json(silent=True) or {}
     product_key = (data.get("product_key") or "").strip()
-    order_id = (data.get("order_id") or "").strip()
+    order_id_raw = data.get("order_id")
+    order_id = str(order_id_raw).strip() if order_id_raw else ""
     email = (data.get("email") or "").strip()
 
     if not product_key:
