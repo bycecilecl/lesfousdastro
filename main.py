@@ -92,28 +92,57 @@ app.secret_key = os.getenv("SECRET_KEY")
 @app.before_request
 def before_request_handler():
     """
-    Gère à la fois :
-    - le timer pour les logs de performance
-    - le mode maintenance
+    Gère le timer ET la maintenance en un seul endroit.
     """
-    # 1️⃣ Timer (toujours activé)
+    # 1️⃣ Timer pour mesurer les perfs
     g._t0 = time.perf_counter()
-
-    # 2️⃣ Si pas de maintenance → on laisse tout passer
-    if not APP_MAINT:
-        return None
-
+    
     path = request.path or "/"
 
-    # 3️⃣ Toujours laisser passer les API (WooCommerce, etc.)
+    # 2️⃣ Si pas de maintenance, on laisse tout passer
+    if not APP_MAINT:
+        return None
+    
+    # 3️⃣ Routes exemptées (API, static, etc.)
+    # → WooCommerce, Gift API, etc.
     if path.startswith("/api/"):
         return None
-
-    # 4️⃣ Toujours laisser passer les fichiers statiques + robots/sitemap/favicon
+    
+    # → fichiers statiques, favicon, robots, sitemap
     if path.startswith("/static/") or path in ("/favicon.ico", "/robots.txt", "/sitemap.xml"):
         return None
 
-    # 5️⃣ Tout le reste est bloqué avec la page maintenance
+    # (Optionnel mais très pratique)
+    # → laisser passer l’affichage de la carte cadeau imprimable,
+    # même en maintenance
+    if path.startswith("/carte-cadeau/carte/"):
+        return None
+    
+    # 4️⃣ Whitelist IP
+    ALLOW_IPS = {
+        ip.strip()
+        for ip in os.getenv("MAINT_ALLOW_IPS", "").split(",")
+        if ip.strip()
+    }
+    client_ip = (
+        request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    ).split(",")[0].strip()
+    
+    if client_ip in ALLOW_IPS:
+        return None
+    
+    # 5️⃣ Token bypass (URL, header, cookie)
+    BYPASS = os.getenv("MAINT_BYPASS_TOKEN", "").strip()
+    token = (
+        request.args.get("maint_token")
+        or request.headers.get("X-MAINT-TOKEN")
+        or request.cookies.get("maint_token")
+    )
+    
+    if BYPASS and token == BYPASS:
+        return None
+    
+    # 6️⃣ Sinon → page maintenance
     return render_template("maintenance.html"), 503
 
 
