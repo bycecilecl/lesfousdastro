@@ -10,7 +10,7 @@ from datetime import datetime
 from flask import Blueprint, request, session, redirect, url_for, render_template, abort, current_app
 from config.products import PRODUCTS
 import stripe
-from config.gift_codes import get_gift_code
+
 
 checkout_bp = Blueprint("checkout_bp", __name__)
 
