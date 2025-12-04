@@ -21,6 +21,7 @@ from module.amour_blocs.partenaire_ideal import generer_bloc_partenaire_ideal
 from module.amour_blocs.couple_ideal import generer_bloc_couple_ideal
 from module.amour_blocs.intimite_sexualite import generer_bloc_intimite_sexualite
 from module.amour_blocs.maniere_aimer import generer_snippets_maniere_aimer
+from config.analysis_sandbox import is_analysis_sandbox
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,21 @@ profil_amoureux_module = Blueprint(
     __name__,
     url_prefix="/profil-amoureux"
 )
+
+@profil_amoureux_module.route("/complet")
+def profil_amoureux_complet():
+    # 🔐 Raccourci SANDBOX : on ne génère rien de lourd
+    if is_analysis_sandbox():
+        infos = session.get("infos_utilisateur") or {}
+        current_app.logger.info(
+            f"[SANDBOX] Profil Amoureux non généré pour {infos.get('nom', 'N/A')}"
+        )
+        return render_template(
+            "debug_sandbox.html",
+            titre="Profil Amoureux – Analyse factice (SANDBOX)",
+            infos=infos,
+        )
+
 
 def debug_snippets_profil_amoureux(theme, polarite: str) -> str:
     """

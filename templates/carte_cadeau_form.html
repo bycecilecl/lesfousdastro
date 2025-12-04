@@ -373,13 +373,14 @@
                     </div>
 
                     <div class="form-group full-width">
-                        <label>Genre (optionnel)</label>
+                        <label>Genre</label>
                         <div class="gender-options">
                             <div class="gender-option">
                                 <input type="radio" 
                                        id="gender_f" 
                                        name="gender" 
                                        value="F"
+                                       required
                                        {% if form and form.gender == 'F' %}checked{% endif %}>
                                 <label for="gender_f">👩 Femme</label>
                             </div>
@@ -388,16 +389,9 @@
                                        id="gender_m" 
                                        name="gender" 
                                        value="M"
+                                       required
                                        {% if form and form.gender == 'M' %}checked{% endif %}>
                                 <label for="gender_m">👨 Homme</label>
-                            </div>
-                            <div class="gender-option">
-                                <input type="radio" 
-                                       id="gender_x" 
-                                       name="gender" 
-                                       value="X"
-                                       {% if form and form.gender == 'X' %}checked{% endif %}>
-                                <label for="gender_x">✨ Autre</label>
                             </div>
                         </div>
                     </div>
