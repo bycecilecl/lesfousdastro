@@ -25,17 +25,20 @@ def _ensure_file_exists():
 def load_gift_codes() -> List[Dict[str, str]]:
     """
     Charge tous les codes cadeaux depuis le CSV.
-    Retourne une liste de dicts.
+    Ne garde que les colonnes officielles (code, product_key, used_by, used_at, notes),
+    pour éviter les vieilles colonnes type 'used'.
     """
     _ensure_file_exists()
     rows: List[Dict[str, str]] = []
+    fieldnames = ["code", "product_key", "used_by", "used_at", "notes"]
+
     with open(GIFT_CODES_CSV, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            # normalisation légère
-            row["code"] = (row.get("code") or "").strip().upper()
-            row["product_key"] = (row.get("product_key") or "").strip()
-            rows.append(row)
+            clean = {k: (row.get(k) or "") for k in fieldnames}
+            clean["code"] = (clean.get("code") or "").strip().upper()
+            clean["product_key"] = (clean.get("product_key") or "").strip()
+            rows.append(clean)
     return rows
 
 
@@ -97,11 +100,15 @@ def mark_code_as_used(code: str, used_by: str = "") -> bool:
     if not updated:
         return False
 
-    # On réécrit tout le CSV
+    fieldnames = ["code", "product_key", "used_by", "used_at", "notes"]
+
     with open(GIFT_CODES_CSV, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["code", "product_key", "used_by", "used_at", "notes"])
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(rows)
+        for row in rows:
+            # On ne garde que les bonnes colonnes
+            clean = {k: row.get(k, "") for k in fieldnames}
+            writer.writerow(clean)
 
     return True
 
