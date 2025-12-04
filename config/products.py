@@ -47,11 +47,10 @@ def load_products():
         "pack_essence": {
             "label": "Pack Essence (3 analyses)",
             "price_cents": 4500,
-            "success_route": None,
             "included_products": [
                 "flash_astral",
                 "forces_defis",
-                "profil_amoureux",   # 👈 bien celui-là maintenant
+                "profil_amoureux",
             ],
         },
     }

@@ -2144,7 +2144,7 @@
 
 
                     <div class="pack-card essence-special" onclick="selectPack('essence')">
-                        <div class="pack-badge">-20% DÉCEMBRE</div>
+                        <div class="pack-badge">-25% DÉCEMBRE</div>
                         <div class="pack-layout-3col">
                             <div class="pack-image-left">
                                 <img src="/static/images/christmas_gift.webp" alt="Cadeau de Noël">
@@ -2160,7 +2160,7 @@
                             <div class="pack-pricing">
                                 <div style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size: 1.2em;">60€</div>
                                 <div style="font-size: 3em; font-weight: bold; color: #FFD700; line-height: 1;">45€</div>
-                                <div style="font-size: 0.9em; color: rgba(255,255,255,0.7); font-style: italic;">(52€ dès janvier)</div>
+                                <div style="font-size: 0.9em; color: rgba(255,255,255,0.7); font-style: italic;">(54€ dès janvier)</div>
                             </div>
                         </div>
                     </div>
@@ -2388,7 +2388,7 @@
                         <a href="#" class="social-link" title="YouTube">
                             <span class="social-icon">🎥</span>
                         </a>
-                        <a href="mailto:contact@lesfousdastro.fr" class="social-link" title="Email">
+                        <a href="/cdn-cgi/l/email-protection#2645494852474552664a435540495355424755525449084054" class="social-link" title="Email">
                             <span class="social-icon">📧</span>
                         </a>
                     </div>
@@ -2420,7 +2420,7 @@
                     <div class="contact-info">
                         <p class="contact-item">
                             <span class="contact-icon">📧</span>
-                            <a href="mailto:contact@lesfousdastro.fr">contact@lesfousdastro.fr</a>
+                            <a href="/cdn-cgi/l/email-protection#2e4d41405a4f4d5a6e424b5d48415b5d4a4f5d5a5c4100485c"><span class="__cf_email__" data-cfemail="e1828e8f95808295a18d8492878e949285809295938ecf8793">[email&#160;protected]</span></a>
                         </p>
                         <p class="contact-item">
                             <span class="contact-icon">🌐</span>
@@ -2468,7 +2468,7 @@
     {% set currency = (PAYPAL_CURRENCY if PAYPAL_CURRENCY is defined else 'EUR') %}
     <!-- <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&intent=capture&components=buttons"></script> -->
     <!-- APRÈS (utilise l'ID effectif choisi à l'étape 1) -->
-    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID_EFFECTIVE }}&currency={{ currency }}&intent=capture&components=buttons"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID_EFFECTIVE }}&currency={{ currency }}&intent=capture&components=buttons"></script>
 
     <script>
     console.log("🔑 PayPal mode:", "{{ mode }}",
@@ -2643,6 +2643,76 @@
         // Fonction pour afficher message "à venir"
         function showComingSoon(analysisName) {
             showNotification(`🚀 ${analysisName} arrive bientôt ! Nous travaillons sur cette fonctionnalité pour vous offrir la meilleure expérience.`, 'info');
+        }
+
+        // Fonction pour sélectionner un pack
+        function selectPack(packId) {
+            // Définir les détails des packs
+            const packs = {
+                'essence': {
+                    id: 'pack_essence',
+                    name: 'Pack Essence',
+                    price: 45,
+                    items: [
+                        { id: 'flash_astral', name: 'Flash Astral', price: 22 },
+                        { id: 'forces_defis', name: 'Forces & Défis', price: 19 },
+                        { id: 'profil_amoureux', name: 'Mon Profil Amoureux', price: 19 }
+                    ]
+                }
+            };
+
+            const pack = packs[packId];
+            if (!pack) {
+                console.error('Pack inconnu:', packId);
+                return;
+            }
+
+            // Si le pack est déjà sélectionné, le désélectionner
+            if (selectedPack && selectedPack.id === pack.id) {
+                selectedPack = null;
+                document.getElementById('product_key').value = '';
+                document.getElementById('selected_product_label').value = '';
+                document.getElementById('selected_product_price').value = '';
+                
+                // Retirer la classe selected de la carte
+                const packCard = document.querySelector('.pack-card.essence-special');
+                if (packCard) packCard.classList.remove('selected');
+                
+                showNotification('Pack désélectionné', 'info');
+            } else {
+                // Sélectionner le nouveau pack
+                
+                // Vider le panier des analyses individuelles
+                cart.forEach(item => {
+                    const element = document.querySelector(`[onclick*="${item.id}"]`);
+                    if (element) element.classList.remove('selected');
+                });
+                cart = [];
+                
+                // Sélectionner le pack
+                selectedPack = pack;
+                
+                // Mettre à jour les champs cachés
+                document.getElementById('product_key').value = pack.id;
+                document.getElementById('selected_product_label').value = pack.name;
+                document.getElementById('selected_product_price').value = pack.price;
+                
+                // Ajouter la classe selected à la carte
+                const packCard = document.querySelector('.pack-card.essence-special');
+                if (packCard) packCard.classList.add('selected');
+                
+                showNotification(`✨ ${pack.name} sélectionné !`, 'success');
+                
+                // Scroll vers le panier
+                setTimeout(() => {
+                    const cartSection = document.getElementById('cartSection');
+                    if (cartSection) {
+                        cartSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
+            }
+            
+            updateCartDisplay();
         }
 
        function addToCart(id, name, price, element) {
@@ -2978,24 +3048,14 @@
                 packDiv.className = 'cart-item';
                 
                 let packDetails = '';
-                if (selectedPack.analyses) {
-                    const analysisNames = {
-                        'flash_astral': 'Flash Astral',
-                        'potentiels_defis': 'Potentiels et Défis',
-                        'mission_ame': 'Mission d\'Âme',
-                        'carriere': 'Carrière/Vocation',
-                        'profil_amoureux': 'Profil Amoureux',
-                        'energies_mois': 'Énergies du Mois',
-                        'revolution_solaire': 'Révolution Solaire'
-                    };
-                    
-                    const selectedNames = selectedPack.analyses.map(id => analysisNames[id] || id);
+                if (selectedPack.items) {
+                    const selectedNames = selectedPack.items.map(item => item.name);
                     packDetails = selectedNames.join(', ');
                 }
                 
                 packDiv.innerHTML = `
                     <div>
-                        <div><strong>Pack sélectionné</strong></div>
+                        <div><strong>${selectedPack.name}</strong></div>
                         <div style="font-size: 0.9rem; color: #666; margin-top: 4px;">${packDetails}</div>
                     </div>
                     <span>
