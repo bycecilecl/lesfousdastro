@@ -102,6 +102,29 @@ def checkout():
         abort(400, description="Panier vide.")
     
     current_app.logger.info(f"🛒 [CHECKOUT] Panier: {cart_items}")
+
+    fixed_cart = []
+    for item in cart_items:
+        if not isinstance(item, dict):
+            continue
+
+        item_id = item.get("id") or item.get("key")
+        if not item_id:
+            continue
+
+        if "items" in item and isinstance(item["items"], list):
+            fixed_cart.append({
+                "key": item_id,
+                "quantity": int(item.get("quantity", 1) or 1)
+            })
+        else:
+            fixed_cart.append({
+                "key": item_id,
+                "quantity": int(item.get("quantity", 1) or 1)
+            })
+
+    cart_items = fixed_cart
+    current_app.logger.info(f"🔄 [CHECKOUT] Corrigé: {cart_items}")
     
     # 3) 📦 Construction des line_items Stripe
     line_items = []
