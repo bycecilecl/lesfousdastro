@@ -222,47 +222,6 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_
 # --- Blueprint principal: créer -> définir routes -> enregistrer
 main_bp = Blueprint("main", __name__)
 
-# # >>> Maintenance guard START
-# ALLOW_IPS = {ip.strip() for ip in os.getenv("MAINT_ALLOW_IPS", "").split(",") if ip.strip()}
-# BYPASS = os.getenv("MAINT_BYPASS_TOKEN", "").strip()
-
-# # Endpoints/paths à laisser passer même en maintenance
-# _MAINT_SAFE_ENDPOINTS = {
-#     "healthz",                      # si tu as une route de santé
-#     # ajoute ici le nom exact de la vue webhook si besoin, ex: "stripe_webhook"
-# }
-# _MAINT_SAFE_PATH_PREFIXES = ("/static/", "/favicon.ico")
-
-# @app.before_request
-# def _maintenance_guard():
-#     # OFF → on ne bloque rien
-#     if not APP_MAINT:
-#         return None
-
-#     # fichiers statiques / favicon
-#     if any(request.path.startswith(p) for p in _MAINT_SAFE_PATH_PREFIXES):
-#         return None
-
-#     # endpoints safe par nom OU blueprint safe
-#     if request.endpoint in _MAINT_SAFE_ENDPOINTS:
-#         return None
-#     if request.blueprint in {"stripe_webhook", "payments"}:
-#         return None
-
-#     # IP autorisée
-#     client_ip = (request.headers.get("X-Forwarded-For", request.remote_addr or "")).split(",")[0].strip()
-#     if client_ip in ALLOW_IPS:
-#         return None
-
-#     # token bypass (query/header/cookie)
-#     token = request.args.get("maint_token") or request.headers.get("X-MAINT-TOKEN") or request.cookies.get("maint_token")
-#     if BYPASS and token == BYPASS:
-#         return None
-
-#     # sinon → page maintenance
-#     return render_template("maintenance.html"), 503
-# # >>> Maintenance guard END
-
 
 
 @app.route('/robots.txt')
