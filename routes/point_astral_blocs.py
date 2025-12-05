@@ -18,11 +18,25 @@ from utils.s3_utils import upload_file_and_presign
 from email.mime.text import MIMEText
 from threading import Thread
 from utils.email_sender import envoyer_email_avec_analyse
-#from routes.point_astral_blocs import point_astral_blocs_bp
-from config.analysis_sandbox import is_analysis_sandbox
+from routes.point_astral_blocs import point_astral_blocs_bp
 
 
 logger = logging.getLogger(__name__)
+
+# from config.analysis_sandbox import is_analysis_sandbox
+
+# @flash_astral_bp.route("/complet")
+# def flash_astral_complet():
+#     if is_analysis_sandbox():
+#         infos = session.get("infos_utilisateur") or {}
+#         current_app.logger.info(
+#             f"[SANDBOX] Flash Astral non généré pour {infos.get('nom', 'N/A')}"
+#         )
+#         return render_template(
+#             "debug_sandbox.html",
+#             titre="Flash Astral – Analyse factice (SANDBOX)",
+#             infos=infos,
+#         )
 
 
 def _fingerprint_infos(infos: dict) -> str:
@@ -129,19 +143,6 @@ def ping_blocs():
 @point_astral_blocs_bp.route("/complet", methods=["GET"])
 def point_astral_blocs_complet():
     """Workflow complet harmonisé : mêmes données que l'ancien système + approche par blocs"""
-
-    # 🔐 Raccourci SANDBOX : on ne génère pas le vrai Flash Astral
-    if is_analysis_sandbox():
-        infos = session.get("infos_utilisateur") or {}
-        current_app.logger.info(
-            "[SANDBOX] Flash Astral (Point Astral blocs) NON généré pour %s",
-            infos.get("nom", "N/A")
-        )
-        return render_template(
-            "debug_sandbox.html",
-            titre="Flash Astral – Analyse factice (SANDBOX)",
-            infos=infos,
-        )
 
     # === DEBUG DÉTAILLÉ SESSION ===
     logger.info("=== DEBUG SESSION COMPLET START ===")
