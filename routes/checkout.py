@@ -58,6 +58,16 @@ print(f"🔑 [Stripe] Mode = {'TEST 🧪' if PAYMENTS_SANDBOX else 'LIVE 💳'} 
 # POST /checkout : crée une Session Stripe MULTI-PRODUITS
 # ─────────────────────────────────────────────────────────────────────────────
 
+
+@checkout_bp.route('/debug-session')
+def debug_session():
+    return {
+        "ordered_products": session.get("ordered_products"),
+        "pending_generation": session.get("pending_generation"),
+        "last_payment": session.get("last_payment"),
+        "cart_items": session.get("cart_items"),
+    }
+
 @checkout_bp.route("/checkout", methods=["POST"])
 def checkout():
     # 1) Infos utilisateur → stockées en session
