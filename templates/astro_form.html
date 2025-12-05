@@ -2645,43 +2645,33 @@
             showNotification(`🚀 ${analysisName} arrive bientôt ! Nous travaillons sur cette fonctionnalité pour vous offrir la meilleure expérience.`, 'info');
         }
 
-        // Fonction pour sélectionner un pack
         function selectPack(packId) {
-            // Définir les détails des packs
-            const packs = {
+            const packData = {
                 'essence': {
-                    id: 'pack_essence',
+                    key: 'pack_essence',
                     name: 'Pack Essence',
-                    price: 45,
-                    items: [
-                        { id: 'flash_astral', name: 'Flash Astral', price: 22 },
-                        { id: 'forces_defis', name: 'Forces & Défis', price: 19 },
-                        { id: 'profil_amoureux', name: 'Mon Profil Amoureux', price: 19 }
-                    ]
+                    price: 45
                 }
             };
 
-            const pack = packs[packId];
+            const pack = packData[packId];
             if (!pack) {
                 console.error('Pack inconnu:', packId);
                 return;
             }
 
             // Si le pack est déjà sélectionné, le désélectionner
-            if (selectedPack && selectedPack.id === pack.id) {
+            if (selectedPack && selectedPack.key === pack.key) {
                 selectedPack = null;
                 document.getElementById('product_key').value = '';
                 document.getElementById('selected_product_label').value = '';
                 document.getElementById('selected_product_price').value = '';
                 
-                // Retirer la classe selected de la carte
                 const packCard = document.querySelector('.pack-card.essence-special');
                 if (packCard) packCard.classList.remove('selected');
                 
                 showNotification('Pack désélectionné', 'info');
             } else {
-                // Sélectionner le nouveau pack
-                
                 // Vider le panier des analyses individuelles
                 cart.forEach(item => {
                     const element = document.querySelector(`[onclick*="${item.id}"]`);
@@ -2693,17 +2683,15 @@
                 selectedPack = pack;
                 
                 // Mettre à jour les champs cachés
-                document.getElementById('product_key').value = pack.id;
+                document.getElementById('product_key').value = pack.key;
                 document.getElementById('selected_product_label').value = pack.name;
                 document.getElementById('selected_product_price').value = pack.price;
                 
-                // Ajouter la classe selected à la carte
                 const packCard = document.querySelector('.pack-card.essence-special');
                 if (packCard) packCard.classList.add('selected');
                 
                 showNotification(`✨ ${pack.name} sélectionné !`, 'success');
                 
-                // Scroll vers le panier
                 setTimeout(() => {
                     const cartSection = document.getElementById('cartSection');
                     if (cartSection) {
