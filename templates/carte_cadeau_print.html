@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Carte Cadeau – Les Fous d'Astro</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: "Georgia", "Times New Roman", serif;
+            background: #f5f7fb;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 25mm;
+            margin: 0 auto;
+            background: #ffffff;
+            position: relative;
+            border: 1px solid #e0e4f0;
+        }
+        .border {
+            position: absolute;
+            top: 10mm;
+            bottom: 10mm;
+            left: 10mm;
+            right: 10mm;
+            border: 2px solid #1f628e;
+            border-radius: 8mm;
+            pointer-events: none;
+        }
+        .content {
+            position: relative;
+            z-index: 2;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 15mm;
+        }
+        .logo img {
+            max-width: 60mm;
+            height: auto;
+        }
+        .title {
+            text-align: center;
+            font-size: 28px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #1f628e;
+            margin-bottom: 5mm;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 15mm;
+        }
+        .line {
+            width: 60mm;
+            height: 2px;
+            background: linear-gradient(90deg, #1f628e, #00a8a8);
+            margin: 0 auto 15mm;
+        }
+        .field-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #777;
+            margin-bottom: 3mm;
+        }
+        .field-box {
+            border-bottom: 1px solid #ccc;
+            padding: 3mm 0 6mm;
+            font-size: 18px;
+            color: #222;
+        }
+        .field-group {
+            margin-bottom: 12mm;
+        }
+        .code {
+            font-family: "Courier New", monospace;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+        .footer {
+            position: absolute;
+            bottom: 18mm;
+            left: 25mm;
+            right: 25mm;
+            font-size: 11px;
+            color: #777;
+            text-align: center;
+        }
+        .hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8mm;
+            text-align: center;
+        }
+        @media print {
+            html, body {
+                background: #fff;
+            }
+            .page {
+                margin: 0;
+                border: none;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="border"></div>
+    <div class="content">
+        <div class="logo">
+            <!-- si tu veux, remplace par une URL statique -->
+            <img src="{{ url_for('static', filename='images/logo_les_fous_dastro.webp') }}" alt="Les Fous d'Astro">
+        </div>
+
+        <div class="title">Carte Cadeau</div>
+        <div class="subtitle">Pour une analyse astrologique personnalisée</div>
+        <div class="line"></div>
+
+        <div class="field-group">
+            <div class="field-label">Type d'analyse</div>
+            <div class="field-box">
+                {{ product_label }}
+            </div>
+        </div>
+
+        <div class="field-group">
+            <div class="field-label">Code cadeau</div>
+            <div class="field-box code">
+                {{ code }}
+            </div>
+        </div>
+
+        <div class="field-group">
+            <div class="field-label">Offert à</div>
+            <div class="field-box">
+                <!-- La personne peut écrire le prénom à la main -->
+            </div>
+        </div>
+
+        <div class="field-group">
+            <div class="field-label">De la part de</div>
+            <div class="field-box">
+                <!-- Et ici aussi -->
+            </div>
+        </div>
+
+        <p class="hint">
+            Pour utiliser cette carte cadeau :<br>
+            rends-toi sur <strong>lesfousdastro.fr/carte-cadeau</strong> et entre ce code.
+        </p>
+
+        <div class="footer">
+            Les Fous d'Astro · lesfousdastro.fr · bycecilecl.com<br>
+            Cette carte cadeau est valable pour une analyse correspondant au type indiqué ci-dessus.
+        </div>
+    </div>
+</div>
+</body>
+</html>
