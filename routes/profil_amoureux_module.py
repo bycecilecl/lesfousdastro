@@ -33,8 +33,6 @@ profil_amoureux_module = Blueprint(
 )
 
 
-
-
 def debug_snippets_profil_amoureux(theme, polarite: str) -> str:
     """
     Retourne une grosse string avec TOUS les snippets utilisés
@@ -244,7 +242,7 @@ def profil_amoureux_complet():
     6. Affiche le résultat HTML
     """
 
-     # 🔐 Raccourci SANDBOX : on ne génère rien de lourd
+    # 🔐 Raccourci SANDBOX : on ne génère rien de lourd
     if is_analysis_sandbox():
         infos = session.get("infos_utilisateur") or {}
         current_app.logger.info(

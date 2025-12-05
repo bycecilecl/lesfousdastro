@@ -103,36 +103,6 @@
             box-shadow: 0 5px 15px rgba(0,168,168,0.4);
         }
 
-        /* États des liens */
-        .analyse-btn.generating {
-            background: linear-gradient(135deg, #ffc107, #ff9800);
-            cursor: wait;
-            animation: pulse 1.5s ease-in-out infinite;
-            pointer-events: auto;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .analyse-btn.completed {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            cursor: pointer;
-        }
-
-        .analyse-btn.completed:hover {
-            background: linear-gradient(135deg, #20c997, #28a745);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40,167,69,0.4);
-        }
-
-        .status-icon {
-            font-size: 1.1rem;
-            margin-left: 5px;
-            display: inline-block;
-        }
-
         .analyse-error {
             background: #fff3cd;
             border-color: #ffc107;
@@ -184,31 +154,6 @@
             color: white;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e9ecef;
-            border-radius: 10px;
-            margin-top: 20px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #1f628e, #00a8a8);
-            width: 0%;
-            transition: width 0.5s ease;
-            border-radius: 10px;
-        }
-
-        .progress-text {
-            text-align: center;
-            color: #1f628e;
-            font-size: 0.9rem;
-            margin-top: 8px;
-            font-weight: 600;
-        }
-
         @media (max-width: 600px) {
             .container {
                 padding: 30px 20px;
@@ -241,7 +186,7 @@
                 </div>
             {% elif provider == 'gift_code' %}
                 <div class="provider-badge provider-stripe">
-                    Utilisation d’un CODE CADEAU
+                    Utilisation d'un CODE CADEAU
                 </div>
             {% endif %}
         {% endif %}
@@ -250,8 +195,7 @@
             <h2 style="color: #1f628e; margin-bottom: 20px; font-size: 1.3rem;">📦 Tes analyses :</h2>
             
             {% for product_key, data in analyses.items() %}
-            <div class="analyse-item {% if data.status == 'error' %}analyse-error{% endif %}" 
-                 id="item-{{ product_key }}">
+            <div class="analyse-item {% if data.status == 'error' %}analyse-error{% endif %}">
                 <div class="analyse-label">
                     {% if data.status == 'ready' %}
                         ✨ {{ data.label }}
@@ -264,10 +208,8 @@
                     <a href="{{ data.url }}" 
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="analyse-btn" 
-                       id="btn-{{ product_key }}"
-                       onclick="markAsGenerating('{{ product_key }}')">
-                        🚀 Générer cette analyse<span class="status-icon" id="icon-{{ product_key }}"></span>
+                       class="analyse-btn">
+                        🚀 Générer cette analyse
                     </a>
                 {% elif data.status == 'error' %}
                     <div class="error-text">
@@ -278,16 +220,10 @@
             {% endfor %}
         </div>
 
-        <!-- Barre de progression -->
-        <div class="progress-bar" id="progressBar" style="display: none;">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <div class="progress-text" id="progressText"></div>
-
         <div class="info-box">
             <h3>📌 Comment ça marche ?</h3>
             <p>✓ Clique sur chaque bouton pour générer l'analyse correspondante</p>
-            <p>✓ Chaque analyse s'ouvre dans un nouvel onglet</p>
+            <p>✓ Chaque analyse s'ouvre dans un nouvel onglet et prend ~30 secondes</p>
             <p>✓ Cette page reste accessible pour générer les autres analyses</p>
             <p>✓ Tu recevras un email avec les liens de téléchargement</p>
             <p>✓ Les liens restent actifs pendant 7 jours</p>
@@ -300,139 +236,5 @@
             </p>
         </div>
     </div>
-
-    <script>
-        // Tracker l'état des analyses
-        const analysesState = {};
-        let totalAnalyses = 0;
-        let clickedAnalyses = 0;
-
-        // Initialiser le compteur
-        document.addEventListener('DOMContentLoaded', () => {
-            const links = document.querySelectorAll('.analyse-btn');
-            totalAnalyses = links.length;
-            
-            // Restaurer l'état sauvegardé
-            restoreState();
-            updateProgress();
-        });
-
-        function markAsGenerating(productKey) {
-            const link = document.getElementById(`btn-${productKey}`);
-            const icon = document.getElementById(`icon-${productKey}`);
-            
-            if (!link) return;
-
-            // Si déjà cliqué, on considère que c'est un ré-accès
-            if (analysesState[productKey] === 'clicked') {
-                // Marquer comme "généré" au 2e clic
-                link.classList.remove('generating');
-                link.classList.add('completed');
-                link.innerHTML = '✅ Analyse générée - Cliquer pour rouvrir<span class="status-icon"></span>';
-                analysesState[productKey] = 'completed';
-                saveState();
-                updateProgress();
-                return;
-            }
-
-            // Premier clic → marquer comme "en cours"
-            link.classList.add('generating');
-            link.innerHTML = '⏳ En cours de génération...<span class="status-icon"></span>';
-            analysesState[productKey] = 'clicked';
-            clickedAnalyses++;
-            
-            saveState();
-            updateProgress();
-        }
-
-        function updateProgress() {
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            const progressText = document.getElementById('progressText');
-
-            if (totalAnalyses === 0) return;
-
-            // Compter combien sont "completed"
-            const completedCount = Object.values(analysesState).filter(s => s === 'completed').length;
-            const percentage = (completedCount / totalAnalyses) * 100;
-            
-            if (clickedAnalyses > 0 || completedCount > 0) {
-                progressBar.style.display = 'block';
-                progressFill.style.width = percentage + '%';
-                
-                const inProgress = Math.min(clickedAnalyses, totalAnalyses);
-
-                if (completedCount === 0) {
-                    progressText.textContent = `${inProgress} / ${totalAnalyses} analyses en cours...`;
-                } else {
-                    progressText.textContent = `${completedCount} / ${totalAnalyses} analyses générées`;
-                }
-
-                // Si toutes sont complétées
-                if (completedCount === totalAnalyses) {
-                    progressText.innerHTML = '🎉 <strong>Toutes tes analyses sont générées !</strong> Tu vas recevoir un email avec les liens.';
-                    progressText.style.color = '#28a745';
-                    progressText.style.fontSize = '1.1rem';
-                }
-            }
-        }
-
-        // Sauvegarder l'état en localStorage
-        function saveState() {
-            try {
-                localStorage.setItem('analysesState', JSON.stringify(analysesState));
-                localStorage.setItem('clickedCount', clickedAnalyses);
-            } catch (e) {
-                console.warn('localStorage non disponible:', e);
-            }
-        }
-
-        // Restaurer l'état au chargement
-        function restoreState() {
-            try {
-                const savedState = localStorage.getItem('analysesState');
-                const savedClicked = localStorage.getItem('clickedCount');
-                
-                if (savedState) {
-                    const state = JSON.parse(savedState);
-                    clickedAnalyses = parseInt(savedClicked) || 0;
-                    
-                    Object.keys(state).forEach(key => {
-                        analysesState[key] = state[key];
-                        const link = document.getElementById(`btn-${key}`);
-                        
-                        if (!link) return;
-
-                        if (state[key] === 'completed') {
-                            link.classList.add('completed');
-                            link.innerHTML = '✅ Analyse générée - Cliquer pour rouvrir<span class="status-icon"></span>';
-                        } else if (state[key] === 'clicked') {
-                            link.classList.add('generating');
-                            link.innerHTML = '⏳ En cours de génération...<span class="status-icon"></span>';
-                        }
-                    });
-                }
-            } catch (e) {
-                console.warn('Impossible de restaurer l\'état:', e);
-            }
-        }
-
-        // Nettoyer le localStorage après 24h (optionnel)
-        function cleanOldState() {
-            const timestamp = localStorage.getItem('stateTimestamp');
-            const now = Date.now();
-            const oneDay = 24 * 60 * 60 * 1000;
-
-            if (timestamp && (now - parseInt(timestamp)) > oneDay) {
-                localStorage.removeItem('analysesState');
-                localStorage.removeItem('clickedCount');
-                localStorage.removeItem('stateTimestamp');
-            } else if (!timestamp) {
-                localStorage.setItem('stateTimestamp', now);
-            }
-        }
-
-        cleanOldState();
-    </script>
 </body>
 </html>
