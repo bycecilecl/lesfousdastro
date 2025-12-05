@@ -668,11 +668,11 @@ def analyse_post():
     
 
 @app.route("/paiement/effectue")
-def paiement_effectue():
+def paiement_effectue_old():
     return render_template("paiement_effectue.html")
 
         
-        # Génération de l'analyse FLash Astral par BLOC
+# Génération de l'analyse FLash Astral par BLOC
 @app.route("/analyse_point_astral", methods=["POST"])
 def analyse_point_astral_route():
     """Route pour générer l'analyse Flash Astral - VERSION BLOCS (5 prompts)"""
