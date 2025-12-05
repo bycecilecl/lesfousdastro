@@ -2518,18 +2518,20 @@
                 tagline: false
             },
 
-            createOrder: (data, actions) => {
-                const total = Number(order?.total ?? 0);
-                console.log('🛒 PayPal.createOrder appelé, total =', total, '€');
-                return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                    value: total.toFixed(2),
-                    currency_code: "{{ PAYPAL_CURRENCY }}"
-                    },
-                    description: order?.description || "Flash Astral"
-                }]
+            createOrder: async (data, actions) => {
+                console.log('🛒 PayPal.createOrder appelé');
+                
+                const response = await fetch('/payments/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        items: order?.items || []
+                    })
                 });
+                
+                const result = await response.json();
+                console.log('✅ Backend order:', result);
+                return result.id;
             },
             onApprove: async (data, actions) => {
                 console.log('✅ PayPal.onApprove déclenché', data);
