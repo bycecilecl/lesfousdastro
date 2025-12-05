@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code invalide | Les Fous d'Astro</title>
+    <link rel="icon" type="image/webp" sizes="64x64"
+      href="{{ url_for('static', filename='images/logo_les_fous_dastro_favicon64.webp') }}">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            color: #1f628e;
+            padding: 50px 40px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #dc2626;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #475569;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .code-display {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            color: #dc2626;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 30px 0;
+            letter-spacing: 3px;
+            border: 2px dashed #dc2626;
+        }
+
+        .help-text {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border-left: 4px solid #1f628e;
+        }
+
+        .help-text strong {
+            color: #1f628e;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(31, 98, 142, 0.3);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(31, 98, 142, 0.4);
+        }
+
+        .secondary-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: #1f628e;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .secondary-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 35px 25px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .code-display {
+                font-size: 18px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">❌</div>
+        
+        <h1>Code cadeau invalide</h1>
+        
+        <p>Le code que vous avez saisi n'existe pas dans notre système ou a déjà été utilisé.</p>
+        
+        <div class="code-display">{{ code }}</div>
+        
+        <div class="help-text">
+            <strong>💡 Que faire ?</strong>
+            • Vérifiez que vous avez bien recopié le code complet<br>
+            • Les codes sont sensibles à la casse (majuscules/minuscules)<br>
+            • Si le problème persiste, contactez-nous
+        </div>
+
+        <a href="mailto:bycecilecl@gmail.com?subject=Problème avec le code cadeau {{ code }}" class="button">
+            📧 Nous contacter
+        </a>
+        
+        <br>
+        
+        <a href="/" class="secondary-link">← Retour à l'accueil</a>
+    </div>
+</body>
+</html>

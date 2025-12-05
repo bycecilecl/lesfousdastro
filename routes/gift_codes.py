@@ -1,17 +1,19 @@
 # routes/gift_codes.py
 
-from flask import Blueprint, render_template, request, redirect, session, current_app, url_for
+from flask import Blueprint, render_template, request, redirect, session, url_for
 from config.gift_codes import get_gift_code, is_code_used, mark_code_as_used
 from config.products import PRODUCTS
 
 gift_bp = Blueprint("gift_bp", __name__, url_prefix="/carte-cadeau")
 
 
+# ---------- FORMULAIRE ----------
 @gift_bp.route("/", methods=["GET"])
 def entrer_code_cadeau():
     return render_template("carte_cadeau_form.html")
 
 
+# ---------- TRAITEMENT DU CODE + GÉNÉRATION ----------
 @gift_bp.route("/valider", methods=["POST"])
 def valider_code_cadeau():
     code = (request.form.get("code") or "").strip().upper()
@@ -24,16 +26,16 @@ def valider_code_cadeau():
     gift = get_gift_code(code)
     if not gift:
         return render_template("carte_cadeau_form.html",
-                            error="Code invalide ou inconnu.")
+                               error="Code invalide ou inconnu.")
 
-    # Vérifier si déjà utilisé
+    # 2️⃣ Vérifier si déjà utilisé
     if is_code_used(gift):
         return render_template("carte_cadeau_form.html",
-                            error="Ce code a déjà été utilisé.")
+                               error="Ce code a déjà été utilisé.")
 
     product_key = gift.get("product_key")
 
-    # 2️⃣ Vérifier produit valide
+    # 3️⃣ Vérifier produit valide
     if product_key not in PRODUCTS:
         return render_template("carte_cadeau_form.html",
                                error="Ce code correspond à un produit inconnu.")
@@ -79,3 +81,31 @@ def valider_code_cadeau():
 
     # 8️⃣ On passe par le même flux que Stripe/PayPal
     return redirect(url_for("checkout_bp.traiter_analyses"))
+
+
+# ---------- CARTE CADEAU IMPRIMABLE ----------
+@gift_bp.route("/carte/<code>", methods=["GET"])
+def afficher_carte_cadeau(code):
+    """
+    Affiche une jolie carte cadeau imprimable pour un code donné.
+    Utilisé depuis l'email WooCommerce.
+    """
+    code = (code or "").strip().upper()
+    gift = get_gift_code(code)
+
+    if not gift:
+        # code inconnu ou supprimé
+        return render_template(
+            "carte_cadeau_invalide.html",
+            code=code,
+        ), 404
+
+    product_key = gift.get("product_key")
+    product = PRODUCTS.get(product_key, {})
+    product_label = product.get("label", product_key)
+
+    return render_template(
+        "carte_cadeau_print.html",
+        code=code,
+        product_label=product_label,
+    )
