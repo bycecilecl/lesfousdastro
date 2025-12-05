@@ -281,20 +281,21 @@ def point_astral_blocs_complet():
     current_fingerprint = _fingerprint_infos(infos)
     
     # --- Anti-reload minimal (TTL 15 min) --------------------------------
-    ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1", "true", "yes")
-    if ANTI_RELOAD:
-        last_fingerprint = session.get("last_fingerprint")
-        lock_until = float(session.get("lock_until", 0))
+    ANTI_RELOAD = False
+    #ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1", "true", "yes")
+    # if ANTI_RELOAD:
+    #     last_fingerprint = session.get("last_fingerprint")
+    #     lock_until = float(session.get("lock_until", 0))
 
-        if time.time() < lock_until and current_fingerprint == last_fingerprint:
-            last_url = session.get("last_pdf_url")
-            if last_url:
-                return render_template(
-                    "paiement_effectue.html", 
-                    pdf_url=last_url, 
-                    already=True
-                )
-            return "Cette action a déjà été effectuée. Réessaie dans quelques minutes.", 429
+    #     if time.time() < lock_until and current_fingerprint == last_fingerprint:
+    #         last_url = session.get("last_pdf_url")
+    #         if last_url:
+    #             return render_template(
+    #                 "paiement_effectue.html", 
+    #                 pdf_url=last_url, 
+    #                 already=True
+    #             )
+    #         return "Cette action a déjà été effectuée. Réessaie dans quelques minutes.", 429
 # ---------------------------------------------------------------------
     warnings_list = []
     contexte = {}
