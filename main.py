@@ -247,15 +247,27 @@ app.register_blueprint(gift_bp)
 
 # ========== REDIRECTIONS POUR COMPATIBILITÉ ==========
 # Dans ton app.py ou main.py
-@app.route("/debug-session")
-def debug_session():
-    return jsonify({
+@app.route("/debug-full")
+def debug_full():
+    import json
+    
+    debug_info = {
+        "session_keys": list(session.keys()),
         "paiement_valide": session.get("paiement_valide"),
         "ordered_products": session.get("ordered_products"),
+        "pending_generation": session.get("pending_generation"),
         "last_payment": session.get("last_payment"),
         "infos_utilisateur": session.get("infos_utilisateur"),
-        "all_keys": list(session.keys())
-    })
+        "generated_analyses": session.get("generated_analyses"),
+        
+        # Variables d'env critiques
+        "ANALYSE_SANDBOX": os.getenv("ANALYSE_SANDBOX"),
+        "ANALYSIS_SANDBOX": os.getenv("ANALYSIS_SANDBOX"),
+        "ANTI_RELOAD": os.getenv("ANTI_RELOAD"),
+        "APP_MAINTENANCE": os.getenv("APP_MAINTENANCE"),
+    }
+    
+    return f"<pre>{json.dumps(debug_info, indent=2, default=str)}</pre>"
 
 @app.route('/flash_astral')
 def redirect_flash_astral():
@@ -666,7 +678,7 @@ def analyse_post():
 # - Affiche dans la console la liste des routes Flask disponibles (debug)
 # - Lance l’application Flask en mode debug, accessible sur toutes les IP locales (0.0.0.0)
     
-
+#renommé en_old 5/12/2025
 @app.route("/paiement/effectue")
 def paiement_effectue_old():
     return render_template("paiement_effectue.html")
