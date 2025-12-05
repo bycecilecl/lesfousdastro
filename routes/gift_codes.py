@@ -86,26 +86,31 @@ def valider_code_cadeau():
 # ---------- CARTE CADEAU IMPRIMABLE ----------
 @gift_bp.route("/carte/<code>", methods=["GET"])
 def afficher_carte_cadeau(code):
-    """
-    Affiche une jolie carte cadeau imprimable pour un code donné.
-    Utilisé depuis l'email WooCommerce.
-    """
+    from flask import current_app
+    
+    current_app.logger.info(f"🎁 Route carte appelée avec code={code}")
+    
     code = (code or "").strip().upper()
     gift = get_gift_code(code)
-
+    
+    current_app.logger.info(f"🎁 Gift = {gift}")
+    
     if not gift:
-        # code inconnu ou supprimé
-        return render_template(
-            "carte_cadeau_invalide.html",
-            code=code,
-        ), 404
+        current_app.logger.warning(f"❌ Code {code} invalide")
+        return render_template("carte_cadeau_invalide.html", code=code), 404
 
     product_key = gift.get("product_key")
     product = PRODUCTS.get(product_key, {})
     product_label = product.get("label", product_key)
-
-    return render_template(
+    
+    current_app.logger.info(f"🎁 Rendu template avec code={code}, label={product_label}")
+    
+    result = render_template(
         "carte_cadeau_print.html",
         code=code,
         product_label=product_label,
     )
+    
+    current_app.logger.info(f"🎁 Template rendu, longueur = {len(result)} caractères")
+    
+    return result
