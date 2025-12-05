@@ -146,6 +146,31 @@ def create_order():
         cart_items = [{"key": product_key, "quantity": 1}]
     
     logger.info(f"🛒 [PayPal] create-order | panier: {cart_items}")
+
+    # 🔥 FIX: Aplatir structure imbriquée (packs avec items internes)
+    fixed_cart = []
+    for item in cart_items:
+        if not isinstance(item, dict):
+            continue  # sécurité, au cas où
+
+        item_id = item.get("id") or item.get("key")
+        if not item_id:
+            continue  # on ne garde que ce qui a un id/clé
+
+        if "items" in item and isinstance(item["items"], list):
+            # Cas pack WooCommerce-like : on garde juste le pack
+            fixed_cart.append({
+                "key": item_id,
+                "quantity": int(item.get("quantity", 1) or 1)
+            })
+        else:
+            fixed_cart.append({
+                "key": item_id,
+                "quantity": int(item.get("quantity", 1) or 1)
+            })
+
+    cart_items = fixed_cart
+    logger.info(f"🔄 [PayPal] Panier aplati: {cart_items}")
     
     # Construire les items PayPal
     items_paypal = []
