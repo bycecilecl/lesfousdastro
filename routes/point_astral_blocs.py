@@ -18,7 +18,7 @@ from utils.s3_utils import upload_file_and_presign
 from email.mime.text import MIMEText
 from threading import Thread
 from utils.email_sender import envoyer_email_avec_analyse
-from routes.point_astral_blocs import point_astral_blocs_bp
+#from routes.point_astral_blocs import point_astral_blocs_bp
 from config.analysis_sandbox import is_analysis_sandbox
 
 
@@ -129,7 +129,6 @@ def ping_blocs():
 @point_astral_blocs_bp.route("/complet", methods=["GET"])
 def point_astral_blocs_complet():
     """Workflow complet harmonisé : mêmes données que l'ancien système + approche par blocs"""
-
 
     # 🔐 Raccourci SANDBOX : on ne génère pas le vrai Flash Astral
     if is_analysis_sandbox():
