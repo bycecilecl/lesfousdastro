@@ -18,7 +18,6 @@ from utils.s3_utils import upload_file_and_presign
 from email.mime.text import MIMEText
 from threading import Thread
 from utils.email_sender import envoyer_email_avec_analyse
-from routes.point_astral_blocs import point_astral_blocs_bp
 
 
 logger = logging.getLogger(__name__)
