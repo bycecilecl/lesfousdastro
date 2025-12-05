@@ -246,6 +246,17 @@ app.register_blueprint(gift_bp)
 
 
 # ========== REDIRECTIONS POUR COMPATIBILITÉ ==========
+# Dans ton app.py ou main.py
+@app.route("/debug-session")
+def debug_session():
+    return jsonify({
+        "paiement_valide": session.get("paiement_valide"),
+        "ordered_products": session.get("ordered_products"),
+        "last_payment": session.get("last_payment"),
+        "infos_utilisateur": session.get("infos_utilisateur"),
+        "all_keys": list(session.keys())
+    })
+
 @app.route('/flash_astral')
 def redirect_flash_astral():
     """Redirection vers l'accueil avec scroll vers Flash Astral"""
