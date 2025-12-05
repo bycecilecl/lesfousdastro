@@ -156,7 +156,13 @@ def create_order():
     
     for item in cart_items:
         pk = item.get("key") or item.get("id")
-        qty = item.get("quantity", 1)
+        
+        # 🔥 FIX: Forcer qty en int (le front peut envoyer "1" en string)
+        qty_raw = item.get("quantity", 1)
+        try:
+            qty = int(qty_raw)
+        except (TypeError, ValueError):
+            qty = 1
         
         product = PRODUCTS.get(pk)
         if not product:
@@ -192,18 +198,20 @@ def create_order():
         })
     
     if not items_paypal:
-        return jsonify({"error": "Panier vide"}), 400
+        logger.error("❌ [PayPal] Aucun item PayPal construit (produits inconnus ? panier=%s)", cart_items)
+        return jsonify({"error": "Panier vide ou produits inconnus"}), 400
     
-    # Stocker les produits à générer en session (les modules réels)
+    # 🔥 FIX: Stocker AUSSI payment_product_keys pour avoir l'info complète
     session["pending_paypal_products"] = analysis_product_keys
+    session["pending_payment_keys"] = payment_product_keys  # 👈 AJOUT
     session["cart_items"] = cart_items
     session.modified = True
     
     token, base_url = get_paypal_token()
     
     logger.info(
-    f"💰 [PayPal] Total: {total_amount:.2f} {currency} | "
-    f"Payés: {payment_product_keys} | Analyses: {analysis_product_keys}"
+        f"💰 [PayPal] Total: {total_amount:.2f} {currency} | "
+        f"Payés: {payment_product_keys} | Analyses: {analysis_product_keys}"
     )
 
     payload = {
@@ -213,7 +221,7 @@ def create_order():
             "custom_id": ",".join(payment_product_keys),     
             "description": (
                 f"Analyses: "
-                f"{', '.join([PRODUCTS[pk]['label'] for pk in payment_product_keys])}"
+                f"{', '.join([PRODUCTS[pk]['label'] for pk in payment_product_keys if pk in PRODUCTS])}"
             ),
             "amount": {
                 "currency_code": currency,
@@ -227,7 +235,7 @@ def create_order():
             },
             "items": items_paypal
         }]
-}
+    }
 
     try:
         r = requests.post(
@@ -240,7 +248,11 @@ def create_order():
         if r.status_code == 201:
             order_data = r.json()
             order_id = order_data.get('id')
-            logger.info(f"✅ [PayPal] Order créé: {order_id} | produits: {product_keys}")
+            # 🔥 FIX: Utiliser les bonnes variables
+            logger.info(
+                f"✅ [PayPal] Order créé: {order_id} | "
+                f"payés: {payment_product_keys} | analyses: {analysis_product_keys}"
+            )
         else:
             logger.error(f"❌ [PayPal] Erreur création: {r.status_code} - {r.text}")
         
@@ -265,11 +277,23 @@ def capture_order():
     order_id = payload.get("orderID") or payload.get("orderId")
     user_info = payload.get("userInfo")
 
-    # Récupérer les produits depuis la session
+    # 🔥 FIX: Récupérer les produits depuis la session avec fallback
     product_keys = session.get("pending_paypal_products") or []
+    payment_keys = session.get("pending_payment_keys") or []
     cart_items = session.get("cart_items") or []
     
-    logger.info(f"🎯 [PayPal] capture-order | order_id={order_id} | produits={product_keys}")
+    # 🔥 DIAGNOSTIC: Logger l'état de la session
+    logger.info(
+        f"🎯 [PayPal] capture-order | order_id={order_id} | "
+        f"analyses={product_keys} | payés={payment_keys} | cart={cart_items}"
+    )
+    
+    if not product_keys:
+        logger.error(
+            "❌ [PayPal] Session vide ! order_id=%s | "
+            "Vérifier: cookies, session timeout, domain", 
+            order_id
+        )
 
     try:
         r = requests.post(
@@ -291,10 +315,13 @@ def capture_order():
         first_cap = captures[0] if captures else {}
         cap_amount = first_cap.get("amount") or {}
 
-        logger.info(f"✅ [PayPal] Capture OK | order={order_id} | produits={product_keys} | montant={cap_amount}")
+        logger.info(
+            f"✅ [PayPal] Capture OK | order={order_id} | "
+            f"analyses={product_keys} | montant={cap_amount}"
+        )
 
-        # Purge
-        for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at", "pending_paypal_products"):
+        # Purge anciens marqueurs
+        for k in ("last_pdf_url", "lock_until", "last_generation_key", "last_generation_at"):
             session.pop(k, None)
 
         # Infos utilisateur
@@ -311,23 +338,33 @@ def capture_order():
                 'tzid': user_info.get('tzid'),
             }
 
-        # Marqueurs
+        # 🔥 FIX: Marqueurs avec info complète
         session["last_payment"] = {
             "provider": "paypal",
             "order_id": order_id,
             "items": cart_items,
             "status": "COMPLETED",
             "mode": PAYPAL_MODE,
-            "product_keys": product_keys,
+            "product_keys": product_keys,  # analyses à générer
+            "payment_keys": payment_keys,  # ce qui a été payé
             "amount": cap_amount.get("value"),
             "currency": cap_amount.get("currency_code"),
         }
         session["paiement_valide"] = True
         session["paypal_order_id"] = order_id
-        session["ordered_products"] = product_keys
+        session["ordered_products"] = product_keys  # 👈 Ce que le backend doit générer
         session.modified = True
 
-        logger.info(f"✅ [PayPal] Marqueurs posés | produits={product_keys}")
+        # 🔥 FIX: Supprimer les pending_ APRÈS avoir tout stocké
+        session.pop("pending_paypal_products", None)
+        session.pop("pending_payment_keys", None)
+        session.modified = True
+
+        logger.info(
+            f"✅ [PayPal] Marqueurs posés | ordered_products={product_keys} | "
+            f"paiement_valide=True"
+        )
+        
         return jsonify(data), r.status_code
 
     except requests.exceptions.RequestException as e:
