@@ -14,6 +14,7 @@ from utils.s3_utils import upload_file_and_presign   # si S3 dispo, sinon laisse
 from utils.email_sender import envoyer_email_avec_analyse
 from utils.forces_defis import generer_forces_defis, extraire_forces_defis_par_maisons
 from utils.convert_markdown_light import md_light_to_html
+from config.analysis_sandbox import is_analysis_sandbox
 
 # from config.analysis_sandbox import is_analysis_sandbox
 
@@ -96,6 +97,19 @@ def _to_float_or_none(x):
 
 @forces_defis_module_bp.route("/complet", methods=["GET"])
 def forces_defis_complet():
+
+    # 🔐 Raccourci SANDBOX : on ne génère pas le vrai Flash Astral
+    if is_analysis_sandbox():
+        infos = session.get("infos_utilisateur") or {}
+        current_app.logger.info(
+            "[SANDBOX] Forces & Défis NON généré pour %s",
+            infos.get("nom", "N/A")
+        )
+        return render_template(
+            "debug_sandbox.html",
+            titre="Forces & Défis – Analyse factice (SANDBOX)",
+            infos=infos,
+        )
 
     # 🔍 Debug utile (laisse-le pour l’instant)
     current_app.logger.info(f"[FD DEBUG] paiement_valide={session.get('paiement_valide')}")
