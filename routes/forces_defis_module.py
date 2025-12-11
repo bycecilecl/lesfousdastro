@@ -15,6 +15,7 @@ from utils.email_sender import envoyer_email_avec_analyse
 from utils.forces_defis import generer_forces_defis, extraire_forces_defis_par_maisons
 from utils.convert_markdown_light import md_light_to_html
 from config.analysis_sandbox import is_analysis_sandbox
+import json, hashlib, time, logging  
 
 # from config.analysis_sandbox import is_analysis_sandbox
 
@@ -70,6 +71,17 @@ forces_defis_module_bp = Blueprint(
     url_prefix="/forces_defis"
 )
 
+
+logger = logging.getLogger(__name__)
+
+
+def _fingerprint_infos(infos: dict) -> str:
+    """Empreinte stable des infos utilisateur pour idempotence."""
+    try:
+        payload = json.dumps(infos or {}, sort_keys=True, ensure_ascii=False)
+    except Exception:
+        payload = str(infos or {})
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3) Helpers
@@ -153,6 +165,33 @@ def forces_defis_complet():
     if not infos:
         current_app.logger.warning("[FORCES_DEFIS] infos_utilisateur absentes → retour index")
         return redirect(url_for("main.index"))
+    
+
+    # === Anti-reload minimal (TTL 15 min) spécifique Forces & Défis ===
+    current_fingerprint = _fingerprint_infos(infos)
+    ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1", "true", "yes")
+
+    if ANTI_RELOAD:
+        last_fingerprint = session.get("last_fingerprint_forces_defis")
+        lock_until = float(session.get("lock_until_forces_defis", 0))
+
+        # Si le verrou est toujours actif et que c'est les mêmes infos
+        if time.time() < lock_until and current_fingerprint == last_fingerprint:
+            last_url = session.get("last_pdf_url_forces_defis")
+            if last_url:
+                # On renvoie vers la page de confirmation avec le PDF existant
+                return render_template(
+                    "paiement_effectue.html",
+                    pdf_url=last_url,
+                    already=True
+                )
+            # Pas d'URL mémorisée → on refuse poliment
+            return "Cette action a déjà été effectuée. Réessaie dans quelques minutes.", 429
+
+        # Sinon on pose/prolonge le verrou pour 15 minutes
+        session["last_fingerprint_forces_defis"] = current_fingerprint
+        session["lock_until_forces_defis"] = time.time() + 15 * 60
+    # -----------------------------------------------------------------
 
     # 1) Calcul du thème (identique à Flash ; lat/lon/tzid si dispo)
     lat = _to_float_or_none(infos.get("lat"))
@@ -310,6 +349,15 @@ def forces_defis_complet():
     if not pdf_final_url:
         rel = os.path.relpath(pdf_path, current_app.static_folder).replace("\\", "/")
         pdf_final_url = url_for("static", filename=rel, _external=True)
+
+        # --- Mémo anti-reload pour Forces & Défis ---
+    try:
+        session["last_fingerprint_forces_defis"] = current_fingerprint
+        session["last_pdf_url_forces_defis"] = pdf_final_url
+        session["lock_until_forces_defis"] = time.time() + 15 * 60  # 15 minutes
+        current_app.logger.info("✅ [FD] Anti-reload: fingerprint + URL mémorisés.")
+    except Exception as e:
+        current_app.logger.warning("[FD] Anti-reload: impossible d'enregistrer l'état : %s", e)
 
     # F) Email non bloquant (si email fourni)
     try:

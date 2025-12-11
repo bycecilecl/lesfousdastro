@@ -281,22 +281,29 @@ def point_astral_blocs_complet():
     current_fingerprint = _fingerprint_infos(infos)
     
     # --- Anti-reload minimal (TTL 15 min) --------------------------------
-    ANTI_RELOAD = False
-    #ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1", "true", "yes")
-    # if ANTI_RELOAD:
-    #     last_fingerprint = session.get("last_fingerprint")
-    #     lock_until = float(session.get("lock_until", 0))
+    ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1", "true", "yes")
 
-    #     if time.time() < lock_until and current_fingerprint == last_fingerprint:
-    #         last_url = session.get("last_pdf_url")
-    #         if last_url:
-    #             return render_template(
-    #                 "paiement_effectue.html", 
-    #                 pdf_url=last_url, 
-    #                 already=True
-    #             )
-    #         return "Cette action a déjà été effectuée. Réessaie dans quelques minutes.", 429
-# ---------------------------------------------------------------------
+    if ANTI_RELOAD:
+        last_fingerprint = session.get("last_fingerprint")
+        lock_until = float(session.get("lock_until", 0))
+
+        # Si le verrou est toujours actif et que c'est le même user/données
+        if time.time() < lock_until and current_fingerprint == last_fingerprint:
+            last_url = session.get("last_pdf_url")
+            if last_url:
+                # On renvoie direct la page "paiement_effectue" avec le PDF existant
+                return render_template(
+                    "paiement_effectue.html",
+                    pdf_url=last_url,
+                    already=True
+                )
+            # Pas de PDF en session → on refuse poliment
+            return "Cette action a déjà été effectuée. Réessaie dans quelques minutes.", 429
+
+        # Sinon on pose / prolonge le verrou pour 15 minutes
+        session["last_fingerprint"] = current_fingerprint
+        session["lock_until"] = time.time() + 15 * 60
+    # ---------------------------------------------------------------------
     warnings_list = []
     contexte = {}
     

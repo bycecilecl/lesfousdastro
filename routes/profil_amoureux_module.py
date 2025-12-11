@@ -14,6 +14,7 @@ from utils.pdf_utils import html_to_pdf
 from utils.genre import get_user_prefs
 from utils.s3_utils import upload_file_and_presign
 from utils.email_sender import envoyer_email_avec_analyse
+import json, hashlib, time
 
 # Modules amour (génération des 4 blocs)
 from module.amour_blocs.maniere_aimer import generer_bloc_maniere_aimer
@@ -32,6 +33,13 @@ profil_amoureux_module = Blueprint(
     url_prefix="/profil-amoureux"
 )
 
+def _fingerprint_infos(infos: dict) -> str:
+    """Empreinte stable des infos utilisateur pour idempotence."""
+    try:
+        payload = json.dumps(infos or {}, sort_keys=True, ensure_ascii=False)
+    except Exception:
+        payload = str(infos or {})
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 def debug_snippets_profil_amoureux(theme, polarite: str) -> str:
     """
@@ -254,9 +262,55 @@ def profil_amoureux_complet():
             infos=infos,
         )
     
+    # 🔍 Debug paiement (comme Forces & Défis)
+    current_app.logger.info(f"[PA DEBUG] paiement_valide={session.get('paiement_valide')}")
+    current_app.logger.info(f"[PA DEBUG] last_payment={session.get('last_payment')}")
+    current_app.logger.info(f"[PA DEBUG] ordered_products={session.get('ordered_products')}")
+
+    # 1) On exige au moins un paiement validé
+    if not session.get("paiement_valide"):
+        return render_template(
+            "erreur.html",
+            titre="Profil Amoureux",
+            message="Aucun paiement confirmé."
+        ), 400
+
+    # 2) Vérifier que profil_amoureux est dans les produits (mais on ne bloque pas en prod)
+    ordered = session.get("ordered_products") or []
+    if "profil_amoureux" not in ordered:
+        current_app.logger.warning("[PA] Produit profil_amoureux non présent dans ordered_products")
+        # On laisse passer pour ne pas casser tes tests en prod.
+    
     infos = session.get("infos_utilisateur")
     if not infos:
         return "❌ Données manquantes. Veuillez recommencer depuis le formulaire.", 400
+    
+
+    # === Anti-reload minimal (TTL 15 min) spécifique Profil Amoureux ===
+    current_fingerprint = _fingerprint_infos(infos)
+    ANTI_RELOAD = os.getenv("ANTI_RELOAD", "true").lower() in ("1", "true", "yes")
+
+    if ANTI_RELOAD:
+        last_fingerprint = session.get("last_fingerprint_profil_amoureux")
+        lock_until = float(session.get("lock_until_profil_amoureux", 0))
+
+        # Si le verrou est encore actif et que c'est la même commande
+        if time.time() < lock_until and current_fingerprint == last_fingerprint:
+            last_url = session.get("last_pdf_url_profil_amoureux")
+            if last_url:
+                # On renvoie vers la page standard avec le PDF existant
+                return render_template(
+                    "paiement_effectue.html",
+                    pdf_url=last_url,
+                    already=True
+                )
+            # Pas d'URL en mémoire → on refuse gentiment
+            return "Cette action a déjà été effectuée. Réessaie dans quelques minutes.", 429
+
+        # Sinon, on pose / prolonge le verrou pour 15 minutes
+        session["last_fingerprint_profil_amoureux"] = current_fingerprint
+        session["lock_until_profil_amoureux"] = time.time() + 15 * 60
+    # -------------------------------------------------------------------
 
     print("\n" + "=" * 60)
     print("💗 DÉBUT ANALYSE PROFIL AMOUREUX")
@@ -429,7 +483,7 @@ def profil_amoureux_complet():
         # ═══════════════════════════════════════════════════════════
         print("📄 Étape 4: Génération du PDF...")
         
-        nom_clean = infos["nom"].replace(" ", "_")
+        nom_clean = (infos.get("nom") or "Analyse_Amour").replace(" ", "_")
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
         nom_fichier = f"Profil_Amoureux_{nom_clean}_{timestamp}"
 
@@ -475,6 +529,15 @@ def profil_amoureux_complet():
             warnings.append("Upload S3 indisponible, lien local utilisé.")
 
         pdf_final_url = download_url or pdf_url_local
+
+        # --- Mémo anti-reload pour Profil Amoureux ---
+        try:
+            session["last_fingerprint_profil_amoureux"] = current_fingerprint
+            session["last_pdf_url_profil_amoureux"] = pdf_final_url
+            session["lock_until_profil_amoureux"] = time.time() + 15 * 60  # 15 minutes
+            logger.info("✅ [PA] Anti-reload: fingerprint + URL mémorisés.")
+        except Exception as e:
+            logger.warning("[PA] Anti-reload: impossible d'enregistrer l'état : %s", e)
 
         # ═══════════════════════════════════════════════════════════
         # 8) ENVOI EMAIL (optionnel)
