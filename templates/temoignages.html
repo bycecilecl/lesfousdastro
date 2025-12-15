@@ -329,10 +329,10 @@ body {
   transition: transform 0.3s ease;
 }
 
-.swiper-slide img.zoomed {
+/* .swiper-slide img.zoomed {
   transform: scale(2);
   cursor: zoom-out;
-}
+} */
   </style>
 </head>
 <body>
@@ -441,12 +441,12 @@ body {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 
     // Après ton code Swiper existant, ajoute :
-    document.querySelectorAll('.swiper-slide img').forEach(img => {
-    img.addEventListener('click', (e) => {
-        e.stopPropagation(); // Empêche de fermer la lightbox
-        img.classList.toggle('zoomed');
-    });
-    });
+    // document.querySelectorAll('.swiper-slide img').forEach(img => {
+    // img.addEventListener('click', (e) => {
+    //    e.stopPropagation(); // Empêche de fermer la lightbox
+    //    img.classList.toggle('zoomed');
+    //});
+    //});
 
   </script>
 </body>
