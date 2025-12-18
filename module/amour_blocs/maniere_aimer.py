@@ -25,6 +25,22 @@ from module.amour_blocs.context_amour import generer_contexte_amour
 logger = logging.getLogger(__name__)
 
 
+    
+
+def _normalize_house_value(maison):
+    """
+    Normalise un numéro de maison pour matcher placements.csv.
+    Ex: 11, 11.0, "11", "11.0" -> "11"
+    """
+    if maison is None:
+        return None
+    try:
+        maison_int = int(float(str(maison).strip()))
+        return str(maison_int)
+    except (ValueError, TypeError):
+        return None
+
+
 def _get_planetes_en_maison(theme: dict, numero: int) -> list[str]:
     """
     Retourne la liste des planètes présentes dans la maison `numero`.
@@ -292,9 +308,9 @@ def generer_snippets_maniere_aimer(theme: dict, polarite: str = "Homme") -> str:
         if not df_venus_signe.empty:
             snippets_venus.append(df_to_snippets(df_venus_signe))
 
-    if maison_venus is not None:
-        brut = str(maison_venus).strip()
-        df_venus_maison = get_from_placements("Vénus", "Maison", f"Maison_{brut}", "Style", polarite)
+    valeur_maison = _normalize_house_value(maison_venus)
+    if valeur_maison:
+        df_venus_maison = get_from_placements("Vénus", "Maison", valeur_maison, "Style", polarite)
         if not df_venus_maison.empty:
             snippets_venus.append(df_to_snippets(df_venus_maison))
 
@@ -404,63 +420,6 @@ def generer_snippets_maniere_aimer(theme: dict, polarite: str = "Homme") -> str:
 
         snippets_parts.append(header + "\n" + "\n".join(snippets_lune))
 
-    # === 4) CHIRON : blessure affective (surtout en 1 et 7) ===
-    chiron_data = planetes.get("Chiron") or {}
-    signe_chiron = chiron_data.get("signe")
-    maison_chiron = chiron_data.get("maison")
-
-    snippets_chiron = []
-
-    if signe_chiron:
-        df_chiron_signe = get_from_placements(
-            planete="Chiron",
-            type_donnee="Signe",
-            valeur=signe_chiron,
-            bloc="Style",
-            polarite=polarite,
-        )
-        if not df_chiron_signe.empty:
-            snippets_chiron.append(df_to_snippets(df_chiron_signe))
-
-    # On privilégie Chiron en 1 et 7 pour l'amour
-    if maison_chiron in (1, 7):
-        brut = str(maison_chiron).strip()
-        valeur_maison = f"Maison_{brut}" if brut.isdigit() else brut
-
-        df_chiron_maison = get_from_placements(
-            planete="Chiron",
-            type_donnee="Maison",
-            valeur=valeur_maison,
-            bloc="Style",
-            polarite=polarite,
-        )
-        if not df_chiron_maison.empty:
-            snippets_chiron.append(df_to_snippets(df_chiron_maison))
-
-    # Aspects majeurs de Chiron vers les planètes affectives
-    aspects_chiron = _get_aspects_majeurs_planete_filtres(
-        theme,
-        nom_planete="Chiron",
-        polarite=polarite,
-        bloc="Style",
-    )
-    if aspects_chiron:
-        snippets_chiron.append(aspects_chiron)
-
-    if snippets_chiron:
-        details = []
-        if signe_chiron:
-            details.append(signe_chiron)
-        if maison_chiron is not None:
-            details.append(f"Maison {maison_chiron}")
-
-        header = "=== CHIRON : TA BLESSURE AFFECTIVE ==="
-        if details:
-            header += " (" + ", ".join(details) + ")"
-
-        snippets_parts.append(header + "\n" + "\n".join(snippets_chiron))
-    
-
 
     # === 4) MAISON 5 : désir, jeu amoureux ===
     snippets_m5 = []
@@ -564,8 +523,11 @@ def generer_bloc_maniere_aimer(theme: dict, call_llm: bool = True, polarite: str
     venus_data = planetes.get("Vénus") or planetes.get("Venus") or {}
     signe_venus = venus_data.get("signe")
     maison_venus = venus_data.get("maison")
-    
+
+    valeur_maison = _normalize_house_value(maison_venus)
+
     logger.info(f"[AMOUR M1] Vénus en {signe_venus}, Maison {maison_venus}")
+    logger.info(f"[AMOUR M1] Valeur maison Vénus envoyée BDD: {valeur_maison}")
     
     snippets_venus = []
 
@@ -580,10 +542,8 @@ def generer_bloc_maniere_aimer(theme: dict, call_llm: bool = True, polarite: str
         if not df_venus_signe.empty:
             snippets_venus.append(df_to_snippets(df_venus_signe))
 
-    if maison_venus is not None:
-        brut = str(maison_venus).strip()
-        valeur_maison = f"Maison_{brut}" if brut.isdigit() else brut
-        
+    valeur_maison = _normalize_house_value(maison_venus)
+    if valeur_maison:
         df_venus_maison = get_from_placements(
             planete="Vénus",
             type_donnee="Maison",
@@ -723,57 +683,6 @@ def generer_bloc_maniere_aimer(theme: dict, call_llm: bool = True, polarite: str
     if snippets_lune:
         snippets_parts.append(
             "=== LUNE : TES BESOINS ÉMOTIONNELS ===\n" + "\n".join(snippets_lune)
-        )
-
-        # ═════════════════════════════════════════
-    # 4) CHIRON : blessure affective
-    # ═════════════════════════════════════════
-    chiron_data = planetes.get("Chiron") or {}
-    signe_chiron = chiron_data.get("signe")
-    maison_chiron = chiron_data.get("maison")
-
-    logger.info(f"[AMOUR M1] Chiron en {signe_chiron}, Maison {maison_chiron}")
-
-    snippets_chiron = []
-
-    if signe_chiron:
-        df_chiron_signe = get_from_placements(
-            planete="Chiron",
-            type_donnee="Signe",
-            valeur=signe_chiron,
-            bloc="Style",
-            polarite=polarite,
-        )
-        if not df_chiron_signe.empty:
-            snippets_chiron.append(df_to_snippets(df_chiron_signe))
-
-    if maison_chiron in (1, 7):
-        brut = str(maison_chiron).strip()
-        valeur_maison = f"Maison_{brut}" if brut.isdigit() else brut
-
-        df_chiron_maison = get_from_placements(
-            planete="Chiron",
-            type_donnee="Maison",
-            valeur=valeur_maison,
-            bloc="Style",
-            polarite=polarite,
-        )
-        if not df_chiron_maison.empty:
-            snippets_chiron.append(df_to_snippets(df_chiron_maison))
-
-    aspects_chiron = _get_aspects_majeurs_planete_filtres(
-        theme,
-        nom_planete="Chiron",
-        polarite=polarite,
-        bloc="Style",
-    )
-    if aspects_chiron:
-        snippets_chiron.append(aspects_chiron)
-
-    if snippets_chiron:
-        snippets_parts.append(
-            "=== CHIRON : TA BLESSURE AFFECTIVE ===\n"
-            + "\n".join(snippets_chiron)
         )
 
     # ═════════════════════════════════════════
