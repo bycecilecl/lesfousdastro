@@ -384,6 +384,37 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         positions_tropicales[nomp] = deg_trop
         positions_vediques[nomp] = round(deg_sid, 2)
 
+
+    # --- AJOUT : Part de Fortune (tropicale) ---
+    def _is_day_chart(sun_deg: float, cusps) -> bool:
+        """Jour si le Soleil est au-dessus de l'horizon (souvent maisons 7→12)."""
+        sun_house = get_maison_planete(sun_deg, cusps)
+        return sun_house in [7, 8, 9, 10, 11, 12]
+
+    sun_deg = float(resultats_tropical["Soleil"]["degre"])
+    moon_deg = float(resultats_tropical["Lune"]["degre"])
+    asc_deg_f = float(asc_deg)
+
+    is_day = _is_day_chart(sun_deg, cusps)
+
+    # Formule classique
+    # Jour : ASC + Lune - Soleil
+    # Nuit : ASC + Soleil - Lune
+    pof_deg = (asc_deg_f + (moon_deg - sun_deg)) % 360 if is_day else (asc_deg_f + (sun_deg - moon_deg)) % 360
+
+    signe_pof, deg_pof = degre_vers_signe(pof_deg)
+    maison_pof = get_maison_planete(pof_deg, cusps)
+
+    resultats_tropical["Part de Fortune"] = {
+        "degre": round(pof_deg, 2),
+        "signe": signe_pof,
+        "degre_dans_signe": round(deg_pof, 2),
+        "maison": maison_pof,
+        "diurne": is_day
+    }
+
+    #positions_tropicales["Part de Fortune"] = round(pof_deg, 2)
+
     
     # Ajout de Ketu
     rahu_deg_trop = resultats_tropical['Rahu']['degre']
@@ -436,6 +467,26 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         'maison': maison_chiron
     }
     positions_tropicales['Chiron'] = deg_chiron
+
+    # --- AJOUT : Axe des Portes Uranus → Saturne ---
+    uranus_deg = float(resultats_tropical["Uranus"]["degre"])
+    saturne_deg = float(resultats_tropical["Saturne"]["degre"])
+
+    def _delta_circulaire(a, b):
+        d = (b - a) % 360.0
+        return d if d >= 0 else d + 360.0
+
+    axe_portes = {
+        "depart": "Uranus",
+        "arrivee": "Saturne",
+        "uranus_deg": round(uranus_deg, 2),
+        "saturne_deg": round(saturne_deg, 2),
+        "arc_uranus_vers_saturne": round(_delta_circulaire(uranus_deg, saturne_deg), 2),
+        "porte": "invisible"
+    }
+
+
+
 
     aspects = detecter_aspects(positions_tropicales)
 
@@ -527,5 +578,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         'interceptions': interceptions,
         'points_forts': points_forts,
         'angles_deg': angles_deg,         
-        'planetes_deg': planetes_deg,     
+        'planetes_deg': planetes_deg,
+        'axe_des_portes': axe_portes,
+        'part_de_fortune': resultats_tropical.get("Part de Fortune"),     
     }

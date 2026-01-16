@@ -24,14 +24,14 @@ def load_products():
         "flash_astral": {
             "label": "Flash Astral complet",
             "price_id": os.getenv("FLASH_ASTRAL_PRICE_ID", "").strip(),
-            "price_cents": _int_env("FLASH_ASTRAL_PRICE_CENTS", 2900),
+            "price_cents": _int_env("FLASH_ASTRAL_PRICE_CENTS", 3500),
             "success_route": "point_astral_blocs.point_astral_blocs_complet",
             "enabled": _bool_env("FLASH_ASTRAL_ENABLED", "1"),
         },
         "forces_defis": {
             "label": "Mes Potentiels et Défis",
             "price_id": os.getenv("FORCES_DEFIS_PRICE_ID", "").strip(),
-            "price_cents": _int_env("FORCES_DEFIS_PRICE_CENTS", 1200),
+            "price_cents": _int_env("FORCES_DEFIS_PRICE_CENTS", 1500),
             "success_route": "forces_defis_module.forces_defis_complet",
             "enabled": _bool_env("FORCES_DEFIS_ENABLED", "1"),
         },
@@ -39,14 +39,14 @@ def load_products():
         "profil_amoureux": {
             "label": "Analyse Amoureuse complète",
             "price_id": os.getenv("ANALYSE_AMOUR_PRICE_ID", "").strip(),
-            "price_cents": _int_env("ANALYSE_AMOUR_PRICE_CENTS", 1900),
+            "price_cents": _int_env("ANALYSE_AMOUR_PRICE_CENTS", 2500),
             "success_route": "profil_amoureux_module.profil_amoureux_complet",
             "enabled": _bool_env("ANALYSE_AMOUR_ENABLED", "1"),
         },
 
         "pack_essence": {
             "label": "Pack Essence (3 analyses)",
-            "price_cents": 4500,
+            "price_cents": 5400,
             "included_products": [
                 "flash_astral",
                 "forces_defis",

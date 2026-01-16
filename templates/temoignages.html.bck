@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Vos retours - Les Fous d'Astro</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+
+  <style>
+    /* === RESET GLOBAL === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* === FOND + TYPO identiques à astro-form === */
+body {
+  background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* === NAVBAR (copiée de astro-form) === */
+.navbar {
+  background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  backdrop-filter: blur(10px);
+}
+
+.navbar__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+  position: relative;
+  z-index: 1;
+}
+
+.navbar__brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: white;
+  background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.navbar__brand:hover { transform: scale(1.05); }
+
+.navbar__toggle {
+  display: none;
+  background: none;
+  border: 2px solid rgba(255,255,255,0.3);
+  color: white;
+  font-size: 1.2rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.navbar__links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 8px;
+}
+
+.navbar__links a {
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  border: 1px solid transparent;
+}
+
+.navbar__links a:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border-color: rgba(255,255,255,0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.navbar__links a.active {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border-color: rgba(255,255,255,0.3);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.navbar__links a[target="_blank"]::after {
+  content: ' ↗';
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* --- Responsive Menu --- */
+@media (max-width: 768px) {
+  .navbar__toggle { display: block; }
+  .navbar__links {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+    flex-direction: column;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    transform: translateY(-10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    gap: 0;
+  }
+  .nav-open .navbar__links {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+  .navbar__links a {
+    display: block;
+    margin: 8px 0;
+    padding: 15px 20px;
+    border-radius: 12px;
+    text-align: center;
+  }
+  .navbar__inner {
+    padding: 0 15px;
+    height: 60px;
+  }
+  .navbar__brand { font-size: 1.3rem; }
+}
+
+/* === CONTENEUR DE LA PAGE === */
+.tmg-page {
+  max-width: 1000px;
+  margin: 100px auto 60px;
+  padding: 0 20px;
+  color: #fff;
+  text-align: center;
+}
+
+.tmg-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: .25rem;
+}
+
+.tmg-sub {
+  color: #e5f7ff;
+  margin-bottom: 2rem;
+}
+
+/* === GRILLE DE TÉMOIGNAGES === */
+.tmg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  justify-items: center;
+}
+
+/* === CARTES === */
+.tmg-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  padding: 10px;
+  max-width: 320px;
+  transition: transform 0.2s ease;
+}
+
+.tmg-card:hover {
+  transform: translateY(-3px);
+}
+
+/* === IMAGES === */
+.tmg-img {
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  display: block;
+}
+
+/* === LIGHTBOX === */
+.tmg-lightbox {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.tmg-lightbox.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tmg-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10000;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.tmg-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+#tmgSwiper {
+  width: 90%;
+  max-width: 800px;
+  height: 80vh;
+}
+
+.swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swiper-slide img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 20px !important;
+}
+
+.swiper-pagination-bullet {
+  background: white !important;
+}
+
+/* === ZOOM SWIPER === */
+.swiper-zoom-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-in;
+}
+
+.swiper-zoom-container img {
+  transition: transform 0.3s ease;
+}
+
+.swiper-slide-zoomed .swiper-zoom-container {
+  cursor: zoom-out;
+}
+
+.swiper-zoom-container::after {
+  content: '🔍 Double-clic pour zoomer';
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.swiper-zoom-container:hover::after {
+  opacity: 1;
+}
+
+/* Cache le tooltip quand zoomé */
+.swiper-slide-zoomed .swiper-zoom-container::after {
+  display: none;
+}
+
+.swiper-slide img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  cursor: zoom-in;
+  transition: transform 0.3s ease;
+}
+
+/* .swiper-slide img.zoomed {
+  transform: scale(2);
+  cursor: zoom-out;
+} */
+  </style>
+</head>
+<body>
+  {% include "_sandbox_banner.html" %}
+
+  <!-- Navigation identique -->
+  <nav class="navbar">
+    <div class="navbar__inner">
+      <a class="navbar__brand" href="/">Les Fous d'Astro</a>
+
+      <button class="navbar__toggle" aria-label="Menu" aria-expanded="false"
+              onclick="document.body.classList.toggle('nav-open')">
+        ☰
+      </button>
+
+      <ul class="navbar__links">
+        <li><a href="{{ url_for('pages_bp.analyses') }}"
+               class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+
+        <li><a href="{{ url_for('site_bp.temoignages') }}"
+               class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
+
+        <li><a href="{{ url_for('pages_bp.formations') }}"
+               class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
+
+        <li><a href="{{ url_for('blog.blog') }}"
+               class="{% if request.path == url_for('blog.blog') %}active{% endif %}">Blog</a></li>
+
+        <li><a href="https://bycecilecl.com/categorie-produit/services/"
+               target="_blank" rel="noopener">Prestations</a></li>
+
+        <li><a href="{{ url_for('pages_bp.contact') }}"
+               class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
+
+        <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+      </ul>
+    </div>
+  </nav>
+    <div class="tmg-page">
+    <h1 class="tmg-title">Vos retours 💬</h1>
+    <p class="tmg-sub">Screenshots de vos messages. Merci pour votre confiance.</p>
+
+    <div class="tmg-grid" id="tmgGrid">
+      {% for it in items %}
+    <figure class="tmg-card" data-index="{{ loop.index0 }}">
+        <img class="tmg-img" src="{{ it.src }}" alt="Témoignage" loading="lazy">
+    </figure>
+    {% endfor %}
+    </div>
+  </div>
+
+  <div class="tmg-lightbox" id="tmgLightbox">
+    <button class="tmg-close" id="tmgClose">✕</button>
+    <div class="swiper" id="tmgSwiper">
+      <div class="swiper-wrapper">
+        {% for it in items %}
+        <div class="swiper-slide">
+        <div class="swiper-zoom-container">
+            <img src="{{ it.src }}" alt="{{ it.caption }}">
+        </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    const swiper = new Swiper('#tmgSwiper', {
+        loop: true,
+        centeredSlides: true,
+        slidesPerView: 1,
+        keyboard: { enabled: true },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        zoom: {
+            maxRatio: 3,  // Zoom jusqu'à 3x
+            minRatio: 1,
+        },
+        });
+
+    const grid = document.getElementById('tmgGrid');
+    const lb = document.getElementById('tmgLightbox');
+    const btnClose = document.getElementById('tmgClose');
+
+    grid.addEventListener('click', (e) => {
+      const fig = e.target.closest('.tmg-card');
+      if (!fig) return;
+      const index = parseInt(fig.getAttribute('data-index'), 10) || 0;
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      swiper.slideToLoop(index, 0);
+    });
+
+    function closeLightbox() {
+        lb.classList.remove('open');
+        document.body.style.overflow = '';
+        swiper.zoom.out(); // Dézoom automatique
+        }
+
+    btnClose.addEventListener('click', closeLightbox);
+    lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+    // Après ton code Swiper existant, ajoute :
+    // document.querySelectorAll('.swiper-slide img').forEach(img => {
+    // img.addEventListener('click', (e) => {
+    //    e.stopPropagation(); // Empêche de fermer la lightbox
+    //    img.classList.toggle('zoomed');
+    //});
+    //});
+
+  </script>
+</body>
+</html>

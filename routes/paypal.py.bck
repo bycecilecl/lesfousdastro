@@ -150,11 +150,12 @@ def create_order():
     # Construire les items PayPal
     items_paypal = []
     total_amount = 0.0
-    product_keys = []
+    payment_product_keys = []    # ce qui est facturé (pack + autres)
+    analysis_product_keys = []   # ce qui est généré comme analyses
     currency = os.getenv("PAYPAL_CURRENCY", "EUR")
     
     for item in cart_items:
-        pk = item.get("key")
+        pk = item.get("key") or item.get("id")
         qty = item.get("quantity", 1)
         
         product = PRODUCTS.get(pk)
@@ -162,11 +163,23 @@ def create_order():
             logger.warning(f"⚠️ Produit inconnu ignoré: {pk}")
             continue
         
-        product_keys.append(pk)
         price_cents = product.get("price_cents", 0)
         unit_price = price_cents / 100.0
         total_amount += unit_price * qty
+
+        # 👉 côté paiement
+        payment_product_keys.append(pk)
+
+        # 👉 côté analyses
+        included = product.get("included_products")
+        if included:
+            for _ in range(qty):
+                analysis_product_keys.extend(included)
+        else:
+            for _ in range(qty):
+                analysis_product_keys.append(pk)
         
+        # Ligne PayPal visible (Pack ou module)
         items_paypal.append({
             "name": product["label"],
             "description": product["label"],
@@ -181,22 +194,27 @@ def create_order():
     if not items_paypal:
         return jsonify({"error": "Panier vide"}), 400
     
-    # Stocker les produits en session
-    session["pending_paypal_products"] = product_keys
+    # Stocker les produits à générer en session (les modules réels)
+    session["pending_paypal_products"] = analysis_product_keys
     session["cart_items"] = cart_items
     session.modified = True
     
     token, base_url = get_paypal_token()
     
-    logger.info(f"💰 [PayPal] Total: {total_amount:.2f} {currency} | Produits: {product_keys}")
-    
-    # Payload PayPal avec items
+    logger.info(
+    f"💰 [PayPal] Total: {total_amount:.2f} {currency} | "
+    f"Payés: {payment_product_keys} | Analyses: {analysis_product_keys}"
+    )
+
     payload = {
         "intent": "CAPTURE",
         "purchase_units": [{
-            "reference_id": ",".join(product_keys),  # Concaténation pour référence
-            "custom_id": ",".join(product_keys),
-            "description": f"Analyses: {', '.join([PRODUCTS[pk]['label'] for pk in product_keys])}",
+            "reference_id": ",".join(payment_product_keys),  
+            "custom_id": ",".join(payment_product_keys),     
+            "description": (
+                f"Analyses: "
+                f"{', '.join([PRODUCTS[pk]['label'] for pk in payment_product_keys])}"
+            ),
             "amount": {
                 "currency_code": currency,
                 "value": f"{total_amount:.2f}",
@@ -209,7 +227,7 @@ def create_order():
             },
             "items": items_paypal
         }]
-    }
+}
 
     try:
         r = requests.post(
