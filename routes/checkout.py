@@ -10,6 +10,7 @@ from datetime import datetime
 from flask import Blueprint, request, session, redirect, url_for, render_template, abort, current_app
 from config.products import PRODUCTS
 import stripe
+from config.gift_codes import get_gift_code, is_code_used, mark_code_as_used
 
 
 checkout_bp = Blueprint("checkout_bp", __name__)
@@ -413,10 +414,19 @@ def traiter_analyses():
     
     # Stocker en session
     session["generated_analyses"] = resultats
+
+    # ✅ Consommer le code cadeau seulement si on arrive ici sans crash
+    if pending.get("provider") == "gift_code":
+        code = pending.get("code") or session.get("gift_code_pending")
+        if code:
+            gift = get_gift_code(code)
+            if gift and not is_code_used(gift):
+                mark_code_as_used(code)
+            session.pop("gift_code_pending", None)
+
     session.pop("pending_generation", None)
     session.modified = True
-    
-    # Afficher la page de confirmation avec tous les liens
+
     return render_template('paiement_effectue_multi.html',
-                         analyses=resultats,
-                         provider=pending.get("provider"))
+                        analyses=resultats,
+                        provider=pending.get("provider"))
