@@ -1,7 +1,7 @@
 # routes/gift_codes.py
 
 from flask import Blueprint, render_template, request, redirect, session, url_for
-from config.gift_codes import get_gift_code, is_code_used, mark_code_as_used
+from config.gift_codes import get_gift_code, is_code_used
 from config.products import PRODUCTS
 
 gift_bp = Blueprint("gift_bp", __name__, url_prefix="/carte-cadeau")
@@ -74,10 +74,8 @@ def valider_code_cadeau():
         "provider": "gift_code",
         "code": code,
     }
+    session["gift_code_pending"] = code
     session.modified = True
-
-    # 7️⃣ Marquer le code comme utilisé
-    mark_code_as_used(code)
 
     # 8️⃣ On passe par le même flux que Stripe/PayPal
     return redirect(url_for("checkout_bp.traiter_analyses"))
