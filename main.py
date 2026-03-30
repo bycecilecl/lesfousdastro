@@ -37,7 +37,7 @@ from routes.profil_amoureux_module import profil_amoureux_module
 from routes import register_routes
 from routes.geocode import geocode_bp
 from routes.paypal import payments_bp
-from routes.blog import blog_bp
+#from routes.blog import blog_bp
 from routes.gift_api import gift_api_bp
 from routes.gift_codes import gift_bp   
 
@@ -238,7 +238,7 @@ app.register_blueprint(stripe_webhook_bp)
 app.register_blueprint(pages_bp)
 app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
-app.register_blueprint(blog_bp)
+#app.register_blueprint(blog_bp)
 app.register_blueprint(site_bp)
 app.register_blueprint(profil_amoureux_module)
 app.register_blueprint(gift_api_bp)
