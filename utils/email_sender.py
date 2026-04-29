@@ -133,3 +133,55 @@ def envoyer_email_avec_analyse(destinataire: str,
     except Exception as e:
         logger.exception("❌ Erreur lors de l'envoi de l'email à %s : %s", destinataire, e)
         return False
+    
+
+def envoyer_email_clarification_3_questions(email, nom):
+    sujet = "Tes 3 questions de clarification"
+
+    corps = f"""
+Bonjour {nom},
+
+Tu as ajouté l’option “3 questions de clarification” à ton analyse.
+
+Merci de m’envoyer tes questions dans un délai de 30 jours après réception de ton analyse.
+
+Je te répondrai par retour écrit sous 10 jours ouvrés maximum après réception de tes 3 questions.
+
+Astrologiquement vôtre,
+Cécile CL 
+"""
+
+    return envoyer_email_avec_analyse(
+        destinataire=email,
+        sujet=sujet,
+        contenu_txt=corps
+    )
+
+def envoyer_email_notification_clarification_admin(
+    nom,
+    email_client,
+    analyse,
+    date_naissance,
+    heure_naissance,
+    lieu_naissance,
+):
+    sujet = "Nouvelle option 3 questions"
+
+    corps = f"""
+Nouvelle option clarification achetée.
+
+Client : {nom}
+Email : {email_client}
+Analyse : {analyse}
+
+Coordonnées :
+- Date : {date_naissance}
+- Heure : {heure_naissance}
+- Lieu : {lieu_naissance}
+"""
+
+    return envoyer_email_avec_analyse(
+        destinataire=os.getenv("EMAIL_ADMIN") or os.getenv("EMAIL_ENVOI"),
+        sujet=sujet,
+        contenu_txt=corps
+    )

@@ -69,6 +69,28 @@ def load_products():
                 "profil_amoureux",
             ],
         },
+
+        "pack_origines": {
+            "label": "Pack Origines",
+            "price_cents": _int_env("PACK_ORIGINES_PRICE_CENTS", 8300),
+            "included_products": [
+                "flash_astral",
+                "analyse_karmique",
+            ],
+            "enabled": _bool_env("PACK_ORIGINES_ENABLED", "1"),
+        },
+
+        "pack_integral": {
+            "label": "Pack Intégral",
+            "price_cents": _int_env("PACK_INTEGRAL_PRICE_CENTS", 9900),
+            "included_products": [
+                "flash_astral",
+                "analyse_karmique",
+                "profil_amoureux",
+                "forces_defis",
+            ],
+            "enabled": _bool_env("PACK_INTEGRAL_ENABLED", "1"),
+        },
     }
 
 try:
