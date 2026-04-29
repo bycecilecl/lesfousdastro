@@ -401,7 +401,7 @@ def paiement_effectue():
         "provider": "stripe",
         "session_id": session_id
     }
-    if clarification_achetee and email:
+    if clarification_achetee and email and not session.get("clarification_email_sent"):
 
         # mail client
         envoyer_email_clarification_3_questions(
@@ -418,6 +418,8 @@ def paiement_effectue():
             heure_naissance=heure_naissance,
             lieu_naissance=lieu_naissance,
         )
+
+        session["clarification_email_sent"] = True
 
         current_app.logger.info(
             f"📩 Option clarification envoyée pour {email}"

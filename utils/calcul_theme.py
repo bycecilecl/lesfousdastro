@@ -369,6 +369,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
             'degre_dans_signe': deg_signe_trop,
             'maison': maison_trop,
             'retrograde': is_retro,
+            'longitude': deg_trop,
         }
 
         resultats_vediques[nomp] = {
@@ -414,6 +415,20 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     }
 
     #positions_tropicales["Part de Fortune"] = round(pof_deg, 2)
+
+    # --- AJOUT : Point d'Illumination (opposé à la Part de Fortune) ---
+    illum_deg = (pof_deg + 180.0) % 360.0
+    signe_illum, deg_illum = degre_vers_signe(illum_deg)
+    maison_illum = get_maison_planete(illum_deg, cusps)
+
+    resultats_tropical["Point d'Illumination"] = {
+        "degre": round(illum_deg, 2),
+        "signe": signe_illum,
+        "degre_dans_signe": round(deg_illum, 2),
+        "maison": maison_illum
+    }
+
+    positions_tropicales["Point d'Illumination"] = round(illum_deg, 2)
 
     
     # Ajout de Ketu
@@ -468,27 +483,62 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     }
     positions_tropicales['Chiron'] = deg_chiron
 
-    # --- AJOUT : Axe des Portes Uranus → Saturne ---
+    # --- AJOUT : Axe des Portes Uranus ↔ Saturne ---
     uranus_deg = float(resultats_tropical["Uranus"]["degre"])
     saturne_deg = float(resultats_tropical["Saturne"]["degre"])
 
     def _delta_circulaire(a, b):
-        d = (b - a) % 360.0
-        return d if d >= 0 else d + 360.0
+        return (b - a) % 360.0
+
+    delta_forward = _delta_circulaire(uranus_deg, saturne_deg)
+    delta_backward = _delta_circulaire(saturne_deg, uranus_deg)
+
+    # On prend l'arc le plus court entre Uranus et Saturne
+    if delta_forward <= delta_backward:
+        arc_court = delta_forward
+        porte_invisible_deg = (uranus_deg + arc_court / 2.0) % 360.0
+    else:
+        arc_court = delta_backward
+        porte_invisible_deg = (saturne_deg + arc_court / 2.0) % 360.0
+
+    # La porte visible est à l'opposé exact
+    porte_visible_deg = (porte_invisible_deg + 180.0) % 360.0
+
+    porte_invisible_maison = get_maison_planete(porte_invisible_deg, cusps)
+    porte_visible_maison = get_maison_planete(porte_visible_deg, cusps)
+
+    porte_invisible_signe, porte_invisible_deg_signe = degre_vers_signe(porte_invisible_deg)
+    porte_visible_signe, porte_visible_deg_signe = degre_vers_signe(porte_visible_deg)
 
     axe_portes = {
         "depart": "Uranus",
         "arrivee": "Saturne",
         "uranus_deg": round(uranus_deg, 2),
         "saturne_deg": round(saturne_deg, 2),
-        "arc_uranus_vers_saturne": round(_delta_circulaire(uranus_deg, saturne_deg), 2),
-        "porte": "invisible"
+        "arc_uranus_saturne_court": round(arc_court, 2),
+
+        "porte_invisible_deg": round(porte_invisible_deg, 2),
+        "porte_invisible_signe": porte_invisible_signe,
+        "porte_invisible_deg_signe": round(porte_invisible_deg_signe, 2),
+        "porte_invisible_maison": porte_invisible_maison,
+
+        "porte_visible_deg": round(porte_visible_deg, 2),
+        "porte_visible_signe": porte_visible_signe,
+        "porte_visible_deg_signe": round(porte_visible_deg_signe, 2),
+        "porte_visible_maison": porte_visible_maison,
     }
 
+    print("DEBUG AXE DES PORTES :", axe_portes)
 
 
-
+    positions_tropicales_avec_angles = dict(positions_tropicales)
+    positions_tropicales_avec_angles.update({
+        "MC": round(mc_deg, 2),
+        "Descendant": round((asc_deg + 180.0) % 360.0, 2),
+        "FC": round((mc_deg + 180.0) % 360.0, 2),
+    })
     aspects = detecter_aspects(positions_tropicales)
+    aspects_avec_angles = detecter_aspects(positions_tropicales_avec_angles)
 
     nom_maitre_trop = get_maitre_ascendant(signe_asc)
     maitre_ascendant = None
@@ -520,6 +570,46 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
             'maison': maison
         }
 
+
+    # --- AJOUT : maisons dirigées par chaque planète (pour interceptions / karma / lectures avancées) --- 20/03/26
+    SIGN_RULERS = {
+        "Bélier": ["Mars"],
+        "Taureau": ["Vénus"],
+        "Gémeaux": ["Mercure"],
+        "Cancer": ["Lune"],
+        "Lion": ["Soleil"],
+        "Vierge": ["Mercure"],
+        "Balance": ["Vénus"],
+        "Scorpion": ["Mars", "Pluton"],
+        "Sagittaire": ["Jupiter"],
+        "Capricorne": ["Saturne"],
+        "Verseau": ["Saturne", "Uranus"],
+        "Poissons": ["Jupiter", "Neptune"],
+    }
+
+    house_rulers_map = {}
+
+    for maison_label, infos_maison in (maisons_tropicales or {}).items():
+        signe_cuspide = infos_maison.get("signe")
+        if not signe_cuspide:
+            continue
+
+        rulers = SIGN_RULERS.get(signe_cuspide, [])
+        if not rulers:
+            continue
+
+        try:
+            maison_num = int(str(maison_label).replace("Maison", "").strip())
+        except Exception:
+            continue
+
+        for ruler in rulers:
+            house_rulers_map.setdefault(ruler, []).append(maison_num)
+
+    for ruler in house_rulers_map:
+        house_rulers_map[ruler] = sorted(set(house_rulers_map[ruler]))
+
+    print("🏠 Calcul_Theme_house_rulers_map :", house_rulers_map)
 
     points_forts = extraire_points_forts({
         'planetes': resultats_tropical,
@@ -580,5 +670,8 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         'angles_deg': angles_deg,         
         'planetes_deg': planetes_deg,
         'axe_des_portes': axe_portes,
-        'part_de_fortune': resultats_tropical.get("Part de Fortune"),     
+        'part_de_fortune': resultats_tropical.get("Part de Fortune"),
+        'point_illumination': resultats_tropical.get("Point d'Illumination"),
+        'aspects_avec_angles': aspects_avec_angles,
+        'house_rulers_map': house_rulers_map,    
     }
