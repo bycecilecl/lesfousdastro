@@ -11,6 +11,10 @@ from flask import Blueprint, request, session, redirect, url_for, render_templat
 from config.products import PRODUCTS
 import stripe
 from config.gift_codes import get_gift_code, is_code_used, mark_code_as_used
+from utils.email_sender import (
+    envoyer_email_clarification_3_questions,
+    envoyer_email_notification_clarification_admin,
+)
 #from utils.brevo_utils import ajouter_contact_brevo
 
 
@@ -277,6 +281,16 @@ def paiement_effectue():
             product_keys = [pk]
         
         current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-PAYPAL] Produits: {product_keys}")
+
+        infos = session.get("infos_utilisateur", {})
+
+        nom = infos.get("nom")
+        email = infos.get("email")
+        date_naissance = infos.get("date_naissance")
+        heure_naissance = infos.get("heure_naissance")
+        lieu_naissance = infos.get("lieu_naissance")
+
+        clarification_achetee = "clarification_3_questions" in product_keys
         
         # Marquer comme traité
         session["pending_generation"] = {
@@ -284,6 +298,26 @@ def paiement_effectue():
             "provider": "paypal",
             "order_id": last_payment.get("order_id")
         }
+    
+        if clarification_achetee and email:
+
+            envoyer_email_clarification_3_questions(
+                email=email,
+                nom=nom
+            )
+
+            envoyer_email_notification_clarification_admin(
+                nom=nom,
+                email_client=email,
+                analyse=", ".join(product_keys),
+                date_naissance=date_naissance,
+                heure_naissance=heure_naissance,
+                lieu_naissance=lieu_naissance,
+            )
+
+            current_app.logger.info(
+                f"📩 Option clarification PayPal envoyée pour {email}"
+                )
         session.modified = True
         
         # Redirection vers page de traitement multi-produits
@@ -336,6 +370,16 @@ def paiement_effectue():
     
     current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-STRIPE] Produits: {product_keys}")
 
+    infos = session.get("infos_utilisateur", {})
+
+    nom = infos.get("nom")
+    email = infos.get("email")
+    date_naissance = infos.get("date_naissance")
+    heure_naissance = infos.get("heure_naissance")
+    lieu_naissance = infos.get("lieu_naissance")
+
+    clarification_achetee = "clarification_3_questions" in product_keys
+
     # ✅ Marqueurs Stripe
     session["last_payment"] = {
         "provider": "stripe",
@@ -357,6 +401,28 @@ def paiement_effectue():
         "provider": "stripe",
         "session_id": session_id
     }
+    if clarification_achetee and email:
+
+        # mail client
+        envoyer_email_clarification_3_questions(
+            email=email,
+            nom=nom
+        )
+
+        # mail admin
+        envoyer_email_notification_clarification_admin(
+            nom=nom,
+            email_client=email,
+            analyse=", ".join(product_keys),
+            date_naissance=date_naissance,
+            heure_naissance=heure_naissance,
+            lieu_naissance=lieu_naissance,
+        )
+
+        current_app.logger.info(
+            f"📩 Option clarification envoyée pour {email}"
+        )
+
     session.modified = True
 
     current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-STRIPE] Paiement validé | produits={product_keys}")

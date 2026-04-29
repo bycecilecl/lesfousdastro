@@ -35,13 +35,29 @@ def load_products():
             "success_route": "forces_defis_module.forces_defis_complet",
             "enabled": _bool_env("FORCES_DEFIS_ENABLED", "1"),
         },
-        # ✅ NOUVEAU : Module Amour
+    
         "profil_amoureux": {
             "label": "Analyse Amoureuse complète",
             "price_id": os.getenv("ANALYSE_AMOUR_PRICE_ID", "").strip(),
             "price_cents": _int_env("ANALYSE_AMOUR_PRICE_CENTS", 2500),
             "success_route": "profil_amoureux_module.profil_amoureux_complet",
             "enabled": _bool_env("ANALYSE_AMOUR_ENABLED", "1"),
+        },
+
+        "analyse_karmique": {
+            "label": "Analyse karmique",
+            "price_id": os.getenv("ANALYSE_KARMIQUE_PRICE_ID", "").strip(),
+            "price_cents": _int_env("ANALYSE_KARMIQUE_PRICE_CENTS", 6900),
+            "success_route": "analyse_karmique.analyse_karmique_complete",
+            "enabled": _bool_env("ANALYSE_KARMIQUE_ENABLED", "1"),
+        },
+
+        "clarification_3_questions": {
+            "label": "Option 3 questions de clarification",
+            "price_id": os.getenv("CLARIFICATION_3_QUESTIONS_PRICE_ID", "").strip(),
+            "price_cents": _int_env("CLARIFICATION_3_QUESTIONS_PRICE_CENTS", 2500),
+            "success_route": None,
+            "enabled": _bool_env("CLARIFICATION_3_QUESTIONS_ENABLED", "1"),
         },
 
         "pack_essence": {
