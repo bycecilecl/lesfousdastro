@@ -236,17 +236,22 @@ Fais une analyse de max 15 lignes.
 
         contenu_html = textwrap.dedent(f"""
         <p>Bonjour {prenom},</p>
-        <p>Voici ton analyse astrologique gratuite :</p>
+        <p>Ton thème natal vient de parler 👇</p>
         <hr>
         <div>{texte}</div>
         <hr>
-        <p><strong>🌠 Envie d’aller plus loin ?</strong><br>
-        Découvre ton <strong>Flash Astral</strong> : une lecture complète, personnalisée et instantanée de ton thème natal.</p>
-        <p>De plus, toute personne ayant réalisé un Flash Astral bénéficie de 
-        <strong>10 % de réduction</strong> sur l’analyse complète du thème natal 💫</p>
-        <p>➡️ <a href="https://bycecilecl.com/categorie-produit/services/" target="_blank">
-        Découvre les offres ici</a></p>
-        <p>À très vite,<br>Les Fous d’Astro – By Cécile CL</p>
+        <p><strong>Tu veux comprendre d'où viennent tes schémas qui se répètent ?</strong><br>
+        Cette analyse te donne une première lecture. Le <strong>Flash Astral</strong> va plus loin :
+        il met en lumière tes grands mécanismes, tes forces, tes blocages, et les zones de ton thème
+        qui demandent à être comprises plus finement.</p>
+        <p style="text-align:center;">
+        <a href="https://lesfousdastro.fr"
+        style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
+        border-radius:8px;text-decoration:none;font-weight:bold;">
+        → Obtenir mon Flash Astral
+        </a>
+        </p>
+        <p>À très vite,<br>Cécile ✨</p>
         """).strip()
 
 
@@ -271,34 +276,45 @@ Fais une analyse de max 15 lignes.
 
         # 🎨 8) Génération du HTML pour le modal
         html = f"""
-            <div class="analysis-summary">
-                <h4>🌟 Bonjour {theme['nom']}, voici ton profil astrologique :</h4>
-                <div style="margin: 20px 0; line-height: 1.6;">{texte}</div>
-                
-                <div style="margin-top: 25px; padding: 20px; background: rgba(31, 98, 142, 0.1); border-radius: 15px; text-align: center;">
-                    <p><strong>🎯 Cette analyse te plaît ?</strong></p>
-                    <p>Découvre bien plus avec nos analyses approfondies !</p>
-                </div>
-            </div>
-            <!-- Disclaimer -->
-            <div style="margin-top:20px; padding-top:12px; border-top:1px solid #ddd; font-size:14px; color:#555;">
-                ⚠️ <strong>Note importante</strong> — Cette analyse gratuite est une
-                <strong>version simplifiée</strong> générée automatiquement à partir de vos
-                données de naissance. Elle donne un aperçu général mais reste
-                <strong>partielle et générique</strong>.<br>
-                Pour une interprétation plus complète et personnalisée,
-                découvrez le <strong>Flash Astral</strong> ✨
-            </div>
-            <!-- Exemple FLash Astral -->
-            <div style="margin-top:25px; text-align:center;">
-                <a href="/static/Exemple_Flash_Astral_Cecile.pdf" target="_blank" 
-                style="display:inline-block; margin-top:10px; padding:12px 20px;
-                        background:#1f628e; color:white; text-decoration:none;
-                        border-radius:8px; font-weight:bold;">
-                📄 Voir un exemple complet de Flash Astral
+        <div class="analysis-summary">
+            <h4>🌟 Bonjour {theme['nom']}, voici ton profil astrologique :</h4>
+            <div style="margin: 20px 0; line-height: 1.6;">{texte}</div>
+            
+            <div style="margin-top:25px; padding:20px; background:rgba(31,98,142,0.1);
+            border-radius:15px; text-align:center;">
+                <p><strong>Tu veux aller plus loin ?</strong></p>
+                <p style="margin-bottom:15px; color:#555;">
+                    Cette analyse te donne une première lecture de ton thème.<br>
+                    Deux façons de creuser selon ce qui t'attire :
+                </p>
+
+                <a href="/flash_astral"
+                style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
+                border-radius:8px;text-decoration:none;font-weight:bold;margin-bottom:10px;
+                width:80%;max-width:300px;">
+                ✨ Mon Flash Astral
+                </a>
+                <p style="font-size:12px;color:#777;margin:0 0 15px 0;">
+                    Tes grands mécanismes, forces et blocages — PDF complet
+                </p>
+
+                <a href="/analyse_karmique"
+                style="display:inline-block;padding:12px 24px;background:#6b3fa0;color:white;
+                border-radius:8px;text-decoration:none;font-weight:bold;margin-bottom:10px;
+                width:80%;max-width:300px;">
+                🔮 Mon Analyse Karmique
+                </a>
+                <p style="font-size:12px;color:#777;margin:0 0 20px 0;">
+                    D'où viennent tes schémas répétitifs — nœuds, Chiron, Lilith
+                </p>
+
+                <a href="/static/Exemple_Flash_Astral_Cecile.pdf" target="_blank"
+                style="font-size:13px;color:#1f628e;text-decoration:underline;">
+                📄 Voir un exemple du Flash Astral avant d'acheter
                 </a>
             </div>
-        """
+        </div>
+    """
 
         # 🔍 9) Données de debug pour toi (ajoutées à la réponse mais cachées)
         debug_data = {

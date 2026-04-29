@@ -1,0 +1,954 @@
+# utils/analyse_karmique_renderer.py
+
+from __future__ import annotations
+from typing import Any, Dict, List, Optional, Callable
+from utils.karmique.karmique_bdd import get_karmique_interp
+from utils.karmique.chapitres.luminaires_karmiques import interpret_block_luminaires_karmiques_llm
+
+def _bdd(astre: str, donnee: str, valeur) -> str:
+    """
+    Helper: renvoie le texte BDD si trouvé, sinon "".
+    valeur peut être int/str.
+    """
+    if valeur is None:
+        return ""
+    txt = get_karmique_interp(astre, donnee, str(valeur))
+    return txt.strip() if isinstance(txt, str) and txt.strip() else ""
+
+
+
+def render_all(
+    blocks: List[Dict[str, Any]],
+    theme: Dict[str, Any],
+    score: Dict[str, Any],
+    call_llm: Optional[Callable[[str], str]] = None,
+    global_ctx: Optional[Dict[str, Any]] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Remplit block["content"] pour chaque bloc.
+    Pour l'instant: texte brut.
+    Plus tard: tu remplaceras le texte par du HTML (mêmes fonctions, même pipeline).
+    """
+    out = []
+    for b in blocks:
+        bb = dict(b)
+
+        # ✅ si le bloc a déjà du contenu, on le garde
+        if isinstance(bb.get("content"), str) and bb["content"].strip():
+            out.append(bb)
+            continue
+
+        bb["content"] = render_block(bb, theme, score, call_llm=call_llm, global_ctx=global_ctx)
+        out.append(bb)
+
+    return out
+
+
+def render_block(
+    block: Dict[str, Any],
+    theme: Dict[str, Any],
+    score: Dict[str, Any],
+    call_llm: Optional[Callable[[str], str]] = None,
+    global_ctx: Optional[Dict[str, Any]] = None,
+) -> str:
+    bid = block.get("id")
+
+    if bid == "header":
+        return _render_header(block, theme, score)
+    
+    if bid == "intro_karmique":
+        return _render_intro_karmique(block, theme, score)
+    
+    if bid == "moon_karmique":
+        return _render_moon_karmique(block, theme, score)
+        
+    if bid == "elements":
+        return _render_elements(block, theme, score)
+    
+    if bid == "sensitive_points":
+        return _render_sensitive_points(block, theme, score)
+    
+    if bid == "luminaires_karmiques":
+        # si le builder a déjà mis du contenu, on le laisse
+        if isinstance(block.get("content"), str) and block["content"].strip():
+            return block["content"]
+        if isinstance(block.get("text"), str) and block["text"].strip():
+            return block["text"]
+
+        # sinon, si LLM dispo, on transforme le brut en chapitre client-friendly
+        if call_llm:
+            return interpret_block_luminaires_karmiques_llm(
+                block, theme, score, call_llm=call_llm, global_ctx=global_ctx
+            )
+
+        # fallback : renvoyer le brut (content/text) sinon rien
+        return block.get("content") or block.get("text") or ""
+
+    if bid == "lunar_nodes":
+        return _render_lunar_nodes(block, theme, score)
+
+    if bid == "karmic_houses":
+        return _render_karmic_houses(block, theme, score)
+    
+    if bid == "maison_12":
+        return _render_maison_12(block, theme, score)
+    
+    if bid == "retrogrades":
+        return _render_retrogrades(block, theme, score)
+
+    if bid == "interceptions":
+        return _render_interceptions(block, theme, score)
+    
+    if bid == "amas_signes":
+        return _render_amas_signes(block, theme, score)
+    
+    if bid == "saturn_pluto":
+        return _render_saturn_pluto(block, theme, score)
+    
+    if bid == "synthese_karmique":
+        return _render_synthese_karmique(block, theme, score)
+    
+    # bloc inconnu => pas d'erreur, juste vide
+    return ""
+
+
+# -----------------------
+# Renderers (texte brut)
+# -----------------------
+
+def _render_header(block: Dict[str, Any],
+                   theme: Dict[str, Any],
+                   score: Dict[str, Any]) -> str:
+    total = score.get("total", "—")
+    label = score.get("label", "—")
+    breakdown = score.get("breakdown", {}) or {}
+
+    lines = [
+        f"Poids karmique : {total} — {label}",
+        "",
+        "Répartition :",
+    ]
+
+    elements = score.get("meta", {}).get("dominant_elements")
+
+    if elements:
+        lines.insert(2, f"Dominante(s) élémentaire(s) : {' / '.join(elements)}")
+        lines.insert(3, "")
+
+    for k, v in breakdown.items():
+        if v:
+            lines.append(f"- {k} : {v}")
+    return "\n".join(lines)
+
+
+def _render_lunar_nodes(block: Dict[str, Any],
+                        theme: Dict[str, Any],
+                        score: Dict[str, Any]) -> str:
+    
+     # ✅ Priorité 1 : content
+    if isinstance(block.get("content"), str) and block["content"].strip():
+        return block["content"]
+    
+    # ✅ Priorité 2 : text
+    if isinstance(block.get("text"), str) and block["text"].strip():
+        return block["text"]
+    
+
+    data = (block.get("data") or {})
+
+    nn_sign = data.get("nn_sign")
+    nn_house = data.get("nn_house")
+    ns_sign = data.get("ns_sign")
+    ns_house = data.get("ns_house")
+
+    # anciens champs (fallback)
+    nn_ruler = data.get("nn_ruler")
+    nn_ruler_house = data.get("nn_ruler_house")
+    ns_ruler = data.get("ns_ruler")
+    ns_ruler_house = data.get("ns_ruler_house")
+    nn_ruler_aspects = data.get("nn_ruler_aspects", []) or []
+    ns_ruler_aspects = data.get("ns_ruler_aspects", []) or []
+
+    # nouveaux champs (source principale)
+    nn_rulers_details = data.get("nn_rulers_details", []) or []
+    ns_rulers_details = data.get("ns_rulers_details", []) or []
+
+    lines = [
+        f"Nœud Nord : {nn_sign} (Maison {nn_house})",
+        f"Nœud Sud  : {ns_sign} (Maison {ns_house})",
+        "",
+    ]
+
+    # ---------
+    # NŒUD NORD
+    # ---------
+    if nn_rulers_details:
+        names = [d.get("name") for d in nn_rulers_details if d.get("name")]
+        lines.append(f"Maître(s) du Nœud Nord : {' / '.join(names) if names else '—'}")
+
+        for d in nn_rulers_details:
+            nm = d.get("name")
+            if not nm:
+                continue
+            
+            # ✅ Va chercher le signe dans le thème
+            planets = theme.get("planetes", {})
+            info = planets.get(nm, {})
+            sig = info.get("signe")
+            hs_from_theme = info.get("maison")  # Plus fiable que d.get("house")
+            
+            # Construit l'affichage
+            parts = []
+            if sig:
+                parts.append(str(sig))
+            if hs_from_theme is not None:
+                parts.append(f"Maison {hs_from_theme}")
+            extra = " — ".join(parts) if parts else "—"
+            
+            lines.append(f"- {nm} ({extra})")
+            
+            for a in (d.get("aspects") or [])[:5]:
+                orb = a.get("orb")
+                orb_txt = f"{orb:.2f}" if isinstance(orb, (int, float)) else (orb if orb is not None else "—")
+                lines.append(f"  • {a.get('type')} avec {a.get('with')} (orbe {orb_txt})")
+    else:
+        # fallback ancien format (un seul maître)
+        lines.append(f"Maître du Nœud Nord : {nn_ruler or '—'} (Maison {nn_ruler_house if nn_ruler_house is not None else '—'})")
+        if nn_ruler_aspects:
+            lines.append("Aspects du maître du Nœud Nord :")
+            for a in nn_ruler_aspects[:5]:
+                orb = a.get("orb")
+                orb_txt = f"{orb:.2f}" if isinstance(orb, (int, float)) else (orb if orb is not None else "—")
+                lines.append(f"- {a.get('type')} avec {a.get('with')} (orbe {orb_txt})")
+
+    lines.append("")
+    
+    # ---------
+    # NŒUD SUD
+    # ---------
+    if ns_rulers_details:
+        names = [d.get("name") for d in ns_rulers_details if d.get("name")]
+        lines.append(f"Maître(s) du Nœud Sud : {' / '.join(names) if names else '—'}")
+
+        for d in ns_rulers_details:
+            nm = d.get("name")
+            if not nm:
+                continue
+            
+            # ✅ Va chercher le signe dans le thème
+            planets = theme.get("planetes", {})
+            info = planets.get(nm, {})
+            sig = info.get("signe")
+            hs_from_theme = info.get("maison")  # Plus fiable que d.get("house")
+            
+            # Construit l'affichage
+            parts = []
+            if sig:
+                parts.append(str(sig))
+            if hs_from_theme is not None:
+                parts.append(f"Maison {hs_from_theme}")
+            extra = " — ".join(parts) if parts else "—"
+            
+            lines.append(f"- {nm} ({extra})")
+            
+            for a in (d.get("aspects") or [])[:5]:
+                orb = a.get("orb")
+                orb_txt = f"{orb:.2f}" if isinstance(orb, (int, float)) else (orb if orb is not None else "—")
+                lines.append(f"  • {a.get('type')} avec {a.get('with')} (orbe {orb_txt})")
+    else:
+        # fallback ancien format
+        lines.append(f"Maître du Nœud Sud : {ns_ruler or '—'} (Maison {ns_ruler_house if ns_ruler_house is not None else '—'})")
+        if ns_ruler_aspects:
+            lines.append("Aspects du maître du Nœud Sud :")
+            for a in ns_ruler_aspects[:5]:
+                orb = a.get("orb")
+                orb_txt = f"{orb:.2f}" if isinstance(orb, (int, float)) else (orb if orb is not None else "—")
+                lines.append(f"- {a.get('type')} avec {a.get('with')} (orbe {orb_txt})")
+
+    return "\n".join(lines)
+
+
+def _render_karmic_houses(block: Dict[str, Any],
+                          theme: Dict[str, Any],
+                          score: Dict[str, Any]) -> str:
+    active = block.get("active_houses", {}) or {}
+    lines = ["Maisons karmiques activées :"]
+    for h in sorted(active.keys()):
+        lines.append(f"- Maison {h} : " + ", ".join(active[h]))
+    return "\n".join(lines)
+
+
+def _render_interceptions(block: Dict[str, Any],
+                          theme: Dict[str, Any],
+                          score: Dict[str, Any]) -> str:
+    # ✅ Priorité 1 : content (si encore présent)
+    if isinstance(block.get("content"), str) and block["content"].strip():
+        return block["content"]
+    
+    # ✅ Priorité 2 : text (sauvegarde du builder)
+    if isinstance(block.get("text"), str) and block["text"].strip():
+        return block["text"]
+    
+    # ✅ Priorité 3 : fallback minimal
+    data = block.get("data", {}) or {}
+    signes = data.get("signes_interceptes", []) or []
+    axes = data.get("axes_interceptes", []) or []
+    rulers = data.get("intercepted_rulers", []) or []
+
+    lines = []
+    if signes:
+        lines.append("Signes interceptés : " + ", ".join(signes))
+    if axes:
+        lines.append("Axes interceptés : " + ", ".join([f"{a[0]}–{a[1]}" for a in axes if isinstance(a, (list, tuple)) and len(a) == 2]))
+    if rulers:
+        lines.append("Maîtres concernés : " + ", ".join(rulers))
+    
+    return "\n".join(lines) if lines else ""
+
+def _render_amas_signes(block: Dict[str, Any],
+                        theme: Dict[str, Any],
+                        score: Dict[str, Any]) -> str:
+    data = (block.get("data") or {})
+    amas_list = data.get("amas_signes", []) or []
+
+    if not amas_list:
+        return ""
+
+    lines = ["Amas par signe :"]
+    for a in amas_list:
+        signe = a.get("signe", "—")
+        planetes = a.get("planetes", []) or []
+        score_impact = a.get("score_impact", 0)
+
+        flags = []
+        if a.get("is_water"):
+            flags.append("Eau")
+        if a.get("is_south_node_sign"):
+            flags.append("Signe du Nœud Sud")
+
+        ftxt = f" ({', '.join(flags)})" if flags else ""
+        lines.append(f"- {signe} : {', '.join(planetes)}{ftxt} → +{score_impact}")
+
+    return "\n".join(lines)
+
+
+def _render_retrogrades(block, theme, score) -> str:
+    # ✅ Priorité 1 : content (si encore présent)
+    if isinstance(block.get("content"), str) and block["content"].strip():
+        return block["content"]
+    
+    # ✅ Priorité 2 : text (sauvegarde du builder)
+    if isinstance(block.get("text"), str) and block["text"].strip():
+        return block["text"]
+
+    # ✅ Priorité 3 : fallback minimal
+    data = block.get("data") or {}
+    retro = data.get("retrogrades") or []
+    if not retro:
+        return ""
+
+    lines = ["Planètes rétrogrades :"]
+    for r in retro:
+        name = r.get("name", "—")
+        signe = r.get("signe", "—")
+        maison = r.get("maison", "—")
+        lines.append(f"- {name} ({signe} — Maison {maison})")
+    return "\n".join(lines)
+
+# def _render_retrogrades(block: Dict[str, Any],
+#                         theme: Dict[str, Any],
+#                         score: Dict[str, Any]) -> str:
+#     data = (block.get("data") or {})
+#     retro = data.get("retrogrades", []) or []
+
+#     if not retro:
+#         return ""
+
+#     lines = ["Planètes rétrogrades :"]
+#     for r in retro:
+#         name = r.get("name", "—")
+#         signe = r.get("signe")
+#         maison = r.get("maison")
+
+#         # format sympa
+#         extra = []
+#         if signe:
+#             extra.append(str(signe))
+#         if maison:
+#             extra.append(f"Maison {maison}")
+
+#         if extra:
+#             lines.append(f"- {name} ({' — '.join(extra)})")
+#         else:
+#             lines.append(f"- {name}")
+
+#     return "\n".join(lines)
+
+
+def _render_sensitive_points(block: Dict[str, Any],
+                             theme: Dict[str, Any],
+                             score: Dict[str, Any]) -> str:
+    data = (block.get("data") or {})
+    points = data.get("points", []) or []
+    cuspides = data.get("cuspides", []) or []
+
+    # s'il n'y a NI points à 29° NI cuspides → on ne rend rien
+    if not points and not cuspides:
+        return ""
+
+    lines = ["Degrés à 29° (fin de cycle / pression d’aboutir) :"]
+    for p in points:
+        name = p.get("name", "—")
+        deg = p.get("deg", "—")
+        signe = p.get("signe")
+        maison = p.get("maison")
+
+        extra = []
+        if signe:
+            extra.append(str(signe))
+        if maison:
+            extra.append(f"Maison {maison}")
+
+        tag = " ✅ VIP" if p.get("is_vip") else ""
+
+        if extra:
+            lines.append(f"- {name} : {deg}° ({' — '.join(extra)}){tag}")
+        else:
+            lines.append(f"- {name} : {deg}°{tag}")
+
+    # --- AJOUT : cuspides (27°–3°) ---
+    cuspides = data.get("cuspides", []) or []
+
+    if cuspides:
+        lines.append("")
+        lines.append("Entre-deux signes (27°–3°) :")
+        for c in cuspides:
+            name = c.get("name")
+            deg = c.get("deg")
+            current = c.get("current_sign")
+            other = c.get("other_sign")
+            position = c.get("position")
+
+            if position == "fin":
+                txt = f"va vers {other}"
+            else:
+                txt = f"vient de {other}"
+
+            lines.append(
+                f"- {name} : {deg}° {current} ({position}) — {txt}"
+            )
+
+    return "\n".join(lines)
+
+def _render_saturn_pluto(block: Dict[str, Any],
+                         theme: Dict[str, Any],
+                         score: Dict[str, Any]) -> str:
+    data = block.get("data") or {}
+    on_angles = data.get("on_angles") or []
+    hard = data.get("hard_aspect")
+
+    lines = ["Saturne / Pluton :"]
+
+    if on_angles:
+        lines.append("Conjonction à un angle (orbe ≤ 5°) :")
+        for x in on_angles:
+            planet = x.get("planet")
+            ang = x.get("angle")
+            orb = x.get("orb")
+            ps = x.get("planet_sign")
+            ph = x.get("planet_house")
+
+            extra = []
+            if ps:
+                extra.append(ps)
+            if ph is not None:
+                extra.append(f"Maison {ph}")
+
+            extra_txt = f" ({' — '.join(extra)})" if extra else ""
+            lines.append(f"- {planet} conjoint {ang} (orbe {orb}°){extra_txt}")
+
+        lines.append("")
+        lines.append("👉 Lecture rapide : ça rend Saturne/Pluton très ‘audibles’ dans la vie :")
+        lines.append("   - Saturne = cadre, exigence, réalité")
+        lines.append("   - Pluton  = transformation, intensité, mue")
+        lines.append("   Quand c’est collé à un angle : ça se voit, ça se vit, ça marque.")
+
+    if hard:
+        typ = hard.get("type")
+        orb = hard.get("orb")
+        sat = hard.get("saturne", {}) or {}
+        plu = hard.get("pluton", {}) or {}
+
+        sat_txt = []
+        if sat.get("sign"):
+            sat_txt.append(sat["sign"])
+        if sat.get("house") is not None:
+            sat_txt.append(f"Maison {sat['house']}")
+
+        plu_txt = []
+        if plu.get("sign"):
+            plu_txt.append(plu["sign"])
+        if plu.get("house") is not None:
+            plu_txt.append(f"Maison {plu['house']}")
+
+        lines.append(f"Aspect dur Saturne–Pluton : {typ} (orbe {orb}°)")
+        if sat_txt or plu_txt:
+            lines.append(f"- Saturne : {' — '.join(sat_txt) if sat_txt else '—'}")
+            lines.append(f"- Pluton  : {' — '.join(plu_txt) if plu_txt else '—'}")
+
+        lines.append("")
+        lines.append("👉 Lecture rapide : tension ‘construction vs destruction’.")
+        lines.append("   Ça pousse à faire du solide… mais en acceptant de perdre l’ancien au passage.")
+
+        lines.append("")
+        lines.append(f"DEBUG on_angles={on_angles}")
+        lines.append(f"DEBUG hard={hard}")
+
+    return "\n".join(lines)
+
+def _render_elements(block: Dict[str, Any],
+                     theme: Dict[str, Any],
+                     score: Dict[str, Any]) -> str:
+    data = block.get("data") or {}
+    counts = data.get("elements_count") or {}
+    lum = data.get("elements_luminaries") or {}
+    pers = data.get("elements_personal_extended") or {}
+    dom = data.get("dominant_elements") or []
+
+    if not counts or not dom:
+        return ""
+
+    lines = []
+    lines.append("Dominante(s) élémentaire(s) : " + " / ".join(dom))
+    lines.append("")
+
+    # Interprétation BDD par dominante
+    # Clés CSV conseillées :
+    # ASTRE=KARMIQUE, DONNEE=element, VALEUR=Air (ou Terre/Feu/Eau)
+    for e in dom:
+        txt = _bdd("Karmique", "element", e)
+        if txt:
+            lines.append(f"• {e} : {txt}")
+
+    if dom:
+        lines.append("")
+
+    lines.append("Comptage (planètes + angles) :")
+    for e in ("Feu", "Terre", "Air", "Eau"):
+        lines.append(f"- {e} : {counts.get(e, 0)}")
+
+    if len(dom) > 1:
+        lines.append("")
+        lines.append("Départage : luminaires → planètes personnelles étendues.")
+        lines.append("Luminaires : " + ", ".join([f"{e}={lum.get(e,0)}" for e in ("Feu","Terre","Air","Eau")]))
+        lines.append("Perso étendues : " + ", ".join([f"{e}={pers.get(e,0)}" for e in ("Feu","Terre","Air","Eau")]))
+
+    return "\n".join(lines)
+
+# def _render_intro_karmique(block, theme, score) -> str:
+#     data = block.get("data", {}) or {}
+
+#     elements = data.get("dominant_elements") or []
+#     moon_sign = data.get("moon_sign")
+#     moon_house = data.get("moon_house")
+#     moon_karmic = data.get("moon_is_karmic_house")
+#     cuspides = data.get("cuspides", [])
+
+#     lines = []
+
+#     # 1) Climat général d’incarnation
+#     if elements:
+#         lines.append(
+#             f"Cette incarnation s’inscrit sous une dominante "
+#             f"{' / '.join(elements)}, qui donne le climat général "
+#             "dans lequel l’âme évolue et apprend."
+#         )
+#         lines.append("")
+
+#     # 2) Lune comme repère karmique (sans analyse)
+#     if moon_sign:
+#         lines.append(
+#             f"La Lune, située en {moon_sign}"
+#             + (f" en Maison {moon_house}" if moon_house else "")
+#             + ", agit comme un point central de la mémoire émotionnelle."
+#         )
+
+#         if moon_karmic:
+#             lines.append(
+#                 "Placée dans une maison karmique, elle indique "
+#                 "un vécu émotionnel ancien réactivé dans cette vie."
+#             )
+
+#         lines.append("")
+
+#     # 3) Zones de transition
+#     for c in cuspides:
+#         name = c.get("name")
+#         pos = c.get("position")
+#         cur = c.get("current_sign")
+#         other = c.get("other_sign")
+
+#         if name and pos and cur and other:
+#             if pos == "fin":
+#                 lines.append(
+#                     f"{name} en fin de {cur} marque une énergie en clôture, "
+#                     f"orientée vers {other}."
+#                 )
+#             else:
+#                 lines.append(
+#                     f"{name} en début de {cur} indique une entrée "
+#                     f"dans une dynamique nouvelle."
+#                 )
+
+#     # 4) Axe des Nœuds Lunaires (orientation)
+#     nn_sign = score.get("meta", {}).get("nn_sign")
+#     ns_sign = score.get("meta", {}).get("ns_sign")
+#     nn_house = score.get("meta", {}).get("nn_house")
+#     ns_house = score.get("meta", {}).get("ns_house")
+
+#     if nn_sign and ns_sign:
+#         lines.append("")
+#         lines.append(
+#             f"L’axe des Nœuds Lunaires trace le chemin évolutif de l’âme : "
+#             f"un passage de {ns_sign}"
+#             f"{f' (Maison {ns_house})' if ns_house else ''} "
+#             f"vers {nn_sign}"
+#             f"{f' (Maison {nn_house})' if nn_house else ''}."
+#         )
+#         lines.append(
+#             "Ce chemin ne consiste pas à renier le passé, "
+#             "mais à cesser d’y revenir par automatisme."
+#         )
+
+#     return "\n".join(lines)
+
+def _score_tagline(total, label: str, level_code: str | None = None) -> str:
+    """
+    Phrase générique selon le niveau.
+    Tu peux affiner avec level_code si tu l'as (ex: L1/L2/L3/L4).
+    """
+    lab = (label or "").lower()
+
+    # Mapping simple basé sur tes labels actuels
+    if "expédition" in lab or "polaire" in lab:
+        return "Ici, on n’est pas sur une balade : le karmique est structurant et revient en boucle tant que ce n’est pas intégré."
+    if "valise" in lab and "soute" in lab:
+        return "Gros bagage karmique : il y a du vécu, des réflexes anciens, et ça peut se rejouer vite si tu pilotes en automatique."
+    if "bagage" in lab:
+        return "Le thème montre un bagage karmique actif : pas forcément ‘lourd’, mais clairement influent dans les choix et les relations."
+    if "léger" in lab or "sac" in lab:
+        return "Karmique plutôt léger : l’axe d’évolution est là, mais sans surcharge. Ça se travaille avec plus de souplesse."
+
+    # Fallback basé sur le score (si tu veux)
+    try:
+        t = float(total) if total is not None else None
+    except Exception:
+        t = None
+
+    if t is not None and t >= 40:
+        return "Poids karmique élevé : les thématiques sont insistantes et demandent une vraie conscience pour éviter la répétition."
+    if t is not None and t >= 25:
+        return "Poids karmique modéré : plusieurs thèmes reviennent, mais ils se transforment bien dès que tu les nommes clairement."
+    return "Poids karmique plutôt léger : la lecture sert surtout à affiner la direction et éviter les automatismes."
+
+
+def _render_intro_karmique(block, theme, score) -> str:
+    data = block.get("data", {}) or {}
+
+    total = data.get("score_total")
+    label = data.get("score_label", "—")
+
+    elements = data.get("dominant_elements") or []
+
+    points_29 = data.get("points_29", []) or []   # Asc/Soleil only
+    cuspides = data.get("cuspides", []) or []     # Asc/Soleil only
+
+    nn_sign = data.get("nn_sign")
+    ns_sign = data.get("ns_sign")
+    nn_house = data.get("nn_house")
+    ns_house = data.get("ns_house")
+
+    lines = []
+
+    # 1) Texte générique (court, stable, clair)
+    lines.append(
+        "Cette analyse karmique met en lumière les mémoires et automatismes qui influencent tes réactions "
+        "et certaines répétitions de vie.\n"
+        "Elle ne prédit pas : elle éclaire. Le but, c’est de reprendre la main sur ce qui se rejoue "
+        "en pilote automatique."
+    )
+    lines.append("")
+
+    # 2) Score + intitulé du voyage
+    lines.append(f"Score karmique : {total if total is not None else '—'} — {label}")
+    lines.append("")
+
+    # 3) Dominantes élémentaires (+ future BDD)
+    if elements:
+        dom_txt = " / ".join(elements)
+        lines.append(f"Dominante(s) élémentaire(s) : {dom_txt}")
+
+        # (optionnel) BDD intro : ASTRE=INTRO, DONNEE=dominant_elements, VALEUR=Eau
+        # on prend la 1ère dominante si plusieurs, simple et robuste
+        bdd_dom = _bdd("INTRO", "dominant_elements", elements[0])
+        if bdd_dom:
+            lines.append(bdd_dom)
+        lines.append("")
+
+    # 4) Points sensibles 29° (Asc/Soleil uniquement)
+    if points_29:
+        shown = []
+        for p in points_29:
+            nm = p.get("name")
+            deg = p.get("deg")
+            sg = p.get("signe")
+            shown.append(f"{nm} {deg}° {sg}".strip())
+        lines.append("Point(s) sensible(s) à 29° : " + " | ".join(shown))
+        lines.append("")
+
+    # 5) Entre-deux signes (Asc/Soleil)
+    if cuspides:
+        lines.append("Entre-deux signes (Ascendant / Soleil) :")
+        for c in cuspides:
+            name = c.get("name")
+            pos = c.get("position")
+            cur = c.get("current_sign")
+            other = c.get("other_sign")
+            deg = c.get("deg")
+            if not (name and pos and cur and other):
+                continue
+
+            if pos == "fin":
+                lines.append(f"- {name} ({deg}°) en fin de {cur} : passage vers {other}.")
+            else:
+                lines.append(f"- {name} ({deg}°) en début de {cur} : sortie de {other} vers {cur}.")
+        lines.append("")
+
+    # 6) Axe des Nœuds (1 ligne large)
+    if nn_sign and ns_sign:
+        left = f"{ns_sign}" + (f" (Maison {ns_house})" if ns_house is not None else "")
+        right = f"{nn_sign}" + (f" (Maison {nn_house})" if nn_house is not None else "")
+        lines.append(f"Axe des Nœuds Lunaires : passage de {left} vers {right}.")
+
+    return "\n".join(lines).strip()
+
+
+# def _render_intro_karmique(block, theme, score) -> str:
+#     data = block.get("data", {}) or {}
+
+#     elements = data.get("dominant_elements") or []
+#     moon_sign = data.get("moon_sign")
+#     moon_house = data.get("moon_house")
+#     moon_karmic = data.get("moon_is_karmic_house")
+#     cuspides = data.get("cuspides", [])
+
+#     lines = []
+
+#     # 1) Dominante élémentaire (texte BDD si tu l’as)
+#     if elements:
+#         dom_txt = " / ".join(elements)
+#         lines.append(f"Dominante karmique : {dom_txt}")
+
+#         # BDD optionnelle (si tu veux écrire un texte par dominante)
+#         # Exemple de clés CSV :
+#         # ASTRE=KARMIQUE, DONNEE=dominante_elements, VALEUR=Air
+#         # ou VALEUR=Air/Terre si tu fais des combos plus tard.
+#         # Pour l’instant: si multiple, on prend la 1ère (simple et robuste).
+
+#         bdd_dom = _bdd("Karmique", "dominante_elements", elements[0])
+#         if bdd_dom:
+#             lines.append(bdd_dom)
+#         else:
+#             lines.append("Ça donne la ‘couleur’ générale de ton incarnation : comment tu réagis, comment tu te défends, comment tu apprends.")
+#         lines.append("")
+
+#     # 2) Lune (repère karmique, sans interprétation)
+#     if moon_sign:
+#         lines.append(
+#             f"Lune : {moon_sign}"
+#             + (f" (Maison {moon_house})" if moon_house else "")
+#         )
+
+#         if moon_karmic:
+#             lines.append(
+#                 "Cette Lune se situe dans une maison karmique, "
+#                 "signalant une mémoire émotionnelle ancienne activée dans cette vie."
+#             )
+
+#         lines.append("")
+
+#     # 3) Entre-deux signes (si tu veux une interprétation BDD plus tard)
+#     for c in cuspides:
+#         name = c.get("name")
+#         pos = c.get("position")
+#         cur = c.get("current_sign")
+#         other = c.get("other_sign")
+
+#         if name and pos and cur and other:
+#             if pos == "fin":
+#                 lines.append(f"{name} en fin de {cur} : énergie en clôture, ça pousse vers {other}.")
+#             else:
+#                 lines.append(f"{name} en début de {cur} : énergie neuve, tu sors de {other}.")
+
+
+#     # 4) Axe des Nœuds Lunaires (orientation karmique)
+#     nn_sign = score.get("meta", {}).get("nn_sign")
+#     ns_sign = score.get("meta", {}).get("ns_sign")
+#     nn_house = score.get("meta", {}).get("nn_house")
+#     ns_house = score.get("meta", {}).get("ns_house")
+
+#     if nn_sign and ns_sign:
+#         lines.append(
+#             f"L’axe des Nœuds Lunaires décrit la direction évolutive de l’âme : "
+#             f"un passage de {ns_sign}"
+#             f"{f' (Maison {ns_house})' if ns_house else ''} "
+#             f"vers {nn_sign}"
+#             f"{f' (Maison {nn_house})' if nn_house else ''}."
+#         )
+#         lines.append(
+#             "Il ne s’agit pas d’effacer le passé, mais d’apprendre à ne plus s’y réfugier automatiquement."
+#         )
+
+#     return "\n".join(lines)
+
+def _render_moon_karmique(block: Dict[str, Any],
+                          theme: Dict[str, Any],
+                          score: Dict[str, Any]) -> str:
+    data = block.get("data", {}) or {}
+
+    moon_sign = data.get("moon_sign")
+    moon_house = data.get("moon_house")
+    moon_intercepted = data.get("moon_intercepted")
+    moon_score = data.get("moon_score", 0)
+    hits = data.get("moon_hard_hits", []) or []
+
+    lines = []
+    lines.append(
+        f"Lune : {moon_sign or '—'}"
+        + (f" (Maison {moon_house})" if moon_house is not None else "")
+    )
+
+    # Interprétation BDD : signe + maison
+    if moon_sign:
+        txt = _bdd("Lune", "signe", moon_sign)
+        if txt:
+            lines.append(txt)
+
+    if moon_house is not None:
+        txt = _bdd("Lune", "maison", moon_house)
+        if txt:
+            lines.append(txt)
+
+    if moon_score:
+        lines.append(f"Score Lune karmique : {moon_score}")
+
+    if moon_intercepted:
+        lines.append("⚠️ Lune interceptée : émotionnel plus ‘en sous-marin’ / moins direct.")
+
+    lines.append("")
+    if hits:
+        lines.append("Aspects karmiques Lune (selon orbes karmiques) :")
+        for h in hits:
+            typ = h.get("type")
+            other = h.get("with")
+            orb = h.get("orb")
+
+            lines.append(f"- {typ} avec {other} (orbe {orb}°)")
+
+            # Interprétation BDD d’aspect (optionnelle)
+            # Clé CSV conseillée :
+            # ASTRE=Lune, DONNEE=aspect, VALEUR=Carre_NoeudNord
+            # ASTRE=Lune, DONNEE=aspect, VALEUR=Opposition_Chiron
+            if typ and other:
+                key = f"{typ}_{other}".replace("œ", "oe")
+                txt = _bdd("Lune", "aspect", key)
+                if txt:
+                    lines.append(f"  {txt}")
+    else:
+        lines.append("Aucun aspect karmique Lune détecté selon tes filtres.")
+
+    return "\n".join(lines)
+
+
+def _render_synthese_karmique(block: Dict[str, Any],
+                              theme: Dict[str, Any],
+                              score: Dict[str, Any]) -> str:
+    data = block.get("data", {}) or {}
+
+    dom = data.get("dominant_elements") or []
+    nn_sign, nn_house = data.get("nn_sign"), data.get("nn_house")
+    ns_sign, ns_house = data.get("ns_sign"), data.get("ns_house")
+    moon_sign, moon_house = data.get("moon_sign"), data.get("moon_house")
+
+    total = data.get("total_score", "—")
+    label = data.get("level_label", "—")
+    breakdown = data.get("breakdown", {}) or {}
+
+    # 1) 2–3 moteurs dominants (lisibles)
+    drivers = []
+    # Tu adaptes les clés selon TON breakdown réel
+    # (je reprends celles vues dans tes outputs)
+    for k in ("houses_karmic", "nodes", "moon_karmic", "saturn_pluto", "anaretic_29", "amas_signes", "retrogrades"):
+        v = breakdown.get(k, 0)
+        if v:
+            drivers.append((k, v))
+    drivers.sort(key=lambda x: x[1], reverse=True)
+    drivers = drivers[:3]
+
+    # petites traductions pour que ça lise “humain”
+    label_map = {
+        "houses_karmic": "Maisons karmiques (IV/VIII/XII)",
+        "nodes": "Nœuds Lunaires",
+        "moon_karmic": "Mémoire lunaire",
+        "saturn_pluto": "Pression Saturne/Pluton",
+        "anaretic_29": "Degrés 29° (fin de cycle)",
+        "amas_signes": "Amas / surcharge",
+        "retrogrades": "Rétrogrades",
+    }
+
+    lines = []
+    lines.append(f"Signature karmique : {total} — {label}")
+    lines.append("")
+
+    # A) direction (axe nodal) — 2 lignes max
+    if ns_sign and nn_sign:
+        lines.append(f"Axe évolutif : {ns_sign} (Maison {ns_house}) → {nn_sign} (Maison {nn_house}).")
+        lines.append("Tu ne “supprimes” pas le passé : tu apprends à ne plus le piloter en automatique.")
+        lines.append("")
+
+    # B) climat d’incarnation (éléments) — 1 idée
+    if dom:
+        lines.append(f"Climat dominant : {' / '.join(dom)}.")
+        txt = _bdd("Karmique", "element", dom[0])  # optionnel
+        if txt:
+            lines.append(txt)
+        lines.append("")
+
+    # C) point d’accroche émotionnel (Lune) — sans refaire toute la Lune
+    if moon_sign:
+        lines.append(f"Point d’accroche émotionnel : Lune en {moon_sign}" + (f" (Maison {moon_house})" if moon_house is not None else "") + ".")
+        lines.append("C’est la zone qui réagit vite, fort, et qui demande du soin plutôt que du contrôle.")
+        lines.append("")
+
+    # D) ce qui pèse le plus (drivers)
+    if drivers:
+        lines.append("Ce qui “pèse” le plus dans ton scénario :")
+        for k, v in drivers:
+            lines.append(f"- {label_map.get(k, k)} : +{v}")
+        lines.append("")
+
+    # E) clôture : 3 axes d’action (génériques, utilisables)
+    lines.append("Clé d’incarnation (version utile) :")
+    lines.append("1) Repérer le réflexe ancien (Nœud Sud) au moment où il se déclenche.")
+    lines.append("2) Choisir un micro-mouvement vers le Nœud Nord (même petit, mais conscient).")
+    lines.append("3) Revenir au corps et au réel quand l’émotion part en pilotage automatique (Lune).")
+
+    return "\n".join(lines)
+
+def _render_maison_12(block: Dict[str, Any], theme: Dict[str, Any], score: Dict[str, Any]) -> str:
+    # Si content existe déjà, on le garde
+    if isinstance(block.get("content"), str) and block["content"].strip():
+        return block["content"]
+    
+    # Sinon, on cherche text à la RACINE (pas dans data)
+    return block.get("text", "")

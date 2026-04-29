@@ -1,0 +1,325 @@
+# utils/karmique/pistes_integration.py
+
+from __future__ import annotations
+from typing import Any, Dict, List
+
+
+LEVIERS_PAR_TENSION: Dict[str, List[Dict[str, str]]] = {
+    "surcontrole": [
+        {
+            "a_observer": "Les moments où tu retiens quelque chose avant même d'avoir décidé de le retenir.",
+            "a_tester": "Nommer ce qui monte, une phrase simple, avant que ça se rigidifie.",
+            "enjeu": "Sortir du réflexe de contention avant la saturation."
+        },
+        {
+            "a_observer": "Les situations où tu gères seul(e) ce qui pourrait être partagé.",
+            "a_tester": "Déléguer une chose concrète cette semaine, même imparfaitement.",
+            "enjeu": "Réapprendre que lâcher n'est pas perdre le contrôle."
+        }
+    ],
+    "suradaptation": [
+        {
+            "a_observer": "Les décisions prises en fonction de ce que les autres attendent.",
+            "a_tester": "Choisir une chose par semaine sans chercher de validation extérieure.",
+            "enjeu": "Recalibrer le rapport entre désir propre et regard extérieur."
+        },
+        {
+            "a_observer": "Les moments où tu changes de ton, de posture ou d'opinion selon l'interlocuteur.",
+            "a_tester": "Rester sur ta position initiale dans une conversation, juste pour voir.",
+            "enjeu": "Tester ce que ça fait de ne pas se plier."
+        }
+    ],
+    "evitement_emotionnel": [
+        {
+            "a_observer": "Les moments où tu passes directement à l'analyse sans traverser l'émotion.",
+            "a_tester": "Laisser 5 minutes à l'émotion avant de chercher à comprendre.",
+            "enjeu": "Arrêter d'utiliser la tête comme sortie de secours."
+        },
+        {
+            "a_observer": "Les situations où tu décris ce que tu as pensé, jamais ce que tu as ressenti.",
+            "a_tester": "Finir une phrase par 'et là j'ai ressenti...' avant de passer à la suite.",
+            "enjeu": "Réintroduire le ressenti comme information valide, pas comme bruit."
+        }
+    ],
+    "difficulte_limites": [
+        {
+            "a_observer": "Les fois où tu dis oui alors qu'un non était déjà là.",
+            "a_tester": "Dire non à une chose mineure cette semaine, sans justification.",
+            "enjeu": "Réhabiliter le non comme acte de respect, pas de rejet."
+        },
+        {
+            "a_observer": "Les moments où tu t'expliques longuement pour justifier une limite.",
+            "a_tester": "Poser une limite en une phrase, sans développer.",
+            "enjeu": "Expérimenter qu'une limite n'a pas besoin d'être méritée."
+        }
+    ],
+    "hypervigilance": [
+        {
+            "a_observer": "Les moments où tu scannes l'ambiance avant de te permettre d'exister.",
+            "a_tester": "Entrer dans une pièce ou une conversation sans évaluer d'abord.",
+            "enjeu": "Expérimenter que la sécurité peut venir de l'intérieur."
+        },
+        {
+            "a_observer": "Les fois où tu interprètes un silence ou un ton comme un signal d'alerte.",
+            "a_tester": "Laisser passer le signal sans agir dessus, juste une fois.",
+            "enjeu": "Tester ce qui se passe quand on ne répond pas à l'alarme."
+        }
+    ],
+    "fusion": [
+        {
+            "a_observer": "Les moments où tu perds le fil de ce que toi tu ressens dans une relation.",
+            "a_tester": "Terminer chaque journée avec une phrase : 'Moi, aujourd'hui, j'ai ressenti...'",
+            "enjeu": "Maintenir un point fixe personnel même dans les liens forts."
+        },
+        {
+            "a_observer": "Les situations où tu prends en charge l'état émotionnel de l'autre sans qu'il le demande.",
+            "a_tester": "Laisser l'autre gérer son propre état une fois, sans intervenir.",
+            "enjeu": "Distinguer empathie et absorption."
+        }
+    ],
+    "blessure_trahison": [
+        {
+            "a_observer": "Les moments où tu anticipes la déception avant même qu'elle arrive.",
+            "a_tester": "Laisser une situation se développer sans la conclure d'avance dans ta tête.",
+            "enjeu": "Distinguer la vigilance utile du scénario automatique."
+        },
+        {
+            "a_observer": "Les fois où tu testes quelqu'un sans lui dire ce que tu testes.",
+            "a_tester": "Formuler une attente clairement, une fois, plutôt que d'attendre qu'elle soit devinée.",
+            "enjeu": "Sortir du contrat implicite comme mode de relation."
+        }
+    ],
+    "peur_abandon": [
+        {
+            "a_observer": "Les moments où tu fais plus que ta part pour qu'une relation tienne.",
+            "a_tester": "Laisser l'autre venir une fois sans relancer, sans combler le silence.",
+            "enjeu": "Expérimenter que ta présence seule suffit à maintenir un lien."
+        },
+        {
+            "a_observer": "Les situations où tu t'effaces pour ne pas déranger, au risque de disparaître.",
+            "a_tester": "Exprimer un besoin direct sans l'emballer dans une excuse.",
+            "enjeu": "Réapprendre que prendre de la place n'éloigne pas."
+        }
+    ],
+    "rapport_pouvoir": [
+        {
+            "a_observer": "Les contextes où tu te soumets ou tu domines, sans vraiment choisir.",
+            "a_tester": "Identifier dans une relation qui décide quoi, et si c'est voulu.",
+            "enjeu": "Passer d'un rapport automatique au pouvoir à un rapport conscient."
+        },
+        {
+            "a_observer": "Les moments où tu ressens de la colère mais tu la retournes contre toi.",
+            "a_tester": "Nommer la colère pour ce qu'elle est, sans la justifier ni l'excuser.",
+            "enjeu": "Réhabiliter la colère comme signal, pas comme défaut."
+        }
+    ],
+    "illegitimite": [
+        {
+            "a_observer": "Les fois où tu minimises ce que tu sais ou ce que tu as accompli.",
+            "a_tester": "Répondre 'oui' à un compliment sans ajouter de 'mais' ou de nuance.",
+            "enjeu": "Laisser la reconnaissance entrer sans la filtrer immédiatement."
+        },
+        {
+            "a_observer": "Les moments où tu attends une permission externe pour avancer.",
+            "a_tester": "Prendre une décision dans ton domaine sans chercher de validation.",
+            "enjeu": "Déplacer l'autorité de l'extérieur vers l'intérieur."
+        }
+    ],
+    "sacrifice_soi": [
+        {
+            "a_observer": "Les situations où tu passes après tout le monde sans que personne ne te le demande.",
+            "a_tester": "Choisir une chose pour toi seul(e) cette semaine, sans que ce soit 'mérité'.",
+            "enjeu": "Déconstruire l'idée que recevoir exige d'avoir d'abord donné."
+        },
+        {
+            "a_observer": "Les moments où tu justifies ton existence par ce que tu apportes aux autres.",
+            "a_tester": "Être présent(e) sans rôle, sans utilité, juste là.",
+            "enjeu": "Expérimenter que ta valeur ne dépend pas de ta fonction."
+        }
+    ],
+    "isolement_choisi": [
+        {
+            "a_observer": "Les fois où tu te retires avant que l'autre ait eu la chance de te décevoir.",
+            "a_tester": "Rester dans un échange inconfortable 5 minutes de plus que d'habitude.",
+            "enjeu": "Distinguer le besoin réel de solitude du réflexe de protection."
+        },
+        {
+            "a_observer": "Les moments où tu préfères tout gérer seul(e) plutôt que de dépendre.",
+            "a_tester": "Demander de l'aide pour quelque chose de concret, même si tu pourrais faire sans.",
+            "enjeu": "Réintroduire la dépendance choisie comme acte de confiance."
+        }
+    ],
+    "perfectionnisme": [
+        {
+            "a_observer": "Les moments où tu repousses une action parce qu'elle ne sera pas assez bien.",
+            "a_tester": "Livrer quelque chose à 80%, consciemment, une fois cette semaine.",
+            "enjeu": "Désactiver le lien automatique entre valeur personnelle et qualité du résultat."
+        },
+        {
+            "a_observer": "La voix intérieure qui commente, corrige et juge en temps réel.",
+            "a_tester": "Remarquer cette voix sans lui répondre. Juste la voir passer.",
+            "enjeu": "Créer de la distance entre toi et le juge interne."
+        }
+    ],
+}
+
+CATEGORIES_VALIDES = list(LEVIERS_PAR_TENSION.keys())
+
+
+def _ajouter_si_absent(dest: List[str], valeur: str) -> None:
+    if valeur not in dest:
+        dest.append(valeur)
+
+
+def detecter_types_tensions(global_tension_points: List[str]) -> List[str]:
+    """
+    Fallback : convertit des tensions textuelles libres en catégories normalisées.
+    Utilisé uniquement si global_tension_types n'est pas disponible en amont.
+    """
+    resultats: List[str] = []
+
+    for tension in global_tension_points or []:
+        t = str(tension or "").lower().strip()
+        if not t:
+            continue
+
+        if any(mot in t for mot in [
+            "surcontrôle", "surcontrole", "contrôle", "controle",
+            "maîtrise", "maitrise", "contention", "retenir",
+            "rigidité", "rigidite", "verrouillage"
+        ]):
+            _ajouter_si_absent(resultats, "surcontrole")
+
+        if any(mot in t for mot in [
+            "suradaptation", "adaptation excessive", "plaire",
+            "validation", "regard extérieur", "regard exterieur",
+            "conformité", "conformite", "surajustement"
+        ]):
+            _ajouter_si_absent(resultats, "suradaptation")
+
+        if any(mot in t for mot in [
+            "évitement émotionnel", "evitement emotionnel",
+            "couper de l'émotion", "émotion", "emotion",
+            "mentalisation", "intellectualisation"
+        ]):
+            _ajouter_si_absent(resultats, "evitement_emotionnel")
+
+        if any(mot in t for mot in [
+            "limite", "dire non", "envahissement",
+            "sur-responsabilité", "perméabilité", "permeabilite"
+        ]):
+            _ajouter_si_absent(resultats, "difficulte_limites")
+
+        if any(mot in t for mot in [
+            "hypervigilance", "scanner", "surveillance",
+            "alerte", "danger", "insécurité", "insecurite"
+        ]):
+            _ajouter_si_absent(resultats, "hypervigilance")
+
+        if any(mot in t for mot in [
+            "fusion", "engloutissement", "perdre le fil de soi",
+            "dépendance", "dependance", "confusion relationnelle",
+            "se dissoudre", "se fondre"
+        ]):
+            _ajouter_si_absent(resultats, "fusion")
+
+        if any(mot in t for mot in [
+            "trahison", "déception", "deception",
+            "test relationnel", "contrat implicite"
+        ]):
+            _ajouter_si_absent(resultats, "blessure_trahison")
+
+        if any(mot in t for mot in [
+            "abandon", "peur de perdre", "effacement",
+            "surinvestissement relationnel"
+        ]):
+            _ajouter_si_absent(resultats, "peur_abandon")
+
+        if any(mot in t for mot in [
+            "pouvoir", "domination", "soumission",
+            "colère retournée", "colere retournee", "impuissance", "emprise"
+        ]):
+            _ajouter_si_absent(resultats, "rapport_pouvoir")
+
+        if any(mot in t for mot in [
+            "illégitimité", "illegitimite", "imposteur",
+            "pas à la hauteur", "minimisation de soi"
+        ]):
+            _ajouter_si_absent(resultats, "illegitimite")
+
+        if any(mot in t for mot in [
+            "sacrifice", "s'oublier", "s oublier",
+            "se mettre après", "utilité", "s'effacer"
+        ]):
+            _ajouter_si_absent(resultats, "sacrifice_soi")
+
+        if any(mot in t for mot in [
+            "isolement", "retrait défensif", "retrait defensif",
+            "tout gérer seul", "autosuffisance", "solitude protectrice"
+        ]):
+            _ajouter_si_absent(resultats, "isolement_choisi")
+
+        if any(mot in t for mot in [
+            "perfectionnisme", "perfection", "juge intérieur", "juge interieur",
+            "autocritique", "jamais assez bien"
+        ]):
+            _ajouter_si_absent(resultats, "perfectionnisme")
+
+    return resultats
+
+
+def generer_pistes_brutes(
+    global_tension_points: List[str],
+    ressources: List[str],
+    max_pistes: int = 3,
+    global_tension_types: List[str] | None = None,
+) -> List[Dict[str, Any]]:
+    """
+    Sélectionne des leviers concrets à partir des tensions détectées.
+
+    Priorité :
+      1. global_tension_types  → clés normalisées produites en amont (idéal)
+      2. global_tension_points → texte libre, fallback via detecter_types_tensions()
+    """
+    pistes: List[Dict[str, Any]] = []
+
+    # Niveau 1 : clés normalisées disponibles en amont
+    if global_tension_types:
+        types_tensions = [t for t in global_tension_types if t in LEVIERS_PAR_TENSION]
+        non_reconnus = [t for t in global_tension_types if t not in LEVIERS_PAR_TENSION]
+        if non_reconnus:
+            print(f"⚠️ Clés non reconnues dans global_tension_types : {non_reconnus}")
+
+    # Niveau 2 : fallback sur détection textuelle
+    else:
+        types_tensions = detecter_types_tensions(global_tension_points)
+        non_mappes = [
+            t for t in (global_tension_points or [])
+            if not detecter_types_tensions([t])
+        ]
+        if non_mappes:
+            print(f"⚠️ Tensions non mappées : {non_mappes}")
+
+    if not types_tensions:
+        return pistes
+
+    for index, tension_type in enumerate(types_tensions):
+        candidats = LEVIERS_PAR_TENSION.get(tension_type, [])
+        if not candidats:
+            continue
+
+        levier = candidats[index % len(candidats)]
+        ressource_associee = ressources[index % len(ressources)] if ressources else ""
+
+        pistes.append({
+            "tension_type": tension_type,
+            "ressource_associee": ressource_associee,
+            "a_observer": levier["a_observer"],
+            "a_tester": levier["a_tester"],
+            "enjeu": levier["enjeu"],
+        })
+
+        if len(pistes) >= max_pistes:
+            break
+
+    return pistes

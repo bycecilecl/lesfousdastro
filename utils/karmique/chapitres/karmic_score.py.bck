@@ -1,0 +1,140 @@
+# utils/karmique/chapitres/karmic_score.py
+from __future__ import annotations
+from typing import Any, Dict, Optional, List, Tuple
+
+from utils.karmique.chapitres.chapter_summary import summarize_chapter
+
+def _label_from_score(score_total: int) -> str:
+    if score_total >= 60:
+        return "Expédition Polaire"
+    if score_total >= 40:
+        return "Expédition Polaire"
+    if score_total >= 25:
+        return "Valise en Soute"
+    return "Bagage Léger"
+
+def _sorted_breakdown(meta: Dict[str, Any]) -> List[Tuple[str, int]]:
+    breakdown = meta.get("breakdown") or {}
+    if not isinstance(breakdown, dict):
+        return []
+
+    items: List[Tuple[str, int]] = []
+    for k, v in breakdown.items():
+        try:
+            items.append((str(k), int(v)))
+        except (TypeError, ValueError):
+            continue
+
+    items.sort(key=lambda x: x[1], reverse=True)
+    return items
+
+def _pretty_key(key: str) -> str:
+    mapping = {
+        "houses_karmic": "Maisons karmiques",
+        "nodes": "Nœuds lunaires",
+        "anaretic_29": "Degrés 29°",
+        "moon_karmic": "Charge lunaire",
+        "amas_signes": "Amas en signe",
+        "retrogrades": "Rétrogrades",
+        "interceptions": "Interceptions",
+        "saturn_pluto": "Saturne / Pluton",
+    }
+    return mapping.get(key, key.replace("_", " ").capitalize())
+
+def build_block_karmic_score(
+    theme: Dict[str, Any],
+    score: Dict[str, Any],
+    global_ctx: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    score_total = int(score.get("total", 0) or 0)
+    label = score.get("label") or _label_from_score(score_total)
+    breakdown = score.get("breakdown") or {}
+    meta = score.get("meta") or {}
+
+    top_items = sorted(
+        [(k, v) for k, v in breakdown.items() if isinstance(v, (int, float)) and v > 0],
+        key=lambda x: x[1],
+        reverse=True
+    )[:4]
+
+    dominant_elements = meta.get("dominant_elements") or []
+    if isinstance(dominant_elements, str):
+        dominant_elements = [dominant_elements]
+
+    lines: List[str] = []
+    lines.append("# Signature karmique — ton terrain de fond")
+    lines.append("")
+    lines.append(f"Ton score karmique actuel est de **{score_total}**, avec une signature **{label}**.")
+    lines.append("")
+
+    if dominant_elements:
+        lines.append(f"Dominante élémentaire : **{', '.join(map(str, dominant_elements))}**.")
+        lines.append("")
+
+    if top_items:
+        lines.append("## Ce qui pèse le plus")
+        lines.append("")
+        for key, value in top_items:
+            lines.append(f"- **{_pretty_key(key)}** : +{value}")
+        lines.append("")
+
+        biggest_key = top_items[0][0]
+
+        if biggest_key == "houses_karmic":
+            lines.append(
+                "Le poids principal vient des maisons karmiques : le thème insiste donc sur des zones intérieures anciennes, "
+                "profondes, souvent liées au repli, à la mémoire ou à la transformation."
+            )
+        elif biggest_key == "nodes":
+            lines.append(
+                "Le poids principal vient des Nœuds lunaires : ton scénario karmique tourne fortement autour du passage "
+                "entre anciens réflexes et nouvel axe d’incarnation."
+            )
+        elif biggest_key == "moon_karmic":
+            lines.append(
+                "Le poids principal passe par la Lune : l’émotion, la mémoire affective et les automatismes intérieurs "
+                "jouent ici un rôle central."
+            )
+        elif biggest_key == "anaretic_29":
+            lines.append(
+                "Le poids principal passe par des degrés de fin de cycle : cela donne une pression intérieure forte, "
+                "comme s’il fallait aller au bout de certaines leçons."
+            )
+        elif biggest_key == "retrogrades":
+            lines.append(
+                "Le poids principal passe par les rétrogrades : certaines expériences demandent à être reprises, revues "
+                "ou intégrées plus consciemment."
+            )
+        else:
+            lines.append(
+                "Le score montre une concentration karmique nette sur un axe précis du thème, ce qui rend certaines répétitions "
+                "plus marquées que d’autres."
+            )
+        lines.append("")
+
+    lines.append(
+        "Ce score n’est pas une condamnation. Il montre surtout où la conscience doit se poser en priorité, "
+        "là où les vieux automatismes risquent de reprendre la main."
+    )
+
+    content = "\n".join(lines).strip()
+
+    summary = summarize_chapter(
+        chapter_title="Signature karmique : ton terrain de fond",
+        chapter_text=content,
+        call_llm=global_ctx.get("call_llm") if isinstance(global_ctx, dict) else None,
+    )
+
+    return {
+        "id": "karmic_score",
+        "title": "Signature karmique : ton terrain de fond",
+        "data": {
+            "score_total": score_total,
+            "label": label,
+            "breakdown": breakdown,
+            "top_items": top_items,
+        },
+        "content": content,
+        "text": content,
+        "summary": summary,
+    }

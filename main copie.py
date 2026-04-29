@@ -47,13 +47,6 @@ from utils.utils_points_forts import extraire_points_forts
 from routes.analyse_gratuite_api import gratuite_api_bp
 from routes.point_astral_blocs import point_astral_blocs_bp
 from routes.forces_defis_module import forces_defis_module_bp
-from utils.karmique.karmique_score import calculer_poids_karmique
-from utils.karmique.karmique_context import build_global_context
-from utils.karmique.analyse_karmique_engine import KarmicEngine
-from utils.karmique.analyse_karmique_interpretation import interpret_all
-from utils.karmique.analyse_karmique_html import build_html_from_blocks
-from routes.analyse_karmique import analyse_karmique_bp
-from routes.analyse_karmique import generer_html_final_karmique_pdf
 
 
 import logging
@@ -250,54 +243,6 @@ app.register_blueprint(site_bp)
 app.register_blueprint(profil_amoureux_module)
 app.register_blueprint(gift_api_bp)
 app.register_blueprint(gift_bp)
-app.register_blueprint(analyse_karmique_bp)
-
-
-# ========== ANALYSE KARMIQUE ==========
-@app.route('/analyse_karmique', methods=['POST'])
-def analyse_karmique_route():
-    try:
-        form_data = request.form
-
-        if not form_data.get("consentement"):
-            return "Consentement obligatoire pour générer l'analyse", 400
-
-        nom = form_data.get("nom", "Analyse Anonyme")
-        date_naissance = form_data.get("date_naissance")
-        heure_naissance = form_data.get("heure_naissance")
-        lieu_naissance = form_data.get("lieu_naissance")
-        email = form_data.get("email", "")
-        genre = form_data.get("genre") or form_data.get("gender") or ""
-
-        lat = form_data.get("lat")
-        lon = form_data.get("lon")
-        tzid = form_data.get("tzid")
-
-        if not all([nom, date_naissance, heure_naissance, lieu_naissance]):
-            return "Toutes les informations de naissance sont requises", 400
-
-        session["infos_utilisateur"] = {
-            "nom": nom,
-            "date_naissance": date_naissance,
-            "heure_naissance": heure_naissance,
-            "lieu_naissance": lieu_naissance,
-            "email": email,
-            "genre": genre,
-            "lat": lat,
-            "lon": lon,
-            "tzid": tzid,
-        }
-
-        return redirect(url_for("analyse_karmique.analyse_karmique_complete"))
-
-    except Exception as e:
-        print(f"❌ Erreur dans analyse_karmique_route : {e}")
-        return render_template(
-            "erreur.html",
-            titre="Erreur dans l'analyse karmique",
-            message=f"Une erreur s'est produite : {str(e)}",
-            details="Veuillez vérifier vos données de naissance et réessayer."
-        ), 500
 
 
 # ========== REDIRECTIONS POUR COMPATIBILITÉ ==========
@@ -885,3 +830,5 @@ if __name__ == "__main__":
         for rule in app.url_map.iter_rules():
             print(f"{rule.endpoint:35} ➝ {rule.methods} ➝ {rule.rule}")
     app.run(debug=True, host="0.0.0.0", port=port)
+
+

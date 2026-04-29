@@ -12,12 +12,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Analyses Astrologiques ✨</title>
-   <link rel="icon" type="image/webp" sizes="64x64" href="static/images/logo_les_fous_dastro_favicon64.webp">
-    <meta charset="utf-8">
-    <title>Les Fous d'Astro</title>
-    <!-- tes autres metas / CSS -->
-
+    <link rel="icon" type="image/webp" sizes="64x64" href="static/images/logo_les_fous_dastro_favicon64.webp">
    <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -25,7 +20,7 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-PN5STD34');</script>
     <!-- End Google Tag Manager -->
-
+    <title>Analyse Astrologique ✨</title>
     <style>
         * {
             margin: 0;
@@ -245,7 +240,7 @@
             transition: all 0.3s ease;
             border: 3px solid transparent;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .option-card::before {
@@ -259,11 +254,13 @@
             opacity: 0;
             transition: opacity 0.3s ease;
             z-index: -1;
+            border-radius: 17px;
         }
 
         .option-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            z-index: 50;
         }
 
         .option-card:hover::before {
@@ -297,6 +294,15 @@
 
         .option-card.pink .price {
             color: #FF1493;
+        }
+
+        .option-card.purple {
+            border: 3px solid #8B5CF6;
+            background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(255,255,255,0.9));
+        }
+
+        .option-card.purple .price {
+            color: #8B5CF6;
         }
 
         .badge {
@@ -396,6 +402,7 @@
             background: #f8d7da;
             color: #721c24;
         }
+        
         .option-card .status {
             margin-top: 15px;
             padding: 6px 12px;
@@ -453,7 +460,202 @@
             box-shadow: 0 1px 6px rgba(108, 117, 125, 0.15);
         }
 
-         /* Section packs */
+        /* Tooltip au survol */
+        .tooltip-wrapper {
+            position: relative;
+        }
+
+        .card-tooltip {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #1f628e, #00a8a8);
+            color: white;
+            padding: 16px 18px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            line-height: 1.55;
+            width: 270px;
+            text-align: left;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+            transform: translateX(-50%) translateY(6px);
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .card-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #00a8a8;
+        }
+
+        .option-card:hover .card-tooltip,
+        .option-card:focus .card-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .card-tooltip ul {
+            margin: 6px 0 0 0;
+            padding-left: 16px;
+        }
+
+        .card-tooltip li {
+            margin-bottom: 4px;
+        }
+
+        .card-tooltip strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: #c0f0f7;
+        }
+
+        /* Introduction cosmique */
+        .intro-cosmique {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border-radius: 22px;
+            padding: 35px 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .intro-cosmique h2 {
+            font-size: 1.55rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+
+        .intro-cosmique p {
+            font-size: 1rem;
+            line-height: 1.7;
+            opacity: 0.92;
+            margin-bottom: 14px;
+        }
+
+        .intro-cosmique p:last-child {
+            margin-bottom: 0;
+        }
+
+        .intro-cosmique .bonus-line {
+            display: inline-block;
+            margin-top: 10px;
+            background: rgba(255,215,0,0.18);
+            border: 1px solid rgba(255,215,0,0.35);
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        /* Badge éligibilité 3 questions sur les cartes */
+        .clarif-eligible-badge {
+            display: inline-block;
+            margin: 8px 0 6px;
+            font-size: 0.75rem;
+            color: #8B5CF6;
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.25);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-weight: 600;
+        }
+
+        /* Case à cocher option 3 questions dans le panier */
+        .clarif-upsell {
+            background: linear-gradient(135deg, rgba(139,92,246,0.07), rgba(167,139,250,0.05));
+            border: 1px solid rgba(139,92,246,0.2);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .clarif-upsell:hover {
+            background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(167,139,250,0.08));
+            border-color: rgba(139,92,246,0.4);
+        }
+
+        .clarif-upsell input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            accent-color: #8B5CF6;
+            cursor: pointer;
+        }
+
+        .clarif-upsell-text {
+            flex: 1;
+        }
+
+        .clarif-upsell-title {
+            font-weight: 700;
+            color: #8B5CF6;
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+        }
+
+        .clarif-upsell-desc {
+            font-size: 0.8rem;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        .clarif-upsell-price {
+            font-weight: 700;
+            color: #8B5CF6;
+            font-size: 1rem;
+            flex-shrink: 0;
+            align-self: center;
+        }
+
+        /* Option 3 questions */
+        .option-card.clarification {
+            border: 3px solid #8B5CF6;
+            background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(255,255,255,0.95));
+            grid-column: 1 / -1;
+        }
+
+        .option-card.clarification .price {
+            color: #8B5CF6;
+        }
+
+        .option-card.clarification .status.clarif {
+            background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+            color: white;
+        }
+
+        .clarif-details {
+            font-size: 0.82rem;
+            color: #888;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        /* Section packs */
         .packs-section {
             background: linear-gradient(135deg, #1f628e, #00a8a8);
             color: white;
@@ -552,14 +754,20 @@
 
         .packs-grid {
             display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
+            grid-template-columns: repeat(3, 1fr) !important;
             gap: 25px !important;
             margin-top: 30px;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .packs-grid {
                 grid-template-columns: 1fr !important;
+            }
+        }
+
+        @media (min-width: 901px) and (max-width: 1100px) {
+            .packs-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
             }
         }
 
@@ -632,7 +840,6 @@
                 width: 200px;
             }
         }
-
         /* Section consultation */
         .consultation-section {
             background: rgba(255, 255, 255, 0.95);
@@ -699,6 +906,10 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             border: 1px solid rgba(255,255,255,0.3);
             margin: 30px 0;
+        }
+
+        .consultation-section .section-title {
+            color: #1f628e;
         }
 
         .cart-section {
@@ -1986,21 +2197,25 @@
             </ul>
         </div>
     </nav>
+   
     <div class="stars" id="stars"></div>
-    
     <div class="container">
         <div class="header">
             <img src="static/images/logo_les_fous_dastro.webp" alt="Les Fous d'Astro" class="logo">
+            
             <h1>✨ Analyses Astrologiques ✨</h1>
-            <p>Découvre les secrets des étoiles et ta destinée</p>
+            <p>Que disent les étoiles ?</p>
+             
+        </div>
+
+        <div class="intro-cosmique">
+            <h2>L'astrologie, c'est ton ADN cosmique.</h2>
+            <p>Les planètes au moment de ta naissance ne décident pas de ta vie : elles décrivent tes énergies profondes. Celles qui te "gouvernent" tant que tu n'en as pas conscience. Celles qui, une fois comprises, deviennent tes meilleurs alliés.</p>
+            <p>Ces analyses ne sont pas des descriptions génériques de tes placements. Elles reprennent le travail d'un vrai astrologue — la même logique, les mêmes combinaisons, la même lecture d'ensemble. Ce sont des documents déclencheurs de conscience, à garder et à relire au fil du temps.</p>
         </div>
 
         <div class="form-container">
             <form id="form-analyse" method="POST">
-                <!-- ✅ AJOUTER CES 3 LIGNES ICI -->
-                <input type="hidden" id="product_key" name="product_key" value="">
-                <input type="hidden" id="selected_product_label" name="selected_product_label" value="">
-                <input type="hidden" id="selected_product_price" name="selected_product_price" value="">
                 <div class="form-section">
                     <h3 class="section-title">🌟 Tes informations personnelles</h3>
                     <div class="form-row">
@@ -2067,9 +2282,13 @@
                             <div class="badge free">GRATUIT</div>
                             <span class="icon">🌟</span>
                             <h4>Analyse Gratuite</h4>
-                            <p>Lecture rapide, synthétique et immédiate de ton profil astrologique</p>
+                            <p>Lecture rapide, synthétique et immédiate de votre profil astrologique</p>
                             <div class="price free">Gratuit</div>
                             <span class="status available">Clique pour sélectionner</span>
+                            <div class="card-tooltip">
+                                <strong>Ce que tu reçois</strong>
+                                Une synthèse instantanée de ton profil astrologique : Soleil, Lune, Ascendant et les grandes dominantes de ton thème. Parfait pour avoir un premier aperçu avant d'aller plus loin.
+                            </div>
                         </div>
                         
                         <div class="option-card coral" onclick="addToCart('flash_astral', 'Flash Astral', 35, this)">
@@ -2077,9 +2296,15 @@
                             <h4>Flash Astral</h4>
                             <p>Analyse occidentale sur 3/4 pages sur les grands axes du thème<br> + Nakshatra de la lune</p>
                             <div class="price">35€</div>
+                            <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                             <span class="status coral">Clique pour sélectionner</span>
+                            <div class="card-tooltip">
+                                <strong>Ce que tu reçois</strong>
+                                Un document de 3 à 4 pages : tes placements clés (Soleil, Lune, Ascendant, Maîtres de maison), les aspects dominants, ta dynamique globale — et ton Nakshatra lunaire pour la touche védique. La base indispensable pour se comprendre.
+                            </div>
                         </div>
-                        
+                
+
                         <!-- Forces & Défis -->
                         <div class="option-card featured" onclick="addToCart('forces_defis', 'Mes Potentiels et Défis', 15, this)">
                             <span class="icon">💪</span>
@@ -2087,14 +2312,17 @@
                             <p>Découvrez tes forces cachées et les obstacles à transformer</p>
                             <div class="price">15€</div>
                             <span class="status featured">Clique pour sélectionner</span>
+                            <div class="card-tooltip">
+                                <strong>Ce que tu reçois</strong>
+                                Une lecture ciblée de tes ressources naturelles et des tensions de ton thème. Quels sont tes vrais super-pouvoirs ? Quels schémas répétitifs te freinent ? Un outil concret pour passer à l'action.
+                            </div>
                         </div>
 
                             <!-- Champ caché pour le backend -->
-                            <!-- <input type="hidden" id="product_key" name="product_key" value="flash_astral"> -->
+                            <input type="hidden" id="product_key" name="product_key" value="flash_astral">
                         
-                          <div class="option-card pink" 
-                            onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', 25, this)">
-                            <div class="badge new">NOUVEAU</div>
+                         <div class="option-card pink" 
+                            onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', 19, this)">
                             <span class="icon">💕</span>
                             <h4>Mon Profil Amoureux</h4>
                             <p style="font-size: 0.85rem; line-height: 1.3;">
@@ -2106,77 +2334,123 @@
                             <div class="price">
                                 <div class="price">25€</div>
                             </div>
+                            <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                             <span class="status available">Clique pour sélectionner</span>
+                            <div class="card-tooltip">
+                                <strong>Ce que tu reçois</strong>
+                                4 modules en un : ta façon d'aimer (Vénus, Lune), le profil qui t'attire vraiment, ta dynamique de couple — et une lecture de ton rapport à l'intimité et à la sexualité. Révélateur, parfois dérangeant, toujours juste.
+                            </div>
                         </div>
                         
-                        
-                            <div class="option-card" onclick="addToCart('analyse_karmique', 'Analyse Karmique', 35, this)">
-                                <div class="badge new">A VENIR</div>
+                        <div class="option-card purple" onclick="addToCart('analyse_karmique', 'Analyse Karmique', 45, this)">
+                                <div class="badge new">NOUVEAU</div>
                                 <span class="icon">🔮</span>
                                 <h4>Analyse Karmique</h4>
-                                <p>Explore ta mission d'âme : Lune Noire, Chiron, planètes rétrogrades, interceptions, maisons 4, 8 et 12</p>
-                                <div class="price">Prix à définir</div>
+                                <p>Explore ta mission d'âme : Lune Noire, Chiron, rétrogrades, interceptions, maisons 4, 8 et 12</p>
+                                <div class="price">
+                                    <span style="text-decoration: line-through; color: #aaa; font-size: 0.9rem; font-weight: 400;">69€</span>
+                                    <span style="color: #8B5CF6; font-size: 1.4rem; font-weight: 700; margin-left: 6px;">45€</span>
+                                    <div style="font-size: 0.75rem; color: #8B5CF6; font-weight: 600; margin-top: 4px;">🎉 Early bird — 3 jours seulement</div>
+                                </div>
+                                <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                                 <span class="status available">Clique pour sélectionner</span>
+                                <div class="card-tooltip">
+                                    <strong>Ce que tu reçois</strong>
+                                    L'analyse la plus profonde : nœuds lunaires (mission d'âme), Chiron (blessure karmique), Lune Noire Lilith, planètes rétrogrades, interceptions et les maisons 4, 8, 12. Pour comprendre pourquoi tu es comme tu es — vraiment.
+                                </div>
                             </div>
 
-                        <div class="option-card" onclick="showComingSoon('Carrière/Vocation')">
-                            <span class="icon">🎯</span>
-                            <h4>Carrière/Vocation</h4>
-                            <p>Quelle voie choisir pour réaliser ton potentiel professionnel</p>
-                            <div class="price">Prix à définir</div>
-                            <span class="status coming-soon">À venir</span>
-                        </div>
-                        
-                      
+
+                       
                     </div>
-                <!-- Section Packs -->
-                <div class="packs-section">
-                    <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
-                    <p style="text-align: center; color: white; margin-bottom: 20px; opacity: 0.9;">
-                        Économise en combinant plusieurs analyses cosmiques dans nos packs exclusifs
-                    </p>
 
 
-                    <div class="pack-card essence-special" onclick="selectPack('essence')">
-                <div class="pack-badge">-28% PACK</div>
-                <div class="pack-layout-3col">
-                    <div class="pack-image-left">
-                        <img src="/static/images/christmas_gift.webp" alt="Cadeau de Noël">
+        <!-- Section Packs -->
+        <div class="packs-section">
+            <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
+            <p style="text-align: center; color: white; margin-bottom: 30px; opacity: 0.9;">
+                Économise en combinant plusieurs analyses — avec l'option 3 questions incluse dans chaque pack
+            </p>
+
+            <div class="packs-grid" style="grid-template-columns: repeat(3, 1fr) !important;">
+
+                <!-- Pack Origines -->
+                <div class="pack-card" onclick="selectPack('origines')">
+                    <div class="pack-badge" style="background: linear-gradient(135deg, #8B5CF6, #A78BFA);">-20% NOUVEAU</div>
+                    <div class="pack-title">🌑 Pack Origines</div>
+                    <div class="pack-content">
+                        ✓ Flash Astral — qui tu es aujourd'hui<br>
+                        ✓ Analyse Karmique — pourquoi tu es comme ça<br>
+                        <span style="font-size:0.85rem; opacity:0.8; margin-top:8px; display:block;">✉️ Option 3 questions disponible sur ce pack</span>
                     </div>
-                    <div class="pack-modules">
-                        <div class="pack-title">✨ Pack Essence</div>
-                        <div class="pack-content">
-                            ✓ Flash Astral<br>
-                            ✓ Forces & Défis<br>
-                            ✓ Profil Amoureux
+                    <div class="pack-price">
+                        <div>
+                            <span style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size:1rem;">104€</span><br>
+                            <span class="pack-price-value">83€</span><br>
+                            <span style="background: rgba(255,215,0,0.25); border: 1px solid rgba(255,215,0,0.5); border-radius:8px; padding:4px 10px; font-size:0.85rem; color:#FFD700; display:inline-block; margin-top:6px;">🚀 prix lancement : 64€</span>
                         </div>
-                    </div>
-                    <div class="pack-pricing">
-                        <div style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size: 1.2em;">75€</div>
-                        <div style="font-size: 3em; font-weight: bold; color: #FFD700; line-height: 1;">54€</div>
                     </div>
                 </div>
+
+                <!-- Pack Essence -->
+                <div class="pack-card essence-special" onclick="selectPack('essence')" style="border: 2px solid #FFD700;">
+                    <div class="pack-badge">-28% PACK</div>
+                    <div class="pack-title">✨ Pack Essence</div>
+                    <div class="pack-content">
+                        ✓ Flash Astral<br>
+                        ✓ Potentiels &amp; Défis<br>
+                        ✓ Profil Amoureux
+                    </div>
+                    <div class="pack-price">
+                        <div>
+                            <span style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size:1rem;">75€</span><br>
+                            <span class="pack-price-value">54€</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pack Intégral -->
+                <div class="pack-card" onclick="selectPack('integral')" style="border: 2px solid rgba(192,240,247,0.5);">
+                    <div class="pack-badge" style="background: linear-gradient(135deg, #00a8a8, #1f628e);">-31% COMPLET</div>
+                    <div class="pack-title">🌟 Pack Intégral</div>
+                    <div class="pack-content">
+                        ✓ Flash Astral<br>
+                        ✓ Analyse Karmique<br>
+                        ✓ Profil Amoureux<br>
+                        ✓ Potentiels &amp; Défis<br>
+                        <span style="font-size:0.85rem; opacity:0.8; margin-top:8px; display:block;">✉️ Option 3 questions disponible sur ce pack</span>
+                    </div>
+                    <div class="pack-price">
+                        <div>
+                            <span style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size:1rem;">144€</span><br>
+                            <span class="pack-price-value">99€</span><br>
+                            <span style="background: rgba(255,215,0,0.25); border: 1px solid rgba(255,215,0,0.5); border-radius:8px; padding:4px 10px; font-size:0.85rem; color:#FFD700; display:inline-block; margin-top:6px;">🚀 prix lancement : 84€</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             </div>
+
                     <!-- Partie prévisionnelle -->
                     <div class="predictive-section">
                         <h3 class="predictive-title">🌙 Analyses Prévisionnelles</h3>
-                        <p class="predictive-subtitle">Découvre ce que l'avenir tes réserve avec nos analyses temporelles</p>
+                        <p class="predictive-subtitle">Bientôt disponibles — découvrez ce que l'avenir vous réserve avec nos analyses temporelles</p>
                         <div class="options-grid">
-                            <div class="option-card" onclick="showComingSoon('Mes Énergies du Mois')">
+                            <div class="option-card" style="opacity:0.45; cursor:not-allowed; filter:grayscale(0.6);">
                                 <span class="icon">🌙</span>
                                 <h4>Mes Énergies du Mois</h4>
-                                <p>Abonnement mensuel pour suivre tes transits personnalisés</p>
-                                <div class="price">Prix à définir</div>
-                                <span class="status coming-soon">À venir</span>
+                                <p>Abonnement mensuel pour suivre vos transits personnalisés</p>
+                                <div class="price" style="color:#aaa;">À venir</div>
+                                <span class="status coming-soon">En développement</span>
                             </div>
 
-                            <div class="option-card" onclick="showComingSoon('Révolution Solaire')">
+                            <div class="option-card" style="opacity:0.45; cursor:not-allowed; filter:grayscale(0.6);">
                                 <span class="icon">🎂</span>
                                 <h4>Révolution Solaire</h4>
-                                <p>Ton thème annuel pour anticiper les grandes tendances</p>
-                                <div class="price">Prix à définir</div>
-                                <span class="status coming-soon">À venir</span>
+                                <p>Votre thème annuel pour anticiper les grandes tendances</p>
+                                <div class="price" style="color:#aaa;">À venir</div>
+                                <span class="status coming-soon">En développement</span>
                             </div>
                         </div>
                     </div>
@@ -2187,7 +2461,7 @@
 
 <div class="testimonials-section">
     <h2 class="section-title">💬 Ce qu'ils disent de nos analyses</h2>
-    <p class="testimonials-subtitle">Découvre pourquoi nos clients recommandent nos analyses astrologiques</p>
+    <p class="testimonials-subtitle">Découvrez pourquoi nos clients recommandent nos analyses astrologiques</p>
     
     <div class="testimonials-grid">
         <div class="testimonial-card">
@@ -2245,11 +2519,19 @@
                 </div>
             </div>
         </div>
+    </div> 
+    
+    <div class="testimonials-cta">
+        <h3>Des tas de personnes ont déjà découvert leur thème</h3>
+        <p>Rejoins-les et lis leurs retours </p>
+        <a href="/retours" class="cta-button">✨ Voir tous les avis</a>
     </div>
-        
+
+
         <!-- Panier -->
         <div class="cart-section" id="cartSection">
             <h3 class="section-title">🛒 Ta Sélection</h3>
+            <div id="clarifUpsell" style="display:none;"></div>
             <div id="cartItems"></div>
             
             <div class="consent-section">
@@ -2269,18 +2551,12 @@
         <!-- Section Consultations -->
         <div class="consultation-section">
             <h2 class="section-title">👥 Consultations Personnalisées</h2>
-            <div class="consultation-grid">
+            <div class="consultation-grid" style="grid-template-columns: 1fr; max-width: 500px; margin: 30px auto 0;">
                 <a href="https://bycecilecl.com/categorie-produit/services/" class="consultation-card" target="_blank">
                     <span class="consultation-icon">🔮</span>
                     <div class="consultation-title">Réserver une Consultation</div>
                     <div class="consultation-description">Consultation approfondie avec analyse personnalisée en direct</div>
                 </a>
-
-                <div class="consultation-card ai" onclick="openPsychologyChat()">
-                    <span class="consultation-icon">🤖</span>
-                    <div class="consultation-title">Cellule Psychologique IA</div>
-                    <div class="consultation-description">10mn de conversation avec notre IA spécialisée sur tes configurations astrales</div>
-                </div>
             </div>
         </div>
 
@@ -2309,6 +2585,28 @@
         </div>
     </div>
 
+    <!-- Modal Confirmation Coordonnées de Naissance -->
+    <div class="payment-modal" id="birthConfirmModal" onclick="event.target === this && closeBirthConfirmModal()">
+        <div class="payment-modal-content" onclick="event.stopPropagation()" style="max-width: 480px;">
+            <div class="payment-modal-header">
+                <h3>🌟 Confirme tes coordonnées de naissance</h3>
+            </div>
+            <div class="payment-modal-body">
+                <p style="color:#555; margin-bottom:20px; font-size:0.95rem;">Ces données servent à calculer ton thème natal. Vérifie qu'elles sont correctes avant de continuer.</p>
+                <div id="birthDataSummary" style="background: linear-gradient(135deg, rgba(192,240,247,0.2), rgba(31,98,142,0.08)); border-radius:14px; padding:20px; margin-bottom:20px; border: 1px solid rgba(31,98,142,0.15);">
+                </div>
+                <div class="payment-buttons">
+                    <button class="payment-btn stripe-btn" onclick="confirmBirthDataAndProceed()" style="background: linear-gradient(135deg, #10B981, #059669);">
+                        ✅ C'est correct, on continue !
+                    </button>
+                    <button class="payment-btn cancel-btn" onclick="closeBirthConfirmModal()">
+                        ✏️ Modifier mes données
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Confirmation Paiement -->
     <div class="payment-modal" id="paymentConfirmationModal" onclick="event.target === this && closePaymentConfirmationModal()">
         <div class="payment-modal-content" onclick="event.stopPropagation()">
@@ -2321,6 +2619,11 @@
                     <button class="payment-btn stripe-btn" onclick="confirmPayment()">
                         Payer avec Stripe
                     </button>
+                    <!-- <button class="payment-btn paypal-btn" onclick="redirectToPayPal(window.pendingOrder)">
+                        Payer avec PayPal
+                    </button> -->
+                    <!-- en com 17.09  <div id="paypal-button-container" style="width:100%;"></div> -->
+                     <!-- Ajouté le 17.09 -->
                     <div id="paypal-button-container" style="width:100%;"></div>
                     <button class="payment-btn cancel-btn" onclick="closePaymentConfirmationModal()">
                         Annuler
@@ -2330,33 +2633,6 @@
         </div>
     </div>
 
-    <!-- Modal Cellule Psychologique -->
-    <div class="modal-overlay" id="psychologyModal" onclick="closePsychologyChat()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3>🧠 Cellule Psychologique IA</h3>
-                <button class="close-btn" onclick="closePsychologyChat()">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="timer-section">
-                    <div class="timer" id="psychologyTimer">10:00</div>
-                    <div class="timer-label">Temps restant</div>
-                </div>
-                <div class="psychology-chat" id="psychologyChat">
-                    <div class="message bot-message">
-                        <div class="message-avatar">🧠</div>
-                        <div class="message-content">
-                            Bonjour ! Je suis votre psychologue astrologique IA. Pendant les 10 prochaines minutes, nous pouvons explorer ensemble vos configurations astrales et leur impact psychologique. Parlez-moi de ce qui vous préoccupe ou intéresse dans votre thème natal.
-                        </div>
-                    </div>
-                </div>
-                <div class="psychology-input-container">
-                    <input type="text" id="psychologyInput" placeholder="Partagez vos réflexions..." onkeypress="handlePsychologyKeyPress(event)">
-                    <button onclick="sendPsychologyMessage()" class="send-btn">📤</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Footer -->
     <footer class="site-footer">
@@ -2372,29 +2648,30 @@
                         Une approche moderne et authentique de l'astrologie pour révéler ton potentiel.
                     </p>
                     <div class="footer-social">
-                        <a href="#" class="social-link" title="Facebook">
+                        <a href="https://www.facebook.com/lesfousdastro" class="social-link" title="Facebook">
                             <span class="social-icon">📘</span>
                         </a>
-                        <a href="#" class="social-link" title="Instagram">
+                        <a href="https://www.instagram.com/bycecilecl" class="social-link" title="Instagram">
                             <span class="social-icon">📷</span>
                         </a>
-                        <a href="#" class="social-link" title="YouTube">
+                        <a href="https://www.instagram.com/lesfousdastro" class="social-link" title="Instagram">
+                            <span class="social-icon">📷</span>
+                        </a>
+                        <a href="https://www.youtube.com/lesfousdastro" class="social-link" title="YouTube">
                             <span class="social-icon">🎥</span>
                         </a>
-                        <a href="/cdn-cgi/l/email-protection#2645494852474552664a435540495355424755525449084054" class="social-link" title="Email">
+                        <a href="mailto:contact@lesfousdastro.fr" class="social-link" title="Email">
                             <span class="social-icon">📧</span>
                         </a>
                     </div>
                 </div>
 
                 <div class="footer-section links-section">
-                    <h4>Nos Services</h4>
+                    <h4>Menu</h4>
                     <ul class="footer-links">
-                        <li><a href="#analyses">Analyse Gratuite</a></li>
-                        <li><a href="#analyses">Flash Astral</a></li>
-                        <li><a href="#analyses">Analyses Cosmiques</a></li>
-                        <li><a href="#packs">Packs Découverte</a></li>
-                        <li><a href="#consultations">Consultations</a></li>
+                        <li><a href="{{ url_for('pages_bp.analyses') }}">Guide des Analyses</a></li>
+                        <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Consultations</a></li>
+                        <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
                     </ul>
                 </div>
 
@@ -2413,7 +2690,7 @@
                     <div class="contact-info">
                         <p class="contact-item">
                             <span class="contact-icon">📧</span>
-                            <a href="/cdn-cgi/l/email-protection#2e4d41405a4f4d5a6e424b5d48415b5d4a4f5d5a5c4100485c"><span class="__cf_email__" data-cfemail="e1828e8f95808295a18d8492878e949285809295938ecf8793">[email&#160;protected]</span></a>
+                            <a href="mailto:contact@lesfousdastro.fr">contact@lesfousdastro.fr</a>
                         </p>
                         <p class="contact-item">
                             <span class="contact-icon">🌐</span>
@@ -2437,7 +2714,7 @@
             <div class="footer-bottom">
                 <div class="footer-bottom-content">
                     <p class="copyright">
-                        © 2025 Les Fous d'Astro. Tous droits réservés.
+                        © 2026 Les Fous d'Astro. Tous droits réservés.
                     </p>
                     <p class="legal-notice">
                         Les analyses astrologiques sont à des fins de divertissement et de développement personnel uniquement.
@@ -2450,24 +2727,8 @@
             </div>
         </div>
     </footer>
-    {# ---- Jinja prelude: choisir le bon client-id ---- #}
-    {% set mode = (PAYPAL_MODE|lower if PAYPAL_MODE is defined else 'live') %}
-    {% if mode == 'live' %}
-        {# si PAYPAL_CLIENT_ID_LIVE n'est pas fourni, on retombe sur PAYPAL_CLIENT_ID existant #}
-        {% set PAYPAL_CLIENT_ID_EFFECTIVE = (PAYPAL_CLIENT_ID_LIVE if PAYPAL_CLIENT_ID_LIVE is defined and PAYPAL_CLIENT_ID_LIVE else PAYPAL_CLIENT_ID) %}
-    {% else %}
-        {% set PAYPAL_CLIENT_ID_EFFECTIVE = (PAYPAL_CLIENT_ID_SB if PAYPAL_CLIENT_ID_SB is defined and PAYPAL_CLIENT_ID_SB else PAYPAL_CLIENT_ID) %}
-    {% endif %}
-    {% set currency = (PAYPAL_CURRENCY if PAYPAL_CURRENCY is defined else 'EUR') %}
-    <!-- <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&intent=capture&components=buttons"></script> -->
-    <!-- APRÈS (utilise l'ID effectif choisi à l'étape 1) -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID_EFFECTIVE }}&currency={{ currency }}&intent=capture&components=buttons"></script>
-
-    <script>
-    console.log("🔑 PayPal mode:", "{{ mode }}",
-                "| client:", "{{ PAYPAL_CLIENT_ID_EFFECTIVE[:10] }}…");
-    </script>
-    
+    <!-- com le 17.09 <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&components=buttons"></script> -->
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&intent=capture&components=buttons"></script>
     <script>
         let paypalRendered = false; // évite de rendre 2x si la modale s’ouvre/ferme
         // Variables globales
@@ -2511,84 +2772,31 @@
                 tagline: false
             },
 
-            createOrder: async (data, actions) => {
-                console.log('🛒 PayPal.createOrder appelé');
-                
-                const response = await fetch('/payments/create-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        items: order?.items || []
-                    })
+            createOrder: (data, actions) => {
+                const total = Number(order?.total ?? 0);
+                console.log('🛒 PayPal.createOrder appelé, total =', total, '€');
+                return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                    value: total.toFixed(2),
+                    currency_code: "{{ PAYPAL_CURRENCY }}"
+                    },
+                    description: order?.description || "Flash Astral"
+                }]
                 });
-                
-                const result = await response.json();
-                console.log('✅ Backend order:', result);
-                return result.id;
             },
+
             onApprove: async (data, actions) => {
                 console.log('✅ PayPal.onApprove déclenché', data);
-
                 try {
-                    // 1) Récupérer les infos formulaire
-                    const userInfo = {
-                    nom: document.getElementById('nom').value,
-                    email: document.getElementById('email').value,
-                    gender: document.querySelector('[name="gender"]:checked').value,
-                    birthDate: document.getElementById('date_naissance').value,
-                    birthTime: document.getElementById('heure_naissance').value,
-                    birthPlace: document.getElementById('lieu_naissance').value,
-                    lat: document.getElementById('lat').value,
-                    lon: document.getElementById('lon').value,
-                    tzid: document.getElementById('tzid').value,
-                    };
-
-                    // 2) Quel produit ?
-                    const product_key =
-                    document.getElementById('product_key').value ||
-                    (order?.items?.[0]?.id) ||
-                    'flash_astral';
-
-                    console.log('📦 Envoi au backend:', {
-                    orderID: data.orderID,
-                    product_key,
-                    total: order?.total,
-                    userInfo
-                    });
-
-                    // 3) 👉 Laisser le BACKEND capturer + stocker en session
-                    const response = await fetch('/payments/capture-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        orderID: data.orderID,
-                        userInfo,
-                        product_key,
-                        items: order?.items || [
-                        {
-                            id: product_key,
-                            name: document.getElementById('selected_product_label').value || 'Analyse',
-                            price: Number(order?.total ?? 0)
-                        }
-                        ]
-                    })
-                    });
-
-                    const result = await response.json();
-                    console.log('🎉 Réponse backend:', result);
-
-                    // 4) Succès → redirection
-                    if (response.ok && (result.status === 'COMPLETED' || result.ok)) {
-                    window.location.href = '/paiement-effectue?provider=paypal';
-                    } else {
-                    console.error('❌ Capture/stockage côté serveur KO:', result);
-                    showNotification('Erreur lors de la confirmation du paiement.', 'warning');
-                    }
+                const details = await actions.order.capture();
+                console.log('🎉 Paiement capturé avec succès ! Détails =', details);
+                window.location.href = '/paiement/effectue';
                 } catch (err) {
-                    console.error('❌ Erreur onApprove:', err);
-                    showNotification('Erreur lors du traitement du paiement.', 'warning');
+                console.error('❌ Erreur lors de la capture PayPal:', err);
+                showNotification('Erreur lors du traitement du paiement.', 'warning');
                 }
-                },
+            },
 
             onError: (err) => {
                 console.error('🔥 PayPal.onError', err);
@@ -2640,114 +2848,62 @@
             showNotification(`🚀 ${analysisName} arrive bientôt ! Nous travaillons sur cette fonctionnalité pour vous offrir la meilleure expérience.`, 'info');
         }
 
-        function selectPack(packId) {
-            const packData = {
-                'essence': {
-                    key: 'pack_essence',
-                    name: 'Pack Essence',
-                    price: 54
-                }
-            };
 
-            const pack = packData[packId];
-            if (!pack) {
-                console.error('Pack inconnu:', packId);
+
+        // Gestion du panier
+        function addToCart(id, name, price, element) {
+            if (selectedPack) {
+                showNotification('Vous avez sélectionné un pack. Désélectionnez-le d\'abord pour ajouter des analyses individuelles.', 'warning');
                 return;
             }
 
-            // Si le pack est déjà sélectionné, le désélectionner
-            if (selectedPack && selectedPack.key === pack.key) {
-                selectedPack = null;
-                document.getElementById('product_key').value = '';
-                document.getElementById('selected_product_label').value = '';
-                document.getElementById('selected_product_price').value = '';
-                
-                const packCard = document.querySelector('.pack-card.essence-special');
-                if (packCard) packCard.classList.remove('selected');
-                
-                showNotification('Pack désélectionné', 'info');
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) {
+                removeFromCart(id);
+                element.classList.remove('selected');
             } else {
-                // Vider le panier des analyses individuelles
-                cart.forEach(item => {
-                    const element = document.querySelector(`[onclick*="${item.id}"]`);
-                    if (element) element.classList.remove('selected');
-                });
-                cart = [];
+                cart.push({ id, name, price });
+                element.classList.add('selected');
                 
-                // Sélectionner le pack
-                selectedPack = pack;
-                
-                // Mettre à jour les champs cachés
-                document.getElementById('product_key').value = pack.key;
-                document.getElementById('selected_product_label').value = pack.name;
-                document.getElementById('selected_product_price').value = pack.price;
-                
-                const packCard = document.querySelector('.pack-card.essence-special');
-                if (packCard) packCard.classList.add('selected');
-                
-                showNotification(`✨ ${pack.name} sélectionné !`, 'success');
-                
+                // Auto-scroll vers le panier après sélection
                 setTimeout(() => {
                     const cartSection = document.getElementById('cartSection');
-                    if (cartSection) {
-                        cartSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (cartSection && cartSection.style.display !== 'none') {
+                        cartSection.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
+                        });
                     }
                 }, 300);
+            }
+            
+            // 🆕 AJOUT : Mettre à jour le champ product_key pour le backend
+            const productField = document.getElementById('product_key');
+            if (productField) {
+                // Si un seul produit dans le panier, c'est lui qu'on envoie
+                if (cart.length === 1) {
+                    productField.value = cart[0].id;
+                    console.log('✅ product_key mis à jour:', cart[0].id);
+                } 
+                // Si panier vide, revenir au défaut
+                else if (cart.length === 0) {
+                    productField.value = 'flash_astral';
+                    console.log('ℹ️ Panier vide, product_key = flash_astral');
+                }
+                // Si plusieurs produits (ne devrait pas arriver pour l'instant)
+                else {
+                    productField.value = cart[0].id; // Premier du panier
+                    console.log('⚠️ Plusieurs produits, on prend le premier:', cart[0].id);
+                }
+            } else {
+                console.error('❌ Champ product_key introuvable !');
             }
             
             updateCartDisplay();
         }
 
-       function addToCart(id, name, price, element) {
-        if (selectedPack) {
-            showNotification(
-            'Vous avez sélectionné un pack. Désélectionnez-le d\'abord pour ajouter des analyses individuelles.',
-            'warning'
-            );
-            return;
-        }
 
-        const existingItem = cart.find(item => item.id === id);
 
-        if (existingItem) {
-            // désélection
-            removeFromCart(id);
-            element && element.classList.remove('selected');
-
-            if (cart.length === 0) {
-            // si plus rien dans le panier -> on vide les champs cachés
-            document.getElementById('product_key').value = '';
-            document.getElementById('selected_product_label').value = '';
-            document.getElementById('selected_product_price').value = '';
-            } else {
-            // sinon on pointe sur le dernier item restant
-            const last = cart[cart.length - 1];
-            document.getElementById('product_key').value = last.id;
-            document.getElementById('selected_product_label').value = last.name;
-            document.getElementById('selected_product_price').value = last.price;
-            }
-
-        } else {
-            // ajout
-            cart.push({ id, name, price });
-            element && element.classList.add('selected');
-
-            // un seul produit au checkout → on écrase toujours
-            document.getElementById('product_key').value = id;
-            document.getElementById('selected_product_label').value = name;
-            document.getElementById('selected_product_price').value = price;
-
-            // scroll vers le panier
-            setTimeout(() => {
-            const cartSection = document.getElementById('cartSection');
-            if (cartSection && cartSection.style.display !== 'none') {
-                cartSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            }, 300);
-        }
-
-        updateCartDisplay();
-        }
 
         function processSelectedAnalyses() {
             // Vérifier que les informations de base sont remplies
@@ -2779,6 +2935,104 @@
                 return;
             }
 
+            // ✅ Afficher le modal de confirmation des coordonnées avant de continuer
+            showBirthConfirmModal();
+        }
+
+        function showBirthConfirmModal() {
+            const nom = document.getElementById('nom').value;
+            const date = document.getElementById('date_naissance').value;
+            const heure = document.getElementById('heure_naissance').value;
+            const lieu = document.getElementById('lieu_naissance').value;
+            const gender = document.querySelector('[name="gender"]:checked')?.value;
+            const genderLabel = gender === 'female' ? '👩 Femme' : '👨 Homme';
+
+            // Formater la date en français
+            const dateObj = new Date(date + 'T12:00:00');
+            const dateFr = dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            // Formater l'heure
+            const [h, m] = heure.split(':');
+            const heureFr = `${h}h${m}`;
+
+            document.getElementById('birthDataSummary').innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:1.4rem;">👤</span>
+                        <div>
+                            <div style="font-size:0.78rem; color:#888; text-transform:uppercase; letter-spacing:0.05em;">Prénom</div>
+                            <div style="font-size:1.05rem; font-weight:600; color:#1f628e;">${nom}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:1.4rem;">${gender === 'female' ? '👩' : '👨'}</span>
+                        <div>
+                            <div style="font-size:0.78rem; color:#888; text-transform:uppercase; letter-spacing:0.05em;">Sexe</div>
+                            <div style="font-size:1.05rem; font-weight:600; color:#1f628e;">${genderLabel}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:1.4rem;">📅</span>
+                        <div>
+                            <div style="font-size:0.78rem; color:#888; text-transform:uppercase; letter-spacing:0.05em;">Date de naissance</div>
+                            <div style="font-size:1.05rem; font-weight:600; color:#1f628e;">${dateFr}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:1.4rem;">🕐</span>
+                        <div>
+                            <div style="font-size:0.78rem; color:#888; text-transform:uppercase; letter-spacing:0.05em;">Heure de naissance</div>
+                            <div style="font-size:1.05rem; font-weight:600; color:#1f628e;">${heureFr}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:1.4rem;">📍</span>
+                        <div>
+                            <div style="font-size:0.78rem; color:#888; text-transform:uppercase; letter-spacing:0.05em;">Lieu de naissance</div>
+                            <div style="font-size:1.05rem; font-weight:600; color:#1f628e;">${lieu}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('birthConfirmModal').style.display = 'flex';
+        }
+
+        function closeBirthConfirmModal() {
+            document.getElementById('birthConfirmModal').style.display = 'none';
+            // Scroll vers les champs pour correction
+            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function confirmBirthDataAndProceed() {
+            document.getElementById('birthConfirmModal').style.display = 'none';
+            _doProceedAfterBirthConfirm();
+        }
+
+        function _doProceedAfterBirthConfirm() {
+            // ANALYSE KARMIQUE : route directe de génération si sélection seule
+            const isKarmicOnly =
+                !selectedPack &&
+                cart.length === 1 &&
+                cart[0].id === 'analyse_karmique';
+
+            if (isKarmicOnly) {
+                const form = document.getElementById('form-analyse');
+                form.action = '/analyse_karmique';
+                form.method = 'POST';
+                
+                let consentInput = form.querySelector('input[name="consentement"]');
+                if (!consentInput) {
+                    consentInput = document.createElement('input');
+                    consentInput.type = 'hidden';
+                    consentInput.name = 'consentement';
+                    form.appendChild(consentInput);
+                }
+                consentInput.value = 'on';
+                form.submit();
+                return;
+            }
+
             // Séparer analyses gratuites et payantes
             const freeAnalyses = [];
             const paidAnalyses = [];
@@ -2795,16 +3049,15 @@
                 });
             }
 
-            // Si il y a des analyses gratuites, les traiter d'abord
             if (freeAnalyses.length > 0) {
                 processFreeAnalyses(freeAnalyses, paidAnalyses);
             } else if (paidAnalyses.length > 0) {
-                // Seulement du payant, aller au paiement
                 proceedToPayment();
             } else {
                 showNotification('⚠️ Veuillez sélectionner au moins une analyse.', 'warning');
             }
         }
+
 
         function processFreeAnalyses(freeAnalyses, paidAnalyses) {
             // Afficher le modal avec animation de traitement
@@ -3015,9 +3268,11 @@
         function updateCartDisplay() {
             const cartSection = document.getElementById('cartSection');
             const cartItems = document.getElementById('cartItems');
+            const clarifUpsell = document.getElementById('clarifUpsell');
             
             if (cart.length === 0 && !selectedPack) {
                 cartSection.style.display = 'none';
+                clarifUpsell.style.display = 'none';
                 return;
             }
 
@@ -3031,8 +3286,16 @@
                 packDiv.className = 'cart-item';
                 
                 let packDetails = '';
-                if (selectedPack.items) {
-                    const selectedNames = selectedPack.items.map(item => item.name);
+                if (selectedPack.analyses) {
+                    const analysisNames = {
+                        'flash_astral': 'Flash Astral',
+                        'forces_defis': 'Potentiels et Défis',
+                        'profil_amoureux': 'Profil Amoureux',
+                        'analyse_karmique': 'Analyse Karmique',
+                        'energies_mois': 'Énergies du Mois',
+                        'revolution_solaire': 'Révolution Solaire'
+                    };
+                    const selectedNames = selectedPack.analyses.map(id => analysisNames[id] || id);
                     packDetails = selectedNames.join(', ');
                 }
                 
@@ -3049,7 +3312,7 @@
                 cartItems.appendChild(packDiv);
                 total = selectedPack.price;
             } else {
-                cart.forEach(item => {
+                cart.filter(item => item.id !== 'clarification_questions').forEach(item => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'cart-item';
                     itemDiv.innerHTML = `
@@ -3064,14 +3327,54 @@
                 });
             }
 
+            // Gérer l'upsell 3 questions
+            const eligibleIds = ['flash_astral', 'profil_amoureux', 'analyse_karmique'];
+            const packEligibleIds = ['pack_origines', 'pack_essence', 'pack_integral'];
+            const hasEligible = cart.some(item => eligibleIds.includes(item.id))
+                || (selectedPack && packEligibleIds.includes(selectedPack.id));
+            const clarifInCart = cart.find(item => item.id === 'clarification_questions');
+
+            if (hasEligible) {
+                const isChecked = !!clarifInCart;
+                clarifUpsell.style.display = 'block';
+                clarifUpsell.innerHTML = `
+                    <label class="clarif-upsell" for="clarifCheck">
+                        <input type="checkbox" id="clarifCheck" ${isChecked ? 'checked' : ''}
+                            onchange="toggleClarification(this.checked)">
+                        <div class="clarif-upsell-text">
+                            <div class="clarif-upsell-title">✉️ Ajouter l'option 3 questions de clarification</div>
+                            <div class="clarif-upsell-desc">Tu m'envoies 3 questions après réception — Cécile répond par email sous 7 jours ouvrés (pas une IA). Instructions incluses dans l'email de livraison.</div>
+                        </div>
+                        <div class="clarif-upsell-price">+25€</div>
+                    </label>
+                `;
+                if (clarifInCart) total += 25;
+            } else {
+                clarifUpsell.style.display = 'none';
+                // Retirer du panier si plus éligible
+                cart = cart.filter(item => item.id !== 'clarification_questions');
+            }
+
             const totalDiv = document.createElement('div');
             totalDiv.className = 'cart-item';
+            totalDiv.style.fontWeight = '700';
             totalDiv.innerHTML = `<span>Total</span><span>${total}€</span>`;
             cartItems.appendChild(totalDiv);
             
-            // Mettre à jour le texte du bouton selon le nombre d'analyses
             updateSubmitButtonText();
         }
+
+        function toggleClarification(checked) {
+            if (checked) {
+                if (!cart.find(item => item.id === 'clarification_questions')) {
+                    cart.push({ id: 'clarification_questions', name: '✉️ Option 3 questions', price: 25 });
+                }
+            } else {
+                cart = cart.filter(item => item.id !== 'clarification_questions');
+            }
+            updateCartDisplay();
+        }
+
 
         function updateSubmitButtonText() {
             const submitBtn = document.getElementById('submitBtn');
@@ -3094,6 +3397,58 @@
                 submitBtn.textContent = '✨ Obtenir mes analyses ✨';
                 submitBtn.disabled = false;
             }
+        }
+
+        function selectPack(packId) {
+            const packs = {
+                origines: {
+                    id: 'pack_origines',
+                    name: '🌑 Pack Origines',
+                    price: 64,
+                    analyses: ['flash_astral', 'analyse_karmique']
+                },
+                essence: {
+                    id: 'pack_essence',
+                    name: '✨ Pack Essence',
+                    price: 54,
+                    analyses: ['flash_astral', 'forces_defis', 'profil_amoureux']
+                },
+                integral: {
+                    id: 'pack_integral',
+                    name: '🌟 Pack Intégral',
+                    price: 84,
+                    analyses: ['flash_astral', 'analyse_karmique', 'profil_amoureux', 'forces_defis']
+                }
+            };
+
+            const pack = packs[packId];
+            if (!pack) return;
+
+            // Si déjà sélectionné, désélectionner
+            if (selectedPack && selectedPack.id === pack.id) {
+                removePackFromCart();
+                return;
+            }
+
+            // Vider le panier individuel
+            cart = [];
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+
+            selectedPack = pack;
+
+            // Sélection visuelle
+            document.querySelectorAll('.pack-card').forEach(c => c.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            showNotification(`✅ ${pack.name} sélectionné — ${pack.price}€`, 'success');
+            updateCartDisplay();
+
+            setTimeout(() => {
+                const cartSection = document.getElementById('cartSection');
+                if (cartSection && cartSection.style.display !== 'none') {
+                    cartSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300);
         }
 
         function removePackFromCart() {
@@ -3218,47 +3573,68 @@
 
         function confirmPayment() {
             const orderData = window.pendingOrder;
-
-            // 🔒 Sécurité : vérifier qu'un produit est choisi
-            const pk = (document.getElementById('product_key').value || '').trim();
-            if (!pk) {
-                showNotification("⚠️ Choisis d'abord une analyse avant de payer.", 'warning');
+            
+            // Vérifier qu'on a bien des données
+            if (!orderData || !orderData.userInfo) {
+                showNotification('❌ Erreur: données manquantes', 'warning');
                 return;
             }
 
-            console.log('✅ Confirmation paiement Stripe pour:', pk, orderData);
-
-            // 🧩 Fermer le modal de confirmation
+            // Fermer le modal de confirmation
             closePaymentConfirmationModal();
-
-            // ✅ Réutiliser le formulaire principal
-            const form = document.getElementById('form-analyse');
-            form.action = '/checkout';
+            
+            // 🆕 Déterminer le product_key selon le type de commande
+            let productKey = 'flash_astral'; // Défaut
+            
+            if (orderData.type === 'pack') {
+                // Pour les packs, tu devras déterminer la logique
+                // Pour l'instant, on prend l'ID du pack
+                productKey = orderData.items[0].id || 'flash_astral';
+            } else if (orderData.items.length === 1) {
+                // Une seule analyse individuelle
+                productKey = orderData.items[0].id;
+            } else if (orderData.items.length > 1) {
+                // Plusieurs analyses : prendre la première (ou gérer autrement)
+                productKey = orderData.items[0].id;
+                console.warn('⚠️ Plusieurs produits, on prend le premier:', productKey);
+            }
+            
+            console.log('💳 Paiement Stripe - product_key:', productKey);
+            
+            // Créer un formulaire temporaire pour envoyer à Stripe
+            const form = document.createElement('form');
             form.method = 'POST';
-
-            // 📦 Ajouter les infos du panier (pour debug / tracking)
-            let itemsInput = document.getElementById('items_json');
-            if (!itemsInput) {
-                itemsInput = document.createElement('input');
-                itemsInput.type = 'hidden';
-                itemsInput.name = 'items';
-                itemsInput.id = 'items_json';
-                form.appendChild(itemsInput);
-            }
-            itemsInput.value = JSON.stringify(orderData?.items || cart || []);
-
-            // 💰 Ajouter le total de la commande (optionnel mais utile)
-            let totalInput = document.getElementById('order_total');
-            if (!totalInput) {
-                totalInput = document.createElement('input');
-                totalInput.type = 'hidden';
-                totalInput.name = 'total';
-                totalInput.id = 'order_total';
-                form.appendChild(totalInput);
-            }
-            totalInput.value = (orderData?.total ?? 0);
-
-            // 🚀 Soumettre le formulaire vers Stripe
+            form.action = '/checkout';
+            form.style.display = 'none';
+            
+            // Ajouter les champs requis pour ton système Stripe
+            const fields = {
+                'nom': orderData.userInfo.nom,
+                'email': orderData.userInfo.email,
+                'date_naissance': orderData.userInfo.birthDate,
+                'heure_naissance': orderData.userInfo.birthTime,
+                'lieu_naissance': orderData.userInfo.birthPlace,
+                'lat': orderData.userInfo.lat,
+                'lon': orderData.userInfo.lon,
+                'tzid': orderData.userInfo.tzid,
+                'gender': orderData.userInfo.gender,
+                'product_key': productKey,  // 🆕 AJOUTÉ
+                'type_commande': orderData.type,
+                'items': JSON.stringify(orderData.items),
+                'total': orderData.total
+            };
+            
+            // Créer les inputs cachés
+            Object.keys(fields).forEach(name => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = fields[name] || '';
+                form.appendChild(input);
+            });
+            
+            // Ajouter le formulaire au DOM et le soumettre
+            document.body.appendChild(form);
             form.submit();
         }
 
@@ -3416,7 +3792,6 @@
         createStars();
         updateCartDisplay();
         updateSubmitButtonText();
-        
 
         document.getElementById('form-analyse').addEventListener('submit', function (e) {
             const pk = document.getElementById('product_key').value.trim();

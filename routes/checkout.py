@@ -11,6 +11,7 @@ from flask import Blueprint, request, session, redirect, url_for, render_templat
 from config.products import PRODUCTS
 import stripe
 from config.gift_codes import get_gift_code, is_code_used, mark_code_as_used
+#from utils.brevo_utils import ajouter_contact_brevo
 
 
 checkout_bp = Blueprint("checkout_bp", __name__)
@@ -103,6 +104,21 @@ def checkout():
         abort(400, description="Panier vide.")
     
     current_app.logger.info(f"🛒 [CHECKOUT] Panier: {cart_items}")
+    # try:
+    #     infos = session.get("infos_utilisateur") or {}
+    #     email = infos.get("email")
+    #     prenom = (infos.get("nom") or "").split()[0]
+
+    #     if "flash_astral" in product_keys and email:
+    #         ajouter_contact_brevo(
+    #             email=email,
+    #             prenom=prenom,
+    #             list_id_env="BREVO_LIST_FLASH_ID"
+    #         )
+    #         current_app.logger.info(f"✅ [BREVO] Client Flash Astral ajouté : {email}")
+
+    # except Exception as e:
+    #     current_app.logger.warning(f"⚠️ [BREVO] Ajout client Flash Astral impossible : {e}")
 
     fixed_cart = []
     for item in cart_items:

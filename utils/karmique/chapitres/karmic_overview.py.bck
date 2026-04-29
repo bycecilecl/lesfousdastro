@@ -1,0 +1,89 @@
+from typing import Dict, Any, List, Optional
+from utils.karmique.karmique_score import _label_from_score
+
+def _pretty_key(key: str) -> str:
+    return key.replace("_", " ").capitalize()
+
+
+def summarize_chapter(chapter_title: str, chapter_text: str, call_llm=None) -> str:
+    return ""
+
+def build_block_karmic_score(
+    theme: Dict[str, Any],
+    score: Dict[str, Any],
+    global_ctx: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    score_total = int(score.get("total", 0) or 0)
+    label = score.get("label") or _label_from_score(score_total)
+    breakdown = score.get("breakdown") or {}
+    meta = score.get("meta") or {}
+
+    top_items = sorted(
+        [(k, v) for k, v in breakdown.items() if isinstance(v, (int, float)) and v > 0],
+        key=lambda x: x[1],
+        reverse=True
+    )[:4]
+
+    dominant_elements = meta.get("dominant_elements") or []
+    if isinstance(dominant_elements, str):
+        dominant_elements = [dominant_elements]
+
+    # Point sensible : degré 29 si présent
+    sensitive_points = []
+    planetes = theme.get("planetes", {}) or {}
+    for nom_planete, infos in planetes.items():
+        if not isinstance(infos, dict):
+            continue
+        deg = infos.get("degre_dans_signe")
+        signe = infos.get("signe")
+        maison = infos.get("maison")
+        try:
+            deg_f = float(deg)
+        except (TypeError, ValueError):
+            continue
+
+        if deg_f >= 29.0:
+            sensitive_points.append(
+                f"{nom_planete} à {deg_f:.2f}° en {signe} (Maison {maison})"
+            )
+
+    # Facteurs dominants lisibles
+    fact_labels = [_pretty_key(k) for k, _ in top_items]
+
+    lines: List[str] = []
+    lines.append(f"Poids karmique : **{score_total}**")
+    lines.append(f"Signature : **{label}**")
+
+    if dominant_elements:
+        lines.append(f"Dominante élémentaire : **{', '.join(map(str, dominant_elements))}**")
+
+    if sensitive_points:
+        lines.append(f"Point sensible : **{sensitive_points[0]}**")
+
+    if fact_labels:
+        lines.append(f"Facteurs dominants : **{' · '.join(fact_labels)}**")
+
+    content = "\n\n".join(lines).strip()
+
+    summary = summarize_chapter(
+        chapter_title="Synthèse karmique",
+        chapter_text=content,
+        call_llm=global_ctx.get("call_llm") if isinstance(global_ctx, dict) else None,
+    )
+
+    return {
+        "id": "karmic_score",
+        "title": "Synthèse karmique",
+        "data": {
+            "score_total": score_total,
+            "label": label,
+            "breakdown": breakdown,
+            "top_items": top_items,
+            "dominant_elements": dominant_elements,
+            "sensitive_points": sensitive_points,
+            "fact_labels": fact_labels,
+        },
+        "content": content,
+        "text": content,
+        "summary": summary,
+    }
