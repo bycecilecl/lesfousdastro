@@ -92,13 +92,19 @@
     {% else %}
       <h1>✨ Paiement confirmé !</h1>
       <p>
-        Merci pour ta confiance !<br>
+        Merci pour ta confiance.<br>
         <strong>Ton {{ produit_titre or 'analyse' }} est en cours de création…</strong>
       </p>
+
       <div class="spinner"></div>
+
       <p class="message">
-        Merci de patienter quelques instants.<br>
-        Tu seras redirigé·e automatiquement.
+        La génération peut prendre quelques minutes selon l’analyse demandée.
+      </p>
+
+      <p class="message">
+        Tu peux rester sur cette page pour recevoir ton analyse directement,
+        ou simplement la fermer : elle sera aussi envoyée dans ta boîte mail 📩
       </p>
 
       <script>
