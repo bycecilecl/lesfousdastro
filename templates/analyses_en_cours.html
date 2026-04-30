@@ -1,31 +1,99 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Analyses en préparation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyses en préparation ✨</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 25px;
+            padding: 50px 40px;
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #1f628e;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        .spinner {
+            margin: 30px auto;
+            width: 55px;
+            height: 55px;
+            border: 5px solid #c0f0f7;
+            border-top: 5px solid #1f628e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message {
+            color: #444;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .email-box {
+            background: #f0f9ff;
+            border: 1px solid #c0f0f7;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 20px 0;
+            color: #1f628e;
+            font-size: 0.95rem;
+        }
+        .email-box strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-top: 5px;
+        }
+        .note {
+            color: #888;
+            font-size: 0.85rem;
+            font-style: italic;
+            margin-top: 25px;
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
-    <main style="max-width: 760px; margin: 60px auto; font-family: Georgia, serif; line-height: 1.6;">
-        <h1>Tes analyses sont en préparation</h1>
-
-        <p>
-            Ta commande contient {{ nombre_analyses }} analyses.
-            Elles vont être générées en arrière-plan, puis envoyées par email.
+    <div class="container">
+        <div class="logo">🔮</div>
+        <h1>Tes analyses sont en préparation ✨</h1>
+        <div class="spinner"></div>
+        <p class="message">
+            Ta commande contient <strong>{{ nombre_analyses }} analyses</strong>.<br>
+            Elles sont générées en arrière-plan et tu recevras un email dès qu'elles seront prêtes.
         </p>
-
         {% if email %}
-            <p>
-                L’email sera envoyé à : <strong>{{ email }}</strong>
-            </p>
+        <div class="email-box">
+            📧 Ton email de livraison :
+            <strong>{{ email }}</strong>
+        </div>
         {% endif %}
-
-        <p>
-            Tu peux fermer cette page sans perdre ta commande.
+        <p class="note">
+            Tu peux fermer cette page sans perdre ta commande.<br>
+            Oui... même Safari. On l'a domestiqué. 😝
         </p>
-
-        <p>
-            Oui, même Safari. On l’a domestiqué.
-        </p>
-    </main>
+    </div>
 </body>
 </html>

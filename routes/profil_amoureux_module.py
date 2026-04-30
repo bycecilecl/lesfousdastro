@@ -713,8 +713,8 @@ def profil_amoureux_complet():
                     "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
                     "Tout ce qui explique pourquoi certains patterns reviennent encore et encore en amour.\n"
                     "👉 https://lesfousdastro.fr/#analyse_karmique\n\n"
-                    "À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,\n"
-                    "Cécile CL ✨ - Les Fous d'Astro 🪐</p>"
+                    "À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).\n"
+                    "Les Fous d'Astro by Cécile CL ✨"
                 )
 
                 body_html = (
@@ -743,8 +743,8 @@ def profil_amoureux_complet():
                     "🔮 Découvrir l'Analyse Karmique"
                     "</a></p>"
                     "</div>"
-                    "<p style='margin-top:40px;'>À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,<br>"
-                    "Cécile CL ✨ - Les Fous d'Astro 🪐</p>"
+                    "<p style='margin-top:40px;'>À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).<br>"
+                    "Les Fous d'Astro by Cécile CL ✨</p>"
                 )
 
                 send_emails = os.getenv("SEND_EMAILS", "true").lower() in ("1", "true", "yes")

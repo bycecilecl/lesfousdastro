@@ -143,12 +143,12 @@ Bonjour {nom},
 
 Tu as ajouté l’option “3 questions de clarification” à ton analyse.
 
-Merci de m’envoyer tes questions dans un délai de 30 jours après réception de ton analyse.
+Envoie moi tes questions dans un délai de 30 jours après réception de ton analyse.
 
 Je te répondrai par retour écrit sous 10 jours ouvrés maximum après réception de tes 3 questions.
 
 Astrologiquement vôtre,
-Cécile CL 
+Les Fous d'Astro by Cécile CL ✨
 """
 
     return envoyer_email_avec_analyse(

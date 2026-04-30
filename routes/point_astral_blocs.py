@@ -923,8 +923,8 @@ def point_astral_blocs_complet():
                     "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
                     "Tout ce qui explique pourquoi certains patterns reviennent encore et encore.\n"
                     "👉 https://lesfousdastro.fr/#analyse_karmique\n\n"
-                    "À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,\n"
-                    "Cécile CL ✨"
+                    "À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).\n"
+                    "Les Fous d'Astro by Cécile CL ✨"
                 )
                 body_html = (
                     f"<p>Bonjour {prenom},</p>"
@@ -952,8 +952,8 @@ def point_astral_blocs_complet():
                     "🔮 Découvrir l'Analyse Karmique"
                     "</a></p>"
                     "</div>"
-                    "<p style='margin-top:40px;'>À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,<br>"
-                    "Cécile CL ✨</p>"
+                    "<p style='margin-top:40px;'>À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).<br>"
+                    "Les Fous d'Astro by Cécile CL ✨</p>"
                 )
                 
                 # Flag ON/OFF côté env (.env: SEND_EMAILS=true|false)

@@ -777,23 +777,46 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
         )
         label = analyse.get("label", "Analyse")
         lignes_txt.append(f"- {label} : {lien}")
-        lignes_html.append(f'<li><a href="{lien}">{label}</a></li>')
+        lignes_html.append(f"""
+            <div style='margin:15px 0; text-align:center;'>
+                <a href='{lien}' target='_blank'
+                style='display:inline-block;padding:12px 24px;background:#1f628e;color:white;
+                border-radius:8px;text-decoration:none;font-weight:bold;font-size:15px;'>
+                📄 {label}
+                </a>
+            </div>
+        """)
 
     contenu_txt = (
         f"Bonjour {prenom},\n\n"
-        "Tes analyses astrologiques sont prêtes ✨\n\n"
+        "Tes analyses sont prêtes ✨ Merci pour ta confiance !\n\n"
         + "\n".join(lignes_txt)
-        + "\n\nTu peux ouvrir chaque lien pour consulter et télécharger ton PDF."
-        "\n\nAstrologiquement vôtre,\nCécile CL — Les Fous d'Astro"
+        + "\n\n⚠️ Veille à bien télécharger chaque document et à le sauvegarder sur ton appareil.\n"
+        "Si un lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.\n\n"
+        "À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais,\n"
+        "Les Fous d'Astro by Cécile CL ✨"
     )
 
     contenu_html = f"""
-<p>Bonjour {prenom},</p>
-<p>Tes analyses astrologiques sont prêtes ✨</p>
-<ul>{"".join(lignes_html)}</ul>
-<p>Tu peux ouvrir chaque lien pour consulter et télécharger ton PDF.</p>
-<p>Astrologiquement vôtre,<br>Cécile CL — Les Fous d'Astro</p>
-"""
+    <p>Bonjour {prenom},</p>
+    <p>Tes analyses sont prêtes ✨ Merci pour ta confiance !</p>
+    <div style='margin:30px 0;'>
+    {"".join(lignes_html)}
+    </div>
+    <p style='font-size:13px;color:#777;text-align:center;'>
+    ⚠️ Veille à bien télécharger chaque document et à le sauvegarder sur ton appareil.<br>
+    Si un lien ne s'ouvre pas, copie/colle l'URL directement dans ton navigateur.
+    </p>
+    <div style='margin:30px 0;padding:20px;background:#f9f6ff;border-radius:12px;'>
+    <p style='color:#534AB7;line-height:1.7;margin:0;'>
+    Tu as maintenant entre les mains des clés pour mieux te comprendre.<br>
+    Prends le temps de lire, de relire. Certaines choses ne résonnent pas tout de suite,
+    et puis un jour ça fait tilt.
+    </p>
+    </div>
+    <p style='margin-top:40px;'>À très vite sur les réseaux..., en vrai, ou dans les étoiles si on se croise jamais,<br>
+    Les Fous d'Astro by Cécile CL ✨</p>
+    """
 
     ok = envoyer_email_avec_analyse(
         destinataire=email,

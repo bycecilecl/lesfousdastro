@@ -234,8 +234,8 @@ Fais une analyse de max 15 lignes.
 
             👉 https://lesfousdastro.fr
 
-            À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,
-            Cécile CL ✨
+            À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).
+            Les Fous d'Astro by Cécile CL ✨
             """).strip()
 
         contenu_html = textwrap.dedent(f"""
@@ -256,8 +256,8 @@ Fais une analyse de max 15 lignes.
             → Je veux en savoir plus !
             </a>
             </p>
-            <p style="margin-top:40px;">À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,<br>
-            Cécile CL ✨</p>
+            <p style="margin-top:40px;">À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).<br>
+            Les Fous d'Astro by Cécile CL ✨</p>
             """).strip()
 
 
