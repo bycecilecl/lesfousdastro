@@ -17,21 +17,6 @@ from utils.convert_markdown_light import md_light_to_html
 from config.analysis_sandbox import is_analysis_sandbox
 import json, hashlib, time, logging  
 
-# from config.analysis_sandbox import is_analysis_sandbox
-
-# @forces_defis_module_bp.route("/complet", methods=["GET"])
-# def forces_defis_complet():
-#     if is_analysis_sandbox():
-#         infos = session.get("infos_utilisateur") or {}
-#         current_app.logger.info(
-#             f"[SANDBOX] Forces & Potentiels non généré pour {infos.get('nom', 'N/A')}"
-#         )
-#         return render_template(
-#             "debug_sandbox.html",
-#             titre="Forces & Potentiels – Analyse factice (SANDBOX)",
-#             infos=infos,
-#         )
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1) Imports analytiques robustes (nouvelle API sinon fallback ancienne)
@@ -101,7 +86,155 @@ def _to_float_or_none(x):
         return float(x) if x not in (None, "",) else None
     except Exception:
         return None
+    
+def _html_pdf_forces_defis_pack(texte_sections_html: str, infos: dict, logo_base64: str = "") -> str:
+    nom = infos.get("nom", "Analyse Anonyme")
+    date_naissance = infos.get("date_naissance", "")
+    heure_naissance = infos.get("heure_naissance", "")
+    lieu_naissance = infos.get("lieu_naissance", "")
 
+    logo_html = (
+        f'<img src="data:image/webp;base64,{logo_base64}" '
+        f'alt="Logo" style="max-width:150px;max-height:80px;margin-bottom:8px" />'
+        if logo_base64 else ""
+    )
+
+    return f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Mes Potentiels & Défis – {nom}</title>
+<style>
+body{{font-family:Georgia,serif;color:#2c3e50;margin:0;padding:40px;}}
+.container{{max-width:800px;margin:0 auto;}}
+h1{{text-align:center;margin:0 0 6px;font-size:24px}}
+.info{{text-align:center;color:#666;font-size:14px;margin:0 0 16px}}
+h2{{color:#34495e;border-bottom:2px solid #3498db;padding-bottom:5px;margin-top:28px}}
+p{{text-align:justify;line-height:1.6}}
+.disclaimer{{background:#f8f9fa;border:1px solid #dee2e6;padding:16px;border-radius:8px;font-size:13px;color:#555;margin-top:22px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div style="text-align:center">{logo_html}</div>
+<h1>Mes Potentiels & Défis</h1>
+<p class="info">{date_naissance} — {heure_naissance} — {lieu_naissance}</p>
+{texte_sections_html}
+<div class="disclaimer">
+<strong>Note :</strong> Analyse générée automatiquement depuis ton thème natal, focalisée sur tes appuis et tes axes de croissance. Elle n’est pas une consultation individuelle.
+</div>
+</div>
+</body>
+</html>"""
+
+def generer_forces_defis_pdf_s3(infos, envoyer_email=False):
+    """
+    Génère Forces & Défis en PDF + S3.
+    Utilisable depuis les packs/background.
+    """
+
+    if not infos:
+        raise ValueError("infos_utilisateur manquant pour Forces & Défis")
+
+    lat = _to_float_or_none(infos.get("lat"))
+    lon = _to_float_or_none(infos.get("lon"))
+
+    theme = calcul_theme_safe(
+        nom=infos.get("nom"),
+        date_naissance=infos.get("date_naissance"),
+        heure_naissance=infos.get("heure_naissance"),
+        lieu_naissance=infos.get("lieu_naissance"),
+        lat=lat,
+        lon=lon,
+        tzid=infos.get("tzid")
+    )
+
+    try:
+        if extraire_points_forts and organiser_points_forts and formater_axes_majeurs:
+            raw_pf = theme.get("points_forts") or extraire_points_forts(theme)
+
+            if isinstance(raw_pf, str):
+                points_forts_list = [l.strip() for l in raw_pf.splitlines() if l.strip()]
+            elif isinstance(raw_pf, (list, tuple)):
+                points_forts_list = list(raw_pf)
+            else:
+                points_forts_list = []
+
+            axes = organiser_points_forts(points_forts_list) if points_forts_list else {}
+            axes_majeurs_str = formater_axes_majeurs(axes) if axes else ""
+            theme["axes_majeurs_str"] = axes_majeurs_str
+
+    except Exception as e:
+        current_app.logger.warning("[FD PACK] Axes majeurs ignorés : %s", e)
+
+    prefs = {"tonalite": "tu", "genre": "neutre"}
+
+    g_form = (infos.get("gender") or "").strip().lower()
+    if g_form in ("female", "femme"):
+        prefs["genre"] = "femme"
+    elif g_form in ("male", "homme"):
+        prefs["genre"] = "homme"
+
+    try:
+        resultat = analyse_forces_defis(theme, meta=prefs)
+    except TypeError:
+        resultat = analyse_forces_defis(theme)
+
+    if isinstance(resultat, dict):
+        texte = resultat.get("texte") or resultat.get("analyse") or str(resultat)
+    else:
+        texte = str(resultat)
+
+    contenu_html = md_light_to_html(texte)
+
+    if not contenu_html or not str(contenu_html).strip():
+        contenu_html = Markup(
+            "<pre style='white-space:pre-wrap'>"
+            + str(texte or "(aucun texte)")
+            + "</pre>"
+        )
+
+    logo_base64 = ""
+    try:
+        logo_path = os.path.join(current_app.static_folder, "images", "logo_les_fous_dastro.webp")
+        if os.path.exists(logo_path):
+            with open(logo_path, "rb") as f:
+                logo_base64 = base64.b64encode(f.read()).decode("utf-8")
+    except Exception:
+        pass
+
+    html_pdf = _html_pdf_forces_defis_pack(str(contenu_html), infos, logo_base64)
+
+    nom_slug = (infos.get("nom", "Anonyme").replace(" ", "_") or "Anonyme")
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    fname = f"Forces_Defis_{nom_slug}_{timestamp}"
+
+    outdir = os.path.join(current_app.static_folder, "pdfs")
+    os.makedirs(outdir, exist_ok=True)
+
+    pdf_path = os.path.join(outdir, f"{fname}.pdf")
+
+    html_to_pdf(html_pdf, pdf_path)
+
+    pdf_final_url = None
+
+    try:
+        s3_info = upload_file_and_presign(
+            pdf_path,
+            key_prefix="forces_defis",
+            content_type="application/pdf"
+        )
+        pdf_final_url = s3_info.get("url") or s3_info.get("presigned_url")
+    except Exception as e:
+        current_app.logger.warning("[FD PACK] Upload S3 KO : %s", e)
+
+    return {
+        "product_id": "forces_defis",
+        "label": "Mes Potentiels et Défis",
+        "pdf_url": pdf_final_url,
+        "pdf_path": pdf_path,
+        "status": "completed",
+    }
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 4) Route principale (GET) appelée après paiement
