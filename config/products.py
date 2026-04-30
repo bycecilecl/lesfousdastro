@@ -52,12 +52,12 @@ def load_products():
             "enabled": _bool_env("ANALYSE_KARMIQUE_ENABLED", "1"),
         },
 
-        "clarification_3_questions": {
+        "clarification_questions": {
             "label": "Option 3 questions de clarification",
-            "price_id": os.getenv("CLARIFICATION_3_QUESTIONS_PRICE_ID", "").strip(),
-            "price_cents": _int_env("CLARIFICATION_3_QUESTIONS_PRICE_CENTS", 2500),
+            "price_id": os.getenv("CLARIFICATION_QUESTIONS_PRICE_ID", "").strip(),
+            "price_cents": _int_env("CLARIFICATION_QUESTIONS_PRICE_CENTS", 2500),
             "success_route": None,
-            "enabled": _bool_env("CLARIFICATION_3_QUESTIONS_ENABLED", "1"),
+            "enabled": _bool_env("CLARIFICATION_QUESTIONS_ENABLED", "1"),
         },
 
         "pack_essence": {

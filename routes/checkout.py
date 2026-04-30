@@ -12,7 +12,7 @@ from config.products import PRODUCTS
 import stripe
 from config.gift_codes import get_gift_code, is_code_used, mark_code_as_used
 from utils.email_sender import (
-    envoyer_email_clarification_3_questions,
+    envoyer_email_clarification_questions,
     envoyer_email_notification_clarification_admin,
     envoyer_email_avec_analyse
 )
@@ -298,7 +298,7 @@ def paiement_effectue():
         heure_naissance = infos.get("heure_naissance")
         lieu_naissance = infos.get("lieu_naissance")
 
-        clarification_achetee = "clarification_3_questions" in product_keys
+        clarification_achetee = "clarification_questions" in product_keys
         
         # Marquer comme traité
         session["pending_generation"] = {
@@ -309,7 +309,7 @@ def paiement_effectue():
     
         if clarification_achetee and email:
 
-            envoyer_email_clarification_3_questions(
+            envoyer_email_clarification_questions(
                 email=email,
                 nom=nom
             )
@@ -386,7 +386,7 @@ def paiement_effectue():
     heure_naissance = infos.get("heure_naissance")
     lieu_naissance = infos.get("lieu_naissance")
 
-    clarification_achetee = "clarification_3_questions" in product_keys
+    clarification_achetee = "clarification_questions" in product_keys
 
     # ✅ Marqueurs Stripe
     session["last_payment"] = {
@@ -412,7 +412,7 @@ def paiement_effectue():
     if clarification_achetee and email and not session.get("clarification_email_sent"):
 
         # mail client
-        envoyer_email_clarification_3_questions(
+        envoyer_email_clarification_questions(
             email=email,
             nom=nom
         )

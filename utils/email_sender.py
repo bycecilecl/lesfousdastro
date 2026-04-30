@@ -135,7 +135,7 @@ def envoyer_email_avec_analyse(destinataire: str,
         return False
     
 
-def envoyer_email_clarification_3_questions(email, nom):
+def envoyer_email_clarification_questions(email, nom):
     sujet = "Tes 3 questions de clarification"
 
     corps = f"""
