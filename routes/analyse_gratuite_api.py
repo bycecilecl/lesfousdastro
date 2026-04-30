@@ -218,43 +218,47 @@ Fais une analyse de max 15 lignes.
         sujet = f"Ton analyse astrologique gratuite - {prenom}"  # tiret simple
 
         contenu_txt = textwrap.dedent(f"""
-        Bonjour {prenom},
+            Bonjour {prenom},
 
-        Voici ton analyse astrologique gratuite :
+            Tu l'as demandé, Cécile l'a fait...Ou plutôt les étoiles ont répondu 🔭
 
-        {texte}
+            Allez, voici ce que disent tes étoiles :
 
-        🌠 Envie d’aller plus loin ?
-        Découvre ton Flash Astral : une lecture complète, personnalisée et instantanée de ton thème natal.
-        De plus, toute personne ayant réalisé un Flash Astral bénéficie de 10% de réduction sur l’analyse complète du thème natal 💫
+            {texte}
 
-        👉 Découvre les offres ici : https://bycecilecl.com/categorie-produit/services/
+            Allez avoue, tu veux en savoir plus 😏
 
-        À très vite,
-        Les Fous d’Astro – By Cécile CL
-        """).strip()
+            Cette analyse n'est qu'une première lecture. Le Flash Astral va plus loin :
+            il met en lumière tes grands mécanismes, tes forces, tes blocages, et les zones de ton thème
+            qui demandent à être comprises plus finement.
+
+            👉 https://lesfousdastro.fr
+
+            À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,
+            Cécile CL ✨
+            """).strip()
 
         contenu_html = textwrap.dedent(f"""
-<p>Bonjour {prenom},</p>
-<p>Tu l'as demandé, Cécile l'a fait...Ou plutôt les étoiles ont répondu 🔭</p>
-<p>Allez, voici ce que disent tes étoiles :</p>
-<div style="margin:30px 0; padding:20px; background:#f9f6ff; border-radius:12px; line-height:1.8;">
-{texte}
-</div>
-<p><strong>Allez avoue, tu veux en savoir plus 😏</strong><br><br>
-Cette analyse n'est qu'une première lecture. Le <strong>Flash Astral</strong> va plus loin :
-il met en lumière tes grands mécanismes, tes forces, tes blocages, et les zones de ton thème
-qui demandent à être comprises plus finement.</p>
-<p style="text-align:center; margin-top:30px;">
-<a href="https://lesfousdastro.fr"
-style="display:inline-block;padding:14px 28px;background:#1f628e;color:white;
-border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
-→ Je veux en savoir plus !
-</a>
-</p>
-<p style="margin-top:40px;">À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,<br>
-Cécile CL ✨</p>
-""").strip()
+            <p>Bonjour {prenom},</p>
+            <p>Tu l'as demandé, Cécile l'a fait...Ou plutôt les étoiles ont répondu 🔭</p>
+            <p>Allez, voici ce que disent tes étoiles :</p>
+            <div style="margin:30px 0; padding:20px; background:#f9f6ff; border-radius:12px; line-height:1.8;">
+            {texte}
+            </div>
+            <p><strong>Allez avoue, tu veux en savoir plus 😏</strong><br><br>
+            Cette analyse n'est qu'une première lecture. Le <strong>Flash Astral</strong> va plus loin :
+            il met en lumière tes grands mécanismes, tes forces, tes blocages, et les zones de ton thème
+            qui demandent à être comprises plus finement.</p>
+            <p style="text-align:center; margin-top:30px;">
+            <a href="https://lesfousdastro.fr"
+            style="display:inline-block;padding:14px 28px;background:#1f628e;color:white;
+            border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
+            → Je veux en savoir plus !
+            </a>
+            </p>
+            <p style="margin-top:40px;">À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,<br>
+            Cécile CL ✨</p>
+            """).strip()
 
 
         if send_emails and email:
