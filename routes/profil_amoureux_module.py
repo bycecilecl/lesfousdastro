@@ -698,20 +698,48 @@ def profil_amoureux_complet():
                 
                 body_txt = (
                     f"Bonjour {prenom},\n\n"
-                    "Merci pour ta commande ! Ton Profil Amoureux est prêt 💗\n\n"
-                    "Télécharge ton PDF ici :\n"
+                    "Ton Profil Amoureux est prêt 💗 Merci pour ta confiance !\n\n"
+                    "📄 Télécharge ton document ici :\n"
                     f"{pdf_final_url}\n\n"
+                    "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.\n"
                     "Si le lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.\n\n"
-                    "À bientôt,\n"
-                    "Les Fous d'Astro – By Cécile CL"
+                    "🔮 Et si tu voulais aller encore plus loin ?\n"
+                    "L'Analyse Karmique explore ce que le Profil Amoureux ne couvre pas : "
+                    "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
+                    "Tout ce qui explique pourquoi certains patterns reviennent encore et encore en amour.\n"
+                    "👉 https://lesfousdastro.fr/#analyse_karmique\n\n"
+                    "À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,\n"
+                    "Cécile CL ✨ - Les Fous d'Astro 🪐</p>"
                 )
-                
+
                 body_html = (
                     f"<p>Bonjour {prenom},</p>"
-                    "<p>Merci pour ta commande ! Ton <strong>Profil Amoureux</strong> est prêt 💗</p>"
-                    f'<p>📄 <a href="{pdf_final_url}" target="_blank">Télécharge ton PDF ici</a></p>'
-                    "<p>Si le lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.</p>"
-                    "<p>À bientôt,<br>Les Fous d'Astro – By Cécile CL</p>"
+                    "<p>Ton <strong>Profil Amoureux</strong> est prêt 💗 Merci pour ta confiance !</p>"
+                    "<div style='margin:30px 0; text-align:center;'>"
+                    f"<a href='{pdf_final_url}' target='_blank' "
+                    "style='display:inline-block;padding:14px 28px;background:#c2185b;color:white;"
+                    "border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;'>"
+                    "💗 Télécharger mon Profil Amoureux"
+                    "</a>"
+                    "<p style='margin-top:12px;font-size:13px;color:#777;'>"
+                    "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.<br>"
+                    "Si le lien ne s'ouvre pas, copie/colle l'URL directement dans ton navigateur."
+                    "</p>"
+                    "</div>"
+                    "<div style='margin:30px 0;padding:20px;background:#f9f6ff;border-radius:12px;'>"
+                    "<p>🔮 <strong>Et si tu voulais aller encore plus loin ?</strong></p>"
+                    "<p>L'Analyse Karmique explore ce que le Profil Amoureux ne couvre pas : "
+                    "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
+                    "Tout ce qui explique pourquoi certains patterns reviennent encore et encore en amour.</p>"
+                    "<p style='text-align:center;margin-top:15px;'>"
+                    "<a href='https://lesfousdastro.fr/#analyse_karmique' target='_blank' "
+                    "style='display:inline-block;padding:12px 24px;background:#6b3fa0;color:white;"
+                    "border-radius:8px;text-decoration:none;font-weight:bold;'>"
+                    "🔮 Découvrir l'Analyse Karmique"
+                    "</a></p>"
+                    "</div>"
+                    "<p style='margin-top:40px;'>À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,<br>"
+                    "Cécile CL ✨ - Les Fous d'Astro 🪐</p>"
                 )
 
                 send_emails = os.getenv("SEND_EMAILS", "true").lower() in ("1", "true", "yes")
