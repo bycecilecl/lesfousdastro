@@ -102,8 +102,11 @@ def interpret_all(
     global_ctx["genre_label"] = genre_label
 
     if call_llm is None:
-        def call_llm(prompt: str) -> str:
-            return interroger_llm(prompt, system_prompt=SYSTEM_KARMIQUE)
+        def call_llm(prompt: str, system_prompt: str | None = None) -> str:
+            return interroger_llm(
+                prompt,
+                system_prompt=system_prompt or SYSTEM_KARMIQUE
+            )
 
     for b in blocks:
         bb = dict(b)

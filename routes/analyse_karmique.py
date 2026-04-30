@@ -588,6 +588,17 @@ def generer_analyse_karmique_pdf_s3(infos, envoyer_email=False):
 def analyse_karmique_complete():
     infos = session.get("infos_utilisateur")
 
+    if is_analysis_sandbox():
+        current_app.logger.info(
+            "[SANDBOX] Analyse karmique NON générée pour %s",
+            (infos or {}).get("nom", "N/A")
+        )
+        return render_template(
+            "debug_sandbox.html",
+            titre="Analyse karmique – Analyse factice (SANDBOX)",
+            infos=infos or {},
+        )
+
     if not infos:
         return render_template(
             "erreur.html",

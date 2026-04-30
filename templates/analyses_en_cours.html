@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyses en préparation</title>
+</head>
+<body>
+    <main style="max-width: 760px; margin: 60px auto; font-family: Georgia, serif; line-height: 1.6;">
+        <h1>Tes analyses sont en préparation</h1>
+
+        <p>
+            Ta commande contient {{ nombre_analyses }} analyses.
+            Elles vont être générées en arrière-plan, puis envoyées par email.
+        </p>
+
+        {% if email %}
+            <p>
+                L’email sera envoyé à : <strong>{{ email }}</strong>
+            </p>
+        {% endif %}
+
+        <p>
+            Tu peux fermer cette page sans perdre ta commande.
+        </p>
+
+        <p>
+            Oui, même Safari. On l’a domestiqué.
+        </p>
+    </main>
+</body>
+</html>
