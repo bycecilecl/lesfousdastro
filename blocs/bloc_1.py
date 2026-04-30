@@ -11,6 +11,16 @@ ASPECTS_MOUS = {"Trigone", "Sextile"}
 ORBE_MAX_ASC = 5.5
 ORBE_MAX_KEY = 5.0
 
+POINT_ASTRAL_EXCLUS = {
+    "Junon",
+    "Chiron",
+    #"Lune Noire",
+    "Part de Fortune",
+    "Cérès",
+    "Pallas",
+    "Vesta",
+}
+
 def _fmt_aspect(a: Dict) -> str:
     return f"{a['planete1']} {a['aspect']} {a['planete2']} (orbe {a['orbe']}°)"
 
@@ -26,6 +36,24 @@ def _orbe(a: Dict) -> float:
         return float(a.get("orbe", 99))
     except:
         return 99
+    
+def _is_excluded_point(nom: str) -> bool:
+    return str(nom).strip() in POINT_ASTRAL_EXCLUS
+
+
+def filtrer_aspects_point_astral(aspects: List[Dict]) -> List[Dict]:
+    return [
+        a for a in aspects
+        if not _is_excluded_point(a.get("planete1"))
+        and not _is_excluded_point(a.get("planete2"))
+    ]
+
+
+def filtrer_planetes_point_astral(planetes: Dict) -> Dict:
+    return {
+        nom: obj for nom, obj in planetes.items()
+        if not _is_excluded_point(nom)
+    }
 
 def _strong(a: Dict, max_orbe: float) -> bool:
     return _orbe(a) <= max_orbe
@@ -43,7 +71,7 @@ def _pick(aspects: List[Dict], keep_fn, max_orbe, whitelist=None):
 def planets_in_house(planetes: Dict, house_num: int) -> List[str]:
     out = []
     for nom, obj in planetes.items():
-        if nom in ("Ascendant", "MC", "Rahu", "Ketu"):  # adapte si besoin
+        if nom in ("Ascendant", "MC", "Rahu", "Ketu") or _is_excluded_point(nom):
             continue
         m = obj.get("maison")
         if m == house_num or str(m) == str(house_num):
@@ -154,8 +182,8 @@ def build_resume_bloc1(theme: Dict, placements_str: str | None = None) -> Dict[s
     Bloc 1 : Ascendant / Maître d'Ascendant / Maison I / Soleil
     Avec fallback texte pour les planètes en Maison I si le dict 'theme' ne les renseigne pas.
     """
-    planetes = theme["planetes"]
-    aspects  = theme["aspects"]
+    planetes = filtrer_planetes_point_astral(theme["planetes"])
+    aspects = filtrer_aspects_point_astral(theme["aspects"])
     asc = planetes.get("Ascendant", {}) or {}
     asc_sign = asc.get("signe", "N/A")
     asc_deg  = asc.get("degre", "N/A")
@@ -167,6 +195,7 @@ def build_resume_bloc1(theme: Dict, placements_str: str | None = None) -> Dict[s
     # 2) Planètes en Maison I (dict -> puis fallback texte)
     maison1_planetes = planets_in_house(planetes, 1)
     if not maison1_planetes and placements_str:
+        placements_str = filtrer_texte_point_astral(placements_str)
         maison1_planetes = planets_in_house_from_text(placements_str, 1)
 
     # 3) Maître d’Ascendant
@@ -248,6 +277,17 @@ Aspects forts du Soleil (≤{ORBE_MAX_KEY}°) :
         "resume_bloc1": resume,
         "points_prioritaires_bloc1": points_prioritaires,
     }
+def filtrer_texte_point_astral(text: str) -> str:
+    if not text:
+        return ""
+
+    lignes = []
+    for line in text.splitlines():
+        if any(point.lower() in line.lower() for point in POINT_ASTRAL_EXCLUS):
+            continue
+        lignes.append(line)
+
+    return "\n".join(lignes)
 
 def generer_bloc_1(contexte: dict, max_tokens: int = 1400) -> str:
     """
@@ -265,6 +305,7 @@ def generer_bloc_1(contexte: dict, max_tokens: int = 1400) -> str:
         or contexte.get("placements")
         or ""
     )
+    placements_str = filtrer_texte_point_astral(placements_str)
     if (not placements_str or len(placements_str) < 50) and theme.get("planetes"):
         try:
             from utils.formatage import formater_positions_planetes

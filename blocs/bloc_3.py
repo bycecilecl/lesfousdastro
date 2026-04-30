@@ -4,6 +4,28 @@ from textwrap import dedent
 from typing import Dict, Any
 from utils.selection_donnees import filtrer_items_pour_bloc3, _extraire_axes_interceptes
 
+POINT_ASTRAL_EXCLUS = {
+    "Junon",
+    "Chiron",
+    #"Lune Noire",
+    "Part de Fortune",
+    "Cérès",
+    "Pallas",
+    "Vesta",
+}
+
+def _filtrer_lignes_points_secondaires(text: str) -> str:
+    if not text:
+        return ""
+
+    lignes = []
+    for line in text.splitlines():
+        if any(point.lower() in line.lower() for point in POINT_ASTRAL_EXCLUS):
+            continue
+        lignes.append(line)
+
+    return "\n".join(lignes)
+
 def _sanitize(txt: str) -> str:
     return (txt or "").strip()
 
@@ -84,6 +106,8 @@ def generer_bloc_3(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
         or ""
     ).strip()
 
+    placements_str = _filtrer_lignes_points_secondaires(placements_str)
+
     # Extraire les points forts du blob de placements
     points_forts = _extract_points_forts_from_placements(placements_str)
     if not points_forts:
@@ -94,10 +118,20 @@ def generer_bloc_3(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
         return "❌ Données insuffisantes pour analyser les points forts."
 
     # ✅ Axes filtrés fournis par l’orchestrateur
-    axes_filtrees = (contexte.get("axes_majeurs_input") or "").strip()
+    axes_filtrees = (
+        contexte.get("axes_majeurs_input")
+        or ""
+    ).strip()
+
+    axes_filtrees = _filtrer_lignes_points_secondaires(axes_filtrees)
 
     # ✅ Conjonctions au MC (optionnel mais recommandé)
-    conj_mc = (ctx.get("conjonctions_mc") or "").strip()
+    conj_mc = (
+        contexte.get("conjonctions_mc")
+        or ""
+    ).strip()
+
+    conj_mc = _filtrer_lignes_points_secondaires(conj_mc)
 
     # ➕ Axes interceptés (et planètes contenues dans ces signes)
     axes_int = _extraire_axes_interceptes(contexte)  # {'signes': [...], 'maisons_par_signe': {...}}

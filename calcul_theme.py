@@ -99,7 +99,7 @@ def get_timezone_for_coordinates_and_date(lat, lon, dt_naive):
 #
 # Utilisation :
 #   Cette fonction est le cœur du calcul du thème natal, utilisée
-#   dans les routes Flask pour alimenter les analyses (gratuite, Flash Astral, etc.).
+#   dans les routes Flask pour alimenter les analyses (gratuite, Point Astral, etc.).
 # ────────────────────────────────────────────────
 
 

@@ -644,7 +644,7 @@ def generer_analyse_pack(product_id, pending):
         infos = pending.get("infos_utilisateur") or {}
 
         # =====================================================
-        # FLASH ASTRAL
+        # POINT ASTRAL
         # =====================================================
         if product_id == "flash_astral":
 

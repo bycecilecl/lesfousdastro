@@ -66,7 +66,7 @@ def api_analyse_gratuite():
                     </ul>
                     <br>
                     <a href="/#flash_astral" style="display:inline-block; padding:12px 20px; background:#856404; color:#fff; border-radius:8px; text-decoration:none; font-weight:bold;">
-                        💫 Découvrir mon Flash Astral
+                        💫 Découvrir mon Point Astral
                     </a>
                 </div>
             """
@@ -298,7 +298,7 @@ Fais une analyse de max 15 lignes.
                 style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
                 border-radius:8px;text-decoration:none;font-weight:bold;margin-bottom:10px;
                 width:80%;max-width:300px;">
-                ✨ Mon Flash Astral
+                ✨ Mon Point Astral
                 </a>
                 <p style="font-size:12px;color:#777;margin:0 0 15px 0;">
                     Tes grands mécanismes, forces et blocages — PDF complet
@@ -316,7 +316,7 @@ Fais une analyse de max 15 lignes.
 
                 <a href="/static/Exemple_Flash_Astral_Cecile.pdf" target="_blank"
                 style="font-size:13px;color:#1f628e;text-decoration:underline;">
-                📄 Voir un exemple du Flash Astral avant d'acheter
+                📄 Voir un exemple du Point Astral avant d'acheter
                 </a>
             </div>
         </div>

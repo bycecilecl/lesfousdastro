@@ -34,6 +34,16 @@ POINT_ALIASES = {
     "lilith": "Lune Noire",
 }
 
+POINT_ASTRAL_EXCLUS = {
+    "Junon",
+    "Chiron",
+    #"Lune Noire",
+    "Part de Fortune",
+    "Cérès",
+    "Pallas",
+    "Vesta",
+}
+
 def _normalize_aspect(name: str) -> str:
     if not name: return ""
     key = name.strip().lower()
@@ -55,7 +65,23 @@ RULERS = {
     "Sagittaire":"Jupiter","Capricorne":"Saturne","Verseau":"Uranus","Poissons":"Neptune",
 }
 
+def _is_excluded_point(nom: str) -> bool:
+    return _normalize_body(nom) in POINT_ASTRAL_EXCLUS
 
+
+def filtrer_aspects_point_astral(aspects: List[Dict]) -> List[Dict]:
+    return [
+        a for a in (aspects or [])
+        if not _is_excluded_point(a.get("planete1"))
+        and not _is_excluded_point(a.get("planete2"))
+    ]
+
+
+def filtrer_planetes_point_astral(planetes: Dict) -> Dict:
+    return {
+        nom: obj for nom, obj in (planetes or {}).items()
+        if not _is_excluded_point(nom)
+    }
 
 
 def _orbe(a): 
@@ -129,8 +155,8 @@ def _points_sur_cuspide(theme: Dict, angle: str, max_orbe: float = 1.5,
     return out
 
 def build_resume_bloc2(theme: Dict, contexte: Dict) -> Dict[str, str]:
-    planetes = theme.get("planetes", {})
-    aspects  = theme.get("aspects", [])
+    planetes = filtrer_planetes_point_astral(theme.get("planetes", {}))
+    aspects = filtrer_aspects_point_astral(theme.get("aspects", []))
 
     L = planetes.get("Lune", {}) or {}
     lune_sign  = L.get("signe", "N/A")
@@ -163,8 +189,11 @@ def build_resume_bloc2(theme: Dict, contexte: Dict) -> Dict[str, str]:
     ic_aspects = sorted(_ic_aspects, key=_orbe)
 
     # Nœuds, Lilith, Chiron vers Lune
-    special_targets = {"Rahu","Ketu","Lune Noire","Chiron"}
-    lune_special = [a for a in lune_aspects if set((a["planete1"],a["planete2"])) & special_targets]
+    special_targets = {"Rahu", "Ketu"}
+    lune_special = [
+        a for a in lune_aspects
+        if set((a["planete1"], a["planete2"])) & special_targets
+    ]
     lune_special.sort(key=_orbe)
 
     # Phase lunaire (si degrés absolus dispo)
@@ -186,9 +215,9 @@ def build_resume_bloc2(theme: Dict, contexte: Dict) -> Dict[str, str]:
     # --- Maison X / MC ---
     M10_planetes = [p for p, d in planetes.items() if d.get("maison")==10 and _normalize_body(p) not in ("Rahu","Ketu","Ascendant","MC","IC")]
     mc_aspects = _pick(aspects, lambda a: _is_to("MC", a), ORBE_MAX_IC, ASPECTS_DURS | ASPECTS_MOUS)
-    points_mc = _points_sur_cuspide(theme, "MC", max_orbe=1.5, candidats=("Chiron", "Lune Noire"))
+    points_mc = []
     points_mc_str = ", ".join(f"{nom} (écart {ecart:.2f}°)" for nom, ecart in points_mc) or "Aucun"
-    points_ic = _points_sur_cuspide(theme, "FC", max_orbe=1.5, candidats=("Jupiter", "Chiron", "Lune Noire"))
+    points_ic = _points_sur_cuspide(theme, "FC", max_orbe=1.5, candidats=("Jupiter",))
     points_ic_str = ", ".join(f"{nom} (écart {ecart:.2f}°)" for nom, ecart in points_ic) or "Aucun"
 
     # Aspects directs Lune ↔ Soleil / Saturne
@@ -347,6 +376,17 @@ def _extract_nakshatra_lune(contexte: dict) -> str:
 
     return "non précisé ici"
 
+def filtrer_texte_point_astral(text: str) -> str:
+    if not text:
+        return ""
+
+    lignes = []
+    for line in text.splitlines():
+        if any(point.lower() in line.lower() for point in POINT_ASTRAL_EXCLUS):
+            continue
+        lignes.append(line)
+
+    return "\n".join(lignes)
 
 def generer_bloc_2(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
     # alias local pour calmer l'IDE dans les f-strings
@@ -377,6 +417,7 @@ def generer_bloc_2(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
         or contexte.get("placements")
         or ""
     )
+    placements_str = filtrer_texte_point_astral(placements_str)
     if (not placements_str or len(placements_str) < 50) and theme.get("planetes"):
         try:
             from utils.formatage import formater_positions_planetes

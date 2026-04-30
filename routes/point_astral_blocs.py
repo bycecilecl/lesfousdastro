@@ -23,21 +23,6 @@ from config.analysis_sandbox import is_analysis_sandbox
 
 logger = logging.getLogger(__name__)
 
-# from config.analysis_sandbox import is_analysis_sandbox
-
-# @flash_astral_bp.route("/complet")
-# def flash_astral_complet():
-#     if is_analysis_sandbox():
-#         infos = session.get("infos_utilisateur") or {}
-#         current_app.logger.info(
-#             f"[SANDBOX] Flash Astral non généré pour {infos.get('nom', 'N/A')}"
-#         )
-#         return render_template(
-#             "debug_sandbox.html",
-#             titre="Flash Astral – Analyse factice (SANDBOX)",
-#             infos=infos,
-#         )
-
 
 def _fingerprint_infos(infos: dict) -> str:
     """Empreinte stable des infos utilisateur pour idempotence."""
@@ -135,12 +120,12 @@ point_astral_blocs_bp = Blueprint(
 
 def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
     """
-    Génère le Flash Astral complet pour pack/background.
+    Génère le Point Astral complet pour pack/background.
     Retourne un PDF S3.
     """
 
     if is_analysis_sandbox():
-        logger.info("🧪 SANDBOX Flash Astral")
+        logger.info("🧪 SANDBOX Point Astral")
 
         return {
             "product_id": "flash_astral",
@@ -154,7 +139,7 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
         raise ValueError("infos_utilisateur manquant")
 
     current_app.logger.info(
-        "🚀 Génération Flash Astral PDF/S3 pour %s",
+        "🚀 Génération Point Astral PDF/S3 pour %s",
         infos.get("nom", "N/A")
     )
 
@@ -178,7 +163,7 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
     # Calcul thème
     # =====================================================
 
-    current_app.logger.info("🪐 Calcul thème Flash Astral")
+    current_app.logger.info("🪐 Calcul thème Point Astral")
 
     if infos.get("lat") and infos.get("lon"):
         data_theme = calcul_theme_safe(
@@ -201,8 +186,8 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
     current_app.logger.info("✅ Thème calculé")
 
     # =====================================================
-# Placements astrologiques
-# =====================================================
+    # Placements astrologiques
+    # =====================================================
 
     placements_str = construire_selection_point_astral(
         data_theme,
@@ -213,7 +198,7 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
         raise ValueError("placements_str incomplet pour Flash Astral")
 
     current_app.logger.info(
-        "✅ Placements Flash Astral construits: %s caractères",
+        "✅ Placements Point Astral construits: %s caractères",
         len(placements_str)
     )
 
@@ -246,15 +231,15 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
         "genre": prefs["genre"],
     }
 
-    current_app.logger.info("✨ Génération texte Flash Astral")
+    current_app.logger.info("✨ Génération texte Point Astral")
 
     texte_brut = generer_point_astral_blocs(contexte)
 
     if not texte_brut or len(texte_brut) < 500:
-        raise ValueError("Texte Flash Astral vide ou trop court")
+        raise ValueError("Texte Point Astral vide ou trop court")
 
     current_app.logger.info(
-        "✅ Texte Flash Astral généré (%s caractères)",
+        "✅ Texte Point Astral généré (%s caractères)",
         len(texte_brut)
     )
 
@@ -270,7 +255,7 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
         texte_structure = transformer_en_sections_fallback(texte_affine)
 
     if not texte_structure:
-        raise ValueError("HTML Flash Astral vide")
+        raise ValueError("HTML Point Astral vide")
 
     # =====================================================
     # Logo
@@ -309,7 +294,7 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
 
     html_to_pdf(html_pdf, pdf_path)
 
-    current_app.logger.info(f"✅ PDF Flash Astral généré: {pdf_path}")
+    current_app.logger.info(f"✅ PDF Point Astral généré: {pdf_path}")
 
     # =====================================================
     # Upload S3
@@ -329,10 +314,10 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
             or s3_info.get("presigned_url")
         )
 
-        current_app.logger.info("☁️ Upload S3 Flash Astral OK")
+        current_app.logger.info("☁️ Upload S3 Point Astral OK")
 
     except Exception as e:
-        current_app.logger.error(f"❌ Upload S3 Flash Astral: {e}")
+        current_app.logger.error(f"❌ Upload S3 Point Astral: {e}")
 
     return {
         "label": "Flash Astral complet",
@@ -351,16 +336,16 @@ def ping_blocs():
 def point_astral_blocs_complet():
     """Workflow complet harmonisé : mêmes données que l'ancien système + approche par blocs"""
 
-    # 🔐 Raccourci SANDBOX : on ne génère pas le vrai Flash Astral
+    # 🔐 Raccourci SANDBOX : on ne génère pas le vrai Point Astral
     if is_analysis_sandbox():
         infos = session.get("infos_utilisateur") or {}
         current_app.logger.info(
-            "[SANDBOX] Flash Astral (Point Astral blocs) NON généré pour %s",
+            "[SANDBOX] Point Astral (Point Astral blocs) NON généré pour %s",
             infos.get("nom", "N/A")
         )
         return render_template(
             "debug_sandbox.html",
-            titre="Flash Astral – Analyse factice (SANDBOX)",
+            titre="Point Astral – Analyse factice (SANDBOX)",
             infos=infos,
         )
 
@@ -515,11 +500,11 @@ def point_astral_blocs_complet():
     contexte = {}
     
     task_id = session.get('current_task_id')
-    print(f"Début analyse Flash Astral avec progression - Task ID: {task_id}")
+    print(f"Début analyse Point Astral avec progression - Task ID: {task_id}")
     print(f"🔍 DEBUG SESSION COMPLÈTE: {infos}")
     print(f"🔍 DEBUG CLÉS SESSION: {list(infos.keys()) if infos else 'None'}")
     print(f"\n{'='*60}")
-    print(f"🎬 Point_Astral_Bloc DÉBUT ANALYSE FLASH ASTRAL BLOCS (harmonisé)")
+    print(f"🎬 Point_Astral_Bloc DÉBUT ANALYSE Point ASTRAL BLOCS (harmonisé)")
     print(f"👤Point_Astral_Bloc Nom: {infos.get('nom', 'Anonyme')}")
     print(f"{'='*60}")
     
@@ -910,16 +895,16 @@ def point_astral_blocs_complet():
             dest_email = (infos.get("email") or "").strip()
             if dest_email:
                 prenom = (infos.get("nom") or "").split()[0] or "toi"
-                sujet_email = "Ton Flash Astral est prêt ✨"
+                sujet_email = "Ton Point Astral est prêt ✨"
                 body_txt = (
                     f"Bonjour {prenom},\n\n"
-                    "Ton Flash Astral est prêt ✨ Merci pour ta confiance !\n\n"
+                    "Ton Point Astral est prêt ✨ Merci pour ta confiance !\n\n"
                     "📄 Télécharge ton document ici :\n"
                     f"{pdf_final_url}\n\n"
                     "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.\n"
                     "Si le lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.\n\n"
                     "🔮 Tu veux aller encore plus loin ?\n"
-                    "L'Analyse Karmique explore ce que le Flash Astral ne couvre pas : "
+                    "L'Analyse Karmique explore ce que le Point Astral ne couvre pas : "
                     "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
                     "Tout ce qui explique pourquoi certains patterns reviennent encore et encore.\n"
                     "👉 https://lesfousdastro.fr/#analyse_karmique\n\n"
@@ -928,12 +913,12 @@ def point_astral_blocs_complet():
                 )
                 body_html = (
                     f"<p>Bonjour {prenom},</p>"
-                    "<p>Ton Flash Astral est prêt ✨ Merci pour ta confiance !</p>"
+                    "<p>Ton Point Astral est prêt ✨ Merci pour ta confiance !</p>"
                     "<div style='margin:30px 0; text-align:center;'>"
                     f"<a href='{pdf_final_url}' target='_blank' "
                     "style='display:inline-block;padding:14px 28px;background:#1f628e;color:white;"
                     "border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;'>"
-                    "📄 Télécharger mon Flash Astral"
+                    "📄 Télécharger mon Point Astral"
                     "</a>"
                     "<p style='margin-top:12px;font-size:13px;color:#777;'>"
                     "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.<br>"
@@ -942,7 +927,7 @@ def point_astral_blocs_complet():
                     "</div>"
                     "<div style='margin:30px 0;padding:20px;background:#f9f6ff;border-radius:12px;'>"
                     "<p>🔮 <strong>Tu veux aller encore plus loin ?</strong></p>"
-                    "<p>L'Analyse Karmique explore ce que le Flash Astral ne couvre pas : "
+                    "<p>L'Analyse Karmique explore ce que le Point Astral ne couvre pas : "
                     "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
                     "Tout ce qui explique pourquoi certains patterns reviennent encore et encore.</p>"
                     "<p style='text-align:center;margin-top:15px;'>"
@@ -1145,7 +1130,7 @@ def generer_html_final_harmonise_pdf_only(
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Flash Astral - {nom}</title>
+    <title>Point Astral - {nom}</title>
     <style>
         body {{
             font-family: Georgia, serif;
@@ -1230,7 +1215,7 @@ def generer_html_final_harmonise_pdf_only(
     <div class="header" style="text-align: center; margin-bottom: 20px;">
         {logo_html}
         <h1 style="margin: 0; font-size: 24px; color: #333;">
-            🌟 Flash Astral - {nom}
+            🌟 Point Astral - {nom}
         </h1>
 
         <!-- ↓ AJOUT : centrage sûr -->
@@ -1243,10 +1228,10 @@ def generer_html_final_harmonise_pdf_only(
         <div class="disclaimer" style="background:#f8f9fa;border:1px solid #dee2e6;
             padding:16px;margin:20px 0;border-radius:8px;font-size:13px;line-height:1.5;">
             <p style="margin:0 0 8px 0;">
-                <strong>⚠️ Le Flash Astral est une lecture automatisée express (≈4 pages).</strong><br>
+                <strong>⚠️ Le Point Astral est une lecture automatisée express (≈4 pages).</strong><br>
                 Il n’est en aucun cas <u>comparable</u> avec une analyse manuelle réalisée par mes soins, 
                 où je prends en compte ton vécu, ton niveau de conscience, et où j’apporte une interprétation incarnée et sur mesure.  
-                <br>Le Flash Astral donne un aperçu rapide de tes grands axes ; l’analyse manuelle est une plongée profonde et unique.
+                <br>Le Point Astral donne un aperçu rapide de tes grands axes ; l’analyse manuelle est une plongée profonde et unique.
             </p>
 
             <p style="margin:0 0 8px 0;">

@@ -3,6 +3,28 @@ from utils.llm_client import ask_llm
 from textwrap import dedent
 from utils.selection_donnees import extraire_noeuds_pour_bloc5
 
+POINT_ASTRAL_EXCLUS = {
+    "Junon",
+    "Chiron",
+    #"Lune Noire",
+    "Part de Fortune",
+    "Cérès",
+    "Pallas",
+    "Vesta",
+}
+
+def _filtrer_lignes_points_secondaires(text: str) -> str:
+    if not text:
+        return ""
+
+    lignes = []
+    for line in text.splitlines():
+        if any(point.lower() in line.lower() for point in POINT_ASTRAL_EXCLUS):
+            continue
+        lignes.append(line)
+
+    return "\n".join(lignes)
+
 def _extract_points_forts_from_placements(placements_str: str) -> str:
     """
     Extrait la section ### Points forts du texte placements_str
@@ -74,15 +96,19 @@ def generer_bloc_5(contexte: dict, max_tokens: int = 1200) -> str:
         or contexte.get("placements")
         or ""
     ).strip()
+    placements_str = _filtrer_lignes_points_secondaires(placements_str)
     if len(placements_str) < 50:
         return "❌ Données insuffisantes pour produire la synthèse."
 
     # CORRECTION: Extraire les points forts directement de placements_str
     points_forts = _extract_points_forts_from_placements(placements_str)
+    points_forts = _filtrer_lignes_points_secondaires(points_forts)
     
     # Fallback si pas de points forts extraits
     if not points_forts:
-        axes_majeurs_fallback = (contexte.get("axes_majeurs_str") or "").strip()
+        axes_majeurs_fallback = _filtrer_lignes_points_secondaires(
+            (contexte.get("axes_majeurs_str") or "").strip()
+        )
         if axes_majeurs_fallback:
             points_forts = axes_majeurs_fallback
         else:

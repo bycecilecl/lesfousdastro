@@ -326,7 +326,7 @@ def debug_full():
 
 @app.route('/flash_astral')
 def redirect_flash_astral():
-    """Redirection vers l'accueil avec scroll vers Flash Astral"""
+    """Redirection vers l'accueil avec scroll vers Point Astral"""
     return redirect('/#flash_astral', code=302)
 
 # ✅ AJOUTER CE DEBUG
@@ -455,7 +455,7 @@ def preparer_donnees_analyse(data):
 # preparer_donnees_analyse(data)
 # ------------------------------------------------------------
 # But :
-#   Préparer les données pour l'analyse complète (Flash Astral).
+#   Préparer les données pour l'analyse complète (Point Astral).
 #   - Vérifie ou extrait les "points forts" depuis le thème.
 #   - Nettoie et normalise la liste.
 #   - Classe ces points forts en "axes majeurs" grâce à organiser_points_forts.
@@ -739,10 +739,10 @@ def paiement_effectue_old():
     return render_template("paiement_effectue.html")
 
         
-# Génération de l'analyse FLash Astral par BLOC
+# Génération de l'analyse Point Astral par BLOC
 @app.route("/analyse_point_astral", methods=["POST"])
 def analyse_point_astral_route():
-    """Route pour générer l'analyse Flash Astral - VERSION BLOCS (5 prompts)"""
+    """Route pour générer l'analyse Point Astral - VERSION BLOCS (5 prompts)"""
     try:
         form_data = request.form
         
@@ -768,7 +768,7 @@ def analyse_point_astral_route():
                    infos_personnelles['heure_naissance'], infos_personnelles['lieu_naissance']]):
             return "Toutes les informations de naissance sont requises", 400
 
-        print(f"🚀 Main Génération Flash Astral BLOCS pour {infos_personnelles['nom']}")
+        print(f"🚀 Main Génération Point Astral BLOCS pour {infos_personnelles['nom']}")
         
         # Stockage en session
         session["infos_utilisateur"] = infos_personnelles
@@ -783,7 +783,7 @@ def analyse_point_astral_route():
 
         return render_template(
             'erreur.html',
-            titre="Erreur dans l'analyse Flash Astral",
+            titre="Erreur dans l'analyse Point Astral",
             message=f"Une erreur s'est produite lors de la génération : {str(e)}",
             details="Veuillez vérifier vos données de naissance et réessayer."
         ), 500

@@ -155,7 +155,7 @@ Utilise des paragraphes en HTML <p>.
     <html lang="fr">
     <head>
         <meta charset="utf-8">
-        <title>Flash Astral - {infos_personnelles['nom']}</title>
+        <title>Point Astral - {infos_personnelles['nom']}</title>
         <style>
             @page {{
                 size: A4;
@@ -453,7 +453,7 @@ Utilise des paragraphes en HTML <p>.
         <div class="container">
             <div class="header">
                 {f'<img src="data:image/webp;base64,{logo_base64}" alt="Les Fous d\'Astro" class="logo">' if logo_base64 else ''}
-                <h1>Flash Astral</h1>
+                <h1>Point Astral</h1>
                 <div class="subtitle">Analyse Astrologique Personnalisée</div>
             </div>
 
