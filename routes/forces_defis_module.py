@@ -132,7 +132,17 @@ def generer_forces_defis_pdf_s3(infos, envoyer_email=False):
     Génère Forces & Défis en PDF + S3.
     Utilisable depuis les packs/background.
     """
+    if is_analysis_sandbox():
+        logger.info("🧪 SANDBOX Forces & Défis")
 
+        return {
+            "product_id": "forces_defis",
+            "label": "Forces & Défis",
+            "pdf_url": "https://sandbox.lesfousdastro.fr/forces-defis-test",
+            "pdf_path": None,
+            "status": "sandbox",
+        }
+    
     if not infos:
         raise ValueError("infos_utilisateur manquant pour Forces & Défis")
 

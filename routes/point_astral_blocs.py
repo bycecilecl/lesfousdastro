@@ -139,6 +139,17 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
     Retourne un PDF S3.
     """
 
+    if is_analysis_sandbox():
+        logger.info("🧪 SANDBOX Flash Astral")
+
+        return {
+            "product_id": "flash_astral",
+            "label": "Flash Astral",
+            "pdf_url": "https://sandbox.lesfousdastro.fr/flash-astral-test",
+            "pdf_path": None,
+            "status": "sandbox",
+        }
+
     if not infos:
         raise ValueError("infos_utilisateur manquant")
 

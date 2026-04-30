@@ -243,6 +243,18 @@ def generer_profil_amoureux_pdf_s3(infos, envoyer_email=False):
     Utilisable depuis les packs/background.
     """
 
+    if is_analysis_sandbox():
+        logger.info("🧪 SANDBOX Profil amoureux")
+
+        return {
+            "product_id": "profil_amoureux",
+            "label": "Profil amoureux",
+            "pdf_url": "https://sandbox.lesfousdastro.fr/profil-amoureux-test",
+            "pdf_path": None,
+            "status": "sandbox",
+        }
+    
+
     if not infos:
         raise ValueError("infos_utilisateur manquant pour Profil Amoureux")
 

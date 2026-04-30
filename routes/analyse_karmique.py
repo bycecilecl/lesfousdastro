@@ -22,6 +22,7 @@ from threading import Thread
 from utils.karmique.chapitres.intro_chapitres import CHAPTER_INTROS
 from utils.s3_utils import upload_file_and_presign
 from utils.email_sender import envoyer_email_avec_analyse
+from config.analysis_sandbox import is_analysis_sandbox
 
 logger = logging.getLogger(__name__)
 
@@ -514,6 +515,17 @@ def generer_analyse_karmique_pdf_s3(infos, envoyer_email=False):
     Génère l'analyse karmique en PDF + S3.
     Utilisable depuis les packs/background.
     """
+
+    if is_analysis_sandbox():
+        logger.info("🧪 SANDBOX Analyse karmique")
+
+        return {
+            "product_id": "analyse_karmique",
+            "label": "Analyse karmique",
+            "pdf_url": "https://sandbox.lesfousdastro.fr/karmique-test",
+            "pdf_path": None,
+            "status": "sandbox",
+        }
 
     if not infos:
         raise ValueError("infos_utilisateur manquant pour Analyse Karmique")
