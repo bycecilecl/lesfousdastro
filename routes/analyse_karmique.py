@@ -676,7 +676,7 @@ def analyse_karmique_complete():
             dest_email = (infos.get("email") or "").strip()
             if dest_email and pdf_final_url:
                 prenom = (infos.get("nom") or "").split()[0] or "toi"
-                sujet_email = "Ton analyse karmique est prête ✨"
+                sujet_email = "Ton Analyse Karmique est prête ✨"
 
                 body_txt = (
                     f"Bonjour {prenom},\n\n"

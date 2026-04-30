@@ -884,15 +884,18 @@ Pas de liste, uniquement de la prose fluide et cohérente.
 Texte continu en paragraphes. Tu intègres les {nb_defis} dynamiques de fond 
 de manière narrative — pas de liste, pas de tirets. Tu tisses les tensions 
 entre elles pour montrer comment elles interagissent dans la vie concrète.
-Exemples de situations réelles. Minimum 400 mots.
+Chaque dynamique doit être développée sur au moins 2 paragraphes complets avec exemples concrets.
+MINIMUM ABSOLU : 700 mots pour cette section. Ne passe pas à la suivante avant d'avoir atteint ce minimum.
 
 **## Tes Potentiels**
 Même chose : prose fluide, {nb_forces} ressources intégrées dans un récit cohérent.
-Montre comment ces forces peuvent s'activer concrètement. Minimum 400 mots.
+Chaque potentiel développé sur au moins 2 paragraphes avec exemples d'activation concrète.
+MINIMUM ABSOLU : 700 mots pour cette section. Ne passe pas à la suivante avant d'avoir atteint ce minimum.
 
 **## Ce qui joue dans les deux sens**
 Les {nb_mixtes} dynamiques mixtes racontées en paragraphes — leur double face, 
-leur complexité, comment les apprivoiser. Minimum 300 mots.
+leur complexité, comment les apprivoiser.
+MINIMUM ABSOLU : 500 mots pour cette section.
 
 **Conclusion** (1-2 paragraphes)
 Synthèse intégrative et ouverture concrète.
@@ -917,6 +920,8 @@ Si un élément manque, ajoute-le MAINTENANT. Ne dis JAMAIS "je continuerai plus
 ✅ Les aspects/placements sont nommés dans le fil du texte, pas en entêtes
 ✅ Développe les mécanismes psychiques avec exemples concrets
 ✅ Paragraphes complets (6 lignes minimum)
+✅ MINIMUM TOTAL du document : 2500 mots hors introduction et conclusion
+✅ Si tu approches de la fin d'une section avant d'avoir atteint le minimum, développe davantage avec des exemples supplémentaires
 
 ❌ NE PAS analyser d'aspects non listés
 ❌ NE PAS mentionner Chiron ou éléments non prioritaires
