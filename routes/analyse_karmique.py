@@ -80,12 +80,23 @@ def generer_analyse_karmique_html(infos: dict) -> tuple:
     Génère le HTML karmique + la liste des titres pour la table des matières.
     Retourne (html_content, titres)
     """
-    theme = calcul_theme(
-        nom=infos["nom"],
-        date_naissance=infos["date_naissance"],
-        heure_naissance=infos["heure_naissance"],
-        lieu_naissance=infos["lieu_naissance"]
-    )
+    if infos.get("lat") and infos.get("lon"):
+        theme = calcul_theme(
+            nom=infos["nom"],
+            date_naissance=infos["date_naissance"],
+            heure_naissance=infos["heure_naissance"],
+            lieu_naissance=infos["lieu_naissance"],
+            lat=float(infos["lat"]),
+            lon=float(infos["lon"]),
+            tzid=infos.get("tzid"),
+        )
+    else:
+        theme = calcul_theme(
+            nom=infos["nom"],
+            date_naissance=infos["date_naissance"],
+            heure_naissance=infos["heure_naissance"],
+            lieu_naissance=infos["lieu_naissance"]
+        )
 
     score = calculer_poids_karmique(theme)
 
@@ -498,6 +509,64 @@ def generer_html_final_karmique_pdf(
 </html>"""
     return html
 
+def generer_analyse_karmique_pdf_s3(infos, envoyer_email=False):
+    """
+    Génère l'analyse karmique en PDF + S3.
+    Utilisable depuis les packs/background.
+    """
+
+    if not infos:
+        raise ValueError("infos_utilisateur manquant pour Analyse Karmique")
+
+    html_content, chapitres_toc = generer_analyse_karmique_html(infos)
+
+    if not html_content or len(html_content.strip()) < 50:
+        raise ValueError("Analyse karmique vide ou trop courte")
+
+    logo_base64 = charger_logo_base64()
+    toc_html = generer_table_des_matieres(chapitres_toc)
+
+    nom = infos.get("nom", "Anonyme").replace(" ", "_")
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    nom_fichier = f"Analyse_Karmique_{nom}_{timestamp}"
+
+    output_dir = os.path.join(current_app.static_folder, "pdfs")
+    os.makedirs(output_dir, exist_ok=True)
+
+    pdf_path = os.path.join(output_dir, f"{nom_fichier}.pdf")
+
+    html_pdf = generer_html_final_karmique_pdf(
+        texte_structure=html_content,
+        table_des_matieres=toc_html,
+        infos_personnelles=infos,
+        logo_base64=logo_base64,
+    )
+
+    ok_pdf = html_to_pdf(html_pdf, pdf_path)
+
+    if not ok_pdf:
+        raise RuntimeError("Échec génération PDF analyse karmique")
+
+    pdf_final_url = None
+
+    try:
+        s3_info = upload_file_and_presign(
+            pdf_path,
+            key_prefix="analyse_karmique",
+            content_type="application/pdf",
+        )
+        pdf_final_url = s3_info.get("url") or s3_info.get("presigned_url")
+
+    except Exception as e:
+        logger.warning("[KARMIQUE PACK] Upload S3 KO : %s", e)
+
+    return {
+        "product_id": "analyse_karmique",
+        "label": "Analyse karmique",
+        "pdf_url": pdf_final_url,
+        "pdf_path": pdf_path,
+        "status": "completed",
+    }
 
 # =============================================================================
 # ROUTES
@@ -656,3 +725,4 @@ def telecharger_analyse_karmique(nom_fichier):
         abort(404)
 
     return send_from_directory(path, fname, as_attachment=True)
+
