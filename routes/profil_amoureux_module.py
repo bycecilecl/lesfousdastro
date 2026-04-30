@@ -23,6 +23,7 @@ from module.amour_blocs.couple_ideal import generer_bloc_couple_ideal
 from module.amour_blocs.intimite_sexualite import generer_bloc_intimite_sexualite
 from module.amour_blocs.maniere_aimer import generer_snippets_maniere_aimer
 from config.analysis_sandbox import is_analysis_sandbox
+from utils.debug_logging import logger as debug_logger
 
 logger = logging.getLogger(__name__)
 
@@ -432,6 +433,9 @@ def profil_amoureux_complet():
     if not infos:
         return "❌ Données manquantes. Veuillez recommencer depuis le formulaire.", 400
     
+    debug_logger.info("💗 [PA] infos_utilisateur = %r", infos)
+    debug_logger.info("💗 [PA] gender brut = %r", (infos or {}).get("gender"))
+    
 
     # === Anti-reload minimal (TTL 15 min) spécifique Profil Amoureux ===
     current_fingerprint = _fingerprint_infos(infos)
@@ -495,16 +499,17 @@ def profil_amoureux_complet():
         # 2) DÉTERMINATION DE LA POLARITÉ (genre)
         # ═══════════════════════════════════════════════════════════
         prefs = get_user_prefs(session, request)
-        genre_form = (infos.get("gender") or "").lower()
-        
-        if genre_form == "female":
+        genre_form = (infos.get("gender") or "").strip().lower()
+
+        if genre_form in ("female", "femme", "woman", "f"):
             polarite = "Femme"
-        elif genre_form == "male":
+        elif genre_form in ("male", "homme", "man", "h", "m"):
             polarite = "Homme"
         else:
-            polarite = "Homme"  # fallback
+            polarite = "Femme"
             
         print(f"👤 Polarité utilisée : {polarite}")
+        debug_logger.info("💗 [PA] polarite finale = %r", polarite)
 
         # ═══════════════════════════════════════════════════════════
         # DEBUG SNIPPETS GLOBAL (si ?debug_snippets=1)
@@ -703,7 +708,7 @@ def profil_amoureux_complet():
                     f"{pdf_final_url}\n\n"
                     "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.\n"
                     "Si le lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.\n\n"
-                    "🔮 Et si tu voulais aller encore plus loin ?\n"
+                    "🔮 Tu veux aller encore plus loin ?\n"
                     "L'Analyse Karmique explore ce que le Profil Amoureux ne couvre pas : "
                     "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
                     "Tout ce qui explique pourquoi certains patterns reviennent encore et encore en amour.\n"
@@ -727,7 +732,7 @@ def profil_amoureux_complet():
                     "</p>"
                     "</div>"
                     "<div style='margin:30px 0;padding:20px;background:#f9f6ff;border-radius:12px;'>"
-                    "<p>🔮 <strong>Et si tu voulais aller encore plus loin ?</strong></p>"
+                    "<p>🔮 <strong>Tu veux aller encore plus loin ?</strong></p>"
                     "<p>L'Analyse Karmique explore ce que le Profil Amoureux ne couvre pas : "
                     "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
                     "Tout ce qui explique pourquoi certains patterns reviennent encore et encore en amour.</p>"

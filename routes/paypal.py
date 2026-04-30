@@ -357,7 +357,7 @@ def capture_order():
                 'heure_naissance': user_info.get('birthTime'),
                 'lieu_naissance': user_info.get('birthPlace'),
                 'email': user_info.get('email'),
-                'gender': user_info.get('gender'),
+                'gender': user_info.get('gender') or user_info.get('genre') or user_info.get('sex') or '',
                 'lat': user_info.get('lat'),
                 'lon': user_info.get('lon'),
                 'tzid': user_info.get('tzid'),

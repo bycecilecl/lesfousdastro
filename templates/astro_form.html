@@ -3038,28 +3038,7 @@
         }
 
         function _doProceedAfterBirthConfirm() {
-            // ANALYSE KARMIQUE : route directe de génération si sélection seule
-            const isKarmicOnly =
-                !selectedPack &&
-                cart.length === 1 &&
-                cart[0].id === 'analyse_karmique';
 
-            if (isKarmicOnly) {
-                const form = document.getElementById('form-analyse');
-                form.action = '/analyse_karmique';
-                form.method = 'POST';
-                
-                let consentInput = form.querySelector('input[name="consentement"]');
-                if (!consentInput) {
-                    consentInput = document.createElement('input');
-                    consentInput.type = 'hidden';
-                    consentInput.name = 'consentement';
-                    form.appendChild(consentInput);
-                }
-                consentInput.value = 'on';
-                form.submit();
-                return;
-            }
 
             // Séparer analyses gratuites et payantes
             const freeAnalyses = [];
@@ -3522,7 +3501,7 @@
                 userInfo: {
                     nom: document.getElementById('nom').value,
                     email: document.getElementById('email').value,
-                    gender: document.querySelector('[name="gender"]:checked').value,
+                    gender: document.querySelector('[name="gender"]:checked')?.value || '',
                     birthDate: document.getElementById('date_naissance').value,
                     birthTime: document.getElementById('heure_naissance').value,
                     birthPlace: document.getElementById('lieu_naissance').value,
