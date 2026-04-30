@@ -2773,18 +2773,26 @@
                 tagline: false
             },
 
-            createOrder: (data, actions) => {
-                const total = Number(order?.total ?? 0);
-                console.log('🛒 PayPal.createOrder appelé, total =', total, '€');
-                return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                    value: total.toFixed(2),
-                    currency_code: "{{ PAYPAL_CURRENCY }}"
+            createOrder: async () => {
+                console.log('🛒 PayPal.createOrder BACKEND appelé', window.pendingOrder);
+
+                const response = await fetch('/payments/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
                     },
-                    description: order?.description || "Flash Astral"
-                }]
+                    body: JSON.stringify(window.pendingOrder || {})
                 });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    console.error('❌ Create order PayPal KO', result);
+                    throw new Error('Création commande PayPal échouée');
+                }
+
+                console.log('✅ Order PayPal créé via backend', result);
+                return result.id;
             },
 
             onApprove: async (data, actions) => {
