@@ -874,26 +874,28 @@ Objectif : Révéler les dynamiques profondes du thème via FORCES et DÉFIS con
 ---
 
 
-
 ╔══ STRUCTURE DE SORTIE OBLIGATOIRE ══╗
 
-**Introduction** (1 paragraphe, 80-100 mots)
-Accroche personnalisée basée sur les **Configurations majeures** (stelliums, angulaires, rétrogrades).
+**Introduction** (2-3 paragraphes)
+Accroche incarnée et personnalisée basée sur les configurations majeures. 
+Pas de liste, uniquement de la prose fluide et cohérente.
 
-**## DÉFIS** ({nb_defis} éléments à traiter - ne pas s'arrêter avant)
-Analyse TOUS les {nb_defis} éléments marqués [DÉFI] ou [DEFIS] dans la liste ci-dessus.
-Format : - **Aspect/Placement précis** : Description (250 mots minimum OBLIGATOIRE)
+**## Tes Défis**
+Texte continu en paragraphes. Tu intègres les {nb_defis} dynamiques de fond 
+de manière narrative — pas de liste, pas de tirets. Tu tisses les tensions 
+entre elles pour montrer comment elles interagissent dans la vie concrète.
+Exemples de situations réelles. Minimum 400 mots.
 
-**## POTENTIELS** ({nb_forces} éléments à traiter - ne pas s'arrêter avant)
-Analyse TOUS les {nb_forces} éléments marqués [FORCE] dans la liste ci-dessus.
-Format : - **Aspect/Placement précis** : Description (250 mots minimum OBLIGATOIRE)
+**## Tes Potentiels**
+Même chose : prose fluide, {nb_forces} ressources intégrées dans un récit cohérent.
+Montre comment ces forces peuvent s'activer concrètement. Minimum 400 mots.
 
-**## DYNAMIQUES MIXTES** ({nb_mixtes} éléments à traiter - ne pas s'arrêter avant)
-Analyse TOUS les {nb_mixtes} éléments marqués [MIXTE] dans la liste ci-dessus.
-Format : - **Aspect/Placement précis** : Description (250 mots minimum - deux faces développées)
+**## Ce qui joue dans les deux sens**
+Les {nb_mixtes} dynamiques mixtes racontées en paragraphes — leur double face, 
+leur complexité, comment les apprivoiser. Minimum 300 mots.
 
-**Conclusion** (1 paragraphe, 100-120 mots)
-Synthèse intégrative.
+**Conclusion** (1-2 paragraphes)
+Synthèse intégrative et ouverture concrète.
 
 ---
 ⚠️ VÉRIFICATION FINALE OBLIGATOIRE :
@@ -910,7 +912,9 @@ Si un élément manque, ajoute-le MAINTENANT. Ne dis JAMAIS "je continuerai plus
 
 ✅ Analyse CHAQUE élément numéroté dans la section ci-dessus
 ✅ Respecte l'ordre d'importance (scores décroissants)
-✅ 250 mots minimum par élément
+✅ Écris en prose continue, jamais de tirets ou de listes
+✅ Chaque section est un texte narratif cohérent
+✅ Les aspects/placements sont nommés dans le fil du texte, pas en entêtes
 ✅ Développe les mécanismes psychiques avec exemples concrets
 ✅ Paragraphes complets (6 lignes minimum)
 

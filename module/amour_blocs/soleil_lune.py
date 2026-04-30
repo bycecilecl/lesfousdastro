@@ -284,6 +284,7 @@ et ce que cela raconte de ses attentes, de ses peurs et de ses schémas.
 Style : psychologique, direct, profond, concret.
 Pas de blabla spirituel fumeux, pas d’envolée poétique.
 Aucun bullet point. Aucun emoji.
+N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
 Parle-lui en "tu".
 """
     

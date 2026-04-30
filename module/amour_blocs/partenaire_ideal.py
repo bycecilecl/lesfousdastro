@@ -375,6 +375,7 @@ STYLE :
 - Parle en "tu", ton direct et cash, pas de langue de bois
 - Psychologique et profond, pas superficiel
 - Pas de bullet points, pas d'emoji
+- N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
 - Fais une synthèse fluide, pas un collage de phrases
 - Ose nommer les zones d'ombre sans complaisance
 - Environ 400-500 mots

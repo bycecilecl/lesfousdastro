@@ -234,6 +234,7 @@ def generer_bloc_3(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
     - Toute recommandation doit être reliée explicitement à un placement cité (ex: « car NN en Capricorne M7… "car Lune en IV"»).
     - Si une idée n’est pas justifiée par les placements fournis, ne l’écris pas.
     - ⚠️ N'INVENTE AUCUN PLACEMENT. Tout ce que tu cites doit se trouver dans la liste des placements.
+    - N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
 
     Format : 4–5 paragraphes en français, texte continu, tutoiement.
     """).strip()

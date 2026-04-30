@@ -289,6 +289,7 @@ IMPORTANT : Tiens compte du signe et de l'état du maître (dignité, chute, exi
 Un maître en chute ou exil modifie l'expression de la maison.
 
 Pas de bullet points. Pas d'emoji.
+N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
 Parle en "tu".
 """
     texte = interroger_llm(prompt)

@@ -170,6 +170,7 @@ Aspects astrologiques :
 Instruction :
 Écris une lecture globale, cohérente et incarnée du thème natal.
 - Ne commente pas les positions une par une.
+- N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
 - Repère les tensions internes (les dissonances, les contradictions).
 - Parle des dynamiques psychologiques sous-jacentes.
 - Mets en lumière les ressources intérieures.

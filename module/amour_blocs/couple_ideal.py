@@ -723,6 +723,7 @@ STYLE :
 - Pas de bullet points, pas d'emoji
 - Synthèse fluide, environ 400-500 mots
 - Ose nommer les zones de friction sans complaisance
+- N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
 
 NE PARLE PAS de :
 - Qui t'attire / le portrait du partenaire (c'est fait dans le Module 2)

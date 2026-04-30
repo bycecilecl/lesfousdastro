@@ -608,6 +608,7 @@ Reste centré(e) sur l'intimité PHYSIQUE et PROFONDE, le désir charnel, la fus
 
 Pas de bullet points. Pas d'emoji.
 Parle en "tu".
+- N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
 Ton direct, cash, psychologique, sans pudeur.
 """
 

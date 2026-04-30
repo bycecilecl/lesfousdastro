@@ -192,6 +192,7 @@ def generer_bloc_5(contexte: dict, max_tokens: int = 1200) -> str:
     - Appuie-toi sur des repères de psychologie jungienne (Persona / Ombre, Anima-Animus, processus d’individuation, fonctions psychologiques) pour proposer 3 à 5 axes d’intégration concrets adaptés au profil, avec des gestes simples du quotidien (conduites, rituels, communication, créativité). Évite tout jargon non expliqué et toute formulation pseudo-médicale.
     - Pas de coaching générique à l'eau de rose "écris un journal, explore tes zones d'ombre, tes émotions sans jugement", ça n'aide en rien.
     - ⚠️ N'INVENTE AUCUN PLACEMENT. Tout ce que tu cites DOIT SE TROUVER dans la liste des placements. Vérifie chaque placement dont tu parles. 
+    - N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
     - Si une idée n’est pas justifiée par les placements fournis, ne l’écris pas.
     - Interdit d’énoncer des actions génériques (« fais un journal », « pratique la gratitude », « écris/peins ») si elles ne sont pas justifiées par <noeuds_lunaires> ou <points_forts>.
     - Toute recommandation doit être reliée explicitement à un placement cité (ex: « car NN en Capricorne M7… "car Lune en IV"»).

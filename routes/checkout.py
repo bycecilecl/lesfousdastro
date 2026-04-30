@@ -793,7 +793,7 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
         + "\n".join(lignes_txt)
         + "\n\n⚠️ Veille à bien télécharger chaque document et à le sauvegarder sur ton appareil.\n"
         "Si un lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.\n\n"
-        "À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais,\n"
+        "À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité),\n"
         "Les Fous d'Astro by Cécile CL ✨"
     )
 
@@ -814,7 +814,7 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
     et puis un jour ça fait tilt.
     </p>
     </div>
-    <p style='margin-top:40px;'>À très vite sur les réseaux..., en vrai, ou dans les étoiles si on se croise jamais,<br>
+    <p style='margin-top:40px;'>À très vite sur les réseaux..., en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité),<br>
     Les Fous d'Astro by Cécile CL ✨</p>
     """
 

@@ -433,6 +433,7 @@ Instruction :
 - Pas de coaching générique à l'eau de rose "écris un journal, explore tes zones d'ombre, tes émotions sans jugement", ça n'aide en rien.
 - Conclure par une phrase de transition ouvrant vers la Lune et le monde intérieur, sans résumer.
 - ⚠️ N'INVENTE AUCUN PLACEMENT. Tout ce que tu cites doit se trouver dans la liste des placements.
+- N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
 
 Format de sortie attendu :
 4–5 paragraphes en français, texte continu (pas de listes), respectant les contraintes ci-dessus. Utilise le tutoiement.

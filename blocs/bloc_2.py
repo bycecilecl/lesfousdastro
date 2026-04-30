@@ -511,6 +511,7 @@ def generer_bloc_2(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
     - Terminer par 2–3 pistes d'intégration pratiques et une transition vers les axes majeurs du thème.
     - Pas de coaching générique à l'eau de rose "écris un journal, explore tes zones d'ombre, tes émotions sans jugement", ça n'aide en rien.
     - ⚠️ N'INVENTE AUCUN PLACEMENT. Tout ce que tu cites doit se trouver dans la liste des placements.
+    - N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
     
     Format de sortie attendu :
     4–5 paragraphes TRES APPROFONDIS en français, texte continu (pas de listes), respectant les contraintes ci-dessus. Utilise le tutoiement.
