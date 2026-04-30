@@ -547,7 +547,7 @@ def traiter_analyses():
             ), 400
 
         return render_template(
-            'paiement_confirme.html',
+            'paiement_effectue.html',
             produit_titre=product.get("label", "analyse"),
             next_url=url_for(route),
             already=False,
