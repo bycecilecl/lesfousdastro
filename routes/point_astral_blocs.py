@@ -325,13 +325,10 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
 
     return {
         "label": "Flash Astral complet",
-        "pdf_url": None,
-        "pdf_path": None,
-        "data_theme": data_theme,
-        "placements_str": placements_str,
-        "texte_brut": texte_brut,
-        "status": "texte_ready",
-    }
+        "pdf_url": pdf_final_url,
+        "pdf_path": pdf_path,
+        "status": "completed",
+     }           
 
 @point_astral_blocs_bp.route("/__ping", methods=["GET"])
 def ping_blocs():

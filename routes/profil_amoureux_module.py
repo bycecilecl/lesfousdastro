@@ -237,6 +237,141 @@ def generer_html_final_amour_pdf(
 </html>"""
     return html
 
+def generer_profil_amoureux_pdf_s3(infos, envoyer_email=False):
+    """
+    Génère le Profil Amoureux en PDF + S3.
+    Utilisable depuis les packs/background.
+    """
+
+    if not infos:
+        raise ValueError("infos_utilisateur manquant pour Profil Amoureux")
+
+    if infos.get("lat") and infos.get("lon"):
+        data_theme = calcul_theme_safe(
+            nom=infos["nom"],
+            date_naissance=infos["date_naissance"],
+            heure_naissance=infos["heure_naissance"],
+            lieu_naissance=infos["lieu_naissance"],
+            lat=float(infos["lat"]),
+            lon=float(infos["lon"]),
+            tzid=infos.get("tzid"),
+        )
+    else:
+        data_theme = calcul_theme_safe(
+            nom=infos["nom"],
+            date_naissance=infos["date_naissance"],
+            heure_naissance=infos["heure_naissance"],
+            lieu_naissance=infos["lieu_naissance"],
+        )
+
+    genre_form = (infos.get("gender") or "").lower()
+    polarite = "Femme" if genre_form == "female" else "Homme"
+
+    snippets_m1 = generer_snippets_maniere_aimer(data_theme, polarite=polarite)
+
+    m1 = generer_bloc_maniere_aimer(data_theme, call_llm=True, polarite=polarite)
+    m2 = generer_bloc_partenaire_ideal(data_theme, call_llm=True, polarite=polarite)
+    m3 = generer_bloc_couple_ideal(
+        data_theme,
+        call_llm=True,
+        polarite=polarite,
+        bilan_amour=snippets_m1,
+    )
+    m4 = generer_bloc_intimite_sexualite(data_theme, call_llm=True, polarite=polarite)
+
+    sections_html = []
+
+    if m1:
+        sections_html.append(f"""
+            <section class="section">
+                <h2>Module 1 · Ma manière d'aimer</h2>
+                <div class="section-content">
+                    {_texte_en_html_paragraphes(m1)}
+                </div>
+            </section>
+        """)
+
+    if m2:
+        sections_html.append(f"""
+            <section class="section">
+                <h2>Module 2 · Partenaire idéal : ce qui t'attire</h2>
+                <div class="section-content">
+                    {_texte_en_html_paragraphes(m2)}
+                </div>
+            </section>
+        """)
+
+    if m3:
+        sections_html.append(f"""
+            <section class="section">
+                <h2>Module 3 · Couple idéal & dynamique relationnelle</h2>
+                <div class="section-content">
+                    {_texte_en_html_paragraphes(m3)}
+                </div>
+            </section>
+        """)
+
+    if m4:
+        sections_html.append(f"""
+            <section class="section">
+                <h2>Module 4 · Intimité & sexualité</h2>
+                <div class="section-content">
+                    {_texte_en_html_paragraphes(m4)}
+                </div>
+            </section>
+        """)
+
+    html_content = "\n".join(sections_html).strip()
+
+    if not html_content:
+        raise ValueError("Profil Amoureux : aucun contenu généré")
+
+    logo_base64 = ""
+    logo_path = os.path.join(current_app.static_folder, "images", "logo_les_fous_dastro.webp")
+
+    try:
+        if os.path.exists(logo_path):
+            with open(logo_path, "rb") as img_file:
+                logo_base64 = base64.b64encode(img_file.read()).decode("utf-8")
+    except Exception as e:
+        current_app.logger.warning("[PA PACK] Logo non chargé : %s", e)
+
+    nom_clean = (infos.get("nom") or "Analyse_Amour").replace(" ", "_")
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    nom_fichier = f"Profil_Amoureux_{nom_clean}_{timestamp}"
+
+    output_dir = os.path.join(current_app.static_folder, "pdfs")
+    os.makedirs(output_dir, exist_ok=True)
+
+    pdf_path = os.path.join(output_dir, f"{nom_fichier}.pdf")
+
+    html_pdf = generer_html_final_amour_pdf(
+        texte_modules_html=html_content,
+        infos_personnelles=infos,
+        logo_base64=logo_base64,
+    )
+
+    html_to_pdf(html_pdf, pdf_path)
+
+    pdf_final_url = None
+
+    try:
+        s3_info = upload_file_and_presign(
+            pdf_path,
+            key_prefix="profil_amoureux",
+            content_type="application/pdf",
+        )
+        pdf_final_url = s3_info.get("url") or s3_info.get("presigned_url")
+    except Exception as e:
+        current_app.logger.warning("[PA PACK] Upload S3 KO : %s", e)
+
+    return {
+        "product_id": "profil_amoureux",
+        "label": "Analyse Amoureuse complète",
+        "pdf_url": pdf_final_url,
+        "pdf_path": pdf_path,
+        "status": "completed",
+    }
 
 @profil_amoureux_module.route("/complet")
 def profil_amoureux_complet():
