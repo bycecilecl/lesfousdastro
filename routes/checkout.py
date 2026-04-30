@@ -546,7 +546,12 @@ def traiter_analyses():
                 message=f"Aucune route de génération trouvée pour {product.get('label', product_id)}."
             ), 400
 
-        return redirect(url_for(route))
+        return render_template(
+            'paiement_confirme.html',
+            produit_titre=product.get("label", "analyse"),
+            next_url=url_for(route),
+            already=False,
+        )
 
     # ============================================================
     # CAS 2 : PACK / PLUSIEURS ANALYSES
