@@ -9,6 +9,9 @@ from utils.utils_points_forts import extraire_points_forts
 from utils.astro_utils import valider_donnees_avant_analyse, corriger_donnees_maisons
 from utils.calculs_astrologiques import get_maison_planete, detecter_aspects, get_nakshatra_name, degre_vers_signe, get_maitre_ascendant, maisons_vediques_fixes, maison_vedique_planete_simple
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Initialiser TimezoneFinder une seule fois
 tf = TimezoneFinder()
 
@@ -170,13 +173,11 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
 
     print(f"📅 Date parsée: {naive}")
 
-    print("🧪 DEBUG TIMEZONE")
-    print(f"   date_naissance reçue = {date_naissance}")
-    print(f"   heure_naissance reçue = {heure_naissance}")
-    print(f"   naive = {naive}")
-    print(f"   tzid reçu = {tzid}")
-    print(f"   dt_naissance_utc reçu = {dt_naissance_utc}")
-    print(f"   timezone système serveur = {datetime.now().astimezone().tzinfo}")
+    logger.warning("🧪 DEBUG TIMEZONE")
+    logger.warning(f"date_naissance = {date_naissance}")
+    logger.warning(f"heure_naissance = {heure_naissance}")
+    logger.warning(f"tzid = {tzid}")
+    logger.warning(f"dt_naissance_utc = {dt_naissance_utc}")
 
     # --- ÉTAPE 3: Obtenir le fuseau horaire correct ---
     dt_local = None  # ✅ évite UnboundLocalError lors du print final
