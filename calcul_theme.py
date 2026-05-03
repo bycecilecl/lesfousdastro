@@ -170,6 +170,14 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
 
     print(f"📅 Date parsée: {naive}")
 
+    print("🧪 DEBUG TIMEZONE")
+    print(f"   date_naissance reçue = {date_naissance}")
+    print(f"   heure_naissance reçue = {heure_naissance}")
+    print(f"   naive = {naive}")
+    print(f"   tzid reçu = {tzid}")
+    print(f"   dt_naissance_utc reçu = {dt_naissance_utc}")
+    print(f"   timezone système serveur = {datetime.now().astimezone().tzinfo}")
+
     # --- ÉTAPE 3: Obtenir le fuseau horaire correct ---
     dt_local = None  # ✅ évite UnboundLocalError lors du print final
     if dt_naissance_utc is not None:
