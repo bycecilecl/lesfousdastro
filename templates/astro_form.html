@@ -2180,6 +2180,9 @@
             <ul class="navbar__links">
                 <li><a href="{{ url_for('pages_bp.analyses') }}"
                         class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+                
+                <li><a href="{{ url_for('blog.blog_index') }}"
+                        class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
 
                 <li><a href="{{ url_for('site_bp.temoignages') }}"
                         class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
@@ -2197,7 +2200,6 @@
             </ul>
         </div>
     </nav>
-   
     <div class="stars" id="stars"></div>
     <div class="container">
         <div class="header">

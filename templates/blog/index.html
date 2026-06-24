@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>Blog Astrologie – Les Fous d'Astro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Articles sur l'astrologie : signes, planètes, maisons, amour et thème natal. Sans jargon, avec du caractère.">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --blue-dark: #1f628e;
+            --teal: #00a8a8;
+            --teal-light: #c0f0f7;
+            --night: #0d1b2a;
+            --text: #1a1a2e;
+            --text-muted: #5a6a7a;
+            --surface: #ffffff;
+            --surface-alt: #f4fbfd;
+            --border: rgba(0, 168, 168, 0.18);
+            --radius: 16px;
+            --radius-sm: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--surface-alt);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Étoiles ── */
+        .stars {
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 0;
+            overflow: hidden;
+        }
+        .star {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+        @keyframes twinkle {
+            from { opacity: 0.2; }
+            to   { opacity: 0.9; }
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            background: linear-gradient(135deg, var(--night) 0%, var(--blue-dark) 60%, #0e5f6e 100%);
+            position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(192, 240, 247, 0.12);
+        }
+        .navbar__inner {
+            max-width: 1200px; margin: 0 auto;
+            padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+        }
+        .navbar__brand {
+            font-size: 1.25rem; font-weight: 700;
+            text-decoration: none; letter-spacing: -0.02em;
+            background: linear-gradient(90deg, var(--teal-light), #e8d5f0);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .navbar__toggle {
+            display: none; background: none; border: 1px solid rgba(255,255,255,0.25);
+            color: #fff; font-size: 1.1rem; padding: 7px 11px;
+            border-radius: var(--radius-sm); cursor: pointer;
+        }
+        .navbar__links {
+            display: flex; list-style: none; gap: 4px;
+        }
+        .navbar__links a {
+            color: rgba(255,255,255,0.82); text-decoration: none;
+            padding: 7px 14px; border-radius: 20px;
+            font-size: 0.875rem; font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+        }
+        .navbar__links a:hover,
+        .navbar__links a.active {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+        }
+
+        /* ── Fond principal ── */
+        .page-bg {
+            position: relative; z-index: 1;
+            background: linear-gradient(160deg, var(--night) 0%, var(--blue-dark) 35%, var(--teal) 70%, var(--teal-light) 100%);
+            padding-bottom: 80px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* ── Hero ── */
+        .hero {
+            max-width: 680px; margin: 0 auto;
+            padding: 64px 24px 48px;
+            text-align: center; color: #fff;
+        }
+        .hero__eyebrow {
+            font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--teal-light); opacity: 0.85;
+            margin-bottom: 16px;
+        }
+        .hero__title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700; letter-spacing: -0.03em;
+            line-height: 1.15; margin-bottom: 16px;
+        }
+        .hero__sub {
+            font-size: 1rem; line-height: 1.65;
+            color: rgba(255,255,255,0.75);
+            max-width: 520px; margin: 0 auto;
+        }
+
+        /* ── Filtres ── */
+        .filters {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px; margin: 0 auto 36px;
+            padding: 0 24px;
+        }
+        .filter-btn {
+            font-size: 0.8rem; font-weight: 600;
+            padding: 7px 18px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.85);
+            cursor: pointer; letter-spacing: 0.02em;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+        .filter-btn.active {
+            background: #fff; color: var(--blue-dark);
+            border-color: #fff;
+        }
+
+        /* ── Grille articles ── */
+        .articles-wrap {
+            max-width: 1200px; margin: 0 auto;
+            padding: 0 24px;
+        }
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            display: flex; flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 60, 90, 0.12);
+        }
+        .card__thumb {
+            width: 100%; height: 160px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem;
+            background: var(--surface-alt);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .card__image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .card__body {
+            padding: 20px 22px 22px;
+            display: flex; flex-direction: column; flex: 1;
+        }
+
+        .card-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card-link:hover {
+            text-decoration: none;
+        }
+        .tag {
+            display: inline-block;
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+            text-transform: uppercase; padding: 4px 10px; border-radius: 20px;
+            margin-bottom: 10px; width: fit-content;
+        }
+        .tag--signe   { background: #eeecff; color: #3c3489; }
+        .tag--planete { background: #e4f4fb; color: #0c447c; }
+        .tag--amour   { background: #fce8f2; color: #72243e; }
+        .tag--maison  { background: #e2f5ee; color: #08503f; }
+        .tag--karma   { background: #fff5e0; color: #854f0b; }
+
+        .card__title {
+            font-size: 1rem; font-weight: 600;
+            line-height: 1.4; margin-bottom: 6px;
+            color: var(--text);
+        }
+        .card__date {
+            font-size: 0.78rem; color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .card__excerpt {
+            font-size: 0.875rem; color: var(--text-muted);
+            line-height: 1.6; flex: 1; margin-bottom: 16px;
+        }
+        .card__link {
+            font-size: 0.85rem; font-weight: 600;
+            color: var(--teal); text-decoration: none;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .card__link:hover { text-decoration: underline; }
+        .card__link::after { content: '→'; }
+
+        .badge-new {
+            display: inline-block;
+            font-size: 0.68rem; font-weight: 700;
+            background: #faece7; color: #712b13;
+            padding: 2px 8px; border-radius: 12px;
+            margin-left: 7px; vertical-align: middle;
+            letter-spacing: 0.04em; text-transform: uppercase;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            grid-column: 1/-1;
+            text-align: center; padding: 60px 24px;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.95rem;
+        }
+
+        /* ── CTA bas ── */
+        .cta-band {
+            max-width: 640px; margin: 56px auto 0;
+            text-align: center; padding: 0 24px;
+            color: rgba(255,255,255,0.9);
+        }
+        .cta-band p { font-size: 1rem; line-height: 1.6; margin-bottom: 18px; }
+        .cta-btn {
+            display: inline-block;
+            background: #fff; color: var(--blue-dark);
+            font-size: 0.9rem; font-weight: 700;
+            padding: 12px 28px; border-radius: 30px;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 768px) {
+            .navbar__toggle { display: block; }
+            .navbar__links {
+                position: absolute; top: 64px; left: 0; right: 0;
+                background: linear-gradient(135deg, var(--night), var(--blue-dark));
+                flex-direction: column; padding: 16px 20px 20px;
+                opacity: 0; visibility: hidden; transform: translateY(-8px);
+                transition: all 0.25s;
+            }
+            .nav-open .navbar__links {
+                opacity: 1; visibility: visible; transform: translateY(0);
+            }
+            .articles-grid { grid-template-columns: 1fr; }
+            .hero { padding: 48px 20px 36px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar__inner">
+            <a class="navbar__brand" href="/">Les Fous d'Astro</a>
+            <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">☰</button>
+               <ul class="navbar__links">
+                <li><a href="{{ url_for('pages_bp.analyses') }}"
+                        class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+                
+                <li><a href="{{ safe_url('blog.blog', _fallback='/blog') }}"
+                        class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
+
+                <li><a href="{{ url_for('site_bp.temoignages') }}"
+                        class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
+
+                <li><a href="{{ url_for('pages_bp.formations') }}"
+                        class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
+
+                <li><a href="https://bycecilecl.com/categorie-produit/services/"
+                        target="_blank" rel="noopener">Prestations</a></li>
+
+                <li><a href="{{ url_for('pages_bp.contact') }}"
+                        class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
+
+                <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+            </ul>
+        </div>
+    </nav>
+
+<div class="page-bg">
+
+    <!-- Hero -->
+    <section class="hero">
+        <p class="hero__eyebrow">✦ Blog astrologie</p>
+        <h1 class="hero__title">Comprendre ton thème natal sans te noyer dans le jargon</h1>
+        <p class="hero__sub">Signes, planètes, maisons, amour — des articles qui parlent vrai, avec du caractère.</p>
+    </section>
+
+    <!-- Filtres -->
+    <div class="filters" id="filters">
+        <button class="filter-btn active" data-cat="all">Tous les articles</button>
+        <button class="filter-btn" data-cat="signe">Signes ♈</button>
+        <button class="filter-btn" data-cat="planete">Planètes ☽</button>
+        <button class="filter-btn" data-cat="maison">Maisons 🏠</button>
+        <button class="filter-btn" data-cat="karma">Karma ☊</button>
+        <button class="filter-btn" data-cat="astropapote">Astropapote ✨</button>
+    </div>
+
+    <!-- Grille -->
+    <div class="articles-wrap">
+        <div class="articles-grid" id="grid">
+
+            {# Version Jinja : boucle sur les articles passés par Flask #}
+           {% for article in articles %}
+            <a href="{{ url_for('blog.blog_article', slug=article.slug) }}" class="card-link">
+                <article class="card" data-cat="{{ article.cat }}">
+                    {% if article.image %}
+                        <img
+                            src="{{ article.image }}"
+                            alt="{{ article.image_alt }}"
+                            class="card__image">
+                    {% else %}
+                        <div class="card__thumb">✦</div>
+                    {% endif %}
+
+                    <div class="card__body">
+                        <span class="tag tag--{{ article.cat }}">{{ article.tag }}</span>
+
+                        <h2 class="card__title">{{ article.title }}</h2>
+
+                        <p class="card__date">📅 {{ article.date }}</p>
+
+                        <p class="card__excerpt">
+                            {{ article.excerpt or article.description }}
+                        </p>
+
+                        <span class="card__link">Lire l'article</span>
+                    </div>
+                </article>
+            </a>
+            {% else %}
+            <div class="empty-state">Aucun article pour le moment — revenez bientôt !</div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-band">
+        <p>Ton signe solaire, c'est un début — mais ton thème natal complet, c'est une autre dimension.</p>
+        <a class="cta-btn" href="{{ url_for('analyses') }}">Découvrir mon Point Astral →</a>
+    </div>
+
+</div>
+
+<script>
+    /* Étoiles */
+    (function() {
+        const c = document.getElementById('stars');
+        for (let i = 0; i < 60; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${(Math.random()*4).toFixed(1)}s;animation-duration:${(2+Math.random()*3).toFixed(1)}s`;
+            c.appendChild(s);
+        }
+    })();
+
+    /* Filtre côté client (si tu veux le filtre JS en plus du Jinja) */
+    document.getElementById('filters').addEventListener('click', function(e) {
+        const btn = e.target.closest('.filter-btn');
+        if (!btn) return;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.cat;
+        document.querySelectorAll('.card-link').forEach(link => {
+            const card = link.querySelector('.card');
+            link.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -308,22 +308,26 @@
       </button>
 
       <ul class="navbar__links">
-        <li><a href="{{ url_for('pages_bp.analyses') }}"
-               class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+                <li><a href="{{ url_for('pages_bp.analyses') }}"
+                        class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+                
+                <li><a href="{{ url_for('blog.blog_index') }}"
+                        class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
 
-        <li><a href="{{ url_for('site_bp.temoignages') }}"
-               class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
+                <li><a href="{{ url_for('site_bp.temoignages') }}"
+                        class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
 
-        <li><a href="{{ url_for('pages_bp.formations') }}"
-               class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
+                <li><a href="{{ url_for('pages_bp.formations') }}"
+                        class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
 
-        <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Prestations</a></li>
+                <li><a href="https://bycecilecl.com/categorie-produit/services/"
+                        target="_blank" rel="noopener">Prestations</a></li>
 
-        <li><a href="{{ url_for('pages_bp.contact') }}"
-               class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
+                <li><a href="{{ url_for('pages_bp.contact') }}"
+                        class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
 
-        <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
-      </ul>
+                <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+            </ul>
     </div>
   </nav>
 

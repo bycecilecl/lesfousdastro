@@ -3,15 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <title>Blog Astrologie – Les Fous d'Astro</title>
-    <link rel="icon" type="image/webp" sizes="64x64" href="static/images/logo_les_fous_dastro_favicon64.webp">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description"
-          content="Découvre les meilleurs articles d’astrologie, les secrets du zodiaque et les coulisses de l’univers bycecilecl.">
-    <meta name="robots" content="index, follow">
+    <meta name="description" content="Découvre tous mes articles sur l'astrologie, le développement personnel et les mystères cosmiques.">
 
-     <!-- ✅ Balise canonique : indique que la page officielle du site est la home -->
-    <link rel="canonical" href="https://lesfousdastro.fr/blog" />
-    
     <style>
         * {
             margin: 0;
@@ -178,6 +172,12 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
 
+        .article-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
         .article-content {
             padding: 25px;
         }
@@ -264,64 +264,39 @@
             }
         }
     </style>
-   <!-- ✅ Données structurées JSON-LD : décrivent la page /blog comme une collection -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      "name": "Blog Astrologie – Les Fous d’Astro",
-      "description": "Tous les articles sur l'astrologie, les signes du zodiaque et les analyses cosmiques de bycecilecl.",
-      "url": "https://lesfousdastro.fr/blog",
-      "isPartOf": {
-        "@type": "WebSite",
-        "name": "Les Fous d’Astro",
-        "url": "https://lesfousdastro.fr/"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Les Fous d’Astro",
-        "url": "https://lesfousdastro.fr/",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://lesfousdastro.fr/static/img/logo.png"
-        }
-      }
-    }
-    </script>
-
 </head>
 <body>
     <div class="stars" id="stars"></div>
 
-    <!-- Navbar -->
+<!-- Navbar -->
     <nav class="navbar">
         <div class="navbar__inner">
             <a class="navbar__brand" href="/">Les Fous d'Astro</a>
             <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">☰</button>
-            <ul class="navbar__links">
-  <li><a href="{{ url_for('pages_bp.analyses') }}"
-         class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">
-         Guide des Analyses</a></li>
+               <ul class="navbar__links">
+                <li><a href="{{ url_for('pages_bp.analyses') }}"
+                        class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+                
+                <li><a href="{{ url_for('blog.blog_index') }}"
+                        class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
 
-  <li><a href="{{ url_for('pages_bp.formations') }}"
-         class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">
-         Formations</a></li>
+                <li><a href="{{ url_for('site_bp.temoignages') }}"
+                        class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
 
-  <li><a href="{{ url_for('pages_bp.ateliers') }}"
-         class="{% if request.path == url_for('pages_bp.ateliers') %}active{% endif %}">
-         Ateliers</a></li>
+                <li><a href="{{ url_for('pages_bp.formations') }}"
+                        class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
 
-  <li><a href="https://bycecilecl.com/categorie-produit/services/"
-         target="_blank" rel="noopener">Prestations</a></li>
+                <li><a href="https://bycecilecl.com/categorie-produit/services/"
+                        target="_blank" rel="noopener">Prestations</a></li>
 
-  <li><a href="{{ url_for('pages_bp.contact') }}"
-         class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">
-         Contact</a></li>
+                <li><a href="{{ url_for('pages_bp.contact') }}"
+                        class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
 
-  <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
-</ul>
+                <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
+            </ul>
         </div>
     </nav>
+
 
     <div class="main-content">
         <!-- Section Hero -->
@@ -334,6 +309,7 @@
         <div class="articles-grid">
             {% for article in articles %}
             <div class="article-card" onclick="window.open('{{ article.url }}', '_blank')">
+                <img src="{{ article.image }}" alt="{{ article.title }}" class="article-image">
                 <div class="article-content">
                     <h2 class="article-title">{{ article.title }}</h2>
                     <p class="article-date">📅 {{ article.date }}</p>
@@ -344,6 +320,7 @@
             {% endfor %}
         </div>
     </div>
+
     <script>
         // Générer des étoiles animées
         function createStars() {
