@@ -2,7 +2,7 @@
 title: "Signe astrologique du Capricorne : ambition, persévérance et sagesse"
 slug: "signe-astrologique-capricorne-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Capricorne : son ambition, sa discipline, ses qualités, ses défauts, sa façon d'aimer et son incroyable capacité à construire sur le long terme."
-date: "2026-06-24"
+date: "2025-10-24"
 category: "Signes astrologiques"
 image: "/static/blog/images/capricorne-signe-astrologique.webp"
 image_alt: "Signe astrologique du Capricorne"

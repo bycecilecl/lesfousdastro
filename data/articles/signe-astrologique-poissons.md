@@ -2,7 +2,7 @@
 title: "Signe astrologique des Poissons : la noyade ou le Graal"
 slug: "signe-astrologique-poissons-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité des Poissons : leur sensibilité, leur intuition, leurs qualités, leurs défauts, leur façon d'aimer et leur quête d'idéal entre noyade et transcendance."
-date: "2026-06-24"
+date: "2026-03-24"
 category: "Signes astrologiques"
 image: "/static/blog/images/poissons-signe-astrologique.webp"
 image_alt: "Signe astrologique des Poissons"
@@ -127,3 +127,6 @@ Le Poisson, c'est celui qui ressent tout — et qui doit apprendre à ne pas se 
 Son vrai pouvoir ? Quand il canalise cette sensibilité infinie dans la création, le soin ou la connexion au divin — il touche les autres comme personne d'autre ne peut le faire.
 
 *Pour aller plus loin et explorer ton thème natal complet : [Les Fous d'Astro](http://lesfousdastro.fr/)*
+
+Article rédigé par Cécile CL
+Astrologue et fondatrice des Fous d'Astro

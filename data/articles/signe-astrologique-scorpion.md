@@ -2,15 +2,10 @@
 title: "Signe astrologique du Scorpion : intensité, pouvoir et transformation"
 slug: "signe-astrologique-scorpion-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Scorpion : son intensité, sa profondeur, ses qualités, ses défauts, sa façon d'aimer et son pouvoir de transformation."
-date: "2026-06-24"
+date: "2026-11-24"
 category: "Signes astrologiques"
 image: "/static/blog/images/scorpion-signe-astrologique.webp"
 image_alt: "Signe astrologique du Scorpion"
----
-
-
-Voilà :
-
 ---
 
 # Signe astrologique Scorpion : intensité, pouvoir et transformation
@@ -192,3 +187,7 @@ Et dans le doute… dépose une main courante quand même. On est jamais à l'ab
 ---
 
 *Pour aller plus loin et explorer ton thème natal complet : [Les Fous d'Astro](http://lesfousdastro.fr/)*
+
+
+Article rédigé par Cécile CL
+Astrologue et fondatrice des Fous d'Astro
