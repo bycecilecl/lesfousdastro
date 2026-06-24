@@ -2,7 +2,7 @@
 title: "Signe astrologique de la Balance : personnalité, qualités, défauts et compatibilités"
 slug: "signe-astrologique-balance-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité de la Balance : son besoin d'harmonie, ses qualités, ses défauts, sa façon d'aimer et les défis qui l'aident à évoluer."
-date: "2026-10-24"
+date: "2025-10-24"
 category: "Signes astrologiques"
 image: "/static/blog/images/balance-signe-astrologique.webp"
 image_alt: "Illustration du signe astrologique de la Balance"
