@@ -15,9 +15,9 @@ def formations():
 def ateliers():
     return render_template("pages/ateliers.html", active="ateliers")
 
-@pages_bp.route("/contact", methods=["GET", "POST"])
-def contact():
-    return render_template("pages/contact.html", active="contact")
+# @pages_bp.route("/contact", methods=["GET", "POST"])
+# def contact():
+#     return render_template("pages/contact.html", active="contact")
 
 
 @pages_bp.route("/contact", methods=["GET", "POST"])
