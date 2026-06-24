@@ -276,7 +276,7 @@
                 <li><a href="{{ url_for('pages_bp.analyses') }}"
                         class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
                 
-                <li><a href="{{ safe_url('blog.blog', _fallback='/blog') }}"
+                <li><a href="{{ url_for('blog.blog_index') }}"
                         class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
 
                 <li><a href="{{ url_for('site_bp.temoignages') }}"
@@ -337,7 +337,7 @@
     <!-- CTA -->
     <div class="article-cta">
         <p>Ton signe solaire, c'est un début — mais ton thème natal complet, c'est une autre dimension. Découvre comment cette énergie s'exprime vraiment chez toi.</p>
-        <a href="{{ url_for('analyses') }}">Obtenir mon Point Astral →</a>
+        <a href="{{ url_for('pages_bp.analyses') }}">Obtenir mon Point Astral →</a>
     </div>
 
     <!-- Nav prev / next -->
