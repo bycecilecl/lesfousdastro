@@ -11,6 +11,8 @@ import openai
 import atexit
 import time  # <— add
 from flask import current_app, g  # <— add
+from flask import Response
+from flask import send_from_directory
 
 from dotenv import load_dotenv
 load_dotenv()  # charge le fichier .env
@@ -37,7 +39,7 @@ from routes.profil_amoureux_module import profil_amoureux_module
 from routes import register_routes
 from routes.geocode import geocode_bp
 from routes.paypal import payments_bp
-#from routes.blog import blog_bp
+from routes.blog import blog_bp
 from routes.gift_api import gift_api_bp
 from routes.gift_codes import gift_bp   
 
@@ -153,21 +155,42 @@ def before_request_handler():
     return render_template("maintenance.html"), 503
 
 
+
 @app.route('/sitemap.xml')
 def sitemap():
     today = datetime.utcnow().strftime('%Y-%m-%d')
 
-    sitemap_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+    pages = [
+        "https://lesfousdastro.fr/",
+        "https://lesfousdastro.fr/blog",
+        "https://lesfousdastro.fr/analyses",
+        "https://lesfousdastro.fr/formations",
+        "https://lesfousdastro.fr/contact",
+    ]
+
+    sitemap_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://lesfousdastro.fr/</loc>
-    <lastmod>{today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-</urlset>"""
+"""
+
+    for page in pages:
+        sitemap_xml += f"""
+    <url>
+        <loc>{page}</loc>
+        <lastmod>{today}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+"""
+
+    sitemap_xml += """
+</urlset>
+"""
 
     return Response(sitemap_xml, mimetype='application/xml')
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory('static', 'robots.txt')
 
 # ───────────────────────────────
 # 🕒 Mesure du temps de réponse (ajoute ici)
@@ -245,7 +268,7 @@ app.register_blueprint(stripe_webhook_bp)
 app.register_blueprint(pages_bp)
 app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
-#app.register_blueprint(blog_bp)
+app.register_blueprint(blog_bp)
 app.register_blueprint(site_bp)
 app.register_blueprint(profil_amoureux_module)
 app.register_blueprint(gift_api_bp)
