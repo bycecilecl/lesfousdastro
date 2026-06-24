@@ -2,7 +2,7 @@
 title: "Signe astrologique du Verseau : l'électron libre du zodiaque"
 slug: "signe-astrologique-verseau-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Verseau : son indépendance, son originalité, ses qualités, ses défauts, sa façon d'aimer et sa vision unique du monde."
-date: "2026-06-24"
+date: "2026-02-24"
 category: "Signes astrologiques"
 image: "/static/blog/images/verseau-signe-astrologique.webp"
 image_alt: "Signe astrologique du Verseau"
@@ -136,3 +136,6 @@ Son vrai pouvoir ? Quand il accepte de redescendre de sa tour d'ivoire et de met
 En attendant — continuez à savoir tout sur tout. C'est quand même pratique pour les dîners.
 
 *Pour aller plus loin et explorer ton thème natal complet : [Les Fous d'Astro](http://lesfousdastro.fr/)*
+
+Article rédigé par Cécile CL
+Astrologue et fondatrice des Fous d'Astro
