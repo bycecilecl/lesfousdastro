@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template
+from flask import Blueprint
+from flask import render_template, request
 
 pages_bp = Blueprint("pages_bp", __name__)
 
@@ -18,7 +19,6 @@ def ateliers():
 def contact():
     return render_template("pages/contact.html", active="contact")
 
-from flask import request, render_template
 
 @pages_bp.route("/contact", methods=["GET", "POST"])
 def contact():
