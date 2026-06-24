@@ -295,7 +295,7 @@
                 <li><a href="{{ url_for('pages_bp.analyses') }}"
                         class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
                 
-                <li><a href="{{ safe_url('blog.blog', _fallback='/blog') }}"
+                <li><a href="{{ url_for('blog.blog_index') }}"
                         class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
 
                 <li><a href="{{ url_for('site_bp.temoignages') }}"
