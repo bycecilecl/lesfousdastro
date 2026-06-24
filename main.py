@@ -188,9 +188,6 @@ def sitemap():
 
     return Response(sitemap_xml, mimetype='application/xml')
 
-@app.route('/robots.txt')
-def robots():
-    return send_from_directory('static', 'robots.txt')
 
 # ───────────────────────────────
 # 🕒 Mesure du temps de réponse (ajoute ici)
