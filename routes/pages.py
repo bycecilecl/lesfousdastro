@@ -23,17 +23,19 @@ def ateliers():
 @pages_bp.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
-        nom = request.form.get("nom")
-        email = request.form.get("email")
-        sujet = request.form.get("sujet")
-        message = request.form.get("message")
+        nom = request.form.get("nom", "").strip()
+        email = request.form.get("email", "").strip()
+        sujet = request.form.get("sujet", "").strip()
+        message = request.form.get("message", "").strip()
+        newsletter = request.form.get("newsletter") == "oui"
 
         print("NOUVEAU MESSAGE CONTACT")
         print("Nom :", nom)
         print("Email :", email)
         print("Sujet :", sujet)
         print("Message :", message)
+        print("Newsletter :", newsletter)
 
-        return render_template("contact.html", succes=True)
+        return render_template("pages/contact.html", active="contact", succes=True)
 
-    return render_template("contact.html")
+    return render_template("pages/contact.html", active="contact")
