@@ -247,6 +247,44 @@
         }
         .article-nav__title { font-size: 0.9rem; font-weight: 600; }
 
+
+        .share-box {
+            margin: 3rem 0 2rem;
+            padding: 24px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .share-title {
+            font-weight: 700;
+            color: var(--blue-dark);
+            margin-bottom: 16px;
+        }
+
+        .share-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .share-btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--blue-dark), var(--teal));
+            color: #fff !important;
+            text-decoration: none !important;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+        }
+
         /* ── Mobile ── */
         @media (max-width: 768px) {
             .navbar__toggle { display: block; }
@@ -331,6 +369,36 @@
     <article class="article-body">
         {{ article.content | safe }}
     </article>
+
+    <div class="share-box">
+    <p class="share-title">Partager cet article</p>
+
+    <div class="share-buttons">
+        <a class="share-btn" 
+           href="https://www.facebook.com/sharer/sharer.php?u={{ canonical_url }}" 
+           target="_blank" rel="noopener">
+            Facebook
+        </a>
+
+        <a class="share-btn" 
+           href="https://twitter.com/intent/tweet?url={{ canonical_url }}&text={{ article.title }}" 
+           target="_blank" rel="noopener">
+            X / Twitter
+        </a>
+
+        <a class="share-btn" 
+           href="https://www.linkedin.com/sharing/share-offsite/?url={{ canonical_url }}" 
+           target="_blank" rel="noopener">
+            LinkedIn
+        </a>
+
+        <a class="share-btn" 
+           href="https://api.whatsapp.com/send?text={{ article.title }}%20{{ canonical_url }}" 
+           target="_blank" rel="noopener">
+            WhatsApp
+        </a>
+    </div>
+</div>
 
     <div class="article-divider">✦ ✦ ✦</div>
 
