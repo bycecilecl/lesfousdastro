@@ -8,214 +8,91 @@ image: "/static/blog/images/astropapote-libre-arbitre-destin.webp"
 image_alt: "Réflexion astrologique sur le libre arbitre"
 ---
 
+Ok, j'ai la matière. C'est de l'oral pur — il faut tout reconstruire dans ton ton écrit. Je m'y colle.
+
+---
+
 # Astrologie et libre arbitre : on a vraiment le choix ?
 
-*Astropapote : mes réflexions en vrac sur l'astrologie*
+*Astropapote — mes réflexions en vrac sur l'astrologie*
+
+---
 
 Hello mes amis !
 
-Aujourd'hui une petite Astropapote, c'est-à-dire que je papote d'astrologie sans plan, sans structure, juste mes réflexions du moment.
+Aujourd'hui une petite Astropapote — c'est-à-dire que je papote d'astrologie sans plan, sans structure, juste mes réflexions du moment. Et le sujet du jour : est-ce qu'on a vraiment un libre arbitre quand on a un thème astral ?
 
-Et le sujet du jour : est-ce qu'on a vraiment un libre arbitre quand on a un thème astral ?
+Spoiler : je n'ai pas de réponse. Mais j'ai des questions, des cas concrets, et mon thème natal — donc on va s'en sortir.
 
-Spoiler : je n'ai pas de réponse. Mais j'ai des questions, des cas concrets, et mon propre thème natal. Donc on va s'en sortir.
-
-## La vidéo de cette Astropapote
-
-👉 https://youtu.be/-11-QTPNr4U
-
-N'hésitez pas à regarder la vidéo puis à revenir partager votre point de vue en commentaire.
+---
 
 ## Ce que j'observe dans les thèmes : l'horloge planétaire
 
-J'apprends l'astrologie par l'exemple.
+J'apprends l'astrologie par l'exemple. Les théories c'est bien, mais ce qui me parle vraiment c'est quand je regarde un thème et que ça colle avec ce que la personne a vécu.
 
-Les théories c'est bien, mais ce qui me parle vraiment c'est quand je regarde un thème et que ça colle avec ce que la personne a vécu.
+Quelques cas récents qui m'ont scotchée :
 
-Quelques cas récents m'ont particulièrement marquée.
+Une amie dont je connaissais un peu le passé difficile. Je lui demande ce qui s'est passé à 17 ans, puis à 28 ans — sans lui dire pourquoi. Elle me décrit le décès brutal de sa mère à 17 ans, et une relation très manipulatrice à 28 qui l'a plongée dans une dépression profonde. En regardant son thème, on voyait la Lune, Pluton, la Maison 12 — tout pointait vers une rupture douloureuse avec la figure maternelle et une période de destruction émotionnelle. Pas de hasard.
 
-Une amie dont je connaissais un peu le passé difficile.
+Autre cas — l'ami d'une amie, quelqu'un que je ne connais pas du tout. Je pose la question : est-ce qu'il a eu des problèmes judiciaires liés au travail autour de 25 ans ? Mon amie n'en sait rien. Deux jours après, elle lui pose la question. Et là — stupéfaction — oui, exactement ça, exactement à cet âge. Un lien Vénus/Jupiter qui pointait vers la justice et la sphère professionnelle.
 
-Je lui demande ce qui s'est passé à 17 ans puis à 28 ans sans lui dire pourquoi.
+Et Bruce Lee, pour finir — dont j'ai étudié le thème. Les configurations présentes à ses 32 ans étaient tellement brutales et "cash" que j'ai du mal à croire à la version officielle d'un simple décès médicamenteux. Mais ça c'est un autre débat.
 
-Elle me décrit le décès brutal de sa mère à 17 ans puis une relation très manipulatrice à 28 ans qui l'a plongée dans une profonde dépression.
+---
 
-En regardant son thème, on retrouvait la Lune, Pluton et la Maison 12. Tout pointait vers une rupture douloureuse avec la figure maternelle et une période de destruction émotionnelle.
+## Mon thème, mon dos, et la Maison 12
 
-Autre exemple.
+Je reviens sur mon propre thème parce que c'est là que j'ai les preuves les plus concrètes — et les plus incarnées, littéralement.
 
-L'ami d'une amie. Quelqu'un que je ne connais absolument pas.
+J'ai Saturne en Maison 12. Pour rappel, la Maison 12 c'est la maison des épreuves, des longues maladies, du karma, de l'enfermement — hôpitaux, prisons, tout ce qui est joyeux. Et Saturne, c'est la planète froide, austère, qui restreint et frustre. Pas le placement qu'on demande au Père Noël.
 
-Je pose une question :
+En regardant mes progressions — une technique qui permet de voir les événements potentiels à chaque âge — on arrive sur mon Saturne vers 15-16 ans. C'est exactement là que j'ai eu ma première opération du dos. Une arthrodèse — des barres métalliques dans le dos pour corriger une scoliose sévère.
 
-> Est-ce qu'il a eu des problèmes judiciaires liés au travail autour de 25 ans ?
+Trois ans plus tard, Jupiter progressé. Jupiter est aussi en Maison 12 dans mon thème — et Jupiter, c'est la Grande Bénéfique, celle qui allège et protège. Cette deuxième opération c'était pour retirer les barres suite à une infection généralisée qui était à deux doigts de virer en septicémie. Le corps médical a parlé de miracle.
 
-Mon amie n'en savait rien.
+Aujourd'hui je fais du sport, je marche, je cours. Ma kiné — qui a vu beaucoup de gens avec le même type d'opération — n'en revient pas de ma forme. Certains finissent en fauteuil roulant. Moi non. Merci Jupiter en Maison 12 ?
 
-Deux jours plus tard elle lui pose la question.
+---
 
-Réponse : oui.
+## Libre arbitre ou déterminisme : la question qui me trotte
 
-Exactement cela.
+Bon, revenons au sujet — parce que je dévie, c'est documenté.
 
-Exactement à cet âge.
+Est-ce qu'on a un libre arbitre ? Ma réponse honnête : je crois que oui, mais dans quelle mesure, je n'en sais franchement rien.
 
-Le thème montrait un lien entre Vénus, Jupiter, la justice et la sphère professionnelle.
+Ce que j'observe, c'est que quand on s'obstine dans un chemin qui n'est pas le nôtre — qui ne correspond pas aux énergies de notre thème natal — ça finit par coincer. La dépression, le mal-être chronique, les maladies qui s'expriment... pour moi c'est souvent le signal que quelque chose cloche dans la trajectoire. Soit on s'en rend compte et on change de cap, soit un événement extérieur nous force à le faire.
 
-Et puis il y a Bruce Lee.
+Moi par exemple, j'ai passé des années dans l'informatique. Mon côté Scorpion y trouvait un exutoire — le hacking, l'analyse, la résolution de problèmes. Mais mon Ascendant Balance, mon âme d'artiste, mon Soleil en Maison 1 qui demande à s'exprimer — tout ça était étouffé. Résultat : dépression. C'est mon voyage en Inde qui a tout changé. Pas un hasard non plus.
 
-J'ai étudié son thème il y a quelque temps.
+---
 
-Les configurations présentes autour de ses 32 ans étaient tellement brutales que j'ai du mal à croire à la version officielle d'un simple décès médicamenteux.
+## La fréquence vibratoire comme variable
 
-Mais ça, c'est un autre sujet.
+Une idée qui me plaît bien — et que j'entends de plus en plus : peut-être qu'on ne peut pas effacer ce qui est écrit dans le thème, mais qu'on peut en moduler la forme selon notre niveau de conscience.
 
-## Mon thème, mon dos et la Maison 12
+Exemple concret : imaginons une configuration Mars tendue qui peut parler d'accident. À basse fréquence vibratoire, peut-être que tu es dans l'accident. À une fréquence plus haute, peut-être que tu traverses la rue une minute avant et que tu assistes à l'accident sans en faire partie. L'énergie est là. La façon dont elle se manifeste dans ta vie, ça dépend peut-être de toi.
 
-Je reviens à mon propre thème parce que c'est là que j'ai les exemples les plus concrets.
+C'est une hypothèse. Je ne vends pas de certitude ici.
 
-J'ai Saturne en Maison 12.
+---
 
-Pour rappel, la Maison 12 parle des épreuves, des longues maladies, des hôpitaux, de l'isolement et de tout ce qui relève du monde invisible.
+## Le test grandeur nature : ma prochaine révolution solaire
 
-Saturne est une planète austère, exigeante et frustrante.
+En parlant de certitudes — ma prochaine révolution solaire va me donner l'occasion de tester tout ça en live.
 
-Ce n'est pas exactement le placement qu'on demande au Père Noël.
+Dans cette révolution solaire j'ai ma Maison 1 qui tombe en Maison 12, et des aspects avec Mars qui touchent mon Soleil et ma vitalité. Classiquement, ça parle d'épreuves de santé, voire d'intervention chirurgicale — ce qui serait cohérent avec mon dos qui devra un jour être ré-opéré.
 
-Lorsque je regarde mes progressions, on arrive sur Saturne vers mes 15-16 ans.
+Ce sera l'occasion de voir si mon niveau de conscience actuel me permet d'atténuer la dureté de l'aspect. Ou pas. Je vous tiendrai au courant.
 
-C'est précisément l'âge de ma première opération du dos.
+Comme dit quelqu'un de sage : *"Ce que tu n'apprends pas par la sagesse, tu l'apprends par la douleur."*
 
-Une arthrodèse avec pose de matériel pour corriger une scoliose sévère.
+---
 
-Quelques années plus tard, Jupiter progressé.
+*N'hésitez pas à me donner votre avis en commentaire — est-ce que vous croyez au libre arbitre ? Est-ce que vous avez déjà eu ce genre de corrélations dans votre propre thème ? C'est en échangeant qu'on avance.*
 
-Jupiter est lui aussi en Maison 12.
+Gros bisous et à très bientôt !
 
-Cette deuxième opération avait pour objectif de retirer les barres suite à une infection généralisée qui était à deux doigts de virer en septicémie.
+*Plus d'articles sur l'astrologie : [lesfousdastro.fr](http://lesfousdastro.fr)*
 
-Le corps médical a parlé de miracle.
-
-Aujourd'hui je fais du sport.
-
-Je marche.
-
-Je cours.
-
-Ma kinésithérapeute, qui a vu énormément de personnes opérées du dos, n'en revient toujours pas.
-
-Certains patients finissent avec des limitations très importantes.
-
-Moi non.
-
-Merci Jupiter en Maison 12 ?
-
-## Libre arbitre ou déterminisme ?
-
-Voilà la question qui me trotte dans la tête depuis des années.
-
-Est-ce qu'on a un libre arbitre ?
-
-Ma réponse honnête est la suivante :
-
-Je crois que oui.
-
-Mais dans quelle mesure ?
-
-Je n'en sais rien.
-
-Ce que j'observe en revanche, c'est que lorsqu'une personne s'obstine dans une direction qui ne correspond pas à son thème natal, quelque chose finit souvent par bloquer.
-
-Dépression.
-
-Mal-être chronique.
-
-Fatigue.
-
-Perte de sens.
-
-Parfois même maladie.
-
-Comme si la vie essayait de remettre la personne sur son axe.
-
-Dans mon cas, j'ai passé plusieurs années dans l'informatique.
-
-Mon côté Scorpion adorait résoudre des problèmes complexes.
-
-Mais mon Ascendant Balance, mon Soleil en Maison 1 et tout mon besoin de création étaient étouffés.
-
-Résultat : dépression.
-
-Puis un voyage en Inde.
-
-Et ensuite une réorientation complète.
-
-Hasard ?
-
-Je ne sais pas.
-
-## La fréquence vibratoire : une piste intéressante
-
-Une idée me plaît beaucoup.
-
-Peut-être que certains événements sont inscrits sous forme de potentiel.
-
-Mais que notre niveau de conscience influence la manière dont ils se manifestent.
-
-Prenons un exemple.
-
-Imaginons un aspect de Mars qui peut symboliser un accident.
-
-À une fréquence basse, tu vis l'accident.
-
-À une fréquence plus élevée, tu passes devant la scène une minute après.
-
-L'énergie est la même.
-
-La manifestation est différente.
-
-Encore une fois, ce n'est qu'une hypothèse.
-
-Je ne prétends pas détenir la vérité.
-
-## Mon prochain test grandeur nature
-
-Ma prochaine révolution solaire sera un terrain d'observation particulièrement intéressant.
-
-J'ai une Maison 1 qui tombe en Maison 12.
-
-Des aspects impliquant Mars, le Soleil et la vitalité.
-
-Traditionnellement, cela peut parler d'épreuves physiques ou d'intervention chirurgicale.
-
-Ce qui serait cohérent avec mon dos qui devra probablement être ré-opéré un jour.
-
-Ce sera donc l'occasion de vérifier une chose :
-
-Est-ce que le niveau de conscience permet réellement d'atténuer la manifestation d'un aspect ?
-
-Ou pas.
-
-Je vous tiendrai évidemment au courant.
-
-Comme dit quelqu'un de sage :
-
-> Ce que tu n'apprends pas par la sagesse, tu l'apprends par la douleur.
-
-## Et vous, qu'en pensez-vous ?
-
-Croyez-vous au libre arbitre ?
-
-Avez-vous déjà observé des corrélations troublantes entre votre thème natal et votre vie ?
-
-Je serais ravie de lire vos expériences et vos réflexions.
-
-À très bientôt friends !
-
-## La vidéo de cette Astropapote
-
-https://youtu.be/-11-QTPNr4U
-
-**Cécile CL**
-
-👉 Plus d'articles et d'analyses astrologiques sur https://lesfousdastro.fr
+Article rédigé par Cécile CL
+Astrologue et fondatrice des Fous d'Astro

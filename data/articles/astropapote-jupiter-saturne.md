@@ -8,319 +8,94 @@ image: "/static/blog/images/astropapote.webp"
 image_alt: "Réflexion astrologique sur Jupiter et Saturne en Maison XII"
 ---
 
-# Astropapote : pourquoi je passe de l'euphorie au doute en permanence
+---
+
+# Jupiter conjoint Saturne : quand l'expansion et la restriction partagent le même thème
+
+*Astropapote — mes petites prises de conscience astrologique*
+
 
 Hello !
 
-J'ai décidé de vous partager de temps en temps quelques petits articles sur des aspects astrologiques, des prises de conscience ou des réflexions personnelles comme je peux déjà le faire sur mon autre projet.
+J'ai décidé de partager de temps en temps des petits articles sur des aspects astrologiques, des petites prises de conscience — comme je peux le faire sur mon autre projet, mais bien sûr ici liés à l'Astrologie. Faudrait d'ailleurs que je fasse un lien entre les sites. Note pour plus tard, comme dirait Parker Lewis.
 
-Mais cette fois-ci, elles seront liées à l'astrologie.
+Anyways.
 
-Faudrait d'ailleurs que je fasse un lien entre les deux sites.
+Comme chaque jour, chaque soir, chaque heure n'est-ce pas, j'astrologe... du verbe Astrologer.
 
-Note pour plus tard, comme dirait Parker Lewis.
+## Le contexte : ces phases où tout s'emballe, puis retombe
 
-Anyway...
+Pour ceux qui me suivent un peu, j'en ai déjà parlé mais je le redis. Je ressens des périodes où je me sens tout schuss — je partage sur les réseaux, je crée, peut-être que vous le constatez d'ailleurs. Je me sens pleine d'énergie et mon problème d'ego ne me pose pas problème.
 
-Comme chaque jour, chaque soir, chaque heure — n'est-ce pas — j'astrologe.
+Quand je dis problème d'ego, c'est le problème "de se mettre en avant."
 
-Oui, oui.
+Certains pourraient se dire : QUOIIII cette nana a un problème pour se mettre en avant alors qu'elle fait des Vlogs ? Oh la la mais carrément...
 
-Du verbe *astrologer*.
+Tout dans mon profil astral me pousse à me concentrer sur moi et à faire de ma vie une vie d'artiste, si je peux dire — du moins où je suis au centre de ma réalisation. C'est dans ma Maison 1 que mon Soleil va s'épanouir. Et je sens bien qu'au fond de moi j'ai toujours eu cette envie. D'être sur une scène, de faire le spectacle. Ce qui est aussi la plus grande de mes peurs.
 
-## Une drôle de variation intérieure
+Mais que c'est dur... et que ça me saoule en vrai. Moi qui veux tantôt me retirer dans une grotte, tantôt être sur une scène devant des milliers de gens. En vrai je suis Mylène Farmer. Enfin, si on peut dire.
 
-Pour ceux qui me suivent un peu, j'en ai déjà parlé mais je vais le redire.
+Je regardais hier des chaînes YouTube de nanas qui se racontent — pas qui se la racontent, qui se racontent leurs expériences, leurs pensées, bref tout plein de choses. Et je repense au fait que je n'ai jamais fait cette vidéo "J'ai vécu à Malibu !", parce que direct je me dis oh la la, mais qu'est-ce que tu vas raconter ça... et pourtant j'en aurais des choses à raconter. Mais problème d'ego. Jamais vraiment osé me mettre en avant, même si j'ai l'impression de passer ma vie à le faire. 1 pas en avant, 2 en arrière.
 
-Il y a des périodes où je me sens portée par quelque chose.
+Surtout chez la Balance où le Soleil est en chute — l'ego n'aime pas trop se mettre en avant, il a plutôt tendance à s'effacer. Si on fait le lien avec les saisons : en Automne, le Soleil se fait plus faible.
 
-Je vais créer, publier, partager sur les réseaux, avoir envie de me montrer davantage.
+---
 
-Peut-être que vous le constatez d'ailleurs.
+## Les phases Up/Down : Jupiter conjoint Saturne
 
-Je vais me sentir pleine d'énergie et mon problème d'ego ne me posera plus vraiment de problème.
+Y a des moments où ça va, je ressens le flow venir, je vais y arriver à prendre cette place, mettre la lumière sur moi — parce que ouais, Soleil en Maison 1 ! Et Nœud Nord en 10 et en Lion, ce qui me pousse à briller socialement. Je sens cette énergie venir où je ne ressens plus trop de complexes ni de doutes, et à chaque fois je ressens une profonde joie de pouvoir ENFIN me débloquer.
 
-Quand je parle de problème d'ego, je parle surtout de cette difficulté à me mettre en avant.
+Mais ça fait des années que ça retombe comme un soufflet avec tous mes doutes. *"Mais tu te mets pas trop en avant là ? Qu'est-ce qu'on en a à foutre ? Oh la la mais la honte... pourquoi tu fais ça ?"*
 
-Et certains vont sûrement se dire :
+Et c'est reparti. Depuis quelques années je ne me laisse plus avoir par cet emballement soudain — ou si, quand même, mais j'essaie de relativiser.
 
-*"QUOI ? Cette nana a du mal à se mettre en avant alors qu'elle fait des vidéos et des vlogs ?"*
+Et je ne comprenais pas pourquoi ça variait autant du Up au Down. Avant, je retombais en déprime à chaque fois que je me sentais de nouveau limitée et frustrée, alors que je sortais tout juste d'une période où tout était possible.
 
-Oh la la...
+Maintenant je sais que ça fait partie de moi. Ça m'emmerde, mais c'est comme ça.
 
-Mais carrément.
+---
 
-## Tout mon thème me pousse pourtant à le faire
+## Ce que dit le thème astral : la conjonction Jupiter-Saturne
 
-Quand je regarde mon thème astral, beaucoup de choses me poussent à me concentrer sur moi, à développer quelque chose de personnel, créatif, visible.
+Hier je regardais mon thème et je me suis penchée sur ma conjonction. Avant de lire la suite — une petite idée pour faire travailler les méninges :
 
-Mon Soleil s'épanouit en Maison I.
+Quelle est la planète de l'expansion, de l'enthousiasme, de la puissance, des honneurs ?
 
-Et je sens bien qu'au fond de moi, j'ai toujours eu cette envie.
+Quelle est la planète dure, froide, austère qui frustre et restreint ?
 
-Être sur scène.
+**C'est Jupiter & Saturne.** La Grande Bénéfique et la Grande Maléfique, conjointes dans mon thème.
 
-Faire le spectacle.
+### L'analogie
 
-Créer.
+Mon Jupiter est en Vierge — le maître est donc Mercure, situé en conjonction avec ma Lune en Scorpion (la Lune ici est en chute). Mon Saturne est en Balance — maître Vénus, qui est en Vierge, et on retombe donc sur Mercure en Scorpion. Les deux nous ramènent à mon Pluton, conjoint Soleil. C'est dire si tout se mélange.
 
-M'exprimer.
+Je crois comprendre maintenant cet élan que j'ai parfois, où j'ai l'impression que je vais casser la baraque et que plus rien ne me retient — pour ensuite, paf, me restreindre totalement quelques temps plus tard.
 
-Et en même temps...
+---
 
-C'est probablement l'une de mes plus grandes peurs.
+## Jupiter et Saturne en Maison XII
 
-Parfois j'ai envie de me retirer dans une grotte.
+Mon Saturne et mon Jupiter sont en Maison XII. Si vous ne le savez pas : la Maison XII, c'est la maison malheureuse, les longues maladies, les épreuves, l'enfermement — hôpitaux, prison, etc. C'est aussi la maison du karmique. Saturne dans cette maison, c'est forcément un placement un peu compliqué.
 
-Puis quelques jours plus tard, j'ai envie d'être sur une scène devant plusieurs milliers de personnes.
+En fonctionnant par progression — que retrouve-t-on à l'âge du placement de Saturne ? Ma première opération du dos. Et à l'âge où Jupiter est situé ? Ma deuxième opération, où on enlèvera mes barres dans le dos suite à une infection généralisée à deux doigts de passer en septicémie. Paraît-il que c'est un miracle que ça n'ait pas été le cas.
 
-Puis de nouveau dans ma grotte.
+Jupiter en XII allège les épreuves. Et de ce que j'entends sur mes opérations, j'aurais pu aujourd'hui être handicapée — alors que je fais du sport, je cours... bien sûr j'ai constamment des douleurs, mais si je n'en parlais pas, personne ne verrait ce que j'ai eu. J'ai sûrement eu de "la chance" à ce niveau-là.
 
-En vrai, je suis un peu Mylène Farmer.
+Merci Jupiter en Maison XII ?
 
-Enfin si on peut dire.
+---
 
-## Le fameux "problème d'ego"
+## Jupiter en XII : sagesse, foi et aide aux autres
 
-Hier encore, je regardais des chaînes YouTube de femmes qui racontent leur vie, leurs expériences, leurs réflexions.
+Jupiter, c'est aussi la sagesse, la foi, l'évolution spirituelle, la croissance intérieure, l'intégrité, la foi en la vie, la réussite à travers la solitude... et pour finir le guide spirituel, voire le gourou.
 
-Et je repensais à toutes ces vidéos que je n'ai jamais faites.
+Ce placement parle aussi d'une grande abondance au niveau de l'imagination, et du fait qu'on peut s'en sortir à travers l'aide qu'on apporte aux autres et au monde. Et n'ai-je pas dit que Create Your Paradise avait été quelque part ma thérapie ? Rigolo de faire tous ces liens. Tu ne trouves pas ?
 
-Par exemple :
+---
 
-*"J'ai vécu à Malibu."*
+*À très bientôt friends !*
 
-Parce qu'immédiatement une petite voix se met en route :
+*Pour retrouver plus d'articles sur l'Astrologie : [lesfousdastro.fr](http://lesfousdastro.fr)*
 
-*"Mais pourquoi tu raconterais ça ?"*
-
-*"Qu'est-ce qu'on en a à faire ?"*
-
-*"C'est trop centré sur toi."*
-
-*"Quelle honte."*
-
-Et pourtant...
-
-J'aurais énormément de choses à raconter.
-
-Mais dès qu'il s'agit de mettre la lumière sur moi, quelque chose bloque.
-
-J'ai l'impression de passer ma vie à avancer d'un pas pour ensuite reculer de deux.
-
-## Le Soleil en Balance
-
-Je suis Balance.
-
-Ascendant Balance.
-
-Et dans ce signe, le Soleil est en chute.
-
-Le Soleil n'aime pas particulièrement se mettre en avant ici.
-
-Il préfère souvent s'effacer.
-
-Quand on fait le lien avec les saisons, cela prend tout son sens.
-
-En automne, la lumière solaire diminue.
-
-Le Soleil devient plus faible.
-
-Il est moins préoccupé par lui-même et davantage tourné vers les autres.
-
-## Ces périodes où tout semble possible
-
-Et pourtant.
-
-Il y a des moments où je sens une énergie monter.
-
-Une espèce de courant intérieur.
-
-Je ressens moins de complexes.
-
-Moins de doutes.
-
-J'arrive à prendre ma place.
-
-À assumer davantage ce que je fais.
-
-Et à chaque fois je ressens une immense joie.
-
-Comme si quelque chose se débloquait enfin.
-
-Parce que oui :
-
-- Soleil en Maison I
-- Nœud Nord en Lion
-- Nœud Nord en Maison X
-
-Autant dire que mon thème pousse clairement vers la visibilité.
-
-Vers le fait d'assumer sa lumière.
-
-Vers le fait de rayonner socialement.
-
-Puis...
-
-Quelques semaines plus tard.
-
-Paf.
-
-Le soufflé retombe.
-
-*"Tu ne te mets pas un peu trop en avant là ?"*
-
-*"Pourquoi tu racontes ça ?"*
-
-*"Quelle honte."*
-
-*"Les gens s'en fichent."*
-
-Et tout recommence.
-
-## Jupiter et Saturne
-
-Pendant longtemps, je ne comprenais pas pourquoi je passais constamment d'un extrême à l'autre.
-
-Aujourd'hui je me demande si une partie de la réponse ne se trouve pas ici :
-
-**Ma conjonction Jupiter-Saturne.**
-
-Petite question.
-
-Quelle est la planète de l'expansion, de l'enthousiasme, de la confiance et des honneurs ?
-
-Jupiter.
-
-Quelle est la planète froide, austère, restrictive, frustrante ?
-
-Saturne.
-
-Eh bien dans mon thème natal...
-
-Les deux sont conjointes.
-
-## Une étrange alternance
-
-Je me demande si cette configuration n'explique pas en partie cette sensation permanente de balancier.
-
-D'un côté :
-
-Jupiter.
-
-La confiance.
-
-L'enthousiasme.
-
-Le sentiment que tout est possible.
-
-Puis :
-
-Saturne.
-
-Le doute.
-
-La retenue.
-
-La peur.
-
-La restriction.
-
-Comme si l'un appuyait sur l'accélérateur pendant que l'autre tirait le frein à main.
-
-## Maison XII : le décor de fond
-
-Autre élément important.
-
-Jupiter et Saturne sont tous les deux situés en Maison XII.
-
-La Maison XII est traditionnellement associée :
-
-- aux épreuves
-- aux enfermements
-- aux longues maladies
-- au karma
-- à la solitude
-- au monde intérieur
-
-Autant dire que Saturne n'y est pas exactement en vacances.
-
-En observant mes progressions, quelque chose m'a frappée.
-
-L'âge symbolique correspondant à Saturne correspond à ma première opération du dos.
-
-L'âge correspondant à Jupiter correspond à ma seconde opération, celle où l'on m'a retiré les barres suite à une infection généralisée.
-
-Une infection qui aurait pu très mal tourner.
-
-On m'a même expliqué à l'époque qu'il était presque miraculeux qu'elle ne se soit pas transformée en septicémie.
-
-## Merci Jupiter ?
-
-Jupiter en Maison XII est souvent décrit comme une protection invisible.
-
-Une aide discrète.
-
-Une forme de grâce qui allège certaines épreuves.
-
-Quand je regarde mon parcours médical, je me dis qu'il y a peut-être quelque chose de cet ordre-là.
-
-J'ai traversé beaucoup de choses.
-
-Et pourtant aujourd'hui :
-
-- je fais du sport
-- je marche
-- je cours
-- je mène une vie relativement normale
-
-Alors oui, j'ai des douleurs.
-
-Mais si je n'en parlais pas, beaucoup de gens n'imagineraient jamais ce que j'ai traversé.
-
-Alors parfois je me demande :
-
-Merci Jupiter ?
-
-## La Maison XII autrement
-
-Jupiter en Maison XII, c'est aussi :
-
-- la foi
-- la sagesse
-- l'évolution intérieure
-- l'imagination
-- l'aide aux autres
-- la spiritualité
-- la croissance à travers la solitude
-
-Et quand je regarde Create Your Paradise, je me rends compte qu'il a été, d'une certaine manière, ma thérapie.
-
-Une façon de transformer certaines épreuves.
-
-Une manière d'aider les autres tout en m'aidant moi-même.
-
-Finalement, l'astrologie est parfois un immense jeu de liens.
-
-Et j'adore quand toutes les pièces du puzzle commencent à s'emboîter.
-
-## Le mot de la fin
-
-Je n'ai pas la réponse définitive.
-
-Mais je crois comprendre un peu mieux pourquoi certaines périodes me donnent l'impression que tout est possible.
-
-Et pourquoi d'autres me ramènent brutalement au doute.
-
-Peut-être qu'une partie de moi est simplement en train d'apprendre à faire cohabiter Jupiter et Saturne.
-
-L'expansion et la retenue.
-
-La foi et la prudence.
-
-La lumière et l'ombre.
-
-À très bientôt friends !
-
-**Cécile**
-**Les Fous d'Astro**
+Article rédigé par Cécile CL
+Astrologue et fondatrice des Fous d'Astro
