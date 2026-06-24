@@ -284,7 +284,86 @@
         .share-btn:hover {
             transform: translateY(-2px);
         }
+        .related-posts,
+        .newsletter-box {
+            margin-top: 3rem;
+        }
 
+        .related-posts h2,
+        .newsletter-box h2 {
+            color: var(--blue-dark);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .related-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            text-decoration: none;
+            color: var(--text);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .related-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+
+        .related-card img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .related-card span {
+            display: block;
+            color: var(--teal);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 12px 14px 0;
+        }
+
+        .related-card h3 {
+            font-size: 0.95rem;
+            line-height: 1.35;
+            padding: 6px 14px 16px;
+        }
+
+        .newsletter-box {
+            background: linear-gradient(135deg, var(--blue-dark), var(--teal));
+            color: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .newsletter-box h2 {
+            color: white;
+        }
+
+        .newsletter-box p {
+            margin-bottom: 18px;
+            line-height: 1.6;
+        }
+
+        .newsletter-box a {
+            display: inline-block;
+            background: white;
+            color: var(--blue-dark);
+            padding: 11px 24px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+        }
         /* ── Mobile ── */
         @media (max-width: 768px) {
             .navbar__toggle { display: block; }
@@ -407,6 +486,50 @@
         <p>Ton signe solaire, c'est un début — mais ton thème natal complet, c'est une autre dimension. Découvre comment cette énergie s'exprime vraiment chez toi.</p>
         <a href="{{ url_for('pages_bp.analyses') }}">Obtenir mon Point Astral →</a>
     </div>
+
+    {% if autres_articles %}
+    <section class="related-posts">
+
+        <h2>À lire aussi</h2>
+
+        <div class="related-grid">
+
+            {% for a in autres_articles %}
+
+            <a class="related-card"
+            href="{{ url_for('blog.blog_article', slug=a.slug) }}">
+
+                {% if a.image %}
+                <img src="{{ a.image }}" alt="{{ a.image_alt }}">
+                {% endif %}
+
+                <span>{{ a.tag }}</span>
+
+                <h3>{{ a.title }}</h3>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+    {% endif %}
+
+    <section class="newsletter-box">
+
+        <h2>Recevoir les prochaines Astropapotes</h2>
+
+        <p>
+            Un peu d’astrologie, quelques prises de conscience,
+            les nouveaux articles et les nouveautés des Fous d’Astro.
+        </p>
+
+        <a href="{{ url_for('pages_bp.contact') }}">
+            Je veux être informé(e)
+        </a>
+
+    </section>
 
     <!-- Nav prev / next -->
     {% if article.prev or article.next %}

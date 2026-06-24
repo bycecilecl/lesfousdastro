@@ -87,12 +87,28 @@ def blog_index():
 
 @blog_bp.route("/blog/<slug>", strict_slashes=False)
 def blog_article(slug):
-    for article in charger_articles():
+
+    articles = charger_articles()
+
+    for article in articles:
+
         if article["slug"] == slug:
-            canonical_url = url_for("blog.blog_article", slug=slug, _external=True)
+
+            autres_articles = [
+                a for a in articles
+                if a["slug"] != slug
+            ][:4]
+
+            canonical_url = url_for(
+                "blog.blog_article",
+                slug=slug,
+                _external=True
+            )
+
             return render_template(
                 "blog/article.html",
                 article=article,
+                autres_articles=autres_articles,
                 canonical_url=canonical_url,
             )
 
