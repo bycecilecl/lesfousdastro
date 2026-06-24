@@ -4,7 +4,7 @@ slug: "signe-astrologique-cancer-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Cancer : sa sensibilité, son intuition, son rapport à la famille, ses qualités, ses défauts et sa façon d'aimer."
 date: "2025-09-24"
 category: "Signes astrologiques"
-image: "/static/blog/Images/cancer-signe-astrologique.webp"
+image: "/static/blog/images/cancer-signe-astrologique.webp"
 image_alt: "Illustration du signe astrologique du Cancer"
 ---
 

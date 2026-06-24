@@ -4,7 +4,7 @@ slug: "astropapote-jupiter-saturne-maison-12"
 description: "Réflexion astrologique personnelle sur Jupiter, Saturne, la Maison XII et ces périodes où l'on se sent capable de tout avant de douter de nouveau."
 date: "2023-06-23"
 category: "Astropapote"
-image: "/static/blog/Images/astropapote.webp"
+image: "/static/blog/images/astropapote.webp"
 image_alt: "Réflexion astrologique sur Jupiter et Saturne en Maison XII"
 ---
 

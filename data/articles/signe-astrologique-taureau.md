@@ -4,7 +4,7 @@ slug: "signe-astrologique-taureau-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Taureau : son rapport au plaisir, à l'amour, à l'argent, ses qualités, ses défauts et les signes avec lesquels il s'entend le mieux."
 date: "2025-07-24"
 category: "Signes astrologiques"
-image: "/static/blog/Images/taureau-signe-astrologique.webp"
+image: "/static/blog/images/taureau-signe-astrologique.webp"
 image_alt: "Illustration du signe astrologique du Taureau"
 ---
 
