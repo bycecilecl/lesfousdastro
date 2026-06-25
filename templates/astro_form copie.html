@@ -20,7 +20,8 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-PN5STD34');</script>
     <!-- End Google Tag Manager -->
-    <title>Analyse Astrologique ✨</title>
+    <title>Les Fous d'Astro – Analyses astrologiques personnalisées</title>
+    <meta name="description" content="Analyses astrologiques personnalisées : thème natal, profil karmique, profil amoureux. Une lecture sérieuse et profonde de ton ciel, créée par une vraie astrologue.">
     <style>
         * {
             margin: 0;
@@ -100,6 +101,81 @@
             font-size: 1.2rem;
             opacity: 0.9;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .badge-d-wrap {
+            margin-bottom: 1.25rem;
+        }
+
+        .badge-d {
+            display: inline-block;
+            background: white;
+            color: #1f628e;
+            font-size: 2.3rem;
+            font-weight: 700;
+            padding: 0.45rem 1.6rem;
+            border-radius: 6px;
+            transform: rotate(-1.5deg);
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.18);
+        }
+
+        .header-hook {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.92);
+            line-height: 1.6;
+            max-width: 680px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .header-btns {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-cta {
+            background: white;
+            color: #1f628e;
+            border: none;
+            padding: 0.7rem 1.75rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .header-cta:hover {
+            transform: translateY(-2px);
+        }
+
+        .header-links-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .header-link {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .header-link:hover { color: white; }
+
+        .header-sep {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+        }
+
+        .planetes-deco {
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
+            display: block;
+            opacity: 0.9;
         }
 
         .form-container {
@@ -522,31 +598,28 @@
 
         /* Introduction cosmique */
         .intro-cosmique {
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(15, 40, 80, 0.55);
             backdrop-filter: blur(12px);
             border-radius: 22px;
             padding: 35px 40px;
             margin-bottom: 30px;
-            border: 1px solid rgba(255,255,255,0.25);
+            border: 1px solid rgba(255,255,255,0.12);
             color: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
 
         .intro-cosmique h2 {
             font-size: 1.55rem;
             font-weight: 700;
             margin-bottom: 18px;
-            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: white;
             line-height: 1.3;
         }
 
         .intro-cosmique p {
             font-size: 1rem;
             line-height: 1.7;
-            opacity: 0.92;
+            opacity: 0.88;
             margin-bottom: 14px;
         }
 
@@ -554,16 +627,53 @@
             margin-bottom: 0;
         }
 
-        .intro-cosmique .bonus-line {
-            display: inline-block;
-            margin-top: 10px;
-            background: rgba(255,215,0,0.18);
-            border: 1px solid rgba(255,215,0,0.35);
-            border-radius: 10px;
-            padding: 10px 16px;
+        .planetes-deco {
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto -40px;
+            display: block;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .intro-cosmique {
+            position: relative;
+            z-index: 1;
+            padding-top: 50px;
+        }
+
+        .qui-suis-je {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .qsj-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.3);
+            flex-shrink: 0;
+        }
+
+        .qsj-texte strong {
+            display: block;
+            color: white;
             font-size: 0.95rem;
-            color: #FFD700;
-            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+
+        .qsj-texte p {
+            font-size: 0.92rem;
+            opacity: 0.85;
+            margin: 0;
+            line-height: 1.7;
+            font-style: italic;
         }
 
         /* Badge éligibilité 3 questions sur les cartes */
@@ -1979,13 +2089,13 @@
 
         /* Navbar Styles - À ajouter dans la section <style> existante */
         .navbar {
-            background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+            background: rgba(15, 40, 80, 0.55);
+            backdrop-filter: blur(12px);
             color: white;
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
         .navbar::before {
@@ -2016,12 +2126,6 @@
             font-weight: bold;
             text-decoration: none;
             color: white;
-            background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
         }
 
         .navbar__brand:hover {
@@ -2180,6 +2284,9 @@
             <ul class="navbar__links">
                 <li><a href="{{ url_for('pages_bp.analyses') }}"
                         class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+                
+                <li><a href="{{ url_for('blog.blog_index') }}"
+                        class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
 
                 <li><a href="{{ url_for('site_bp.temoignages') }}"
                         class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
@@ -2197,21 +2304,45 @@
             </ul>
         </div>
     </nav>
-   
     <div class="stars" id="stars"></div>
     <div class="container">
         <div class="header">
             <img src="static/images/logo_les_fous_dastro.webp" alt="Les Fous d'Astro" class="logo">
             
-            <h1>✨ Analyses Astrologiques ✨</h1>
-            <p>Que disent les étoiles ?</p>
-             
-        </div>
+            <div class="badge-d-wrap">
+                <div class="badge-d">✦ Analyses Astrologiques ✦</div>
+            </div>
+            
+            <p class="header-hook">Tu t'es toujours senti plus complexe qu'un simple signe solaire ? <br> Ton thème natal a les réponses.</p>
+            
+            <div class="header-btns">
+                <button class="header-cta" onclick="document.getElementById('form-analyse').scrollIntoView({behavior:'smooth'})">
+                    Découvrir mon analyse ↓
+                </button>
+                <div class="header-links-row">
+                    <a href="/blog" class="header-link">Le blog</a>
+                    <span class="header-sep">·</span>
+                    <a href="/temoignages" class="header-link">Les avis</a>
+                </div>
+            </div>
+
+        <img src="static/images/les-fous-dastro-planetes.webp" 
+            alt="" 
+            class="planetes-deco">
 
         <div class="intro-cosmique">
             <h2>L'astrologie, c'est ton ADN cosmique.</h2>
             <p>Les planètes au moment de ta naissance ne décident pas de ta vie : elles décrivent tes énergies profondes. Celles qui te "gouvernent" tant que tu n'en as pas conscience. Celles qui, une fois comprises, deviennent tes meilleurs alliés.</p>
             <p>Ces analyses ne sont pas des descriptions génériques de tes placements. Elles reprennent le travail d'un vrai astrologue — la même logique, les mêmes combinaisons, la même lecture d'ensemble. Ce sont des documents déclencheurs de conscience, à garder et à relire au fil du temps.</p>
+            
+            <div class="qui-suis-je">
+                <img src="static/images/cecilecl-astrologue.webp" alt="Cécile, astrologue" class="qsj-photo">
+                <div class="qsj-texte">
+                    <strong>Cécile CL - Astrologue & Développeur </strong>
+                    <p><em>Anciennement dans l'informatique, j'ai fait une reconversion dans l'astrologie. La connaissance de soi est essentielle pour une vie authentique et alignée. C'est pourquoi j'ai fusionné mes deux univers pour créer des analyses permettant une connaissance approfondie de soi.<br>
+                    Pas des horoscopes, de vraies analyses pour te comprendre en profondeur, codées par une vraie astrologue.</em></p>
+                </div>
+            </div>
         </div>
 
         <div class="form-container">
@@ -2291,8 +2422,8 @@
                             </div>
                         </div>
                         
-                        <div class="option-card coral" onclick="addToCart('flash_astral', 'Flash Astral', 35, this)">
-                            <span class="icon">📊</span>
+                        <div class="option-card coral" onclick="addToCart('flash_astral', 'Point Astral', 35, this)">
+                            <span class="icon">✨</span>
                             <h4>Point Astral</h4>
                             <p>Analyse occidentale sur 3/4 pages sur les grands axes du thème<br> + Nakshatra de la lune</p>
                             <div class="price">35€</div>
@@ -2309,12 +2440,12 @@
                         <div class="option-card featured" onclick="addToCart('forces_defis', 'Mes Potentiels et Défis', 15, this)">
                             <span class="icon">💪</span>
                             <h4>Mes Potentiels et Défis</h4>
-                            <p>Découvrez tes forces cachées et les obstacles à transformer</p>
+                            <p>Découvre tes forces cachées et les obstacles à transformer</p>
                             <div class="price">15€</div>
                             <span class="status featured">Clique pour sélectionner</span>
                             <div class="card-tooltip">
                                 <strong>Ce que tu reçois</strong>
-                                Une lecture ciblée de tes ressources naturelles et des tensions de ton thème. Quels sont tes vrais super-pouvoirs ? Quels schémas répétitifs te freinent ? Un outil concret pour passer à l'action.
+                                Une lecture ciblée de tes ressources naturelles et des tensions de ton thème. Quels sont tes vrais super-pouvoirs ? Qu'est-ce qui te freine ? Un outil concret pour passer à l'action.
                             </div>
                         </div>
 
@@ -2322,7 +2453,7 @@
                             <input type="hidden" id="product_key" name="product_key" value="flash_astral">
                         
                          <div class="option-card pink" 
-                            onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', 19, this)">
+                            onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', 25, this)">
                             <span class="icon">💕</span>
                             <h4>Mon Profil Amoureux</h4>
                             <p style="font-size: 0.85rem; line-height: 1.3;">
@@ -2342,21 +2473,17 @@
                             </div>
                         </div>
                         
-                        <div class="option-card purple" onclick="addToCart('analyse_karmique', 'Analyse Karmique', 45, this)">
+                        <div class="option-card purple" onclick="addToCart('analyse_karmique', 'Analyse Karmique', 69, this)">
                                 <div class="badge new">NOUVEAU</div>
                                 <span class="icon">🔮</span>
                                 <h4>Analyse Karmique</h4>
-                                <p>Explore ta mission d'âme : Lune Noire, Chiron, rétrogrades, interceptions, maisons 4, 8 et 12</p>
-                                <div class="price">
-                                    <span style="text-decoration: line-through; color: #aaa; font-size: 0.9rem; font-weight: 400;">69€</span>
-                                    <span style="color: #8B5CF6; font-size: 1.4rem; font-weight: 700; margin-left: 6px;">45€</span>
-                                    <div style="font-size: 0.75rem; color: #8B5CF6; font-weight: 600; margin-top: 4px;">🎉 Early bird — 3 jours seulement</div>
-                                </div>
+                                <p>Explore tes blessures, schémas inconscients et mémoires profondes</p>
+                                <div class="price">69€</div>
                                 <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                                 <span class="status available">Clique pour sélectionner</span>
                                 <div class="card-tooltip">
                                     <strong>Ce que tu reçois</strong>
-                                    L'analyse la plus profonde : nœuds lunaires (mission d'âme), Chiron (blessure karmique), Lune Noire Lilith, planètes rétrogrades, interceptions et les maisons 4, 8, 12. Pour comprendre pourquoi tu es comme tu es — vraiment.
+                                    L'analyse la plus profonde : nœuds lunaires (mission d'âme), Chiron (blessure karmique), Lune Noire Lilith, planètes rétrogrades, interceptions et les maisons 4, 8, 12. Pour comprendre pourquoi tu es comme tu es.
                                 </div>
                             </div>
 
@@ -2387,7 +2514,6 @@
                         <div>
                             <span style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size:1rem;">104€</span><br>
                             <span class="pack-price-value">83€</span><br>
-                            <span style="background: rgba(255,215,0,0.25); border: 1px solid rgba(255,215,0,0.5); border-radius:8px; padding:4px 10px; font-size:0.85rem; color:#FFD700; display:inline-block; margin-top:6px;">🚀 prix lancement : 64€</span>
                         </div>
                     </div>
                 </div>
@@ -2401,6 +2527,7 @@
                         ✓ Potentiels &amp; Défis<br>
                         ✓ Profil Amoureux
                     </div>
+                    <span style="font-size:0.85rem; opacity:0.8; margin-top:8px; display:block;">✉️ Option 3 questions disponible sur ce pack</span>
                     <div class="pack-price">
                         <div>
                             <span style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size:1rem;">75€</span><br>
@@ -2424,7 +2551,6 @@
                         <div>
                             <span style="text-decoration: line-through; color: rgba(255,255,255,0.5); font-size:1rem;">144€</span><br>
                             <span class="pack-price-value">99€</span><br>
-                            <span style="background: rgba(255,215,0,0.25); border: 1px solid rgba(255,215,0,0.5); border-radius:8px; padding:4px 10px; font-size:0.85rem; color:#FFD700; display:inline-block; margin-top:6px;">🚀 prix lancement : 84€</span>
                         </div>
                     </div>
                 </div>
@@ -2435,7 +2561,7 @@
                     <!-- Partie prévisionnelle -->
                     <div class="predictive-section">
                         <h3 class="predictive-title">🌙 Analyses Prévisionnelles</h3>
-                        <p class="predictive-subtitle">Bientôt disponibles — découvrez ce que l'avenir vous réserve avec nos analyses temporelles</p>
+                        <p class="predictive-subtitle">Bientôt disponibles — découvre ce que l'avenir vous réserve avec nos analyses temporelles</p>
                         <div class="options-grid">
                             <div class="option-card" style="opacity:0.45; cursor:not-allowed; filter:grayscale(0.6);">
                                 <span class="icon">🌙</span>
@@ -2461,7 +2587,7 @@
 
 <div class="testimonials-section">
     <h2 class="section-title">💬 Ce qu'ils disent de nos analyses</h2>
-    <p class="testimonials-subtitle">Découvrez pourquoi nos clients recommandent nos analyses astrologiques</p>
+    <p class="testimonials-subtitle">Découvre pourquoi nos clients recommandent nos analyses astrologiques</p>
     
     <div class="testimonials-grid">
         <div class="testimonial-card">
@@ -2481,7 +2607,7 @@
         <div class="testimonial-card">
             <div class="testimonial-content">
                 <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                <p>"Je ne peux que recommander ce point astral. Étant moi même astrologue, je me suis complètement reconnue dans cette analyse mais le plus dingue c'est justement ce qu'il y a à relever, à travailler qui ressort dans ce point astral ! Una analyse qui correspond en tout point à qui je suis et à ce que je dois travailler 😝 .Je ne peux que recommander ce point astral qui n'est autre que le fruit du travail d'une astrologue passionnée. Encore Bravo Cécile pour ton travail 🫶"</p>
+                <p>"Je ne peux que recommander ce Point Astral. Étant moi même astrologue, je me suis complètement reconnue dans cette analyse mais le plus dingue c'est justement ce qu'il y a à relever, à travailler qui ressort dans ce Point astral ! Una analyse qui correspond en tout point à qui je suis et à ce que je dois travailler 😝 .Je ne peux que recommander ce Point Astral qui n'est autre que le fruit du travail d'une astrologue passionnée. Encore Bravo Cécile pour ton travail 🫶"</p>
             </div>
             <div class="testimonial-author">
                 <div class="author-avatar">👨</div>
@@ -2522,7 +2648,7 @@
     </div> 
     
     <div class="testimonials-cta">
-        <h3>Celles qui ne croyaient pas à l'astro... jusqu'à leur analyse !</h3>
+        <h3>Des tas de personnes ont déjà découvert leur thème</h3>
         <p>Rejoins-les et lis leurs retours </p>
         <a href="{{ url_for('site_bp.temoignages') }}" class="cta-button">✨ Voir tous les avis</a>
     </div>
@@ -2772,29 +2898,56 @@
                 tagline: false
             },
 
-            createOrder: (data, actions) => {
-                const total = Number(order?.total ?? 0);
-                console.log('🛒 PayPal.createOrder appelé, total =', total, '€');
-                return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                    value: total.toFixed(2),
-                    currency_code: "{{ PAYPAL_CURRENCY }}"
+            createOrder: async () => {
+                console.log('🛒 PayPal.createOrder BACKEND appelé', window.pendingOrder);
+
+                const response = await fetch('/payments/create-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
                     },
-                    description: order?.description || "Point Astral"
-                }]
+                    body: JSON.stringify(window.pendingOrder || {})
                 });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    console.error('❌ Create order PayPal KO', result);
+                    throw new Error('Création commande PayPal échouée');
+                }
+
+                console.log('✅ Order PayPal créé via backend', result);
+                return result.id;
             },
 
             onApprove: async (data, actions) => {
                 console.log('✅ PayPal.onApprove déclenché', data);
+
                 try {
-                const details = await actions.order.capture();
-                console.log('🎉 Paiement capturé avec succès ! Détails =', details);
-                window.location.href = '/paiement/effectue';
+                    const response = await fetch('/payments/capture-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            orderID: data.orderID,
+                            userInfo: window.pendingOrder?.userInfo || {}
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        console.error('❌ Capture backend PayPal KO', result);
+                        throw new Error('Capture PayPal échouée');
+                    }
+
+                    console.log('🎉 Paiement PayPal capturé via backend !', result);
+                    window.location.href = '/paiement-effectue?provider=paypal';
+
                 } catch (err) {
-                console.error('❌ Erreur lors de la capture PayPal:', err);
-                showNotification('Erreur lors du traitement du paiement.', 'warning');
+                    console.error('❌ Erreur lors de la capture PayPal:', err);
+                    showNotification('Erreur lors du traitement du paiement.', 'warning');
                 }
             },
 
@@ -3010,28 +3163,7 @@
         }
 
         function _doProceedAfterBirthConfirm() {
-            // ANALYSE KARMIQUE : route directe de génération si sélection seule
-            const isKarmicOnly =
-                !selectedPack &&
-                cart.length === 1 &&
-                cart[0].id === 'analyse_karmique';
 
-            if (isKarmicOnly) {
-                const form = document.getElementById('form-analyse');
-                form.action = '/analyse_karmique';
-                form.method = 'POST';
-                
-                let consentInput = form.querySelector('input[name="consentement"]');
-                if (!consentInput) {
-                    consentInput = document.createElement('input');
-                    consentInput.type = 'hidden';
-                    consentInput.name = 'consentement';
-                    form.appendChild(consentInput);
-                }
-                consentInput.value = 'on';
-                form.submit();
-                return;
-            }
 
             // Séparer analyses gratuites et payantes
             const freeAnalyses = [];
@@ -3404,7 +3536,7 @@
                 origines: {
                     id: 'pack_origines',
                     name: '🌑 Pack Origines',
-                    price: 64,
+                    price: 83,
                     analyses: ['flash_astral', 'analyse_karmique']
                 },
                 essence: {
@@ -3416,7 +3548,7 @@
                 integral: {
                     id: 'pack_integral',
                     name: '🌟 Pack Intégral',
-                    price: 84,
+                    price: 99,
                     analyses: ['flash_astral', 'analyse_karmique', 'profil_amoureux', 'forces_defis']
                 }
             };
@@ -3494,7 +3626,7 @@
                 userInfo: {
                     nom: document.getElementById('nom').value,
                     email: document.getElementById('email').value,
-                    gender: document.querySelector('[name="gender"]:checked').value,
+                    gender: document.querySelector('[name="gender"]:checked')?.value || '',
                     birthDate: document.getElementById('date_naissance').value,
                     birthTime: document.getElementById('heure_naissance').value,
                     birthPlace: document.getElementById('lieu_naissance').value,
