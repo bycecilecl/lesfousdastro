@@ -295,6 +295,7 @@
             <a class="navbar__brand" href="/">Les Fous d'Astro</a>
             <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">☰</button>
                <ul class="navbar__links">
+                <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Analyses 💫</a></li>
                 <li><a href="{{ url_for('pages_bp.analyses') }}"
                         class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
                 
