@@ -26,185 +26,92 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
         .badge-d-wrap { margin-bottom: 1.25rem; text-align: center; }
+        .badge-d { display: inline-block; background: white; color: #1f628e; font-size: 2.3rem; font-weight: 700; padding: 0.45rem 1.6rem; border-radius: 6px; transform: rotate(-1.5deg); box-shadow: 4px 4px 0px rgba(0,0,0,0.18); }
 
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          overflow: hidden;
-          clip: rect(0,0,0,0);
-          white-space: nowrap;
-          border: 0;
-      }
-
-        .badge-d {
-            display: inline-block;
-            background: white;
-            color: #1f628e;
-            font-size: 2.3rem;
-            font-weight: 700;
-            padding: 0.45rem 1.6rem;
-            border-radius: 6px;
-            transform: rotate(-1.5deg);
-            box-shadow: 4px 4px 0px rgba(0,0,0,0.18);
-        }
-
-        .navbar {
-            background: rgba(15, 40, 80, 0.55);
-            backdrop-filter: blur(12px);
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-
-        .navbar__inner {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 70px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .navbar__brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-decoration: none;
-            color: white;
-        }
-
+        .navbar { background: rgba(15, 40, 80, 0.55); backdrop-filter: blur(12px); color: white; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .navbar__inner { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 70px; position: relative; z-index: 1; }
+        .navbar__brand { font-size: 1.5rem; font-weight: bold; text-decoration: none; color: white; }
         .navbar__brand:hover { transform: scale(1.05); }
+        .navbar__toggle { display: none; background: none; border: 2px solid rgba(255,255,255,0.3); color: white; font-size: 1.2rem; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+        .navbar__toggle:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+        .navbar__links { display: flex; list-style: none; margin: 0; padding: 0; gap: 8px; }
+        .navbar__links a { color: rgba(255,255,255,0.9); text-decoration: none; padding: 10px 16px; border-radius: 25px; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; border: 1px solid transparent; }
+        .navbar__links a:hover { background: rgba(255,255,255,0.15); color: white; border-color: rgba(255,255,255,0.2); }
+        .navbar__links a.active { background: rgba(255,255,255,0.2); color: white; border-color: rgba(255,255,255,0.3); }
+        .navbar__links a[target="_blank"]::after { content: ' ↗'; font-size: 0.8rem; opacity: 0.7; }
 
-        .navbar__toggle {
-            display: none;
-            background: none;
-            border: 2px solid rgba(255,255,255,0.3);
-            color: white;
-            font-size: 1.2rem;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .navbar__toggle:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.5);
-        }
-
-        .navbar__links {
-            display: flex;
-            list-style: none;
-            margin: 0; padding: 0;
-            gap: 8px;
-        }
-
-        .navbar__links a {
-            color: rgba(255,255,255,0.9);
-            text-decoration: none;
-            padding: 10px 16px;
-            border-radius: 25px;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-
-        .navbar__links a:hover {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-color: rgba(255,255,255,0.2);
-        }
-
-        .navbar__links a.active {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border-color: rgba(255,255,255,0.3);
-        }
-
-        .navbar__links a[target="_blank"]::after {
-            content: ' ↗';
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-
-        .site-footer {
-            background: rgba(15, 40, 80, 0.8);
-            color: rgba(255,255,255,0.7);
-            text-align: center;
-            padding: 20px;
-            font-size: 14px;
-            margin-top: 40px;
-        }
+        /* Footer */
+        .site-footer { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%); color: white; margin-top: 60px; position: relative; overflow: hidden; }
+        .site-footer::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.15"/></svg>'); pointer-events: none; }
+        .footer-container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+        .footer-content { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; padding: 50px 20px 30px; }
+        .footer-section h4 { color: #c0f0f7; margin-bottom: 20px; font-size: 1.2rem; font-weight: 600; }
+        .footer-section h5 { color: #c0f0f7; margin-bottom: 10px; font-size: 1rem; font-weight: 600; }
+        .about-section .footer-logo { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .footer-logo-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); }
+        .footer-logo h3 { color: white; font-size: 1.5rem; margin: 0; background: linear-gradient(45deg, #c0f0f7, #d3b1c2, white); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .footer-description { color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 25px; font-size: 0.95rem; }
+        .footer-social { display: flex; gap: 15px; }
+        .social-link { display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: rgba(255,255,255,0.1); border-radius: 50%; text-decoration: none; transition: all 0.3s ease; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .social-link:hover { background: rgba(255,255,255,0.2); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .social-icon { font-size: 1.2rem; filter: grayscale(1) brightness(2); }
+        .footer-links { list-style: none; padding: 0; margin: 0; }
+        .footer-links li { margin-bottom: 12px; }
+        .footer-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.95rem; transition: all 0.3s ease; position: relative; }
+        .footer-links a:hover { color: #c0f0f7; padding-left: 8px; }
+        .footer-links a::before { content: '→'; position: absolute; left: -15px; opacity: 0; transition: all 0.3s ease; }
+        .footer-links a:hover::before { opacity: 1; left: -10px; }
+        .contact-info { margin-bottom: 25px; }
+        .contact-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: rgba(255,255,255,0.8); font-size: 0.95rem; }
+        .contact-item a { color: rgba(255,255,255,0.8); text-decoration: none; transition: color 0.3s ease; }
+        .contact-item a:hover { color: #c0f0f7; }
+        .contact-icon { font-size: 1.1rem; width: 20px; text-align: center; }
+        .newsletter-form { display: flex; gap: 8px; margin-top: 15px; }
+        .newsletter-input { flex: 1; padding: 12px 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 25px; background: rgba(255,255,255,0.1); color: white; font-size: 0.9rem; backdrop-filter: blur(10px); }
+        .newsletter-input::placeholder { color: rgba(255,255,255,0.6); }
+        .newsletter-input:focus { outline: none; border-color: #c0f0f7; background: rgba(255,255,255,0.15); }
+        .newsletter-btn { padding: 12px 18px; background: linear-gradient(45deg, #c0f0f7, #d3b1c2); border: none; border-radius: 25px; color: #1f628e; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }
+        .newsletter-btn:hover { transform: scale(1.1); box-shadow: 0 5px 15px rgba(192,240,247,0.3); }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.2); padding: 25px 20px; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); }
+        .footer-bottom-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .copyright { color: rgba(255,255,255,0.7); font-size: 0.9rem; margin: 0; }
+        .legal-notice { color: rgba(255,255,255,0.6); font-size: 0.8rem; margin: 0; font-style: italic; text-align: center; }
+        .footer-badges { display: flex; gap: 15px; }
+        .security-badge { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); padding: 6px 12px; border-radius: 15px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.2); }
 
         @media (max-width: 768px) {
             .navbar__toggle { display: block; }
-
-            .navbar__links {
-                position: absolute;
-                top: 100%;
-                left: 0; right: 0;
-                background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
-                flex-direction: column;
-                padding: 20px;
-                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-                transform: translateY(-10px);
-                opacity: 0;
-                visibility: hidden;
-                transition: all 0.3s ease;
-                gap: 0;
-            }
-
-            .nav-open .navbar__links {
-                transform: translateY(0);
-                opacity: 1;
-                visibility: visible;
-            }
-
-            .navbar__links a {
-                display: block;
-                margin: 8px 0;
-                padding: 15px 20px;
-                border-radius: 12px;
-                text-align: center;
-            }
-
+            .navbar__links { position: absolute; top: 100%; left: 0; right: 0; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%); flex-direction: column; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); transform: translateY(-10px); opacity: 0; visibility: hidden; transition: all 0.3s ease; gap: 0; }
+            .nav-open .navbar__links { transform: translateY(0); opacity: 1; visibility: visible; }
+            .navbar__links a { display: block; margin: 8px 0; padding: 15px 20px; border-radius: 12px; text-align: center; }
             .navbar__inner { padding: 0 15px; height: 60px; }
             .navbar__brand { font-size: 1.3rem; }
+            .footer-content { grid-template-columns: 1fr; gap: 30px; padding: 40px 20px 20px; }
+            .footer-bottom-content { flex-direction: column; text-align: center; gap: 15px; }
+            .footer-badges { flex-direction: column; align-items: center; }
+            .about-section .footer-logo { justify-content: center; text-align: center; }
+            .footer-social { justify-content: center; }
         }
 
         {% block extra_css %}{% endblock %}
     </style>
 </head>
 <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PN5STD34"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PN5STD34" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <nav class="navbar">
         <div class="navbar__inner">
             <a class="navbar__brand" href="/">Les Fous d'Astro</a>
             <button class="navbar__toggle" aria-label="Menu" aria-expanded="false">☰</button>
             <ul class="navbar__links">
-                <li><a href="{{ url_for('pages_bp.analyses') }}"
-                    class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
-                <li><a href="{{ url_for('blog.blog_index') }}"
-                    class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
-                <li><a href="{{ url_for('site_bp.temoignages') }}"
-                    class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
-                <!-- <li><a href="{{ url_for('pages_bp.formations') }}"
-                    class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li> -->
-                <li><a href="https://bycecilecl.com/categorie-produit/services/"
-                    target="_blank" rel="noopener">Prestations</a></li>
-                <li><a href="{{ url_for('pages_bp.contact') }}"
-                    class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
+                <li><a href="{{ url_for('pages_bp.analyses') }}" class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+                <li><a href="{{ url_for('blog.blog_index') }}" class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
+                <li><a href="{{ url_for('site_bp.temoignages') }}" class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
+                <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Prestations</a></li>
+                <li><a href="{{ url_for('pages_bp.contact') }}" class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
                 <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
             </ul>
         </div>
@@ -216,7 +123,6 @@
 
     {% include "_footer.html" %}
 
-    <!-- Statcounter -->
     <script type="text/javascript">
         var sc_project=12490079;
         var sc_invisible=1;
@@ -224,8 +130,7 @@
     </script>
     <script async src="https://www.statcounter.com/counter/counter.js"></script>
     <noscript><div class="statcounter"><a href="https://statcounter.com/" target="_blank">
-        <img class="statcounter" src="https://c.statcounter.com/12490079/0/a231e1c7/1/"
-        alt="Web Analytics" referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+        <img class="statcounter" src="https://c.statcounter.com/12490079/0/a231e1c7/1/" alt="Web Analytics" referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
