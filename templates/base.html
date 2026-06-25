@@ -1,106 +1,198 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>{% block title %}Les Fous d'Astro{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { margin:0; font-family: Arial, sans-serif; }
-    nav {
-      background: #1f628e;
-      padding: 10px 20px;
-    }
-    nav ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    nav ul li {
-      margin: 0 15px;
-    }
-    nav ul li a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    nav ul li a:hover {
-      text-decoration: underline;
-    }
-    main {
-      max-width: 1200px;   /* élargi */
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-    footer {
-      width: 100%;
-      background: #f6f7fb;
-      border-top: 1px solid #e5e7eb;
-      padding: 20px 0;
-      margin-top: 40px;
-      text-align: center;
-      color: #555;
-      font-size: 14px;
-    }
-    footer .inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-  </style>
+    <!-- Google tag -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-553N1CDR9Q"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-553N1CDR9Q');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/webp" sizes="64x64" href="{{ url_for('static', filename='images/logo_les_fous_dastro_favicon64.webp') }}">
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PN5STD34');</script>
+    <!-- End Google Tag Manager -->
+
+    <title>{% block title %}Les Fous d'Astro | Analyses astrologiques personnalisées{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Analyses astrologiques personnalisées : Point astral, profil karmique, profil amoureux. Une lecture approfondie de ton ciel, créée par une vraie astrologue.{% endblock %}">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        .navbar {
+            background: rgba(15, 40, 80, 0.55);
+            backdrop-filter: blur(12px);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .navbar__inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar__brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+        }
+
+        .navbar__brand:hover { transform: scale(1.05); }
+
+        .navbar__toggle {
+            display: none;
+            background: none;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 1.2rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .navbar__toggle:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .navbar__links {
+            display: flex;
+            list-style: none;
+            margin: 0; padding: 0;
+            gap: 8px;
+        }
+
+        .navbar__links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .navbar__links a:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .navbar__links a.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .navbar__links a[target="_blank"]::after {
+            content: ' ↗';
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .navbar__toggle { display: block; }
+
+            .navbar__links {
+                position: absolute;
+                top: 100%;
+                left: 0; right: 0;
+                background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                transform: translateY(-10px);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                gap: 0;
+            }
+
+            .nav-open .navbar__links {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .navbar__links a {
+                display: block;
+                margin: 8px 0;
+                padding: 15px 20px;
+                border-radius: 12px;
+                text-align: center;
+            }
+
+            .navbar__inner { padding: 0 15px; height: 60px; }
+            .navbar__brand { font-size: 1.3rem; }
+        }
+
+        {% block extra_css %}{% endblock %}
+    </style>
 </head>
 <body>
-  <nav>
-    <ul class="navbar__links">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PN5STD34" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+    <nav class="navbar">
+        <div class="navbar__inner">
+            <a class="navbar__brand" href="/">Les Fous d'Astro</a>
+            <button class="navbar__toggle" aria-label="Menu" aria-expanded="false"
+                onclick="document.body.classList.toggle('nav-open')">☰</button>
+            <ul class="navbar__links">
                 <li><a href="{{ url_for('pages_bp.analyses') }}"
-                        class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
-                
+                    class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
                 <li><a href="{{ url_for('blog.blog_index') }}"
-                        class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
-
+                    class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
                 <li><a href="{{ url_for('site_bp.temoignages') }}"
-                        class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
-
+                    class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
                 <li><a href="{{ url_for('pages_bp.formations') }}"
-                        class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
-
+                    class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
                 <li><a href="https://bycecilecl.com/categorie-produit/services/"
-                        target="_blank" rel="noopener">Prestations</a></li>
-
+                    target="_blank" rel="noopener">Prestations</a></li>
                 <li><a href="{{ url_for('pages_bp.contact') }}"
-                        class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
-
+                    class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
                 <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
             </ul>
-  </nav>
+        </div>
+    </nav>
 
-  <main>
+    {% block content %}{% endblock %}
+
+    <footer style="background: rgba(15,40,80,0.8); color: rgba(255,255,255,0.7); text-align: center; padding: 20px; font-size: 14px; margin-top: 40px;">
+        © 2026 Les Fous d'Astro — Tous droits réservés
+    </footer>
+
+    <!-- Statcounter -->
+    <script type="text/javascript">
+        var sc_project=12490079;
+        var sc_invisible=1;
+        var sc_security="a231e1c7";
+    </script>
+    <script async src="https://www.statcounter.com/counter/counter.js"></script>
+    <noscript><div class="statcounter"><a href="https://statcounter.com/" target="_blank">
+        <img class="statcounter" src="https://c.statcounter.com/12490079/0/a231e1c7/1/"
+        alt="Web Analytics" referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+
     {% block scripts %}{% endblock %}
-  </main>
-
-  <footer>
-    <div class="inner">
-      © Les Fous d’Astro — Tous droits réservés
-    </div>
-  </footer>
-
-  <!-- Statcounter -->
-  <script type="text/javascript">
-  var sc_project=12490079; 
-  var sc_invisible=1; 
-  var sc_security="a231e1c7"; 
-  </script>
-  <script type="text/javascript"
-  src="https://www.statcounter.com/counter/counter.js"
-  async></script>
-  <noscript><div class="statcounter"><a title="Web Analytics"
-  href="https://statcounter.com/" target="_blank"><img
-  class="statcounter"
-  src="https://c.statcounter.com/12490079/0/a231e1c7/1/"
-  alt="Web Analytics"
-  referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
-  <!-- End of Statcounter -->
 </body>
 </html>
