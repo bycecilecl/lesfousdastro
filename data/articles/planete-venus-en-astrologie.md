@@ -2,7 +2,7 @@
 title: "Vénus en astrologie : amour, désir, beauté et argent"
 slug: "venus-astrologie-amour-desir-beaute-argent"
 description: "Découvrez la signification de Vénus en astrologie : amour, relations, désir, beauté, harmonie, argent et son rôle dans le thème natal."
-date: "2026-06-28"
+date: "2024-11-28"
 category: "Planètes"
 image: "/static/blog/images/venus-astrologie.webp"
 image_alt: "Illustration de Vénus en astrologie"
@@ -68,3 +68,6 @@ Voilà mes amis, c'est tout... pour le moment !
 👇 Dis-moi en commentaire où est située ta Vénus — en signe et en maison !
 
 🎥 [Voir la vidéo sur Vénus](https://youtu.be/iRmWFWVMEnY)
+
+Article rédigé par Cécile CL
+Astrologue et fondatrice des Fous d'Astro
