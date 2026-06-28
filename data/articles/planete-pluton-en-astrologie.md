@@ -2,7 +2,7 @@
 title: "Pluton en astrologie : transformation, pouvoir et renaissance"
 slug: "pluton-astrologie-transformation-pouvoir-renaissance"
 description: "Découvrez la signification de Pluton en astrologie : transformation, renaissance, pouvoir, résilience, authenticité et son influence dans le thème natal."
-date: "2026-06-28"
+date: "2024-06-28"
 category: "Planètes"
 image: "/static/blog/images/pluton-astrologie.webp"
 image_alt: "Illustration de Pluton en astrologie"
