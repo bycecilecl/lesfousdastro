@@ -2,14 +2,14 @@
 title: "Saturne en astrologie : discipline, karma, temps et sagesse"
 slug: "saturne-astrologie-discipline-karma-sagesse"
 description: "Découvrez la signification de Saturne en astrologie : discipline, responsabilités, karma, limites, temps et son influence dans le thème natal."
-date: "2026-06-28"
+date: "2024-02-28"
 category: "Planètes"
 image: "/static/blog/images/saturne-astrologie.webp"
 image_alt: "Illustration de Saturne en astrologie"
 ---
 
 
-# Saturne en astrologie : discipline, karma et sagesse dans ton thème natal
+# Saturne en astrologie : discipline, karma et sagesse
 
 **DOMICILE :** Capricorne, Verseau | **EXALTATION :** Balance | **CHUTE :** Bélier | **EXIL :** Cancer
 
@@ -70,3 +70,6 @@ Sans Saturne, aucune fondation. Sans lui on ne pourrait jamais rien accomplir de
 Dis-moi en commentaire où est situé ton Saturne — en signe et en maison !
 
 🎥 [Voir la vidéo sur Saturne](https://youtu.be/JfE6Zx3vLpo)
+
+Article rédigé par Cécile CL
+Astrologue et fondatrice des Fous d'Astro

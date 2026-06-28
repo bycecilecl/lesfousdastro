@@ -2,7 +2,7 @@
 title: "Uranus en astrologie : révolution, liberté et changements soudains"
 slug: "uranus-astrologie-revolution-liberte-changements-soudains"
 description: "Découvrez la signification d'Uranus en astrologie : révolution, liberté, intuition, changements soudains, originalité et son influence dans le thème natal."
-date: "2026-06-28"
+date: "2024-03-28"
 category: "Planètes"
 image: "/static/blog/images/uranus-astrologie.webp"
 image_alt: "Illustration d'Uranus en astrologie"
@@ -68,3 +68,6 @@ S'il se trouve dans une **maison angulaire**, le besoin d'extérioriser un non-c
 Dis-moi en commentaire où est situé ton Uranus — en signe et en maison !
 
 🎥 [Voir la vidéo sur Uranus](https://youtu.be/p9Fdnz1EXns)
+
+Article rédigé par Cécile CL
+Astrologue et fondatrice des Fous d'Astro

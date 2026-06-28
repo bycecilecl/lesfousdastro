@@ -2,7 +2,7 @@
 title: "La Lune en astrologie : émotions, intuition et monde intérieur"
 slug: "lune-astrologie-emotions-intuition-monde-interieur"
 description: "Découvrez la signification de la Lune en astrologie : émotions, intuition, besoins, inconscient, sécurité affective et son rôle dans le thème natal."
-date: "2026-06-28"
+date: "2023-09-28"
 category: "Planètes"
 image: "/static/blog/images/lune-astrologie.webp"
 image_alt: "Illustration de la Lune en astrologie"
@@ -82,3 +82,6 @@ Dis-moi en commentaire où est située ta Lune — en signe et en maison !
 ➡️ Pour me suivre sur Instagram : [fousdastro](http://www.instagram.com/fousdastro)
 
 🎥 [Voir la vidéo sur la Lune](#)
+
+Article rédigé par Cécile CL
+Astrologue et fondatrice des Fous d'Astro

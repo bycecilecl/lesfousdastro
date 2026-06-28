@@ -2,7 +2,7 @@
 title: "Mercure en astrologie : communication, mental et intelligence"
 slug: "mercure-astrologie-communication-mental-intelligence"
 description: "Découvrez la signification de Mercure en astrologie : communication, intellect, apprentissage, écriture et fonctionnement du mental."
-date: "2026-06-24"
+date: "2023-10-24"
 category: "Planètes"
 image: "/static/blog/images/mercure-astrologie.webp"
 image_alt: "Illustration de Mercure en astrologie"

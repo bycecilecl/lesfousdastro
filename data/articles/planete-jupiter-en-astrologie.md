@@ -2,7 +2,7 @@
 title: "Jupiter en astrologie : chance, abondance et expansion"
 slug: "jupiter-astrologie-chance-abondance-expansion"
 description: "Découvrez la signification de Jupiter en astrologie : chance, abondance, expansion, optimisme, foi et son influence dans le thème natal."
-date: "2026-06-28"
+date: "2024-01-28"
 category: "Planètes"
 image: "/static/blog/images/jupiter-astrologie.webp"
 image_alt: "Illustration de Jupiter en astrologie"

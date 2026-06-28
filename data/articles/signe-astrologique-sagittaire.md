@@ -8,10 +8,6 @@ image: "/static/blog/images/sagittaire-signe-astrologique.webp"
 image_alt: "Signe astrologique du Sagittaire"
 ---
 
-Voilà :
-
----
-
 # Signe astrologique Sagittaire : optimisme, expansion et quête de sens
 
 Ah le Sagittaire ! Huuh Huuuh — j'essaie de faire le cheval mais en fait non, c'est pas un cheval.

@@ -2,7 +2,7 @@
 title: "Le Soleil en astrologie : identité, ego et thème astral"
 slug: "soleil-astrologie-identite-ego-theme-astral"
 description: "Découvrez la signification du Soleil en astrologie : identité, ego, confiance en soi, rayonnement, figure du père et rôle dans le thème astral."
-date: "2026-06-24"
+date: "2023-08-24"
 category: "Planètes"
 image: "/static/blog/images/soleil-astrologie.webp"
 image_alt: "Illustration du Soleil en astrologie dans le thème astral"
