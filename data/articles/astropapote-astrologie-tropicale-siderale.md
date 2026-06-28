@@ -3,7 +3,7 @@ title: "Astrologie tropicale ou sidérale : quelle est la différence ?"
 slug: "astrologie-tropicale-ou-siderale-difference"
 description: "Découvrez les différences entre l'astrologie tropicale et l'astrologie sidérale : saisons, constellations, précession des équinoxes et impact sur votre thème natal."
 date: "2026-06-24"
-category: "Astrologie"
+category: "Astropapote"
 image: "/static/blog/images/tropicale-vs-siderale.webp"
 image_alt: "Astrologie tropicale et astrologie sidérale"
 ---
