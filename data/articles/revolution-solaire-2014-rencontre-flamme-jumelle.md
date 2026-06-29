@@ -54,6 +54,8 @@ Je me base sur ma révolution du 11 Octobre 2014, puisque ma rencontre s'est fai
 
 ### Ascendant Sagittaire en Maison II natale
 
+![Révolution solaire 2014](/static/blog/images/revolution-solaire-2014.webp)
+
 Le fait que ce soit en Maison II — maison des revenus et possessions — pouvait annoncer une promotion. Et justement. Ça faisait un moment que je tournais en rond dans mon ancien job. Je joue un coup de bluff, je remets mon CV en augmentant beaucoup ma paie annuelle. Si ça marche tant mieux, si non je reste là où je suis. Une boîte m'appelle. Salaire accepté. Et pour le même job que je fais actuellement : créer un support en Inde et superviser l'équipe. Je n'hésite pas une seule seconde.
 
 Sauf que ça ne se déroule pas comme prévu. Je reste 2 mois là-bas, juste le temps de rencontrer F-JuJu qui vient passer deux semaines en France. Et une fois la rencontre faite… je pique une esclandre au boulot. Je retourne au siège une semaine après son arrivée. Nous deux ça se concrétise à mon dernier jour de taf. Je ne vous refais pas l'histoire, mais en gros : juste le temps de réussir à se voir 2/3 fois… et il repart au Canada.
