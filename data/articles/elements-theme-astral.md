@@ -2,7 +2,7 @@
 title: "Dominance des éléments dans le thème astral : feu, terre, air et eau"
 slug: "dominance-elements-theme-astral-feu-terre-air-eau"
 description: "Découvrez comment la dominance des éléments en astrologie — feu, terre, air et eau — influence la personnalité, les forces, les carences et les zones d'ombre dans un thème astral."
-date: "2026-06-29"
+date: "2022-0602-15"
 category: "Les Bases"
 image: "/static/blog/images/dominance-elements-theme-astral.webp"
 image_alt: "Illustration des quatre éléments en astrologie : feu, terre, air et eau"

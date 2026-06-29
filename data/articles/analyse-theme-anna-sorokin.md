@@ -1,11 +1,11 @@
 ---
 title: "Thème astral Anna Sorokin : quand les astres fabriquent une arnaqueuse de génie"
-slug: “theme-astral-anna-sorokin-inventing-anna”
+slug: "theme-astral-anna-sorokin-inventing-anna"
 description: "Analyse du thème astral d'Anna Sorokin, l'escroc qui a inspiré la série Netflix Inventing Anna. Découvrez comment Saturne, Uranus, Neptune et Jupiter éclairent son incroyable parcours."
-date: “2026-06-29”
-category: “Analyses de thèmes”
-image: “/static/blog/images/theme-astral-anna-sorokin.webp”
-image_alt: “Illustration du thème astral d’Anna Sorokin, héroïne de la série Inventing Anna”
+date: "2026-06-29"
+category: "Analyses de thèmes"
+image: "/static/blog/images/theme-astral-anna-sorokin.webp"
+image_alt: "Illustration du thème astral d'Anna Sorokin, héroïne de la série Inventing Anna"
 ---
 
 
@@ -14,7 +14,6 @@ image_alt: “Illustration du thème astral d’Anna Sorokin, héroïne de la s�
 **Méta-description :** Analyse du thème astral d'Anna Sorokin, la fausse héritière d'Inventing Anna : Verseau, Saturne, Uranus, Neptune… tout était écrit dans les étoiles.
 
 ---
-
 
 Coucou mes loulous garous !
 
