@@ -29,6 +29,8 @@ En matant la série, vu l'empire qu'elle essaie de construire — une fondation 
 
 On n'a pas son heure de naissance, mais regardons vite fait 2/3 petites choses de son thème, tellement parlantes !
 
+
+![Thème d'Anna Sorokin](/static/blog/images/theme-natal-anna-sorokin.webp)
 ---
 
 ## Le Verseau et Saturne : l'ambition comme moteur
