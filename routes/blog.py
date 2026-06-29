@@ -10,9 +10,9 @@ CATEGORIES_MAP = {
     "Signes astrologiques": "signe",
     "Planètes": "planete",
     "Maisons": "maison",
-    "Amour": "amour",
     "Karma": "karma",
     "Astropapote": "astropapote",
+    "Carnets d'Astrologue": "carnets",
 }
 
 
