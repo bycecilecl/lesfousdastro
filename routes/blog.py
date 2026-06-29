@@ -7,7 +7,7 @@ import yaml
 blog_bp = Blueprint("blog", __name__)
 
 CATEGORIES_MAP = {
-    "Les Bases": "base",
+    "Les Bases": "bases",
     "Signes astrologiques": "signe",
     "Planètes": "planete",
     "Maisons": "maison",
