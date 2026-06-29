@@ -8,8 +8,6 @@ image: "/static/blog/images/vierge-signe-astrologique.webp"
 image_alt: "Illustration du signe astrologique de la Vierge"
 ---
 
----
-
 # Signe Vierge : personnalité, amour et traits de caractère
 
 **Planète maîtresse :** Mercure
