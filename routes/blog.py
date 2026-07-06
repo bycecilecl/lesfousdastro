@@ -11,7 +11,7 @@ CATEGORIES_MAP = {
     "Signes astrologiques": "signe",
     "Planètes": "planete",
     "Maisons": "maison",
-    "Analyses de thèmes": "analyse",
+    "Analyses de thèmes": "analyses",
     "Astropapote": "astropapote",
     "Carnets d'Astrologue": "carnets",
 }
@@ -49,6 +49,7 @@ def lire_article_md(path: Path) -> dict:
     print("RAW START :", raw[:300])
     print("CONTENT LENGTH :", len(content))
     print("HTML LENGTH :", len(html_content))
+    print("CATÉGORIE :", meta.get("category"))
 
     return {
         "title": meta.get("title", slug),
@@ -56,8 +57,8 @@ def lire_article_md(path: Path) -> dict:
         "description": meta.get("description", ""),
         "excerpt": meta.get("description", ""),
         "date": meta.get("date", ""),
-        "category": meta.get("category", ""),
-        "cat": CATEGORIES_MAP.get(meta.get("category", ""), "signe"),
+        "category": str(meta.get("category", "")).strip(),
+        "cat": CATEGORIES_MAP.get(str(meta.get("category", "")).strip(), "signe"),  
         "tag": meta.get("tag", meta.get("category", "Article")),
         "image": meta.get("image", ""),
         "image_alt": meta.get("image_alt", meta.get("title", slug)),
