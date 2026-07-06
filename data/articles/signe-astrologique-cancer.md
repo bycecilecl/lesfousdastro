@@ -116,7 +116,9 @@ Il est jovial, attachant, avec un capital comique redoutable. Il charme facileme
 
 ### Niveau 3 : ou la version finale : protéger sans écraser, aimer sans s'oublier.
 
-![Cancer Niveau 3](/static/blog/images/bd_cancer_niveau3.webp)
+<a href="/static/blog/images/bd_cancer_niveau3.webp" data-fancybox="bd-cancer">
+  <img src="/static/blog/images/bd_cancer_niveau3.webp" alt="Cancer Niveau 3">
+</a>
 
 Au niveau 3, l'instinct de défense est toujours là, mais canalisé : protéger sans opprimer, tenir parole sans se dérober. Tendre, patient, tolérant jusqu'à l'excès presque suspect, le Cancer observe et analyse au lieu de juger à la va-vite. 
 Fini le doute permanent des niveaux précédents ("comment je m'en sors sans mon clan", "pourquoi me responsabiliser si je suis fragile") il a rangé ses excuses et développé à la place une acuité émotionnelle quasi surnaturelle.

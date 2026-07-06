@@ -19,6 +19,7 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-PN5STD34');</script>
     <!-- End Google Tag Manager -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.css">
 
     <title>{% block title %}Les Fous d'Astro | Analyses astrologiques personnalisées{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}Analyses astrologiques personnalisées : Point astral, profil karmique, profil amoureux. Une lecture approfondie de ton ciel, créée par une vraie astrologue.{% endblock %}">
@@ -147,5 +148,22 @@
     </script>
 
     {% block scripts %}{% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.js"></script>
+
+        <script>
+        Fancybox.bind("[data-fancybox]", {
+            Toolbar: {
+            display: {
+                left: [],
+                middle: [],
+                right: ["zoom", "close"],
+            },
+            },
+            Images: {
+            zoom: true,
+            },
+        });
+        </script>
 </body>
 </html>
