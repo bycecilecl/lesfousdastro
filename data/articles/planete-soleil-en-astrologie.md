@@ -8,8 +8,6 @@ image: "/static/blog/images/soleil-astrologie.webp"
 image_alt: "Illustration du Soleil en astrologie dans le thème astral"
 ---
 
----
-
 # Le Soleil en astrologie : identité, ego et thème astral
 
 **Domicile :** Lion

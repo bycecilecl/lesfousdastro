@@ -8,7 +8,6 @@ image: "/static/blog/images/astropapote.webp"
 image_alt: "Réflexion astrologique sur Jupiter et Saturne en Maison XII"
 ---
 
----
 
 # Jupiter conjoint Saturne : quand l'expansion et la restriction partagent le même thème
 

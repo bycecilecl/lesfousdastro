@@ -8,7 +8,6 @@ image: "/static/blog/images/balance-signe-astrologique.webp"
 image_alt: "Illustration du signe astrologique de la Balance"
 ---
 
----
 
 # Signe Balance : personnalité, amour et traits de caractère
 

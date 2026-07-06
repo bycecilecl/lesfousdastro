@@ -8,10 +8,6 @@ image: "/static/blog/images/astropapote-libre-arbitre-destin.webp"
 image_alt: "Réflexion astrologique sur le libre arbitre"
 ---
 
-Ok, j'ai la matière. C'est de l'oral pur — il faut tout reconstruire dans ton ton écrit. Je m'y colle.
-
----
-
 # Astrologie et libre arbitre : on a vraiment le choix ?
 
 *Astropapote — mes réflexions en vrac sur l'astrologie*
