@@ -78,7 +78,9 @@ Professionnellement, ça peut être une zone de friction et de fatigue. Vous n'�
 ### Niveau 1 : le Cancer niveau 1 ou l'art de transformer chaque contrariété en tragédie grecque
 
 
-![Cancer Niveau 1](/static/blog/images/bd_cancer_niveau1.webp)
+<a href="/static/blog/images/bd_cancer_niveau1.webp" data-fancybox="cancer-niveaux">
+    <img src="/static/blog/images/bd_cancer_niveau1.webp" alt="Cancer Niveau 1">
+</a>
 
 Cette énergie est toxique, encore plus que les autres. Oui...même plus que le Scorpion ou encore le Poissons, ses copains de galère émotionnelle. 
 Le Cancer de niveau 1 se plaint avec une aisance Olympique, vit dans le déni total de ses propres défauts "Quoi ? De MA faute ?!," et cultive une mauvaise foi digne d'une médaille d'Or. 
@@ -101,7 +103,9 @@ Esclace de ses envies du moment, prêt à tout pour qu'on s'occupe de lui, oppor
 
 ### Le Cancer Niveau 2 ou comment devenir stable émotionnellement sans perdre son sans du drama gratuit
 
-![Cancer Niveau 2](/static/blog/images/bd_cancer_niveau2.webp)
+<a href="/static/blog/images/bd_cancer_niveau2.webp" data-fancybox="cancer-niveaux">
+    <img src="/static/blog/images/bd_cancer_niveau2.webp" alt="Cancer Niveau 2">
+</a>
 
 Au niveau 2, le Cancer est plus accomodant, mais toujours réticent à lâcher ses vieux réflexes de survie. Il peut tomber amoureux jeune, façon Bélier, mais version tableau Excel avec colonne avantages/inconvénients avant de s'engager pour le cocon parfait. 
 Il pose enfin ses limites, arrête de se faire marcher dessus, et réalise qu'il peut être un peu (beaucoup) étouffant. Rassuré par son cercle qu'il a trié sur le volet, il s'ouvre, se stabilise, et découvre, enfin, que son point d'ancrage c'est lui-même, pas forcément le clan entier.
