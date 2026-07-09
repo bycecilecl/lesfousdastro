@@ -34,6 +34,7 @@ from routes.pages import pages_bp
 from routes.checkout import checkout_bp
 from routes.site import site_bp
 from routes.profil_amoureux_module import profil_amoureux_module
+from routes.blog import charger_articles
 
 
 from routes import register_routes
@@ -162,11 +163,18 @@ def sitemap():
 
     pages = [
         "https://lesfousdastro.fr/",
-        "https://lesfousdastro.fr/blog",
         "https://lesfousdastro.fr/analyses",
-        "https://lesfousdastro.fr/formations",
+        "https://lesfousdastro.fr/blog",
+        "https://lesfousdastro.fr/temoignages",
         "https://lesfousdastro.fr/contact",
     ]
+
+    articles = charger_articles()
+
+    for article in articles:
+        pages.append(
+            f"https://lesfousdastro.fr/blog/{article['slug']}"
+        )
 
     sitemap_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

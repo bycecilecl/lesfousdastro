@@ -269,4 +269,4 @@ Enfance, famille, mère, passé, généalogie, ancêtres, femmes, bébé, gestat
 Article rédigé par Cécile CL
 
 Astrologue et fondatrice des Fous d'Astro
-Illustrations générées par l'IA
+Illustrations générées par l'IA  
