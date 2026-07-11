@@ -287,6 +287,16 @@ input[type="time"]:focus, input[type="email"]:focus {
     border: 2px solid transparent;
 }
 
+.option-card.consultation {
+    border: 3px solid #1f628e;
+    background: linear-gradient(135deg, rgba(31,98,142,0.08), rgba(255,255,255,0.9));
+}
+
+.option-card.consultation .status {
+    background: linear-gradient(45deg, #1f628e, #00a8a8);
+    color: white;
+}
+
 
 .icon {
     display: flex;
@@ -796,7 +806,16 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <em>Détail complet et exemple de rapport sur la page Analyses.</em>
                         </div>
                     </div>
+
+                    <div class="option-card consultation" onclick="window.location.href='/prestations'">
+                        <span class="icon"><img src="/static/icons/ccl-consultations.webp" alt="" width="120" height="120"></span>
+                        <h4>Consultation Personnalisée</h4>
+                        <p>Une lecture manuelle, en direct, qui prend en compte ton vécu et s'adapte à toi en temps réel</p>
+                        <span class="status available">Découvrir mes prestations</span>
                     </div>
+                    </div>
+
+
 
                 <div class="packs-section">
                     <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
@@ -805,7 +824,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                         <div class="pack-card" onclick="selectPack('origines')">
                             <div class="pack-badge" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">-20% NOUVEAU</div>
                             <div class="pack-title">🌑 Pack Origines</div>
-                            <div class="pack-content">✓ Point Astral — qui tu es aujourd'hui<br>✓ Analyse Karmique — pourquoi tu es comme ça<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
+                            <div class="pack-content">✓ Point Astral : qui tu es aujourd'hui<br>✓ Analyse Karmique : pourquoi tu es comme ça<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
                             <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">104€</span><br><span class="pack-price-value">83€</span></div></div>
                         </div>
                         <div class="pack-card essence-special" onclick="selectPack('essence')" style="border:2px solid #FFD700;">
