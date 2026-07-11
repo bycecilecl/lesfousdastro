@@ -68,7 +68,7 @@ body {
     padding: 40px;
     margin-bottom: 30px;
     box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-    line-height: 1.7;
+    line-height: 1.5;
 }
 
 .section-title {
@@ -83,28 +83,28 @@ body {
     color: #1f628e;
     font-size: 1.5rem;
     font-weight: 600;
-    margin: 30px 0 15px 0;
+    margin: 26px 0 12px 0;
 }
 
 .content-section p {
     color: #333;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
     font-size: 1.05rem;
 }
 
 .content-section ul {
     color: #333;
     padding-left: 25px;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
-.content-section li { margin-bottom: 8px; }
+.content-section li { margin-bottom: 6px; }
 
 .highlight-box {
     background: linear-gradient(135deg, rgba(31,98,142,0.1), rgba(0,168,168,0.05));
     border-left: 4px solid #00a8a8;
     padding: 20px;
-    margin: 25px 0;
+    margin: 20px 0;
     border-radius: 8px;
 }
 
@@ -112,7 +112,7 @@ body {
     background: rgba(192, 240, 247, 0.2);
     border-radius: 15px;
     padding: 25px;
-    margin: 25px 0;
+    margin: 20px 0;
     font-style: italic;
     text-align: center;
     color: #1f628e;
@@ -123,7 +123,7 @@ body {
     background: rgba(255, 193, 7, 0.1);
     border-left: 4px solid #ffc107;
     padding: 20px;
-    margin: 25px 0;
+    margin: 20px 0;
     border-radius: 8px;
 }
 
@@ -158,7 +158,7 @@ body {
 }
 
 .point-astral-quote {
-    margin: 24px 0;
+    margin: 20px 0;
     padding: 20px 24px;
     border-left: 4px solid var(--accent, #d4af37);
     background: rgba(212, 175, 55, 0.08);
@@ -168,17 +168,33 @@ body {
 }
 
 .point-astral-fit {
-    margin-top: 16px;
+    margin-top: 12px;
     font-size: 0.95em;
     color: var(--text-secondary, #555);
 }
 
 .point-astral-sample {
     display: inline-block;
-    margin-top: 12px;
+    margin-top: 10px;
     font-size: 0.95em;
     text-decoration: underline;
     color: var(--accent, #d4af37);
+}
+
+.global-disclaimer {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto 60px auto;
+    padding: 0 20px;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.global-disclaimer a {
+    color: white;
+    text-decoration: underline;
 }
 
 @media (max-width: 768px) {
@@ -222,7 +238,7 @@ body {
 
     <section class="content-section">
         <h2 class="section-title">Comment fonctionnent les analyses astrologiques ?</h2>
-        <p>L'analyse comment par le calcul précis de ton thème natal à partir de trois informations essentielles :</p>
+        <p>L'analyse commence par le calcul précis de ton thème natal à partir de trois informations essentielles :</p>
 
         <h3 class="section-subtitle">Les données nécessaires</h3>
         <ul>
@@ -248,6 +264,10 @@ body {
     <section class="content-section">
         <h2 class="section-title">Les analyses astrologiques</h2>
         <p>Avec Les Fous d'Astro, je propose différentes analyses permettant de répondre à différents besoins et à ton niveau de curiosité astrologique :</p>
+
+        <div class="quote-box">
+            "Chaque analyse est calculée et personnalisée selon ton thème natal unique. Je ne propose jamais de contenu générique."
+        </div>
 
         <h3 class="section-subtitle">🌟 Analyse Gratuite</h3>
         <p>Parfait pour découvrir l'astrologie ou avoir un premier aperçu de ton profil :</p>
@@ -299,8 +319,8 @@ body {
         </ul>
 
         <blockquote class="point-astral-quote">
-            On ne te dit pas si tu vas trouver l'amour.<br>
-            On t'explique comment aimes, ce qui t'attire, et pourquoi certains schémas reviennent.
+            Je ne te dis pas si tu vas trouver l'amour.<br>
+            Je t'explique comment tu aimes, ce qui t'attire, et pourquoi certains schémas reviennent.
         </blockquote>
 
         <p class="point-astral-fit">
@@ -309,12 +329,8 @@ body {
 
         <a href="/exemple-profil-amoureux.pdf" target="_blank" class="point-astral-sample">📄 Voir un extrait du rapport</a>
 
-        <div class="quote-box">
-            "Chaque analyse est calculée et personnalisée selon ton thème natal unique. Nous ne proposons jamais de contenu générique."
-        </div>
-
         <h3 class="section-subtitle">🔮 Analyse Karmique — 69€</h3>
-        <p>L'analyse la plus profonde de la gamme : une exploration de 12 pages des schémas que tu rejoues sans t'en rendre compte : mémoires anciennes, blessures actives, dynamiques inconscientes.</p>
+        <p>L'analyse la plus profonde de la gamme : une exploration de 12 pages des schémas que tu rejoues sans t'en rendre compte — mémoires anciennes, blessures actives, dynamiques inconscientes.</p>
         <p>Contrairement aux autres analyses centrées sur qui tu es, Analyse Karmique s'intéresse à ce qui se répète : les nœuds lunaires, les maisons 4/8/12, les rétrogrades, Chiron, la Lune Noire, les interceptions. Chaque module éclaire une facette différente du même fil conducteur, pour t'aider à sortir des automatismes plutôt que de les subir.</p>
 
         <ul>
@@ -329,7 +345,7 @@ body {
 
         <blockquote class="point-astral-quote">
             Ce thème ne parle pas de destin.<br>
-            Il parle de ce que tu rejoues sans t'en rendre compte et de ce que tu peux enfin conscientiser.
+            Je t'aide à voir ce que tu rejoues sans t'en rendre compte — et ce que tu peux enfin conscientiser.
         </blockquote>
 
         <p class="point-astral-fit">
@@ -337,12 +353,21 @@ body {
         </p>
 
         <a href="/exemple-analyse-karmique.pdf" target="_blank" class="point-astral-sample">📄 Voir un extrait du rapport</a>
-            </section>
-
-    
+    </section>
 
     <section class="content-section">
         <h2 class="section-title">Limites et précautions importantes</h2>
+        <p>
+            Chaque analyse s'appuie sur une base d'interprétation que j'ai construite moi-même, à partir de
+            mes années de pratique en astrologie occidentale et védique. L'objectif est de se rapprocher le
+            plus possible d'une lecture manuelle, avec la nuance et la profondeur que je mets habituellement
+            dans mes consultations.
+        </p>
+        <p>
+            Cela dit, une analyse automatisée reste différente d'une analyse manuelle : la machine n'a pas
+            accès à ton vécu réel, à ce que tu me raconterais en séance, ni à la capacité d'ajuster une
+            interprétation en fonction de ce que tu me refléterais sur le moment.
+        </p>
         <div class="warning-box">
             <h4>L'astrologie ne peut pas :</h4>
             <ul>
@@ -364,7 +389,16 @@ body {
     </section>
 </div>
 
-
+<div class="global-disclaimer">
+    <p>
+        ♻ Ces rapports sont générés avec l'aide d'un système d'IA à partir d'une base d'interprétation
+        que j'ai construite. De petites répétitions ou incohérences peuvent apparaître. Rien ne remplace
+        un échange humain direct pour approfondir ton thème.
+    </p>
+    <p>
+        💫 Envie d'aller plus loin ? <a href="https://www.bycecilecl.com" target="_blank">Réserve une consultation personnalisée</a>.
+    </p>
+</div>
 {% endblock %}
 
 {% block scripts %}
