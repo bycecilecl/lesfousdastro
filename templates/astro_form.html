@@ -283,6 +283,12 @@ input[type="time"]:focus, input[type="email"]:focus {
     border: 2px solid transparent;
 }
 
+.icon img {
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
 .status.available { background: linear-gradient(135deg, #10B981, #059669); color: white; box-shadow: 0 1px 6px rgba(16,185,129,0.15); }
 .status.available:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(16,185,129,0.2); }
 .status.coral { background: linear-gradient(135deg, #FF6B6B, #FF8E53); color: white; }
@@ -713,9 +719,11 @@ input[type="time"]:focus, input[type="email"]:focus {
                     </div>
 
                   <div class="option-card coral" onclick="addToCart('flash_astral', 'Point Astral', 35, this)">
-                    <span class="icon">✨</span>
+                    <span class="icon">
+                        <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
+                    </span>
                     <h4>Point Astral</h4>
-                    <p>Les grandes dynamiques de ton thème natal sur 4 à 6 pages<br>+ ton Nakshatra lunaire</p>
+                    <p>Les grandes dynamiques de ton thème natal sur 4 à 6 pages</p>
                     <div class="price">35€</div>
                     <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                     <span class="status coral">Clique pour sélectionner</span>
@@ -723,7 +731,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                         <strong>Ce que tu reçois</strong>
                         Ton Big 3 (Ascendant, Soleil, Lune), ton monde intérieur, tes racines familiales, tes grands axes, une synthèse personnalisée.
                         <br><br>
-                        <a href="/guide-analyses#point-astral" onclick="event.stopPropagation()">Voir le détail et un exemple de rapport →</a>
+                        <em>Détail complet et exemple de rapport sur la page Analyses.</em>
                     </div>
                 </div>
 
