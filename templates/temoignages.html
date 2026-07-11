@@ -6,7 +6,6 @@
 
 {% block extra_css %}
 /* Swiper */
-@import url('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css');
 
 body {
     background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
@@ -194,8 +193,12 @@ body {
 {% endblock %}
 
 {% block scripts %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='vendor/swiper/swiper-bundle.min.css') }}"
+>
+
+<script src="{{ url_for('static', filename='vendor/swiper/swiper-bundle.min.js') }}"></script>
 <script>
     const swiper = new Swiper('#tmgSwiper', {
         loop: false,
