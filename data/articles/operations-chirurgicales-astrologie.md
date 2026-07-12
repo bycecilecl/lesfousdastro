@@ -3,7 +3,7 @@ title: "Chirurgies et santé en Astrologie : mon parcours médical décrypté"
 slug: "chirurgies-sante-astrologie-theme-natal"
 description: "Trois opérations, une infection ayant frôlé la septicémie : découvrez comment mon thème natal, mes révolutions solaires et mes transits reflètent mon parcours médical en astrologie."
 date: "2026-07-12"
-category: "Carnets d'Astrologue"
+category: "Carnets d'astrologue"
 image: "/static/blog/images/chirurgies-sante-astrologie.webp"
 image_alt: "Illustration d'une analyse astrologique de chirurgies et de problèmes de santé à travers un thème natal"
 ---

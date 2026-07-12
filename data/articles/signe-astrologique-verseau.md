@@ -3,7 +3,7 @@ title: "Signe astrologique du Verseau : l'électron libre du zodiaque"
 slug: "signe-astrologique-verseau-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Verseau : son indépendance, son originalité, ses qualités, ses défauts, sa façon d'aimer et sa vision unique du monde."
 date: "2026-02-24"
-category: 
+categories:
 - "Signes astrologiques"
 - "Les Bases"
 image: "/static/blog/images/verseau-signe-astrologique.webp"

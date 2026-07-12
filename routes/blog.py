@@ -13,8 +13,8 @@ CATEGORIES_MAP = {
     "Maisons": "maison",
     "Analyses de thèmes": "analyses",
     "Astropapote": "astropapote",
-    "Carnets d'Astrologue": "carnets",
-    "Astrologie Védique": "vedique",
+    "Carnets d'astrologue": "carnets",
+    "Astrologie védique": "vedique",
 }
 
 

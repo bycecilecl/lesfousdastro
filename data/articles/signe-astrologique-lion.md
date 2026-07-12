@@ -3,7 +3,7 @@ title: "Signe astrologique du Lion : personnalité, qualités, défauts et compa
 slug: "signe-astrologique-lion-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Lion : ses qualités, ses défauts, sa façon d'aimer, son besoin de reconnaissance et les signes avec lesquels il s'entend le mieux."
 date: "2025-10-24"
-category: 
+categories:
 - "Signes astrologiques"
 - "Les Bases"
 image: "/static/blog/images/lion-signe-astrologique.webp"

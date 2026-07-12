@@ -3,7 +3,7 @@ title: "Signe astrologique des Poissons : la noyade ou le Graal"
 slug: "signe-astrologique-poissons-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité des Poissons : leur sensibilité, leur intuition, leurs qualités, leurs défauts, leur façon d'aimer et leur quête d'idéal entre noyade et transcendance."
 date: "2026-03-24"
-category: 
+categories:
 - "Signes astrologiques"
 - "Les Bases"
 image: "/static/blog/images/poissons-signe-astrologique.webp"
