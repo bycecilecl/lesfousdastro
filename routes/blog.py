@@ -57,6 +57,9 @@ def lire_article_md(path: Path) -> dict:
     if not categories:
         categories = [meta.get("category", "")]
 
+    if isinstance(categories, str):
+        categories = [categories]
+
     categories = [
         str(category).strip()
         for category in categories
