@@ -346,7 +346,7 @@
             {# Version Jinja : boucle sur les articles passés par Flask #}
            {% for article in articles %}
             <a href="{{ url_for('blog.blog_article', slug=article.slug) }}" class="card-link">
-                <article class="card" data-cat="{{ article.cat }}">
+                <article class="card" data-cats="{{ article.cats | join(' ') }}">
                     {% if article.image %}
                         <img
                             src="{{ article.image }}"
@@ -407,8 +407,12 @@
         const cat = btn.dataset.cat;
         document.querySelectorAll('.card-link').forEach(link => {
             const card = link.querySelector('.card');
-            link.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
-        });
+            const categories = card.dataset.cats.split(' ');
+            link.style.display =
+                (cat === 'all' || categories.includes(cat))
+                    ? ''
+                    : 'none';
+                });
     });
 </script>
 

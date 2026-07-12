@@ -3,7 +3,9 @@ title: "Signe astrologique du Sagittaire : optimisme, expansion et quête de sen
 slug: "signe-astrologique-sagittaire-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Sagittaire : son optimisme, son besoin de liberté, ses qualités, ses défauts, sa façon d'aimer et sa quête de sens."
 date: "2025-12-24"
-category: "Signes astrologiques"
+category: 
+- "Signes astrologiques"
+- "Les Bases"
 image: "/static/blog/images/sagittaire-signe-astrologique.webp"
 image_alt: "Signe astrologique du Sagittaire"
 ---

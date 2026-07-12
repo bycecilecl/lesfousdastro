@@ -52,15 +52,34 @@ def lire_article_md(path: Path) -> dict:
     print("HTML LENGTH :", len(html_content))
     print("CATÉGORIE :", meta.get("category"))
 
+    categories = meta.get("categories")
+
+    if not categories:
+        categories = [meta.get("category", "")]
+
+    categories = [
+        str(category).strip()
+        for category in categories
+        if str(category).strip()
+    ]
+
+    cats = [
+        CATEGORIES_MAP[category]
+        for category in categories
+        if category in CATEGORIES_MAP
+    ]
+
     return {
         "title": meta.get("title", slug),
         "slug": slug,
         "description": meta.get("description", ""),
         "excerpt": meta.get("description", ""),
         "date": meta.get("date", ""),
-        "category": str(meta.get("category", "")).strip(),
-        "cat": CATEGORIES_MAP.get(str(meta.get("category", "")).strip(), "signe"),  
-        "tag": meta.get("tag", meta.get("category", "Article")),
+       "categories": categories,
+        "cats": cats,
+        "category": categories[0] if categories else "",
+        "cat": cats[0] if cats else "signe",
+        "tag": meta.get("tag", categories[0] if categories else "Article"),
         "image": meta.get("image", ""),
         "image_alt": meta.get("image_alt", meta.get("title", slug)),
         "content": html_content,

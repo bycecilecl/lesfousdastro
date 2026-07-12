@@ -150,14 +150,27 @@ def before_request_handler():
 def sitemap():
     today = datetime.utcnow().strftime('%Y-%m-%d')
 
-    sitemap_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    urls = [
+        ("https://lesfousdastro.fr/", "1.0"),
+        ("https://lesfousdastro.fr/analyses", "0.8"),
+        ("https://lesfousdastro.fr/blog", "0.8"),
+        ("https://lesfousdastro.fr/temoignages", "0.8"),
+        ("https://lesfousdastro.fr/contact", "0.6"),
+    ]
+
+    sitemap_items = ""
+
+    for loc, priority in urls:
+        sitemap_items += f"""
   <url>
-    <loc>https://lesfousdastro.fr/</loc>
+    <loc>{loc}</loc>
     <lastmod>{today}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+    <priority>{priority}</priority>
+  </url>"""
+
+    sitemap_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{sitemap_items}
 </urlset>"""
 
     return Response(sitemap_xml, mimetype='application/xml')

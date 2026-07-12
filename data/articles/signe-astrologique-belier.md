@@ -3,7 +3,9 @@ title: "Signe astrologique du Bélier : personnalité, qualités, défauts et co
 slug: "signe-astrologique-belier-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Bélier : ses qualités, ses défauts, sa façon d'aimer, son tempérament de feu et les signes avec lesquels il s'entend le mieux."
 date: "2025-06-23"
-category: "Signes astrologiques"
+category: 
+- "Signes astrologiques"
+- "Les Bases"
 image: "/static/blog/images/belier-signe-astrologique.webp"
 image_alt: "Illustration du signe astrologique du Bélier"
 ---

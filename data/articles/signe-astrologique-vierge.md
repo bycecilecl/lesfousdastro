@@ -3,7 +3,9 @@ title: "Signe astrologique de la Vierge : personnalité, qualités, défauts et 
 slug: "signe-astrologique-vierge-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité de la Vierge : son perfectionnisme, ses qualités, ses défauts, sa façon d'aimer et les signes avec lesquels elle s'entend le mieux."
 date: "2025-11-24"
-category: "Signes astrologiques"
+category: 
+- "Signes astrologiques"
+- "Les Bases"
 image: "/static/blog/images/vierge-signe-astrologique.webp"
 image_alt: "Illustration du signe astrologique de la Vierge"
 ---

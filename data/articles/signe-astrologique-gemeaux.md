@@ -3,7 +3,9 @@ title: "Signe astrologique du Gémeaux : personnalité, qualités, défauts et c
 slug: "signe-astrologique-gemeaux-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Gémeaux : son intelligence, son humour, ses qualités, ses défauts, sa façon d'aimer et son incroyable capacité d'adaptation."
 date: "2025-08-24"
-category: "Signes astrologiques"
+category: 
+- "Signes astrologiques"
+- "Les Bases"
 image: "/static/blog/images/gemeaux-signe-astrologique.webp"
 image_alt: "Illustration du signe astrologique du Gémeaux"
 ---

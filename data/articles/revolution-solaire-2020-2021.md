@@ -3,7 +3,9 @@ title: "Révolution solaire 2020-2021 : l'année où j'ai cru y passer"
 slug: "revolution-solaire-2020-2021-etude-cas"
 description: "Étude complète de ma révolution solaire 2020-2021. Découvrez comment les placements astrologiques ont accompagné l'une des années les plus difficiles de ma vie et ce que les astres annonçaient réellement."
 date: "2026-03-07"
-category: "Analyses de thèmes"
+category:
+  - "Analyses de thèmes"
+  - "Carnets d'astrologue"
 image: "/static/blog/images/revolution-solaire-2020-2021.webp"
 image_alt: "Illustration d'une révolution solaire 2020-2021 avec roue astrologique et ambiance introspective"
 ---

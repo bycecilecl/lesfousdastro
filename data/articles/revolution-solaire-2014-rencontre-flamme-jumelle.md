@@ -3,7 +3,9 @@ title: "Révolution solaire : comment mon thème avait annoncé l'année qui a c
 slug: "revolution-solaire-annee-qui-a-change-ma-vie"
 description: "Peut-on voir un grand tournant de vie dans une révolution solaire ? Retour sur l'année où une rencontre a bouleversé mon existence et sur les indices astrologiques qui l'annonçaient."
 date: "2021-11-21"
-category: "Carnets d'Astrologue"
+category:
+  - "Analyses de thèmes"
+  - "Carnets d'astrologue"
 image: "/static/blog/images/revolution-solaire-annee-vie.webp"
 image_alt: "Illustration d'une révolution solaire et d'un tournant de vie en astrologie"
 ---

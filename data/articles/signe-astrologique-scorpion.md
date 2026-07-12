@@ -3,7 +3,9 @@ title: "Signe astrologique du Scorpion : intensité, pouvoir et transformation"
 slug: "signe-astrologique-scorpion-personnalite-qualites-defauts-compatibilites"
 description: "Découvrez la personnalité du Scorpion : son intensité, sa profondeur, ses qualités, ses défauts, sa façon d'aimer et son pouvoir de transformation."
 date: "2025-11-24"
-category: "Signes astrologiques"
+category: 
+- "Signes astrologiques"
+- "Les Bases"
 image: "/static/blog/images/scorpion-signe-astrologique.webp"
 image_alt: "Signe astrologique du Scorpion"
 ---

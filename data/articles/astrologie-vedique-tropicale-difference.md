@@ -3,7 +3,7 @@ title: "Astrologie védique vs astrologie tropicale : quelles différences ?"
 slug: "astrologie-vedique-vs-tropicale"
 description: "Découvrez les différences entre l'astrologie védique et l'astrologie tropicale à travers le thème de Marilyn Monroe et le système de prédiction indien Vimshottari Dasha."
 date: "2022-08-10"
-category: "Les Bases de l'Astrologie"
+category: "Les Bases"
 image: "/static/blog/images/astrologie-vedique-vs-tropicale.webp"
 image_alt: "Comparaison entre l'astrologie védique et l'astrologie tropicale illustrée par le thème de Marilyn Monroe"
 ---

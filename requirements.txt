@@ -63,3 +63,4 @@ google-auth>=2.0.0
 pandas
 Markdown==3.6
 PyYAML==6.0.2
+requests

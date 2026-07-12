@@ -3,7 +3,7 @@ title: "La Maison 1 en astrologie : Ascendant, personnalité et chemin d'incarna
 slug: "maison-1-astrologie-ascendant"
 description: "Découvrez la signification de la Maison 1 en astrologie : Ascendant, personnalité, corps, vitalité, conditions de naissance et rôle des planètes en Maison I, illustrés par des exemples concrets."
 date: "2022-04-13"
-category: "Les Maisons Astrologiques"
+category: "Maisons"
 image: "/static/blog/images/maison-1-astrologie.webp"
 image_alt: "Illustration de la Maison 1 en astrologie représentant l'Ascendant et la personnalité"
 ---
