@@ -26,6 +26,7 @@ CATEGORIES_MAP = {
     "astropapote": "astropapote",
     "carnets d'astrologue": "carnets",
     "astrologie védique": "vedique",
+    "astrologie uranienne": "uranienne"
 }
 
 
