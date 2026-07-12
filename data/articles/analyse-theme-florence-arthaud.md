@@ -8,10 +8,6 @@ image: "/static/blog/images/florence-arthaud-astrologie.webp"
 image_alt: "Illustration de l'analyse astrologique de Florence Arthaud en astrologie uranienne et traditionnelle"
 ---
 
-Titre H1 suggéré : **L'accident de Florence Arthaud en 3 astrologies : Uranienne, Traditionnelle et Védique**
-Meta description : *Un même événement, trois grilles de lecture. Thème natal, révolution solaire, transits et Vimshottari Dasha pour comprendre l'accident d'hélicoptère de Florence Arthaud.*
-
----
 
 ## Intro Astropapote
 
