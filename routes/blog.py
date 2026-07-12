@@ -6,15 +6,26 @@ import yaml
 
 blog_bp = Blueprint("blog", __name__)
 
+# CATEGORIES_MAP = {
+#     "Les Bases": "bases",
+#     "Signes astrologiques": "signe",
+#     "Planètes": "planete",
+#     "Maisons": "maison",
+#     "Analyses de thèmes": "analyses",
+#     "Astropapote": "astropapote",
+#     "Carnets d'astrologue": "carnets",
+#     "Astrologie védique": "vedique",
+# }
+
 CATEGORIES_MAP = {
-    "Les Bases": "bases",
-    "Signes astrologiques": "signe",
-    "Planètes": "planete",
-    "Maisons": "maison",
-    "Analyses de thèmes": "analyses",
-    "Astropapote": "astropapote",
-    "Carnets d'astrologue": "carnets",
-    "Astrologie védique": "vedique",
+    "les bases": "bases",
+    "signes astrologiques": "signe",
+    "planètes": "planete",
+    "maisons": "maison",
+    "analyses de thèmes": "analyses",
+    "astropapote": "astropapote",
+    "carnets d'astrologue": "carnets",
+    "astrologie védique": "vedique",
 }
 
 
@@ -67,9 +78,9 @@ def lire_article_md(path: Path) -> dict:
     ]
 
     cats = [
-        CATEGORIES_MAP[category]
+        CATEGORIES_MAP[category.lower()]
         for category in categories
-        if category in CATEGORIES_MAP
+        if category.lower() in CATEGORIES_MAP
     ]
 
     return {
