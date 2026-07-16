@@ -94,8 +94,7 @@ Ces trois astrologies se complètent : chacune éclaire une facette différente,
 
 Voilà mes amis ! À bientôt pour d'autres analyses en 3 astrologies :)
 
-Cécile CL
-[lesfousdastro.fr](http://lesfousdastro.fr)
-
 Article rédigé par Cécile CL
 Astrologue et fondatrice des Fous d'Astro
+[lesfousdastro.fr](https://lesfousdastro.fr)
+
