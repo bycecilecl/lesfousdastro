@@ -23,7 +23,7 @@
                 <h4>Menu</h4>
                 <ul class="footer-links">
                     <li><a href="{{ url_for('pages_bp.analyses') }}">Guide des Analyses</a></li>
-                    <li><a href="https://bycecilecl.com/categorie-produit/services/" target="_blank" rel="noopener">Consultations</a></li>
+                    <li><a href="{{ url_for('pages_bp.prestations') }}">Consultations</a></li>
                     <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
                 </ul>
             </div>
@@ -47,7 +47,7 @@
                     </p>
                     <p class="contact-item">
                         <span class="contact-icon">🌐</span>
-                        <a href="https://lesfousdastro.fr">lesfousdastro.fr</a>
+                        <a href="https://lesfousdastro.fr" target="_blank" rel="noopener">lesfousdastro.fr</a>
                     </p>
                     <p class="contact-item">
                         <span class="contact-icon">🏢</span>
@@ -56,8 +56,18 @@
                 </div>
                 <div class="newsletter">
                     <h5>Newsletter Cosmique</h5>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="Votre email..." class="newsletter-input">
+
+                    <form class="newsletter-form"
+                        action="{{ url_for('pages_bp.inscription_newsletter') }}"
+                        method="POST">
+
+                        <input
+                            type="email"
+                            name="newsletter_email"
+                            placeholder="Votre email..."
+                            class="newsletter-input"
+                            required>
+
                         <button type="submit" class="newsletter-btn">✨</button>
                     </form>
                 </div>

@@ -935,16 +935,18 @@ input[type="time"]:focus, input[type="email"]:focus {
         </button>
     </div>
 
-    <div class="consultation-section">
-        <h2 class="section-title">👥 Consultations Personnalisées</h2>
-        <div class="consultation-grid" style="grid-template-columns:1fr;max-width:500px;margin:30px auto 0;">
-            <a href="https://bycecilecl.com/categorie-produit/services/" class="consultation-card" target="_blank">
-                <span class="consultation-icon">🔮</span>
-                <div class="consultation-title">Réserver une Consultation</div>
-                <div class="consultation-description">Consultation approfondie avec analyse personnalisée en direct</div>
-            </a>
-        </div>
+    <<div class="consultation-section">
+    <h2 class="section-title">👥 Consultations Personnalisées</h2>
+    <div class="consultation-grid" style="grid-template-columns:1fr;max-width:500px;margin:30px auto 0;">
+        <a href="{{ url_for('pages_bp.prestations') }}" class="consultation-card">
+            <span class="consultation-icon">🔮</span>
+            <div class="consultation-title">Réserver une consultation</div>
+            <div class="consultation-description">
+                Consultation approfondie avec analyse personnalisée en direct.
+            </div>
+        </a>
     </div>
+</div>
 </div>
 
 <!-- Modal Analyse Gratuite -->
