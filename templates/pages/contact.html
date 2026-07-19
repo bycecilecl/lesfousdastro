@@ -170,6 +170,104 @@ body {
     text-align: center;
 }
 
+.newsletter-cta {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 45px 40px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.newsletter-cta h3 {
+    color: #1f628e;
+    font-size: 1.7rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.newsletter-cta__intro {
+    color: #444;
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.newsletter-cta__list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px;
+    text-align: left;
+    display: inline-block;
+}
+
+.newsletter-cta__list li {
+    color: #333;
+    font-size: 0.95rem;
+    line-height: 1.9;
+}
+
+.newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 380px;
+    margin: 0 auto;
+}
+
+.newsletter-form input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #c0f0f7;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: rgba(192,240,247,0.1);
+    transition: all 0.3s ease;
+}
+
+.newsletter-form input:focus {
+    outline: none;
+    border-color: #00a8a8;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0,168,168,0.1);
+}
+
+.newsletter-form button {
+    background: linear-gradient(135deg, #1f628e, #00a8a8);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.newsletter-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(31,98,142,0.3);
+}
+
+.newsletter-msg {
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    font-size: 0.92rem;
+}
+
+.newsletter-msg--succes {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.newsletter-msg--erreur {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
 @media (max-width: 768px) {
     .main-content { padding: 40px 15px; }
     .hero-title { font-size: 2.2rem; }
@@ -177,6 +275,7 @@ body {
     .contact-card { padding: 25px; }
     .form-row { grid-template-columns: 1fr; }
     .contact-methods li { flex-direction: column; text-align: center; gap: 10px; }
+    .newsletter-cta { padding: 32px 24px; }
 }
 {% endblock %}
 
@@ -185,7 +284,7 @@ body {
 
 <div class="main-content">
     <section class="hero-section">
-           <div class="badge-d-wrap">
+        <div class="badge-d-wrap">
             <div class="badge-d">✦ Nous contacter ✦</div>
         </div>
         <h1 class="sr-only">Nous Contacter</h1>
@@ -268,6 +367,32 @@ body {
                 <button type="submit" class="submit-btn">Envoyer le message</button>
             </form>
         </div>
+    </div>
+
+    <div class="newsletter-cta">
+        <h3>Rejoins la communauté des Fous d'Astro</h3>
+        <p class="newsletter-cta__intro">Reçois gratuitement :</p>
+
+        <ul class="newsletter-cta__list">
+            <li>🌙 les nouveaux articles du blog</li>
+            <li>🎥 les Astropapotes</li>
+            <li>🔮 les nouveautés et nouvelles analyses</li>
+            <li>🎁 les offres réservées aux abonnés</li>
+            <li>⛱️ et parfois, tout simplement des bons plans et du lifestyle !</li>
+        </ul>
+
+        {% if newsletter_succes %}
+        <div class="newsletter-msg newsletter-msg--succes">Inscription réussie, bienvenue chez les Fous d'Astro ! 🎉</div>
+        {% endif %}
+        {% if newsletter_erreur %}
+        <div class="newsletter-msg newsletter-msg--erreur">{{ newsletter_erreur }}</div>
+        {% endif %}
+
+        <form class="newsletter-form" action="{{ url_for('pages_bp.inscription_newsletter') }}" method="post">
+            <input type="text" name="newsletter_nom" placeholder="Ton prénom (optionnel)">
+            <input type="email" name="newsletter_email" placeholder="Ton adresse email" required>
+            <button type="submit">👉 Je m'inscris à la newsletter</button>
+        </form>
     </div>
 </div>
 {% endblock %}
