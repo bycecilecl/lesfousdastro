@@ -228,13 +228,19 @@ def api_analyse_gratuite():
 
             ajouter_email_au_sheet(email, prenom)
             try:
-                ajouter_contact_brevo(
+                contact_brevo_ok = ajouter_contact_brevo(
                     email=email,
                     nom=nom,
                     liste="flash",
                 )
-            except Exception:
-                print(f"⚠️ Impossible d'ajouter {email} à Brevo")
+
+                if contact_brevo_ok:
+                    print(f"✅ Contact ajouté à Brevo : {email}")
+                else:
+                    print(f"❌ Échec ajout Brevo : {email}")
+
+            except Exception as e:
+                print(f"❌ Exception pendant l'ajout Brevo : {e}")
             print("✅ [LEAD] Ajout Google Sheet OK")
         except Exception as e:
             import traceback
