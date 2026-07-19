@@ -166,6 +166,7 @@ def sitemap():
         "https://lesfousdastro.fr/analyses",
         "https://lesfousdastro.fr/blog",
         "https://lesfousdastro.fr/temoignages",
+        "https://lesfousdastro.fr/prestations",
         "https://lesfousdastro.fr/contact",
     ]
 
