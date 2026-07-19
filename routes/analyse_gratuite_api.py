@@ -11,6 +11,7 @@ from utils.email_sender import envoyer_email_avec_analyse
 from utils.email_quota import check_and_log_email_quota
 from threading import Thread
 import textwrap
+from textwrap import dedent
 from dotenv import load_dotenv
 import os
 
@@ -147,47 +148,66 @@ def api_analyse_gratuite():
         aspects_str   = formater_aspects(theme['aspects'])
 
         # 🤖 5) Prompt (même que l'ancienne version + genre)
-        prompt = f"""
-Tu es une astrologue expérimentée, à la plume fine, directe, drôle et lucide.
-Tu proposes des analyses psychologiques profondes, qui vont à l'essentiel.
-Tu parles à la personne avec respect, sans flatterie, ni fioriture inutile, ni phrases creuses.
-Ton style est vivant mais jamais niais. Tu évites les clichés astrologiques.
-Tu ne parles pas *de* la personne, tu lui parles *directement*.
-Tu aides la personne à prendre conscience de ses forces et défis intérieurs.
+        prompt = dedent(
+            f"""
+            Tu es une astrologue expérimentée, directe, lucide et vivante avec une pointe d'humour noir.
 
-Voici les données du thème de {theme['nom']} :
-- Genre déclaré (facultatif) : {gender or "non précisé"}
+            Tu écris un aperçu astrologique gratuit destiné à faire découvrir
+            la profondeur du thème astral, sans livrer une analyse complète.
 
-Résumé synthétique :
-{resume_str}
+            Considère cette analyse comme la bande-annonce d'un film, pas le film lui-même. Elle doit créer le suspense.
+            Elle doit être suffisamment précise pour que la personne se reconnaisse,
+            mais suffisamment incomplète pour susciter la curiosité.
+            Ne dévoile pas tous les mécanismes psychologiques.
+            Termine par 2-3 questions sur les grands axes du thème pour susciter la curiosité du lecteur.
 
-Positions planétaires :
-{positions_str}
+            Tu parles directement à la personne.
+            Tu utilises le tutoiement.
+            Tu ne flattes pas et tu n'emploies pas de phrases creuses.
+            Tu utilises uniquement l'astrologie occidentale tropicale.
+            N'intègre jamais l'astrologie védique ni d'autres systèmes astrologiques.
+            N'utilise pas les Nakshatras ni les concepts karmiques.
 
-Aspects astrologiques :
-{aspects_str}
+            Personne analysée : {theme.get("nom", "la personne")}
+            Genre déclaré (facultatif) : {gender or "non précisé"}
 
-Instruction :
-Écris une lecture globale, cohérente et incarnée du thème natal.
-- Ne commente pas les positions une par une.
-- N’utilise pas de pronom possessif devant les planètes (évite : “ton Mars”, “ta Vénus”, “ta Saturne”).
-- Repère les tensions internes (les dissonances, les contradictions).
-- Parle des dynamiques psychologiques sous-jacentes.
-- Mets en lumière les ressources intérieures.
-- Parle vrai, pas besoin de brosser dans le sens du poil.
-- Ose montrer les tiraillements, les paradoxes, les excès ou inhibitions.
-- Tu peux ajouter un regard existentiel si pertinent.
-- Ne déduis pas que la personne est extravertie ou sociable sans raison valable.
-- Utilise uniquement l'astrologie occidentale tropicale (signes, maisons, aspects) comme base d'interprétation.
-- N'intègre pas les données védiques (signe sidéral, maisons égales, logique karmique, etc.).
-- Fais exception uniquement pour le Nakshatra de la Lune védique, si celui-ci permet un éclairage complémentaire précis.
-- Ne mélange pas les deux systèmes dans une même phrase ou logique d'interprétation.
+            RÉSUMÉ SYNTHÉTIQUE :
 
-Tu peux conclure par une ou deux questions qui ouvrent à la réflexion. 
-Cette analyse doit donner envie d'en savoir plus, d'explorer plus en profondeur.
+            {resume_str}
 
-Fais une analyse de max 15 lignes.
-"""
+            POSITIONS PLANÉTAIRES :
+
+            {positions_str}
+
+            ASPECTS ASTROLOGIQUES :
+
+            {aspects_str}
+
+
+            L'analyse doit principalement parler :
+
+            - de la manière dont la personne apparaît au monde ;
+            - de la façon dont elle construit son identité ;
+            - du paradoxe principal qui traverse sa personnalité.
+
+            Termine par des questions ouvertes.
+            Ne cherche pas à tout expliquer.
+
+            RÈGLES :
+
+            - Ne commence pas par « Avec ton Ascendant ».
+            - Ne fais pas une liste de placements.
+            - Ne cite pas obligatoirement tous les termes astrologiques.
+            - Ne répète pas plusieurs fois la même idée.
+            - Donne au moins un exemple concret de comportement.
+            - N'invente aucun placement ni aucun aspect.
+            - Pas de conseil générique de développement personnel.
+            - Pas de syntaxe Markdown.
+            - Texte brut uniquement.
+            - Deux paragraphes maximum + questions finales.
+            - Entre 180 et 230 mots.
+            """
+        ).strip()
 
         print("📤 Prompt envoyé à l'IA :", prompt)
 
@@ -281,7 +301,7 @@ Fais une analyse de max 15 lignes.
         else:
             print("✉️  Email non envoyé (SEND_EMAILS=false ou email manquant)")
 
-        # 🎨 8) Génération du HTML pour le modal
+         # 🎨 8) Génération du HTML pour le modal
         html = f"""
         <div class="analysis-summary">
             <h4>🌟 Bonjour {theme['nom']}, voici ton profil astrologique :</h4>
@@ -289,39 +309,64 @@ Fais une analyse de max 15 lignes.
             
             <div style="margin-top:25px; padding:20px; background:rgba(31,98,142,0.1);
             border-radius:15px; text-align:center;">
-                <p><strong>Tu veux aller plus loin ?</strong></p>
                 <p style="margin-bottom:15px; color:#555;">
-                    Cette analyse te donne une première lecture de ton thème.<br>
-                    Deux façons de creuser selon ce qui t'attire :
+                    Si tu veux aller plus loin, découvre le <strong>Point Astral</strong> :
+                    une lecture approfondie avec les grands axes de ton thème.
                 </p>
 
-                <a href="/flash_astral"
+                <a href="/static/pdfs/Point_Astral_Britney_Spears.pdf" target="_blank"
                 style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
-                border-radius:8px;text-decoration:none;font-weight:bold;margin-bottom:10px;
+                border-radius:8px;text-decoration:none;font-weight:bold;
                 width:80%;max-width:300px;">
-                ✨ Mon Point Astral
-                </a>
-                <p style="font-size:12px;color:#777;margin:0 0 15px 0;">
-                    Tes grands mécanismes, forces et blocages — PDF complet
-                </p>
-
-                <a href="/analyse_karmique"
-                style="display:inline-block;padding:12px 24px;background:#6b3fa0;color:white;
-                border-radius:8px;text-decoration:none;font-weight:bold;margin-bottom:10px;
-                width:80%;max-width:300px;">
-                🔮 Mon Analyse Karmique
-                </a>
-                <p style="font-size:12px;color:#777;margin:0 0 20px 0;">
-                    D'où viennent tes schémas répétitifs — nœuds, Chiron, Lilith
-                </p>
-
-                <a href="/static/Exemple_Flash_Astral_Cecile.pdf" target="_blank"
-                style="font-size:13px;color:#1f628e;text-decoration:underline;">
-                📄 Voir un exemple du Point Astral avant d'acheter
+                📄 Voir un exemple de Point Astral
                 </a>
             </div>
         </div>
     """
+
+
+
+
+    #     html = f"""
+    #     <div class="analysis-summary">
+    #         <h4>🌟 Bonjour {theme['nom']}, voici ton profil astrologique :</h4>
+    #         <div style="margin: 20px 0; line-height: 1.6;">{texte}</div>
+            
+    #         <div style="margin-top:25px; padding:20px; background:rgba(31,98,142,0.1);
+    #         border-radius:15px; text-align:center;">
+    #             <p><strong>Tu veux aller plus loin ?</strong></p>
+    #             <p style="margin-bottom:15px; color:#555;">
+    #                 Cette analyse te donne une première lecture de ton thème.<br>
+    #                 Deux façons de creuser selon ce qui t'attire :
+    #             </p>
+
+    #             <a href="/flash_astral"
+    #             style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
+    #             border-radius:8px;text-decoration:none;font-weight:bold;margin-bottom:10px;
+    #             width:80%;max-width:300px;">
+    #             ✨ Mon Point Astral
+    #             </a>
+    #             <p style="font-size:12px;color:#777;margin:0 0 15px 0;">
+    #                 Tes grands mécanismes, forces et blocages — PDF complet
+    #             </p>
+
+    #             <a href="/analyse_karmique"
+    #             style="display:inline-block;padding:12px 24px;background:#6b3fa0;color:white;
+    #             border-radius:8px;text-decoration:none;font-weight:bold;margin-bottom:10px;
+    #             width:80%;max-width:300px;">
+    #             🔮 Mon Analyse Karmique
+    #             </a>
+    #             <p style="font-size:12px;color:#777;margin:0 0 20px 0;">
+    #                 D'où viennent tes schémas répétitifs — nœuds, Chiron, Lilith
+    #             </p>
+
+    #             <a href="/static/pdfs/Point_Astral_Britney_Spears.pdf" target="_blank"
+    #             style="font-size:13px;color:#1f628e;text-decoration:underline;">
+    #             📄 Voir un exemple du Point Astral avant d'acheter
+    #             </a>
+    #         </div>
+    #     </div>
+    # """
 
         # 🔍 9) Données de debug pour toi (ajoutées à la réponse mais cachées)
         debug_data = {
