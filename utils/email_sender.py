@@ -189,25 +189,13 @@ Coordonnées :
 def envoyer_email_contact(nom: str, email: str, sujet: str, message: str) -> bool:
     """Envoie le contenu du formulaire de contact à l'adresse du site."""
 
-    email_exp = os.getenv("EMAIL_ENVOI")
-    mdp_app = os.getenv("EMAIL_PASSWORD")
+    destinataire = os.getenv("EMAIL_ADMIN") or os.getenv("EMAIL_ENVOI")
 
-    if not email_exp or not mdp_app:
-        logger.error("🚫 EMAIL_ENVOI ou EMAIL_PASSWORD manquant")
+    if not destinataire:
+        logger.error("🚫 EMAIL_ADMIN ou EMAIL_ENVOI manquant")
         return False
 
-    try:
-        yag = yagmail.SMTP(
-            user=email_exp,
-            password=mdp_app,
-            host=SMTP_HOST,
-            port=SMTP_PORT,
-            smtp_ssl=SMTP_USE_SSL,
-            smtp_starttls=SMTP_USE_STARTTLS,
-            oauth2_file=None,
-        )
-
-        contenu = f"""
+    contenu_txt = f"""
 Nouveau message reçu depuis le formulaire de contact.
 
 Nom : {nom}
@@ -219,16 +207,10 @@ Sujet : {sujet}
 {message}
 """
 
-        yag.send(
-            to=email_exp,
-            reply_to=email,
-            subject=f"[Contact] {sujet}",
-            contents=contenu,
-        )
+    sujet_email = f"[Contact] {sujet or 'Nouveau message'}"
 
-        logger.info("✅ Message de contact reçu de %s", email)
-        return True
-
-    except Exception:
-        logger.exception("❌ Erreur envoi formulaire contact")
-        return False
+    return envoyer_email_avec_analyse(
+        destinataire=destinataire,
+        sujet=sujet_email,
+        contenu_txt=contenu_txt,
+    )
