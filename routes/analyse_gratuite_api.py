@@ -318,7 +318,7 @@ def api_analyse_gratuite():
                 style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
                 border-radius:8px;text-decoration:none;font-weight:bold;
                 width:80%;max-width:300px;">
-                📄 Voir un exemple de Point Astral
+                📄 Voir un exemple 
                 </a>
             </div>
         </div>
