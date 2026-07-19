@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask import render_template, request
 from utils.email_sender import envoyer_email_contact
 from utils.google.sheets_writer import ajouter_email_au_sheet
+from utils.brevo_contacts import ajouter_contact_brevo
 
 pages_bp = Blueprint("pages_bp", __name__)
 
@@ -45,11 +46,28 @@ def contact():
         )
 
         # Inscription newsletter
+        # Inscription newsletter depuis le formulaire de contact
         if newsletter:
             try:
-                ajouter_email_au_sheet(email, nom)
+                ajouter_email_au_sheet(email, nom or "Inconnu")
+                print(f"✅ Newsletter ajoutée au Google Sheet : {email}")
             except Exception as e:
-                print(f"Erreur inscription newsletter : {e}")
+                print(f"❌ Erreur Google Sheet newsletter : {e}")
+
+            try:
+                brevo_ok = ajouter_contact_brevo(
+                    email=email,
+                    nom=nom,
+                    liste="site",
+                )
+
+                if brevo_ok:
+                    print(f"✅ Newsletter ajoutée à Brevo : {email}")
+                else:
+                    print(f"❌ Échec ajout newsletter Brevo : {email}")
+
+            except Exception as e:
+                print(f"❌ Exception ajout newsletter Brevo : {e}")
 
         return render_template(
             "pages/contact.html",
@@ -75,18 +93,34 @@ def inscription_newsletter():
 
     try:
         ajouter_email_au_sheet(email, nom or "Inconnu")
-
-        return render_template(
-            "pages/contact.html",
-            active="contact",
-            newsletter_succes=True,
-        )
+        print(f"✅ Newsletter ajoutée au Google Sheet : {email}")
 
     except Exception as e:
-        print(f"Erreur inscription newsletter : {e}")
+        print(f"❌ Erreur Google Sheet newsletter : {e}")
 
         return render_template(
             "pages/contact.html",
             active="contact",
             newsletter_erreur="Une erreur est survenue. Merci de réessayer.",
         )
+
+    try:
+        brevo_ok = ajouter_contact_brevo(
+            email=email,
+            nom=nom,
+            liste="site",
+        )
+
+        if brevo_ok:
+            print(f"✅ Newsletter ajoutée à Brevo : {email}")
+        else:
+            print(f"❌ Échec ajout newsletter Brevo : {email}")
+
+    except Exception as e:
+        print(f"❌ Exception ajout newsletter Brevo : {e}")
+
+    return render_template(
+        "pages/contact.html",
+        active="contact",
+        newsletter_succes=True,
+    )
