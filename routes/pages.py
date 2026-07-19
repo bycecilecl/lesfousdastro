@@ -1,5 +1,5 @@
 from flask import Blueprint
-from flask import render_template, request
+from flask import render_template, request, redirect
 from utils.email_sender import envoyer_email_contact
 from utils.google.sheets_writer import ajouter_email_au_sheet
 from utils.brevo_contacts import ajouter_contact_brevo
@@ -119,8 +119,10 @@ def inscription_newsletter():
     except Exception as e:
         print(f"❌ Exception ajout newsletter Brevo : {e}")
 
-    return render_template(
-        "pages/contact.html",
-        active="contact",
-        newsletter_succes=True,
-    )
+    # return render_template(
+    #     "pages/contact.html",
+    #     active="contact",
+    #     newsletter_succes=True,
+    # )
+
+    return redirect(request.referrer or "/")
