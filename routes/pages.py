@@ -1,6 +1,5 @@
 from flask import Blueprint
 from flask import render_template, request
-from utils.google_reviews import get_google_reviews
 
 pages_bp = Blueprint("pages_bp", __name__)
 
