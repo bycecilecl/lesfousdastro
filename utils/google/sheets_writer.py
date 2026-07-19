@@ -1,6 +1,7 @@
 # utils/google/sheets_writer.py
 import os, json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -47,7 +48,7 @@ def ajouter_email_au_sheet(email, nom="Inconnu"):
     sheet = sh.sheet1
 
      # 🕒 Ajout date/heure
-    now = datetime.now()
+    now = datetime.now(ZoneInfo("Europe/Paris"))
     date = now.strftime("%Y-%m-%d")
     heure = now.strftime("%H:%M:%S")
 
