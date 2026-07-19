@@ -1,420 +1,266 @@
-<!doctype html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8" />
-    <title>{{ article.title }} – Les Fous d'Astro</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="{{ article.description }}">
+{% extends "base.html" %}
 
-    <!-- Open Graph -->
-    <meta property="og:type"        content="article">
-    <meta property="og:site_name"   content="Les Fous d'Astro">
-    <meta property="og:title"       content="{{ article.title }}">
-    <meta property="og:description" content="{{ article.description }}">
-    <meta property="og:url"         content="{{ canonical_url }}">
-    {% if article.image %}
-    <meta property="og:image" content="{{ request.host_url.rstrip('/') }}{{ article.image }}">
-    <meta property="og:image:alt" content="{{ article.image_alt }}">
-    <meta name="twitter:image" content="{{ request.host_url.rstrip('/') }}{{ article.image }}">
-    {% endif %}
-    {% if article.date %}
-    <meta property="article:published_time" content="{{ article.date }}">
-    {% endif %}
+{% block title %}{{ article.title }} – Les Fous d'Astro{% endblock %}
+{% block meta_description %}{{ article.description }}{% endblock %}
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card"        content="summary_large_image">
-    <meta name="twitter:title"       content="{{ article.title }}">
-    <meta name="twitter:description" content="{{ article.description }}">
-    {% if article.image %}
-    <meta name="twitter:image"       content="{{ article.image }}">
-    {% endif %}
+{% block extra_css %}
+:root {
+    --blue-dark: #1f628e;
+    --teal: #00a8a8;
+    --teal-light: #c0f0f7;
+    --night: #0d1b2a;
+    --text: #1a1a2e;
+    --text-muted: #5a6a7a;
+    --surface: #ffffff;
+    --surface-alt: #f4fbfd;
+    --border: rgba(0, 168, 168, 0.18);
+    --radius: 16px;
+    --radius-sm: 8px;
+}
 
-    <link rel="canonical" href="{{ canonical_url }}">
+/* ── Étoiles ── */
+.stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star {
+    position: absolute; width: 2px; height: 2px;
+    background: #fff; border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+}
+@keyframes twinkle { from { opacity: 0.2; } to { opacity: 0.9; } }
 
-    <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── Header article ── */
+.article-header {
+    background: linear-gradient(160deg, var(--night) 0%, var(--blue-dark) 50%, #0e5f6e 100%);
+    padding: 56px 24px 48px;
+    text-align: center;
+    position: relative; z-index: 1;
+    margin: 0 -20px;
+}
+.article-header__back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: rgba(255,255,255,0.6); text-decoration: none;
+    font-size: 0.82rem; font-weight: 500;
+    margin-bottom: 24px;
+    transition: color 0.2s;
+}
+.article-header__back:hover { color: var(--teal-light); }
+.article-header__back::before { content: '←'; }
 
-        :root {
-            --blue-dark: #1f628e;
-            --teal: #00a8a8;
-            --teal-light: #c0f0f7;
-            --night: #0d1b2a;
-            --text: #1a1a2e;
-            --text-muted: #5a6a7a;
-            --surface: #ffffff;
-            --surface-alt: #f4fbfd;
-            --border: rgba(0, 168, 168, 0.18);
-            --radius: 16px;
-            --radius-sm: 8px;
-        }
+.article-cover {
+    width: 100%;
+    border-radius: var(--radius);
+    margin-bottom: 36px;
+    display: block;
+}
 
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--surface-alt);
-            color: var(--text);
-        }
+.tag {
+    display: inline-block;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
+    margin-bottom: 20px;
+}
+.tag--signe   { background: #eeecff; color: #3c3489; }
+.tag--planete { background: #e4f4fb; color: #0c447c; }
+.tag--amour   { background: #fce8f2; color: #72243e; }
+.tag--maison  { background: #e2f5ee; color: #08503f; }
+.tag--karma   { background: #fff5e0; color: #854f0b; }
 
-        /* ── Étoiles ── */
-        .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-        .star {
-            position: absolute; width: 2px; height: 2px;
-            background: #fff; border-radius: 50%;
-            animation: twinkle 3s infinite alternate;
-        }
-        @keyframes twinkle { from { opacity: 0.2; } to { opacity: 0.9; } }
+.article-header__title {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700; letter-spacing: -0.03em; line-height: 1.2;
+    color: #fff; max-width: 720px; margin: 0 auto 16px;
+}
+.article-header__desc {
+    font-size: 1rem; line-height: 1.65;
+    color: rgba(255,255,255,0.7);
+    max-width: 600px; margin: 0 auto 24px;
+}
+.article-header__meta {
+    font-size: 0.8rem; color: rgba(255,255,255,0.45);
+    display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
+}
+.article-header__meta span::before { margin-right: 5px; }
 
-        /* ── Navbar ── */
-        .navbar {
-            background: linear-gradient(135deg, var(--night) 0%, var(--blue-dark) 60%, #0e5f6e 100%);
-            position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(192, 240, 247, 0.12);
-        }
-        .navbar__inner {
-            max-width: 1200px; margin: 0 auto; padding: 0 24px;
-            display: flex; align-items: center; justify-content: space-between;
-            height: 64px;
-        }
-        .navbar__brand {
-            font-size: 1.25rem; font-weight: 700; text-decoration: none; letter-spacing: -0.02em;
-            background: linear-gradient(90deg, var(--teal-light), #e8d5f0);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-        }
-        .navbar__toggle {
-            display: none; background: none; border: 1px solid rgba(255,255,255,0.25);
-            color: #fff; font-size: 1.1rem; padding: 7px 11px;
-            border-radius: var(--radius-sm); cursor: pointer;
-        }
-        .navbar__links { display: flex; list-style: none; gap: 4px; }
-        .navbar__links a {
-            color: rgba(255,255,255,0.82); text-decoration: none;
-            padding: 7px 14px; border-radius: 20px;
-            font-size: 0.875rem; font-weight: 500;
-            transition: background 0.2s, color 0.2s;
-        }
-        .navbar__links a:hover,
-        .navbar__links a.active { background: rgba(255,255,255,0.12); color: #fff; }
+/* ── Contenu ── */
+.article-wrap {
+    max-width: 740px; margin: 0 auto;
+    padding: 56px 24px 80px;
+    position: relative; z-index: 1;
+}
 
-        /* ── Header article ── */
-        .article-header {
-            background: linear-gradient(160deg, var(--night) 0%, var(--blue-dark) 50%, #0e5f6e 100%);
-            padding: 56px 24px 48px;
-            text-align: center;
-            position: relative; z-index: 1;
-        }
-        .article-header__back {
-            display: inline-flex; align-items: center; gap: 6px;
-            color: rgba(255,255,255,0.6); text-decoration: none;
-            font-size: 0.82rem; font-weight: 500;
-            margin-bottom: 24px;
-            transition: color 0.2s;
-        }
-        .article-header__back:hover { color: var(--teal-light); }
-        .article-header__back::before { content: '←'; }
+.article-body { font-size: 1.05rem; line-height: 1.8; color: var(--text); }
 
-        .article-cover {
-            width: 100%;
-            border-radius: var(--radius);
-            margin-bottom: 36px;
-            display: block;
-        }
+.article-body h1,
+.article-body h2 {
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--blue-dark); margin: 2.2rem 0 0.8rem;
+    letter-spacing: -0.02em; line-height: 1.3;
+}
+.article-body h3 {
+    font-size: 1.1rem; font-weight: 600;
+    color: var(--teal); margin: 1.8rem 0 0.6rem;
+}
+.article-body p { margin-bottom: 1.2rem; }
+.article-body a { color: var(--teal); text-decoration: underline; }
+.article-body a:hover { color: var(--blue-dark); }
 
-        .tag {
-            display: inline-block;
-            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
-            text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
-            margin-bottom: 20px;
-        }
-        .tag--signe   { background: #eeecff; color: #3c3489; }
-        .tag--planete { background: #e4f4fb; color: #0c447c; }
-        .tag--amour   { background: #fce8f2; color: #72243e; }
-        .tag--maison  { background: #e2f5ee; color: #08503f; }
-        .tag--karma   { background: #fff5e0; color: #854f0b; }
+.article-body ul,
+.article-body ol {
+    margin: 0 0 1.2rem 1.4rem;
+    display: flex; flex-direction: column; gap: 6px;
+}
+.article-body li { line-height: 1.7; }
 
-        .article-header__title {
-            font-size: clamp(1.6rem, 4vw, 2.4rem);
-            font-weight: 700; letter-spacing: -0.03em; line-height: 1.2;
-            color: #fff; max-width: 720px; margin: 0 auto 16px;
-        }
-        .article-header__desc {
-            font-size: 1rem; line-height: 1.65;
-            color: rgba(255,255,255,0.7);
-            max-width: 600px; margin: 0 auto 24px;
-        }
-        .article-header__meta {
-            font-size: 0.8rem; color: rgba(255,255,255,0.45);
-            display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
-        }
-        .article-header__meta span::before { margin-right: 5px; }
+.article-body blockquote {
+    border-left: 3px solid var(--teal);
+    margin: 1.8rem 0; padding: 14px 20px;
+    background: var(--surface-alt);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-style: italic; color: var(--text-muted);
+}
 
-        /* ── Contenu ── */
-        .article-wrap {
-            max-width: 740px; margin: 0 auto;
-            padding: 56px 24px 80px;
-            position: relative; z-index: 1;
-        }
+.article-body strong { font-weight: 600; color: var(--text); }
+.article-body em { color: var(--text-muted); }
 
-        /* Styles prose pour le contenu WordPress/HTML injecté */
-        .article-body { font-size: 1.05rem; line-height: 1.8; color: var(--text); }
+.article-body hr {
+    border: none; border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+}
 
-        .article-body h1,
-        .article-body h2 {
-            font-size: 1.4rem; font-weight: 700;
-            color: var(--blue-dark); margin: 2.2rem 0 0.8rem;
-            letter-spacing: -0.02em; line-height: 1.3;
-        }
-        .article-body h3 {
-            font-size: 1.1rem; font-weight: 600;
-            color: var(--teal); margin: 1.8rem 0 0.6rem;
-        }
-        .article-body p { margin-bottom: 1.2rem; }
-        .article-body a { color: var(--teal); text-decoration: underline; }
-        .article-body a:hover { color: var(--blue-dark); }
+.article-body img {
+    max-width: 100%; border-radius: var(--radius);
+    margin: 1.5rem 0;
+}
 
-        .article-body ul,
-        .article-body ol {
-            margin: 0 0 1.2rem 1.4rem;
-            display: flex; flex-direction: column; gap: 6px;
-        }
-        .article-body li { line-height: 1.7; }
+.article-divider {
+    text-align: center; color: var(--teal);
+    font-size: 1.2rem; letter-spacing: 0.3em;
+    margin: 2.5rem 0; opacity: 0.5;
+}
 
-        .article-body blockquote {
-            border-left: 3px solid var(--teal);
-            margin: 1.8rem 0; padding: 14px 20px;
-            background: var(--surface-alt);
-            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-            font-style: italic; color: var(--text-muted);
-        }
+.article-cta {
+    margin-top: 3rem;
+    background: linear-gradient(135deg, var(--blue-dark), var(--teal));
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    text-align: center; color: #fff;
+}
+.article-cta p {
+    font-size: 0.95rem; line-height: 1.6;
+    margin-bottom: 18px; opacity: 0.9;
+}
+.article-cta a {
+    display: inline-block;
+    background: #fff; color: var(--blue-dark);
+    font-size: 0.9rem; font-weight: 700;
+    padding: 11px 26px; border-radius: 30px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.article-cta a:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
 
-        .article-body strong { font-weight: 600; color: var(--text); }
-        .article-body em { color: var(--text-muted); }
+.article-nav {
+    display: flex; gap: 16px; margin-top: 2.5rem; flex-wrap: wrap;
+}
+.article-nav__link {
+    flex: 1; min-width: 200px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 20px;
+    text-decoration: none; color: var(--text);
+    transition: border-color 0.2s, transform 0.2s;
+    display: flex; flex-direction: column; gap: 4px;
+}
+.article-nav__link:hover { border-color: var(--teal); transform: translateY(-2px); }
+.article-nav__link--next { text-align: right; }
+.article-nav__label {
+    font-size: 0.75rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+}
+.article-nav__title { font-size: 0.9rem; font-weight: 600; }
 
-        .article-body hr {
-            border: none; border-top: 1px solid var(--border);
-            margin: 2.5rem 0;
-        }
+.share-box {
+    margin: 3rem 0 2rem;
+    padding: 24px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: center;
+}
+.share-title { font-weight: 700; color: var(--blue-dark); margin-bottom: 16px; }
+.share-buttons { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.share-btn {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--blue-dark), var(--teal));
+    color: #fff !important;
+    text-decoration: none !important;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+.share-btn:hover { transform: translateY(-2px); }
 
-        .article-body img {
-            max-width: 100%; border-radius: var(--radius);
-            margin: 1.5rem 0;
-        }
+.related-posts,
+.newsletter-box { margin-top: 3rem; }
 
-        /* ── Séparateur décoratif ── */
-        .article-divider {
-            text-align: center; color: var(--teal);
-            font-size: 1.2rem; letter-spacing: 0.3em;
-            margin: 2.5rem 0; opacity: 0.5;
-        }
+.related-posts h2,
+.newsletter-box h2 {
+    color: var(--blue-dark);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
 
-        /* ── CTA fin d'article ── */
-        .article-cta {
-            margin-top: 3rem;
-            background: linear-gradient(135deg, var(--blue-dark), var(--teal));
-            border-radius: var(--radius);
-            padding: 32px 28px;
-            text-align: center; color: #fff;
-        }
-        .article-cta p {
-            font-size: 0.95rem; line-height: 1.6;
-            margin-bottom: 18px; opacity: 0.9;
-        }
-        .article-cta a {
-            display: inline-block;
-            background: #fff; color: var(--blue-dark);
-            font-size: 0.9rem; font-weight: 700;
-            padding: 11px 26px; border-radius: 30px;
-            text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .article-cta a:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
 
-        /* ── Nav prev/next ── */
-        .article-nav {
-            display: flex; gap: 16px; margin-top: 2.5rem; flex-wrap: wrap;
-        }
-        .article-nav__link {
-            flex: 1; min-width: 200px;
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 16px 20px;
-            text-decoration: none; color: var(--text);
-            transition: border-color 0.2s, transform 0.2s;
-            display: flex; flex-direction: column; gap: 4px;
-        }
-        .article-nav__link:hover { border-color: var(--teal); transform: translateY(-2px); }
-        .article-nav__link--next { text-align: right; }
-        .article-nav__label {
-            font-size: 0.75rem; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.06em;
-        }
-        .article-nav__title { font-size: 0.9rem; font-weight: 600; }
+.related-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.related-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.related-card img { width: 100%; height: 110px; object-fit: cover; display: block; }
+.related-card span {
+    display: block; color: var(--teal);
+    font-size: 0.75rem; font-weight: 700;
+    padding: 12px 14px 0;
+}
+.related-card h3 { font-size: 0.95rem; line-height: 1.35; padding: 6px 14px 16px; }
 
+.newsletter-box {
+    background: linear-gradient(135deg, var(--blue-dark), var(--teal));
+    color: white;
+    border-radius: var(--radius);
+    padding: 30px;
+    text-align: center;
+}
+.newsletter-box h2 { color: white; }
+.newsletter-box p { margin-bottom: 18px; line-height: 1.6; }
+.newsletter-box a {
+    display: inline-block;
+    background: white;
+    color: var(--blue-dark);
+    padding: 11px 24px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+}
 
-        .share-box {
-            margin: 3rem 0 2rem;
-            padding: 24px;
-            background: var(--surface-alt);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            text-align: center;
-        }
+@media (max-width: 768px) {
+    .article-header { padding: 40px 20px 36px; margin: 0 -15px; }
+    .article-wrap { padding: 36px 20px 60px; }
+}
+{% endblock %}
 
-        .share-title {
-            font-weight: 700;
-            color: var(--blue-dark);
-            margin-bottom: 16px;
-        }
-
-        .share-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .share-btn {
-            display: inline-block;
-            padding: 10px 16px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, var(--blue-dark), var(--teal));
-            color: #fff !important;
-            text-decoration: none !important;
-            font-size: 0.85rem;
-            font-weight: 700;
-        }
-
-        .share-btn:hover {
-            transform: translateY(-2px);
-        }
-        .related-posts,
-        .newsletter-box {
-            margin-top: 3rem;
-        }
-
-        .related-posts h2,
-        .newsletter-box h2 {
-            color: var(--blue-dark);
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-        }
-
-        .related-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-        }
-
-        .related-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            text-decoration: none;
-            color: var(--text);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .related-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
-
-        .related-card img {
-            width: 100%;
-            height: 110px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .related-card span {
-            display: block;
-            color: var(--teal);
-            font-size: 0.75rem;
-            font-weight: 700;
-            padding: 12px 14px 0;
-        }
-
-        .related-card h3 {
-            font-size: 0.95rem;
-            line-height: 1.35;
-            padding: 6px 14px 16px;
-        }
-
-        .newsletter-box {
-            background: linear-gradient(135deg, var(--blue-dark), var(--teal));
-            color: white;
-            border-radius: var(--radius);
-            padding: 30px;
-            text-align: center;
-        }
-
-        .newsletter-box h2 {
-            color: white;
-        }
-
-        .newsletter-box p {
-            margin-bottom: 18px;
-            line-height: 1.6;
-        }
-
-        .newsletter-box a {
-            display: inline-block;
-            background: white;
-            color: var(--blue-dark);
-            padding: 11px 24px;
-            border-radius: 999px;
-            text-decoration: none;
-            font-weight: 700;
-        }
-        /* ── Mobile ── */
-        @media (max-width: 768px) {
-            .navbar__toggle { display: block; }
-            .navbar__links {
-                position: absolute; top: 64px; left: 0; right: 0;
-                background: linear-gradient(135deg, var(--night), var(--blue-dark));
-                flex-direction: column; padding: 16px 20px 20px;
-                opacity: 0; visibility: hidden; transform: translateY(-8px);
-                transition: all 0.25s;
-            }
-            .nav-open .navbar__links { opacity: 1; visibility: visible; transform: translateY(0); }
-            .article-header { padding: 40px 20px 36px; }
-            .article-wrap { padding: 36px 20px 60px; }
-        }
-    </style>
-</head>
-<body>
-
+{% block content %}
 <div class="stars" id="stars"></div>
 
-<!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar__inner">
-            <a class="navbar__brand" href="/">Les Fous d'Astro</a>
-            <button class="navbar__toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open')">☰</button>
-               <ul class="navbar__links">
-                <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Analyses 💫</a></li>
-                <li><a href="{{ url_for('pages_bp.analyses') }}"
-                        class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
-                
-                <li><a href="{{ url_for('blog.blog_index') }}"
-                        class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
-
-                <li><a href="{{ url_for('site_bp.temoignages') }}"
-                        class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
-
-                <li><a href="{{ url_for('pages_bp.formations') }}"
-                        class="{% if request.path == url_for('pages_bp.formations') %}active{% endif %}">Formations</a></li>
-
-                <li><a href="https://bycecilecl.com/categorie-produit/services/"
-                        target="_blank" rel="noopener">Prestations</a></li>
-
-                <li><a href="{{ url_for('pages_bp.contact') }}"
-                        class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
-
-                <li><a href="https://bycecilecl.com" target="_blank" rel="noopener">ByCecileCL.com</a></li>
-            </ul>
-        </div>
-    </nav>
-
-<!-- Header -->
 <header class="article-header">
     <a class="article-header__back" href="{{ url_for('blog.blog_index') }}">Retour au blog</a>
 
@@ -436,7 +282,6 @@
     </div>
 </header>
 
-<!-- Corps -->
 <div class="article-wrap">
 
     {% if article.image %}
@@ -451,38 +296,37 @@
     </article>
 
     <div class="share-box">
-    <p class="share-title">Partager cet article</p>
+        <p class="share-title">Partager cet article</p>
 
-    <div class="share-buttons">
-        <a class="share-btn" 
-           href="https://www.facebook.com/sharer/sharer.php?u={{ canonical_url }}" 
-           target="_blank" rel="noopener">
-            Facebook
-        </a>
+        <div class="share-buttons">
+            <a class="share-btn"
+               href="https://www.facebook.com/sharer/sharer.php?u={{ canonical_url }}"
+               target="_blank" rel="noopener">
+                Facebook
+            </a>
 
-        <a class="share-btn" 
-           href="https://twitter.com/intent/tweet?url={{ canonical_url }}&text={{ article.title }}" 
-           target="_blank" rel="noopener">
-            X / Twitter
-        </a>
+            <a class="share-btn"
+               href="https://twitter.com/intent/tweet?url={{ canonical_url }}&text={{ article.title }}"
+               target="_blank" rel="noopener">
+                X / Twitter
+            </a>
 
-        <a class="share-btn" 
-           href="https://www.linkedin.com/sharing/share-offsite/?url={{ canonical_url }}" 
-           target="_blank" rel="noopener">
-            LinkedIn
-        </a>
+            <a class="share-btn"
+               href="https://www.linkedin.com/sharing/share-offsite/?url={{ canonical_url }}"
+               target="_blank" rel="noopener">
+                LinkedIn
+            </a>
 
-        <a class="share-btn" 
-           href="https://api.whatsapp.com/send?text={{ article.title }}%20{{ canonical_url }}" 
-           target="_blank" rel="noopener">
-            WhatsApp
-        </a>
+            <a class="share-btn"
+               href="https://api.whatsapp.com/send?text={{ article.title }}%20{{ canonical_url }}"
+               target="_blank" rel="noopener">
+                WhatsApp
+            </a>
+        </div>
     </div>
-</div>
 
     <div class="article-divider">✦ ✦ ✦</div>
 
-    <!-- CTA -->
     <div class="article-cta">
         <p>Ton signe solaire, c'est un début — mais ton thème natal complet, c'est une autre dimension. Découvre comment cette énergie s'exprime vraiment chez toi.</p>
         <a href="{{ url_for('pages_bp.analyses') }}">Obtenir mon Point Astral →</a>
@@ -490,49 +334,32 @@
 
     {% if autres_articles %}
     <section class="related-posts">
-
         <h2>À lire aussi</h2>
-
         <div class="related-grid">
-
             {% for a in autres_articles %}
-
-            <a class="related-card"
-            href="{{ url_for('blog.blog_article', slug=a.slug) }}">
-
+            <a class="related-card" href="{{ url_for('blog.blog_article', slug=a.slug) }}">
                 {% if a.image %}
                 <img src="{{ a.image }}" alt="{{ a.image_alt }}">
                 {% endif %}
-
                 <span>{{ a.tag }}</span>
-
                 <h3>{{ a.title }}</h3>
-
             </a>
-
             {% endfor %}
-
         </div>
-
     </section>
     {% endif %}
 
     <section class="newsletter-box">
-
         <h2>Recevoir les prochaines Astropapotes</h2>
-
         <p>
-            Un peu d’astrologie, quelques prises de conscience,
-            les nouveaux articles et les nouveautés des Fous d’Astro.
+            Un peu d'astrologie, quelques prises de conscience,
+            les nouveaux articles et les nouveautés des Fous d'Astro.
         </p>
-
         <a href="{{ url_for('pages_bp.contact') }}">
             Je veux être informé(e)
         </a>
-
     </section>
 
-    <!-- Nav prev / next -->
     {% if article.prev or article.next %}
     <nav class="article-nav" aria-label="Articles précédent et suivant">
         {% if article.prev %}
@@ -551,18 +378,18 @@
     {% endif %}
 
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
-    (function() {
-        const c = document.getElementById('stars');
-        for (let i = 0; i < 60; i++) {
-            const s = document.createElement('div');
-            s.className = 'star';
-            s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${(Math.random()*4).toFixed(1)}s;animation-duration:${(2+Math.random()*3).toFixed(1)}s`;
-            c.appendChild(s);
-        }
-    })();
+(function() {
+    const c = document.getElementById('stars');
+    for (let i = 0; i < 60; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${(Math.random()*4).toFixed(1)}s;animation-duration:${(2+Math.random()*3).toFixed(1)}s`;
+        c.appendChild(s);
+    }
+})();
 </script>
-
-</body>
-</html>
+{% endblock %}
