@@ -72,10 +72,37 @@
         .contact-item a { color: rgba(255,255,255,0.8); text-decoration: none; transition: color 0.3s ease; }
         .contact-item a:hover { color: #c0f0f7; }
         .contact-icon { font-size: 1.1rem; width: 20px; text-align: center; }
-        .newsletter-form { display: flex; gap: 8px; margin-top: 15px; }
-        .newsletter-input { flex: 1; padding: 12px 15px; border: 1px solid rgba(255,255,255,0.3); border-radius: 25px; background: rgba(255,255,255,0.1); color: white; font-size: 0.9rem; backdrop-filter: blur(10px); }
-        .newsletter-input::placeholder { color: rgba(255,255,255,0.6); }
-        .newsletter-input:focus { outline: none; border-color: #c0f0f7; background: rgba(255,255,255,0.15); }
+        .newsletter-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .newsletter-form .newsletter-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            background: rgba(255,255,255,0.10) !important;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff;
+            caret-color: #ffffff;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .newsletter-form .newsletter-input::placeholder {
+            color: rgba(255,255,255,0.6);
+            opacity: 1;
+        }
+
+        .newsletter-form .newsletter-input:focus {
+            outline: none;
+            border-color: #c0f0f7;
+            background: rgba(255,255,255,0.15) !important;
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff;
+        }
         .newsletter-btn { padding: 12px 18px; background: linear-gradient(45deg, #c0f0f7, #d3b1c2); border: none; border-radius: 25px; color: #1f628e; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }
         .newsletter-btn:hover { transform: scale(1.1); box-shadow: 0 5px 15px rgba(192,240,247,0.3); }
         .footer-bottom { border-top: 1px solid rgba(255,255,255,0.2); padding: 25px 20px; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); }
