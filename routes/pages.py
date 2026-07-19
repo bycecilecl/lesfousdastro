@@ -1,5 +1,7 @@
 from flask import Blueprint
 from flask import render_template, request
+from utils.email_sender import envoyer_email_contact
+from utils.google.sheets_writer import ajouter_email_au_sheet
 
 pages_bp = Blueprint("pages_bp", __name__)
 
@@ -15,18 +17,6 @@ def formations():
 def ateliers():
     return render_template("pages/ateliers.html", active="ateliers")
 
-# @pages_bp.route("/prestations")
-# def prestations():
-#     google_data = get_google_reviews()
-
-#     return render_template(
-#         "pages/prestations.html",
-#         active="prestations",
-#         google_reviews=google_data.get("reviews", []),
-#         google_rating=google_data.get("rating"),
-#         google_reviews_count=google_data.get("reviews_count"),
-#         google_maps_uri=google_data.get("maps_uri"),
-#     )
 
 @pages_bp.route("/prestations")
 def prestations():
@@ -46,13 +36,57 @@ def contact():
         message = request.form.get("message", "").strip()
         newsletter = request.form.get("newsletter") == "oui"
 
-        print("NOUVEAU MESSAGE CONTACT")
-        print("Nom :", nom)
-        print("Email :", email)
-        print("Sujet :", sujet)
-        print("Message :", message)
-        print("Newsletter :", newsletter)
+        # Envoi du message
+        email_envoye = envoyer_email_contact(
+            nom=nom,
+            email=email,
+            sujet=sujet,
+            message=message,
+        )
 
-        return render_template("pages/contact.html", active="contact", succes=True)
+        # Inscription newsletter
+        if newsletter:
+            try:
+                ajouter_email_au_sheet(email, nom)
+            except Exception as e:
+                print(f"Erreur inscription newsletter : {e}")
+
+        return render_template(
+            "pages/contact.html",
+            active="contact",
+            succes=email_envoye,
+            erreur=not email_envoye,
+        )
 
     return render_template("pages/contact.html", active="contact")
+
+
+@pages_bp.route("/newsletter/inscription", methods=["POST"])
+def inscription_newsletter():
+    nom = request.form.get("newsletter_nom", "").strip()
+    email = request.form.get("newsletter_email", "").strip()
+
+    if not email:
+        return render_template(
+            "pages/contact.html",
+            active="contact",
+            newsletter_erreur="Merci de renseigner ton adresse email.",
+        )
+
+    try:
+        ajouter_email_au_sheet(email, nom or "Inconnu")
+
+        return render_template(
+            "pages/contact.html",
+            active="contact",
+            newsletter_succes=True,
+        )
+
+    except Exception as e:
+        print(f"Erreur inscription newsletter : {e}")
+
+        return render_template(
+            "pages/contact.html",
+            active="contact",
+            newsletter_erreur="Une erreur est survenue. Merci de réessayer.",
+        )
