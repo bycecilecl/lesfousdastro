@@ -714,7 +714,7 @@ def interpret_block_lunar_nodes_llm(
     global_ctx: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
-    Chapitre Nœuds Lunaires : version Flash Astral karmique.
+    Chapitre Nœuds Lunaires : version Point Astral karmique.
     On transforme le bloc 'content' en un texte client-friendly.
     """
     content = (block.get("content") or "").strip()

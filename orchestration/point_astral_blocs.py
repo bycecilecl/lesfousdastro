@@ -189,7 +189,7 @@ def _normalize_maitre_nom(maitre):
 
 def generer_point_astral_blocs(contexte: dict) -> str:
     """
-    Génère le flash astral par blocs et retourne l’assemblage brut,
+    Génère le point astral par blocs et retourne l’assemblage brut,
     sans aucune étape d’affinage.
     """
     print("🔵 ORCH: clés dispo :", list(contexte.keys()))

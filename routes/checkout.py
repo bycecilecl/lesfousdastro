@@ -163,10 +163,10 @@ def checkout():
     #             prenom=prenom,
     #             list_id_env="BREVO_LIST_FLASH_ID"
     #         )
-    #         current_app.logger.info(f"✅ [BREVO] Client Flash Astral ajouté : {email}")
+    #         current_app.logger.info(f"✅ [BREVO] Client Point Astral ajouté : {email}")
 
     # except Exception as e:
-    #     current_app.logger.warning(f"⚠️ [BREVO] Ajout client Flash Astral impossible : {e}")
+    #     current_app.logger.warning(f"⚠️ [BREVO] Ajout client Point Astral impossible : {e}")
 
     fixed_cart = []
     for item in cart_items:

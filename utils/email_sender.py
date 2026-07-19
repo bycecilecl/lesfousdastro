@@ -15,7 +15,7 @@
 # Sortie : log console “✅ Email envoyé …” ou message d’erreur.
 # Où c’est utilisé :
 #   - Analyse gratuite : envoi du texte généré à l’utilisateur
-#   - Flash Astral (route afficher_point_astral) : envoi du lien de téléchargement PDF
+#   - Point Astral (route afficher_point_astral) : envoi du lien de téléchargement PDF
 # Remarques :
 #   - Si tu utilises Gmail : nécessite un “mot de passe d’application”.
 #   - `attachments` n’est ajouté que si `pdf_path` est fourni.

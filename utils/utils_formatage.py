@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # MODULE : utils/utils_formatage.py
 # Rôle : Fonctions de formatage “texte” pour afficher les placements et aspects.
-# Contexte : utilisé par l’analyse gratuite, le Flash Astral et les résumés.
+# Contexte : utilisé par l’analyse gratuite, le Point Astral et les résumés.
 # Doublons connus :
 #   - utils_analyse.py (formater_positions_planetes / formater_aspects)
 #   - utils/format_utils.py (variantes proches)

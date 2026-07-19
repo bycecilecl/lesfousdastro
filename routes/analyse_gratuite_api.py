@@ -60,7 +60,7 @@ def api_analyse_gratuite():
             html_limit = f"""
                 <div style="padding:20px; border-radius:12px; background:#fff3cd; border:1px solid #ffeeba; color:#856404; text-align:center; font-family:sans-serif;">
                     <strong>🚫 Limite atteinte</strong><br><br>
-                    👉 Pour continuer ton exploration, découvre ton <strong>Flash Astral complet</strong> :<br>
+                    👉 Pour continuer ton exploration, découvre ton <strong>Point Astral complet</strong> :<br>
                     <ul style="text-align:left; display:inline-block; margin:10px auto; padding:0; list-style:disc;">
                         <li>Lecture approfondie & psychologiques (4 pages)</li>
                         <li>PDF personnalisé à télécharger</li>
@@ -249,7 +249,7 @@ def api_analyse_gratuite():
 
             Allez avoue, tu veux en savoir plus 😏
 
-            Cette analyse n'est qu'une première lecture. Le Flash Astral va plus loin :
+            Cette analyse n'est qu'une première lecture. Le Point Astral va plus loin :
             il met en lumière tes grands mécanismes, tes forces, tes blocages, et les zones de ton thème
             qui demandent à être comprises plus finement.
 
@@ -267,7 +267,7 @@ def api_analyse_gratuite():
             {texte}
             </div>
             <p><strong>Allez avoue, tu veux en savoir plus 😏</strong><br><br>
-            Cette analyse n'est qu'une première lecture. Le <strong>Flash Astral</strong> va plus loin :
+            Cette analyse n'est qu'une première lecture. Le <strong>Point Astral</strong> va plus loin :
             il met en lumière tes grands mécanismes, tes forces, tes blocages, et les zones de ton thème
             qui demandent à être comprises plus finement.</p>
             <p style="text-align:center; margin-top:30px;">

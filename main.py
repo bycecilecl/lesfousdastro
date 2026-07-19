@@ -444,7 +444,7 @@ def generer_theme():
 def preparer_donnees_analyse(data):
     """
     Range les 'points_forts' existants en Axes Majeurs et prépare un bloc texte
-    prêt à injecter dans le Flash Astral.
+    prêt à injecter dans le Point Astral.
     """
     # 0) Sécurité : si points_forts manquants, on tente de les extraire
     raw_pf = data.get("points_forts")
@@ -646,7 +646,7 @@ def tous_les_placements():
 #
 # 🔹 Utilité :
 #   - Utile pour afficher une vue complète du thème sans passer par
-#     l’analyse gratuite ou le Flash Astral.
+#     l’analyse gratuite ou le Point Astral.
 #   - Pratique pour visualiser ou déboguer les calculs bruts.
 # -----------------------------------------------------------
 
@@ -819,7 +819,7 @@ def analyse_point_astral_route():
 
 # 📝 Route GET /telecharger_point_astral/<nom_fichier>
 # ----------------------------------------------------
-# Sert à télécharger le Flash Astral sous forme de fichier PDF.
+# Sert à télécharger le Point Astral sous forme de fichier PDF.
 # Étapes :
 # 1. Récupère le HTML de l’analyse en session (clé : "html_point_astral_<nom_fichier>").
 # 2. Si absent → retourne une erreur 404.
@@ -831,7 +831,7 @@ def analyse_point_astral_route():
 
 @app.route("/telecharger_point_astral/<nom_fichier>")
 def telecharger_point_astral(nom_fichier):
-    """Route pour télécharger le PDF du Flash Astral"""
+    """Route pour télécharger le PDF du Point Astral"""
     try:
         # Récupérer le contenu HTML de la session
         html_content = session.get(f"html_point_astral_{nom_fichier}")
@@ -875,7 +875,7 @@ def telecharger_point_astral(nom_fichier):
 
 # 📝 Route GET /apercu_point_astral/<nom_fichier>
 # ------------------------------------------------
-# Sert à afficher un aperçu HTML du Flash Astral dans le navigateur.
+# Sert à afficher un aperçu HTML du Point Astral dans le navigateur.
 # Étapes :
 # 1. Récupère le HTML de l’analyse en session.
 # 2. Si absent → retourne une erreur 404.
@@ -885,7 +885,7 @@ def telecharger_point_astral(nom_fichier):
 
 @app.route("/apercu_point_astral/<nom_fichier>")
 def apercu_point_astral(nom_fichier):
-    """Route pour prévisualiser le Flash Astral en HTML"""
+    """Route pour prévisualiser le Point Astral en HTML"""
     try:
         # Récupérer le contenu HTML de la session
         html_content = session.get(f"html_point_astral_{nom_fichier}")

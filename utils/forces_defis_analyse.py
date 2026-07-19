@@ -150,7 +150,7 @@ DISCLAIMER_FORCES_DEFIS_HTML = r"""
       placements saillants (aspects, maisons, angles). Les « forces » et « défis » sont analysés
       <strong>de manière isolée</strong>, sans prendre en compte tout l'ensemble du thème.
       Ce n'est <em>pas</em> une consultation : l'interprétation dépend de ton histoire et de ton niveau d'intégration.
-      Pour une lecture <strong>plus complète</strong> (liens entre tous les éléments), consulte le <em>Flash Astral</em>
+      Pour une lecture <strong>plus complète</strong> (liens entre tous les éléments), consulte le <em>Point Astral</em>
       — ou réserve une <strong>consultation</strong> personnalisée.
       <a href="https://bycecilecl.com" target="_blank" style="color:#1f628e;text-decoration:none;">Prendre rendez-vous</a>
     </p>

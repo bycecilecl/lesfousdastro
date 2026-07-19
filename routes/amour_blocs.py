@@ -205,7 +205,7 @@ def amour_complet():
     print("="*60)
 
     try:
-        # 1) Calcul thème (même logique que Flash Astral)
+        # 1) Calcul thème (même logique que Point Astral)
         if infos.get("lat") and infos.get("lon"):
             data_theme = calcul_theme_safe(
                 nom=infos["nom"],
@@ -299,7 +299,7 @@ def amour_complet():
                 details="Les quatre modules ont renvoyé un texte vide.",
             ), 500
 
-        # 5) Logo (comme pour Flash Astral)
+        # 5) Logo (comme pour Point Astral)
         logo_base64 = ""
         logo_path = os.path.join(current_app.static_folder, "images", "logo_les_fous_dastro.webp")
         try:
@@ -335,7 +335,7 @@ def amour_complet():
             _external=True,
         )
 
-        # 7) Upload S3 (facultatif, comme Flash Astral)
+        # 7) Upload S3 (facultatif, comme Point Astral)
         warnings = []
         try:
             s3_info = upload_file_and_presign(
@@ -354,7 +354,7 @@ def amour_complet():
 
         pdf_final_url = download_url or pdf_url_local
 
-        # 8) Email (optionnel, comme pour Flash Astral)
+        # 8) Email (optionnel, comme pour Point Astral)
         try:
             dest_email = (infos.get("email") or "").strip()
             if dest_email:

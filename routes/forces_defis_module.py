@@ -253,7 +253,7 @@ def generer_forces_defis_pdf_s3(infos, envoyer_email=False):
 @forces_defis_module_bp.route("/complet", methods=["GET"])
 def forces_defis_complet():
 
-    # 🔐 Raccourci SANDBOX : on ne génère pas le vrai Flash Astral
+    # 🔐 Raccourci SANDBOX : on ne génère pas le vrai Point Astral
     if is_analysis_sandbox():
         infos = session.get("infos_utilisateur") or {}
         current_app.logger.info(
