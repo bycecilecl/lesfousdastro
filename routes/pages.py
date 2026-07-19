@@ -1,5 +1,6 @@
 from flask import Blueprint
 from flask import render_template, request
+from utils.google_reviews import get_google_reviews
 
 pages_bp = Blueprint("pages_bp", __name__)
 
@@ -14,6 +15,23 @@ def formations():
 @pages_bp.route("/ateliers")
 def ateliers():
     return render_template("pages/ateliers.html", active="ateliers")
+
+# @pages_bp.route("/prestations")
+# def prestations():
+#     google_data = get_google_reviews()
+
+#     return render_template(
+#         "pages/prestations.html",
+#         active="prestations",
+#         google_reviews=google_data.get("reviews", []),
+#         google_rating=google_data.get("rating"),
+#         google_reviews_count=google_data.get("reviews_count"),
+#         google_maps_uri=google_data.get("maps_uri"),
+#     )
+
+@pages_bp.route("/prestations")
+def prestations():
+    return render_template("pages/prestations.html", active="prestations")
 
 # @pages_bp.route("/contact", methods=["GET", "POST"])
 # def contact():
