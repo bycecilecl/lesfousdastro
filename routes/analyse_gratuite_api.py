@@ -9,6 +9,7 @@ from utils.enregistrement_placements import enregistrer_placements_utilisateur
 from utils.google.sheets_writer import ajouter_email_au_sheet
 from utils.email_sender import envoyer_email_avec_analyse
 from utils.email_quota import check_and_log_email_quota
+from utils.brevo_contacts import ajouter_contact_brevo
 from threading import Thread
 import textwrap
 from textwrap import dedent
@@ -226,6 +227,14 @@ def api_analyse_gratuite():
                 raise ValueError(f"Email invalide: {email!r}")
 
             ajouter_email_au_sheet(email, prenom)
+            try:
+                ajouter_contact_brevo(
+                    email=email,
+                    nom=nom,
+                    liste="flash",
+                )
+            except Exception:
+                print(f"⚠️ Impossible d'ajouter {email} à Brevo")
             print("✅ [LEAD] Ajout Google Sheet OK")
         except Exception as e:
             import traceback
