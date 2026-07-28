@@ -64,3 +64,6 @@ pandas
 Markdown==3.6
 PyYAML==6.0.2
 requests
+Flask-SQLAlchemy
+Flask-Migrate
+psycopg2-binary
