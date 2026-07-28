@@ -7,6 +7,10 @@ legal_bp = Blueprint("legal_bp", __name__)
 def conditions_utilisation():
     return render_template("conditions-generales-utilisation.html")
 
+@legal_bp.route("/cgv", endpoint="conditions_generales_vente")
+def conditions_generales_vente():
+    return render_template("conditions-generales-vente.html")
+
 @legal_bp.route("/mentions-legales", endpoint="mentions_legales")
 def mentions_legales():
     return render_template("mentions-legales.html")
