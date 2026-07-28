@@ -102,6 +102,10 @@ def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
+@app.route("/test-deploiement-beta")
+def test_deploiement_beta():
+    return "NOUVELLE VERSION BETA OK", 200
+
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
