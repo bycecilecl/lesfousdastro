@@ -54,21 +54,32 @@ def point_astral():
                 400,
             )
 
+        try:
+            date_naissance_obj = datetime.strptime(
+                date_naissance,
+                "%Y-%m-%d",
+            ).date()
+
+            heure_naissance_obj = datetime.strptime(
+                heure_naissance,
+                "%H:%M",
+            ).time()
+
+        except (TypeError, ValueError):
+            return (
+                "La date ou l’heure de naissance est invalide.",
+                400,
+            )
+
         participation = ParticipationTest(
             type_test="point_astral_beta",
 
             prenom=prenom.strip(),
             email=email.strip().lower(),
 
-            date_naissance=datetime.strptime(
-                date_naissance,
-                "%Y-%m-%d",
-            ).date(),
+            ddate_naissance=date_naissance_obj,
 
-            heure_naissance=datetime.strptime(
-                heure_naissance,
-                "%H:%M",
-            ).time(),
+            heure_naissance=heure_naissance_obj,
 
             ville_naissance=ville_naissance.strip(),
             genre=genre,
