@@ -48,7 +48,6 @@ def point_astral():
         if not (
             acceptation_cgv
             and acceptation_confidentialite
-            and acceptation_beta
         ):
             return (
                 "Les consentements obligatoires doivent être acceptés.",
@@ -81,7 +80,7 @@ def point_astral():
             acceptation_confidentialite=(
                 acceptation_confidentialite
             ),
-            acceptation_test=acceptation_beta,
+            acceptation_test=True,
             consentement_recherche=acceptation_recherche,
         )
 
