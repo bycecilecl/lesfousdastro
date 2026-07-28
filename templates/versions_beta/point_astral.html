@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point Astral - Version bêta</title>
+    <link rel="icon" type="image/webp" sizes="64x64" href="static/images/logo_les_fous_dastro_favicon64.webp">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        h1 {
+            color: #ffd700;
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        header p {
+            color: #e0e6ed;
+            font-size: 1rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            color: #ffd700;
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .card > p {
+            color: #e0e6ed;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .field {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            color: #e0e6ed;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+        }
+
+        label span {
+            color: #ffd700;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="time"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.07);
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.15);
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .consent-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+            margin-bottom: 1rem;
+        }
+
+        .consent-item input[type="checkbox"] {
+            margin-top: 0.3rem;
+            width: 18px;
+            height: 18px;
+            accent-color: #ffd700;
+            flex-shrink: 0;
+        }
+
+        .consent-item label {
+            margin-bottom: 0;
+            font-weight: 400;
+            font-size: 0.95rem;
+            color: #e0e6ed;
+            display: inline;
+        }
+
+        .consent-item a {
+            color: #ffd700;
+            text-decoration: underline;
+        }
+
+        .required-note {
+            color: #a0a6ad;
+            font-size: 0.85rem;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>🌟 Point Astral V2</h1>
+        <p>Merci de participer à cette version 2 du Point Astral.</p>
+        <p>
+            Cette version me permet de tester de nouvelles interprétations et
+            d'améliorer progressivement le rapport. Votre participation
+            contribue directement à son évolution.
+        </p>
+    </header>
+
+    <form method="POST">
+
+        <section class="card">
+            <h2>👤 Vos coordonnées</h2>
+            <p>
+                Ces informations me permettront de vous contacter lorsque votre
+                Point Astral sera prêt ou si j'ai besoin d'une précision
+                concernant vos données de naissance.
+            </p>
+
+            <div class="field">
+                <label for="prenom">Prénom <span>*</span></label>
+                <input type="text" id="prenom" name="prenom" autocomplete="given-name" required>
+            </div>
+
+            <div class="field">
+                <label for="email">Adresse e-mail <span>*</span></label>
+                <input type="email" id="email" name="email" autocomplete="email" required>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>⭐ Informations de naissance</h2>
+            <p>
+                Merci de renseigner ces informations avec la plus grande
+                précision possible. Elles sont indispensables pour calculer
+                correctement votre thème astral.
+            </p>
+
+            <div class="field">
+                <label for="date_naissance">Date de naissance <span>*</span></label>
+                <input type="date" id="date_naissance" name="date_naissance" required>
+            </div>
+
+            <div class="field">
+                <label for="heure_naissance">Heure de naissance <span>*</span></label>
+                <input type="time" id="heure_naissance" name="heure_naissance" required>
+            </div>
+
+            <div class="field">
+                <label for="ville_naissance">Ville de naissance <span>*</span></label>
+                <input type="text" id="ville_naissance" name="ville_naissance" autocomplete="off" required>
+            </div>
+
+            <div class="field">
+                <label for="genre">Genre <span>*</span></label>
+                <select id="genre" name="genre" required>
+                    <option value="">-- Sélectionnez --</option>
+                    <option value="femme">Femme</option>
+                    <option value="homme">Homme</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>👨‍👩‍👧 Votre famille — facultatif</h2>
+            <p>
+                Les informations ci-dessous sont entièrement facultatives.
+                Elles ne sont pas utilisées pour générer votre Point Astral.
+            </p>
+            <p>
+                Elles me permettent simplement de comparer certaines
+                interprétations à votre vécu afin d'améliorer les futures
+                versions.
+            </p>
+            <p>
+                Vous êtes libre de laisser ces champs vides si vous ne
+                souhaitez pas y répondre.
+            </p>
+
+            <div class="field">
+                <label for="fratrie"><strong>Votre fratrie</strong></label>
+                <p>
+                    Vous pouvez par exemple indiquer si vous avez des frères ou
+                    des sœurs, leur nombre, votre place dans la fratrie —
+                    aîné(e), cadet(te), benjamin(e), enfant du milieu —, ou
+                    encore s'il s'agit d'une famille recomposée, de demi-frères
+                    ou de demi-sœurs.
+                </p>
+                <textarea id="fratrie" name="fratrie" rows="6"></textarea>
+            </div>
+
+            <div class="field">
+                <label for="enfance"><strong>Votre enfance</strong></label>
+                <p>
+                    Décrivez en quelques lignes votre contexte familial durant
+                    votre enfance.
+                </p>
+                <p>
+                    Par exemple : avez-vous grandi avec vos deux parents ?
+                    Étaient-ils séparés ? Avez-vous été élevé(e) par un autre
+                    membre de votre famille ? Tout élément que vous jugez utile
+                    est le bienvenu.
+                </p>
+                <textarea id="enfance" name="enfance" rows="8"></textarea>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>✅ Consentements</h2>
+            <p>
+                Avant de valider votre demande, merci de prendre connaissance
+                des documents suivants.
+            </p>
+
+            <div class="consent-item">
+                <input type="checkbox" id="acceptation_cgv" name="acceptation_cgv" value="1" required>
+                <label for="acceptation_cgv">
+                    J'accepte les <a href="#" target="_blank" rel="noopener noreferrer">Conditions Générales de Vente</a>.
+            </label>
+            </div>
+
+            <div class="consent-item">
+                <input type="checkbox" id="acceptation_confidentialite" name="acceptation_confidentialite" value="1" required>
+                <label for="acceptation_confidentialite">
+                    J'ai pris connaissance de la <a href="{{ url_for('legal_bp.politique_confidentialite') }}" target="_blank" rel="noopener noreferrer">Politique de confidentialité</a>.
+                </label>
+            </div>
+
+   
+
+            <div class="consent-item">
+                <input type="checkbox" id="acceptation_recherche" name="acceptation_recherche" value="1">
+                <label for="acceptation_recherche">
+                    J'accepte que les informations que je choisis de
+                    communiquer puissent être utilisées de manière anonyme
+                    afin d'améliorer les futures versions du Point Astral.
+                </label>
+            </div>
+
+            <p class="required-note">Les champs marqués d'un * sont obligatoires.</p>
+
+            <button type="submit" class="submit-btn">Envoyer ma demande</button>
+        </section>
+
+    </form>
+
+</div>
+</body>
+</html>

@@ -58,6 +58,10 @@ from utils.karmique.analyse_karmique_html import build_html_from_blocks
 from routes.analyse_karmique import analyse_karmique_bp
 from routes.analyse_karmique import generer_html_final_karmique_pdf
 
+from extensions import db, migrate
+from routes.versions_beta import versions_beta_bp
+from models.participations_beta import ParticipationTest
+
 
 import logging
 logging.getLogger('weasyprint').setLevel(logging.CRITICAL)
@@ -97,6 +101,12 @@ def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db.init_app(app)
+migrate.init_app(app, db)
 
 
 @app.before_request
@@ -280,6 +290,7 @@ app.register_blueprint(profil_amoureux_module)
 app.register_blueprint(gift_api_bp)
 app.register_blueprint(gift_bp)
 app.register_blueprint(analyse_karmique_bp)
+app.register_blueprint(versions_beta_bp)
 
 
 # ========== ANALYSE KARMIQUE ==========
