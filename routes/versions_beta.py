@@ -13,9 +13,10 @@ versions_beta_bp = Blueprint(
 
 
 @versions_beta_bp.route(
-    "/versions-beta/point-astral",
+    "/test-point-astral",
     methods=["GET", "POST"],
 )
+
 def point_astral():
 
     if request.method == "POST":
@@ -96,9 +97,10 @@ def point_astral():
     )
 
 @versions_beta_bp.route(
-    "/versions-beta/point-astral/confirmation",
+    "/test-point-astral/confirmation",
     methods=["GET"],
 )
+
 def confirmation_point_astral():
     return render_template(
         "versions_beta/confirmation_point_astral_beta.html"
