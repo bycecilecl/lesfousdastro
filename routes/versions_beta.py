@@ -77,7 +77,7 @@ def point_astral():
             prenom=prenom.strip(),
             email=email.strip().lower(),
 
-            ddate_naissance=date_naissance_obj,
+            date_naissance=date_naissance_obj,
 
             heure_naissance=heure_naissance_obj,
 
