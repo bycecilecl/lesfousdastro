@@ -51,6 +51,28 @@ class ParticipationTest(db.Model):
 
     donnees_complementaires = Column(Text, nullable=True)
 
+    paiement_effectue = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
+
+    date_paiement = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    point_astral_envoye = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
+
+    date_envoi_point_astral = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
     date_creation = Column(
         DateTime(timezone=True),
         default=utcnow,
