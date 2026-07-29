@@ -315,6 +315,107 @@ body {
     opacity: 0.92;
 }
 
+.prestation-request-form__selected {
+    font-size: 1.08rem;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+.prestation-form-group {
+    margin-bottom: 20px;
+}
+
+.prestation-form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 1.02rem;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.prestation-form-group input[type="text"],
+.prestation-form-group input[type="email"],
+.prestation-form-group textarea {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+.prestation-form-group input:focus,
+.prestation-form-group textarea:focus {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 2px rgba(0,168,168,0.15);
+}
+.prestation-form-group textarea {
+    resize: vertical;
+}
+
+.prestation-payment-choice {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 14px 16px 6px;
+    margin-top: 6px;
+}
+.prestation-payment-choice legend {
+    font-weight: 600;
+    font-size: 1.02rem;
+    color: #333;
+    padding: 0 6px;
+}
+
+.prestation-radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+    font-size: 1rem;
+    color: #444;
+    margin-bottom: 12px;
+}
+.prestation-radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--navy);
+    margin: 0;
+}
+
+.prestation-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-weight: normal;
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+.prestation-consent input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--navy);
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.prestation-request-submit {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, var(--navy), var(--teal));
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.prestation-request-submit:hover {
+    opacity: 0.92;
+}
+
 /* Avis Google — carrousel */
 .google-reviews { margin-bottom: 50px; }
 .google-reviews__header {
