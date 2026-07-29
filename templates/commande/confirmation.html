@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .commande-confirmation-page {
+    min-height: 100vh;
+    padding: 3rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at top, #241b3a 0%, #14101f 60%, #0c0914 100%);
+  }
+
+  .commande-confirmation {
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+    background: #1c1630;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    color: #eae6f5;
+  }
+
+  .commande-confirmation .icone-succes {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8a6fd8, #6a5acd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: #fff;
+  }
+
+  .commande-confirmation h1 {
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 1.2rem;
+  }
+
+  .commande-confirmation p {
+    font-size: 0.92rem;
+    color: #cfc7e5;
+    line-height: 1.6;
+    margin: 0.6rem 0;
+  }
+
+  .commande-confirmation strong {
+    color: #d4af7a;
+    font-weight: 600;
+  }
+</style>
+
+<div class="commande-confirmation-page">
+  <main class="commande-confirmation">
+
+    <div class="icone-succes">✓</div>
+
+    <h1>Merci, votre formulaire a bien été envoyé</h1>
+
+    <p>
+        Les informations concernant votre prestation ont bien été enregistrées.
+    </p>
+
+    <p>
+        Référence de la commande :
+        <strong>{{ commande.reference }}</strong>
+    </p>
+
+    <p>
+        Je reviendrai vers vous afin de confirmer le créneau de réalisation.
+    </p>
+
+  </main>
+</div>
+
+{% endblock %}h

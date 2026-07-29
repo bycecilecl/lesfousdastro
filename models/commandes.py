@@ -229,6 +229,63 @@ class Commande(db.Model):
         self.token_hash = hasher_token(token)
         return token
 
+
+# ---------- CRÉNEAUX DISPONIBLES ----------
+
+class CreneauDisponible(db.Model):
+    __tablename__ = "creneaux_disponibles"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "date_creneau",
+            "heure_creneau",
+            name="uq_creneau_date_heure",
+        ),
+    )
+
+    id = Column(Integer, primary_key=True)
+
+    date_creneau = Column(
+        Date,
+        nullable=False,
+        index=True,
+    )
+
+    heure_creneau = Column(
+        Time,
+        nullable=False,
+    )
+
+    disponible = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+    )
+
+    commande_id = Column(
+        Integer,
+        ForeignKey("commandes.id", ondelete="SET NULL"),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
+
+    date_creation = Column(
+        DateTime(timezone=True),
+        default=utcnow,
+        nullable=False,
+    )
+
+    date_reservation = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    commande = relationship(
+        "Commande",
+        foreign_keys=[commande_id],
+    )
+
 # ---------- LIGNES DE COMMANDE ----------
 
 class LigneCommande(db.Model):

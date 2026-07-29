@@ -188,12 +188,31 @@
         <fieldset>
             <legend>Planification de votre prestation</legend>
 
+            {% if creneaux_disponibles %}
+                {% for creneau in creneaux_disponibles %}
+                    <label>
+                        <input
+                            type="radio"
+                            name="creneau_realisation"
+                            value="{{ creneau.id }}"
+                            required
+                        >
+                        {{ creneau.date_creneau.strftime("%d/%m/%Y") }}
+                        à
+                        {{ creneau.heure_creneau.strftime("%H:%M") }}
+                    </label>
+                {% endfor %}
+            {% else %}
+                <p>
+                    Aucun créneau précis n’est disponible pour le moment.
+                </p>
+            {% endif %}
+
             <label>
                 <input
                     type="radio"
                     name="creneau_realisation"
                     value="a_planifier"
-                    checked
                     required
                 >
                 Je souhaite convenir du créneau de réalisation avec Cécile
