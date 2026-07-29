@@ -59,11 +59,11 @@ body {
     border: 0;
 }
 .prestations-hero p {
-    font-size: 1.2rem;
-    line-height: 1.6;
+    font-size: 1.35rem;
+    line-height: 1.7;
     color: white;
     opacity: 0.95;
-    max-width: 650px;
+    max-width: 680px;
     margin: 0 auto;
 }
 
@@ -73,14 +73,14 @@ body {
     border-left: 4px solid var(--teal);
     border-radius: 12px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-    padding: 26px 30px;
+    padding: 32px 36px;
     margin-bottom: 40px;
     text-align: center;
 }
 .prestations-about p {
     color: #3a3a3a;
-    font-size: 1.12rem;
-    line-height: 1.75;
+    font-size: 1.22rem;
+    line-height: 1.8;
     margin-bottom: 14px;
 }
 
@@ -89,19 +89,19 @@ body {
     color: var(--navy);
     font-weight: 600;
     text-decoration: none;
-    font-size: 1.05rem;
+    font-size: 1.12rem;
 }
 .prestations-about__link:hover { text-decoration: underline; }
 
 .prestations-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+    gap: 36px;
 }
 
 .prestation-card {
     background: white;
-    border-radius: 16px;
+    border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.18);
     overflow: hidden;
     display: flex;
@@ -109,38 +109,38 @@ body {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .prestation-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
 
 .prestation-card__head {
     background: linear-gradient(135deg, var(--navy), var(--teal));
-    padding: 26px 24px 20px;
+    padding: 30px 28px 24px;
     color: white;
 }
 .prestation-card__eyebrow {
-    font-size: 0.75rem;
+    font-size: 0.82rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     opacity: 0.85;
     margin-bottom: 6px;
 }
 .prestation-card__title {
-    font-size: 1.4rem;
+    font-size: 1.65rem;
     font-weight: 700;
     margin: 0;
 }
 
 .prestation-card__body {
-    padding: 22px 24px 26px;
+    padding: 26px 28px 30px;
     flex: 1;
     display: flex;
     flex-direction: column;
 }
 .prestation-card__desc {
     color: #3a3a3a;
-    line-height: 1.75;
-    font-size: 1.08rem;
+    line-height: 1.8;
+    font-size: 1.15rem;
     margin-bottom: 20px;
     flex: 1;
 }
@@ -148,8 +148,8 @@ body {
     background: #f4f9fb;
     border-left: 3px solid var(--teal);
     border-radius: 6px;
-    padding: 13px 16px;
-    font-size: 1rem;
+    padding: 15px 18px;
+    font-size: 1.05rem;
     line-height: 1.6;
     color: #555;
     margin-bottom: 20px;
@@ -158,7 +158,7 @@ body {
 .prestation-card__format {
     font-style: italic;
     color: #666;
-    font-size: 1rem;
+    font-size: 1.05rem;
     line-height: 1.5;
     margin-bottom: 20px;
 }
@@ -170,9 +170,12 @@ body {
     padding-top: 18px;
 }
 .prestation-card__price {
-    font-size: 1.5rem;
+    font-size: 1.9rem;
     font-weight: 700;
-    color: var(--navy);
+    background: linear-gradient(135deg, var(--navy), var(--teal));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 .prestations-note {
@@ -181,9 +184,9 @@ body {
     text-align: center;
     background: white;
     border-radius: 12px;
-    padding: 24px 28px;
+    padding: 28px 32px;
     color: #444;
-    font-size: 0.92rem;
+    font-size: 1.02rem;
     line-height: 1.6;
     box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
@@ -205,9 +208,9 @@ body {
     margin-bottom: 22px;
     flex-wrap: wrap;
 }
-.google-reviews__score { font-size: 1.6rem; font-weight: 700; color: white; }
+.google-reviews__score { font-size: 1.9rem; font-weight: 700; color: white; }
 .google-reviews__stars { color: #f5a623; letter-spacing: 2px; font-size: 1.1rem; }
-.google-reviews__count { color: white; opacity: 0.85; font-size: 0.9rem; }
+.google-reviews__count { color: white; opacity: 0.85; font-size: 1rem; }
 
 .google-carousel {
     position: relative;
@@ -242,8 +245,8 @@ body {
 }
 .google-review-card__text {
     color: #3a3a3a;
-    font-size: 0.96rem;
-    line-height: 1.6;
+    font-size: 1.05rem;
+    line-height: 1.7;
     margin-bottom: 16px;
 }
 .google-review-card__name {
