@@ -19,6 +19,10 @@ from models.commandes import (
     hasher_token,
 )
 
+from utils.email_sender import (
+    envoyer_notification_formulaire_commande_admin,
+)
+
 
 commande_formulaire_bp = Blueprint(
     "commande_formulaire_bp",
@@ -351,6 +355,27 @@ def afficher_formulaire_commande(token):
                 "l’enregistrement. Merci de réessayer."
             ),
         ), 500
+
+    try:
+        envoyer_notification_formulaire_commande_admin(
+            reference_commande=commande.reference,
+            nom=beneficiaire_nom,
+            prenom=beneficiaire_prenom,
+            email_client=commande.client.email,
+            date_naissance=date_naissance.strftime("%d/%m/%Y"),
+            heure_naissance=heure_naissance.strftime("%H:%M"),
+            lieu_naissance=lieu_naissance,
+            creneau_realisation=commande.creneau_realisation,
+            attentes=questionnaire_attentes,
+            approfondir=questionnaire_approfondir,
+        )
+
+    except Exception:
+        current_app.logger.exception(
+            "Le formulaire de la commande %s a été enregistré, "
+            "mais la notification administrateur n’a pas pu être envoyée.",
+            commande.reference,
+        )
 
     return render_template(
         "commande/confirmation.html",
