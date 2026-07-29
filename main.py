@@ -62,7 +62,7 @@ from extensions import db, migrate
 from routes.versions_beta import versions_beta_bp
 from models.participations_beta import ParticipationTest
 
-#from routes.commande_formulaire import commande_formulaire_bp
+from routes.commande_formulaire import commande_formulaire_bp
 
 
 import logging
@@ -297,7 +297,7 @@ app.register_blueprint(gift_api_bp)
 app.register_blueprint(gift_bp)
 app.register_blueprint(analyse_karmique_bp)
 app.register_blueprint(versions_beta_bp)
-#app.register_blueprint(commande_formulaire_bp)
+app.register_blueprint(commande_formulaire_bp)
 
 
 # ========== ANALYSE KARMIQUE ==========
