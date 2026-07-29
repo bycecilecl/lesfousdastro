@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 from flask import (
     Blueprint,
@@ -45,6 +45,7 @@ def afficher_formulaire_commande(token):
         abort(404)
 
     maintenant = datetime.now(timezone.utc)
+    date_minimum_creneau = maintenant.date() + timedelta(days=10)
 
     if (
         commande.date_limite_lien
@@ -67,7 +68,7 @@ def afficher_formulaire_commande(token):
             CreneauDisponible.query
             .filter(
                 CreneauDisponible.disponible.is_(True),
-                CreneauDisponible.date_creneau >= maintenant.date(),
+                CreneauDisponible.date_creneau >= date_minimum_creneau,
             )
             .order_by(
                 CreneauDisponible.date_creneau.asc(),
@@ -231,7 +232,7 @@ def afficher_formulaire_commande(token):
                         .filter(
                             CreneauDisponible.disponible.is_(True),
                             CreneauDisponible.date_creneau
-                            >= maintenant.date(),
+                            >= date_minimum_creneau,
                         )
                         .order_by(
                             CreneauDisponible.date_creneau.asc(),
@@ -243,9 +244,11 @@ def afficher_formulaire_commande(token):
 
             creneau_choisi = (
                 CreneauDisponible.query
-                .filter_by(
-                    id=creneau_id,
-                    disponible=True,
+                .filter(
+                    CreneauDisponible.id == creneau_id,
+                    CreneauDisponible.disponible.is_(True),
+                    CreneauDisponible.date_creneau
+                    >= date_minimum_creneau,
                 )
                 .with_for_update()
                 .first()
@@ -267,7 +270,7 @@ def afficher_formulaire_commande(token):
                         .filter(
                             CreneauDisponible.disponible.is_(True),
                             CreneauDisponible.date_creneau
-                            >= maintenant.date(),
+                            >= date_minimum_creneau,
                         )
                         .order_by(
                             CreneauDisponible.date_creneau.asc(),

@@ -23,6 +23,84 @@ def ateliers():
 def prestations():
     return render_template("pages/prestations.html", active="prestations")
 
+@pages_bp.route("/prestations/demande", methods=["POST"])
+def demande_prestation():
+    prestations_autorisees = {
+        "Lecture du Thème Natal",
+        "Révolution Solaire",
+        "Accompagnement en connaissance de soi",
+    }
+
+    prestation = request.form.get(
+        "prestation",
+        "",
+    ).strip()
+
+    nom = request.form.get(
+        "nom",
+        "",
+    ).strip()
+
+    email = request.form.get(
+        "email",
+        "",
+    ).strip()
+
+    message = request.form.get(
+        "message",
+        "",
+    ).strip()
+
+    accord_contact = (
+        request.form.get("accord_contact") == "1"
+    )
+
+    if (
+        prestation not in prestations_autorisees
+        or not nom
+        or not email
+        or not accord_contact
+    ):
+        return render_template(
+            "pages/prestations.html",
+            active="prestations",
+            demande_erreur=(
+                "Merci de remplir les champs obligatoires "
+                "et d’accepter d’être recontacté(e)."
+            ),
+        ), 400
+
+    contenu = f"""
+Nouvelle demande de prestation.
+
+Prestation : {prestation}
+Nom : {nom}
+Email : {email}
+
+Message :
+{message or "Aucune précision renseignée."}
+
+La personne a accepté d’être recontactée au sujet de cette demande.
+"""
+
+    email_envoye = envoyer_email_contact(
+        nom=nom,
+        email=email,
+        sujet=f"Demande de prestation — {prestation}",
+        message=contenu,
+    )
+
+    return render_template(
+        "pages/prestations.html",
+        active="prestations",
+        demande_succes=email_envoye,
+        demande_erreur=(
+            None
+            if email_envoye
+            else "La demande n’a pas pu être envoyée. Merci de réessayer."
+        ),
+    )
+
 # @pages_bp.route("/contact", methods=["GET", "POST"])
 # def contact():
 #     return render_template("pages/contact.html", active="contact")
