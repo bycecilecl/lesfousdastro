@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+  .commande-formulaire-page {
+    min-height: 100vh;
+    padding: 3rem 1rem;
+    background: radial-gradient(ellipse at top, #241b3a 0%, #14101f 60%, #0c0914 100%);
+  }
+
+  .commande-formulaire {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #1c1630;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    color: #eae6f5;
+  }
+
+  .commande-formulaire .logo {
+    display: block;
+    max-width: 180px;
+    margin: 0 auto 1.8rem;
+  }
+
+  .commande-formulaire h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+    color: #fff;
+  }
+
+  .commande-formulaire > p {
+    text-align: center;
+    font-size: 0.92rem;
+    color: #b8aed6;
+    margin: 0.2rem 0;
+  }
+
+  .commande-formulaire > p strong {
+    color: #d4af7a;
+    font-weight: 600;
+  }
+
+  .commande-formulaire fieldset {
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 1.3rem 1.4rem 0.6rem;
+    margin: 1.8rem 0;
+  }
+
+  .commande-formulaire legend {
+    padding: 0 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #d4af7a;
+    letter-spacing: 0.02em;
+  }
+
+  .commande-formulaire label {
+    display: block;
+    margin-bottom: 1.1rem;
+    font-size: 0.88rem;
+    color: #cfc7e5;
+  }
+
+  .commande-formulaire fieldset label:has(input[type="radio"]),
+  .commande-formulaire fieldset label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .commande-formulaire input[type="radio"],
+  .commande-formulaire input[type="checkbox"] {
+    margin-top: 0.2rem;
+    accent-color: #8a6fd8;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .commande-formulaire input[type="text"],
+  .commande-formulaire input[type="date"],
+  .commande-formulaire input[type="time"],
+  .commande-formulaire textarea {
+    display: block;
+    width: 100%;
+    margin-top: 0.4rem;
+    padding: 0.65rem 0.8rem;
+    background: #14101f;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  .commande-formulaire textarea {
+    resize: vertical;
+  }
+
+  .commande-formulaire input:focus,
+  .commande-formulaire textarea:focus {
+    outline: none;
+    border-color: #8a6fd8;
+    box-shadow: 0 0 0 3px rgba(138,111,216,0.2);
+  }
+
+  .commande-formulaire input::placeholder,
+  .commande-formulaire textarea::placeholder {
+    color: #6f6690;
+  }
+
+  .commande-formulaire a {
+    color: #d4af7a;
+  }
+
+  .commande-formulaire button[type="submit"] {
+    display: block;
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, #8a6fd8, #6a5acd);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .commande-formulaire button[type="submit"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(138,111,216,0.35);
+  }
+</style>
+
+<div class="commande-formulaire-page">
+  <main class="commande-formulaire">
+
+    <img src="{{ url_for('static', filename='images/logo_les_fous_dastro.webp') }}" alt="Les Fous d'Astro" class="logo">
+
+    <h1>Informations pour votre prestation</h1>
+
+    <p>Commande : <strong>{{ commande.reference }}</strong></p>
+    <p>Prestation : <strong>{{ commande.prestation }}</strong></p>
+
+    <form method="POST">
+
+        <fieldset>
+            <legend>Informations de naissance</legend>
+
+            <label>
+                Prénom
+                <input type="text" name="beneficiaire_prenom" required>
+            </label>
+
+            <label>
+                Nom
+                <input type="text" name="beneficiaire_nom" required>
+            </label>
+
+            <label>
+                Date de naissance
+                <input type="date" name="date_naissance" required>
+            </label>
+
+            <label>
+                Heure de naissance (au plus précis)
+                <input type="time" name="heure_naissance" required>
+            </label>
+
+            <label>
+                Lieu de naissance
+                <input type="text" name="lieu_naissance" required>
+            </label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Planification de votre prestation</legend>
+
+            <label>
+                <input
+                    type="radio"
+                    name="creneau_realisation"
+                    value="a_planifier"
+                    checked
+                    required
+                >
+                Je souhaite convenir du créneau de réalisation avec Cécile
+            </label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Vos attentes</legend>
+
+            <label>
+                Qu'attendez-vous principalement de cette prestation ?
+                <textarea name="questionnaire_attentes" rows="5"></textarea>
+            </label>
+
+            <label>
+                Y a-t-il un sujet que vous souhaitez approfondir ?
+                <textarea name="questionnaire_approfondir" rows="5"></textarea>
+            </label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Validation</legend>
+
+            <label>
+                <input type="checkbox" name="informations_exactes" value="1" required>
+                Je confirme que les informations renseignées sont exactes.
+            </label>
+
+            <label>
+                <input type="checkbox" name="acceptation_cgv" value="1" required>
+                J'accepte les
+                <a href="{{ url_for('legal_bp.conditions_generales_vente') }}" target="_blank" rel="noopener noreferrer">
+                    Conditions Générales de Vente
+                </a>.
+            </label>
+
+            <label>
+                <input type="checkbox" name="acceptation_confidentialite" value="1" required>
+                J'ai pris connaissance de la
+                <a href="{{ url_for('legal_bp.politique_confidentialite') }}" target="_blank" rel="noopener noreferrer">
+                    Politique de confidentialité
+                </a>.
+            </label>
+        </fieldset>
+
+        <button type="submit">Continuer</button>
+
+    </form>
+  </main>
+</div>
+
+{% endblock %}
