@@ -186,6 +186,53 @@ Coordonnées :
         contenu_txt=corps
     )
 
+def envoyer_notification_formulaire_commande_admin(
+    reference_commande,
+    nom,
+    prenom,
+    email_client,
+    date_naissance,
+    heure_naissance,
+    lieu_naissance,
+    creneau_realisation,
+    attentes=None,
+    approfondir=None,
+):
+    sujet = (
+        f"Nouveau formulaire reçu — {reference_commande}"
+    )
+
+    corps = f"""
+Un formulaire de commande vient d’être complété.
+
+Commande :
+- Référence : {reference_commande}
+- Créneau : {creneau_realisation}
+
+Bénéficiaire :
+- Nom : {nom}
+- Prénom : {prenom}
+- Email : {email_client}
+- Date de naissance : {date_naissance}
+- Heure de naissance : {heure_naissance}
+- Lieu de naissance : {lieu_naissance}
+
+Attentes :
+{attentes or "Aucune précision renseignée."}
+
+Éléments à approfondir :
+{approfondir or "Aucune précision renseignée."}
+"""
+
+    return envoyer_email_avec_analyse(
+        destinataire=(
+            os.getenv("EMAIL_ADMIN")
+            or os.getenv("EMAIL_ENVOI")
+        ),
+        sujet=sujet,
+        contenu_txt=corps,
+    )
+
 def envoyer_email_contact(nom: str, email: str, sujet: str, message: str) -> bool:
     """Envoie le contenu du formulaire de contact à l'adresse du site."""
 
