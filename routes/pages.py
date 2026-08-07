@@ -3,8 +3,48 @@ from flask import render_template, request, redirect
 from utils.email_sender import envoyer_email_contact
 from utils.google.sheets_writer import ajouter_email_au_sheet
 from utils.brevo_contacts import ajouter_contact_brevo
+import os
+import requests
 
 pages_bp = Blueprint("pages_bp", __name__)
+
+def verifier_turnstile():
+    token = request.form.get("cf-turnstile-response", "").strip()
+    secret = os.getenv("TURNSTILE_SECRET_KEY", "").strip()
+
+    if not token or not secret:
+        return False
+
+    try:
+        reponse = requests.post(
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            data={
+                "secret": secret,
+                "response": token,
+                "remoteip": request.remote_addr,
+            },
+            timeout=8,
+        )
+
+        resultat = reponse.json()
+
+    except (requests.RequestException, ValueError):
+        return False
+
+    return (
+        resultat.get("success") is True
+        and resultat.get("hostname")
+        in {"lesfousdastro.fr", "www.lesfousdastro.fr"}
+    )
+
+@pages_bp.app_context_processor
+def injecter_cle_turnstile():
+    return {
+        "turnstile_site_key": os.getenv(
+            "TURNSTILE_SITE_KEY",
+            "",
+        ).strip()
+    }
 
 @pages_bp.route("/analyses")
 def analyses():
@@ -109,6 +149,15 @@ La personne a accepté d’être recontactée au sujet de cette demande.
 @pages_bp.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
+        if not verifier_turnstile():
+            return render_template(
+                "pages/contact.html",
+                active="contact",
+                erreur=(
+                    "La vérification anti-spam a échoué. "
+                    "Merci de réessayer."
+                ),
+            ), 400
         nom = request.form.get("nom", "").strip()
         email = request.form.get("email", "").strip()
         sujet = request.form.get("sujet", "").strip()
@@ -151,8 +200,12 @@ def contact():
             "pages/contact.html",
             active="contact",
             succes=email_envoye,
-            erreur=not email_envoye,
-        )
+            erreur=(
+                None
+                if email_envoye
+                else "Le message n’a pas pu être envoyé. Merci de réessayer."
+            ),
+)
 
     return render_template("pages/contact.html", active="contact")
 

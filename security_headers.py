@@ -47,11 +47,11 @@ def add_security_headers(app):
            csp_parts = [
                 "default-src 'self'",
                 # JS : Paypal + Google + Maps + StatCounter
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://www.gstatic.com https://www.google.com https://maps.googleapis.com https://www.statcounter.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://www.gstatic.com https://www.google.com https://maps.googleapis.com https://www.statcounter.com https://challenges.cloudflare.com",
                 # XHR / beacons : OpenAI, Maps, PayPal, StatCounter
                 "connect-src 'self' https://api.openai.com https://maps.googleapis.com https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://api-m.paypal.com https://api-m.sandbox.paypal.com https://statcounter.com https://*.statcounter.com",
                 # iframes autorisés
-                "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://statcounter.com https://*.statcounter.com",
+                "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://statcounter.com https://*.statcounter.com https://challenges.cloudflare.com",
                 # Images : self + data + PayPal + StatCounter (pixel)
                 "img-src 'self' data: https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://c.statcounter.com",
                 # Styles / Fonts
@@ -64,11 +64,11 @@ def add_security_headers(app):
             csp_parts = [
                 "default-src 'self'",
                 # JS : PayPal + StatCounter
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com https://www.statcounter.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com https://www.statcounter.com https://challenges.cloudflare.com",
                 # XHR / beacons : PayPal + StatCounter
                 "connect-src 'self' https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com https://api-m.paypal.com https://statcounter.com https://*.statcounter.com",
                 # iframes autorisés
-                "frame-src 'self' https://www.paypal.com https://*.paypal.com https://statcounter.com https://*.statcounter.com",
+                "frame-src 'self' https://www.paypal.com https://*.paypal.com https://statcounter.com https://*.statcounter.com https://challenges.cloudflare.com",
                 # Images : self + data + PayPal + StatCounter (pixel)
                 "img-src 'self' data: https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com https://c.statcounter.com",
                 # Styles / Fonts

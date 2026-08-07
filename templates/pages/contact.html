@@ -294,7 +294,11 @@ body {
     {% if succes %}
     <div class="succes-msg">Message envoyé avec succès.</div>
     {% endif %}
-
+    {% if erreur %}
+        <div class="newsletter-msg newsletter-msg--erreur">
+            {{ erreur }}
+        </div>
+    {% endif %}
     <div class="contact-grid">
         <div class="contact-card">
             <h3>Nos coordonnées</h3>
@@ -364,6 +368,11 @@ body {
                         <span>Je souhaite recevoir les prochains articles, Astropapotes et nouveautés des Fous d'Astro.</span>
                     </label>
                 </div>
+                <div
+                    class="cf-turnstile"
+                    data-sitekey="{{ turnstile_site_key }}"
+                    data-theme="light">
+                </div>
                 <button type="submit" class="submit-btn">Envoyer le message</button>
             </form>
         </div>
@@ -396,8 +405,12 @@ body {
     </div>
 </div>
 {% endblock %}
-
 {% block scripts %}
+<script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer>
+</script>
 <script>
     function createStars() {
         const starsContainer = document.getElementById('stars');
