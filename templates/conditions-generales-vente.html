@@ -337,9 +337,11 @@
 </div>
         
 
-        <center>
-            <a href="index.html" class="back-btn">← Retour à l'accueil</a>
-        </center>
+        <div style="text-align: center;">
+          <a href="{{ url_for('main.index') }}" class="back-btn">
+              ← Retour à l'accueil
+          </a>
+      </div>
     </div>
 </body>
 </html>
