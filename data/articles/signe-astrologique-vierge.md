@@ -86,7 +86,7 @@ Ces niveaux ne servent pas à distribuer des bons et des mauvais points — ce q
 
 Que donne une Vierge de niveau 1 ?
 
-Tout d'abord, la pauvre, car elle vit sous une forte pression intérieure.
+Tout d'abord, la pauvre ! Elle vit sous une forte pression intérieure.
 Elle analyse tout, anticipe tout, cherche les erreurs et les imperfections, avec l'impression persistante que quelque chose ne va jamais assez bien : chez elle, chez les autres ou dans son environnement. PARTOUT. (Oui, jusqu'à la virgule page 374.)
 
 L'une de ses blessures possibles est un sentiment d'insuffisance : elle peut se croire imparfaite, inadéquate ou « pas à la hauteur ». Elle peut alors devenir très sensible au jugement. Même un compliment peut être difficile à recevoir, parce que son propre regard sur elle-même reste extrêmement critique.
