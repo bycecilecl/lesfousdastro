@@ -253,6 +253,25 @@ input[type="time"]:focus, input[type="email"]:focus {
 .option-card:hover::before { opacity: 0.1; }
 .option-card.selected { border-color: #00a8a8; background: linear-gradient(135deg, rgba(192,240,247,0.3), rgba(211,177,194,0.3)); }
 .option-card.free { border: 3px solid #10B981; background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(255,255,255,0.9)); }
+.free-analysis-banner {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 25px;
+    padding: 22px 28px;
+    text-align: left;
+}
+.free-analysis-banner .icon { margin: 0; }
+.free-analysis-banner .icon img { width: 96px; height: 96px; object-fit: contain; }
+.free-analysis-copy h4 { margin-bottom: 6px; }
+.free-analysis-copy p { margin: 0; max-width: 560px; }
+.free-analysis-banner .free-analysis-cta {
+    margin: 0;
+    padding: 11px 18px;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
 .option-card.featured { border: 3px solid #FFD700; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,255,255,0.9)); }
 .option-card.coral { border: 3px solid #FF6B6B; background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,255,255,0.9)); }
 .option-card.pink { border: 3px solid #FF69B4; background: linear-gradient(135deg, rgba(255,105,180,0.1), rgba(255,255,255,0.9)); }
@@ -659,6 +678,15 @@ input[type="time"]:focus, input[type="email"]:focus {
     .predictive-title { font-size: 1.3rem; }
     .testimonials-section { padding: 25px; margin: 30px 0; }
     .testimonials-grid { grid-template-columns: 1fr; gap: 20px; }
+    .free-analysis-banner {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 22px 18px;
+        text-align: center;
+    }
+    .free-analysis-banner .icon img { width: 88px; height: 88px; }
+    .free-analysis-copy p { margin: 0 auto; }
+    .free-analysis-banner .free-analysis-cta { justify-self: center; }
 }
 {% endblock %}
 
@@ -768,13 +796,14 @@ input[type="time"]:focus, input[type="email"]:focus {
             <div class="form-section">
                 <h3 class="section-title">🔮 Les Analyses Cosmiques</h3>
                 <div class="options-grid">
-                    <div class="option-card free" onclick="addToCart('gratuite', 'Analyse Gratuite', 0, this)">
+                    <div class="option-card free free-analysis-banner" onclick="addToCart('gratuite', 'Analyse Gratuite', 0, this)">
                         <div class="badge free">GRATUIT</div>
                         <span class="icon"><img src="/static/icons/analyse-gratuite-icon.webp" alt="" width="120" height="120"></span>
-                        <h4>Analyse Gratuite</h4>
-                        <p>Lecture rapide, synthétique et immédiate de ton profil astrologique</p>
-                        <div class="price free">Gratuit</div>
-                        <span class="status available">Clique pour sélectionner</span>
+                        <div class="free-analysis-copy">
+                            <h4>Analyse Gratuite</h4>
+                            <p>Découvre ton Soleil, ta Lune, ton Ascendant et les grandes tendances de ton thème.</p>
+                        </div>
+                        <span class="status available free-analysis-cta">Découvrir mon profil gratuitement</span>
                         <div class="card-tooltip">
                             <strong>Ce que tu reçois</strong>
                             Une synthèse instantanée de ton profil astrologique : Soleil, Lune, Ascendant et les grandes dominantes de ton thème. Parfait pour avoir un premier aperçu avant d'aller plus loin.
@@ -801,13 +830,14 @@ input[type="time"]:focus, input[type="email"]:focus {
                         </div>
                     </div>
 
-                      <div class="option-card coral" onclick="addToCart('point_astral_famille', 'Point Astral – Racines familiales', 42, this)">
+                      <div class="option-card coral" onclick="addToCart('point_astral_famille', 'Point Astral – Racines familiales', 35, this)">
+                        <div class="badge coral">OFFRE DE LANCEMENT</div>
                         <span class="icon">
                             <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
                         </span>
                         <h4>Point Astral – Racines familiales</h4>
                         <p>Comprends d'où tu viens, ce que tu portes et les schémas familiaux qui influencent ta vie.</p>
-                        <div class="price">42€</div>
+                        <div class="price"><span class="old-price">42€</span>35€</div>
                         <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                         <span class="status coral">Clique pour sélectionner</span>
                         <div class="card-tooltip">
@@ -879,10 +909,10 @@ input[type="time"]:focus, input[type="email"]:focus {
                     <p style="text-align:center; color:white; margin-bottom:30px; opacity:0.9;">Économise en combinant plusieurs analyses — avec l'option 3 questions incluse dans chaque pack</p>
                     <div class="packs-grid">
                         <div class="pack-card" onclick="selectPack('origines')">
-                            <div class="pack-badge" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">ÉCONOMISE 28€</div>
+                            <div class="pack-badge" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">ÉCONOMISE 21€</div>
                             <div class="pack-title">🌑 Pack Origines</div>
                             <div class="pack-content">✓ Point Astral Racines familiales : comprendre d’où tu viens<br>✓ Analyse Karmique : pourquoi tu es comme ça<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">111€</span><br><span class="pack-price-value">83€</span></div></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">104€</span><br><span class="pack-price-value">83€</span></div></div>
                         </div>
                         <div class="pack-card essence-special" onclick="selectPack('essence')" style="border:2px solid #FFD700;">
                             <div class="pack-badge">ÉCONOMISE 20€</div>
@@ -892,10 +922,10 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">69€</span><br><span class="pack-price-value">49€</span></div></div>
                         </div>
                         <div class="pack-card" onclick="selectPack('integral')" style="border:2px solid rgba(192,240,247,0.5);">
-                            <div class="pack-badge" style="background:linear-gradient(135deg,#00a8a8,#1f628e);">ÉCONOMISE 42€</div>
+                            <div class="pack-badge" style="background:linear-gradient(135deg,#00a8a8,#1f628e);">ÉCONOMISE 35€</div>
                             <div class="pack-title">🌟 Pack Intégral</div>
                             <div class="pack-content">✓ Point Astral Racines familiales<br>✓ Analyse Karmique<br>✓ Profil Amoureux<br>✓ Potentiels &amp; Défis<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">151€</span><br><span class="pack-price-value">109€</span></div></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">144€</span><br><span class="pack-price-value">109€</span></div></div>
                         </div>
                     </div>
                 </div>

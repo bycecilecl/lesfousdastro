@@ -32,7 +32,7 @@ def load_products():
         "point_astral_famille": {
             "label": "Point Astral – Racines familiales",
             "price_id": os.getenv("POINT_ASTRAL_FAMILLE_PRICE_ID", "").strip(),
-            "price_cents": _int_env("POINT_ASTRAL_FAMILLE_PRICE_CENTS", 4200),
+            "price_cents": _int_env("POINT_ASTRAL_FAMILLE_PRICE_CENTS", 3500),
             "success_route": "point_astral_famille.point_astral_famille_complet",
             "enabled": _bool_env("POINT_ASTRAL_FAMILLE_ENABLED", "1"),
         },
