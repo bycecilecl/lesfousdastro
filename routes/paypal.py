@@ -132,40 +132,6 @@ def get_paypal_token():
 @payments_bp.route("/payments/create-order", methods=["POST"])
 def create_order():
 
-    # 🧹 Nettoyage ancienne session
-    for k in (
-        "ordered_products",
-        "pending_generation",
-        "last_payment",
-        "cart_items",
-        "paiement_valide",
-        "paiement_timestamp",
-        "stripe_session_id",
-        "paypal_order_id",
-        "clarification_email_sent",
-
-        "last_pdf_url",
-        "lock_until",
-        "last_generation_key",
-        "last_generation_at",
-        "last_fingerprint",
-
-        "last_pdf_url_profil_amoureux",
-        "lock_until_profil_amoureux",
-        "last_fingerprint_profil_amoureux",
-
-        "last_pdf_url_forces_defis",
-        "lock_until_forces_defis",
-        "last_fingerprint_forces_defis",
-
-        "last_pdf_url_analyse_karmique",
-        "lock_until_analyse_karmique",
-        "last_fingerprint_analyse_karmique",
-    ):
-        session.pop(k, None)
-
-    session.modified = True
-
     # 🔐 QA bypass
     if is_qa_request():
         return jsonify({"id": "TEST-ORDER-QA", "status": "CREATED", "qa": True}), 200
@@ -357,7 +323,7 @@ def capture_order():
         "infos_utilisateur",
     ):
         session.pop(k, None)
-        
+
     session.modified = True
     
     # 🔥 DIAGNOSTIC: Logger l'état de la session

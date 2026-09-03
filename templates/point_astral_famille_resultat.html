@@ -1,0 +1,252 @@
+<!-- templates/point_astral_resultat.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point Astral - {{ nom }}</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* LOGO TOUT EN HAUT */
+        .logo-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .logo {
+            max-width: 200px;
+            max-height: 120px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #1f628e;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #1f628e;
+            margin-bottom: 10px;
+        }
+        .personal-info {
+            text-align: center;
+            margin: 20px auto;
+            font-size: 0.9em;
+            color: #666;
+            max-width: 400px;
+        }
+        
+        .personal-info p {
+            margin: 5px 0;
+            padding: 0;
+        }
+        .actions {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 8px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 0 10px;
+            background: #1f628e;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background: #144a6b;
+        }
+        .content-wrapper {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* STYLES POUR LE CONTENU ANALYSÉ */
+        .content-wrapper h1 {
+            color: #1f628e;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            border-bottom: 2px solid #1f628e;
+            padding-bottom: 15px;
+        }
+        
+        .content-wrapper h2 {
+            color: #1f628e;
+            border-bottom: 2px solid #1f628e;
+            padding-bottom: 8px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .content-wrapper h3 {
+            color: #144a6b;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-left: 4px solid #1f628e;
+            padding-left: 15px;
+        }
+        
+        .content-wrapper p {
+            margin-bottom: 15px;
+            text-align: justify;
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+        
+        .content-wrapper strong {
+            color: #1f628e;
+        }
+        
+        .content-wrapper em {
+            color: #144a6b;
+            font-style: italic;
+        }
+
+        .encadre-note {
+            background: #f7f3ec;
+            border-left: 4px solid #b98b5f;
+            padding: 16px 20px;
+            margin: 20px 20px 24px;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+
+        .encadre-note p {
+            margin: 0 0 10px 0;
+            line-height: 1.6;
+            text-align: left;
+            padding: 0;
+        }
+
+        .encadre-note p:last-child {
+            margin-bottom: 0;
+        }
+
+        .encadre-titre {
+            font-weight: 700;
+            font-size: 1.05em;
+            color: #144a6b;
+            margin-bottom: 10px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LOGO TOUT EN HAUT DU DOCUMENT -->
+        <div class="logo-header">
+            <img src="data:image/webp;base64,{{ logo_base64 }}" alt="Logo Les Fous d'Astro" class="logo">
+        </div>
+        
+        <div class="header">
+            <h1>🌟 Point Astral - {{ nom }}</h1>
+            
+            <div class="personal-info">
+                <p style="margin: 5px 0; font-size: 14px; color: #666;">
+                    {{ infos.date_naissance }} — {{ infos.heure_naissance }} — {{ infos.lieu_naissance }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Actions de téléchargement -->
+        <div class="actions">
+            {% if nom_fichier %}
+                <a href="{{ url_for('point_astral_famille.telecharger_point_astral', nom_fichier=nom_fichier) }}" class="btn">
+                    📄 Télécharger PDF
+                </a>
+            {% else %}
+                <p style="color: #666;">Fichier en cours de génération...</p>
+            {% endif %}
+        </div>
+        <div class="disclaimer" style="background:#f8f9fa;border:1px solid #dee2e6;
+            padding:20px;margin:20px 0;border-radius:8px;font-size:14.5px;line-height:1.65;">
+            <p style="margin:0 0 8px 0;">
+                <strong>⚠️ Le Point Astral est une lecture automatisée (≈4 pages).</strong><br>
+                Il n’est pas <u>comparable</u> avec une analyse manuelle réalisée par mes soins, 
+                où je prends en compte ton vécu, ton niveau de conscience, et où j’apporte une interprétation incarnée et sur mesure.  
+                <br>Le Point Astral donne un aperçu rapide de tes grands axes ; l’analyse manuelle est une plongée profonde et unique.
+            </p>
+
+            <p style="margin:0 0 8px 0;">
+                <strong>❗️Important :</strong> Cette analyse reflète les potentiels énergétiques de ton thème natal. 
+                <u>Chaque personne exprime ses énergies à des niveaux de conscience différents</u> selon son parcours, 
+                sa culture, son environnement et ses choix. Certaines qualités peuvent rester en dormance, 
+                s’exprimer de façon subtile, ou même par <em>compensation</em> (tu peux incarner l’inverse de ce qui est inscrit).
+                <br>Il est normal de ne pas te reconnaître dans tous les aspects décrits. 
+                L’astrologie révèle des tendances, pas des vérités absolues. 
+                Cette analyse est un outil de réflexion, qui peut parfois résonner plus tard dans ta vie plutôt qu’aujourd’hui.
+            </p>
+
+            <p style="margin:0 0 8px 0;">
+                <strong>🌙 À propos du Nakshatra :</strong> En astrologie védique, la Lune est reliée à un « nakshatra », 
+                une constellation symbolique associée à une divinité ou une énergie. 
+                Ce n’est pas une croyance religieuse, mais une image archétypale pour comprendre ton monde intérieur. 
+                Par exemple, si ton nakshatra est <em>Swati</em>, il est lié au dieu du vent (Vayu) et reflète indépendance, 
+                mouvement et quête de liberté. Cela donne une couleur particulière à ta sensibilité et à ta manière de ressentir.
+            </p>
+
+            <p style="margin:0 0 8px 0;">
+                <strong>♻️ Note technique :</strong> J'ai conçu et développé moi-même l'ensemble du système derrière cette analyse. 
+                Le texte est généré automatiquement avec l'aide d'une IA. 
+                De petites répétitions ou incohérences peuvent apparaître. Rien ne remplace un échange humain direct 
+                pour approfondir ton thème.
+            </p>
+
+            <p style="margin:0;">
+                <strong>💫 Pour aller plus loin :</strong> 
+                Réserve une consultation personnalisée sur 
+                <a href="https://bycecilecl.com" target="_blank" style="color:#1f628e; text-decoration:none;">
+                www.bycecilecl.com
+                </a>
+            </p>
+            </div>
+        <!-- Contenu HTML généré -->
+        <div class="content-wrapper">
+            {% if html_content %}
+                {{ html_content|safe }}
+            {% else %}
+                <div style="padding: 40px; text-align: center; color: #666;">
+                    <h2>⚠️ Contenu non disponible</h2>
+                    <p>Le contenu HTML n'a pas pu être généré ou est vide.</p>
+                    <p>Veuillez vérifier les logs du serveur pour plus d'informations.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Lien retour -->
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{{ url_for('main.index') }}" class="btn">
+                🏠 Nouvelle analyse
+            </a>
+        </div>
+    </div>
+</body>
+</html>

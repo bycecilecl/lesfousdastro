@@ -20,6 +20,7 @@ from utils.email_sender import (
 from threading import Thread
 from utils.s3_utils import upload_file_and_presign
 from routes.point_astral_blocs import generer_flash_astral_pdf_s3
+from point_astral_famille.routes import generer_point_astral_famille_pdf_s3
 from routes.forces_defis_module import generer_forces_defis_pdf_s3
 from routes.profil_amoureux_module import generer_profil_amoureux_pdf_s3
 from routes.analyse_karmique import generer_analyse_karmique_pdf_s3
@@ -685,6 +686,24 @@ def generer_analyse_pack(product_id, pending):
         if product_id == "flash_astral":
 
             resultat = generer_flash_astral_pdf_s3(
+                infos=infos,
+                envoyer_email=False,
+            )
+
+            return {
+                "product_id": product_id,
+                "label": product["label"],
+                "pdf_url": resultat.get("pdf_url"),
+                "pdf_path": resultat.get("pdf_path"),
+                "s3_ready": True,
+            }
+
+        # =====================================================
+        # POINT ASTRAL – RACINES FAMILIALES
+        # =====================================================
+        if product_id == "point_astral_famille":
+
+            resultat = generer_point_astral_famille_pdf_s3(
                 infos=infos,
                 envoyer_email=False,
             )

@@ -24,9 +24,17 @@ def load_products():
         "flash_astral": {
             "label": "Flash Astral complet",
             "price_id": os.getenv("FLASH_ASTRAL_PRICE_ID", "").strip(),
-            "price_cents": _int_env("FLASH_ASTRAL_PRICE_CENTS", 3500),
+            "price_cents": _int_env("FLASH_ASTRAL_PRICE_CENTS", 2900),
             "success_route": "point_astral_blocs.point_astral_blocs_complet",
             "enabled": _bool_env("FLASH_ASTRAL_ENABLED", "1"),
+        },
+
+        "point_astral_famille": {
+            "label": "Point Astral – Racines familiales",
+            "price_id": os.getenv("POINT_ASTRAL_FAMILLE_PRICE_ID", "").strip(),
+            "price_cents": _int_env("POINT_ASTRAL_FAMILLE_PRICE_CENTS", 4200),
+            "success_route": "point_astral_famille.point_astral_famille_complet",
+            "enabled": _bool_env("POINT_ASTRAL_FAMILLE_ENABLED", "1"),
         },
         "forces_defis": {
             "label": "Mes Potentiels et Défis",
@@ -62,7 +70,7 @@ def load_products():
 
         "pack_essence": {
             "label": "Pack Essence (3 analyses)",
-            "price_cents": 5400,
+            "price_cents": _int_env("PACK_ESSENCE_PRICE_CENTS", 4900),
             "included_products": [
                 "flash_astral",
                 "forces_defis",
@@ -74,7 +82,7 @@ def load_products():
             "label": "Pack Origines",
             "price_cents": _int_env("PACK_ORIGINES_PRICE_CENTS", 8300),
             "included_products": [
-                "flash_astral",
+                "point_astral_famille",
                 "analyse_karmique",
             ],
             "enabled": _bool_env("PACK_ORIGINES_ENABLED", "1"),
@@ -82,9 +90,9 @@ def load_products():
 
         "pack_integral": {
             "label": "Pack Intégral",
-            "price_cents": _int_env("PACK_INTEGRAL_PRICE_CENTS", 9900),
+            "price_cents": _int_env("PACK_INTEGRAL_PRICE_CENTS", 10900),
             "included_products": [
-                "flash_astral",
+                "point_astral_famille",
                 "analyse_karmique",
                 "profil_amoureux",
                 "forces_defis",

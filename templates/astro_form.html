@@ -296,6 +296,29 @@ input[type="time"]:focus, input[type="email"]:focus {
     background: linear-gradient(135deg, rgba(31,98,142,0.08), rgba(255,255,255,0.9));
 }
 
+.points-astraux-group {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(255,107,107,0.07), rgba(255,142,83,0.03));
+    border: 2px dashed rgba(255,107,107,0.35);
+    border-radius: 20px;
+    padding: 18px 20px 25px;
+    margin: 5px 0;
+}
+
+.points-astraux-title {
+    color: #FF6B6B;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    margin: 8px 0 20px;
+}
+
+.points-astraux-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
 .option-card.consultation .status {
     background: linear-gradient(45deg, #1f628e, #00a8a8);
     color: white;
@@ -758,22 +781,42 @@ input[type="time"]:focus, input[type="email"]:focus {
                         </div>
                     </div>
 
-                  <div class="option-card coral" onclick="addToCart('flash_astral', 'Point Astral', 35, this)">
-                    <span class="icon">
-                        <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
-                    </span>
-                    <h4>Point Astral</h4>
-                    <p>Les grandes dynamiques de ton thème natal sur 4 à 6 pages</p>
-                    <div class="price">35€</div>
-                    <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
-                    <span class="status coral">Clique pour sélectionner</span>
-                    <div class="card-tooltip">
-                        <strong>Ce que tu reçois</strong>
-                        Ton Big 3 (Ascendant, Soleil, Lune), ton monde intérieur, tes racines familiales, tes grands axes, une synthèse personnalisée.
-                        <br><br>
-                        <em>Détail complet et exemple de rapport sur la page "Guide des Analyses".</em>
+                  <div class="points-astraux-group">
+                    <h4 class="points-astraux-title">🔮 Points Astraux</h4>
+                    <div class="points-astraux-grid">
+                      <div class="option-card coral" onclick="addToCart('flash_astral', 'Point Astral Essentiel', 29, this)">
+                        <span class="icon">
+                            <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
+                        </span>
+                        <h4>Point Astral Essentiel</h4>
+                        <p>Les grandes dynamiques de ton thème natal sur 4 à 6 pages</p>
+                        <div class="price">29€</div>
+                        <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
+                        <span class="status coral">Clique pour sélectionner</span>
+                        <div class="card-tooltip">
+                            <strong>Ce que tu reçois</strong>
+                            Ton Big 3 — Ascendant, Soleil et Lune — ton identité profonde, ton monde intérieur, un premier éclairage sur ton enfance et tes dynamiques parentales, les grands axes de ton thème et une synthèse personnalisée.
+                            <br><br>
+                            <em>Une lecture globale pour mieux comprendre ton fonctionnement.</em>
+                        </div>
                     </div>
-                </div>
+
+                      <div class="option-card coral" onclick="addToCart('point_astral_famille', 'Point Astral – Racines familiales', 42, this)">
+                        <span class="icon">
+                            <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
+                        </span>
+                        <h4>Point Astral – Racines familiales</h4>
+                        <p>Comprends d'où tu viens, ce que tu portes et les schémas familiaux qui influencent ta vie.</p>
+                        <div class="price">42€</div>
+                        <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
+                        <span class="status coral">Clique pour sélectionner</span>
+                        <div class="card-tooltip">
+                            <strong>Ce que tu reçois</strong>
+                            Une lecture approfondie de tes racines, de ton foyer intérieur, des pôles mère et père, de ta place dans la famille et des schémas transmis qui influencent encore ta vie.
+                        </div>
+                    </div>
+                    </div>
+                  </div>
 
                     <div class="option-card featured" onclick="addToCart('forces_defis', 'Mes Potentiels et Défis', 15, this)">
                         <span class="icon"><img src="/static/icons/forces-defis-icon.webp" alt="" width="120" height="120"></span>
@@ -836,23 +879,23 @@ input[type="time"]:focus, input[type="email"]:focus {
                     <p style="text-align:center; color:white; margin-bottom:30px; opacity:0.9;">Économise en combinant plusieurs analyses — avec l'option 3 questions incluse dans chaque pack</p>
                     <div class="packs-grid">
                         <div class="pack-card" onclick="selectPack('origines')">
-                            <div class="pack-badge" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">-20% NOUVEAU</div>
+                            <div class="pack-badge" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">ÉCONOMISE 28€</div>
                             <div class="pack-title">🌑 Pack Origines</div>
-                            <div class="pack-content">✓ Point Astral : qui tu es aujourd'hui<br>✓ Analyse Karmique : pourquoi tu es comme ça<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">104€</span><br><span class="pack-price-value">83€</span></div></div>
+                            <div class="pack-content">✓ Point Astral Racines familiales : comprendre d’où tu viens<br>✓ Analyse Karmique : pourquoi tu es comme ça<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">111€</span><br><span class="pack-price-value">83€</span></div></div>
                         </div>
                         <div class="pack-card essence-special" onclick="selectPack('essence')" style="border:2px solid #FFD700;">
-                            <div class="pack-badge">-28% PACK</div>
+                            <div class="pack-badge">ÉCONOMISE 20€</div>
                             <div class="pack-title">✨ Pack Essence</div>
-                            <div class="pack-content">✓ Point Astral<br>✓ Potentiels &amp; Défis<br>✓ Profil Amoureux</div>
+                            <div class="pack-content">✓ Point Astral Essentiel<br>✓ Potentiels &amp; Défis<br>✓ Profil Amoureux</div>
                             <span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">75€</span><br><span class="pack-price-value">54€</span></div></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">69€</span><br><span class="pack-price-value">49€</span></div></div>
                         </div>
                         <div class="pack-card" onclick="selectPack('integral')" style="border:2px solid rgba(192,240,247,0.5);">
-                            <div class="pack-badge" style="background:linear-gradient(135deg,#00a8a8,#1f628e);">-31% COMPLET</div>
+                            <div class="pack-badge" style="background:linear-gradient(135deg,#00a8a8,#1f628e);">ÉCONOMISE 42€</div>
                             <div class="pack-title">🌟 Pack Intégral</div>
-                            <div class="pack-content">✓ Point Astral<br>✓ Analyse Karmique<br>✓ Profil Amoureux<br>✓ Potentiels &amp; Défis<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">144€</span><br><span class="pack-price-value">99€</span></div></div>
+                            <div class="pack-content">✓ Point Astral Racines familiales<br>✓ Analyse Karmique<br>✓ Profil Amoureux<br>✓ Potentiels &amp; Défis<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">151€</span><br><span class="pack-price-value">109€</span></div></div>
                         </div>
                     </div>
                 </div>
@@ -1326,7 +1369,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             });
         }
 
-        const eligibleIds = ['flash_astral', 'profil_amoureux', 'analyse_karmique'];
+        const eligibleIds = ['flash_astral', 'point_astral_famille', 'profil_amoureux', 'analyse_karmique'];
         const packEligibleIds = ['pack_origines', 'pack_essence', 'pack_integral'];
         const hasEligible = cart.some(item => eligibleIds.includes(item.id)) || (selectedPack && packEligibleIds.includes(selectedPack.id));
         const clarifInCart = cart.find(item => item.id === 'clarification_questions');
@@ -1373,9 +1416,9 @@ input[type="time"]:focus, input[type="email"]:focus {
 
     function selectPack(packId) {
         const packs = {
-            origines: { id: 'pack_origines', name: '🌑 Pack Origines', price: 83, analyses: ['flash_astral', 'analyse_karmique'] },
-            essence: { id: 'pack_essence', name: '✨ Pack Essence', price: 54, analyses: ['flash_astral', 'forces_defis', 'profil_amoureux'] },
-            integral: { id: 'pack_integral', name: '🌟 Pack Intégral', price: 99, analyses: ['flash_astral', 'analyse_karmique', 'profil_amoureux', 'forces_defis'] }
+            origines: { id: 'pack_origines', name: '🌑 Pack Origines', price: 83, analyses: ['point_astral_famille', 'analyse_karmique'] },
+            essence: { id: 'pack_essence', name: '✨ Pack Essence', price: 49, analyses: ['flash_astral', 'forces_defis', 'profil_amoureux'] },
+            integral: { id: 'pack_integral', name: '🌟 Pack Intégral', price: 109, analyses: ['point_astral_famille', 'analyse_karmique', 'profil_amoureux', 'forces_defis'] }
         };
         const pack = packs[packId];
         if (!pack) return;
