@@ -514,30 +514,38 @@ input[type="time"]:focus, input[type="email"]:focus {
     background: linear-gradient(135deg, rgba(192,240,247,0.3), rgba(31,98,142,0.2));
     backdrop-filter: blur(10px);
     border-radius: 25px;
-    padding: 40px;
+    padding: 28px 32px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     border: 1px solid rgba(255,255,255,0.3);
     margin: 30px 0;
 }
 
-.consultation-section .section-title { color: #1f628e; }
-.consultation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px; }
-
-.consultation-card {
-    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
-    color: white;
-    border-radius: 20px;
-    padding: 30px;
-    text-align: center;
-    transition: all 0.3s ease;
+.consultation-banner {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 26px;
+    color: #1f628e;
     text-decoration: none;
-    display: block;
+    transition: all 0.3s ease;
 }
 
-.consultation-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(255,107,107,0.3); text-decoration: none; color: white; }
-.consultation-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
-.consultation-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; }
-.consultation-description { font-size: 1rem; opacity: 0.9; line-height: 1.5; }
+.consultation-banner:hover { transform: translateY(-3px); text-decoration: none; color: #1f628e; }
+.consultation-portrait { width: 110px; height: 110px; object-fit: contain; display: block; }
+.consultation-copy { min-width: 0; }
+.consultation-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 8px; }
+.consultation-description { color: #4f6472; font-size: 1rem; line-height: 1.5; }
+.consultation-cta {
+    display: inline-block;
+    padding: 12px 20px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #1f628e, #00a8a8);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 5px 15px rgba(31,98,142,0.2);
+}
 
 .cart-section {
     background: rgba(255,255,255,0.95);
@@ -687,6 +695,10 @@ input[type="time"]:focus, input[type="email"]:focus {
     .free-analysis-banner .icon img { width: 88px; height: 88px; }
     .free-analysis-copy p { margin: 0 auto; }
     .free-analysis-banner .free-analysis-cta { justify-self: center; }
+    .consultation-section { padding: 24px 18px; }
+    .consultation-banner { grid-template-columns: 1fr; gap: 14px; text-align: center; }
+    .consultation-portrait { width: 100px; height: 100px; margin: 0 auto; }
+    .consultation-cta { justify-self: center; white-space: normal; }
 }
 {% endblock %}
 
@@ -894,12 +906,6 @@ input[type="time"]:focus, input[type="email"]:focus {
                         </div>
                     </div>
 
-                    <div class="option-card consultation" onclick="window.location.href='/prestations'">
-                        <span class="icon"><img src="/static/icons/ccl-consultations.webp" alt="" width="120" height="120"></span>
-                        <h4>Consultation Personnalisée</h4>
-                        <p>Une lecture manuelle, en direct, qui prend en compte ton vécu et s'adapte à toi en temps réel</p>
-                        <span class="status available">Découvrir mes prestations</span>
-                    </div>
                     </div>
 
 
@@ -930,25 +936,15 @@ input[type="time"]:focus, input[type="email"]:focus {
                     </div>
                 </div>
 
-                <div class="predictive-section">
-                    <h3 class="predictive-title">🌙 Analyses Prévisionnelles</h3>
-                    <p class="predictive-subtitle">Bientôt disponibles — découvre ce que l'avenir te réserve avec nos analyses temporelles</p>
-                    <div class="options-grid">
-                        <div class="option-card" style="opacity:0.45;cursor:not-allowed;filter:grayscale(0.6);">
-                            <span class="icon">🌙</span>
-                            <h4>Mes Énergies du Mois</h4>
-                            <p>Abonnement mensuel pour suivre vos transits personnalisés</p>
-                            <div class="price" style="color:#aaa;">À venir</div>
-                            <span class="status coming-soon">En développement</span>
+                <div class="consultation-section">
+                    <a href="{{ url_for('pages_bp.prestations') }}" class="consultation-banner">
+                        <img src="/static/icons/ccl-consultations.webp" alt="Cécile, astrologue des Fous d'Astro" class="consultation-portrait" width="120" height="120">
+                        <div class="consultation-copy">
+                            <div class="consultation-title">Tu préfères une lecture en direct ?</div>
+                            <div class="consultation-description">Pour aller plus loin avec ton vécu, tes questions et un véritable échange, réserve une consultation personnalisée.</div>
                         </div>
-                        <div class="option-card" style="opacity:0.45;cursor:not-allowed;filter:grayscale(0.6);">
-                            <span class="icon">🎂</span>
-                            <h4>Révolution Solaire</h4>
-                            <p>Votre thème annuel pour anticiper les grandes tendances</p>
-                            <div class="price" style="color:#aaa;">À venir</div>
-                            <span class="status coming-soon">En développement</span>
-                        </div>
-                    </div>
+                        <span class="consultation-cta">Découvrir les consultations</span>
+                    </a>
                 </div>
             </div>
         </form>
@@ -1021,18 +1017,6 @@ input[type="time"]:focus, input[type="email"]:focus {
         </button>
     </div>
 
-    <<div class="consultation-section">
-    <h2 class="section-title">👥 Consultations Personnalisées</h2>
-    <div class="consultation-grid" style="grid-template-columns:1fr;max-width:500px;margin:30px auto 0;">
-        <a href="{{ url_for('pages_bp.prestations') }}" class="consultation-card">
-            <span class="consultation-icon">🔮</span>
-            <div class="consultation-title">Réserver une consultation</div>
-            <div class="consultation-description">
-                Analyse personnalisée en visio.
-            </div>
-        </a>
-    </div>
-</div>
 </div>
 
 <!-- Modal Analyse Gratuite -->
