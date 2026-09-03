@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Transits - {{ nom }}</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: Georgia, serif;
+            background: #f5f5f5;
+            color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .logo {
+            width: auto;
+            height: auto;
+            max-width: 200px;
+            max-height: 120px;
+            object-fit: contain;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #1f628e;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1f628e;
+            margin: 0 0 10px;
+        }
+
+        .header p {
+            color: #666;
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .actions {
+            text-align: center;
+            margin: 0 0 30px;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 8px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #1f628e;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .btn:hover { background: #144a6b; }
+
+        .content-wrapper {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+            overflow: hidden;
+        }
+
+        .content-wrapper h2 {
+            color: #1f628e;
+            border-bottom: 2px solid #1f628e;
+            padding-bottom: 8px;
+            margin: 35px 0 20px;
+            font-size: 1.5rem;
+        }
+
+        .content-wrapper h2:first-child { margin-top: 0; }
+
+        .content-wrapper h3 {
+            color: #144a6b;
+            margin: 0 0 12px;
+            font-size: 1.15rem;
+        }
+
+        .content-wrapper p {
+            line-height: 1.7;
+            margin: 0 0 16px;
+            text-align: justify;
+        }
+
+        .transits-global {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin: 30px 0;
+        }
+
+        .transits-date {
+            color: #666;
+            font-size: 0.95rem;
+            text-align: center !important;
+            margin-bottom: 24px !important;
+        }
+
+        .transits-list { margin-top: 35px; }
+
+        .transit-card {
+            background: linear-gradient(135deg, rgba(192, 240, 247, 0.2), rgba(31, 98, 142, 0.06));
+            border: 1px solid rgba(31, 98, 142, 0.18);
+            border-left: 4px solid #1f628e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 18px;
+        }
+
+        .transit-card p {
+            margin-bottom: 0;
+            text-align: left;
+        }
+
+        .transits-error {
+            background: #fff4e5;
+            border: 1px solid #e7b866;
+            border-radius: 12px;
+            margin-top: 24px;
+            padding: 18px;
+        }
+
+        .brady-context {
+            background: #f7f3ef;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            margin-top: 14px;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 20px 15px; }
+            .logo { max-width: 160px; }
+            .header h1 { font-size: 1.7rem; }
+            .content-wrapper { padding: 18px 14px; }
+            .content-wrapper p { text-align: left; }
+            .transit-card { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <div class="logo-header">
+            <img
+                src="{{ url_for('static', filename='images/logo_les_fous_dastro.webp') }}"
+                alt="Les Fous d'Astro"
+                class="logo"
+                onerror="this.style.display='none'"
+            >
+        </div>
+
+        <header class="header">
+            <h1>⚡ Flash Transits — {{ nom }}</h1>
+            <p>Que se passe-t-il dans ton ciel&nbsp;?</p>
+        </header>
+
+        {% if pdf_url %}
+            <div class="actions">
+                <a href="{{ pdf_url }}" class="btn" download>
+                    📄 Télécharger mon Flash Transits en PDF
+                </a>
+            </div>
+        {% endif %}
+
+        <section class="content-wrapper">
+            {{ contenu_html|safe }}
+        </section>
+    </main>
+</body>
+</html>

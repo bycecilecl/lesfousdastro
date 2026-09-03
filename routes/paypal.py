@@ -226,6 +226,11 @@ def create_order():
     if not items_paypal:
         logger.error("❌ [PayPal] Aucun item PayPal construit (produits inconnus ? panier=%s)", cart_items)
         return jsonify({"error": "Panier vide ou produits inconnus"}), 400
+
+    if "flash_transits" in payment_product_keys and len(payment_product_keys) > 1:
+        return jsonify({
+            "error": "Le Flash Transits doit être commandé séparément."
+        }), 400
     
     # 🔥 FIX: Stocker AUSSI payment_product_keys pour avoir l'info complète
     session["pending_paypal_products"] = analysis_product_keys
@@ -380,6 +385,8 @@ def capture_order():
                 'lat': user_info.get('lat'),
                 'lon': user_info.get('lon'),
                 'tzid': user_info.get('tzid'),
+                'transit_date_mode': user_info.get('transitDateMode') or 'today',
+                'transit_date': user_info.get('transitDate') or '',
             }
 
         # 🔥 FIX: Marqueurs avec info complète

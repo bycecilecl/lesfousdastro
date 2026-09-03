@@ -72,6 +72,34 @@ def html_to_pdf(html_content, output_path):
             section {
                 break-inside: avoid;
             }
+
+            .encadre-note {
+                background: #f7f3ec;
+                border-left: 4px solid #b98b5f;
+                padding: 16px 20px;
+                margin: 20px 20px 24px;
+                border-radius: 8px;
+                font-size: 0.95em;
+                page-break-inside: avoid;
+            }
+
+            .encadre-note p {
+                margin: 0 0 10px 0;
+                line-height: 1.6;
+                text-align: left;
+                padding: 0;
+            }
+
+            .encadre-note p:last-child {
+                margin-bottom: 0;
+            }
+
+            .encadre-titre {
+                font-weight: 700;
+                font-size: 1.05em;
+                color: #144a6b;
+                margin-bottom: 10px !important;
+            }
         """)
         
         # Générer le PDF

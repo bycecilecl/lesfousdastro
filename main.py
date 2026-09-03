@@ -50,6 +50,7 @@ from utils.utils_points_forts import extraire_points_forts
 from routes.analyse_gratuite_api import gratuite_api_bp
 from routes.point_astral_blocs import point_astral_blocs_bp
 from point_astral_famille.routes import point_astral_famille_bp
+from routes.transits import transits_bp
 from routes.forces_defis_module import forces_defis_module_bp
 from utils.karmique.karmique_score import calculer_poids_karmique
 from utils.karmique.karmique_context import build_global_context
@@ -286,6 +287,7 @@ app.register_blueprint(geocode_bp)
 app.register_blueprint(gratuite_api_bp)
 app.register_blueprint(point_astral_blocs_bp)
 app.register_blueprint(point_astral_famille_bp)
+app.register_blueprint(transits_bp)
 app.register_blueprint(payments_bp)
 app.register_blueprint(legal_bp)
 app.register_blueprint(stripe_webhook_bp)

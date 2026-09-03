@@ -132,6 +132,8 @@ def checkout():
         "lat": (request.form.get("lat") or "").strip(),
         "lon": (request.form.get("lon") or "").strip(),
         "tzid": (request.form.get("tzid") or "").strip(),
+        "transit_date_mode": (request.form.get("transit_date_mode") or "today").strip(),
+        "transit_date": (request.form.get("transit_date") or "").strip(),
     }
 
     # 2) 🛒 NOUVEAU : Récupération des items du panier
@@ -248,6 +250,9 @@ def checkout():
     if not line_items:
         current_app.logger.error("❌ [CHECKOUT] Aucun produit valide dans le panier")
         abort(400, description="Aucun produit valide.")
+
+    if "flash_transits" in payment_product_keys and len(payment_product_keys) > 1:
+        abort(400, description="Le Flash Transits doit être commandé séparément.")
     
     current_app.logger.info(
         f"💰 [CHECKOUT] Total: {total_cents/100:.2f}€ | "
@@ -267,6 +272,8 @@ def checkout():
                 "product_keys": ",".join(analysis_product_keys),
                 "email": session['infos_utilisateur'].get('email', ''),
                 "total_cents": str(total_cents),
+                "transit_date_mode": session['infos_utilisateur'].get('transit_date_mode', 'today'),
+                "transit_date": session['infos_utilisateur'].get('transit_date', ''),
             },
             client_reference_id=(session['infos_utilisateur'].get('email') or str(uuid.uuid4()))
         )
@@ -416,6 +423,19 @@ def paiement_effectue():
     current_app.logger.info(f"✅ [PAIEMENT-EFFECTUE-STRIPE] Produits: {product_keys}")
 
     infos = session.get("infos_utilisateur", {})
+
+    if "flash_transits" in product_keys:
+        infos["transit_date_mode"] = (
+            infos.get("transit_date_mode")
+            or metadata.get("transit_date_mode")
+            or "today"
+        )
+        infos["transit_date"] = (
+            infos.get("transit_date")
+            or metadata.get("transit_date")
+            or ""
+        )
+        session["infos_utilisateur"] = infos
 
     nom = infos.get("nom")
     email = infos.get("email")

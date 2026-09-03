@@ -36,6 +36,13 @@ def load_products():
             "success_route": "point_astral_famille.point_astral_famille_complet",
             "enabled": _bool_env("POINT_ASTRAL_FAMILLE_ENABLED", "1"),
         },
+        "flash_transits": {
+            "label": "Flash Transits",
+            "price_id": os.getenv("FLASH_TRANSITS_PRICE_ID", "").strip(),
+            "price_cents": _int_env("FLASH_TRANSITS_PRICE_CENTS", 1200),
+            "success_route": "transits.transits_complet",
+            "enabled": _bool_env("FLASH_TRANSITS_ENABLED", "1"),
+        },
         "forces_defis": {
             "label": "Mes Potentiels et Défis",
             "price_id": os.getenv("FORCES_DEFIS_PRICE_ID", "").strip(),
