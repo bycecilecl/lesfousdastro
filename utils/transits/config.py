@@ -45,6 +45,27 @@ PLANETES_LENTES = [
     "Pluton",
 ]
 
+# Mars apporte le déclencheur concret d'une période, sans avoir la portée
+# structurelle des planètes lentes. Il suit donc des règles plus strictes.
+ASPECTS_MARS_FLASH = [
+    "conjonction",
+    "opposition",
+    "carré",
+]
+
+CIBLES_MARS_ORBE_ELARGI = [
+    "Soleil",
+    "Lune",
+    "Ascendant",
+    "Descendant",
+    "Milieu du Ciel",
+    "Fond du Ciel",
+]
+
+ORBE_MARS_FLASH = 2.0
+ORBE_MARS_FLASH_CIBLES_MAJEURES = 3.0
+MAX_TRANSITS_MARS_AFFICHES = 1
+
 ASPECTS_MAJEURS = [
     "conjonction",
     "opposition",

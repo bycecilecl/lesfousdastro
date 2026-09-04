@@ -5,11 +5,11 @@ from .calcul_transits import calculer_positions_transits
 from .detecteurs import detecter_aspects
 from datetime import datetime, timedelta
 from .config import (
-    PLANETES_LENTES,
     ASPECTS_MAJEURS,
-    MAX_TRANSITS_AFFICHES,
+    PLANETES_LENTES,
     IMPORTANCE_MIN_AFFICHAGE,
 )
+from .selection import est_transit_mars_flash_pertinent, selectionner_transits_flash
 
 from .maisons import extraire_cuspides
 from .synthese_brady import THEMES_MAISONS
@@ -174,6 +174,7 @@ def fusionner_transits_periode(transits_periode: list) -> dict:
         )
     )
 
+
 def generer_analyse_transits(
     theme: dict,
     periode: str = "période actuelle",
@@ -231,17 +232,8 @@ def generer_analyse_transits(
         angles_deg=angles_deg,
     )
 
-    # 5. filtrage simple (V1)
-    aspects_importants = [
-        a for a in aspects
-        if a.planete_transit in PLANETES_LENTES
-        and a.aspect in ASPECTS_MAJEURS
-    ]
-
-    transits_affiches = [
-        a for a in aspects_importants
-        if a.importance >= IMPORTANCE_MIN_AFFICHAGE
-    ][:MAX_TRANSITS_AFFICHES]
+    # 5. Transits de fond + au plus un déclencheur bref de Mars.
+    transits_affiches = selectionner_transits_flash(aspects)
 
     logger.info("TRANSITS AFFICHES = %s", [
         f"{a.planete_transit} {a.aspect} {a.planete_natale} ({a.importance})"
@@ -255,8 +247,13 @@ def generer_analyse_transits(
 
     transits_periode_filtres = [
         a for a in transits_periode
-        if a.planete_transit in PLANETES_LENTES
-        and a.aspect in ASPECTS_MAJEURS
+        if (
+            (
+                a.planete_transit in PLANETES_LENTES
+                and a.aspect in ASPECTS_MAJEURS
+            )
+            or est_transit_mars_flash_pertinent(a)
+        )
         and a.importance >= IMPORTANCE_MIN_AFFICHAGE
     ]
 
