@@ -9,7 +9,7 @@ from utils.calcul_theme import calcul_theme as _calcul_theme
 from utils.pdf_utils import html_to_pdf
 from utils.genre import get_user_prefs
 from utils.s3_utils import upload_file_and_presign
-from utils.email_sender import envoyer_email_avec_analyse
+from utils.email_sender import construire_email_analyse, envoyer_email_avec_analyse
 from threading import Thread
 import logging
 
@@ -359,22 +359,8 @@ def amour_complet():
             dest_email = (infos.get("email") or "").strip()
             if dest_email:
                 prenom = (infos.get("nom") or "").split()[0] or "toi"
-                sujet_email = "Ton Analyse Amoureuse est prête"
-                body_txt = (
-                    f"Bonjour {prenom},\n\n"
-                    "Merci pour ta commande ! Ton Analyse Amoureuse est prête 💗\n\n"
-                    "Télécharge ton PDF ici :\n"
-                    f"{pdf_final_url}\n\n"
-                    "Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.\n\n"
-                    "À bientôt,\n"
-                    "Les Fous d’Astro – By Cécile CL"
-                )
-                body_html = (
-                    f"<p>Bonjour {prenom},</p>"
-                    "<p>Merci pour ta commande ! Ton <strong>Analyse Amoureuse</strong> est prête 💗</p>"
-                    f"<p>📄 <a href=\"{pdf_final_url}\" target=\"_blank\">Télécharge ton PDF ici</a></p>"
-                    "<p>Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.</p>"
-                    "<p>À bientôt,<br>Les Fous d’Astro – By Cécile CL</p>"
+                sujet_email, body_txt, body_html = construire_email_analyse(
+                    prenom, "Analyse Amoureuse", pdf_final_url, etat="est prête"
                 )
 
                 send_emails = os.getenv("SEND_EMAILS", "true").lower() in ("1", "true", "yes")

@@ -21,7 +21,7 @@ from threading import Thread
 
 from utils.karmique.chapitres.intro_chapitres import CHAPTER_INTROS
 from utils.s3_utils import upload_file_and_presign
-from utils.email_sender import envoyer_email_avec_analyse
+from utils.email_sender import construire_email_analyse, envoyer_email_avec_analyse
 from config.analysis_sandbox import is_analysis_sandbox
 
 logger = logging.getLogger(__name__)
@@ -676,51 +676,8 @@ def analyse_karmique_complete():
             dest_email = (infos.get("email") or "").strip()
             if dest_email and pdf_final_url:
                 prenom = (infos.get("nom") or "").split()[0] or "toi"
-                sujet_email = "Ton Analyse Karmique est prête ✨"
-
-                body_txt = (
-                    f"Bonjour {prenom},\n\n"
-                    "Ton Analyse Karmique est prête 🔮 Merci pour ta confiance !\n\n"
-                    "📄 Télécharge ton document ici :\n"
-                    f"{pdf_final_url}\n\n"
-                    "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.\n"
-                    "Si le lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.\n\n"
-                    "Ce que tu tiens entre les mains, c'est pas rien.\n"
-                    "Les nœuds lunaires, Chiron, Lilith, les planètes rétrogrades...\n"
-                    "C'est tout ce qui explique pourquoi tu te retrouves toujours dans les mêmes situations\n"
-                    "— et surtout, comment t'en sortir.\n\n"
-                    "Prends le temps de le lire, de le relire. Certaines choses ne résonnent pas\n"
-                    "tout de suite, et puis un jour ça fait tilt.\n\n"
-                    "À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,\n"
-                    "Cécile CL ✨"
-                )
-
-                body_html = (
-                    f"<p>Bonjour {prenom},</p>"
-                    "<p>Ton <strong>Analyse Karmique</strong> est prête 🔮 Merci pour ta confiance !</p>"
-                    "<div style='margin:30px 0; text-align:center;'>"
-                    f"<a href='{pdf_final_url}' target='_blank' "
-                    "style='display:inline-block;padding:14px 28px;background:#6b3fa0;color:white;"
-                    "border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;'>"
-                    "🔮 Télécharger mon Analyse Karmique"
-                    "</a>"
-                    "<p style='margin-top:12px;font-size:13px;color:#777;'>"
-                    "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.<br>"
-                    "Si le lien ne s'ouvre pas, copie/colle l'URL directement dans ton navigateur."
-                    "</p>"
-                    "</div>"
-                    "<div style='margin:30px 0;padding:20px;background:#f9f6ff;border-radius:12px;'>"
-                    "<p style='color:#3C3489;'>Ce que tu tiens entre les mains, c'est pas rien.</p>"
-                    "<p style='color:#534AB7;line-height:1.7;'>"
-                    "Les nœuds lunaires, Chiron, Lilith, les planètes rétrogrades...<br>"
-                    "C'est tout ce qui explique pourquoi tu te retrouves toujours dans les mêmes situations "
-                    "— et surtout, comment t'en sortir.<br><br>"
-                    "Prends le temps de le lire, de le relire. Certaines choses ne résonnent pas "
-                    "tout de suite, et puis un jour ça fait tilt."
-                    "</p>"
-                    "</div>"
-                    "<p style='margin-top:40px;'>À très vite sur les réseaux...ou dans les étoiles si on se croise jamais,<br>"
-                    "Cécile CL ✨</p>"
+                sujet_email, body_txt, body_html = construire_email_analyse(
+                    prenom, "Analyse Karmique", pdf_final_url, etat="est prête"
                 )
 
                 send_emails = os.getenv("SEND_EMAILS", "true").lower() in ("1", "true", "yes")
@@ -775,4 +732,3 @@ def telecharger_analyse_karmique(nom_fichier):
         abort(404)
 
     return send_from_directory(path, fname, as_attachment=True)
-

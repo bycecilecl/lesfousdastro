@@ -11,7 +11,7 @@ import os, base64
 
 from utils.pdf_utils import html_to_pdf
 from utils.s3_utils import upload_file_and_presign   # si S3 dispo, sinon laisse try/except
-from utils.email_sender import envoyer_email_avec_analyse
+from utils.email_sender import construire_email_analyse, envoyer_email_avec_analyse
 from utils.forces_defis import generer_forces_defis, extraire_forces_defis_par_maisons
 from utils.convert_markdown_light import md_light_to_html
 from config.analysis_sandbox import is_analysis_sandbox
@@ -507,40 +507,9 @@ def forces_defis_complet():
         dest = (infos.get("email") or "").strip()
         if dest:
             prenom = (infos.get("nom","").split()[0] or "toi")
-            sujet = "Ton module Mes Potentiels & Défis"
-            body_txt = (
-                f"Bonjour {prenom},\n\n"
-                "Ton analyse Mes Potentiels & Défis est prête ✨ Merci pour ta confiance !\n\n"
-                "📄 Télécharge ton document ici :\n"
-                f"{pdf_final_url}\n\n"
-                "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.\n"
-                "Si le lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.\n\n"
-                "À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).\n"
-                "Les Fous d'Astro by Cécile CL ✨"
-            )
-
-            body_html = (
-                f"<p>Bonjour {prenom},</p>"
-                "<p>Ton analyse <strong>Mes Potentiels & Défis</strong> est prête ✨ Merci pour ta confiance !</p>"
-                "<div style='margin:30px 0; text-align:center;'>"
-                f"<a href='{pdf_final_url}' target='_blank' "
-                "style='display:inline-block;padding:14px 28px;background:#FFD700;color:#333;"
-                "border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;'>"
-                "💪 Télécharger Mes Potentiels & Défis"
-                "</a>"
-                "<p style='margin-top:12px;font-size:13px;color:#777;'>"
-                "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.<br>"
-                "Si le lien ne s'ouvre pas, copie/colle l'URL directement dans ton navigateur."
-                "</p>"
-                "</div>"
-                "<div style='margin:30px 0;padding:20px;background:#fffdf0;border-radius:12px;'>"
-                "<p style='color:#856404;line-height:1.7;margin:0;'>"
-                "Ce que tu vas découvrir dans cette analyse, c'est ce qui te propulse, et ce qui te freine.<br>"
-                "Lis-le avec bienveillance. Les défis ne sont pas des fatalités, ce sont des zones de croissance."
-                "</p>"
-                "</div>"
-                "<p style='margin-top:40px;'>À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).<br>"
-                "Les Fous d'Astro by Cécile CL ✨</p>"
+            sujet, body_txt, body_html = construire_email_analyse(
+                prenom, "analyse Mes Potentiels & Défis", pdf_final_url,
+                possessif="Ton", etat="est prête"
             )
             if os.getenv("SEND_EMAILS","true").lower() in ("1","true","yes"):
                 Thread(target=envoyer_email_avec_analyse, kwargs=dict(

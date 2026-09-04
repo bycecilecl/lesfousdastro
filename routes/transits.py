@@ -8,7 +8,7 @@ from flask import Blueprint, abort, current_app, render_template, request, sessi
 from markupsafe import escape
 
 from utils.calcul_theme import calcul_theme
-from utils.email_sender import envoyer_email_avec_analyse
+from utils.email_sender import construire_email_analyse, envoyer_email_avec_analyse
 from utils.genre import get_user_prefs
 from utils.pdf_utils import html_to_pdf
 from utils.s3_utils import upload_file_and_presign
@@ -189,18 +189,8 @@ def transits_complet():
     destinataire = (infos.get("email") or "").strip()
     if _env_on("SEND_EMAILS", "true") and destinataire:
         prenom = (theme.get("nom") or "").split()[0] or "toi"
-        sujet = "Ton Flash Transits est prêt"
-        corps_texte = (
-            f"Bonjour {prenom},\n\n"
-            f"Ton Flash Transits pour le {date_affichee} est prêt ✨\n\n"
-            f"Télécharger ton analyse : {pdf_url}\n\n"
-            "À bientôt,\nLes Fous d’Astro – By Cécile CL"
-        )
-        corps_html = (
-            f"<p>Bonjour {escape(prenom)},</p>"
-            f"<p>Ton Flash Transits pour le <strong>{escape(date_affichee)}</strong> est prêt ✨</p>"
-            f'<p>📄 <a href="{pdf_url}" target="_blank">Télécharger mon Flash Transits</a></p>'
-            "<p>À bientôt,<br>Les Fous d’Astro – By Cécile CL</p>"
+        sujet, corps_texte, corps_html = construire_email_analyse(
+            prenom, f"Flash Transits du {date_affichee}", pdf_url
         )
         Thread(
             target=envoyer_email_avec_analyse,

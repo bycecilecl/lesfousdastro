@@ -864,33 +864,30 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
 
     contenu_txt = (
         f"Bonjour {prenom},\n\n"
-        "Tes analyses sont prêtes ✨ Merci pour ta confiance !\n\n"
+        "Tes analyses sont prêtes ✨\n\n"
+        "Merci pour ta confiance !\n"
         + "\n".join(lignes_txt)
-        + "\n\n⚠️ Veille à bien télécharger chaque document et à le sauvegarder sur ton appareil.\n"
-        "Si un lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.\n\n"
-        "À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité),\n"
-        "Les Fous d'Astro by Cécile CL ✨"
+        + "\n\nPense à télécharger les documents et à les sauvegarder sur ton appareil.\n"
+        "Si un lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.\n\n"
+        "Envie d’explorer une autre facette de ton thème ?\n"
+        "Découvrir toutes les analyses : https://lesfousdastro.fr/analyses\n\n"
+        "À très vite,\n"
+        "Cécile CL ✨\n"
+        "Les Fous d’Astro"
     )
 
     contenu_html = f"""
     <p>Bonjour {prenom},</p>
-    <p>Tes analyses sont prêtes ✨ Merci pour ta confiance !</p>
+    <p>Tes analyses sont prêtes ✨</p>
+    <p>Merci pour ta confiance !</p>
     <div style='margin:30px 0;'>
     {"".join(lignes_html)}
     </div>
-    <p style='font-size:13px;color:#777;text-align:center;'>
-    ⚠️ Veille à bien télécharger chaque document et à le sauvegarder sur ton appareil.<br>
-    Si un lien ne s'ouvre pas, copie/colle l'URL directement dans ton navigateur.
-    </p>
-    <div style='margin:30px 0;padding:20px;background:#f9f6ff;border-radius:12px;'>
-    <p style='color:#534AB7;line-height:1.7;margin:0;'>
-    Tu as maintenant entre les mains des clés pour mieux te comprendre.<br>
-    Prends le temps de lire, de relire. Certaines choses ne résonnent pas tout de suite,
-    et puis un jour ça fait tilt.
-    </p>
-    </div>
-    <p style='margin-top:40px;'>À très vite sur les réseaux..., en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité),<br>
-    Les Fous d'Astro by Cécile CL ✨</p>
+    <p>Pense à télécharger les documents et à les sauvegarder sur ton appareil.
+    Si un lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.</p>
+    <p><strong>Envie d’explorer une autre facette de ton thème ?</strong><br>
+    <a href="https://lesfousdastro.fr/analyses" target="_blank">Découvrir toutes les analyses</a></p>
+    <p>À très vite,<br>Cécile CL ✨<br>Les Fous d’Astro</p>
     """
 
     ok = envoyer_email_avec_analyse(

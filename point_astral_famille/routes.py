@@ -24,7 +24,7 @@ from point_astral_famille.configurations_astrologiques import (
 from email.mime.text import MIMEText
 import logging
 from threading import Thread
-from utils.email_sender import envoyer_email_avec_analyse
+from utils.email_sender import construire_email_analyse, envoyer_email_avec_analyse
 import logging
 logger = logging.getLogger(__name__)
 
@@ -902,32 +902,8 @@ def point_astral_famille_complet():
             dest_email = (infos.get("email") or "").strip()
             if dest_email:
                 prenom = (infos.get("nom") or "").split()[0] or "toi"
-                sujet_email = "Ton Point Astral est prêt"
-                body_txt = (
-                    f"Bonjour {prenom},\n\n"
-                    "Merci pour ta commande ! Ton Point Astral est prêt ✨\n\n"
-                    "Télécharge ton PDF ici :\n"
-                    f"{pdf_final_url}\n\n"
-                    "Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.\n\n"
-                    "🎁 Bonus : je t’offre 10% de réduction sur l’analyse complète de ton thème natal.\n"
-                    "Découvre les prestations ici : https://bycecilecl.com/categorie-produit/services/\n"
-                    "Et contacte-moi pour bénéficier de ton offre : contact@lesfousdastro.fr\n\n"
-                    "À bientôt,\n"
-                    "Les Fous d’Astro – By Cécile CL"
-                )
-                body_html = (
-                    f"<p>Bonjour {prenom},</p>"
-                    "<p>Merci pour ta commande ! Ton Point Astral est prêt ✨</p>"
-                    f"<p>📄 <a href=\"{pdf_final_url}\" target=\"_blank\">Télécharge ton PDF ici</a></p>"
-                    "<p>Si le lien ne s’ouvre pas, copie/colle l’URL dans ton navigateur.</p>"
-                    "<p>🎁 <strong>Bonus :</strong> je t’offre <strong>10% de réduction</strong> sur "
-                    "l’analyse complète de ton thème natal.</p>"
-                    "<p>➡️ Découvre les prestations ici : "
-                    "<a href=\"https://bycecilecl.com/categorie-produit/services/\" target=\"_blank\">"
-                    "https://bycecilecl.com/categorie-produit/services/</a></p>"
-                    "<p>Et contacte-moi pour bénéficier de ton offre : "
-                    "<a href=\"mailto:contact@lesfousdastro.fr\">contact@lesfousdastro.fr</a></p>"
-                    "<p>À bientôt,<br>Les Fous d’Astro – By Cécile CL</p>"
+                sujet_email, body_txt, body_html = construire_email_analyse(
+                    prenom, "Point Astral", pdf_final_url
                 )
 
                 # Flag ON/OFF côté env (.env: SEND_EMAILS=true|false)

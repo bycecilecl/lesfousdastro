@@ -30,6 +30,50 @@ import html as htmllib
 
 logger = logging.getLogger(__name__)
 
+
+def construire_email_analyse(
+    prenom: str,
+    nom_analyse: str,
+    pdf_url: str,
+    *,
+    possessif: str = "Ton",
+    etat: str = "est prêt",
+) -> tuple[str, str, str]:
+    """Construit l'e-mail commun envoyé avec une analyse téléchargeable."""
+    sujet = f"{possessif} {nom_analyse} {etat} ✨"
+    contenu_txt = (
+        f"Bonjour {prenom},\n\n"
+        f"{possessif} {nom_analyse} {etat} ✨\n\n"
+        "Merci pour ta confiance !\n"
+        f"📄 Télécharger {possessif.lower()} {nom_analyse}\n"
+        f"{pdf_url}\n\n"
+        "Pense à télécharger le document et à le sauvegarder sur ton appareil. "
+        "Si le lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.\n\n"
+        "Envie d’explorer une autre facette de ton thème ?\n"
+        "Découvrir toutes les analyses : https://lesfousdastro.fr/analyses\n\n"
+        "À très vite,\n"
+        "Cécile CL ✨\n"
+        "Les Fous d’Astro"
+    )
+    contenu_html = (
+        f"<p>Bonjour {htmllib.escape(prenom)},</p>"
+        f"<p>{htmllib.escape(possessif)} <strong>{htmllib.escape(nom_analyse)}</strong> "
+        f"{htmllib.escape(etat)} ✨</p>"
+        "<p>Merci pour ta confiance !</p>"
+        "<div style=\"margin:30px 0;text-align:center;\">"
+        f"<a href=\"{htmllib.escape(pdf_url, quote=True)}\" target=\"_blank\" "
+        "style=\"display:inline-block;padding:14px 28px;background:#1f628e;color:#ffffff;"
+        "border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;\">"
+        f"📄 Télécharger {htmllib.escape(possessif.lower())} {htmllib.escape(nom_analyse)}</a></div>"
+        "<p>Pense à télécharger le document et à le sauvegarder sur ton appareil. "
+        "Si le lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.</p>"
+        "<p><strong>Envie d’explorer une autre facette de ton thème ?</strong><br>"
+        "<a href=\"https://lesfousdastro.fr/analyses\" target=\"_blank\">"
+        "Découvrir toutes les analyses</a></p>"
+        "<p>À très vite,<br>Cécile CL ✨<br>Les Fous d’Astro</p>"
+    )
+    return sujet, contenu_txt, contenu_html
+
 SMTP_HOST = os.getenv("SMTP_HOST", "node175-eu.n0c.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", 465))
 SMTP_USE_SSL = os.getenv("SMTP_USE_SSL", "true").lower() in ("1","true","yes")

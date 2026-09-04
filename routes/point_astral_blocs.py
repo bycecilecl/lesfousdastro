@@ -17,7 +17,7 @@ from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.s3_utils import upload_file_and_presign
 from email.mime.text import MIMEText
 from threading import Thread
-from utils.email_sender import envoyer_email_avec_analyse
+from utils.email_sender import construire_email_analyse, envoyer_email_avec_analyse
 from config.analysis_sandbox import is_analysis_sandbox
 
 
@@ -895,50 +895,8 @@ def point_astral_blocs_complet():
             dest_email = (infos.get("email") or "").strip()
             if dest_email:
                 prenom = (infos.get("nom") or "").split()[0] or "toi"
-                sujet_email = "Ton Point Astral est prêt ✨"
-                body_txt = (
-                    f"Bonjour {prenom},\n\n"
-                    "Ton Point Astral est prêt ✨ Merci pour ta confiance !\n\n"
-                    "📄 Télécharge ton document ici :\n"
-                    f"{pdf_final_url}\n\n"
-                    "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.\n"
-                    "Si le lien ne s'ouvre pas, copie/colle l'URL dans ton navigateur.\n\n"
-                    "🔮 Tu veux aller encore plus loin ?\n"
-                    "L'Analyse Karmique explore ce que le Point Astral ne couvre pas : "
-                    "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
-                    "Tout ce qui explique pourquoi certains patterns reviennent encore et encore.\n"
-                    "👉 https://lesfousdastro.fr/#analyse_karmique\n\n"
-                    "À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).\n"
-                    "Les Fous d'Astro by Cécile CL ✨"
-                )
-                body_html = (
-                    f"<p>Bonjour {prenom},</p>"
-                    "<p>Ton Point Astral est prêt ✨ Merci pour ta confiance !</p>"
-                    "<div style='margin:30px 0; text-align:center;'>"
-                    f"<a href='{pdf_final_url}' target='_blank' "
-                    "style='display:inline-block;padding:14px 28px;background:#1f628e;color:white;"
-                    "border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;'>"
-                    "📄 Télécharger mon Point Astral"
-                    "</a>"
-                    "<p style='margin-top:12px;font-size:13px;color:#777;'>"
-                    "⚠️ Veille à bien télécharger ton document et à le sauvegarder sur ton appareil.<br>"
-                    "Si le lien ne s'ouvre pas, copie/colle l'URL directement dans ton navigateur."
-                    "</p>"
-                    "</div>"
-                    "<div style='margin:30px 0;padding:20px;background:#f9f6ff;border-radius:12px;'>"
-                    "<p>🔮 <strong>Tu veux aller encore plus loin ?</strong></p>"
-                    "<p>L'Analyse Karmique explore ce que le Point Astral ne couvre pas : "
-                    "tes schémas inconscients, tes nœuds karmiques, Chiron, Lilith... "
-                    "Tout ce qui explique pourquoi certains patterns reviennent encore et encore.</p>"
-                    "<p style='text-align:center;margin-top:15px;'>"
-                    "<a href='https://lesfousdastro.fr/#analyse_karmique' target='_blank' "
-                    "style='display:inline-block;padding:12px 24px;background:#6b3fa0;color:white;"
-                    "border-radius:8px;text-decoration:none;font-weight:bold;'>"
-                    "🔮 Découvrir l'Analyse Karmique"
-                    "</a></p>"
-                    "</div>"
-                    "<p style='margin-top:40px;'>À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).<br>"
-                    "Les Fous d'Astro by Cécile CL ✨</p>"
+                sujet_email, body_txt, body_html = construire_email_analyse(
+                    prenom, "Point Astral", pdf_final_url
                 )
                 
                 # Flag ON/OFF côté env (.env: SEND_EMAILS=true|false)
