@@ -1,10 +1,46 @@
 import logging
-from utils.llm_client import ask_llm
+import os
+
 from utils.llm_system_prompts import SYSTEM_BASE
 from .prompts import construire_prompt_bloc_transits
 
 
 logger = logging.getLogger(__name__)
+
+
+def _ask_transits_llm(**kwargs) -> str:
+    """Sélectionne le fournisseur du Flash Transits, Claude par défaut."""
+    provider = (
+        os.getenv("FLASH_TRANSITS_LLM_PROVIDER")
+        or os.getenv("LLM_PROVIDER")
+        or "claude"
+    )
+    provider = (
+        provider
+        .strip()
+        .lower()
+    )
+
+    if provider == "claude":
+        # Import tardif : la production OpenAI n'a pas besoin d'initialiser
+        # le client Anthropic ni d'exiger ANTHROPIC_API_KEY au démarrage.
+        from utils.claude_llm import ask_claude
+
+        logger.info("Flash Transits : génération avec Claude")
+        return ask_claude(**kwargs)
+
+    if provider == "openai":
+        from utils.llm_client import ask_llm as ask_openai
+
+        logger.info("Flash Transits : génération avec OpenAI")
+        return ask_openai(**kwargs)
+
+    raise ValueError(
+        "FLASH_TRANSITS_LLM_PROVIDER (ou LLM_PROVIDER) doit valoir "
+        "'openai' ou 'claude' "
+        f"(valeur reçue : {provider!r})."
+    )
+
 
 class ErreurGenerationTransits(RuntimeError):
     """Le calcul astrologique a réussi, mais le texte LLM est indisponible."""
@@ -52,7 +88,7 @@ def generer_bloc_transits_llm(
     )
 
     try:
-        reponse = ask_llm(
+        reponse = _ask_transits_llm(
             prompt=prompt,
             system=SYSTEM_BASE,
             max_tokens=1800,
