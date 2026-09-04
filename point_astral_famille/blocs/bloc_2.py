@@ -1331,7 +1331,7 @@ def dossier_identite(d: dict) -> str:
     for m in d["maitres_maison4"]:
         bdd_m4 = bdd_maitre_angle(
             d,
-            "maitre_de_4",
+            "maitre_fdc",
             m,
             colonnes=["IDENTITE"],
         )
