@@ -1333,7 +1333,7 @@ def dossier_identite(d: dict) -> str:
             d,
             "maitre_fdc",
             m,
-            colonnes=["IDENTITE"],
+            colonnes=["FAMILLE"],
         )
 
         if bdd_m4:
