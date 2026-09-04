@@ -181,7 +181,7 @@ manifestations possibles et concrètes, sans affirmer qu'elles vont nécessairem
 se produire et sans inventer de contexte biographique. Ne réexplique pas les
 aspects ni les maîtrises déjà analysés : approfondis leurs conséquences vécues.
 
-## Le rythme des prochaines semaines
+## Le rythme autour de la date choisie
 À partir des grandes dynamiques de la période, distingue ce qui monte, ce qui est
 le plus sensible autour des dates fournies et ce qui commence à se relâcher. Les
 dates proviennent d'un échantillonnage : emploie toujours "autour de" ou "vers",

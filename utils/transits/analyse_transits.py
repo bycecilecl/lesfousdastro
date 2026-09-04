@@ -17,6 +17,7 @@ from .interpretation_brady import interpreter_transit_brady
 from .llm_transits import generer_bloc_transits_llm, ErreurGenerationTransits
 from collections import Counter
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +44,30 @@ def formater_date_fr(date: datetime) -> str:
     return f"{date.day} {MOIS_FR[date.month - 1]} {date.year}"
 
 
+def securiser_precision_temporelle(texte: str) -> str:
+    """Neutralise uniquement les fausses promesses d'exactitude du LLM."""
+    remplacements = (
+        (r"\bexactement opposée? à\b", "en opposition très serrée à"),
+        (
+            r"\batteint son orbe le plus serré avec\b",
+            "présente le plus faible orbe observé avec",
+        ),
+        (
+            r"\batteindre un point culminant\b",
+            "entrer dans une phase particulièrement sensible",
+        ),
+        (r"\bpoint culminant\b", "phase particulièrement sensible"),
+    )
+    for motif, remplacement in remplacements:
+        texte = re.sub(motif, remplacement, texte, flags=re.IGNORECASE)
+    return texte
+
+
 def texte_en_paragraphes_html(texte: str) -> str:
     if not texte:
         return ""
 
+    texte = securiser_precision_temporelle(texte)
     blocs = [b.strip() for b in texte.split("\n\n") if b.strip()]
 
     elements = []
