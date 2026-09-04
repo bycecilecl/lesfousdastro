@@ -62,6 +62,16 @@ def construire_html_pdf_transits(
         h3 {{ color: #144a6b; }}
         p {{ line-height: 1.65; text-align: justify; }}
         .transits-date {{ display: none; }}
+        .transits-methodology {{
+            background: #f7f3ef;
+            border-left: 4px solid #b58b4c;
+            border-radius: 8px;
+            margin: 24px 0;
+            padding: 14px 16px;
+            font-size: 0.9em;
+        }}
+        .transits-methodology h3 {{ margin-top: 0; }}
+        .transits-methodology p:last-child {{ margin-bottom: 0; }}
         .transit-card {{
             border: 1px solid #c9dbe5;
             border-left: 4px solid #1f628e;

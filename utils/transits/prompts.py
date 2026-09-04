@@ -124,7 +124,8 @@ Lecture structurée :
                 txt = (
                     f"- {evt['aspect']} "
                     f"{evt['planete_natale']} "
-                    f"(orbe {evt['orbe']}°)"
+                    f"(orbe minimal observé {evt['orbe']}°, "
+                    f"autour du {evt.get('date_detection') or 'jour non précisé'})"
                 )
 
                 conjs = evt.get("conjonctions_associees", [])
@@ -157,17 +158,67 @@ Grandes dynamiques de la période :
 {bloc_dynamique}
 
 Consigne de rédaction :
-Rédige une analyse en texte fluide, sans titres, sans numérotation, en "tu".
-- Il s'agit d'un Flash Transits : une photographie de la période actuelle, pas
-  d'une prévision mensuelle ni d'une chronologie des événements.
-- Commence par une ou deux phrases sur le climat général du moment.
-- Développe les transit dominants avec profondeur.
+Rédige une analyse approfondie, personnalisée et structurée, en "tu".
+Utilise exactement les six titres ci-dessous, précédés de "## ", avec une ligne
+vide après chaque titre. N'ajoute aucun autre titre et aucune numérotation.
+
+## Le climat dominant
+Synthétise les deux ou trois forces majeures et surtout leur interaction. Ne fais
+pas une simple succession de transits. Limite cette ouverture à deux ou trois
+paragraphes denses : elle pose la vision d'ensemble sans déjà épuiser tous les
+détails développés ensuite.
+
+## Ce qui travaille en profondeur
+Développe les transits lents dominants, les fonctions psychologiques touchées,
+les maisons activées et les éventuelles configurations natales réveillées. C'est
+ici, et uniquement ici, que tu expliques en détail la mécanique astrologique de
+chaque transit majeur.
+
+## Comment cela peut se manifester
+Traduis l'analyse dans les domaines de vie réellement indiqués par les maisons :
+relations, travail, orientation, foyer, émotions, argent ou décisions. Donne des
+manifestations possibles et concrètes, sans affirmer qu'elles vont nécessairement
+se produire et sans inventer de contexte biographique. Ne réexplique pas les
+aspects ni les maîtrises déjà analysés : approfondis leurs conséquences vécues.
+
+## Le rythme des prochaines semaines
+À partir des grandes dynamiques de la période, distingue ce qui monte, ce qui est
+le plus sensible autour des dates fournies et ce qui commence à se relâcher. Les
+dates proviennent d'un échantillonnage : emploie toujours "autour de" ou "vers",
+jamais une date comme certitude ni comme prédiction d'événement.
+Ne reprends pas l'analyse psychologique complète des transits : concentre cette
+section sur l'évolution, les croisements et les moments les plus sensibles.
+
+## Tes points de vigilance
+Expose deux à quatre pièges ou réactions possibles, précisément reliés aux
+transits dominants. Reste lucide et nuancé, sans dramatisation.
+Ne répète pas leur définition astrologique.
+
+## Comment utiliser cette période
+Propose des pistes concrètes et personnalisées : ce que la personne peut observer,
+clarifier, initier, ralentir ou protéger. Termine par une synthèse mémorable mais
+non fataliste. Chaque conseil doit apporter une réponse pratique nouvelle, et non
+reformuler un point de vigilance précédent.
+
+- Il s'agit d'un Flash Transits centré sur la période actuelle et les six semaines
+  qui l'entourent, pas d'une prévision annuelle.
+- Développe les transits dominants avec profondeur.
 - Si une même planète en transit revient plusieurs fois, considère qu’elle peut former le climat dominant de la période, surtout si elle touche le Soleil, la Lune ou l’Ascendant.
 - Si un transit touche une planète natale conjointe à d'autres planètes ou angles, interprète le transit comme l'activation de toute cette configuration natale, et non comme un aspect isolé.
 - Les transits aux angles, surtout Ascendant et Milieu du Ciel, doivent être traités comme des marqueurs majeurs de période. 
 - Un transit au Milieu du Ciel doit être relié explicitement à la carrière, la visibilité, la direction de vie et la reconnaissance sociale.
 - Intègre les autres dynamiques naturellement, sans les lister mécaniquement.
-- Conclus avec ce qui est concret : ce que la personne peut observer, traverser ou initier.
+- Préserve la profondeur psychologique et la richesse concrète de chaque section.
+- Chaque transit majeur reçoit une analyse approfondie complète, mais une seule
+  fois. Dans les sections suivantes, fais progresser la lecture au lieu de répéter
+  sa signification, ses maisons, ses maîtrises ou les mêmes mises en garde.
+- Les répétitions lexicales et les rappels utiles sont permis lorsqu'ils assurent
+  la cohérence ; seules les redites qui n'apportent aucune information sont à retirer.
+- Le mot "conjonction" désigne un aspect situé dans l'orbe admis, pas une
+  superposition exacte. N'emploie jamais "pile", "exact", "exactement",
+  "culmine" ou "culmination" pour qualifier un aspect ou une date : les données
+  fournies ne calculent pas l'instant d'exactitude. Même un orbe affiché à 0,00°
+  est arrondi et un minimum observé reste une approximation.
 
 Style :
 - Direct, incarné, psychologique
@@ -176,5 +227,6 @@ Style :
 - Pas de spiritualité floue
 - Tutoiement ("tu") du début à la fin
 
-Longueur : entre 600 et 700 mots, pas plus.
+Longueur : entre 1300 et 1600 mots. Privilégie la densité, la profondeur et la
+personnalisation ; n'allonge jamais artificiellement avec des généralités.
 """.strip()

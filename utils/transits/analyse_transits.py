@@ -49,10 +49,18 @@ def texte_en_paragraphes_html(texte: str) -> str:
 
     blocs = [b.strip() for b in texte.split("\n\n") if b.strip()]
 
-    return "\n".join(
-        f"<p>{bloc.replace(chr(10), ' ')}</p>"
-        for bloc in blocs
-    )
+    elements = []
+    for bloc in blocs:
+        lignes = bloc.splitlines()
+        if lignes[0].startswith("## "):
+            elements.append(f"<h3>{lignes[0][3:].strip()}</h3>")
+            contenu = " ".join(ligne.strip() for ligne in lignes[1:] if ligne.strip())
+            if contenu:
+                elements.append(f"<p>{contenu}</p>")
+        else:
+            elements.append(f"<p>{bloc.replace(chr(10), ' ')}</p>")
+
+    return "\n".join(elements)
 
 def generer_dates_periode(
     date_reference: datetime,
@@ -261,7 +269,10 @@ def generer_analyse_transits(
         transits_periode_filtres
     )
     logger.info("DYNAMIQUES PERIODE = %s", dynamiques_periode)
-    date_affichee = formater_date_fr(date_transit or datetime.now())
+    date_reference = date_transit or datetime.now()
+    date_affichee = formater_date_fr(date_reference)
+    date_debut_periode = formater_date_fr(date_reference - timedelta(days=21))
+    date_fin_periode = formater_date_fr(date_reference + timedelta(days=21))
 
     compteur_planetes = Counter(
         a.planete_transit
@@ -296,6 +307,7 @@ def generer_analyse_transits(
                 interpretations_structurees,
                 nom=nom,
                 ascendant=ascendant_signe,
+                dynamiques_periode=dynamiques_periode,
                 genre=genre,
             )
         except ErreurGenerationTransits as exc:
@@ -329,6 +341,13 @@ def generer_analyse_transits(
         <div class="transits-global">
             {bloc_transits_html}
         </div>
+
+        <aside class="transits-methodology">
+            <h3>Comment lire ton Flash Transits</h3>
+            <p>L’analyse part des positions planétaires calculées pour le <strong>{date_affichee}</strong>. Elle observe également leur évolution du <strong>{date_debut_periode}</strong> au <strong>{date_fin_periode}</strong>, par relevés espacés de cinq jours, afin de dégager le rythme général de la période.</p>
+            <p>Un aspect est retenu dans les limites suivantes : conjonction et opposition jusqu’à 5° d’orbe, carré et trigone jusqu’à 4°, sextile jusqu’à 3°. Pour Mars, seuls la conjonction, le carré et l’opposition sont retenus, jusqu’à 2° — ou 3° lorsqu’un luminaire ou un angle majeur est touché. Plus l’orbe est faible, plus l’aspect est précis.</p>
+            <p><strong>« Conjoint » ne signifie donc pas nécessairement « exactement superposé » :</strong> cela signifie que les deux points se trouvent dans l’orbe admis. Les dates mentionnées indiquent des zones de sensibilité repérées lors des relevés ; elles ne constituent ni des heures d’exactitude astronomique ni la prédiction certaine d’un événement.</p>
+        </aside>
 
         <div class="transits-list">
             <h2>Les mouvements principaux</h2>

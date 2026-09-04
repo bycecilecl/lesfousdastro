@@ -91,7 +91,7 @@ def generer_bloc_transits_llm(
         reponse = _ask_transits_llm(
             prompt=prompt,
             system=SYSTEM_BASE,
-            max_tokens=1800,
+            max_tokens=4500,
             temperature=0.7,
         )
         if not reponse:
