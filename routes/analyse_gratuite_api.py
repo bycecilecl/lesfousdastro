@@ -10,6 +10,7 @@ from utils.google.sheets_writer import ajouter_email_au_sheet
 from utils.email_sender import envoyer_email_avec_analyse
 from utils.email_quota import check_and_log_email_quota
 from utils.brevo_contacts import ajouter_contact_brevo
+from utils.llm_system_prompts import SYSTEM_BASE
 from threading import Thread
 from html import escape
 import textwrap
@@ -30,6 +31,37 @@ def _texte_analyse_vers_html(texte):
         if paragraphe.strip()
     ]
     return "".join(f'<p style="margin:0 0 16px;">{p}</p>' for p in paragraphes)
+
+
+def _generer_texte_analyse_gratuite(prompt):
+    """Choisit le fournisseur du gratuit sans modifier le fournisseur global."""
+    provider = (
+        os.getenv("FREE_ANALYSIS_LLM_PROVIDER", "openai")
+        .strip()
+        .lower()
+    )
+
+    if provider == "openai":
+        print("🤖 Analyse gratuite générée avec OpenAI")
+        return interroger_llm(prompt)
+
+    if provider == "claude":
+        # Import tardif : une production restée sur OpenAI ne dépend pas de
+        # la présence d'une clé Anthropic au démarrage.
+        from utils.claude_llm import ask_claude
+
+        print("🤖 Analyse gratuite générée avec Claude")
+        return ask_claude(
+            prompt=prompt,
+            system=SYSTEM_BASE,
+            max_tokens=900,
+            temperature=0.6,
+        )
+
+    raise ValueError(
+        "FREE_ANALYSIS_LLM_PROVIDER doit valoir 'openai' ou 'claude' "
+        f"(valeur reçue : {provider!r})."
+    )
 
 @gratuite_api_bp.route("/api/analyse_gratuite", methods=["POST"])
 def api_analyse_gratuite():
@@ -53,7 +85,15 @@ def api_analyse_gratuite():
         lat             = data.get("lat")
         lon             = data.get("lon")
         tzid            = data.get("tzid")
-        gender          = data.get("gender")  # "male" | "female" | None
+        gender          = str(data.get("gender") or "").strip().lower()
+
+        if gender not in {"male", "female"}:
+            return jsonify({
+                "ok": False,
+                "error": "Le genre déclaré est obligatoire pour générer l’analyse."
+            }), 400
+
+        genre_label = "femme" if gender == "female" else "homme"
 
         print(f"DEBUG: nom reçu = '{nom}'")
 
@@ -162,25 +202,28 @@ def api_analyse_gratuite():
         # 🤖 5) Prompt : un aperçu concret qui ouvre vers le Point Astral
         prompt = dedent(
             f"""
-            Tu es une astrologue expérimentée, directe, lucide et concrète.
+            Tu es une astrologue expérimentée, directe, lucide avec une pointe d'humour noir.
 
             OBJECTIF
-            Écris un aperçu astrologique gratuit qui donne une preuve de
-            personnalisation et fait apparaître UN mécanisme central du thème.
+            Écris une véritable mini-analyse astrologique qui donne une preuve
+            de personnalisation et fait apparaître UN ou DEUX mécanismes centraux
+            du thème, choisis selon leur importance réelle dans les données fournies.
             L'aperçu doit permettre à la personne de se reconnaître dans une
-            situation observable, puis lui faire comprendre qu'il reste à
+            situation observable, tout en lui faisant comprendre qu'il reste à
             explorer l'origine, les contextes d'activation et les ressources
-            liées à ce mécanisme. Ne rédige pas une analyse complète.
+            liées à ce ou ces mécanismes. Ne rédige pas une analyse complète.
 
             Tu parles directement à la personne.
             Tu utilises le tutoiement.
             Tu ne flattes pas et tu n'emploies pas de phrases creuses.
-            Tu utilises uniquement l'astrologie occidentale tropicale.
-            N'intègre jamais l'astrologie védique ni d'autres systèmes astrologiques.
-            N'utilise pas les Nakshatras ni les concepts karmiques.
+            Tu fondes l'analyse sur l'astrologie occidentale tropicale. Tu peux
+            utiliser le Nakshatra lunaire fourni comme éclairage complémentaire
+            s'il enrichit réellement l'un des mécanismes retenus. Ne le cite pas
+            artificiellement et n'en déduis pas automatiquement une affirmation
+            karmique ou un événement de vie.
 
             Personne analysée : {theme.get("nom", "la personne")}
-            Genre déclaré (facultatif) : {gender or "non précisé"}
+            Genre déclaré obligatoire : {genre_label}
 
             RÉSUMÉ SYNTHÉTIQUE :
 
@@ -196,17 +239,20 @@ def api_analyse_gratuite():
 
 
             CONSTRUCTION OBLIGATOIRE
-            1. Choisis seulement deux ou trois facteurs astrologiques réellement
-               structurants et cohérents entre eux. N'énumère pas les données.
-            2. Formule le contraste principal entre l'image montrée, le besoin
-               intérieur et/ou la réaction automatique de la personne.
-            3. Donne un exemple de comportement précis et quotidien introduit
-               par « Concrètement ». Il doit être plausible d'après les données,
-               sans inventer un événement de vie.
-            4. Montre brièvement la ressource ET le revers possible de ce même
-               mécanisme. Ne transforme pas la ressource en flatterie.
-            5. Termine par UNE question d'observation personnelle précise. Cette
-               question constitue le dernier paragraphe.
+            1. Premier paragraphe : décris la manière dont la personne construit
+               son identité ou apparaît au monde. Choisis seulement les facteurs
+               réellement structurants et n'énumère pas les placements.
+            2. Deuxième paragraphe : décris son fonctionnement émotionnel et
+               relie-le à l'identité pour faire apparaître le paradoxe central.
+            3. Troisième paragraphe : donne DEUX manifestations concrètes de ce
+               ce ou ces mécanismes dans deux domaines de vie différents. Choisis uniquement
+               des domaines soutenus par les maisons, les angles ou les maîtrises
+               fournis. N'invente aucun événement biographique.
+            4. Quatrième paragraphe : montre la ressource ET le revers possible
+               des mécanismes retenus, puis formule clairement ce qui resterait à
+               explorer pour le comprendre plus complètement.
+            5. Termine par UNE question d'observation personnelle précise dans
+               un dernier paragraphe très court.
 
             RÈGLES :
 
@@ -215,6 +261,10 @@ def api_analyse_gratuite():
             - Cite au maximum trois termes astrologiques dans tout le texte.
             - Ne répète pas plusieurs fois la même idée.
             - N'invente aucun placement ni aucun aspect.
+            - Pour toute manifestation concrète, croise les facteurs disponibles
+              dans ce thème (planètes, signes, maisons, aspects, angles, maîtrises
+              et, s'il est pertinent, Nakshatra lunaire). Ne transforme jamais
+              le symbolisme isolé d'un seul facteur en certitude biographique.
             - Évite les compliments invérifiables comme « magnétique »,
               « charismatique », « exceptionnel » ou « don naturel ».
             - Évite les formulations dramatiques ou diagnostiques comme
@@ -224,15 +274,17 @@ def api_analyse_gratuite():
             - Pas de conseil générique de développement personnel.
             - Pas de syntaxe Markdown.
             - Texte brut uniquement.
-            - Trois paragraphes courts, puis la question finale.
-            - Entre 140 et 180 mots.
+            - Respecte obligatoirement le genre déclaré dans tous les adjectifs
+              et participes.
+            - Quatre paragraphes courts, puis la question finale.
+            - Entre 220 et 260 mots. Ne produis jamais moins de 220 mots.
             """
         ).strip()
 
         print("📤 Prompt envoyé à l'IA :", prompt)
 
         # 🤖 6) Appel à l'IA
-        texte = interroger_llm(prompt)
+        texte = _generer_texte_analyse_gratuite(prompt)
         print("✅ Analyse IA reçue :", texte[:100] + "...")
         texte_html = _texte_analyse_vers_html(texte)
 
