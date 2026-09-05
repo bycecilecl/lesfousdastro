@@ -870,7 +870,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                   <div class="points-astraux-group">
                     <h4 class="points-astraux-title">🔮 Points Astraux</h4>
                     <div class="points-astraux-grid">
-                      <div class="option-card coral" onclick="addToCart('flash_astral', 'Point Astral Essentiel', 29, this)">
+                      <div class="option-card coral" id="flash_astral" onclick="addToCart('flash_astral', 'Point Astral Essentiel', 29, this)">
                         <span class="icon">
                             <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
                         </span>
@@ -1126,7 +1126,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             </div>
         </div>
         <div class="analysis-actions">
-            <button class="explore-btn" onclick="exploreMoreAnalyses()">🔍 Explorer plus d'analyses</button>
+            <button class="explore-btn" onclick="choosePointAstralFromFreeAnalysis()">✨ Découvrir mon Point Astral — 29€</button>
             <button class="explore-btn" onclick="closeFreeAnalysisModal()">Plus tard</button>
         </div>
     </div>
@@ -1481,6 +1481,21 @@ input[type="time"]:focus, input[type="email"]:focus {
             const cards = document.querySelectorAll('.option-card:not(.free)');
             cards.forEach(card => { card.style.animation = 'pulse 2s ease-in-out 3'; });
         }, 500);
+    }
+
+    function choosePointAstralFromFreeAnalysis() {
+        const pointAstralCard = document.getElementById('flash_astral');
+        closeFreeAnalysisModal();
+
+        if (!pointAstralCard) return;
+
+        if (!cart.some(item => item.id === 'flash_astral')) {
+            addToCart('flash_astral', 'Point Astral Essentiel', 29, pointAstralCard);
+        }
+
+        setTimeout(() => {
+            pointAstralCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
     }
 
     function showNotification(message, type = 'info') {

@@ -11,6 +11,7 @@ from utils.email_sender import envoyer_email_avec_analyse
 from utils.email_quota import check_and_log_email_quota
 from utils.brevo_contacts import ajouter_contact_brevo
 from threading import Thread
+from html import escape
 import textwrap
 from textwrap import dedent
 from dotenv import load_dotenv
@@ -19,6 +20,16 @@ import os
 load_dotenv()
 
 gratuite_api_bp = Blueprint("gratuite_api_bp", __name__)
+
+
+def _texte_analyse_vers_html(texte):
+    """Affiche la réponse LLM comme du texte, avec de vrais paragraphes."""
+    paragraphes = [
+        escape(paragraphe.strip()).replace("\n", "<br>")
+        for paragraphe in texte.split("\n\n")
+        if paragraphe.strip()
+    ]
+    return "".join(f'<p style="margin:0 0 16px;">{p}</p>' for p in paragraphes)
 
 @gratuite_api_bp.route("/api/analyse_gratuite", methods=["POST"])
 def api_analyse_gratuite():
@@ -148,19 +159,18 @@ def api_analyse_gratuite():
         positions_str = formater_positions_planetes(theme['planetes'])
         aspects_str   = formater_aspects(theme['aspects'])
 
-        # 🤖 5) Prompt (même que l'ancienne version + genre)
+        # 🤖 5) Prompt : un aperçu concret qui ouvre vers le Point Astral
         prompt = dedent(
             f"""
-            Tu es une astrologue expérimentée, directe, lucide et vivante avec une pointe d'humour noir.
+            Tu es une astrologue expérimentée, directe, lucide et concrète.
 
-            Tu écris un aperçu astrologique gratuit destiné à faire découvrir
-            la profondeur du thème astral, sans livrer une analyse complète.
-
-            Considère cette analyse comme la bande-annonce d'un film, pas le film lui-même. Elle doit créer le suspense.
-            Elle doit être suffisamment précise pour que la personne se reconnaisse,
-            mais suffisamment incomplète pour susciter la curiosité.
-            Ne dévoile pas tous les mécanismes psychologiques.
-            Termine par 2-3 questions sur les grands axes du thème pour susciter la curiosité du lecteur.
+            OBJECTIF
+            Écris un aperçu astrologique gratuit qui donne une preuve de
+            personnalisation et fait apparaître UN mécanisme central du thème.
+            L'aperçu doit permettre à la personne de se reconnaître dans une
+            situation observable, puis lui faire comprendre qu'il reste à
+            explorer l'origine, les contextes d'activation et les ressources
+            liées à ce mécanisme. Ne rédige pas une analyse complète.
 
             Tu parles directement à la personne.
             Tu utilises le tutoiement.
@@ -185,28 +195,37 @@ def api_analyse_gratuite():
             {aspects_str}
 
 
-            L'analyse doit principalement parler :
-
-            - de la manière dont la personne apparaît au monde ;
-            - de la façon dont elle construit son identité ;
-            - du paradoxe principal qui traverse sa personnalité.
-
-            Termine par des questions ouvertes.
-            Ne cherche pas à tout expliquer.
+            CONSTRUCTION OBLIGATOIRE
+            1. Choisis seulement deux ou trois facteurs astrologiques réellement
+               structurants et cohérents entre eux. N'énumère pas les données.
+            2. Formule le contraste principal entre l'image montrée, le besoin
+               intérieur et/ou la réaction automatique de la personne.
+            3. Donne un exemple de comportement précis et quotidien introduit
+               par « Concrètement ». Il doit être plausible d'après les données,
+               sans inventer un événement de vie.
+            4. Montre brièvement la ressource ET le revers possible de ce même
+               mécanisme. Ne transforme pas la ressource en flatterie.
+            5. Termine par UNE question d'observation personnelle précise. Cette
+               question constitue le dernier paragraphe.
 
             RÈGLES :
 
-            - Ne commence pas par « Avec ton Ascendant ».
+            - Commence directement par une dynamique humaine, jamais par un placement.
             - Ne fais pas une liste de placements.
-            - Ne cite pas obligatoirement tous les termes astrologiques.
+            - Cite au maximum trois termes astrologiques dans tout le texte.
             - Ne répète pas plusieurs fois la même idée.
-            - Donne au moins un exemple concret de comportement.
             - N'invente aucun placement ni aucun aspect.
+            - Évite les compliments invérifiables comme « magnétique »,
+              « charismatique », « exceptionnel » ou « don naturel ».
+            - Évite les formulations dramatiques ou diagnostiques comme
+              « tourmenté », « toxique », « traumatisme » ou « blessure profonde ».
+            - Utilise « tu peux », « il est possible » ou « semble » lorsque
+              l'interprétation n'est pas certaine.
             - Pas de conseil générique de développement personnel.
             - Pas de syntaxe Markdown.
             - Texte brut uniquement.
-            - Deux paragraphes maximum + questions finales.
-            - Entre 180 et 230 mots.
+            - Trois paragraphes courts, puis la question finale.
+            - Entre 140 et 180 mots.
             """
         ).strip()
 
@@ -215,9 +234,12 @@ def api_analyse_gratuite():
         # 🤖 6) Appel à l'IA
         texte = interroger_llm(prompt)
         print("✅ Analyse IA reçue :", texte[:100] + "...")
+        texte_html = _texte_analyse_vers_html(texte)
 
         # 📧 7) Envoi email + Google Sheets (comme dans l'ancienne version)
         prenom = theme['nom'].split()[0]
+        prenom_html = escape(prenom)
+        nom_html = escape(str(theme['nom']))
         
         # Ajout au Google Sheet — logs détaillés
         print(f"[LEAD] Tentative d'ajout au Google Sheet — email='{email}', prenom='{prenom}'")
@@ -262,34 +284,32 @@ def api_analyse_gratuite():
 
             {texte}
 
-            Allez avoue, tu veux en savoir plus 😏
+            Cet aperçu met en lumière un mécanisme central, mais pas encore ses origines,
+            les situations dans lesquelles il s'active ni les ressources qui permettent de mieux le vivre.
+            Le Point Astral Essentiel relie ces différentes dimensions dans une analyse personnalisée de 4 à 6 pages.
 
-            Cette analyse n'est qu'une première lecture. Le Point Astral va plus loin :
-            il met en lumière tes grands mécanismes, tes forces, tes blocages, et les zones de ton thème
-            qui demandent à être comprises plus finement.
-
-            👉 https://lesfousdastro.fr
+            👉 Découvrir mon Point Astral Essentiel — 29 € : https://lesfousdastro.fr/#flash_astral
 
             À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).
             Les Fous d'Astro by Cécile CL ✨
             """).strip()
 
         contenu_html = textwrap.dedent(f"""
-            <p>Bonjour {prenom},</p>
+            <p>Bonjour {prenom_html},</p>
             <p>Tu l'as demandé, Cécile l'a fait...Ou plutôt les étoiles ont répondu 🔭</p>
             <p>Allez, voici ce que disent tes étoiles :</p>
             <div style="margin:30px 0; padding:20px; background:#f9f6ff; border-radius:12px; line-height:1.8;">
-            {texte}
+            {texte_html}
             </div>
-            <p><strong>Allez avoue, tu veux en savoir plus 😏</strong><br><br>
-            Cette analyse n'est qu'une première lecture. Le <strong>Point Astral</strong> va plus loin :
-            il met en lumière tes grands mécanismes, tes forces, tes blocages, et les zones de ton thème
-            qui demandent à être comprises plus finement.</p>
+            <p><strong>Ton aperçu s'arrête là où l'exploration commence.</strong><br><br>
+            Il met en lumière un mécanisme central, mais pas encore ses origines,
+            les situations dans lesquelles il s'active ni les ressources qui permettent de mieux le vivre.
+            Le <strong>Point Astral Essentiel</strong> relie ces dimensions dans une analyse personnalisée de 4 à 6 pages.</p>
             <p style="text-align:center; margin-top:30px;">
-            <a href="https://lesfousdastro.fr"
+            <a href="https://lesfousdastro.fr/#flash_astral"
             style="display:inline-block;padding:14px 28px;background:#1f628e;color:white;
             border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
-            → Je veux en savoir plus !
+            Comprendre les mécanismes de mon thème — 29 €
             </a>
             </p>
             <p style="margin-top:40px;">À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).<br>
@@ -319,21 +339,27 @@ def api_analyse_gratuite():
          # 🎨 8) Génération du HTML pour le modal
         html = f"""
         <div class="analysis-summary">
-            <h4>🌟 Bonjour {theme['nom']}, voici ton profil astrologique :</h4>
-            <div style="margin: 20px 0; line-height: 1.6;">{texte}</div>
+            <h4>🌟 Bonjour {nom_html}, voici ton profil astrologique :</h4>
+            <div style="margin: 20px 0; line-height: 1.6;">{texte_html}</div>
             
             <div style="margin-top:25px; padding:20px; background:rgba(31,98,142,0.1);
             border-radius:15px; text-align:center;">
                 <p style="margin-bottom:15px; color:#555;">
-                    Si tu veux aller plus loin, découvre le <strong>Point Astral</strong> :
-                    une lecture approfondie avec les grands axes de ton thème.
+                    Cet aperçu montre un mécanisme central. Le <strong>Point Astral Essentiel</strong>
+                    explore ses origines, ses contextes d'activation et les ressources de ton thème
+                    dans une analyse personnalisée de 4 à 6 pages.
                 </p>
 
-                <a href="/static/pdfs/Point_Astral_Britney_Spears.pdf" target="_blank"
+                <button type="button" onclick="choosePointAstralFromFreeAnalysis()"
                 style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
-                border-radius:8px;text-decoration:none;font-weight:bold;
+                border:0;border-radius:8px;text-decoration:none;font-weight:bold;cursor:pointer;
                 width:80%;max-width:300px;">
-                📄 Voir un exemple 
+                Comprendre les mécanismes de mon thème — 29 €
+                </button>
+                <br>
+                <a href="/static/pdfs/Point_Astral_Britney_Spears.pdf" target="_blank" rel="noopener"
+                style="display:inline-block;margin-top:14px;font-size:13px;color:#1f628e;text-decoration:underline;">
+                Voir un exemple avant de choisir
                 </a>
             </div>
         </div>
