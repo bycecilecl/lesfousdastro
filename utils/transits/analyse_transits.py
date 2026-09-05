@@ -332,7 +332,7 @@ def generer_analyse_transits(
                 genre=genre,
             )
         except ErreurGenerationTransits as exc:
-            logger.error("Échec de génération du Flash Transits : %s", exc)
+            logger.error("Échec de génération du Point Transits : %s", exc)
             return ResultatTransits(
                 nom=nom,
                 periode=periode,
@@ -345,9 +345,9 @@ def generer_analyse_transits(
                 erreur=str(exc),
                 texte_html=f"""
                     <h2>Ton ciel du moment</h2>
-                    <p class="transits-date">Ton Flash Transits a été calculé pour le {date_affichee}.</p>
+                    <p class="transits-date">Ton Point Transits a été calculé pour le {date_affichee}.</p>
                     <div class="transits-error" role="alert">
-                        <p><strong>La génération du Flash Transits a rencontré un problème temporaire.</strong></p>
+                        <p><strong>La génération du Point Transits a rencontré un problème temporaire.</strong></p>
                         <p>Les données astrologiques ont bien été calculées, mais le texte n’a pas pu être généré. Tu pourras relancer l’analyse.</p>
                     </div>
                 """,
@@ -357,14 +357,14 @@ def generer_analyse_transits(
     # 6. debug texte simple
     texte = f"""
         <h2>Ton ciel du moment</h2>
-        <p class="transits-date">Ton Flash Transits a été calculé pour le {date_affichee}.</p>
+        <p class="transits-date">Ton Point Transits a été calculé pour le {date_affichee}.</p>
 
         <div class="transits-global">
             {bloc_transits_html}
         </div>
 
         <aside class="transits-methodology">
-            <h3>Comment lire ton Flash Transits</h3>
+            <h3>Comment lire ton Point Transits</h3>
             <p>L’analyse part des positions planétaires calculées pour le <strong>{date_affichee}</strong>. Elle observe également leur évolution du <strong>{date_debut_periode}</strong> au <strong>{date_fin_periode}</strong>, par relevés espacés de cinq jours, afin de dégager le rythme général de la période.</p>
             <p>Un aspect est retenu dans les limites suivantes : conjonction et opposition jusqu’à 5° d’orbe, carré et trigone jusqu’à 4°, sextile jusqu’à 3°. Pour Mars, seuls la conjonction, le carré et l’opposition sont retenus, jusqu’à 2° — ou 3° lorsqu’un luminaire ou un angle majeur est touché. Plus l’orbe est faible, plus l’aspect est précis.</p>
             <p><strong>« Conjoint » ne signifie donc pas nécessairement « exactement superposé » :</strong> cela signifie que les deux points se trouvent dans l’orbe admis. Les dates mentionnées indiquent des zones de sensibilité repérées lors des relevés ; elles ne constituent ni des heures d’exactitude astronomique ni la prédiction certaine d’un événement.</p>

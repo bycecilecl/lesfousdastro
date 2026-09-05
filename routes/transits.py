@@ -50,7 +50,7 @@ def construire_html_pdf_transits(
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Flash Transits — {escape(nom)}</title>
+    <title>Point Transits — {escape(nom)}</title>
     <style>
         body {{ font-family: Georgia, serif; color: #2c3e50; }}
         .container {{ max-width: 800px; margin: 0 auto; }}
@@ -86,7 +86,7 @@ def construire_html_pdf_transits(
 <body>
     <div class="container">
         <div class="logo">{logo_html}</div>
-        <h1>Flash Transits — {escape(nom)}</h1>
+        <h1>Point Transits — {escape(nom)}</h1>
         <p class="period">Période analysée : {escape(date_affichee)}</p>
         {contenu_html}
     </div>
@@ -105,7 +105,7 @@ def transits_complet():
         or paiement.get("status") not in {"paid", "COMPLETED"}
     ):
         current_app.logger.warning("[TRANSITS] Accès refusé : paiement non validé")
-        abort(403, description="Paiement requis pour générer le Flash Transits.")
+        abort(403, description="Paiement requis pour générer le Point Transits.")
 
     infos = session.get("infos_utilisateur") or {}
     champs_obligatoires = (
@@ -135,7 +135,7 @@ def transits_complet():
         )
     except Exception:
         current_app.logger.exception("[TRANSITS] Échec de la génération")
-        abort(500, description="Impossible de générer le Flash Transits.")
+        abort(500, description="Impossible de générer le Point Transits.")
 
     if resultat.erreur:
         current_app.logger.error("[TRANSITS] Génération incomplète : %s", resultat.erreur)
@@ -172,13 +172,13 @@ def transits_complet():
     ).strip("_") or "Anonyme"
     horodatage = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     nom_fichier = (
-        f"Flash_Transits_{nom_slug}_{date_effective:%Y-%m-%d}_{horodatage}.pdf"
+        f"Point_Transits_{nom_slug}_{date_effective:%Y-%m-%d}_{horodatage}.pdf"
     )
     dossier_pdf = os.path.join(current_app.static_folder, "pdfs")
     chemin_pdf = os.path.join(dossier_pdf, nom_fichier)
 
     if not html_to_pdf(html_pdf, chemin_pdf):
-        abort(500, description="Impossible de créer le PDF du Flash Transits.")
+        abort(500, description="Impossible de créer le PDF du Point Transits.")
 
     pdf_url = url_for("static", filename=f"pdfs/{nom_fichier}", _external=True)
     try:
@@ -200,7 +200,7 @@ def transits_complet():
     if _env_on("SEND_EMAILS", "true") and destinataire:
         prenom = (theme.get("nom") or "").split()[0] or "toi"
         sujet, corps_texte, corps_html = construire_email_analyse(
-            prenom, f"Flash Transits du {date_affichee}", pdf_url
+            prenom, f"Point Transits du {date_affichee}", pdf_url
         )
         Thread(
             target=envoyer_email_avec_analyse,

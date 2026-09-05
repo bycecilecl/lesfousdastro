@@ -200,7 +200,7 @@ clarifier, initier, ralentir ou protéger. Termine par une synthèse mémorable 
 non fataliste. Chaque conseil doit apporter une réponse pratique nouvelle, et non
 reformuler un point de vigilance précédent.
 
-- Il s'agit d'un Flash Transits centré sur la période actuelle et les six semaines
+- Il s'agit d'un Point Transits centré sur la période actuelle et les six semaines
   qui l'entourent, pas d'une prévision annuelle.
 - Développe les transits dominants avec profondeur.
 - Si une même planète en transit revient plusieurs fois, considère qu’elle peut former le climat dominant de la période, surtout si elle touche le Soleil, la Lune ou l’Ascendant.

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def _ask_transits_llm(**kwargs) -> str:
-    """Sélectionne le fournisseur du Flash Transits, Claude par défaut."""
+    """Sélectionne le fournisseur du Point Transits, Claude par défaut."""
     provider = (
         os.getenv("FLASH_TRANSITS_LLM_PROVIDER")
         or os.getenv("LLM_PROVIDER")
@@ -26,13 +26,13 @@ def _ask_transits_llm(**kwargs) -> str:
         # le client Anthropic ni d'exiger ANTHROPIC_API_KEY au démarrage.
         from utils.claude_llm import ask_claude
 
-        logger.info("Flash Transits : génération avec Claude")
+        logger.info("Point Transits : génération avec Claude")
         return ask_claude(**kwargs)
 
     if provider == "openai":
         from utils.llm_client import ask_llm as ask_openai
 
-        logger.info("Flash Transits : génération avec OpenAI")
+        logger.info("Point Transits : génération avec OpenAI")
         return ask_openai(**kwargs)
 
     raise ValueError(

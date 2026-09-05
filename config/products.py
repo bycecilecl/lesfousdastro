@@ -37,7 +37,7 @@ def load_products():
             "enabled": _bool_env("POINT_ASTRAL_FAMILLE_ENABLED", "1"),
         },
         "flash_transits": {
-            "label": "Flash Transits",
+            "label": "Point Transits",
             "price_id": os.getenv("FLASH_TRANSITS_PRICE_ID", "").strip(),
             "price_cents": _int_env("FLASH_TRANSITS_PRICE_CENTS", 1200),
             "success_route": "transits.transits_complet",

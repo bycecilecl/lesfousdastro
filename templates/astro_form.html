@@ -962,7 +962,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                         <span class="transits-badge">OFFRE DE LANCEMENT</span>
                         <span class="transits-icon" aria-hidden="true">⚡</span>
                         <div class="transits-copy">
-                            <h4>Flash Transits</h4>
+                            <h4>Point Transits</h4>
                             <p>Découvre les dynamiques astrologiques qui traversent ta période actuelle — ou explore une date passée ou future.</p>
                         </div>
                         <div class="transits-price">
@@ -1247,11 +1247,11 @@ input[type="time"]:focus, input[type="email"]:focus {
             return;
         }
         if (selectedPack) {
-            showNotification('Désélectionne d’abord ton pack pour ajouter Flash Transits.', 'warning');
+            showNotification('Désélectionne d’abord ton pack pour ajouter Point Transits.', 'warning');
             return;
         }
         if (cart.some(item => item.price > 0)) {
-            showNotification('Flash Transits se commande séparément des autres analyses.', 'warning');
+            showNotification('Point Transits se commande séparément des autres analyses.', 'warning');
             return;
         }
         pendingTransitCard = element;
@@ -1282,7 +1282,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         const card = pendingTransitCard;
         document.getElementById('transitDateModal').style.display = 'none';
         pendingTransitCard = null;
-        addToCart('flash_transits', 'Flash Transits', 12, card, {
+        addToCart('flash_transits', 'Point Transits', 12, card, {
             transitDateMode: custom ? 'custom' : 'today',
             transitDate: custom ? dateInput.value : ''
         });
@@ -1301,7 +1301,7 @@ input[type="time"]:focus, input[type="email"]:focus {
     function addToCart(id, name, price, element, details = {}) {
         if (selectedPack) { showNotification('Vous avez sélectionné un pack. Désélectionnez-le d\'abord.', 'warning'); return; }
         if (id !== 'flash_transits' && price > 0 && cart.some(item => item.id === 'flash_transits')) {
-            showNotification('Flash Transits se commande séparément des autres analyses.', 'warning');
+            showNotification('Point Transits se commande séparément des autres analyses.', 'warning');
             return;
         }
         const existingItem = cart.find(item => item.id === id);

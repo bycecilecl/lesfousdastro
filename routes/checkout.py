@@ -252,7 +252,7 @@ def checkout():
         abort(400, description="Aucun produit valide.")
 
     if "flash_transits" in payment_product_keys and len(payment_product_keys) > 1:
-        abort(400, description="Le Flash Transits doit être commandé séparément.")
+        abort(400, description="Le Point Transits doit être commandé séparément.")
     
     current_app.logger.info(
         f"💰 [CHECKOUT] Total: {total_cents/100:.2f}€ | "

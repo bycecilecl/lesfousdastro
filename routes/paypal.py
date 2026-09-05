@@ -229,7 +229,7 @@ def create_order():
 
     if "flash_transits" in payment_product_keys and len(payment_product_keys) > 1:
         return jsonify({
-            "error": "Le Flash Transits doit être commandé séparément."
+            "error": "Le Point Transits doit être commandé séparément."
         }), 400
     
     # 🔥 FIX: Stocker AUSSI payment_product_keys pour avoir l'info complète
