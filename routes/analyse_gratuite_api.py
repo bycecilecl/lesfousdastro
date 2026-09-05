@@ -36,14 +36,14 @@ def _texte_analyse_vers_html(texte):
 def _generer_texte_analyse_gratuite(prompt):
     """Choisit le fournisseur du gratuit sans modifier le fournisseur global."""
     provider = (
-        os.getenv("FREE_ANALYSIS_LLM_PROVIDER", "openai")
-        .strip()
-        .lower()
-    )
+        os.getenv("FREE_ANALYSIS_LLM_PROVIDER")
+        or os.getenv("LLM_PROVIDER")
+        or "claude"
+    ).strip().lower()
 
     if provider == "openai":
         print("🤖 Analyse gratuite générée avec OpenAI")
-        return interroger_llm(prompt)
+        return interroger_llm(prompt, provider="openai")
 
     if provider == "claude":
         # Import tardif : une production restée sur OpenAI ne dépend pas de
@@ -51,12 +51,19 @@ def _generer_texte_analyse_gratuite(prompt):
         from utils.claude_llm import ask_claude
 
         print("🤖 Analyse gratuite générée avec Claude")
-        return ask_claude(
-            prompt=prompt,
-            system=SYSTEM_BASE,
-            max_tokens=900,
-            temperature=0.6,
-        )
+        try:
+            return ask_claude(
+                prompt=prompt,
+                system=SYSTEM_BASE,
+                max_tokens=900,
+                temperature=0.6,
+            )
+        except Exception as claude_error:
+            print(
+                "⚠️ Claude indisponible pour le gratuit, repli vers OpenAI : "
+                f"{claude_error}"
+            )
+            return interroger_llm(prompt, provider="openai")
 
     raise ValueError(
         "FREE_ANALYSIS_LLM_PROVIDER doit valoir 'openai' ou 'claude' "

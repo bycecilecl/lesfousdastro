@@ -20,25 +20,13 @@ DOTENV_PATH = PROJECT_ROOT / ".env"
 load_dotenv(dotenv_path=DOTENV_PATH, override=True)
 
 # 2) Récupérer et NETTOYER la clé API
-raw_key = (os.getenv("OPENAI_API_KEY") or "").strip()
-
-# Si quelqu'un a collé 2 clés d'affilée, ne garder que la première (séparateur "sk-")
-if raw_key.startswith("sk-"):
-    j = raw_key.find("sk-", 4)  # cherche une 2e occurrence
-    if j != -1:
-        raw_key = raw_key[:j].strip()
-
-# Enlever tout retour chariot/ligne au cas où
-CLEAN_API_KEY = raw_key.replace("\r", "").replace("\n", "").strip()
-
-if not CLEAN_API_KEY:
-    raise RuntimeError(
-        "OPENAI_API_KEY manquant. Vérifie ton .env à la racine (clé unique, une seule ligne).\n"
-        f"Chemin lu : {DOTENV_PATH}"
-    )
-
-# 3) Initialiser le client avec un timeout clair
-CLIENT = OpenAI(api_key=CLEAN_API_KEY, timeout=90.0)
+def _get_openai_client():
+    """Initialise OpenAI uniquement lorsqu'il est choisi comme moteur de repli."""
+    raw_key = (os.getenv("OPENAI_API_KEY") or "").strip()
+    clean_api_key = raw_key.replace("\r", "").replace("\n", "").strip()
+    if not clean_api_key:
+        raise RuntimeError(f"OPENAI_API_KEY manquant. Chemin lu : {DOTENV_PATH}")
+    return OpenAI(api_key=clean_api_key, timeout=90.0)
 
 # 4) Modèle par défaut (overridable via .env)
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
@@ -46,7 +34,7 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 def ping_openai() -> bool:
     """Petit test de santé : renvoie True si l'API répond à un 'ping' minimal."""
     try:
-        r = CLIENT.chat.completions.create(
+        r = _get_openai_client().chat.completions.create(
             model=MODEL,
             messages=[{"role": "user", "content": "ping"}],
             max_tokens=5,
@@ -67,9 +55,36 @@ def ask_llm(
     min_backoff: float = 1.5,
 ) -> str:
     """
-    Appel LLM robuste avec retries et messages d'erreurs explicites.
+    Appel Claude par défaut, avec OpenAI conservé comme moteur de repli.
+    Les retries ci-dessous concernent le chemin OpenAI.
     Retourne le texte (content) directement.
     """
+    provider = os.getenv("LLM_PROVIDER", "claude").lower().strip()
+
+    if provider == "claude":
+        from utils.claude_llm import ask_claude
+
+        try:
+            return ask_claude(
+                prompt=prompt,
+                system=system,
+                max_tokens=max_tokens,
+                temperature=temperature,
+            )
+        except Exception as claude_error:
+            print(
+                "[LLM] Claude indisponible, repli ponctuel vers OpenAI : "
+                f"{claude_error}",
+                flush=True,
+            )
+            provider = "openai"
+
+    if provider != "openai":
+        raise ValueError(
+            "LLM_PROVIDER doit valoir 'claude' ou 'openai' "
+            f"(valeur reçue : {provider!r})."
+        )
+
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
@@ -78,7 +93,7 @@ def ask_llm(
     last_err = None
     for attempt in range(1, retries + 1):
         try:
-            resp = CLIENT.chat.completions.create(
+            resp = _get_openai_client().chat.completions.create(
                 model=MODEL,
                 messages=messages,
                 temperature=temperature,
