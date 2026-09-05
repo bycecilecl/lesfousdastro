@@ -398,7 +398,8 @@ input[type="time"]:focus, input[type="email"]:focus {
     border-top-color: #00a8a8;
 }
 
-.option-card:hover .card-tooltip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.option-card:hover .card-tooltip,
+.transits-offer:hover .card-tooltip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 .card-tooltip ul { margin: 6px 0 0 0; padding-left: 16px; }
 .card-tooltip li { margin-bottom: 4px; }
 .card-tooltip strong { display: block; margin-bottom: 6px; font-size: 0.9rem; color: #c0f0f7; }
@@ -608,7 +609,7 @@ input[type="time"]:focus, input[type="email"]:focus {
 
 .transits-section {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     margin: 34px 0;
     padding: 30px;
     border: 1px solid rgba(139, 92, 246, 0.28);
@@ -961,6 +962,12 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <span class="old-price">19€</span>
                             12€
                             <span class="transits-cta">Choisir ma date</span>
+                        </div>
+                        <div class="card-tooltip">
+                            <strong>Ce que tu reçois</strong>
+                            Une lecture personnalisée et condensée d'environ 4 pages : le climat dominant, les transits qui travaillent en profondeur, leurs manifestations possibles et le rythme autour de la date choisie.
+                            <br><br>
+                            <em>Détail complet et exemple de rapport en bas de la page Guide des analyses.</em>
                         </div>
                     </div>
                 </section>
