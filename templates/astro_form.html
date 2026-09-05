@@ -688,20 +688,12 @@ input[type="time"]:focus, input[type="email"]:focus {
 
 .testimonials-section { background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(192,240,247,0.1)); backdrop-filter: blur(10px); border-radius: 25px; padding: 40px; margin: 40px 0; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2); }
 .testimonials-subtitle { text-align: center; color: #666; margin-bottom: 35px; font-size: 1.1rem; }
-.testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 40px; }
-.testimonial-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); border: 2px solid transparent; transition: all 0.3s ease; position: relative; overflow: hidden; }
-.testimonial-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #1f628e, #00a8a8, #c0f0f7); }
-.testimonial-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); border-color: rgba(31,98,142,0.2); }
-.testimonial-content { margin-bottom: 20px; }
-.rating-stars { font-size: 1.2rem; margin-bottom: 15px; color: #FFD700; }
-.testimonial-content p { color: #333; line-height: 1.6; font-style: italic; font-size: 0.95rem; margin: 0; }
-.testimonial-author { display: flex; align-items: center; gap: 15px; }
-.author-avatar { width: 45px; height: 45px; background: linear-gradient(135deg, #1f628e, #00a8a8); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
-.author-info strong { display: block; color: #1f628e; font-size: 1rem; margin-bottom: 3px; }
-.author-info span { color: #666; font-size: 0.85rem; opacity: 0.8; }
+.testimonials-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; align-items: start; margin-bottom: 30px; }
+.testimonial-proof { display: block; overflow: hidden; background: white; border: 1px solid rgba(31,98,142,0.14); border-radius: 16px; color: #1f628e; text-decoration: none; box-shadow: 0 8px 24px rgba(0,0,0,0.1); transition: transform 0.25s ease, box-shadow 0.25s ease; }
+.testimonial-proof:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,0.16); }
+.testimonial-proof img { display: block; width: 100%; height: auto; background: white; }
+.testimonial-proof span { display: block; padding: 12px 14px; border-top: 1px solid rgba(31,98,142,0.1); font-size: 0.9rem; font-weight: 700; text-align: center; }
 .testimonials-cta { text-align: center; padding: 30px; background: linear-gradient(135deg, rgba(31,98,142,0.1), rgba(0,168,168,0.05)); border-radius: 15px; margin-top: 30px; }
-.testimonials-cta h3 { color: #1f628e; margin-bottom: 10px; font-size: 1.4rem; }
-.testimonials-cta p { color: #666; margin-bottom: 20px; }
 .cta-button { background: linear-gradient(135deg, #1f628e, #00a8a8); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
 .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(31,98,142,0.3); }
 
@@ -1014,54 +1006,24 @@ input[type="time"]:focus, input[type="email"]:focus {
     </div>
 
     <div class="testimonials-section">
-        <h2 class="section-title">💬 Ce qu'ils disent de nos analyses</h2>
-        <p class="testimonials-subtitle">Découvre pourquoi nos clients recommandent nos analyses astrologiques</p>
+        <h2 class="section-title">💬 Leurs mots, tels quels</h2>
+        <p class="testimonials-subtitle">Des retours reçus après la découverte de leur analyse astrologique</p>
         <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <div class="testimonial-content">
-                    <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                    <p>"J'ai voulu tester l'application par curiosité et je suis absolument bluffée ! Une analyse très étonnante.. D'une justesse incroyable. J'ai l'impression que l'appli a lu à travers moi pour pointer toutes mes failles, mes atouts, mes challenges, mon fonctionnement et surtout je repars avec des clés de progression !"</p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">👩</div>
-                    <div class="author-info"><strong>Sarah W.</strong><span>Scorpion Ascendant Scorpion</span></div>
-                </div>
-            </div>
-            <div class="testimonial-card">
-                <div class="testimonial-content">
-                    <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                    <p>"Je ne peux que recommander ce Point Astral. Étant moi même astrologue, je me suis complètement reconnue dans cette analyse. Une analyse qui correspond en tout point à qui je suis et à ce que je dois travailler 😝. Encore Bravo Cécile pour ton travail 🫶"</p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">👩</div>
-                    <div class="author-info"><strong>Angélique V.</strong><span>Cancer Ascendant Poissons</span></div>
-                </div>
-            </div>
-            <div class="testimonial-card">
-                <div class="testimonial-content">
-                    <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                    <p>"C'était un chouette voyage au confins des astres de notre système solaire. Apprendre sur soi par le biais des planètes et étoiles, merci fou d'astro pour le compte rendu clair!"</p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">👩</div>
-                    <div class="author-info"><strong>Samé</strong><span>Capricorne Ascendant Capricorne</span></div>
-                </div>
-            </div>
-            <div class="testimonial-card">
-                <div class="testimonial-content">
-                    <div class="rating-stars">⭐⭐⭐⭐⭐</div>
-                    <p>"J'ai été subjugée par l'exactitude des propos. Ce point a lu en moi comme dans un livre ouvert et a permis de mettre des mots concrets sur des notions que je sentais floues en moi. Merci Cécile pour ton travail !"</p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">👩</div>
-                    <div class="author-info"><strong>Caroline S.</strong><span>Balance Ascendant Vierge</span></div>
-                </div>
-            </div>
+            <a class="testimonial-proof" href="{{ url_for('site_bp.temoignages') }}" aria-label="Voir les avis sur le Profil amoureux">
+                <img src="{{ url_for('static', filename='temoignages/2025_12_sarah_profil_amoureux.webp') }}" alt="Retour client authentique sur le Profil amoureux" loading="lazy">
+                <span>Profil amoureux</span>
+            </a>
+            <a class="testimonial-proof" href="{{ url_for('site_bp.temoignages') }}" aria-label="Voir les avis sur l'Analyse karmique">
+                <img src="{{ url_for('static', filename='temoignages/2026_05_celine_karmique.webp') }}" alt="Retour client authentique sur l'Analyse karmique" loading="lazy">
+                <span>Analyse karmique</span>
+            </a>
+            <a class="testimonial-proof" href="{{ url_for('site_bp.temoignages') }}" aria-label="Voir les avis sur le Point Astral Racines">
+                <img src="{{ url_for('static', filename='temoignages/2026_08_sophie_point_astral_famille.webp') }}" alt="Retour client authentique sur le Point Astral Racines" loading="lazy">
+                <span>Point Astral Racines</span>
+            </a>
         </div>
         <div class="testimonials-cta">
-            <h3>Des tas de personnes ont déjà découvert leur thème</h3>
-            <p>Rejoins-les et lis leurs retours</p>
-            <a href="{{ url_for('site_bp.temoignages') }}" class="cta-button">✨ Voir tous les avis</a>
+            <a href="{{ url_for('site_bp.temoignages') }}" class="cta-button">✨ Voir plus d'avis</a>
         </div>
     </div>
 
