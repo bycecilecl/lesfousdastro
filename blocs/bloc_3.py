@@ -96,7 +96,7 @@ def _as_text(lines_or_text) -> str:
         return "\n".join(str(x).strip() for x in lines_or_text if str(x).strip())
     return str(lines_or_text).strip()
 
-def generer_bloc_3(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
+def generer_bloc_3(contexte: Dict[str, Any], max_tokens: int = 1800) -> str:
     ctx: Dict[str, Any] = contexte
 
     # 1) Données de base

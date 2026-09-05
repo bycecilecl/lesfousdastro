@@ -388,7 +388,7 @@ def filtrer_texte_point_astral(text: str) -> str:
 
     return "\n".join(lignes)
 
-def generer_bloc_2(contexte: Dict[str, Any], max_tokens: int = 1200) -> str:
+def generer_bloc_2(contexte: Dict[str, Any], max_tokens: int = 1800) -> str:
     # alias local pour calmer l'IDE dans les f-strings
     ctx: Dict[str, Any] = contexte
     """

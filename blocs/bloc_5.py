@@ -83,7 +83,7 @@ def _section_noeuds_lunaires_for_prompt(theme: dict, max_orbe: float = 5.0) -> s
 
     return "\n".join(lines)
 
-def generer_bloc_5(contexte: dict, max_tokens: int = 1200) -> str:
+def generer_bloc_5(contexte: dict, max_tokens: int = 1800) -> str:
     print("[BLOC5] version=2025-09-12A")
     """
     Bloc 5 – Axes & Synthèse
