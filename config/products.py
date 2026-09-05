@@ -22,9 +22,9 @@ def load_products():
     """
     return {
         "flash_astral": {
-            "label": "Flash Astral complet",
+            "label": "Point Astral Essentiel",
             "price_id": os.getenv("FLASH_ASTRAL_PRICE_ID", "").strip(),
-            "price_cents": _int_env("FLASH_ASTRAL_PRICE_CENTS", 2900),
+            "price_cents": _int_env("FLASH_ASTRAL_PRICE_CENTS", 2500),
             "success_route": "point_astral_blocs.point_astral_blocs_complet",
             "enabled": _bool_env("FLASH_ASTRAL_ENABLED", "1"),
         },

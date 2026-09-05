@@ -288,7 +288,7 @@ def api_analyse_gratuite():
             les situations dans lesquelles il s'active ni les ressources qui permettent de mieux le vivre.
             Le Point Astral Essentiel relie ces différentes dimensions dans une analyse personnalisée de 4 à 6 pages.
 
-            👉 Découvrir mon Point Astral Essentiel — 29 € : https://lesfousdastro.fr/#flash_astral
+            👉 Découvrir mon Point Astral Essentiel — 25 € : https://lesfousdastro.fr/#flash_astral
 
             À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).
             Les Fous d'Astro by Cécile CL ✨
@@ -309,7 +309,7 @@ def api_analyse_gratuite():
             <a href="https://lesfousdastro.fr/#flash_astral"
             style="display:inline-block;padding:14px 28px;background:#1f628e;color:white;
             border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
-            Comprendre les mécanismes de mon thème — 29 €
+            Comprendre les mécanismes de mon thème — 25 €
             </a>
             </p>
             <p style="margin-top:40px;">À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).<br>
@@ -354,10 +354,10 @@ def api_analyse_gratuite():
                 style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
                 border:0;border-radius:8px;text-decoration:none;font-weight:bold;cursor:pointer;
                 width:80%;max-width:300px;">
-                Comprendre les mécanismes de mon thème — 29 €
+                Comprendre les mécanismes de mon thème — 25 €
                 </button>
                 <br>
-                <a href="/static/pdfs/Point_Astral_Britney_Spears.pdf" target="_blank" rel="noopener"
+                <a href="/static/pdfs/Exemple_Flash_Astral_Cecile.pdf" target="_blank" rel="noopener"
                 style="display:inline-block;margin-top:14px;font-size:13px;color:#1f628e;text-decoration:underline;">
                 Voir un exemple avant de choisir
                 </a>
@@ -401,7 +401,7 @@ def api_analyse_gratuite():
     #                 D'où viennent tes schémas répétitifs — nœuds, Chiron, Lilith
     #             </p>
 
-    #             <a href="/static/pdfs/Point_Astral_Britney_Spears.pdf" target="_blank"
+    #             <a href="/static/pdfs/Exemple_Flash_Astral_Cecile.pdf" target="_blank"
     #             style="font-size:13px;color:#1f628e;text-decoration:underline;">
     #             📄 Voir un exemple du Point Astral avant d'acheter
     #             </a>

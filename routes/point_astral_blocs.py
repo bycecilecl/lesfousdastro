@@ -320,7 +320,7 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
         current_app.logger.error(f"❌ Upload S3 Point Astral: {e}")
 
     return {
-        "label": "Flash Astral complet",
+        "label": "Point Astral Essentiel",
         "pdf_url": pdf_final_url,
         "pdf_path": pdf_path,
         "status": "completed",

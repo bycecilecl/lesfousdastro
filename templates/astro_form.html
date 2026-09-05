@@ -870,13 +870,13 @@ input[type="time"]:focus, input[type="email"]:focus {
                   <div class="points-astraux-group">
                     <h4 class="points-astraux-title">🔮 Points Astraux</h4>
                     <div class="points-astraux-grid">
-                      <div class="option-card coral" id="flash_astral" onclick="addToCart('flash_astral', 'Point Astral Essentiel', 29, this)">
+                      <div class="option-card coral" id="flash_astral" onclick="addToCart('flash_astral', 'Point Astral Essentiel', 25, this)">
                         <span class="icon">
                             <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
                         </span>
                         <h4>Point Astral Essentiel</h4>
                         <p>Les grandes dynamiques de ton thème natal sur 4 à 6 pages</p>
-                        <div class="price">29€</div>
+                        <div class="price">25€</div>
                         <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                         <span class="status coral">Clique pour sélectionner</span>
                         <div class="card-tooltip">
@@ -984,11 +984,11 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">104€</span><br><span class="pack-price-value">83€</span></div></div>
                         </div>
                         <div class="pack-card essence-special" onclick="selectPack('essence')" style="border:2px solid #FFD700;">
-                            <div class="pack-badge">ÉCONOMISE 20€</div>
+                            <div class="pack-badge">ÉCONOMISE 16€</div>
                             <div class="pack-title">✨ Pack Essence</div>
                             <div class="pack-content">✓ Point Astral Essentiel<br>✓ Potentiels &amp; Défis<br>✓ Profil Amoureux</div>
                             <span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">69€</span><br><span class="pack-price-value">49€</span></div></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">65€</span><br><span class="pack-price-value">49€</span></div></div>
                         </div>
                         <div class="pack-card" onclick="selectPack('integral')" style="border:2px solid rgba(192,240,247,0.5);">
                             <div class="pack-badge" style="background:linear-gradient(135deg,#00a8a8,#1f628e);">ÉCONOMISE 35€</div>
@@ -1126,7 +1126,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             </div>
         </div>
         <div class="analysis-actions">
-            <button class="explore-btn" onclick="choosePointAstralFromFreeAnalysis()">✨ Découvrir mon Point Astral — 29€</button>
+            <button class="explore-btn" onclick="choosePointAstralFromFreeAnalysis()">✨ Découvrir mon Point Astral — 25€</button>
             <button class="explore-btn" onclick="closeFreeAnalysisModal()">Plus tard</button>
         </div>
     </div>
@@ -1490,7 +1490,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         if (!pointAstralCard) return;
 
         if (!cart.some(item => item.id === 'flash_astral')) {
-            addToCart('flash_astral', 'Point Astral Essentiel', 29, pointAstralCard);
+            addToCart('flash_astral', 'Point Astral Essentiel', 25, pointAstralCard);
         }
 
         setTimeout(() => {
