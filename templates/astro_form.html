@@ -422,7 +422,8 @@ input[type="time"]:focus, input[type="email"]:focus {
 .intro-cosmique p:last-child { margin-bottom: 0; }
 
 .qui-suis-je { display: flex; align-items: center; gap: 1.25rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.15); }
-.qsj-photo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0; }
+.qsj-photo { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0; }
+.qsj-texte { min-width: 0; }
 .qsj-texte strong { display: block; color: white; font-size: 0.95rem; margin-bottom: 0.35rem; }
 .qsj-texte p { font-size: 0.92rem; opacity: 0.85; margin: 0; line-height: 1.7; font-style: italic; }
 
@@ -715,6 +716,8 @@ input[type="time"]:focus, input[type="email"]:focus {
     .container { padding: 15px; }
     .form-row { grid-template-columns: 1fr; }
     .options-grid, .packs-grid, .consultation-grid { grid-template-columns: 1fr; }
+    .qui-suis-je { flex-direction: column; text-align: center; }
+    .qsj-photo { width: 140px; height: 140px; margin: 0 auto; }
     .form-container, .packs-section, .consultation-section { padding: 25px; }
     .gender-options { flex-direction: column; }
     .predictive-section { padding: 20px; margin-top: 30px; }
@@ -777,7 +780,7 @@ input[type="time"]:focus, input[type="email"]:focus {
     <p>Ces analyses ne sont pas des descriptions génériques de tes placements. Elles reprennent le travail d'une vraie astrologue : la même logique, les mêmes combinaisons, la même lecture d'ensemble : de véritables déclencheurs de conscience, à garder et à relire au fil du temps pour mieux naviguer dans ta vie.</p>
 
     <div class="qui-suis-je">
-    <img src="{{ url_for('static', filename='images/cecilecl-astrologue.webp') }}" alt="Cécile, astrologue" class="qsj-photo" style="width:220px; height:220px; object-fit:cover;">
+    <img src="{{ url_for('static', filename='images/cecilecl-astrologue.webp') }}" alt="Cécile, astrologue" class="qsj-photo">
     <div class="qsj-texte">
         <strong>Cécile CL — Astrologue & Développeuse</strong>
         <p><em>Je ne lis pas les étoiles au hasard. Je les code.</em></p>
