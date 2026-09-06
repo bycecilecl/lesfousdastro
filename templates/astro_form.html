@@ -715,7 +715,7 @@ input[type="time"]:focus, input[type="email"]:focus {
 @media (max-width: 768px) {
     .container { padding: 15px; }
     .form-row { grid-template-columns: 1fr; }
-    .options-grid, .packs-grid, .consultation-grid { grid-template-columns: 1fr; }
+    .options-grid, .packs-grid, .consultation-grid { grid-template-columns: minmax(0, 1fr); }
     .qui-suis-je { flex-direction: column; text-align: center; }
     .qsj-photo { width: 140px; height: 140px; margin: 0 auto; }
     .form-container, .packs-section, .consultation-section { padding: 25px; }
