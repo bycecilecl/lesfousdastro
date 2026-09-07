@@ -420,9 +420,6 @@ input[type="time"]:focus, input[type="email"]:focus {
 .intro-cosmique h2 { font-size: 1.55rem; font-weight: 700; margin-bottom: 18px; color: white; line-height: 1.3; }
 .intro-cosmique p { font-size: 1rem; line-height: 1.7; opacity: 0.88; margin-bottom: 14px; }
 .intro-cosmique p:last-child { margin-bottom: 0; }
-.method-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 20px 0; }
-.method-links a { color: #fff; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
-.method-links a:hover { color: #d4af37; }
 
 .qui-suis-je { display: flex; align-items: center; gap: 1.25rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.15); }
 .qsj-photo { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); flex-shrink: 0; }
@@ -773,11 +770,11 @@ input[type="time"]:focus, input[type="email"]:focus {
         <div class="badge-d-wrap">
             <div class="badge-d">✦ Analyses Astrologiques ✦</div>
         </div>
-        <p class="header-hook"><strong>Explore les grandes dynamiques de ton thème : ta personnalité, tes ressources, tes contradictions et tes chemins d’évolution.</strong></p>
-        <p class="header-hook">Des analyses personnalisées qui associent le calcul de ton thème, ma méthode de lecture astrologique et une rédaction assistée par IA.</p>
+        <p class="header-hook">Tu t'es toujours senti plus complexe qu'un simple signe solaire ?<br>Ton thème natal a les réponses.</p>
         <div class="header-btns">
             <button class="header-cta" style="font-size:1.3rem; font-weight:700; padding:18px 40px; border-radius:50px; box-shadow:0 4px 20px rgba(212,175,55,0.4);" onclick="document.getElementById('form-analyse').scrollIntoView({behavior:'smooth'})">
                 Découvrir mon analyse ↓
+            </button>
             </button>
             <div class="header-links-row">
                 <a href="/blog" class="header-link">Le blog</a>
@@ -789,22 +786,24 @@ input[type="time"]:focus, input[type="email"]:focus {
     </div>
 
    <div class="intro-cosmique">
-    <h2>Ce qui relie les éléments de ton thème change toute la lecture.</h2>
-    <p>Tu peux rechercher la signification de chaque placement séparément. Mais comment comprendre un besoin de sécurité qui coexiste avec une forte envie d’indépendance ?</p>
-    <p>J’ai développé ma propre méthode pour sélectionner, hiérarchiser et mettre en relation les configurations de ton thème. L’IA rédige à partir de ce cadre : des données calculées, des priorités de lecture et des règles de synthèse définies en amont.</p>
-    <p><strong>Tu n’as pas à savoir quelles questions poser : cette préparation est intégrée à ton analyse.</strong></p>
-    <div class="method-links">
-        <a href="{{ url_for('pages_bp.analyses') }}#approche">Découvrir ma méthode</a>
-        <a href="{{ url_for('static', filename='pdfs/Point_Astral_Britney_Spears.pdf') }}" target="_blank" rel="noopener">Lire un exemple complet — Racines familiales</a>
-    </div>
+    <h2>L'astrologie, c'est ton ADN cosmique.</h2>
+    <p>Les planètes au moment de ta naissance ne décident pas de ta vie : elles décrivent tes énergies profondes. Celles qui te "gouvernent" tant que tu n'en as pas conscience. Celles qui, une fois comprises, deviennent tes meilleurs alliés.</p>
+
+    <blockquote class="quote-box">
+        <em>« Tant que vous ne rendrez pas l'inconscient conscient, il dirigera votre vie et vous appellerez cela le destin. »</em>
+        <span style="display:block; margin-top:10px; font-weight:normal; font-style:normal;">— Carl Gustav Jung</span>
+    </blockquote>
+    <br>
+    <p>C'est exactement à ça que sert l'astrologie : <strong>rendre conscient l'inconscient</strong>, et se servir de ses énergies pour créer une vie qui nous correspond.</p>
+    <p>Ces analyses ne sont pas des descriptions génériques de tes placements. Elles reprennent le travail d'une vraie astrologue : la même logique, les mêmes combinaisons, la même lecture d'ensemble : de véritables déclencheurs de conscience, à garder et à relire au fil du temps pour mieux naviguer dans ta vie.</p>
 
     <div class="qui-suis-je">
     <img src="{{ url_for('static', filename='images/cecilecl-astrologue.webp') }}" alt="Cécile, astrologue" class="qsj-photo">
     <div class="qsj-texte">
-        <strong>Cécile CL — Astrologue &amp; Développeuse</strong>
+        <strong>Cécile CL — Astrologue & Développeuse</strong>
         <p><em>Je ne lis pas les étoiles au hasard. Je les code.</em></p>
-        <p>Ex-informaticienne, je sentais que ma vie ne me ressemblait pas vraiment. Un voyage en Inde a tout chamboulé et m’a poussée à chercher qui j’étais profondément. Ce cheminement m’a menée à l’astrologie, qui m’a aidée à mieux comprendre mon fonctionnement et à me sentir plus en paix.</p>
-        <p>J’ai réuni mes deux univers, astrologie et informatique, pour créer ces analyses et aider chacun à mieux se connaître et à vivre une vie qui lui ressemble.</p>
+        <p>Ex-informaticienne, j'avais la sensation que ma vie ne correspondait pas à qui j'étais vraiment. Un voyage en Inde a tout chamboulé, et j'ai cherché à comprendre qui j'étais profondément. Ce cheminement m'a menée à l'astrologie qui m'a aidée à comprendre pourquoi je fonctionnais ainsi et comment faire pour me sentir plus en paix.</p>
+        <p>J'ai ensuite décidé de fusionner mes deux univers, astrologie et informatique, afin d'aider chacun à mieux se connaître et vivre ainsi une vie plus alignée et plus sereine.</p>
         <p><a href="https://bycecilecl.com/ma-life/" target="_blank" rel="noopener" style="color:#d4af37; text-decoration:underline; font-weight:600;">→ Découvrir mon histoire</a></p>
         <p>Je propose aussi des <a href="{{ url_for('pages_bp.prestations') }}" style="color:#d4af37; text-decoration:underline; font-weight:600;">consultations et accompagnements</a> en parallèle de ces analyses codées.</p>
         
@@ -814,6 +813,57 @@ input[type="time"]:focus, input[type="email"]:focus {
 
     <div class="form-container">
         <form id="form-analyse" method="POST">
+            <div class="form-section" id="informations-personnelles">
+                <h3 class="section-title">🌟 Tes informations personnelles</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nom">Prénom</label>
+                        <input type="text" name="nom" id="nom" required placeholder="Votre prénom">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" id="email" required placeholder="votre.email@example.com">
+                    </div>
+                    <div class="form-group gender-row">
+                        <label>Sexe</label>
+                        <div class="gender-options">
+                            <div class="gender-option">
+                                <input type="radio" id="female" name="gender" value="female" required>
+                                <label for="female">👩 Femme</label>
+                            </div>
+                            <div class="gender-option">
+                                <input type="radio" id="male" name="gender" value="male" required>
+                                <label for="male">👨 Homme</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">🌙 Tes coordonnées de naissance</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date_naissance">Date de naissance</label>
+                        <input type="date" name="date_naissance" id="date_naissance" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="heure_naissance">Heure de naissance</label>
+                        <input type="time" name="heure_naissance" id="heure_naissance" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="lieu_naissance">Lieu de naissance</label>
+                        <input type="text" name="lieu_naissance" id="lieu_naissance" required placeholder="Ville, Pays" autocomplete="off" list="suggestions-lieux"/>
+                        <datalist id="suggestions-lieux"></datalist>
+                        <input type="hidden" name="lat" id="lat" />
+                        <input type="hidden" name="lon" id="lon" />
+                        <input type="hidden" name="tzid" id="tzid" />
+                    </div>
+                </div>
+            </div>
+
             <div class="form-section">
                 <h3 class="section-title">🔮 Les Analyses Cosmiques</h3>
                 <div class="options-grid">
@@ -981,57 +1031,6 @@ input[type="time"]:focus, input[type="email"]:focus {
                     </a>
                 </div>
             </div>
-            <div class="form-section" id="informations-personnelles">
-                <h3 class="section-title">🌟 Tes informations personnelles</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nom">Prénom</label>
-                        <input type="text" name="nom" id="nom" required placeholder="Votre prénom">
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" name="email" id="email" required placeholder="votre.email@example.com">
-                    </div>
-                    <div class="form-group gender-row">
-                        <label>Sexe</label>
-                        <div class="gender-options">
-                            <div class="gender-option">
-                                <input type="radio" id="female" name="gender" value="female" required>
-                                <label for="female">👩 Femme</label>
-                            </div>
-                            <div class="gender-option">
-                                <input type="radio" id="male" name="gender" value="male" required>
-                                <label for="male">👨 Homme</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3 class="section-title">🌙 Tes coordonnées de naissance</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="date_naissance">Date de naissance</label>
-                        <input type="date" name="date_naissance" id="date_naissance" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="heure_naissance">Heure de naissance</label>
-                        <input type="time" name="heure_naissance" id="heure_naissance" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group full-width">
-                        <label for="lieu_naissance">Lieu de naissance</label>
-                        <input type="text" name="lieu_naissance" id="lieu_naissance" required placeholder="Ville, Pays" autocomplete="off" list="suggestions-lieux"/>
-                        <datalist id="suggestions-lieux"></datalist>
-                        <input type="hidden" name="lat" id="lat" />
-                        <input type="hidden" name="lon" id="lon" />
-                        <input type="hidden" name="tzid" id="tzid" />
-                    </div>
-                </div>
-            </div>
-
         </form>
     </div>
 
