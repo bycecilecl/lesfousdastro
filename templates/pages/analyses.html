@@ -173,6 +173,28 @@ body {
     color: var(--text-secondary, #555);
 }
 
+.guide-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 24px auto 30px;
+}
+
+.guide-nav a {
+    color: #1f628e;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(31,98,142,0.18);
+    border-radius: 999px;
+    padding: 9px 16px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.92rem;
+}
+
+.guide-nav a:hover { transform: translateY(-2px); }
+.guide-anchor { scroll-margin-top: 24px; }
+
 .point-astral-sample {
     display: inline-block;
     margin-top: 10px;
@@ -234,6 +256,12 @@ body {
         <p class="hero-subtitle">Une introduction claire et accessible à l'astrologie moderne et à ses applications pratiques dans ton développement personnel</p>
     </section>
 
+    <nav class="guide-nav" aria-label="Sections du guide">
+        <a href="#approche">Notre méthode</a>
+        <a href="#analyses">Les analyses</a>
+        <a href="#limites">Limites et précautions</a>
+    </nav>
+
 
     <section class="content-section">
         <h2 class="section-title">Qu'est-ce que l'astrologie ?</h2>
@@ -254,43 +282,23 @@ body {
         </div>
     </section>
 
-   <section class="content-section">
+   <section class="content-section guide-anchor" id="approche">
         <h2 class="section-title">L'approche des Fous d'Astro</h2>
 
-        <p>
-            Une véritable analyse astrologique ne consiste pas à additionner
-            des descriptions du Soleil, de la Lune et de l'Ascendant.
-        </p>
-
-        <p>
-            J'ai développé une logique de synthèse qui met en relation les signes,
-            les maisons, les maîtrises planétaires, les aspects et les différentes
-            contradictions du thème.
-        </p>
-
-        <p>
-            Chaque configuration est interprétée dans son contexte. Une même planète
-            peut prendre un sens très différent selon sa maison, ses aspects et le rôle
-            qu'elle occupe dans l'ensemble du thème.
-        </p>
-
-        <p>
-            Cette lecture croisée fait émerger les dynamiques dominantes de ta
-            personnalité : tes ressources, tes tensions intérieures, tes besoins
-            profonds et les schémas susceptibles d'influencer tes choix.
-        </p>
+        <p><strong>Ton thème ne se résume pas à une collection de descriptions. Et toi non plus.</strong></p>
+        <p>Un Soleil dans un signe ne raconte pas la même histoire selon sa maison, ses aspects et les liens qu’il entretient avec le reste du thème. Lire chaque placement séparément, c’est passer à côté de ce qui les relie, et parfois les contredit.</p>
+        <p>J’ai développé <strong>ma propre méthode</strong> pour organiser cette lecture croisée : mettre en relation les signes, les maisons, les maîtrises et les aspects, puis hiérarchiser les configurations pour construire une synthèse à ma façon.</p>
+        <p>L’objectif : comprendre comment plusieurs tendances peuvent coexister. Un besoin de sécurité peut, par exemple, entrer en tension avec une forte envie d’indépendance.</p>
+        <p><strong>Derrière ton rapport, il y a donc un travail réalisé en amont : le calcul du thème, la sélection des éléments à interpréter et les règles qui orientent leur mise en relation.</strong></p>
 
         <div class="highlight-box">
             <p>
-                La technologie me permet de rendre cette approche accessible et de
-                personnaliser chaque document. La hiérarchisation des configurations,
-                les règles de synthèse et la manière de les traduire en une lecture
-                cohérente sont le fruit de mon travail.
+                L’IA participe à la rédaction à partir de ce cadre. La méthode, les priorités de lecture et la structure des analyses sont le fruit de mon travail d’astrologue et de développeuse.
             </p>
         </div>
     </section>
 
-    <section class="content-section">
+    <section class="content-section guide-anchor" id="analyses">
         <h2 class="section-title">Les analyses astrologiques</h2>
         <p>Avec Les Fous d'Astro, je propose différentes analyses permettant de répondre à différents besoins et à ton niveau de curiosité astrologique :</p>
 
@@ -451,18 +459,24 @@ body {
     </section>
 
    <section class="content-section">
-    <h2 class="section-title">Une IA généraliste peut-elle faire la même analyse ?</h2>
+    <h2 class="section-title">Pourquoi choisir Les Fous d’Astro plutôt que demander à une IA ?</h2>
 
-    <p>Une intelligence artificielle généraliste peut interpréter les principaux éléments d'un thème astral et produire rapidement un texte fluide et convaincant. Mais cette lecture reste souvent construite à partir de significations générales, assemblées au moment de la demande.</p>
-
-    <p>Les analyses des <strong>Fous d'Astro</strong> s'appuient sur la Méthode des Analogies Cosmiques : une lecture croisée des maisons, maîtrises, aspects et contradictions du thème, qu'aucune IA généraliste ne peut reproduire.</p>
+    <p><strong>Une IA peut produire une interprétation astrologique détaillée. Ce que tu achètes ici, c’est aussi tout le travail qui prépare et encadre cette interprétation.</strong></p>
+    <p>Pour construire une demande comparable dans une IA généraliste, il faut lui fournir un thème correctement calculé, préciser les éléments à croiser, définir les priorités de lecture et examiner le résultat.</p>
+    <p>Avec <strong>Les Fous d’Astro</strong>, cette préparation est intégrée :</p>
+    <ul>
+        <li><strong>Ton thème est calculé à partir de tes coordonnées de naissance</strong>, puis les données sont transmises à l’IA pour l’interprétation.</li>
+        <li><strong>Les configurations sont sélectionnées et hiérarchisées selon ma méthode</strong>.</li>
+        <li><strong>Les placements sont mis en relation</strong> pour explorer les tensions, les complémentarités et les contradictions du thème.</li>
+        <li><strong>Ton rapport suit une structure définie pour l’analyse choisie</strong>.</li>
+    </ul>
 
     <div class="highlight-box">
-        <p><strong>L'IA sait rédiger une interprétation. Les Fous d'Astro lui fournissent une méthode, une hiérarchie et une véritable logique de synthèse.</strong></p>
+        <p><strong>Tu renseignes ta naissance. Tu bénéficies d’un cadre de lecture conçu par une astrologue selon ses propres méthodes d’analyse, sans avoir à construire toi-même toute la démarche.</strong></p>
     </div>
 </section>
 
-    <section class="content-section">
+    <section class="content-section guide-anchor" id="limites">
         <h2 class="section-title">Limites et précautions importantes</h2>
         <p>
             Chaque analyse s'appuie sur une base d'interprétation que j'ai construite moi-même, à partir de
