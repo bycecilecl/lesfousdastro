@@ -905,14 +905,13 @@ input[type="time"]:focus, input[type="email"]:focus {
                         </div>
                     </div>
 
-                      <div class="option-card coral" onclick="addToCart('point_astral_famille', 'Point Astral – Racines familiales', 35, this)">
-                        <div class="badge coral">OFFRE DE LANCEMENT</div>
+                      <div class="option-card coral" onclick="addToCart('point_astral_famille', 'Point Astral – Racines familiales', 42, this)">
                         <span class="icon">
                             <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
                         </span>
                         <h4>Point Astral – Racines familiales</h4>
                         <p>Comprends d'où tu viens, ce que tu portes et les schémas familiaux qui influencent ta vie.</p>
-                        <div class="price"><span class="old-price">42€</span>35€</div>
+                        <div class="price">42€</div>
                         <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                         <span class="status coral">Clique pour sélectionner</span>
                         <div class="card-tooltip">
@@ -977,15 +976,13 @@ input[type="time"]:focus, input[type="email"]:focus {
                     <h3 class="transits-heading">⚡ Ton ciel en mouvement</h3>
                     <p class="transits-subtitle">Une lecture ciblée des influences actives autour de la date de ton choix.</p>
                     <div class="transits-offer" data-product-id="flash_transits" onclick="openTransitDateModal(this)">
-                        <span class="transits-badge">OFFRE DE LANCEMENT</span>
                         <span class="transits-icon" aria-hidden="true">⚡</span>
                         <div class="transits-copy">
                             <h4>Point Transits</h4>
                             <p>Découvre les dynamiques astrologiques qui traversent ta période actuelle — ou explore une date passée ou future.</p>
                         </div>
                         <div class="transits-price">
-                            <span class="old-price">19€</span>
-                            12€
+                            19€
                             <span class="transits-cta">Choisir ma date</span>
                         </div>
                         <div class="card-tooltip">
@@ -1010,16 +1007,16 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">65€</span><br><span class="pack-price-value">49€</span></div></div>
                         </div>
                         <div class="pack-card" onclick="selectPack('origines')">
-                            <div class="pack-badge" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">ÉCONOMISE 21€</div>
+                            <div class="pack-badge" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">ÉCONOMISE 28€</div>
                             <div class="pack-title">🌑 Pack Origines</div>
                             <div class="pack-content">✓ Point Astral Racines familiales : comprendre d’où tu viens<br>✓ Analyse Karmique : pourquoi tu es comme ça<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">104€</span><br><span class="pack-price-value">83€</span></div></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">111€</span><br><span class="pack-price-value">83€</span></div></div>
                         </div>
                         <div class="pack-card" onclick="selectPack('integral')" style="border:2px solid rgba(192,240,247,0.5);">
-                            <div class="pack-badge" style="background:linear-gradient(135deg,#00a8a8,#1f628e);">ÉCONOMISE 35€</div>
+                            <div class="pack-badge" style="background:linear-gradient(135deg,#00a8a8,#1f628e);">ÉCONOMISE 42€</div>
                             <div class="pack-title">🌟 Pack Intégral</div>
                             <div class="pack-content">✓ Point Astral Racines familiales<br>✓ Analyse Karmique<br>✓ Profil Amoureux<br>✓ Potentiels &amp; Défis<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">144€</span><br><span class="pack-price-value">109€</span></div></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">151€</span><br><span class="pack-price-value">109€</span></div></div>
                         </div>
                     </div>
                 </div>
@@ -1277,7 +1274,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         const card = pendingTransitCard;
         document.getElementById('transitDateModal').style.display = 'none';
         pendingTransitCard = null;
-        addToCart('flash_transits', 'Point Transits', 12, card, {
+        addToCart('flash_transits', 'Point Transits', 19, card, {
             transitDateMode: custom ? 'custom' : 'today',
             transitDate: custom ? dateInput.value : ''
         });

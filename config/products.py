@@ -32,14 +32,14 @@ def load_products():
         "point_astral_famille": {
             "label": "Point Astral – Racines familiales",
             "price_id": os.getenv("POINT_ASTRAL_FAMILLE_PRICE_ID", "").strip(),
-            "price_cents": _int_env("POINT_ASTRAL_FAMILLE_PRICE_CENTS", 3500),
+            "price_cents": _int_env("POINT_ASTRAL_FAMILLE_PRICE_CENTS", 4200),
             "success_route": "point_astral_famille.point_astral_famille_complet",
             "enabled": _bool_env("POINT_ASTRAL_FAMILLE_ENABLED", "1"),
         },
         "flash_transits": {
             "label": "Point Transits",
             "price_id": os.getenv("FLASH_TRANSITS_PRICE_ID", "").strip(),
-            "price_cents": _int_env("FLASH_TRANSITS_PRICE_CENTS", 1200),
+            "price_cents": _int_env("FLASH_TRANSITS_PRICE_CENTS", 1900),
             "success_route": "transits.transits_complet",
             "enabled": _bool_env("FLASH_TRANSITS_ENABLED", "1"),
         },
