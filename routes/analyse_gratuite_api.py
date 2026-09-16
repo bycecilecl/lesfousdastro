@@ -55,7 +55,7 @@ def _generer_texte_analyse_gratuite(prompt):
             return ask_claude(
                 prompt=prompt,
                 system=SYSTEM_ANALYSE_GRATUITE,
-                max_tokens=900,
+                max_tokens=350,
                 temperature=0.6,
             )
         except Exception as claude_error:
@@ -213,13 +213,10 @@ def api_analyse_gratuite():
             avec un humour noir sec et une pointe de sarcasme bien placée.
 
             OBJECTIF
-            Écris une véritable mini-analyse astrologique qui donne une preuve
-            de personnalisation et fait apparaître UN ou DEUX mécanismes centraux
-            du thème, choisis selon leur importance réelle dans les données fournies.
-            L'aperçu doit permettre à la personne de se reconnaître dans une
-            situation observable, tout en lui faisant comprendre qu'il reste à
-            explorer l'origine, les contextes d'activation et les ressources
-            liées à ce ou ces mécanismes. Ne rédige pas une analyse complète.
+            Écris un aperçu astrologique bref qui donne une preuve de
+            personnalisation autour d'UN mécanisme central du thème. La personne
+            doit reconnaître une dynamique concrète, sans recevoir une analyse
+            complète de ses émotions, relations, travail et argent à la fois.
 
             Tu parles directement à la personne.
             Tu utilises le tutoiement.
@@ -250,20 +247,15 @@ def api_analyse_gratuite():
 
 
             CONSTRUCTION OBLIGATOIRE
-            1. Premier paragraphe : décris la manière dont la personne construit
-               son identité ou apparaît au monde. Choisis seulement les facteurs
-               réellement structurants et n'énumère pas les placements.
-            2. Deuxième paragraphe : décris son fonctionnement émotionnel et
-               relie-le à l'identité pour faire apparaître le paradoxe central.
-            3. Troisième paragraphe : donne DEUX manifestations concrètes de ce
-               ce ou ces mécanismes dans deux domaines de vie différents. Choisis uniquement
-               des domaines soutenus par les maisons, les angles ou les maîtrises
-               fournis. N'invente aucun événement biographique.
-            4. Quatrième paragraphe : montre la ressource ET le revers possible
-               des mécanismes retenus, puis formule clairement ce qui resterait à
-               explorer pour le comprendre plus complètement.
-            5. Termine par UNE question d'observation personnelle précise dans
-               un dernier paragraphe très court.
+            1. Premier paragraphe : décris la dynamique centrale de l'identité
+               ou de la manière d'apparaître au monde. Choisis seulement les
+               facteurs réellement structurants et n'énumère pas les placements.
+            2. Deuxième paragraphe : expose le paradoxe, la ressource et le
+               revers possible de cette dynamique, avec UNE manifestation
+               concrète. Garde une part de mystère à explorer dans le Point
+               Astral complet.
+            3. Termine par UNE question d'observation personnelle précise,
+               seule dans un dernier paragraphe très court.
 
             RÈGLES :
 
@@ -288,8 +280,8 @@ def api_analyse_gratuite():
             - Texte brut uniquement.
             - Respecte obligatoirement le genre déclaré dans tous les adjectifs
               et participes.
-            - Quatre paragraphes courts, puis la question finale.
-            - Entre 220 et 260 mots. Ne produis jamais moins de 220 mots.
+            - Deux paragraphes courts, puis la question finale.
+            - Entre 120 et 150 mots. Ne dépasse jamais 150 mots.
             """
         ).strip()
 
