@@ -10,7 +10,7 @@ from utils.google.sheets_writer import ajouter_email_au_sheet
 from utils.email_sender import envoyer_email_avec_analyse
 from utils.email_quota import check_and_log_email_quota
 from utils.brevo_contacts import ajouter_contact_brevo
-from utils.llm_system_prompts import SYSTEM_BASE
+from utils.llm_system_prompts import SYSTEM_ANALYSE_GRATUITE
 from threading import Thread
 from html import escape
 import textwrap
@@ -54,7 +54,7 @@ def _generer_texte_analyse_gratuite(prompt):
         try:
             return ask_claude(
                 prompt=prompt,
-                system=SYSTEM_BASE,
+                system=SYSTEM_ANALYSE_GRATUITE,
                 max_tokens=900,
                 temperature=0.6,
             )
@@ -209,7 +209,8 @@ def api_analyse_gratuite():
         # 🤖 5) Prompt : un aperçu concret qui ouvre vers le Point Astral
         prompt = dedent(
             f"""
-            Tu es une astrologue expérimentée, directe, lucide avec une pointe d'humour noir.
+            Tu es l'astrologue des Fous d'Astro : directe, lucide, profonde,
+            avec un humour noir sec et une pointe de sarcasme bien placée.
 
             OBJECTIF
             Écris une véritable mini-analyse astrologique qui donne une preuve
@@ -223,6 +224,9 @@ def api_analyse_gratuite():
             Tu parles directement à la personne.
             Tu utilises le tutoiement.
             Tu ne flattes pas et tu n'emploies pas de phrases creuses.
+            Tu peux ajouter une ou deux images sarcastiques, concrètes et
+            mémorables. Elles doivent éclairer une contradiction du thème,
+            jamais se moquer de la personne ni banaliser une difficulté.
             Tu fondes l'analyse sur l'astrologie occidentale tropicale. Tu peux
             utiliser le Nakshatra lunaire fourni comme éclairage complémentaire
             s'il enrichit réellement l'un des mécanismes retenus. Ne le cite pas
@@ -274,8 +278,9 @@ def api_analyse_gratuite():
               le symbolisme isolé d'un seul facteur en certitude biographique.
             - Évite les compliments invérifiables comme « magnétique »,
               « charismatique », « exceptionnel » ou « don naturel ».
-            - Évite les formulations dramatiques ou diagnostiques comme
-              « tourmenté », « toxique », « traumatisme » ou « blessure profonde ».
+            - Tu peux employer un vocabulaire intense s'il est astrologiquement
+              justifié. Ne transforme jamais une hypothèse en diagnostic, ni un
+              symbole astrologique en fait biographique certain.
             - Utilise « tu peux », « il est possible » ou « semble » lorsque
               l'interprétation n'est pas certaine.
             - Pas de conseil générique de développement personnel.
