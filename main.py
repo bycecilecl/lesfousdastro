@@ -63,6 +63,7 @@ from routes.analyse_karmique import generer_html_final_karmique_pdf
 from extensions import db, migrate
 from routes.versions_beta import versions_beta_bp
 from models.participations_beta import ParticipationTest
+# from models.abonnements import Abonnement, EvenementStripe
 
 from routes.commande_formulaire import commande_formulaire_bp
 
@@ -923,6 +924,9 @@ def apercu_point_astral(nom_fichier):
         print(f"❌ Erreur dans apercu_point_astral : {e}")
         return f"Erreur lors de l'aperçu : {str(e)}", 500
 
+
+from services.generation_access import install_generation_guards
+install_generation_guards(app)
 
 atexit.register(cleanup_weaviate)
 

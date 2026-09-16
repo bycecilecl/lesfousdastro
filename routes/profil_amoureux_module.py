@@ -1,3 +1,4 @@
+from services.generation_access import paid_analysis
 # routes/profil_amoureux_module.py
 # Module complet pour l'Analyse Amoureuse (4 modules + PDF + email)
 
@@ -387,6 +388,7 @@ def generer_profil_amoureux_pdf_s3(infos, envoyer_email=False):
     }
 
 @profil_amoureux_module.route("/complet")
+@paid_analysis("profil_amoureux")
 def profil_amoureux_complet():
     """
     Workflow complet de l'Analyse Amoureuse :

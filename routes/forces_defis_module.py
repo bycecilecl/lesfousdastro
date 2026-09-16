@@ -1,5 +1,6 @@
 # routes/forces_defis_module.py
 from __future__ import annotations
+from services.generation_access import paid_analysis
 
 from flask import Blueprint, render_template, session, request, redirect, url_for, current_app
 import inspect
@@ -251,6 +252,7 @@ def generer_forces_defis_pdf_s3(infos, envoyer_email=False):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @forces_defis_module_bp.route("/complet", methods=["GET"])
+@paid_analysis("forces_defis")
 def forces_defis_complet():
 
     # 🔐 Raccourci SANDBOX : on ne génère pas le vrai Point Astral

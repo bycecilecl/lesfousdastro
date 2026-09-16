@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ton analyse — Les Fous d’Astro</title>
+{% if en_cours %}<meta http-equiv="refresh" content="10">{% endif %}
+</head><body><main>
+<h1>Ton analyse</h1>
+{% if en_cours %}<p>Ton analyse est en cours. Cette page se met à jour automatiquement.</p>
+{% elif incident %}<p>La préparation a été interrompue. Contacte-nous avec la référence de ta commande pour reprendre son traitement. Tu n’as pas besoin de payer à nouveau.</p>
+{% else %}<p>Ton analyse est prête.</p><p><a href="{{ pdf_url }}">Télécharger ton analyse</a></p>{% endif %}
+</main></body></html>

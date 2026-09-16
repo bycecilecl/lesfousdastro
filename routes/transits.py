@@ -1,3 +1,4 @@
+from services.generation_access import paid_analysis
 import base64
 import os
 from datetime import datetime
@@ -95,6 +96,7 @@ def construire_html_pdf_transits(
 
 
 @transits_bp.route("/complet")
+@paid_analysis("flash_transits")
 def transits_complet():
     produits_payes = session.get("ordered_products") or []
     paiement = session.get("last_payment") or {}

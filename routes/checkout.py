@@ -25,6 +25,10 @@ from routes.forces_defis_module import generer_forces_defis_pdf_s3
 from routes.profil_amoureux_module import generer_profil_amoureux_pdf_s3
 from routes.analyse_karmique import generer_analyse_karmique_pdf_s3
 import traceback
+from services.analysis_orders import (catalog_items, create_order, bind_provider, owned_order,
+    confirm_stripe, restore_order, run_job, JobBusy, JobReview, claim_notice)
+from models.analysis_orders import AnalysisJob
+from extensions import db
 
 
 checkout_bp = Blueprint("checkout_bp", __name__)
@@ -171,6 +175,7 @@ def checkout():
     # except Exception as e:
     #     current_app.logger.warning(f"⚠️ [BREVO] Ajout client Point Astral impossible : {e}")
 
+    cart_items, _ = catalog_items(cart_items)
     fixed_cart = []
     for item in cart_items:
         if not isinstance(item, dict):
@@ -212,7 +217,7 @@ def checkout():
         
         price_cents = product.get("price_cents") or 0
         total_cents += price_cents * qty
-        price_id = (product.get("price_id") or "").strip()
+        price_id = ""  # Prix fixé depuis le catalogue serveur, y compris chez Stripe.
 
         # 👉 1) côté paiement : on ajoute tel quel (pack ou module)
         payment_product_keys.append(pk)
@@ -259,6 +264,8 @@ def checkout():
         f"Payés: {payment_product_keys} | Analyses: {analysis_product_keys}"
     )
     
+    secure_order = create_order("stripe", cart_items, session["infos_utilisateur"], PAYMENTS_SANDBOX)
+
     # 4) Créer la session Stripe
     try:
         checkout_session = stripe.checkout.Session.create(
@@ -267,7 +274,9 @@ def checkout():
             line_items=line_items,
             success_url=url_for('checkout_bp.paiement_effectue', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=url_for('main.index', _external=True),
+            idempotency_key="checkout-" + secure_order.id,
             metadata={
+                "order_id": secure_order.id,
                 # 👉 on enregistre les ANALYSES à générer, pas juste ce qui est payé
                 "product_keys": ",".join(analysis_product_keys),
                 "email": session['infos_utilisateur'].get('email', ''),
@@ -275,7 +284,7 @@ def checkout():
                 "transit_date_mode": session['infos_utilisateur'].get('transit_date_mode', 'today'),
                 "transit_date": session['infos_utilisateur'].get('transit_date', ''),
             },
-            client_reference_id=(session['infos_utilisateur'].get('email') or str(uuid.uuid4()))
+            client_reference_id=secure_order.id
         )
         
         current_app.logger.info(
@@ -286,6 +295,8 @@ def checkout():
     except stripe.error.StripeError as e:
         current_app.logger.error(f"❌ [CHECKOUT] Erreur Stripe: {e}")
         abort(500, description="Erreur lors de la création du paiement.")
+
+    bind_provider(secure_order, checkout_session.id)
 
     # ✅ Stocker les produits commandés en session
     session["ordered_products"] = analysis_product_keys
@@ -315,6 +326,8 @@ def paiement_effectue():
     # ── BRANCHE PAYPAL
     # ─────────────────────────────────────────────────────────────────────────
     if provider == "paypal":
+        secure_order = owned_order(provider="paypal", paid=True)
+        restore_order(secure_order)
         last_payment = session.get("last_payment") or {}
         
         current_app.logger.info(f"🎯 [PAIEMENT-EFFECTUE-PAYPAL] order_id={last_payment.get('order_id')} | "
@@ -351,7 +364,7 @@ def paiement_effectue():
             "order_id": last_payment.get("order_id")
         }
     
-        if clarification_achetee and email:
+        if clarification_achetee and email and claim_notice(secure_order.id, "__clarification"):
 
             envoyer_email_clarification_questions(
                 email=email,
@@ -386,6 +399,7 @@ def paiement_effectue():
         return render_template('paiement_effectue_problem.html',
                             message="Session paiement manquante."), 400
 
+    secure_order = owned_order(provider="stripe", provider_id=session_id)
     try:
         s = stripe.checkout.Session.retrieve(session_id)
         
@@ -402,6 +416,9 @@ def paiement_effectue():
         return render_template('paiement_effectue_problem.html',
                             message="Impossible de vérifier le paiement."), 400
 
+    confirm_stripe(secure_order, s)
+    restore_order(secure_order)
+
     if s.get("payment_status") != "paid":
         current_app.logger.warning(f"⚠️ [PAIEMENT-EFFECTUE-STRIPE] Non payé: {s.get('payment_status')}")
         return render_template('paiement_effectue_problem.html',
@@ -409,7 +426,7 @@ def paiement_effectue():
 
     # 🛒 Récupérer les produits de la metadata
     metadata = s.get('metadata') or {}
-    product_keys_str = metadata.get('product_keys', '')
+    product_keys_str = ','.join(secure_order.products)
     product_keys = [pk.strip() for pk in product_keys_str.split(',') if pk.strip()]
     
     # Fallback
@@ -466,7 +483,7 @@ def paiement_effectue():
         "provider": "stripe",
         "session_id": session_id
     }
-    if clarification_achetee and email and not session.get("clarification_email_sent"):
+    if clarification_achetee and email and claim_notice(secure_order.id, "__clarification"):
 
         # mail client
         envoyer_email_clarification_questions(
@@ -541,6 +558,8 @@ def expand_products(product_keys):
 def traiter_analyses():
     """Page intermédiaire qui prépare les analyses commandées."""
 
+    secure_order = owned_order(paid=True)
+    restore_order(secure_order)
     pending = session.get("pending_generation")
     if not pending:
         return render_template(
@@ -680,6 +699,11 @@ def get_success_route_from_product(product_id):
 
 
 def generer_analyse_pack(product_id, pending):
+    return run_job(pending.get("secure_order_id"), product_id,
+                   lambda infos: _generer_analyse_pack(product_id, {**pending, "infos_utilisateur": infos}))
+
+
+def _generer_analyse_pack(product_id, pending):
     """
     Génère une analyse complète pour un pack
     et retourne un lien PDF S3.
@@ -818,13 +842,22 @@ def generer_pack_et_envoyer_email(valid_products, infos_client, pending):
     for product_id in valid_products:
         current_app.logger.info(f"🔮 Génération pack : {product_id}")
 
-        resultat = generer_analyse_pack(product_id, pending)
+        try:
+            resultat = generer_analyse_pack(product_id, pending)
+        except (JobBusy, JobReview):
+            return  # Aucun email présentant un pack partiel comme terminé.
 
         if resultat:
             analyses_generees.append(resultat)
             current_app.logger.info(f"✅ Analyse générée : {product_id}")
 
-    if analyses_generees:
+    if len(analyses_generees) == len(valid_products):
+        # Persistent claim also prevents duplicate emails on payment replays.
+        claimed = AnalysisJob.query.filter_by(order_id=pending['secure_order_id'],
+            product='__delivery', status='pending').update({'status': 'running'})
+        db.session.commit()
+        if not claimed:
+            return
         envoyer_email_pack_termine(
             infos_client=infos_client,
             analyses_generees=analyses_generees,

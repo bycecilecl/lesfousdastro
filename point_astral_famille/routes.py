@@ -1,3 +1,4 @@
+from services.generation_access import paid_analysis
 # routes/point_astral_blocs.py - VERSION HARMONISÉE
 from flask import Blueprint, render_template, session, send_from_directory, abort, request, url_for,current_app
 import inspect
@@ -421,6 +422,7 @@ def ping_blocs():
 
 # ---------- Route principale HARMONISÉE ----------
 @point_astral_famille_bp.route("/complet", methods=["GET"])
+@paid_analysis("point_astral_famille")
 def point_astral_famille_complet():
     """Génère le Point Astral élaboré avec l’analyse des racines familiales."""
 
