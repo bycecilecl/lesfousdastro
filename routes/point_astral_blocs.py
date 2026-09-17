@@ -1,3 +1,4 @@
+from services.generation_access import paid_analysis
 # routes/point_astral_blocs.py - VERSION HARMONISÉE
 from flask import Blueprint, render_template, session, send_from_directory, abort, request, url_for,current_app
 import inspect
@@ -333,6 +334,7 @@ def ping_blocs():
 
 # ---------- Route principale HARMONISÉE ----------
 @point_astral_blocs_bp.route("/complet", methods=["GET"])
+@paid_analysis("flash_astral")
 def point_astral_blocs_complet():
     """Workflow complet harmonisé : mêmes données que l'ancien système + approche par blocs"""
 
@@ -352,7 +354,7 @@ def point_astral_blocs_complet():
     # === DEBUG DÉTAILLÉ SESSION ===
     logger.info("=== DEBUG SESSION COMPLET START ===")
     logger.info("Session keys: %s", list(session.keys()))
-    logger.info("Full session: %s", dict(session))
+
     
     # Récupération des infos depuis la session
     infos = session.get("infos_utilisateur")
@@ -361,7 +363,7 @@ def point_astral_blocs_complet():
 
     if not infos:
         logger.error("❌ AUCUNE infos_utilisateur en session")
-        logger.info("Session disponible: %s", dict(session))
+
         
         # Chercher des variations possibles
         possible_keys = [k for k in session.keys() if 'info' in k.lower() or 'user' in k.lower()]
@@ -457,7 +459,7 @@ def point_astral_blocs_complet():
     #     ), 400
 
     # Protection “appel direct sans paiement” (sauf QA)
-    if not session.get("last_payment") and request.args.get("qa") != "1":
+    if not session.get("last_payment"):
         logger.warning("[GEN] ABORT — aucun paiement en session — email=%s nom=%s", email, nom)
         logger.info("Session pour debug paiement: %s", dict(session))
         return render_template(

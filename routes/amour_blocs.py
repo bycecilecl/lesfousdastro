@@ -1,3 +1,4 @@
+from services.generation_access import paid_analysis
 # routes/amour_blocs.py
 
 from flask import Blueprint, render_template, session, current_app, url_for
@@ -192,6 +193,7 @@ def generer_html_final_amour_pdf_only(
 
 
 @amour_bp.route("/complet", methods=["GET"])
+@paid_analysis("profil_amoureux")
 def amour_complet():
     """Workflow complet de l'Analyse Amoureuse (4 modules + PDF + bouton download)"""
 

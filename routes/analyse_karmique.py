@@ -1,3 +1,4 @@
+from services.generation_access import paid_analysis
 from flask import (
     Blueprint,
     render_template,
@@ -585,6 +586,7 @@ def generer_analyse_karmique_pdf_s3(infos, envoyer_email=False):
 # =============================================================================
 
 @analyse_karmique_bp.route("/complet", methods=["GET"])
+@paid_analysis("analyse_karmique")
 def analyse_karmique_complete():
     infos = session.get("infos_utilisateur")
 
