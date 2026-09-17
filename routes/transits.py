@@ -13,6 +13,7 @@ from utils.email_sender import construire_email_analyse, envoyer_email_avec_anal
 from utils.genre import get_user_prefs
 from utils.pdf_utils import html_to_pdf
 from utils.s3_utils import upload_file_and_presign
+from utils.client_pdf_storage import private_pdf_path, upload_client_pdf
 from utils.transits.analyse_transits import formater_date_fr, generer_analyse_transits
 
 
@@ -176,27 +177,20 @@ def transits_complet():
     nom_fichier = (
         f"Point_Transits_{nom_slug}_{date_effective:%Y-%m-%d}_{horodatage}.pdf"
     )
-    dossier_pdf = os.path.join(current_app.static_folder, "pdfs")
-    chemin_pdf = os.path.join(dossier_pdf, nom_fichier)
+    chemin_pdf = private_pdf_path()
 
     if not html_to_pdf(html_pdf, chemin_pdf):
         abort(500, description="Impossible de créer le PDF du Point Transits.")
 
-    pdf_url = url_for("static", filename=f"pdfs/{nom_fichier}", _external=True)
     try:
-        s3_info = upload_file_and_presign(
+        pdf_url = upload_client_pdf(
             chemin_pdf,
             key_prefix="transits",
-            content_type="application/pdf",
+            download_filename=nom_fichier,
         )
-        lien_s3 = s3_info.get("url") or s3_info.get("presigned_url")
-        if lien_s3:
-            pdf_url = lien_s3
     except Exception as erreur_s3:
-        current_app.logger.warning(
-            "[TRANSITS] PDF local disponible, mais envoi S3 impossible : %s",
-            erreur_s3,
-        )
+        current_app.logger.exception("[TRANSITS] Upload S3 impossible : %s", erreur_s3)
+        abort(503, description="Le rapport est prêt mais sa livraison doit être relancée.")
 
     destinataire = (infos.get("email") or "").strip()
     if _env_on("SEND_EMAILS", "true") and destinataire:

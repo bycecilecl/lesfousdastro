@@ -16,6 +16,7 @@ from utils.selection_donnees import construire_selection_point_astral
 from utils.pdf_utils import html_to_pdf
 from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.s3_utils import upload_file_and_presign
+from utils.client_pdf_storage import private_pdf_path, upload_client_pdf
 from email.mime.text import MIMEText
 from threading import Thread
 from utils.email_sender import construire_email_analyse, envoyer_email_avec_analyse
@@ -282,10 +283,7 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
 
     nom_fichier = f"Point_Astral_{nom}_{timestamp}"
 
-    output_dir = os.path.join(current_app.static_folder, "pdfs")
-    os.makedirs(output_dir, exist_ok=True)
-
-    pdf_path = os.path.join(output_dir, f"{nom_fichier}.pdf")
+    pdf_path = private_pdf_path()
 
     html_pdf = generer_html_final_harmonise_pdf_only(
         texte_structure=texte_structure,
@@ -301,29 +299,15 @@ def generer_flash_astral_pdf_s3(infos, envoyer_email=False):
     # Upload S3
     # =====================================================
 
-    pdf_final_url = None
-
-    try:
-        s3_info = upload_file_and_presign(
-            pdf_path,
-            key_prefix="point_astral",
-            content_type="application/pdf"
-        )
-
-        pdf_final_url = (
-            s3_info.get("url")
-            or s3_info.get("presigned_url")
-        )
-
-        current_app.logger.info("☁️ Upload S3 Point Astral OK")
-
-    except Exception as e:
-        current_app.logger.error(f"❌ Upload S3 Point Astral: {e}")
+    pdf_final_url = upload_client_pdf(
+        pdf_path, key_prefix="point_astral", download_filename=f"{nom_fichier}.pdf"
+    )
+    current_app.logger.info("☁️ Upload S3 Point Astral OK")
 
     return {
         "label": "Point Astral Essentiel",
         "pdf_url": pdf_final_url,
-        "pdf_path": pdf_path,
+        "pdf_path": None,
         "status": "completed",
      }           
 

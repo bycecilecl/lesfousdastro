@@ -12,6 +12,7 @@ import os, base64
 
 from utils.pdf_utils import html_to_pdf
 from utils.s3_utils import upload_file_and_presign   # si S3 dispo, sinon laisse try/except
+from utils.client_pdf_storage import private_pdf_path, upload_client_pdf
 from utils.email_sender import construire_email_analyse, envoyer_email_avec_analyse
 from utils.forces_defis import generer_forces_defis, extraire_forces_defis_par_maisons
 from utils.convert_markdown_light import md_light_to_html
@@ -220,30 +221,19 @@ def generer_forces_defis_pdf_s3(infos, envoyer_email=False):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
     fname = f"Forces_Defis_{nom_slug}_{timestamp}"
 
-    outdir = os.path.join(current_app.static_folder, "pdfs")
-    os.makedirs(outdir, exist_ok=True)
-
-    pdf_path = os.path.join(outdir, f"{fname}.pdf")
+    pdf_path = private_pdf_path()
 
     html_to_pdf(html_pdf, pdf_path)
 
-    pdf_final_url = None
-
-    try:
-        s3_info = upload_file_and_presign(
-            pdf_path,
-            key_prefix="forces_defis",
-            content_type="application/pdf"
-        )
-        pdf_final_url = s3_info.get("url") or s3_info.get("presigned_url")
-    except Exception as e:
-        current_app.logger.warning("[FD PACK] Upload S3 KO : %s", e)
+    pdf_final_url = upload_client_pdf(
+        pdf_path, key_prefix="forces_defis", download_filename=f"{fname}.pdf"
+    )
 
     return {
         "product_id": "forces_defis",
         "label": "Mes Potentiels et Défis",
         "pdf_url": pdf_final_url,
-        "pdf_path": pdf_path,
+        "pdf_path": None,
         "status": "completed",
     }
 

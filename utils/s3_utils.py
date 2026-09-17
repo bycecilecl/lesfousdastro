@@ -12,7 +12,8 @@ _s3 = boto3.client("s3", region_name=_REGION)
 def upload_file_and_presign(local_path: str,
                             key_prefix: str = "point_astral",
                             content_type: str | None = None,
-                            expires_in: int | None = None):
+                            expires_in: int | None = None,
+                            download_filename: str | None = None):
     """Upload le fichier dans S3 puis renvoie une URL présignée."""
     if not _S3_BUCKET:
         raise RuntimeError("S3_BUCKET_NAME manquant dans l'environnement")
@@ -41,7 +42,7 @@ def upload_file_and_presign(local_path: str,
         _s3.upload_file(local_path, _S3_BUCKET, key, ExtraArgs=extra)
 
         # 🔖 Nom sympa pour le téléchargement
-        base_name = os.path.basename(local_path)
+        base_name = download_filename or os.path.basename(local_path)
         disposition = f'inline; filename="{base_name}"'
 
         # URL présignée (avec hints navigateurs)
