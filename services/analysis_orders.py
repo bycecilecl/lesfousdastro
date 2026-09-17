@@ -130,13 +130,17 @@ def money_cents(amount, currency):
 def confirm_paypal(order, data):
     units = data.get('purchase_units') or []
     if (order.provider != 'paypal' or order.provider_id != 'paypal:' + str(data.get('id'))
-        or data.get('status') != 'COMPLETED' or len(units) != 1
-        or units[0].get('custom_id') != order.id):
+        or data.get('status') != 'COMPLETED' or len(units) != 1):
         abort(403, 'Le paiement ne correspond pas à la commande.')
     captures = (units[0].get('payments') or {}).get('captures') or []
     if (len(captures) != 1 or captures[0].get('status') != 'COMPLETED'
         or money_cents(captures[0].get('amount') or {}, order.currency) != order.amount_cents):
         abort(403, 'Capture ou montant non confirmé.')
+    # PayPal Sandbox may omit custom_id from a capture response. The order ID is
+    # already bound server-side before approval; reject any returned mismatch.
+    for custom_id in (units[0].get('custom_id'), captures[0].get('custom_id')):
+        if custom_id is not None and custom_id != order.id:
+            abort(403, 'Le paiement ne correspond pas à la commande.')
     mark_paid(order, captures[0].get('id'))
 
 
