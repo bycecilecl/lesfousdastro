@@ -21,27 +21,8 @@ def _roman_to_int(roman: str) -> int:
 # Localisation des CSV
 # ─────────────────────────────────────────────────────────────
 def _resolve_data_dir() -> Path:
-    env = os.getenv("FD_CSV_DIR")
-    if env:
-        p = Path(env).expanduser().resolve()
-        if p.exists():
-            return p
-
-    here = Path(__file__).resolve().parent
-    candidates = [
-        here / "data",
-        here.parent / "data",
-        Path.cwd() / "data",
-        Path("data"),
-        Path.cwd() / "utils" / "data",
-        here.parent / "rag",
-        here.parent.parent / "rag",
-    ]
-    for c in candidates:
-        if c.exists():
-            return c.resolve()
-
-    return (Path.cwd() / "data").resolve()
+    """Barèmes validés isolés : aucun CSV partagé ni configuration globale modifiés."""
+    return Path(__file__).resolve().parent.parent / "data" / "forces_defis_report"
 
 DATA_DIR = _resolve_data_dir()
 
@@ -166,7 +147,7 @@ def _collect_theme_aspects(theme: dict):
             p1 = a.get("p1") or a.get("planete1") or a.get("planet1") or a.get("A") or a.get("from")
             p2 = a.get("p2") or a.get("planete2") or a.get("planet2") or a.get("B") or a.get("to")
             t  = a.get("type") or a.get("aspect") or a.get("relation") or a.get("kind")
-            orb = a.get("orb") or a.get("orbe") or a.get("delta")
+            orb = next((a[k] for k in ('orb', 'orbe', 'delta') if a.get(k) is not None), None)
         else:
             p1 = p2 = t = None
             orb = None
@@ -189,6 +170,15 @@ def _collect_theme_aspects(theme: dict):
                 "type": _norm_aspect(t),
                 "orb": float(orb) if isinstance(orb, (int, float, str)) and str(orb).replace('.', '', 1).isdigit() else None,
             })
+    # Le calculateur partagé historique ne fournit pas les quinconces.
+    # Complément local à Forces & Défis, sans modifier les autres produits.
+    from utils.fd_context import quinconces
+    seen = {(_pair_key(a['p1'], a['p2']), a['type']) for a in out}
+    for aspect in quinconces(theme):
+        key = (_pair_key(aspect['p1'], aspect['p2']), 'quinconce')
+        if key not in seen:
+            out.append({**aspect, 'p1': _norm(aspect['p1']), 'p2': _norm(aspect['p2'])})
+            seen.add(key)
     return out
 
 def _parse_aspects_field(s: str) -> set[str]:
@@ -207,7 +197,7 @@ def detect_aspects_from_csv(theme: dict,
     theme_aspects_all = _collect_theme_aspects(theme)
     
      # 🔹 Évite les doublons des angles (Ascendant, MC, etc.) — gérés ailleurs
-    ANGLES = {"ascendant", "mc", "milieu du ciel", "fc", "fond du ciel", "dsc", "descendant"}
+    ANGLES = {"asc", "ascendant", "mc", "milieu du ciel", "fc", "fond du ciel", "dsc", "descendant"}
     theme_aspects_all = [
         a for a in theme_aspects_all
         if _norm(a["p1"]) not in ANGLES and _norm(a["p2"]) not in ANGLES
@@ -233,6 +223,7 @@ def detect_aspects_from_csv(theme: dict,
         "opposition": 7.0,
         "trigone": 5.0,
         "sextile": 5.0,
+        "quinconce": 3.0,
     }
 
     def _type_norm(t: str) -> str:
@@ -299,7 +290,11 @@ def detect_aspects_from_csv(theme: dict,
             key_theme = _pair_key(ta["p1"], ta["p2"])
             if key_theme != key_csv:
                 continue
-            if ta["type"] not in aspects_ok:
+            inherited_quinconce = (
+                ta['type'] == 'quinconce' and 'quinconce' not in aspects_ok
+                and bool(aspects_ok & {'carre', 'opposition'})
+            )
+            if ta["type"] not in aspects_ok and not inherited_quinconce:
                 continue
 
             t_norm = _type_norm(ta["type"])
@@ -327,7 +322,13 @@ def detect_aspects_from_csv(theme: dict,
                 "aspect": ta["type"],
                 "orb": float(orb_val),
                 "score": score,
-                "comment": comment,
+                "comment": (
+                    "Quinconce : décalage entre les fonctions des deux astres, ajustements répétés "
+                    "et difficulté à les coordonner spontanément. Développer les manifestations "
+                    "selon leurs signes et maisons ; ne pas l'interpréter comme un carré ou une opposition. "
+                    "Score et catégorie hérités du barème carré/opposition de cette paire."
+                    if inherited_quinconce else comment
+                ),
                 "type": typ,
             })
 
@@ -380,6 +381,9 @@ def detect_etat_planetes(theme: dict,
                     })
         
         elif etat in {"domicile", "exaltation", "exil", "chute"}:
+            from utils.fd_context import valid_dignity
+            if not valid_dignity(planet, signe_csv, etat):
+                continue
             for k, v in plan.items():
                 if _norm(k) != planet:
                     continue
@@ -803,6 +807,7 @@ def detect_placements_maisons(theme: dict,
 
 def _regrouper_dignites_par_planete(items: list[dict]) -> list[dict]:
     """Fusionne les entrées de dignités/rétro pour une même planète."""
+    from utils.fd_editorial import body_name
     from collections import defaultdict
     import unicodedata
 
@@ -820,7 +825,7 @@ def _regrouper_dignites_par_planete(items: list[dict]) -> list[dict]:
     for it in items:
         if _is_dignite(it):
             desc = it.get("description", "") or ""
-            nom = desc.split()[0] if desc else ""
+            nom = body_name(desc)
             if nom:
                 groupes[nom.lower()].append(it)
             else:
@@ -845,7 +850,7 @@ def _regrouper_dignites_par_planete(items: list[dict]) -> list[dict]:
         scores = [x.get("score", 0) for x in bloc]
         score_final = min(5.0, max(scores) + (0.5 if len(bloc) >= 2 else 0))
 
-        planete_nom = (bloc[0].get("description","").split()[0] or nom).title()
+        planete_nom = body_name(bloc[0].get("description", "")) or nom.title()
         etats = []
         for x in bloc:
             d = x.get("description","")
@@ -874,6 +879,8 @@ def build_unified_priorities(theme: dict,
                              min_score: float = 3.0,
                              limit: int = 30,
                              style: str = "v2") -> str:
+    from utils.fd_editorial import prepare_theme, body_name, classify, priority_tension
+    theme = prepare_theme(theme)
     _forcer_retrogrades_reels(theme)
 
     all_priorities = []
@@ -953,7 +960,7 @@ def build_unified_priorities(theme: dict,
         placements = detect_placements_maisons(theme, "placements_maisons.csv", min_score, 999)
 
         planetes_sur_angles = {
-            item["description"].split()[0]
+            body_name(item["description"])
             for item in all_priorities
             if "conjoint" in item.get("description", "") and "(angle)" in (item.get("categorie") or "")
         }
@@ -989,7 +996,7 @@ def build_unified_priorities(theme: dict,
         desc = it.get("description") or ""
         if "(angle)" in cat and "conjoint" in desc:
             # planète = 1er mot de la description ("Mercure conjoint ASC …")
-            planete_angle = desc.split()[0].strip().title()
+            planete_angle = body_name(desc)
             angles_index.setdefault(planete_angle, []).append(it)
 
     # 2) parcourir les dignités/rétros et fusionner vers l’angle si même planète
@@ -1002,7 +1009,7 @@ def build_unified_priorities(theme: dict,
         # planète = 1er mot avant les ":" dans la description des états
         # ex: "Mercure : rétrograde + exaltation Vierge"
         raw_desc = it.get("description") or ""
-        planete_txt = raw_desc.split(":")[0].strip().title() if ":" in raw_desc else raw_desc.split()[0].strip().title()
+        planete_txt = body_name(raw_desc)
         if not planete_txt:
             continue
 
@@ -1054,13 +1061,13 @@ def build_unified_priorities(theme: dict,
         desc = (it.get("description") or "").lower()
         cat  = (it.get("categorie") or "").lower()
         if "conjoint" in desc and "(angle)" in cat:
-            planet = it.get("description","").split()[0]
+            planet = body_name(it.get("description", ""))
             angle_items_idx[_norm(planet)] = i
 
     to_remove = set()
     for planet_norm, idx in angle_items_idx.items():
         item = all_priorities[idx]
-        planet_display = item["description"].split()[0]
+        planet_display = body_name(item["description"])
 
         if not _is_retro_planet(theme, planet_display):
             continue
@@ -1084,7 +1091,7 @@ def build_unified_priorities(theme: dict,
             cat2 = (it2.get("categorie") or "")
             desc2 = (it2.get("description") or "")
             if "DIGNITE" in unicodedata.normalize("NFKD", cat2).upper():
-                if _norm(desc2.split()[0]) == planet_norm and "retro" in _norm(desc2):
+                if _norm(body_name(desc2)) == planet_norm and "retro" in _norm(desc2):
                     to_remove.add(j)
 
     if to_remove:
@@ -1108,8 +1115,10 @@ def build_unified_priorities(theme: dict,
             return 6
         return 7
 
+    all_priorities = classify(all_priorities)
     all_priorities.sort(
         key=lambda x: (
+            0 if priority_tension(x.get("description", "")) else 1,
             _fam_rank(x.get("categorie")),
             -x.get("score", 0),
             (x.get("orb") if isinstance(x.get("orb"), (int, float)) else 99.0)
@@ -1156,7 +1165,7 @@ def build_unified_priorities(theme: dict,
         "# 🎯 ÉLÉMENTS PRIORITAIRES À ANALYSER",
         "",
         f"**{len(top)} éléments sélectionnés (Défis: {len(defis_md)}, Potentiels: {len(forces_md)}, Mixtes: {len(mixtes_md)})**",
-        "**Traite UNIQUEMENT ces éléments. Structure ton analyse en 3 sections : DÉFIS / POTENTIELS / DYNAMIQUES MIXTES**",
+        "Sélection du barème, complétée par les figures classées fournies séparément.",
         ""
     ]
 

@@ -63,6 +63,7 @@ ENCADRE_FAMILLE = """
 <p class="encadre-titre">À propos de cette analyse familiale</p>
 <p>IMPORTANT : Cette partie ne décrit pas tes parents tels qu'ils étaient objectivement, mais la manière dont tu as pu vivre ton environnement familial et les mécanismes psychologiques qui en ont découlé.</p>
 <p>En astrologie, des situations très différentes peuvent laisser une empreinte intérieure similaire : une figure parentale absente, malade, débordée, autoritaire, protectrice à l'excès ou émotionnellement inaccessible peut générer des ressentis proches chez l'enfant : manque de sécurité, besoin de contrôle, difficulté à faire confiance, recherche de validation.</p>
+<p><strong>Convention utilisée dans ce rapport :</strong> pour explorer la dynamique parentale, j'associe le Fond du Ciel (FDC) à la mère lorsque la personne analysée est une femme, et au père lorsqu'elle est un homme ; l'autre figure parentale est alors étudiée en miroir sur l'axe opposé. Cette attribution peut varier selon les écoles astrologiques : il s'agit ici de la méthode que j'ai choisie pour cette analyse, et non d'une règle universelle.</p>
 <p>Lis cette partie comme une exploration de ton monde intérieur, pas comme un jugement sur tes proches. L'IA ne connaît pas le vécu réel des figures parentales. L'essentiel n'est pas de savoir si chaque détail correspond exactement à la réalité vécue, mais de comprendre les dynamiques qui ont façonné ta manière d'aimer, de te protéger et de construire tes relations.</p>
 </div>
 """

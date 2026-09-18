@@ -1,0 +1,130 @@
+PLANETE;SIGNE;ETAT;TYPE;SCORE;COMMENTAIRE;
+Soleil;Bélier;exaltation;force;4.5;Volonté pionnière et affirmée. Courage, instinct d’action et besoin de se démarquer. Donne un rayonnement naturel et une présence dynamique.;
+Soleil;Taureau;neutre;force;2;Stabilité, persévérance et sensualité. Recherche de sécurité intérieure et extérieure, parfois au détriment du changement.;
+Soleil;Gémeaux;neutre;mixte;2;Esprit curieux, adaptable et expressif. Capacité à apprendre et à relier les idées, mais parfois dispersion de l’énergie et de l’identité.;
+Soleil;Cancer;neutre;defis;2;Forte sensibilité et besoin de protection. Identité liée à la sphère intime, parfois repliée ou nostalgique.;
+Soleil;Lion;domicile;force;5;Rayonnement naturel, confiance et leadership. Identité claire, besoin d’être reconnu et de laisser une trace visible.;
+Soleil;Vierge;neutre;defis;2;Besoin de perfection et d’utilité. Identité tournée vers le service ou la performance, tendance à l’autocritique.;
+Soleil;Balance;chute;defis;4.5;Recherche d’approbation et besoin d’harmonie. Difficulté à affirmer son individualité sans dépendre du regard d’autrui.;
+Soleil;Scorpion;neutre;mixte;2;Volonté intense et passionnée. Besoin de transformation et de contrôle, tendance à vivre en profondeur chaque expérience.;
+Soleil;Sagittaire;neutre;force;2;Foi, enthousiasme et vision. Identité expansive et aventurière, besoin d’un but supérieur pour guider la vie.;
+Soleil;Capricorne;exaltation;force;4.8;Ambition, endurance et maîtrise. Identité construite sur la rigueur et la fiabilité. Risque de se définir uniquement par la réussite.;
+Soleil;Verseau;exil;defis;4;Individualisme fort, originalité et détachement émotionnel. Peut se sentir différent ou marginal, cherche sa propre voie.;
+Soleil;Poissons;neutre;mixte;2;Empathie, imagination et foi intérieure. Identité perméable, parfois floue ou indécise. Besoin d’un ancrage spirituel.;
+Soleil;Tous;retrograde;defis;4.5;Remise en question de l’identité. Introspection sur la place dans le monde, expression plus intériorisée du rayonnement personnel.;
+Lune;Bélier;neutre;defis;3.5;Réactivité émotionnelle, franchise des sentiments. Besoin d’agir selon ses envies immédiates. Peut manquer de recul émotionnel.;
+Lune;Taureau;exaltation;force;5;Grande stabilité émotionnelle, besoin de confort et de sécurité. Affectivité concrète, apaisante, tournée vers la douceur et les plaisirs simples.;
+Lune;Gémeaux;neutre;mixte;2.5;Émotions changeantes, curiosité et besoin de communication. Affectivité cérébrale, détachée mais vive. Peut fuir la profondeur émotionnelle.;
+Lune;Cancer;domicile;force;5;Sensibilité et intuition profondes. Besoin de protection et de lien familial. Capacité à nourrir et à réconforter les autres.;
+Lune;Lion;neutre;mixte;3.5;Besoin de reconnaissance et d’expression affective. Générosité du cœur, mais tendance à dramatiser ou à rechercher l’attention.;
+Lune;Vierge;neutre;defis;3;Émotions retenues, besoin de contrôle et de compréhension rationnelle. Peut analyser au lieu de ressentir. Apprentissage du lâcher-prise affectif.;
+Lune;Balance;neutre;mixte;3;Besoin d’harmonie et d’échanges. Recherche de sécurité à travers la relation. Risque de dépendance ou de peur du conflit.;
+Lune;Scorpion;chute;defis;5;Émotions intenses, profondes, souvent secrètes. Passion et transformation, mais risque de crises intérieures et de jalousie.;
+Lune;Sagittaire;neutre;mixte;3;Optimisme émotionnel, besoin de liberté et de sens. Recherche de vérité dans l’expérience. Peut fuir l’engagement affectif.;
+Lune;Capricorne;exil;defis;4.5;Maîtrise émotionnelle et réserve affective. Besoin de contrôle pour se protéger. Apprentissage de la vulnérabilité.;
+Lune;Verseau;neutre;mixte;3;Détachement émotionnel, besoin de liberté intérieure. Émotions filtrées par la raison. Indépendance affective parfois froide.;
+Lune;Poissons;neutre;Mixte;4.5;Sensibilité extrême, compassion et imagination. Empathie naturelle mais tendance à l’absorption émotionnelle des autres.;
+Lune;Tous;retrograde;defis;4.3;Émotions intériorisées. Difficulté à exprimer ou comprendre ses besoins profonds, hypersensibilité intérieure.;
+Mercure;Bélier;neutre;force;2;Esprit rapide, franc et direct. Communication spontanée, parfois impulsive. Tendance à parler avant de réfléchir.;
+Mercure;Taureau;neutre;mixte;2;Pensée concrète et stable. Esprit méthodique, parfois rigide ou lent à changer d’avis.;
+Mercure;Gémeaux;domicile;force;4.5;Esprit vif, curieux, adaptable. Communication fluide et besoin d’apprendre constamment.;
+Mercure;Cancer;neutre;mixte;2;Mémoire et sensibilité, pensée intuitive. Communication teintée d’émotion.;
+Mercure;Lion;neutre;force;3;Communication confiante et expressive. Tendance à dramatiser ou à chercher l’approbation.;
+Mercure;Vierge;domicile;force;4.5;Esprit analytique, précis et rigoureux. Capacité de synthèse et sens du détail.;
+Mercure;Balance;neutre;mixte;2;Communication diplomate, besoin d’équilibre dans les échanges. Peut hésiter à trancher.;
+Mercure;Scorpion;neutre;mixte;3;Esprit perçant, lucide et stratégique. Tendance à l’obsession mentale, intensité psychique.;
+Mercure;Sagittaire;exil;defis;2;Jugements rapides, idéalisme excessif. Difficulté à écouter ou à adapter sa pensée.;
+Mercure;Capricorne;exaltation;force;3;Pensée structurée et pragmatique. Capacité à organiser, planifier et concrétiser les idées.;
+Mercure;Verseau;neutre;mixte;3;Esprit visionnaire, original, mais nerveux et parfois coupé de l’émotion. Communication brillante mais distante. Capacité d’analyse intuitive, besoin de liberté mentale.;
+Mercure;Poissons;chute;defis;4;Flou mental, intuition inspirée. Difficulté à garder le fil rationnel, mais grande imagination.;
+Mercure;Tous;retrograde;defis;4.5;Communication intériorisée, réflexion profonde. Besoin de réviser, ralentir. Génie introspectif.;
+Vénus;Taureau;domicile;force;5;Sens du corps, plaisir et ancrage. Amour du concret, du beau et du simple. Fidélité et sensualité.;
+Vénus;Balance;domicile;force;4.5;Harmonie relationnelle, diplomatie et élégance. Recherche de paix et d’équilibre.;
+Vénus;Poissons;exaltation;force;5;Amour inconditionnel, compassion et idéalisme romantique. Tendance au don de soi excessif.;
+Vénus;Scorpion;exil;defis;4.5;Intensité émotionnelle, jalousie et attachements profonds. Passion transformante, parfois douloureuse.;
+Vénus;Vierge;chute;defis;4;Pudeur affective, exigence émotionnelle. Difficulté à lâcher le contrôle ou à exprimer la tendresse.;
+Vénus;Bélier;neutre;mixte;3.5;Amour passionné, impulsif. Recherche de conquête et d’autonomie relationnelle.;
+Vénus;Gémeaux;neutre;mixte;2;Légèreté affective, besoin de stimulation mentale. Tendance à la dispersion sentimentale.;
+Vénus;Cancer;neutre;force;2;Sensibilité et besoin de sécurité émotionnelle. Amour protecteur et attachant.;
+Vénus;Lion;neutre;force;3;Charisme affectif, besoin d’être admiré et reconnu. Générosité dans l’amour.;
+Vénus;Sagittaire;neutre;force;2;Amour libre et enthousiaste. Besoin d’aventure et d’expansion relationnelle.;
+Vénus;Capricorne;neutre;mixte;3.5;Amour réservé mais loyal. Besoin de sécurité et de stabilité émotionnelle.;
+Vénus;Verseau;neutre;mixte;3;Amour indépendant, original et amical. Recherche de liens atypiques et égalitaires.;
+Vénus;Tous;retrograde;defis;4;Réévaluation des valeurs affectives. Amours du passé, pudeur relationnelle. Besoin de se reconnecter à soi.;
+Mars;Bélier;domicile;force;5;Élan vital, courage et initiative. Besoin d’agir vite et de se confronter. Forte énergie physique.;
+Mars;Scorpion;domicile;force;5;Puissance concentrée, stratégie et endurance. Force de volonté et intensité émotionnelle.;
+Mars;Capricorne;exaltation;force;5;Ambition, discipline et efficacité. Capacité à transformer l’effort en réussite concrète.;
+Mars;Cancer;chute;defis;4.5;Colère intériorisée, réactivité affective. Difficulté à agir sans se laisser dominer par les émotions.;
+Mars;Balance;exil;defis;4.5;Hésitations dans l’initiative. Tendance à l’indécision ou à l’action dépendante du regard d’autrui.;
+Mars;Poissons;neutre;mixte;4;Action inspirée, intuitive, mais parfois diffuse. Besoin de donner un sens spirituel à l’effort.;
+Mars;Verseau;neutre;force;2;Énergie originale, indépendante, orientée vers le collectif. Audace intellectuelle.;
+Mars;Vierge;neutre;force;2;Action méthodique et précise. Capacité à concrétiser par la rigueur et le service.;
+Mars;Tous;retrograde;defis;4.5;Énergie intériorisée, frustrations d’action. Besoin de canaliser la colère et de redéfinir ses désirs.;
+Jupiter;Bélier;neutre;force;2;Confiance active, esprit d’entreprise. Expansion par l’action et le courage. Peut parfois se disperser dans trop de projets ou d’audace.;
+Jupiter;Taureau;neutre;force;2;Croissance lente mais sûre. Goût pour le concret et les plaisirs de la vie. Stabilité et bon sens guident les réussites.;
+Jupiter;Gémeaux;exil;defis;3.5;Pensée dispersée, difficulté à approfondir. Curiosité abondante, mais manque de direction. Nécessité de choisir ses batailles intellectuelles.;
+Jupiter;Cancer;exaltation;force;4;Grande générosité émotionnelle. Protection, empathie et esprit familial. Foi en la vie nourrie par la tendresse.;
+Jupiter;Lion;neutre;force;4;Confiance flamboyante, magnétisme et charisme naturel. Peut parfois tomber dans l’orgueil ou l’excès de certitude.;
+Jupiter;Vierge;exil;defis;4;Confiance mesurée, besoin de structure et de méthode. Croissance intérieure par le travail et le service concret.;
+Jupiter;Balance;neutre;mixte;2;Soutien à travers les alliances, diplomatie et sens moral. Recherche d’équilibre dans les croyances et les relations.;
+Jupiter;Scorpion;neutre;mixte;3;Foi en la transformation et le pouvoir intérieur. Tendance à creuser les vérités profondes, voire obsessionnelles.;
+Jupiter;Sagittaire;domicile;force;5;Expansion, vision et idéal. Foi contagieuse et soif d’apprendre. Besoin de liberté pour grandir.;
+Jupiter;Capricorne;chute;defis;4;Pragmatisme et ambition retenue. Succès lent mais solide, souvent après effort et persévérance.;
+Jupiter;Verseau;neutre;force;2;Ouverture humaniste, vision globale. Foi dans le progrès et la collectivité. Esprit libre et indépendant.;
+Jupiter;Poissons;domicile;force;5;Compassion, imagination et foi profonde. Croissance spirituelle, intuition développée. Tendance à l’idéalisme.;
+Jupiter;Tous;retrograde;defis;3.5;Expansion intériorisée, quête de sens personnelle. Foi intérieure plus que sociale. Besoin de redéfinir ses croyances.;
+Saturne,Bélier,chute,defis,4.5,L’énergie brute du Bélier rencontre la retenue de Saturne : difficulté à agir spontanément, peur d’échouer ou d’être jugé. L’apprentissage passe par la patience et le courage tranquille.
+Saturne,Taureau,neutre,mixte,3.5,Recherche de stabilité et de sécurité à tout prix. Saturne solidifie le Taureau mais le rend lent à évoluer. Apprendre à ne pas tout contrôler matériellement.
+Saturne,Gémeaux,neutre,mixte,3.0,Esprit rigoureux mais anxieux. Tendance à douter de sa pensée ou à trop rationaliser. L’équilibre se trouve dans la curiosité disciplinée.
+Saturne,Cancer,exil,defis,4.5,Crainte d’être vulnérable, peur du rejet affectif. Difficulté à se sentir “chez soi” émotionnellement. L’équilibre passe par la confiance et la tendresse maîtrisée.
+Saturne,Lion,exil,defis,4.5,Volonté et autorité se heurtent. Peur de ne pas être reconnu ou de mal briller. L’humilité devient la clé pour rayonner avec justesse et non par besoin d’approbation.
+Saturne,Vierge,domicile,mixte,4.0,Le besoin de perfection devient parfois tyrannique. Maîtrise et rigueur extrême, mais peur constante de l’erreur. L’évolution vient du relâchement et de la confiance dans le processus.
+Saturne,Balance,exaltation,mixte,4.5,Quête d’équilibre relationnel souvent atteinte après des déséquilibres répétés. Saturne teste les limites du lien jusqu’à ce que la justice et la réciprocité deviennent naturelles.
+Saturne,Scorpion,neutre,mixte,4.0,Endurance émotionnelle et besoin de contrôle sur la vulnérabilité. Saturne pousse ici à se régénérer sans s’enfermer dans la rigidité ou la méfiance.
+Saturne,Sagittaire,neutre,mixte,3.5,Foi et morale mises à l’épreuve. L’idéal se structure lentement, souvent après des désillusions. Trouver une sagesse vécue plutôt que théorique.
+Saturne,Capricorne,domicile,mixte,4.5,Responsabilité et exigence maximales. Maîtrise gagnée par l’effort. Saturne ici apprend la solitude constructive et la force du temps long.
+Saturne,Verseau,domicile,mixte,4.0,Indépendance et rigueur intellectuelle. Tendance à se détacher des émotions pour rester lucide. Le défi : humaniser sa vision sans la rigidifier.
+Saturne,Poissons,neutre,defis,3.5,Frontière floue entre compassion et fuite. Saturne apprend ici à canaliser la sensibilité sans se dissoudre. Discipline émotionnelle à développer.
+Uranus;Bélier;neutre;force;2;Besoin d’indépendance et de nouveauté. Rébellion instinctive, intuition d’action. Risque de brusquer les autres.;
+Uranus;Taureau;chute;defis;2;Conflit entre stabilité et liberté. Changements lents mais irréversibles. Difficulté à lâcher les attachements.;
+Uranus;Gémeaux;neutre;force;2;Esprit inventif, vif et adaptable. Génie du lien et des idées nouvelles. Attention à la nervosité mentale.;
+Uranus;Cancer;neutre;mixte;2;Besoin de libérer les émotions refoulées. Changements familiaux imprévisibles, rapport ambivalent à la sécurité.;
+Uranus;Lion;exaltation;force;2;Créativité audacieuse et affirmation de soi indépendante. Besoin de briller hors des conventions.;
+Uranus;Vierge;neutre;mixte;2;Innovation pratique, esprit de réforme. Peut devenir rigide dans la quête d’ordre ou d’efficacité.;
+Uranus;Balance;chute;defis;2;Instabilité relationnelle, peur de la dépendance. Besoin de redéfinir les équilibres dans le lien.;
+Uranus;Scorpion;domicile;force;2;Lucidité extrême, transformation radicale. Esprit réformateur et magnétique, attiré par le tabou et la vérité.;
+Uranus;Sagittaire;neutre;force;2;Vision progressiste, curiosité universelle. Esprit libre, pédagogie moderne. Risque d’impatience intellectuelle.;
+Uranus;Capricorne;exil;defis;2;Rébellion contre les structures traditionnelles. Besoin de transformer les systèmes avec méthode.;
+Uranus;Verseau;domicile;force;2;Originalité, liberté et indépendance absolue. Génie collectif, intuition technologique, besoin d’avenir.;
+Uranus;Poissons;neutre;mixte;2;Inspiration visionnaire, sensibilité aux mondes invisibles. Peut manquer d’ancrage ou de clarté directionnelle.;
+Uranus;Tous;retrograde;defis;2;Révolte intériorisée, éveil lent. Transformations internes avant les ruptures extérieures.;
+Neptune;Bélier;chute;defis;2;Idéaux trop impulsifs ou irréalistes. Difficulté à canaliser l’imagination dans l’action.;
+Neptune;Taureau;neutre;mixte;2;Imagination constructive, goût pour l’art et la beauté tangible. Peut devenir matérialiste ou hédoniste.;
+Neptune;Gémeaux;neutre;mixte;2;Intuition intellectuelle, curiosité spirituelle. Risque de confusion mentale ou de désinformation.;
+Neptune;Cancer;exaltation;force;2;Grande empathie et imagination affective. Spiritualité incarnée dans le soin et la tendresse.;
+Neptune;Lion;neutre;mixte;2;Idéal de grandeur ou d’inspiration artistique. Risque d’illusion d’ego ou de désillusion créative.;
+Neptune;Vierge;exil;defis;2;Tension entre rêve et réalisme. Besoin d’intégrer spiritualité et rigueur dans un équilibre concret.;
+Neptune;Balance;neutre;mixte;2;Idéal d’amour absolu et d’union parfaite. Illusion relationnelle, mais sens esthétique développé.;
+Neptune;Scorpion;domicile;force;2;Mysticisme profond, régénération spirituelle. Attraction pour le mystère et la guérison.;
+Neptune;Sagittaire;neutre;force;2;Spiritualité expansive, foi en l’avenir. Tendance à l’idéalisme religieux ou au fanatisme doux.;
+Neptune;Capricorne;chute;defis;2;Conflit entre rêve et structure. Doute spirituel, quête de sens dans le concret.;
+Neptune;Verseau;neutre;force;2;Idéal humaniste et universel. Spiritualité tournée vers le collectif, intuition scientifique.;
+Neptune;Poissons;domicile;force;2;Imagination illimitée, compassion et foi universelle. Fusion avec le tout. Risque de fuite du réel.;
+Neptune;Tous;retrograde;defis;2;Spiritualité intériorisée, éveil lent et profond. Connexion au divin par le rêve ou la solitude.;
+Pluton,Bélier,neutre,mixte,4.0,Transformation par l’action et le courage. Volonté puissante parfois impulsive. Capacité à renaître après les épreuves.
+Pluton,Taureau,neutre,defis,3.5,Difficulté à lâcher prise sur le plan matériel ou affectif. Transformations lentes mais durables.
+Pluton,Gémeaux,neutre,mixte,3.0,Intensité mentale curiosité puissante. Risque de manipuler ou de disperser son énergie intellectuelle.
+Pluton,Cancer,neutre,defis,4.0,Crises émotionnelles et familiales. Transformation intérieure liée à la sécurité la famille ou la maternité.
+Pluton,Lion,neutre,mixte,4.0,Volonté de puissance charisme fort. Peut osciller entre domination et rayonnement conscient.
+Pluton,Vierge,neutre,mixte,3.5,Transformation par le travail la santé ou le service. Risque d’obsession du détail ou de contrôle du quotidien.
+Pluton,Balance,neutre,mixte,4.0,Transformations profondes dans les relations. Quête d’harmonie intense besoin de se régénérer à travers l’autre.
+Pluton,Scorpion,domicile,force,4.5,Régénération intensité et maîtrise. Pouvoir intérieur immense et grande capacité à se réinventer.
+Pluton,Sagittaire,neutre,force,3.5,Transformation par la connaissance et la quête de vérité. Vision large et force d’inspiration.
+Pluton,Capricorne,neutre,force,4.0,Pouvoir structurel maîtrise du réel. Capacité à transformer le monde matériel et les systèmes établis.
+Pluton,Verseau,neutre,mixte,3.5,Transformation sociale et idéologique. Esprit visionnaire parfois rigide dans ses idéaux.
+Pluton,Poissons,neutre,defis,4.5,Crises spirituelles perte d’identité. Besoin de foi et de dissolution consciente de l’ego pour renaître.
+;;;;;;
+Chiron;Tous;neutre;mixte;4.5;Blessure existentielle, souvent liée au rejet ou à l’imperfection. Don de guérison une fois la blessure intégrée.;
+Lune Noire;Tous;neutre;defis;4.5;Point de vide ou d’obsession. Ce qui fascine et dérange à la fois. Dévoile la part sauvage ou taboue.;
+Nœud Nord;Tous;neutre;mixte;4.5;Chemin d’évolution, direction de croissance. Indique le domaine où l’âme cherche à s’accomplir.;
+Nœud Sud;Tous;neutre;defis;4.5;Bagage karmique, habitudes passées à transcender. Tendance à retomber dans le connu.;

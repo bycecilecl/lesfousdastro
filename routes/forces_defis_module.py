@@ -187,10 +187,10 @@ def generer_forces_defis_pdf_s3(infos, envoyer_email=False):
     elif g_form in ("male", "homme"):
         prefs["genre"] = "homme"
 
-    try:
-        resultat = analyse_forces_defis(theme, meta=prefs)
-    except TypeError:
-        resultat = analyse_forces_defis(theme)
+    # Check the signature before calling: an internal TypeError must not
+    # trigger a second paid generation.
+    inspect.signature(analyse_forces_defis).bind(theme, meta=prefs)
+    resultat = analyse_forces_defis(theme, meta=prefs)
 
     if isinstance(resultat, dict):
         texte = resultat.get("texte") or resultat.get("analyse") or str(resultat)
@@ -378,12 +378,8 @@ def forces_defis_complet():
 
      
     # 4) Analyse (fonction résolue dynamiquement)
-    try:
-        # Signature moderne (préférée) : (theme, meta=...)
-        resultat = analyse_forces_defis(theme, meta=prefs)  # type: ignore[arg-type]
-    except TypeError:
-        # Fallback ancien : (theme) seul
-        resultat = analyse_forces_defis(theme)  # type: ignore[call-arg]
+    inspect.signature(analyse_forces_defis).bind(theme, meta=prefs)
+    resultat = analyse_forces_defis(theme, meta=prefs)
 
     # Extraire le texte (peut être dict ou str selon la fonction)
     if isinstance(resultat, dict):

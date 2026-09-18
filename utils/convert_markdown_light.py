@@ -43,6 +43,16 @@ def md_light_to_html(text: str) -> str:
             flush_para()
             continue
 
+        # Titres de premier niveau : ne pas laisser le marqueur Markdown
+        # dans le texte envoyé au moteur PDF.
+        if line.startswith('# '):
+            flush_ul()
+            flush_para()
+            titre = line[2:].strip()
+            titre = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', titre)
+            html.append(f'<h1 class="section-title">{titre}</h1>')
+            continue
+
         # Titres ##
         if line.startswith('## '):
             flush_ul()

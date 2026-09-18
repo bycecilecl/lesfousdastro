@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from utils.selection_donnees import construire_selection_point_astral
-from utils.openai_utils import interroger_llm
+from utils.fd_claude import interroger_llm
 from utils.convert_markdown_light import md_light_to_html
 from utils.fd_inject import build_unified_priorities
 import logging
@@ -147,8 +147,8 @@ DISCLAIMER_FORCES_DEFIS_HTML = r"""
               padding:10px 14px;font-size:12.5px;line-height:1.55;color:#555;">
     <p style="margin:0 0 6px 0;">
       <strong style="font-weight:600;">À lire avant l'analyse</strong> — texte généré automatiquement à partir de
-      placements saillants (aspects, maisons, angles). Les « forces » et « défis » sont analysés
-      <strong>de manière isolée</strong>, sans prendre en compte tout l'ensemble du thème.
+      placements saillants (aspects, maisons, angles). Les potentiels et défis sont regroupés
+      autour des configurations majeures, avec leur contexte en signes, maisons et interceptions.
       Ce n'est <em>pas</em> une consultation : l'interprétation dépend de ton histoire et de ton niveau d'intégration.
       Pour une lecture <strong>plus complète</strong> (liens entre tous les éléments), consulte le <em>Point Astral</em>
       — ou réserve une <strong>consultation</strong> personnalisée.
@@ -562,16 +562,17 @@ def _build_contexte_global(data_theme) -> dict:
     }
 
 def _construire_configurations(data_theme: dict) -> str:
-    """Construit le bloc 'Configurations majeures'."""
+    """Construit les configurations structurantes, angles et points sensibles inclus."""
     plan = data_theme.get("planetes", {}) or {}
 
-    EXCLURE = {"Rahu", "Ketu", "Noeud Nord", "Nœud Nord", "Noeud Sud", "Nœud Sud", "Lune Noire", "Lilith", "Chiron"}
+    EXCLURE = {"Rahu", "Ketu", "Noeud Nord", "Nœud Nord", "Noeud Sud", "Nœud Sud", "Chiron"}
     PERSONNELLES_SOCIALES = {"Soleil", "Lune", "Mercure", "Vénus", "Venus", "Mars", "Jupiter", "Saturne"}
 
     entries = []
     for nom, p in plan.items():
-        if nom in {"Ascendant", "Milieu du Ciel", "MC"}:
-            continue
+        # Les angles et la Lune Noire sont conservés : ils peuvent former
+        # une configuration structurante avec les planètes, contrairement aux
+        # nœuds qui restent des indicateurs secondaires dans ce rapport.
         try:
             lon = p.get("longitude") or p.get("lon") or p.get("ecliptic_longitude")
             lon = float(lon) if lon is not None else None
@@ -583,7 +584,9 @@ def _construire_configurations(data_theme: dict) -> str:
             "signe": p.get("signe") or p.get("sign"),
             "maison": p.get("maison") or p.get("house"),
             "countable": nom not in EXCLURE,
-            "is_ps": nom in PERSONNELLES_SOCIALES
+            "is_ps": nom in PERSONNELLES_SOCIALES,
+            "is_angle": nom in {"Ascendant", "Descendant", "Milieu du Ciel", "MC", "Fond du Ciel"},
+            "is_sensitive": nom in {"Lune Noire", "Lilith"},
         })
 
     lines = []
@@ -606,14 +609,19 @@ def _construire_configurations(data_theme: dict) -> str:
             else:
                 break
 
-        if len(grp) >= 3 and sum(1 for g in grp if g["is_ps"]) >= 2:
+        # Un amas est retenu s'il contient au moins deux planètes/points
+        # personnels ou un angle, avec au moins trois membres au total.
+        nb_ps_ou_sensibles = sum(1 for g in grp if g["is_ps"] or g["is_angle"] or g["is_sensitive"])
+        if len(grp) >= 3 and nb_ps_ou_sensibles >= 2:
             noms = ", ".join(g["nom"] for g in grp)
             signe = grp[0]["signe"] or "?"
             maison = grp[0]["maison"]
+            angle = any(g["is_angle"] for g in grp)
+            label = "Amas angulaire" if angle else "Amas planétaire"
             if maison:
-                amas_lines.append(f"- Amas en {signe} maison {maison} ({noms})")
+                amas_lines.append(f"- {label} en {signe}, maison {maison} ({noms})")
             else:
-                amas_lines.append(f"- Amas en {signe} ({noms})")
+                amas_lines.append(f"- {label} en {signe} ({noms})")
 
         i = j if j > i + 1 else i + 1
 
@@ -630,11 +638,13 @@ def _construire_configurations(data_theme: dict) -> str:
         by_sign.setdefault(s, []).append(e)
 
     for s, lst in by_sign.items():
-        if len(lst) < 3 or sum(1 for g in lst if g["is_ps"]) < 2:
+        if len(lst) < 3 or sum(1 for g in lst if g["is_ps"] or g["is_angle"] or g["is_sensitive"]) < 2:
             continue
 
-        deja_amas_ce_signe = any((f" Amas en {s} " in line or line.startswith(f"- Amas en {s}"))
-                                 for line in lines)
+        deja_amas_ce_signe = any(
+            line.startswith(f"- Amas") and f" en {s}" in line
+            for line in lines
+        )
         if deja_amas_ce_signe:
             continue
 
@@ -645,9 +655,9 @@ def _construire_configurations(data_theme: dict) -> str:
             maison_dom, _ = Counter(maisons).most_common(1)[0]
 
         if maison_dom:
-            lines.append(f"- Stellium en {s} maison {maison_dom} ({noms})")
+            lines.append(f"- Concentration en {s}, maison {maison_dom} ({noms})")
         else:
-            lines.append(f"- Stellium en {s} ({noms})")
+            lines.append(f"- Concentration en {s} ({noms})")
 
     ret_pers = []
     for nom in ("Mercure", "Vénus", "Venus", "Mars"):
@@ -666,9 +676,9 @@ def _construire_configurations(data_theme: dict) -> str:
     for maison in range(1, 13):
         group = [e for e in entries
                 if e["countable"] and str(e.get("maison")) == str(maison)]
-        if len(group) >= 3 and sum(1 for e in group if e.get("is_ps")) >= 2:
+        if len(group) >= 3 and sum(1 for e in group if e.get("is_ps") or e.get("is_angle") or e.get("is_sensitive")) >= 2:
             noms = ", ".join(e["nom"] for e in group)
-            lines.append(f"- Stellium en maison {maison} : {noms}")
+            lines.append(f"- Concentration en maison {maison} : {noms}")
 
     return "\n".join(lines).strip()
 
@@ -722,6 +732,8 @@ def _birth_header_html(data_theme: dict, meta: dict | None = None) -> str:
 
 def analyse_forces_defis(data_theme, meta=None) -> str:
     """Génère une analyse Forces & Défis structurée."""
+    from utils.fd_editorial import prepare_theme
+    data_theme = prepare_theme(data_theme)
     html_final = ""
 
     meta = meta or {"tonalite": "tu", "genre": "neutre"}
@@ -745,10 +757,13 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
     if ctx_global.strip():
         bloc_contexte = f"{bloc_contexte}\n\n### Contexte global\n{ctx_global.strip()}"
 
+    priorities_md = ""
     try:
         priorities_md = build_unified_priorities(
             data_theme,
             min_score=3.0,
+            # Les configurations sont les unités d'analyse ; les aspects
+            # individuels servent ensuite à les nuancer.
             limit=30
         )
         if priorities_md:
@@ -776,195 +791,30 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
 
     genre_rules = _genre_directives(meta)
 
-    bloc_placements_simple = f"""
-- Ascendant : {data_theme['ascendant']['signe']}
-- Soleil : {data_theme['planetes']['Soleil']['signe']} (Maison {data_theme['planetes']['Soleil']['maison']})
-- Lune : {data_theme['planetes']['Lune']['signe']} (Maison {data_theme['planetes']['Lune']['maison']})
-- Mercure : {data_theme['planetes']['Mercure']['signe']} (Maison {data_theme['planetes']['Mercure']['maison']})
-- Vénus : {data_theme['planetes']['Vénus']['signe']} (Maison {data_theme['planetes']['Vénus']['maison']})
-- Mars : {data_theme['planetes']['Mars']['signe']} (Maison {data_theme['planetes']['Mars']['maison']})
-- Jupiter : {data_theme['planetes']['Jupiter']['signe']} (Maison {data_theme['planetes']['Jupiter']['maison']})
-- Saturne : {data_theme['planetes']['Saturne']['signe']} (Maison {data_theme['planetes']['Saturne']['maison']})
-- Uranus : {data_theme['planetes']['Uranus']['signe']} (Maison {data_theme['planetes']['Uranus']['maison']})
-- Neptune : {data_theme['planetes']['Neptune']['signe']} (Maison {data_theme['planetes']['Neptune']['maison']})
-- Pluton : {data_theme['planetes']['Pluton']['signe']} (Maison {data_theme['planetes']['Pluton']['maison']})
-"""
+    from utils.fd_context import build_context, configurations
+    from utils.fd_figures import major_figures
+    bloc_placements_simple = build_context(data_theme)
+    figures = major_figures(data_theme)
+    bloc_configurations = configurations(data_theme, figures)
 
-    bloc_configurations = _construire_configurations(data_theme)
+    from utils.fd_editorial import report_prompt
+    prompt = report_prompt(meta, bloc_placements_simple, priorities_md, bloc_configurations)
 
-    # --- Comptage + limitation à 10 éléments par section ---
-    import re
-
-    try:
-        txt_source = priorities_md if isinstance(priorities_md, str) and priorities_md.strip() else bloc_contexte
-    except NameError:
-        txt_source = bloc_contexte
-    txt_source = txt_source or ""
-    lignes = txt_source.splitlines()
-
-    nb_defis = nb_forces = nb_mixtes = 0
-    current_section = None
-
-    # Conteneurs (pour éventuellement les afficher ou debug)
-    defis_items, forces_items, mixtes_items = [], [], []
-
-    for line in lignes:
-        s = line.strip()
-        low = s.lower()
-
-        # Détection de section
-        if s.startswith("##"):
-            if "défis" in low or "defis" in low:
-                current_section = "defis";  continue
-            if "potentiels" in low:
-                current_section = "forces"; continue
-            if "dynamiques mixtes" in low or "mixtes" in low:
-                current_section = "mixtes"; continue
-            current_section = None
-            continue
-
-        # Comptage et enregistrement des items numérotés
-        if current_section and re.match(r"^\s*\d+\.\s+\*\*", s):
-            if current_section == "defis":
-                defis_items.append(s)
-            elif current_section == "forces":
-                forces_items.append(s)
-            elif current_section == "mixtes":
-                mixtes_items.append(s)
-
-    # ✅ Limite à 10 par catégorie
-    defis_items = defis_items[:10]
-    forces_items = forces_items[:10]
-    mixtes_items = mixtes_items[:10]
-
-    # ✅ Comptages
-    nb_defis = len(defis_items)
-    nb_forces = len(forces_items)
-    nb_mixtes = len(mixtes_items)
-    total_elements = nb_defis + nb_forces + nb_mixtes
-
-    # (Optionnel) log
-    print(f"[COMPTAGE LIMITÉ] Défis={nb_defis} Forces={nb_forces} Mixtes={nb_mixtes} Total={total_elements}")
-
-    
-
-    prompt = f"""
-Tu es une astrologue-psychologue experte (20+ ans), spécialisée en astrologie psychologique (Jung, Alice Bailey).
-
-ANALYSE PAYANTE - Thème : {meta.get("prenom", "la personne")}
-Objectif : Révéler les dynamiques profondes du thème via FORCES et DÉFIS concrets.
-
-═══ CONTEXTE MINIMAL DU THÈME ═══
-
-**Placements de base :**
-{bloc_placements_simple}
-
-**Configurations majeures :**
-{bloc_configurations}
-
----
-
-🚨 ÉLÉMENTS À ANALYSER (TOTAL : {total_elements})
-- DÉFIS : {nb_defis} éléments
-- FORCES : {nb_forces} éléments  
-- MIXTES : {nb_mixtes} éléments
-
-{bloc_contexte}
-
----
-
-
-╔══ STRUCTURE DE SORTIE OBLIGATOIRE ══╗
-
-**Introduction** (2-3 paragraphes)
-Accroche incarnée et personnalisée basée sur les configurations majeures. 
-Pas de liste, uniquement de la prose fluide et cohérente.
-
-**## Tes Défis**
-Texte continu en paragraphes. Tu intègres les {nb_defis} dynamiques de fond 
-de manière narrative — pas de liste, pas de tirets. Tu tisses les tensions 
-entre elles pour montrer comment elles interagissent dans la vie concrète.
-Chaque dynamique doit être développée sur au moins 2 paragraphes complets avec exemples concrets.
-MINIMUM ABSOLU : 700 mots pour cette section. Ne passe pas à la suivante avant d'avoir atteint ce minimum.
-
-**## Tes Potentiels**
-Même chose : prose fluide, {nb_forces} ressources intégrées dans un récit cohérent.
-Chaque potentiel développé sur au moins 2 paragraphes avec exemples d'activation concrète.
-MINIMUM ABSOLU : 700 mots pour cette section. Ne passe pas à la suivante avant d'avoir atteint ce minimum.
-
-**## Ce qui joue dans les deux sens**
-Les {nb_mixtes} dynamiques mixtes racontées en paragraphes — leur double face, 
-leur complexité, comment les apprivoiser.
-MINIMUM ABSOLU : 500 mots pour cette section.
-
-**Conclusion** (1-2 paragraphes)
-Synthèse intégrative et ouverture concrète.
-
----
-⚠️ VÉRIFICATION FINALE OBLIGATOIRE :
-Avant de terminer, compte tes analyses :
-- DÉFIS analysés : {nb_defis}/{nb_defis} ✓
-- POTENTIELS analysés : {nb_forces}/{nb_forces} ✓
-- MIXTES analysés : {nb_mixtes}/{nb_mixtes} ✓
-TOTAL = {total_elements} éléments
-
-Si un élément manque, ajoute-le MAINTENANT. Ne dis JAMAIS "je continuerai plus tard".
-
-
-═══ CONSIGNES D'ANALYSE ═══
-
-✅ Analyse CHAQUE élément numéroté dans la section ci-dessus
-✅ Respecte l'ordre d'importance (scores décroissants)
-✅ Écris en prose continue, jamais de tirets ou de listes
-✅ Chaque section est un texte narratif cohérent
-✅ Les aspects/placements sont nommés dans le fil du texte, pas en entêtes
-✅ Développe les mécanismes psychiques avec exemples concrets
-✅ Paragraphes complets (6 lignes minimum)
-✅ MINIMUM TOTAL du document : 2500 mots hors introduction et conclusion
-✅ Si tu approches de la fin d'une section avant d'avoir atteint le minimum, développe davantage avec des exemples supplémentaires
-
-❌ NE PAS analyser d'aspects non listés
-❌ NE PAS mentionner Chiron ou éléments non prioritaires
-❌ NE PAS résumer ou regrouper les éléments
-❌ NE PAS s'arrêter avant d'avoir traité les {total_elements} éléments
-
-Développe chaque point avec beaucoup de profondeur, 
-en expliquant les mécanismes psychiques ou comportementaux associés. 
-N'hésite pas à donner des exemples concrets ou des situations types.
-Fais des paragraphes complets (6 lignes par point minimum).
-
-═══ STYLE D'ÉCRITURE ═══
-
-✓ Ton : Lucide, direct, bienveillant mais sans complaisance
-✓ Profondeur : Psychologie jungienne, symbolisme archétypal
-✓ Style : psychologique, sobre, sans humour cosmique, sans tournures poétiques ou métaphores excessives
-✓ Concret : Exemples de vie, situations tangibles
-✓ Empathie : Reconnaître la difficulté sans dramatiser
-⚠️ Important : utilise le tutoiement uniquement
-
-✗ INTERDIT :
-- Phrases vides type "tu es unique", "le cosmos t'appelle", PAS DE METAPHORE COSMIQUE
-- Images farfelues gratuites
-- Psychologie de comptoir
-- Prédictions, jugements moraux
-- Ton professoral ou condescendant
-
-Métadonnées :
-- Tonalité: {meta.get("tonalite","tu")}
-- Genre: {meta.get("genre","neutre")}
-"""
-
-    
-    # 🛠 Voir le prompt entier dans la console
-    print("\n=== PROMPT FORCES & DEFIS ===\n")
-    print(prompt)
-    print("\n=== FIN PROMPT ===\n")
+    # La requête complète est affichée par le client Claude juste avant l'envoi.
 
     texte = ""
     html_core = ""
 
     try:
-        resultat_llm = interroger_llm(prompt)
+        import inspect
+        options = dict(single_attempt=True, max_tokens=12000,
+                       system_prompt="Tu rédiges une interprétation astrologique symbolique. "
+                       "Ton direct, incarné, psychologique et mordant, avec une pointe d'humour noir pertinente. "
+                       "Respecte les faits calculés et le contexte des maisons ; formule les vécus supposés "
+                       "comme des possibilités. Applique les consignes éditoriales détaillées du prompt.")
+        supported = inspect.signature(interroger_llm).parameters
+        options = {k: v for k, v in options.items() if k in supported}
+        resultat_llm = interroger_llm(prompt, **options)
 
         if isinstance(resultat_llm, dict):
             texte = (
@@ -977,6 +827,18 @@ Métadonnées :
         else:
             texte = str(resultat_llm)
 
+        if not texte.strip():
+            raise ValueError("Analyse vide : aucun PDF à livrer.")
+
+        words = len(texte.split())
+        if not 1300 <= words <= 2600:
+            # La longueur est une métrique éditoriale, pas une panne technique.
+            # Conserver la réponse déjà payée sans relancer automatiquement le LLM.
+            logger.warning(
+                "Rapport Forces & Défis hors cible éditoriale : %s mots (cible 1700–2100). "
+                "Texte conservé, aucune nouvelle génération automatique.", words,
+            )
+
         try:
             html_core = md_light_to_html(texte or "")
         except Exception as conv_err:
@@ -985,11 +847,8 @@ Métadonnées :
 
     except Exception as gen_err:
         print(f"[FD] Erreur génération: {gen_err}")
-        html_core = (
-            "<div class='error' style='border:1px solid #e00;padding:8px;margin:8px 0'>"
-            "<strong>Erreur de génération</strong></div>"
-            f"<pre style='white-space:pre-wrap'>{prompt[:1000]}</pre>"
-        )
+        raise
+
 
     header_birth = _birth_header_html(data_theme, meta)
     html_final = f"{header_birth}{DISCLAIMER_FORCES_DEFIS_HTML}\n{html_core}"
