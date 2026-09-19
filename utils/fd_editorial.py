@@ -1,12 +1,13 @@
 """Règles éditoriales locales au rapport Forces & Défis, avant rédaction."""
 from copy import deepcopy
+import re
 from utils.fd_context import norm
 
 
 def excluded_body(name):
     value = norm(str(name).replace('œ', 'oe').replace('Œ', 'OE'))
     return (any(word in value for word in ('noeud', 'node', 'fortune', 'illumination'))
-            or bool({'rahu', 'ketu'} & set(value.split())))
+            or bool({'rahu', 'ketu', 'junon', 'juno'} & set(value.split())))
 
 
 def prepare_theme(theme):
@@ -77,6 +78,13 @@ fait astrologique ou biographique. Genre grammatical : {meta.get('genre', 'neutr
 Développe suffisamment pour donner de la profondeur, sans répétitions.
 Chaque paragraphe traite quatre dynamiques maximum, sans chercher à atteindre ce plafond.
 
+Utilise obligatoirement ces titres Markdown exacts, dans cet ordre :
+## Tes Défis
+## Tes Potentiels
+## Dynamiques mixtes
+## Synthèse
+Ne remplace jamais ces titres par de simples séparateurs « --- ».
+
 La synthèse relie les enjeux dominants et montre comment les ressources peuvent
 répondre aux défis. Elle dégage un fil conducteur, sans refaire la liste des configurations.
 
@@ -89,3 +97,15 @@ DYNAMIQUES CLASSÉES PAR LE BARÈME :
 FIGURES CLASSÉES — toutes à intégrer :
 {figures}
 """
+
+
+def ensure_report_sections(text):
+    """Rétablit les quatre titres si le modèle les remplace par trois séparateurs."""
+    text = str(text or '').strip()
+    headings = ('Tes Défis', 'Tes Potentiels', 'Dynamiques mixtes', 'Synthèse')
+    if any(re.search(rf'(?im)^#+\s*{re.escape(title)}\s*$', text) for title in headings):
+        return text
+    parts = [part.strip() for part in re.split(r'(?m)^\s*---\s*$', text)]
+    if len(parts) != 4 or not all(parts):
+        return text
+    return '\n\n'.join(f'## {title}\n\n{part}' for title, part in zip(headings, parts))

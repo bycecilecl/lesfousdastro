@@ -1,5 +1,11 @@
 import re
 
+
+def _inline_markdown(text: str) -> str:
+    """Convertit le gras et l'italique simples sans confondre * et **."""
+    text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+    return re.sub(r'(?<!\*)\*([^*\n]+?)\*(?!\*)', r'<em>\1</em>', text)
+
 def md_light_to_html(text: str) -> str:
     if not text:
         return ""
@@ -29,8 +35,7 @@ def md_light_to_html(text: str) -> str:
             # joindre par espace, retirer doubles espaces
             p = " ".join(para_buf)
             p = re.sub(r'\s{2,}', ' ', p).strip()
-            # gras **...**
-            p = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', p)
+            p = _inline_markdown(p)
             html.append(f"<p>{p}</p>")
             para_buf = []
 
@@ -49,7 +54,7 @@ def md_light_to_html(text: str) -> str:
             flush_ul()
             flush_para()
             titre = line[2:].strip()
-            titre = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', titre)
+            titre = _inline_markdown(titre)
             html.append(f'<h1 class="section-title">{titre}</h1>')
             continue
 
@@ -78,13 +83,13 @@ def md_light_to_html(text: str) -> str:
                 html.append('<ul>')
                 in_ul = True
             item = line[2:].strip()
-            item = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', item)
+            item = _inline_markdown(item)
             html.append(f'<li>{item}</li>')
             continue
 
         # Sinon : ligne de paragraphe → on accumule
-        # (et on normalise déjà le gras)
-        line = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', line)
+        # Normalisation des emphases Markdown avant assemblage du paragraphe.
+        line = _inline_markdown(line)
         para_buf.append(line)
 
     # Fin de texte : flush

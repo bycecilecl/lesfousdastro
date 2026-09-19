@@ -141,7 +141,7 @@ def get_retrogrades_occidentales(data_theme: dict) -> list[str]:
     return [DISPLAY_FIX.get(name, name) for name in _detecter_retrogrades_locales(occ)]
 
 DISCLAIMER_FORCES_DEFIS_HTML = r"""
-<div style="display:flex;justify-content:center;margin:12px 0 18px;">
+<div class="fd-disclaimer" style="display:flex;justify-content:center;margin:12px 0 18px;">
   <div style="max-width:720px;width:100%;
               border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;
               padding:10px 14px;font-size:12.5px;line-height:1.55;color:#555;">
@@ -826,6 +826,9 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
             )
         else:
             texte = str(resultat_llm)
+
+        from utils.fd_editorial import ensure_report_sections
+        texte = ensure_report_sections(texte)
 
         if not texte.strip():
             raise ValueError("Analyse vide : aucun PDF à livrer.")

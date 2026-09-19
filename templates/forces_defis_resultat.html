@@ -1,153 +1,55 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mes Potentiels & Défis - {{ nom }}</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
- <style>
-  :root{
-    --bg: #f7fbfd;           /* fond très clair pour respirer */
-    --card: #ffffff;         /* cartes blanches lisibles */
-    --ink: #1f2937;          /* texte principal (gris très foncé) */
-    --muted:#64748b;         /* texte secondaire */
-    --brand:#1f628e;         /* Bleu foncé (marque) */
-    --brand-soft:#c0f0f7;    /* Bleu ciel (surbrillance) */
-    --accent:#00a8a8;        /* Bleu vert d’eau (accent / CTA) */
-    --shadow: 0 10px 40px rgba(31,98,142,.22);  /* ombre bleutée douce */
-    --radius: 16px;
-  }
-
-  *{ box-sizing:border-box }
-
-  body{
-    margin:0; padding:24px;
-    /* fond avec ta palette, subtil et lumineux */
-    background: linear-gradient(135deg, #1f628e 0%, #00a8a8 55%, #c0f0f7 115%);
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
-    color: var(--ink);
-  }
-
-  .container{
-    max-width: 860px; margin: 0 auto;
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-
-  header{
-    padding: 32px 36px 16px 36px;
-    /* halos + dégradé clair aux couleurs de marque */
-    background:
-      radial-gradient(1200px 400px at 80% -50%, rgba(31,98,142,0.15), transparent 60%),
-      radial-gradient(1000px 400px at -10% -80%, rgba(0,168,168,0.12), transparent 60%),
-      linear-gradient(180deg, #ffffff 0%, #f9fdff 55%, #ffffff 100%);
-    border-bottom: 1px solid #e6f3f7;
-  }
-
-  h1{
-    margin:0 0 6px 0;
-    font-family: "Playfair Display", serif;
-    font-size: 2rem; line-height: 1.15;
-    letter-spacing: 0.2px;
-    color: #0f172a;
-    text-align: center;
-  }
-
-  .sub{
-    text-align:center; color: var(--muted);
-    font-size: .95rem; margin-bottom: 6px;
-  }
-
-  main{
-    padding: 28px 36px 36px 36px;
-  }
-
-  /* Titres de sections "DÉFIS" / "FORCES" */
-  .section-title{
-    font-family: "Playfair Display", serif;
-    font-size: 1.35rem;
-    font-weight: 700;
-    letter-spacing: .2px;
-    color: #0b1220;
-    margin: 26px 0 12px;
-    padding: 8px 12px;
-    border-left: 4px solid var(--brand);
-    background: var(--brand-soft);
-    border-radius: 10px;
-  }
-
-  /* Paragraphes */
-  p{ margin: 12px 0; color: #0b1220; }
-
-  /* Listes jolies */
-  ul{ list-style: none; padding-left: 0; margin: 14px 0 8px 0; }
-  li{
-    position: relative;
-    margin: 10px 0;
-    padding: 12px 14px 12px 44px;
-    border: 1px solid #e6f3f7;         /* bord bleu ciel */
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: 0 1px 0 rgba(2,6,23,0.03);
-  }
-  li::before{
-    content: "";
-    position: absolute; left: 14px; top: 16px;
-    width: 20px; height: 20px; border-radius: 6px;
-    background: linear-gradient(135deg, var(--brand), var(--accent));
-    box-shadow: 0 0 0 3px var(--brand-soft); /* halo bleu ciel */
-  }
-
-  strong{ font-weight: 700; }
-
-  /* Bouton */
-  .actions{ text-align: center; margin: 24px 0 8px; }
-  .btn{
-    display:inline-block; padding:12px 18px; border-radius:12px;
-    background: linear-gradient(135deg, var(--accent), var(--brand));
-    color:#fff; text-decoration:none; font-weight:600;
-    box-shadow: 0 6px 20px rgba(0,168,168,0.35);
-    transition: transform .12s ease, filter .2s ease;
-  }
-  .btn:hover{ filter: brightness(1.05); transform: translateY(-1px); }
-
-  footer{
-    text-align: center; color:#0b3550; font-size:.92rem; margin-top:18px;
-    opacity:.7;
-  }
-  .home{
-    display:inline-block; margin-top:8px; color:#1f628e; text-decoration:none;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Potentiels &amp; Défis - {{ nom }}</title>
+  <style>
+    body { font-family: Georgia, serif; margin: 0; padding: 20px; background:#f5f5f5; color:#1f2937; }
+    .container { max-width:1200px; margin:0 auto; background:#fff; padding:30px; border-radius:10px; box-shadow:0 0 20px rgba(0,0,0,.1); }
+    .logo-header { text-align:center; margin-bottom:30px; padding-bottom:20px; border-bottom:1px solid #eee; }
+    .logo { max-width:200px; max-height:120px; width:auto; height:auto; object-fit:contain; margin-bottom:20px; }
+    .header { text-align:center; padding:20px 0; border-bottom:2px solid #1f628e; margin-bottom:30px; }
+    .header h1 { color:#1f628e; margin:0 0 10px; }
+    .personal-info { text-align:center; margin:20px auto; font-size:.9em; color:#666; max-width:600px; }
+    .actions { text-align:center; margin:30px 0; padding:20px; background:#f0f8ff; border-radius:8px; }
+    .btn { display:inline-block; padding:12px 24px; margin:0 10px; background:#1f628e; color:#fff; text-decoration:none; border-radius:5px; font-weight:bold; transition:background-color .3s, transform .2s; }
+    .btn:hover { background:#144a6b; transform:translateY(-1px); }
+    .content-wrapper { border:1px solid #ddd; border-radius:8px; overflow:hidden; padding:10px 20px 30px; }
+    .content-wrapper h1 { color:#1f628e; text-align:center; margin:25px 20px 30px; font-size:2.2em; border-bottom:2px solid #1f628e; padding-bottom:15px; }
+    .content-wrapper h2, .content-wrapper .section-title { color:#1f628e; border-bottom:2px solid #1f628e; background:transparent; border-left:0; border-radius:0; padding:0 0 8px; margin:40px 20px 20px; font-family:Georgia,serif; font-size:1.5em; }
+    .content-wrapper h3 { color:#144a6b; margin:30px 20px 15px; font-size:1.2em; border-left:4px solid #1f628e; padding-left:15px; }
+    .content-wrapper p { margin:0 0 15px; text-align:justify; line-height:1.65; padding:0 20px; }
+    .content-wrapper strong { color:#1f628e; }
+    .content-wrapper em { color:#144a6b; }
+    .content-wrapper a { color:#1f628e; font-weight:600; }
+    .content-wrapper .fd-disclaimer { background:#f0f8ff; border:1px solid #cfe3f1; border-radius:8px; margin:20px !important; }
+    .return { text-align:center; margin-top:30px; }
+    @media (max-width:700px) {
+      body { padding:8px; }
+      .container { padding:18px 12px; }
+      .content-wrapper { padding:5px 4px 20px; }
+      .content-wrapper p { padding:0 12px; text-align:left; }
+      .content-wrapper h2, .content-wrapper .section-title { margin-left:12px; margin-right:12px; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Mes Potentiels & Défis</h1>
-      <div class="sub">{{ nom }}</div>
-    </header>
-
-    <main>
-      <!-- On injecte le HTML converti (titres H2 + listes) -->
-      <div class="content">
-        {{ contenu_html|safe }}
-      </div>
-
-      {% if pdf_url %}
-      <div class="actions">
-        <a class="btn" href="{{ pdf_url }}" target="_blank" rel="noopener">Télécharger le PDF</a>
-      </div>
-      {% endif %}
-    </main>
+    <div class="logo-header">
+      {% if logo_base64 %}<img src="data:image/webp;base64,{{ logo_base64 }}" alt="Logo Les Fous d'Astro" class="logo">{% endif %}
+    </div>
+    <div class="header">
+      <h1>🌟 Mes Potentiels &amp; Défis - {{ nom }}</h1>
+      <div class="personal-info">{{ infos.date_naissance }} — {{ infos.heure_naissance }} — {{ infos.lieu_naissance }}</div>
+    </div>
+    <div class="actions">
+      {% if pdf_url %}<a class="btn" href="{{ pdf_url }}" target="_blank" rel="noopener">📄 Télécharger mon analyse en PDF</a>{% else %}<p>Fichier en cours de génération...</p>{% endif %}
+    </div>
+    <div class="content-wrapper">
+      {% if contenu_html %}{{ contenu_html|safe }}{% else %}<div style="padding:40px;text-align:center;color:#666;"><h2>⚠️ Contenu non disponible</h2><p>Le rapport n’a pas pu être affiché.</p></div>{% endif %}
+    </div>
+    <div class="return"><a class="btn" href="{{ url_for('main.index') }}">🏠 Nouvelle analyse</a></div>
   </div>
-
-  <footer>
-    <div><a class="home" href="/">← Retour à l’accueil</a></div>
-  </footer>
 </body>
 </html>
-
-

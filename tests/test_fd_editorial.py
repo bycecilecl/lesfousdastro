@@ -5,7 +5,8 @@ import re
 import unicodedata
 import unittest
 from pathlib import Path
-from utils.fd_editorial import prepare_theme, classify, priority_tension, report_prompt
+from utils.fd_editorial import (prepare_theme, classify, priority_tension,
+                                report_prompt, ensure_report_sections)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -37,13 +38,25 @@ class EditorialTests(unittest.TestCase):
 
     def test_exclusions_without_mutating_theme(self):
         names = ['Soleil', 'Lune', 'Lune Noire', 'Rahu', 'Ketu', 'Nœud Nord',
-                 'Noeud Sud', 'Part de Fortune', "Point d’illumination"]
+                 'Noeud Sud', 'Part de Fortune', "Point d’illumination", 'Junon', 'Juno']
         theme = {'planetes': {n: {} for n in names},
                  'aspects': [dict(p1='Mars', p2='Rahu', type='trigone')]}
         clean = prepare_theme(theme)
         self.assertEqual(set(clean['planetes']), {'Soleil', 'Lune', 'Lune Noire'})
         self.assertEqual(clean['aspects'], [])
         self.assertEqual(len(theme['planetes']), len(names))
+
+    def test_excluded_points_are_removed_from_aspects_and_priorities(self):
+        excluded = ('Junon', 'Juno', 'Part de Fortune', "Point d’illumination")
+        for body in excluded:
+            theme = {'planetes': {'Soleil': {}, body: {}},
+                     'aspects': [dict(p1='Soleil', p2=body, type='conjonction')]}
+            clean = prepare_theme(theme)
+            self.assertNotIn(body, clean['planetes'])
+            self.assertEqual(clean['aspects'], [])
+            self.assertEqual(classify([
+                dict(description=f'Soleil conjonction {body}', categorie='MIXTE')
+            ]), [])
 
     def test_black_moon_is_always_challenge_and_filters(self):
         items = [dict(description=t, categorie='FORCE (aspect)', score=5) for t in
@@ -93,6 +106,18 @@ class EditorialTests(unittest.TestCase):
         self.assertIn('quatre dynamiques maximum', prompt)
         self.assertNotIn('EXCLUSIONS', prompt)
         self.assertNotIn('ORDRE IMPÉRATIF', prompt)
+
+    def test_missing_headings_are_restored_from_separators(self):
+        text = 'défis\n---\npotentiels\n---\nmixtes\n---\nsynthèse'
+        result = ensure_report_sections(text)
+        self.assertEqual(result.count('## '), 4)
+        for title in ('Tes Défis', 'Tes Potentiels', 'Dynamiques mixtes', 'Synthèse'):
+            self.assertIn('## ' + title, result)
+        self.assertNotIn('\n---\n', result)
+
+    def test_existing_headings_are_not_rewritten(self):
+        text = '## Tes Défis\n\nTexte déjà structuré.'
+        self.assertEqual(ensure_report_sections(text), text)
 
 
 if __name__ == '__main__':

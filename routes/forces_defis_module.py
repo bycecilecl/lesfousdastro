@@ -20,6 +20,14 @@ from config.analysis_sandbox import is_analysis_sandbox
 import json, hashlib, time, logging  
 
 
+def _contenu_forces_defis_html(value):
+    """Évite de reconvertir le HTML déjà produit par l'analyse."""
+    text = str(value or '')
+    if re.search(r'<(?:div|p|h[1-6]|ul|ol|section)\b', text, flags=re.I):
+        return Markup(text)
+    return Markup(md_light_to_html(text))
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 1) Imports analytiques robustes (nouvelle API sinon fallback ancienne)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -197,7 +205,7 @@ def generer_forces_defis_pdf_s3(infos, envoyer_email=False):
     else:
         texte = str(resultat)
 
-    contenu_html = md_light_to_html(texte)
+    contenu_html = _contenu_forces_defis_html(texte)
 
     if not contenu_html or not str(contenu_html).strip():
         contenu_html = Markup(
@@ -388,7 +396,7 @@ def forces_defis_complet():
         texte = str(resultat)
 
     # 5) Formatage lisible pour le template (Markdown léger → sections HTML)
-    contenu_html = md_light_to_html(texte)
+    contenu_html = _contenu_forces_defis_html(texte)
 
     print("\n" + "="*60)
     print("HTML GÉNÉRÉ PAR PARSER (300 premiers caractères):")
@@ -521,7 +529,9 @@ def forces_defis_complet():
     return render_template(
         "forces_defis_resultat.html",
         nom=nom_aff,
-        contenu_html=contenu_html,   # <- au lieu de texte_html
+        infos=infos,
+        logo_base64=logo_base64,
+        contenu_html=contenu_html,
         pdf_url=pdf_final_url
     )
 
