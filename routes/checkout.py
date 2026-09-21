@@ -7,7 +7,7 @@ import os
 import uuid
 import json
 from datetime import datetime
-from flask import Blueprint, request, session, redirect, url_for, render_template, abort, current_app
+from flask import Blueprint, request, session, redirect, url_for, render_template, abort, current_app, jsonify
 from config.products import PRODUCTS
 import stripe
 from config.gift_codes import get_gift_code, is_code_used, mark_code_as_used
@@ -665,6 +665,83 @@ def traiter_analyses():
         "analyses_en_cours.html",
         email=infos_client.get("email"),
         nombre_analyses=len(valid_products),
+        status_url=(
+            url_for("checkout_bp.analyse_status", product_id=valid_products[0])
+            if len(valid_products) == 1
+            else None
+        ),
+    )
+
+
+@checkout_bp.route("/analyse-status/<product_id>")
+def analyse_status(product_id):
+    """Retourne l'état d'une analyse achetée par la session courante."""
+    secure_order = owned_order(paid=True)
+    if product_id not in secure_order.products:
+        abort(403, description="Analyse non achetée pour cette commande.")
+
+    job = AnalysisJob.query.filter_by(
+        order_id=secure_order.id,
+        product=product_id,
+    ).one_or_none()
+    if job is None:
+        abort(404, description="Analyse introuvable.")
+
+    payload = {"status": job.status}
+    if (
+        job.status == "complete"
+        and isinstance(job.result, dict)
+        and job.result.get("pdf_url")
+    ):
+        payload["result_url"] = url_for(
+            "checkout_bp.analyse_resultat",
+            product_id=product_id,
+        )
+
+    response = jsonify(payload)
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@checkout_bp.route("/analyse-resultat/<product_id>")
+def analyse_resultat(product_id):
+    """Affiche un résultat déjà généré, sans relancer son moteur d'analyse."""
+    secure_order = owned_order(paid=True)
+    if product_id not in secure_order.products:
+        abort(403, description="Analyse non achetée pour cette commande.")
+
+    job = AnalysisJob.query.filter_by(
+        order_id=secure_order.id,
+        product=product_id,
+    ).one_or_none()
+    if job is None:
+        abort(404, description="Analyse introuvable.")
+    if job.status != "complete":
+        return render_template(
+            "analyses_en_cours.html",
+            email=(secure_order.beneficiary or {}).get("email"),
+            nombre_analyses=1,
+            status_url=url_for(
+                "checkout_bp.analyse_status",
+                product_id=product_id,
+            ),
+        )
+
+    result = job.result if isinstance(job.result, dict) else {}
+    if product_id == "forces_defis" and result.get("contenu_html"):
+        infos = dict(secure_order.beneficiary or {})
+        return render_template(
+            "forces_defis_resultat.html",
+            nom=infos.get("nom") or "Anonyme",
+            infos=infos,
+            logo_base64="",
+            contenu_html=result["contenu_html"],
+            pdf_url=result.get("pdf_url"),
+        )
+
+    return render_template(
+        "analyse_suivi.html",
+        pdf_url=result.get("pdf_url"),
     )
 
 def lancer_generation_pack_en_arriere_plan(app, valid_products, infos_client, pending):
@@ -777,6 +854,7 @@ def _generer_analyse_pack(product_id, pending):
                 "label": product["label"],
                 "pdf_url": resultat.get("pdf_url"),
                 "pdf_path": resultat.get("pdf_path"),
+                "contenu_html": resultat.get("contenu_html"),
                 "s3_ready": True,
             }
         

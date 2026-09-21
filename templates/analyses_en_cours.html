@@ -95,7 +95,10 @@
         </div>
         {% endif %}
         <p class="note">
-            Tu peux fermer cette page sans perdre ta commande.<br>
+            {% if status_url %}
+            Cette page affichera automatiquement ton rapport dès qu'il sera prêt.<br>
+            {% endif %}
+            Tu peux aussi fermer cette page sans perdre ta commande.<br>
         </p>
         <a href="https://lesfousdastro.fr" 
            style="display:inline-block;margin-top:20px;padding:12px 24px;
@@ -104,5 +107,44 @@
             ✨ Retour aux analyses
         </a>
     </div>
+    {% if status_url %}
+    <script>
+        (() => {
+            const statusUrl = {{ status_url|tojson }};
+            let stopped = false;
+
+            async function refreshStatus() {
+                if (stopped) return;
+                try {
+                    const response = await fetch(statusUrl, {
+                        credentials: 'same-origin',
+                        cache: 'no-store',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                    const data = await response.json();
+                    if (data.status === 'complete' && data.result_url) {
+                        stopped = true;
+                        window.location.replace(data.result_url);
+                        return;
+                    }
+                    if (data.status === 'review') {
+                        stopped = true;
+                        document.querySelector('.spinner').style.display = 'none';
+                        document.querySelector('.message').textContent =
+                            "La génération doit être vérifiée. Ton rapport ne sera pas relancé automatiquement.";
+                        return;
+                    }
+                } catch (error) {
+                    console.warn('Suivi de génération temporairement indisponible', error);
+                }
+                window.setTimeout(refreshStatus, 3000);
+            }
+
+            window.setTimeout(refreshStatus, 1500);
+        })();
+    </script>
+    {% endif %}
 </body>
 </html>

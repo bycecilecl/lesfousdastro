@@ -37,7 +37,11 @@
 <body>
   <div class="container">
     <div class="logo-header">
-      {% if logo_base64 %}<img src="data:image/webp;base64,{{ logo_base64 }}" alt="Logo Les Fous d'Astro" class="logo">{% endif %}
+      {% if logo_base64 %}
+      <img src="data:image/webp;base64,{{ logo_base64 }}" alt="Logo Les Fous d'Astro" class="logo">
+      {% else %}
+      <img src="{{ url_for('static', filename='images/logo_les_fous_dastro.webp') }}" alt="Logo Les Fous d'Astro" class="logo">
+      {% endif %}
     </div>
     <div class="header">
       <h1>🌟 Mes Potentiels &amp; Défis - {{ nom }}</h1>

@@ -246,6 +246,7 @@ def generer_forces_defis_pdf_s3(infos, envoyer_email=False):
         "label": "Mes Potentiels et Défis",
         "pdf_url": pdf_final_url,
         "pdf_path": None,
+        "contenu_html": str(contenu_html),
         "status": "completed",
     }
 

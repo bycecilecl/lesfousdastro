@@ -19,6 +19,7 @@ class ResultTemplateTests(unittest.TestCase):
             self.assertIn(marker, template)
         self.assertIn('max-width:1200px', template)
         self.assertIn("url_for('main.index')", template)
+        self.assertIn("url_for('static', filename='images/logo_les_fous_dastro.webp')", template)
 
     def test_disclaimer_has_stable_css_hook(self):
         analysis = (ROOT / 'utils/forces_defis_analyse.py').read_text()

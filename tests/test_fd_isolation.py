@@ -55,6 +55,19 @@ class IsolationTests(unittest.TestCase):
             source,
         )
 
+    def test_background_result_is_persisted_and_displayed_without_regeneration(self):
+        checkout = (ROOT / 'routes/checkout.py').read_text()
+        generator = (ROOT / 'routes/forces_defis_module.py').read_text()
+        waiting = (ROOT / 'templates/analyses_en_cours.html').read_text()
+
+        self.assertIn('"contenu_html": str(contenu_html)', generator)
+        self.assertIn('"contenu_html": resultat.get("contenu_html")', checkout)
+        self.assertIn('@checkout_bp.route("/analyse-status/<product_id>")', checkout)
+        self.assertIn('@checkout_bp.route("/analyse-resultat/<product_id>")', checkout)
+        self.assertIn('owned_order(paid=True)', checkout)
+        self.assertIn('fetch(statusUrl', waiting)
+        self.assertIn('window.location.replace(data.result_url)', waiting)
+
 
 if __name__ == '__main__':
     unittest.main()
