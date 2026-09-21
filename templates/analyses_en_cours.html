@@ -1,6 +1,10 @@
  <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-553N1CDR9Q"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+    gtag('js',new Date());gtag('config','G-553N1CDR9Q',{page_location:location.origin+location.pathname,page_referrer:'',page_title:'Commande',allow_google_signals:false,allow_ad_personalization_signals:false});</script>
+    <script src="{{ url_for('static', filename='conversion.js') }}" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analyses en préparation ✨</title>
@@ -78,11 +82,11 @@
 <body>
     <div class="container">
         <div class="logo">🔮</div>
-        <h1>Tes analyses sont en préparation ✨</h1>
+        <h1>{% if nombre_analyses == 1 %}Ton analyse est{% else %}Tes analyses sont{% endif %} en préparation ✨</h1>
         <div class="spinner"></div>
         <p class="message">
-            Ta commande contient <strong>{{ nombre_analyses }} analyses</strong>.<br>
-            Elles sont générées en arrière-plan et tu recevras un email dès qu'elles seront prêtes.
+            Ta commande contient <strong>{{ nombre_analyses }} analyse{% if nombre_analyses != 1 %}s{% endif %}</strong>.<br>
+            {% if nombre_analyses == 1 %}Elle est générée{% else %}Elles sont générées{% endif %} en arrière-plan et tu recevras un email dès qu'{% if nombre_analyses == 1 %}elle sera prête{% else %}elles seront prêtes{% endif %}.
         </p>
         {% if email %}
         <div class="email-box">

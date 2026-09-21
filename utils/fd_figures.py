@@ -4,7 +4,8 @@ from math import isfinite
 from html import escape
 
 from point_astral_famille import configurations_astrologiques as engine
-from utils.fd_context import norm, placements, planet_context, concentration_records
+from utils.fd_context import (norm, placements, planet_context, concentration_records,
+                              ascendant_ruler)
 
 
 def major_figures(theme):
@@ -86,6 +87,12 @@ def figure_description(theme, figure):
     focal = figure.get('planetes_focales') or ([figure['planete_focale']] if figure.get('planete_focale') else [])
     if focal:
         text += '. Sommet focal : ' + ', '.join(focal)
+    ruler = ascendant_ruler(theme)
+    members = {norm(n) for n in figure['planetes']}
+    if ruler and norm(ruler) in members:
+        text += f". Maître d'Ascendant impliqué : {ruler} — priorité renforcée"
+        if any(norm(n) == norm(ruler) for n in focal):
+            text += ', enjeu identitaire central au sommet de la figure'
     return text
 
 

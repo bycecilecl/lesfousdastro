@@ -880,8 +880,10 @@ def build_unified_priorities(theme: dict,
                              limit: int = 30,
                              style: str = "v2") -> str:
     from utils.fd_editorial import prepare_theme, body_name, classify, priority_tension
+    from utils.fd_context import ascendant_ruler, norm as context_norm
     theme = prepare_theme(theme)
     _forcer_retrogrades_reels(theme)
+    ruler = ascendant_ruler(theme)
 
     all_priorities = []
 
@@ -947,6 +949,12 @@ def build_unified_priorities(theme: dict,
     # 4) Dignités / rétrogrades
     etats = detect_etat_planetes(theme, "etat_planetes.csv", min_score, 999)
     for e in etats:
+        # Les dignités des transsaturniennes varient selon les écoles : elles ne
+        # sont jamais injectées, même lorsque la planète est maître d'Ascendant.
+        if (context_norm(e['planete']) in {'uranus', 'neptune', 'pluton'} and
+                any(state in context_norm(e['etat'])
+                    for state in ('domicile', 'exaltation', 'exil', 'chute'))):
+            continue
         all_priorities.append({
             "categorie": f"{e['type'].upper()} (dignité)",
             "description": f"{e['planete'].title()} {e['etat']}",
@@ -1116,9 +1124,18 @@ def build_unified_priorities(theme: dict,
         return 7
 
     all_priorities = classify(all_priorities)
+    if ruler:
+        ruler_norm = context_norm(ruler)
+        for item in all_priorities:
+            if ruler_norm in context_norm(item.get('description', '')).split():
+                item['maitre_ascendant'] = True
+                if "maître d'Ascendant" not in item.get('comment', ''):
+                    item['comment'] = ("Maître d'Ascendant : enjeu identitaire central. / " +
+                                       item.get('comment', '')).rstrip(' /')
     all_priorities.sort(
         key=lambda x: (
             0 if priority_tension(x.get("description", "")) else 1,
+            0 if x.get('maitre_ascendant') else 1,
             _fam_rank(x.get("categorie")),
             -x.get("score", 0),
             (x.get("orb") if isinstance(x.get("orb"), (int, float)) else 99.0)

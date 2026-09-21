@@ -146,13 +146,13 @@ DISCLAIMER_FORCES_DEFIS_HTML = r"""
               border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;
               padding:10px 14px;font-size:12.5px;line-height:1.55;color:#555;">
     <p style="margin:0 0 6px 0;">
-      <strong style="font-weight:600;">À lire avant l'analyse</strong> — texte généré automatiquement à partir de
+      <strong style="font-weight:600;">À lire avant l'analyse.</strong> Texte généré automatiquement à partir de
       placements saillants (aspects, maisons, angles). Les potentiels et défis sont regroupés
       autour des configurations majeures, avec leur contexte en signes, maisons et interceptions.
       Ce n'est <em>pas</em> une consultation : l'interprétation dépend de ton histoire et de ton niveau d'intégration.
       Pour une lecture <strong>plus complète</strong> (liens entre tous les éléments), consulte le <em>Point Astral</em>
       — ou réserve une <strong>consultation</strong> personnalisée.
-      <a href="https://bycecilecl.com" target="_blank" style="color:#1f628e;text-decoration:none;">Prendre rendez-vous</a>
+      <a href="https://lesfousdastro.fr/prestations" target="_blank" rel="noopener" style="color:#1f628e;text-decoration:none;">Prendre rendez-vous</a>
     </p>
   </div>
 </div>

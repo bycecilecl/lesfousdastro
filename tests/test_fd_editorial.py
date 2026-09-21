@@ -106,6 +106,8 @@ class EditorialTests(unittest.TestCase):
         self.assertIn('quatre dynamiques maximum', prompt)
         self.assertNotIn('EXCLUSIONS', prompt)
         self.assertNotIn('ORDRE IMPÉRATIF', prompt)
+        self.assertIn("N'interprète jamais Uranus, Neptune ou", prompt)
+        self.assertIn("Ne leur attribue aucune dignité", prompt)
 
     def test_missing_headings_are_restored_from_separators(self):
         text = 'défis\n---\npotentiels\n---\nmixtes\n---\nsynthèse'

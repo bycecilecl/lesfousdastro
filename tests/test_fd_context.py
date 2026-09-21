@@ -9,7 +9,8 @@ import unittest
 import unicodedata
 from unittest.mock import Mock
 
-from utils.fd_context import build_context, configurations, quinconces, valid_dignity
+from utils.fd_context import (build_context, configurations, quinconces, valid_dignity,
+                              ascendant_ruler)
 from utils.fd_figures import major_figures, figures_html
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -78,6 +79,31 @@ class FiguresTests(unittest.TestCase):
         self.assertFalse(valid_dignity('Soleil', 'Capricorne', 'exaltation'))
         self.assertTrue(valid_dignity('Soleil', 'Bélier', 'exaltation'))
         self.assertTrue(valid_dignity('Jupiter', 'Vierge', 'exil'))
+
+    def test_ascendant_ruler_is_transmitted_and_prioritised_in_t_square(self):
+        theme = theme_at({'Soleil': 0, 'Lune': 180, 'Uranus': 90})
+        theme['maitre_ascendant'] = {'nom': 'Uranus', 'signe': 'Cancer', 'maison': 3}
+        self.assertEqual(ascendant_ruler(theme), 'Uranus')
+        context = build_context(theme)
+        self.assertIn("Maître d'Ascendant tropical : Uranus", context)
+        self.assertIn('Uranus en Cancer', context)
+        description = configurations(theme, major_figures(theme))
+        self.assertIn("Maître d'Ascendant impliqué : Uranus", description)
+        self.assertIn('enjeu identitaire central au sommet', description)
+
+    def test_transsaturnian_sign_is_generational_when_not_ruler(self):
+        theme = {'planetes': {
+            'Ascendant': {'signe': 'Bélier', 'maison': 1},
+            'Mars': {'signe': 'Scorpion', 'maison': 6},
+            'Uranus': {'signe': 'Cancer', 'maison': 10},
+            'Neptune': {'signe': 'Balance', 'maison': 8},
+            'Pluton': {'signe': 'Lion', 'maison': 12},
+        }}
+        text = build_context(theme)
+        self.assertIn("Maître d'Ascendant tropical : Mars", text)
+        self.assertEqual(text.count('signe omis : donnée générationnelle'), 3)
+        self.assertNotIn('Uranus en Cancer', text)
+        self.assertNotIn('Cancer', text)
 
     def test_quinconce_barreme_and_boundary(self):
         # Exécuter seulement les fonctions pures pour éviter les imports de clients IA.

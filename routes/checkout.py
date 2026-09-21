@@ -605,11 +605,13 @@ def traiter_analyses():
         ), 400
 
     # ============================================================
-    # CAS 1 : UNE SEULE ANALYSE
+    # CAS 1 : UNE SEULE ANALYSE COURTE
     # → on garde ton fonctionnement actuel
     # → redirection vers la route de succès du produit
+    # Forces & Défis reste en arrière-plan : sa rédaction Claude peut dépasser
+    # le délai maximal du proxy HTTP alors que le rapport finit correctement.
     # ============================================================
-    if len(valid_products) == 1:
+    if len(valid_products) == 1 and valid_products[0] != "forces_defis":
         current_app.logger.info("🟢 Achat solo détecté : affichage direct")
 
         product_id = valid_products[0]
@@ -630,10 +632,10 @@ def traiter_analyses():
         )
 
     # ============================================================
-    # CAS 2 : PACK / PLUSIEURS ANALYSES
+    # CAS 2 : FORCES & DÉFIS SOLO OU PACK / PLUSIEURS ANALYSES
     # → génération en arrière-plan + email final
     # ============================================================
-    current_app.logger.info("🟣 Pack détecté : génération en arrière-plan")
+    current_app.logger.info("🟣 Génération en arrière-plan : %s", valid_products)
 
     fallback_urls = {}
 

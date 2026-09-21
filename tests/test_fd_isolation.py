@@ -36,6 +36,25 @@ class IsolationTests(unittest.TestCase):
             self.assertNotIn('load_dotenv', source)
             self.assertNotIn('os.environ[', source)
 
+    def test_pdf_uses_forces_defis_running_header(self):
+        tree = ast.parse((ROOT / 'routes/forces_defis_module.py').read_text())
+        calls = [node for node in ast.walk(tree)
+                 if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                 and node.func.id == 'html_to_pdf']
+        self.assertEqual(len(calls), 2)
+        for call in calls:
+            values = {keyword.arg: keyword.value for keyword in call.keywords}
+            self.assertIn('page_header', values)
+            self.assertEqual(ast.literal_eval(values['page_header']),
+                             "Mes Potentiels & Défis - Les Fous d'Astro")
+
+    def test_solo_forces_defis_uses_background_generation(self):
+        source = (ROOT / 'routes/checkout.py').read_text()
+        self.assertIn(
+            'if len(valid_products) == 1 and valid_products[0] != "forces_defis":',
+            source,
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

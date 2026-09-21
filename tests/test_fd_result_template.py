@@ -7,6 +7,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ResultTemplateTests(unittest.TestCase):
+    def test_booking_link_points_to_services_page(self):
+        analysis = (ROOT / 'utils/forces_defis_analyse.py').read_text()
+        self.assertIn('href="https://lesfousdastro.fr/prestations"', analysis)
+        self.assertNotIn('href="https://bycecilecl.com"', analysis)
+
     def test_template_matches_report_family_structure(self):
         template = (ROOT / 'templates/forces_defis_resultat.html').read_text()
         for marker in ('logo-header', 'personal-info', 'content-wrapper',
@@ -19,6 +24,8 @@ class ResultTemplateTests(unittest.TestCase):
         analysis = (ROOT / 'utils/forces_defis_analyse.py').read_text()
         template = (ROOT / 'templates/forces_defis_resultat.html').read_text()
         self.assertIn('class="fd-disclaimer"', analysis)
+        self.assertIn("À lire avant l'analyse.</strong> Texte généré", analysis)
+        self.assertNotIn("À lire avant l'analyse</strong> —", analysis)
         self.assertIn('.content-wrapper .fd-disclaimer', template)
 
 

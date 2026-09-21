@@ -27,6 +27,40 @@ def placements(theme):
     return planets
 
 
+def ascendant_ruler(theme):
+    """Retourne le maître d'Ascendant tropical déjà calculé, avec repli local."""
+    raw = (theme.get('maitre_ascendant_occ') or
+           theme.get('maitre_ascendant_tropical') or
+           theme.get('maitre_ascendant'))
+    if isinstance(raw, dict):
+        ruler = raw.get('nom') or raw.get('planete')
+    elif isinstance(raw, str):
+        ruler = raw.strip().split()[0] if raw.strip() else None
+    else:
+        ruler = None
+
+    planets = placements(theme)
+    if not ruler:
+        asc = planets.get('Ascendant') or theme.get('ascendant') or {}
+        sign = norm(asc.get('signe') or asc.get('sign')) if isinstance(asc, dict) else ''
+        rulers = {
+            'belier': 'Mars', 'taureau': 'Vénus', 'gemeaux': 'Mercure', 'cancer': 'Lune',
+            'lion': 'Soleil', 'vierge': 'Mercure', 'balance': 'Vénus', 'scorpion': 'Pluton',
+            'sagittaire': 'Jupiter', 'capricorne': 'Saturne', 'verseau': 'Uranus',
+            'poissons': 'Neptune',
+        }
+        ruler = rulers.get(sign)
+
+    if not ruler:
+        return None
+    return next((name for name in planets if norm(name) == norm(ruler)), str(ruler))
+
+
+def is_ascendant_ruler(theme, name):
+    ruler = ascendant_ruler(theme)
+    return bool(ruler and norm(ruler) == norm(name))
+
+
 def intercepted_signs(theme):
     data = theme.get('interceptions') or {}
     if isinstance(data, list):
@@ -49,17 +83,26 @@ def planet_context(theme, name):
     name, data = match
     sign = data.get('signe') or data.get('sign') or 'signe non fourni'
     house = data.get('maison') or data.get('house')
-    text = f'{name} en {sign}'
+    ruler = is_ascendant_ruler(theme, name)
+    transsaturnian = norm(name) in {'uranus', 'neptune', 'pluton'}
+    if transsaturnian and not ruler:
+        text = f'{name} (signe omis : donnée générationnelle)'
+    else:
+        text = f'{name} en {sign}'
     text += f', maison {house}' if house else ', maison non fournie'
     if norm(sign) in intercepted_signs(theme):
         text += ', signe intercepté'
     if data.get('retrograde') or data.get('retro'):
         text += ', rétrograde'
+    if ruler:
+        text += ", maître d'Ascendant [priorité renforcée]"
     return text
 
 
 def build_context(theme):
-    lines = [planet_context(theme, name) +
+    ruler = ascendant_ruler(theme)
+    lines = ([f"Maître d'Ascendant tropical : {ruler} [donnée prioritaire]"] if ruler else [])
+    lines += [planet_context(theme, name) +
              (' [Défi]' if norm(name) in {'lune noire', 'lilith'} else '')
              for name in placements(theme)]
     return '\n'.join('- ' + line for line in lines)

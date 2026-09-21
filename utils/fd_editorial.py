@@ -67,7 +67,10 @@ Structure : Tes Défis, Tes Potentiels, Dynamiques mixtes, puis Synthèse.
 
 Construis une lecture, pas un catalogue. Regroupe les éléments qui décrivent une
 même dynamique sans effacer leurs particularités. Ancre chaque interprétation
-dans les signes, maisons et états fournis. Explique le mécanisme psychologique,
+dans les signes, maisons et états fournis. N'interprète jamais Uranus, Neptune ou
+Pluton par leur signe, donnée générationnelle, sauf si la planète est explicitement
+identifiée comme maître d'Ascendant. Ne leur attribue aucune dignité (domicile,
+exaltation, exil ou chute). Explique le mécanisme psychologique,
 ses contradictions, ses manifestations concrètes possibles et les ressources mobilisables.
 
 Tutoiement. Ton direct, incarné, psychologique et mordant, avec une pointe d’humour

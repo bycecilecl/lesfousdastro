@@ -24,7 +24,7 @@ from datetime import datetime
 #   - Idéal quand on génère d’abord un HTML propre puis on le “print” en PDF.
 # ─────────────────────────────────────────────────────────────────────────────
 
-def html_to_pdf(html_content, output_path):
+def html_to_pdf(html_content, output_path, page_header="Point Astral - Les Fous d'Astro"):
     """
     Convertit du HTML en PDF en utilisant WeasyPrint
     Compatible avec votre code existant
@@ -41,13 +41,17 @@ def html_to_pdf(html_content, output_path):
             base_url=os.getcwd()  # Pour résoudre les chemins relatifs
         )
         
+        # Le titre courant est personnalisable par rapport. La valeur par défaut
+        # conserve le rendu historique des appels existants.
+        safe_page_header = str(page_header).replace('\\', '\\\\').replace('"', '\\"')
+
         # Configuration CSS pour WeasyPrint
-        css = weasyprint.CSS(string="""
+        css_text = """
             @page {
                 size: A4;
                 margin: 20mm;
                 @top-center {
-                    content: "Point Astral - Les Fous d'Astro";
+                    content: "__PAGE_HEADER__";
                     font-size: 10px;
                     color: #1f628e;
                 }
@@ -100,7 +104,8 @@ def html_to_pdf(html_content, output_path):
                 color: #144a6b;
                 margin-bottom: 10px !important;
             }
-        """)
+        """
+        css = weasyprint.CSS(string=css_text.replace("__PAGE_HEADER__", safe_page_header))
         
         # Générer le PDF
         pdf_bytes = html_doc.write_pdf(stylesheets=[css])

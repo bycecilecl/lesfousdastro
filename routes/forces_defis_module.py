@@ -231,7 +231,11 @@ def generer_forces_defis_pdf_s3(infos, envoyer_email=False):
 
     pdf_path = private_pdf_path()
 
-    html_to_pdf(html_pdf, pdf_path)
+    html_to_pdf(
+        html_pdf,
+        pdf_path,
+        page_header="Mes Potentiels & Défis - Les Fous d'Astro",
+    )
 
     pdf_final_url = upload_client_pdf(
         pdf_path, key_prefix="forces_defis", download_filename=f"{fname}.pdf"
@@ -475,7 +479,11 @@ def forces_defis_complet():
     outdir = os.path.join(current_app.static_folder, "pdfs")
     os.makedirs(outdir, exist_ok=True)
     pdf_path = os.path.join(outdir, f"{fname}.pdf")
-    html_to_pdf(html_pdf, pdf_path)
+    html_to_pdf(
+        html_pdf,
+        pdf_path,
+        page_header="Mes Potentiels & Défis - Les Fous d'Astro",
+    )
 
     # E) URL finale (S3 si dispo, sinon locale)
     pdf_final_url = None
