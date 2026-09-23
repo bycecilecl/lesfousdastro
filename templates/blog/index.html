@@ -95,6 +95,59 @@ body {
     border-color: #fff;
 }
 
+/* ── Recherche ── */
+.blog-search {
+    max-width: 620px;
+    margin: 0 auto 28px;
+    padding: 0 24px;
+}
+.blog-search__label {
+    display: block;
+    margin-bottom: 8px;
+    color: rgba(255,255,255,0.88);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.blog-search__field {
+    position: relative;
+}
+.blog-search__icon {
+    position: absolute;
+    top: 50%; left: 16px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+.blog-search__input {
+    width: 100%;
+    padding: 13px 42px 13px 44px;
+    border: 1px solid rgba(255,255,255,0.38);
+    border-radius: 28px;
+    background: rgba(255,255,255,0.96);
+    color: var(--text);
+    font: inherit;
+    box-shadow: 0 5px 18px rgba(0, 32, 58, 0.16);
+}
+.blog-search__input:focus {
+    outline: 3px solid rgba(192,240,247,0.62);
+    outline-offset: 2px;
+}
+.blog-search__clear {
+    position: absolute;
+    top: 50%; right: 11px;
+    transform: translateY(-50%);
+    width: 28px; height: 28px;
+    border: 0; border-radius: 50%;
+    background: #dcecf1; color: var(--blue-dark);
+    cursor: pointer; font-size: 1.1rem; line-height: 1;
+}
+.blog-search__clear:hover { background: var(--teal-light); }
+.search-status {
+    min-height: 1.4em;
+    margin-top: 10px;
+    color: rgba(255,255,255,0.84);
+    font-size: 0.88rem;
+}
+
 /* ── Grille articles ── */
 .articles-wrap {
     max-width: 1200px; margin: 0 auto;
@@ -236,6 +289,22 @@ body {
         <h1 class="hero__title">Comprendre ton thème natal sans te noyer dans le jargon</h1>
     </section>
 
+    <form class="blog-search" role="search" onsubmit="return false;">
+        <label class="blog-search__label" for="blog-search-input">Rechercher un article</label>
+        <div class="blog-search__field">
+            <span class="blog-search__icon" aria-hidden="true">⌕</span>
+            <input
+                class="blog-search__input"
+                id="blog-search-input"
+                type="search"
+                name="q"
+                placeholder="Ex. lune, amour, thème natal…"
+                autocomplete="off">
+            <button class="blog-search__clear" type="button" aria-label="Effacer la recherche" hidden>×</button>
+        </div>
+        <p class="search-status" id="search-status" aria-live="polite"></p>
+    </form>
+
     <div class="filters" id="filters">
         <button class="filter-btn active" data-cat="all">Tous les articles</button>
         <button class="filter-btn" data-cat="bases">Les Bases ✍🏼</button>
@@ -253,7 +322,7 @@ body {
         <div class="articles-grid" id="grid">
 
             {% for article in articles %}
-            <a href="{{ url_for('blog.blog_article', slug=article.slug) }}" class="card-link">
+            <a href="{{ url_for('blog.blog_article', slug=article.slug) }}" class="card-link" data-search="{{ (article.title ~ ' ' ~ article.tag ~ ' ' ~ article.category ~ ' ' ~ article.excerpt) | lower }}">
                 <article class="card" data-cats="{{ article.cats | join(' ') }}">
                     {% if article.image %}
                         <img
@@ -275,9 +344,12 @@ body {
                     </div>
                 </article>
             </a>
-            {% else %}
-            <div class="empty-state">Aucun article pour le moment — revenez bientôt !</div>
             {% endfor %}
+            {% if articles %}
+            <div class="empty-state" id="no-results" hidden>Aucun article ne correspond à ta recherche. Les astres sont parfois avares en réponses.</div>
+            {% else %}
+            <div class="empty-state">Aucun article pour le moment — reviens bientôt !</div>
+            {% endif %}
 
         </div>
     </div>
@@ -304,20 +376,64 @@ body {
     }
 })();
 
-document.getElementById('filters').addEventListener('click', function(e) {
+const filters = document.getElementById('filters');
+const searchInput = document.getElementById('blog-search-input');
+const clearSearch = document.querySelector('.blog-search__clear');
+const searchStatus = document.getElementById('search-status');
+const noResults = document.getElementById('no-results');
+let activeCategory = 'all';
+
+function normalize(value) {
+    return (value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
+function filterArticles() {
+    const query = normalize(searchInput.value);
+    const queryTerms = query.split(/\s+/).filter(Boolean);
+    let visibleCount = 0;
+
+    document.querySelectorAll('.card-link').forEach(link => {
+        const card = link.querySelector('.card');
+        const categories = card.dataset.cats.split(' ');
+        const matchesCategory = activeCategory === 'all' || categories.includes(activeCategory);
+        const searchableText = normalize(link.dataset.search);
+        const matchesSearch = queryTerms.every(term => searchableText.includes(term));
+        const isVisible = matchesCategory && matchesSearch;
+        link.hidden = !isVisible;
+        if (isVisible) visibleCount += 1;
+    });
+
+    if (noResults) noResults.hidden = visibleCount !== 0;
+    clearSearch.hidden = !searchInput.value;
+    searchStatus.textContent = query
+        ? `${visibleCount} article${visibleCount > 1 ? 's' : ''} trouvé${visibleCount > 1 ? 's' : ''} pour « ${searchInput.value.trim()} »`
+        : '';
+}
+
+filters.addEventListener('click', function(e) {
     const btn = e.target.closest('.filter-btn');
     if (!btn) return;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const cat = btn.dataset.cat;
-    document.querySelectorAll('.card-link').forEach(link => {
-        const card = link.querySelector('.card');
-        const categories = card.dataset.cats.split(' ');
-        link.style.display =
-            (cat === 'all' || categories.includes(cat))
-                ? ''
-                : 'none';
-    });
+    activeCategory = btn.dataset.cat;
+    filterArticles();
 });
+
+searchInput.addEventListener('input', filterArticles);
+clearSearch.addEventListener('click', function() {
+    searchInput.value = '';
+    filterArticles();
+    searchInput.focus();
+});
+
+const initialQuery = new URLSearchParams(window.location.search).get('q');
+if (initialQuery) {
+    searchInput.value = initialQuery;
+    filterArticles();
+}
 </script>
 {% endblock %}
