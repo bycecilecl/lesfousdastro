@@ -421,6 +421,7 @@ filters.addEventListener('click', function(e) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     activeCategory = btn.dataset.cat;
+    searchInput.value = '';
     filterArticles();
 });
 
