@@ -1,13 +1,25 @@
 """Règles éditoriales locales au rapport Forces & Défis, avant rédaction."""
 from copy import deepcopy
+from html import escape
 import re
 from utils.fd_context import norm
 
 
+def render_report_markdown(text):
+    """Convertit le Markdown du rapport sans exécuter le HTML du modèle."""
+    import markdown
+    text = re.sub(
+        r'^\s*#{1,2}\s*(?:Rapport\s+)?(?:Mes\s+)?Potentiels\s*(?:&|et)\s*Défis\s*\n+',
+        '', str(text or ''), count=1, flags=re.IGNORECASE,
+    )
+    safe_text = escape(text).replace('[', r'\[').replace(']', r'\]')
+    return markdown.markdown(safe_text, extensions=['extra', 'sane_lists'])
+
+
 def excluded_body(name):
     value = norm(str(name).replace('œ', 'oe').replace('Œ', 'OE'))
-    return (any(word in value for word in ('noeud', 'node', 'fortune', 'illumination'))
-            or bool({'rahu', 'ketu', 'junon', 'juno'} & set(value.split())))
+    return (any(word in value for word in ('noeud', 'node', 'fortune', 'illumination', 'junon', 'juno'))
+            or bool({'rahu', 'ketu'} & set(value.split())))
 
 
 def prepare_theme(theme):
@@ -67,29 +79,23 @@ Structure : Tes Défis, Tes Potentiels, Dynamiques mixtes, puis Synthèse.
 
 Construis une lecture, pas un catalogue. Regroupe les éléments qui décrivent une
 même dynamique sans effacer leurs particularités. Ancre chaque interprétation
-dans les signes, maisons et états fournis. N'interprète jamais Uranus, Neptune ou
-Pluton par leur signe, donnée générationnelle, sauf si la planète est explicitement
-identifiée comme maître d'Ascendant. Ne leur attribue aucune dignité (domicile,
-exaltation, exil ou chute). Explique le mécanisme psychologique,
+dans les signes, maisons et états fournis. Explique le mécanisme psychologique,
 ses contradictions, ses manifestations concrètes possibles et les ressources mobilisables.
 
 Tutoiement. Ton direct, incarné, psychologique et mordant, avec une pointe d’humour
 noir pertinente. Pas de flatterie, de métaphores décoratives ni de conseils
 interchangeables. Formule les vécus supposés au conditionnel ; n’invente aucun
 fait astrologique ou biographique. Genre grammatical : {meta.get('genre', 'neutre')}.
+Une maison n'est pas une dignité ni une conjonction à un angle : n'affirme une
+conjonction que si son orbe figure dans les données. N'interprète pas le signe
+d'une transsaturnienne hors maître d'Ascendant.
 
-Développe suffisamment pour donner de la profondeur, sans répétitions.
+Vise 1 700 à 2 100 mots : assez de profondeur, sans répétitions ni inventaire exhaustif.
 Chaque paragraphe traite quatre dynamiques maximum, sans chercher à atteindre ce plafond.
 
-Utilise obligatoirement ces titres Markdown exacts, dans cet ordre :
-## Tes Défis
-## Tes Potentiels
-## Dynamiques mixtes
-## Synthèse
-Ne remplace jamais ces titres par de simples séparateurs « --- ».
-
-La synthèse relie les enjeux dominants et montre comment les ressources peuvent
-répondre aux défis. Elle dégage un fil conducteur, sans refaire la liste des configurations.
+La synthèse ne refait pas la liste. Elle isole le point de bascule du thème :
+comment une ressource sélectionnée répond au défi dominant, dans un vécu possible
+et concret. Garde un fil conducteur, sans conseil interchangeable.
 
 DONNÉES DU THÈME :
 {placements}

@@ -8,7 +8,6 @@ Soleil;Vierge;neutre;defis;2;Besoin de perfection et d’utilité. Identité tou
 Soleil;Balance;chute;defis;4.5;Recherche d’approbation et besoin d’harmonie. Difficulté à affirmer son individualité sans dépendre du regard d’autrui.;
 Soleil;Scorpion;neutre;mixte;2;Volonté intense et passionnée. Besoin de transformation et de contrôle, tendance à vivre en profondeur chaque expérience.;
 Soleil;Sagittaire;neutre;force;2;Foi, enthousiasme et vision. Identité expansive et aventurière, besoin d’un but supérieur pour guider la vie.;
-Soleil;Capricorne;exaltation;force;4.8;Ambition, endurance et maîtrise. Identité construite sur la rigueur et la fiabilité. Risque de se définir uniquement par la réussite.;
 Soleil;Verseau;exil;defis;4;Individualisme fort, originalité et détachement émotionnel. Peut se sentir différent ou marginal, cherche sa propre voie.;
 Soleil;Poissons;neutre;mixte;2;Empathie, imagination et foi intérieure. Identité perméable, parfois floue ou indécise. Besoin d’un ancrage spirituel.;
 Soleil;Tous;retrograde;defis;4.5;Remise en question de l’identité. Introspection sur la place dans le monde, expression plus intériorisée du rayonnement personnel.;
@@ -33,8 +32,7 @@ Mercure;Lion;neutre;force;3;Communication confiante et expressive. Tendance à d
 Mercure;Vierge;domicile;force;4.5;Esprit analytique, précis et rigoureux. Capacité de synthèse et sens du détail.;
 Mercure;Balance;neutre;mixte;2;Communication diplomate, besoin d’équilibre dans les échanges. Peut hésiter à trancher.;
 Mercure;Scorpion;neutre;mixte;3;Esprit perçant, lucide et stratégique. Tendance à l’obsession mentale, intensité psychique.;
-Mercure;Sagittaire;exil;defis;2;Jugements rapides, idéalisme excessif. Difficulté à écouter ou à adapter sa pensée.;
-Mercure;Capricorne;exaltation;force;3;Pensée structurée et pragmatique. Capacité à organiser, planifier et concrétiser les idées.;
+Mercure;Sagittaire;exil;defis;3;Pensée portée vers la vue d'ensemble, parfois au détriment des nuances ou des faits concrets. Défi : articuler conviction et vérification.;
 Mercure;Verseau;neutre;mixte;3;Esprit visionnaire, original, mais nerveux et parfois coupé de l’émotion. Communication brillante mais distante. Capacité d’analyse intuitive, besoin de liberté mentale.;
 Mercure;Poissons;chute;defis;4;Flou mental, intuition inspirée. Difficulté à garder le fil rationnel, mais grande imagination.;
 Mercure;Tous;retrograde;defis;4.5;Communication intériorisée, réflexion profonde. Besoin de réviser, ralentir. Génie introspectif.;
@@ -73,18 +71,18 @@ Jupiter;Capricorne;chute;defis;4;Pragmatisme et ambition retenue. Succès lent m
 Jupiter;Verseau;neutre;force;2;Ouverture humaniste, vision globale. Foi dans le progrès et la collectivité. Esprit libre et indépendant.;
 Jupiter;Poissons;domicile;force;5;Compassion, imagination et foi profonde. Croissance spirituelle, intuition développée. Tendance à l’idéalisme.;
 Jupiter;Tous;retrograde;defis;3.5;Expansion intériorisée, quête de sens personnelle. Foi intérieure plus que sociale. Besoin de redéfinir ses croyances.;
-Saturne,Bélier,chute,defis,4.5,L’énergie brute du Bélier rencontre la retenue de Saturne : difficulté à agir spontanément, peur d’échouer ou d’être jugé. L’apprentissage passe par la patience et le courage tranquille.
-Saturne,Taureau,neutre,mixte,3.5,Recherche de stabilité et de sécurité à tout prix. Saturne solidifie le Taureau mais le rend lent à évoluer. Apprendre à ne pas tout contrôler matériellement.
-Saturne,Gémeaux,neutre,mixte,3.0,Esprit rigoureux mais anxieux. Tendance à douter de sa pensée ou à trop rationaliser. L’équilibre se trouve dans la curiosité disciplinée.
-Saturne,Cancer,exil,defis,4.5,Crainte d’être vulnérable, peur du rejet affectif. Difficulté à se sentir “chez soi” émotionnellement. L’équilibre passe par la confiance et la tendresse maîtrisée.
-Saturne,Lion,exil,defis,4.5,Volonté et autorité se heurtent. Peur de ne pas être reconnu ou de mal briller. L’humilité devient la clé pour rayonner avec justesse et non par besoin d’approbation.
-Saturne,Vierge,domicile,mixte,4.0,Le besoin de perfection devient parfois tyrannique. Maîtrise et rigueur extrême, mais peur constante de l’erreur. L’évolution vient du relâchement et de la confiance dans le processus.
-Saturne,Balance,exaltation,mixte,4.5,Quête d’équilibre relationnel souvent atteinte après des déséquilibres répétés. Saturne teste les limites du lien jusqu’à ce que la justice et la réciprocité deviennent naturelles.
-Saturne,Scorpion,neutre,mixte,4.0,Endurance émotionnelle et besoin de contrôle sur la vulnérabilité. Saturne pousse ici à se régénérer sans s’enfermer dans la rigidité ou la méfiance.
-Saturne,Sagittaire,neutre,mixte,3.5,Foi et morale mises à l’épreuve. L’idéal se structure lentement, souvent après des désillusions. Trouver une sagesse vécue plutôt que théorique.
-Saturne,Capricorne,domicile,mixte,4.5,Responsabilité et exigence maximales. Maîtrise gagnée par l’effort. Saturne ici apprend la solitude constructive et la force du temps long.
-Saturne,Verseau,domicile,mixte,4.0,Indépendance et rigueur intellectuelle. Tendance à se détacher des émotions pour rester lucide. Le défi : humaniser sa vision sans la rigidifier.
-Saturne,Poissons,neutre,defis,3.5,Frontière floue entre compassion et fuite. Saturne apprend ici à canaliser la sensibilité sans se dissoudre. Discipline émotionnelle à développer.
+Saturne;Bélier;chute;defis;4.5;L’énergie brute du Bélier rencontre la retenue de Saturne : difficulté à agir spontanément, peur d’échouer ou d’être jugé. L’apprentissage passe par la patience et le courage tranquille.;
+Saturne;Taureau;neutre;mixte;3.5;Recherche de stabilité et de sécurité à tout prix. Saturne solidifie le Taureau mais le rend lent à évoluer. Apprendre à ne pas tout contrôler matériellement.;
+Saturne;Gémeaux;neutre;mixte;3.0;Esprit rigoureux mais anxieux. Tendance à douter de sa pensée ou à trop rationaliser. L’équilibre se trouve dans la curiosité disciplinée.;
+Saturne;Cancer;exil;defis;4.5;Crainte d’être vulnérable, peur du rejet affectif. Difficulté à se sentir “chez soi” émotionnellement. L’équilibre passe par la confiance et la tendresse maîtrisée.;
+Saturne;Lion;exil;defis;4.5;Volonté et autorité se heurtent. Peur de ne pas être reconnu ou de mal briller. L’humilité devient la clé pour rayonner avec justesse et non par besoin d’approbation.;
+Saturne;Vierge;neutre;mixte;2.0;Rigueur et sens du détail, sans dignité particulière.;
+Saturne;Balance;exaltation;mixte;4.5;Quête d’équilibre relationnel souvent atteinte après des déséquilibres répétés. Saturne teste les limites du lien jusqu’à ce que la justice et la réciprocité deviennent naturelles.;
+Saturne;Scorpion;neutre;mixte;4.0;Endurance émotionnelle et besoin de contrôle sur la vulnérabilité. Saturne pousse ici à se régénérer sans s’enfermer dans la rigidité ou la méfiance.;
+Saturne;Sagittaire;neutre;mixte;3.5;Foi et morale mises à l’épreuve. L’idéal se structure lentement, souvent après des désillusions. Trouver une sagesse vécue plutôt que théorique.;
+Saturne;Capricorne;domicile;mixte;4.5;Responsabilité et exigence maximales. Maîtrise gagnée par l’effort. Saturne ici apprend la solitude constructive et la force du temps long.;
+Saturne;Verseau;domicile;mixte;4.0;Indépendance et rigueur intellectuelle. Tendance à se détacher des émotions pour rester lucide. Le défi : humaniser sa vision sans la rigidifier.;
+Saturne;Poissons;neutre;defis;3.5;Frontière floue entre compassion et fuite. Saturne apprend ici à canaliser la sensibilité sans se dissoudre. Discipline émotionnelle à développer.;
 Uranus;Bélier;neutre;force;2;Besoin d’indépendance et de nouveauté. Rébellion instinctive, intuition d’action. Risque de brusquer les autres.;
 Uranus;Taureau;chute;defis;2;Conflit entre stabilité et liberté. Changements lents mais irréversibles. Difficulté à lâcher les attachements.;
 Uranus;Gémeaux;neutre;force;2;Esprit inventif, vif et adaptable. Génie du lien et des idées nouvelles. Attention à la nervosité mentale.;

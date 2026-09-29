@@ -6,7 +6,8 @@ import unicodedata
 import unittest
 from pathlib import Path
 from utils.fd_editorial import (prepare_theme, classify, priority_tension,
-                                report_prompt, ensure_report_sections)
+                                report_prompt, ensure_report_sections,
+                                render_report_markdown)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -91,6 +92,30 @@ class EditorialTests(unittest.TestCase):
         self.assertLess(challenges.index('Soleil conjonction Neptune'), challenges.index('Venus carre Pluton'))
         self.assertNotIn('Fatigue chronique', text)
 
+    def test_deduplicated_placements_and_aspects(self):
+        ns = selection_functions()
+        theme = {'planetes': {
+            'Lune': {'signe': 'Cancer', 'maison': 2},
+            'Neptune': {'signe': 'Cancer', 'maison': 8},
+            'Mars': {'signe': 'Scorpion', 'maison': 12}},
+            'aspects': [dict(p1='Lune', p2='Neptune', type='conjonction', orb=1)]}
+        selected = ns['build_unified_priorities'](theme)
+        self.assertEqual(selected.count('**Lune conjonction Neptune**'), 1)
+        self.assertEqual(selected.count('**Mars en maison XII**'), 1)
+
+    def test_false_dignities_are_absent_from_report_barreme(self):
+        with (ROOT / 'data/forces_defis_report/etat_planetes.csv').open() as handle:
+            rows = list(csv.DictReader(handle, delimiter=';'))
+        false_dignities = {('Soleil', 'Capricorne', 'exaltation'),
+                           ('Mercure', 'Capricorne', 'exaltation'),
+                           ('Saturne', 'Vierge', 'domicile')}
+        self.assertFalse(false_dignities & {
+            (row['PLANETE'], row['SIGNE'], row['ETAT']) for row in rows
+        })
+        saturn_virgo = next(row for row in rows
+                            if row['PLANETE'] == 'Saturne' and row['SIGNE'] == 'Vierge')
+        self.assertLess(float(saturn_virgo['SCORE']), 3)
+
     def test_angle_quinconces_removed_planet_quinconces_kept(self):
         ns = selection_functions()
         for angle in ('Ascendant', 'MC', 'FC', 'Descendant'):
@@ -106,8 +131,20 @@ class EditorialTests(unittest.TestCase):
         self.assertIn('quatre dynamiques maximum', prompt)
         self.assertNotIn('EXCLUSIONS', prompt)
         self.assertNotIn('ORDRE IMPÉRATIF', prompt)
-        self.assertIn("N'interprète jamais Uranus, Neptune ou", prompt)
-        self.assertIn("Ne leur attribue aucune dignité", prompt)
+        self.assertIn("N'interprète pas le signe", prompt)
+        self.assertIn("n'affirme une", prompt)
+        self.assertIn("Vise 1 700 à 2 100 mots", prompt)
+
+    def test_markdown_emphasis_is_safe_and_redundant_title_is_removed(self):
+        html = render_report_markdown(
+            '# Rapport Potentiels & Défis\n\n## Tes Défis\n\nTu *sondes*. '
+            '<script>alert(1)</script> [clic](javascript:alert(1))'
+        )
+        self.assertNotIn('Rapport Potentiels', html)
+        self.assertIn('<h2>Tes Défis</h2>', html)
+        self.assertIn('<em>sondes</em>', html)
+        self.assertNotIn('<script>', html)
+        self.assertNotIn('<a ', html)
 
     def test_missing_headings_are_restored_from_separators(self):
         text = 'défis\n---\npotentiels\n---\nmixtes\n---\nsynthèse'

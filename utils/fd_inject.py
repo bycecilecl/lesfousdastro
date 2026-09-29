@@ -802,8 +802,19 @@ def detect_placements_maisons(theme: dict,
                     "categorie": categorie
                 })
     
-    results.sort(key=lambda x: -x['score'])
-    return results[:limit]
+    # Une planète dans la même maison peut avoir plusieurs lignes au barème.
+    # Ne transmettre que la lecture dominante de ce placement.
+    by_placement = {}
+    type_rank = {'defis': 2, 'defi': 2, 'mixte': 1, 'force': 0}
+    for item in results:
+        key = (_norm(item['planete']), item['maison'])
+        current = by_placement.get(key)
+        if current is None or (item['score'], type_rank.get(item['type'], -1)) > (
+                current['score'], type_rank.get(current['type'], -1)):
+            by_placement[key] = item
+    unique_results = list(by_placement.values())
+    unique_results.sort(key=lambda x: -x['score'])
+    return unique_results[:limit]
 
 def _regrouper_dignites_par_planete(items: list[dict]) -> list[dict]:
     """Fusionne les entrées de dignités/rétro pour une même planète."""
@@ -878,7 +889,8 @@ def _regrouper_dignites_par_planete(items: list[dict]) -> list[dict]:
 def build_unified_priorities(theme: dict,
                              min_score: float = 3.0,
                              limit: int = 30,
-                             style: str = "v2") -> str:
+                             style: str = "v2",
+                             return_items: bool = False):
     from utils.fd_editorial import prepare_theme, body_name, classify, priority_tension
     from utils.fd_context import ascendant_ruler, norm as context_norm
     theme = prepare_theme(theme)
@@ -894,24 +906,8 @@ def build_unified_priorities(theme: dict,
     except Exception as e:
         print(f"[FD_INJECT] Erreur conjonctions angles: {e}")
 
-    # Fallback : maisons I et X
-    if not any("(angle)" in (x.get("categorie") or "") for x in all_priorities):
-        try:
-            maisons_I_X = []
-            for nom, p in (theme.get("planetes") or {}).items():
-                h = p.get("maison") or p.get("house")
-                if str(h) in ("1", "10"):
-                    maisons_I_X.append(nom)
-            if maisons_I_X:
-                all_priorities.append({
-                    "categorie": "MIXTE (angle)",
-                    "description": f"Planètes angulaires (I/X) : {', '.join(maisons_I_X)}",
-                    "orb": None,
-                    "score": 3.8,
-                    "comment": "Présence directe, visibilité, impact sur l'identité (I) et la vocation (X)."
-                })
-        except Exception:
-            pass
+    # Une maison I ou X ne prouve pas une conjonction à un angle.
+    # Les placements y sont déjà décrits par le barème des maisons.
 
     # 2) DÉFIS (aspects)
     defis = detect_aspects_from_csv(theme, "defis", min_score, 999)
@@ -919,6 +915,7 @@ def build_unified_priorities(theme: dict,
         all_priorities.append({
             "categorie": "DÉFI (aspect)",
             "description": f"{d['p1'].title()} {d['aspect']} {d['p2'].title()}",
+            "aspect_key": (_pair_key(d['p1'], d['p2']), _norm_aspect(d['aspect'])),
             "orb": d.get('orb'),
             "score": d['score'],
             "comment": d['comment']
@@ -930,6 +927,7 @@ def build_unified_priorities(theme: dict,
         all_priorities.append({
             "categorie": "FORCE (aspect)",
             "description": f"{f['p1'].title()} {f['aspect']} {f['p2'].title()}",
+            "aspect_key": (_pair_key(f['p1'], f['p2']), _norm_aspect(f['aspect'])),
             "orb": f.get('orb'),
             "score": f['score'],
             "comment": f['comment']
@@ -941,6 +939,7 @@ def build_unified_priorities(theme: dict,
         all_priorities.append({
             "categorie": "MIXTE (aspect)",
             "description": f"{m['p1'].title()} {m['aspect']} {m['p2'].title()}",
+            "aspect_key": (_pair_key(m['p1'], m['p2']), _norm_aspect(m['aspect'])),
             "orb": m.get('orb'),
             "score": m['score'],
             "comment": m['comment']
@@ -1123,7 +1122,23 @@ def build_unified_priorities(theme: dict,
             return 6
         return 7
 
-    all_priorities = classify(all_priorities)
+    # Une même paire/type d'aspect peut être présente dans plusieurs lignes CSV.
+    # Conserver le score maximal, puis Défi > Mixte > Force à score égal.
+    deduped_aspects = {}
+    other_priorities = []
+    category_rank = {'DEFI': 2, 'MIXTE': 1, 'FORCE': 0}
+    for item in all_priorities:
+        key = item.get('aspect_key')
+        if key is None:
+            other_priorities.append(item)
+            continue
+        current = deduped_aspects.get(key)
+        value = (item.get('score', 0), category_rank.get(_cat_key(item.get('categorie')).split()[0], -1))
+        if current is None or value > (
+                current.get('score', 0),
+                category_rank.get(_cat_key(current.get('categorie')).split()[0], -1)):
+            deduped_aspects[key] = item
+    all_priorities = classify(other_priorities + list(deduped_aspects.values()))
     if ruler:
         ruler_norm = context_norm(ruler)
         for item in all_priorities:
@@ -1207,4 +1222,5 @@ def build_unified_priorities(theme: dict,
             lines.append(f"{i}. **{item['description']}**{orb}")
             lines.append(f"   Score: **{item['score']}** — {item['comment']}\n")
 
-    return "\n".join(lines).strip()
+    markdown = "\n".join(lines).strip()
+    return (markdown, top) if return_items else markdown

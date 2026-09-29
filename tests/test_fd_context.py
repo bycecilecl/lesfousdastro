@@ -49,6 +49,23 @@ class FiguresTests(unittest.TestCase):
         self.assertEqual(figures[0]['type'], 'stellium')
         self.assertEqual(figures[0]['categorie'], 'Dynamiques mixtes')
 
+    def test_sign_concentration_is_not_mistaken_for_conjunction(self):
+        theme = theme_at({'Soleil': 279.04, 'Neptune': 274.52, 'Mercure': 285.69})
+        description = configurations(theme)
+        self.assertIn('Concentration par signe', description)
+        self.assertIn('hors orbe de conjonction', description)
+        self.assertIn('11.17°', description)
+
+    def test_diamond_is_a_potential_without_changing_shared_engine(self):
+        theme = theme_at({'Soleil': 0, 'Lune': 120, 'Mars': 240, 'Vénus': 180})
+        theme['aspects'] = [dict(p1='Vénus', p2='Lune', type='sextile', orb=0),
+                            dict(p1='Vénus', p2='Mars', type='sextile', orb=0)]
+        figures = major_figures(theme)
+        diamonds = [f for f in figures if f['type'] == 'diamant']
+        self.assertEqual(len(diamonds), 1)
+        self.assertEqual(diamonds[0]['categorie'], 'Tes Potentiels')
+        self.assertIn('Diamant (cerf-volant)', configurations(theme, figures))
+
     def test_unrelated_aspects_do_not_make_t_square(self):
         theme = {'aspects': [dict(p1=a, p2=b, type=t, orb=0) for a, b, t in
                             [('Soleil', 'Lune', 'opposition'),
@@ -79,6 +96,23 @@ class FiguresTests(unittest.TestCase):
         self.assertFalse(valid_dignity('Soleil', 'Capricorne', 'exaltation'))
         self.assertTrue(valid_dignity('Soleil', 'Bélier', 'exaltation'))
         self.assertTrue(valid_dignity('Jupiter', 'Vierge', 'exil'))
+
+    def test_unselected_chiron_does_not_enter_report_context(self):
+        theme = {'planetes': {'Soleil': {'signe': 'Bélier', 'maison': 1},
+                             'Chiron': {'signe': 'Cancer', 'maison': 4}}}
+        self.assertNotIn('Chiron', build_context(theme, selected_bodies=set()))
+        self.assertIn('Chiron', build_context(theme, selected_bodies={'chiron'}))
+
+    def test_saturn_dignities_are_read_from_csv(self):
+        path = ROOT / 'data' / 'forces_defis_report' / 'etat_planetes.csv'
+        with path.open() as handle:
+            rows = list(csv.DictReader(handle, delimiter=';'))
+        saturn = [row for row in rows if row['PLANETE'] == 'Saturne']
+        self.assertEqual(len(saturn), 12)
+        balance = next(row for row in saturn if row['SIGNE'] == 'Balance')
+        self.assertEqual(balance['ETAT'], 'exaltation')
+        self.assertEqual(balance['TYPE'], 'mixte')
+        self.assertEqual(float(balance['SCORE']), 4.5)
 
     def test_ascendant_ruler_is_transmitted_and_prioritised_in_t_square(self):
         theme = theme_at({'Soleil': 0, 'Lune': 180, 'Uranus': 90})
@@ -150,8 +184,9 @@ class FiguresTests(unittest.TestCase):
             extraire_forces_defis_par_maisons=lambda t: {},
             _genre_directives=lambda m: '', interroger_llm=fake_llm,
             logger=logging.getLogger('test.fd'),
-            md_light_to_html=lambda text: text,
-            _birth_header_html=lambda *a: '', DISCLAIMER_FORCES_DEFIS_HTML='')
+            render_report_markdown=lambda text: text,
+            escape=lambda text: text,
+            _birth_header_html=lambda *a: '')
         exec(compile(tree, 'forces_defis_analyse.py', 'exec'), ns)
         with contextlib.redirect_stdout(io.StringIO()):
             result = ns['analyse_forces_defis'](theme_at({'Soleil': 0, 'Lune': 180, 'Mars': 90}))

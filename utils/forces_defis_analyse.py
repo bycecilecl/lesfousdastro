@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from utils.selection_donnees import construire_selection_point_astral
 from utils.fd_claude import interroger_llm
-from utils.convert_markdown_light import md_light_to_html
+from html import escape
+from utils.fd_editorial import render_report_markdown
 from utils.fd_inject import build_unified_priorities
 import logging
 logger = logging.getLogger(__name__)
@@ -139,24 +140,6 @@ def get_retrogrades_occidentales(data_theme: dict) -> list[str]:
         or {}
     )
     return [DISPLAY_FIX.get(name, name) for name in _detecter_retrogrades_locales(occ)]
-
-DISCLAIMER_FORCES_DEFIS_HTML = r"""
-<div class="fd-disclaimer" style="display:flex;justify-content:center;margin:12px 0 18px;">
-  <div style="max-width:720px;width:100%;
-              border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;
-              padding:10px 14px;font-size:12.5px;line-height:1.55;color:#555;">
-    <p style="margin:0 0 6px 0;">
-      <strong style="font-weight:600;">À lire avant l'analyse.</strong> Texte généré automatiquement à partir de
-      placements saillants (aspects, maisons, angles). Les potentiels et défis sont regroupés
-      autour des configurations majeures, avec leur contexte en signes, maisons et interceptions.
-      Ce n'est <em>pas</em> une consultation : l'interprétation dépend de ton histoire et de ton niveau d'intégration.
-      Pour une lecture <strong>plus complète</strong> (liens entre tous les éléments), consulte le <em>Point Astral</em>
-      — ou réserve une <strong>consultation</strong> personnalisée.
-      <a href="https://lesfousdastro.fr/prestations" target="_blank" rel="noopener" style="color:#1f628e;text-decoration:none;">Prendre rendez-vous</a>
-    </p>
-  </div>
-</div>
-"""
 
 try:
     from utils.forces_defis import generer_forces_defis as _GENERER_FORCES_DEFIS
@@ -724,10 +707,10 @@ def _birth_header_html(data_theme: dict, meta: dict | None = None) -> str:
     if not any([birth_dt, birth_tm, birth_pl]):
         return ""
 
-    line = " — ".join([x for x in (birth_dt, birth_tm, birth_pl) if x])
+    line = " — ".join(escape(str(x)) for x in (birth_dt, birth_tm, birth_pl) if x)
 
     return (
-        f"<p style='margin:4px 0 8px; text-align:center; font-size:14px; color:#666;'>{line}</p>"
+        f"<p class='fd-birth-header' style='margin:4px 0 8px; text-align:center; font-size:14px; color:#666;'>{line}</p>"
     )
 
 def analyse_forces_defis(data_theme, meta=None) -> str:
@@ -758,14 +741,20 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
         bloc_contexte = f"{bloc_contexte}\n\n### Contexte global\n{ctx_global.strip()}"
 
     priorities_md = ""
+    priority_items = []
     try:
-        priorities_md = build_unified_priorities(
+        selection = build_unified_priorities(
             data_theme,
             min_score=3.0,
             # Les configurations sont les unités d'analyse ; les aspects
             # individuels servent ensuite à les nuancer.
-            limit=30
+            limit=30,
+            return_items=True,
         )
+        if isinstance(selection, tuple):
+            priorities_md, priority_items = selection
+        else:
+            priorities_md = selection
         if priorities_md:
             bloc_contexte = f"{bloc_contexte}\n\n{priorities_md}"
     except Exception as e:
@@ -793,8 +782,14 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
 
     from utils.fd_context import build_context, configurations
     from utils.fd_figures import major_figures
-    bloc_placements_simple = build_context(data_theme)
     figures = major_figures(data_theme)
+    selected_bodies = set()
+    if any('chiron' in str(item.get('description', '')).lower() for item in priority_items):
+        selected_bodies.add('chiron')
+    if any('chiron' in str(name).lower() for figure in figures
+           for name in figure.get('planetes', [])):
+        selected_bodies.add('chiron')
+    bloc_placements_simple = build_context(data_theme, selected_bodies=selected_bodies)
     bloc_configurations = configurations(data_theme, figures)
 
     from utils.fd_editorial import report_prompt
@@ -843,10 +838,10 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
             )
 
         try:
-            html_core = md_light_to_html(texte or "")
+            html_core = render_report_markdown(texte or "")
         except Exception as conv_err:
             print(f"[FD] Erreur conversion md_light_to_html: {conv_err}")
-            html_core = f"<pre style='white-space:pre-wrap'>{(texte or '')}</pre>"
+            html_core = f"<pre style='white-space:pre-wrap'>{escape(texte or '')}</pre>"
 
     except Exception as gen_err:
         print(f"[FD] Erreur génération: {gen_err}")
@@ -854,6 +849,6 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
 
 
     header_birth = _birth_header_html(data_theme, meta)
-    html_final = f"{header_birth}{DISCLAIMER_FORCES_DEFIS_HTML}\n{html_core}"
+    html_final = f"{header_birth}{html_core}"
 
     return html_final

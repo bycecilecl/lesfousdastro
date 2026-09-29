@@ -8,6 +8,49 @@ from utils.fd_context import (norm, placements, planet_context, concentration_re
                               ascendant_ruler)
 
 
+def _diamants_du_rapport(figures, aspects):
+    """Détecte les cerfs-volants pour ce rapport sans changer le moteur partagé."""
+    index = {(frozenset((a['planete1'], a['planete2'])), a['aspect']): a
+             for a in aspects}
+
+    def linked(a, b, kind):
+        return index.get((frozenset((a, b)), kind))
+
+    results = []
+    seen = set()
+    bodies = {body for a in aspects for body in (a['planete1'], a['planete2'])
+              if body in engine.CORPS_CONFIGURATIONS_MAJEURES}
+    for trigone in (f for f in figures if f['type'] == 'grand_trigone'):
+        summits = trigone.get('sommets') or [[p] for p in trigone['planetes']]
+        if len(summits) != 3 or any(len(s) != 1 for s in summits):
+            continue
+        vertices = [s[0] for s in summits]
+        for opposite in vertices:
+            others = [p for p in vertices if p != opposite]
+            candidates = {tip for tip in bodies - set(vertices)
+                          if linked(tip, opposite, 'opposition')
+                          and all(linked(tip, p, 'sextile') for p in others)}
+            while candidates:
+                group = {min(candidates)}
+                candidates -= group
+                frontier = list(group)
+                while frontier:
+                    current = frontier.pop()
+                    joined = {p for p in candidates if linked(current, p, 'conjonction')}
+                    candidates -= joined
+                    group |= joined
+                    frontier.extend(joined)
+                members = tuple(sorted(set(vertices) | group))
+                if members in seen:
+                    continue
+                seen.add(members)
+                results.append({'type': 'diamant', 'label': 'Diamant (cerf-volant)',
+                                'categorie': 'Tes Potentiels', 'planetes': list(members),
+                                'sommets_grand_trigone': vertices,
+                                'pointe': sorted(group), 'sommet_oppose': opposite})
+    return results
+
+
 def major_figures(theme):
     """Figures hors quotas CSV ; règles et orbes du moteur existant conservés."""
     aliases = {norm(n): n for n in engine.CORPS_CONFIGURATIONS_MAJEURES | engine.POINTS_CONJONCTIONS_IDENTITAIRES}
@@ -74,6 +117,7 @@ def major_figures(theme):
         if figure.get('type') in categories:
             category, label = categories[figure['type']]
             records.append({**figure, 'categorie': category, 'label': label})
+    records.extend(_diamants_du_rapport(records, list(aspects.values())))
     stelliums = [set(r['planetes']) for r in records if r['type'] == 'stellium']
     records.extend(r for r in concentration_records(theme)
                    if not any({canonical(p) for p in r['planetes']} <= members for members in stelliums))
@@ -82,6 +126,25 @@ def major_figures(theme):
 
 def figure_description(theme, figure):
     text = figure['label'] + ' : ' + ' ; '.join(planet_context(theme, n) for n in figure['planetes'])
+    if figure.get('type') == 'concentration' and figure['label'].startswith('Concentration par'):
+        positions = {}
+        for name in figure['planetes']:
+            data = next((value for key, value in placements(theme).items()
+                         if norm(key) == norm(name)), {})
+            value = next((data.get(key) for key in
+                          ('longitude', 'lon', 'ecliptic_longitude', 'degre')
+                          if data.get(key) is not None), None)
+            try:
+                positions[name] = float(value) % 360
+            except (TypeError, ValueError):
+                pass
+        if len(positions) >= 2:
+            pairs = ((abs((a_lon - b_lon + 180) % 360 - 180), a, b)
+                     for (a, a_lon), (b, b_lon) in combinations(positions.items(), 2))
+            gap, a, b = max(pairs)
+            if gap > engine.ORBE_CONJONCTION_BLOC:
+                text += (f'. {a}–{b} : écart {gap:.2f}°, hors orbe de conjonction '
+                         f'de {engine.ORBE_CONJONCTION_BLOC:g}°')
     if any(norm(n) in {'lune noire', 'lilith'} for n in figure['planetes']):
         text += '. Composante Lune Noire : Défi'
     focal = figure.get('planetes_focales') or ([figure['planete_focale']] if figure.get('planete_focale') else [])

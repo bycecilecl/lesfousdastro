@@ -99,12 +99,15 @@ def planet_context(theme, name):
     return text
 
 
-def build_context(theme):
+def build_context(theme, selected_bodies=None):
+    """Contexte du rapport ; Chiron n'entre que s'il est réellement sélectionné."""
     ruler = ascendant_ruler(theme)
     lines = ([f"Maître d'Ascendant tropical : {ruler} [donnée prioritaire]"] if ruler else [])
     lines += [planet_context(theme, name) +
              (' [Défi]' if norm(name) in {'lune noire', 'lilith'} else '')
-             for name in placements(theme)]
+             for name in placements(theme)
+             if (norm(name) != 'chiron' or selected_bodies is None
+                 or 'chiron' in {norm(body) for body in selected_bodies})]
     return '\n'.join('- ' + line for line in lines)
 
 

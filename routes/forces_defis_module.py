@@ -5,7 +5,7 @@ from services.generation_access import paid_analysis
 from flask import Blueprint, render_template, session, request, redirect, url_for, current_app
 import inspect
 import re
-from markupsafe import Markup
+from markupsafe import Markup, escape as escape_html
 from datetime import datetime
 from threading import Thread
 import os, base64
@@ -98,10 +98,10 @@ def _to_float_or_none(x):
         return None
     
 def _html_pdf_forces_defis_pack(texte_sections_html: str, infos: dict, logo_base64: str = "") -> str:
-    nom = infos.get("nom", "Analyse Anonyme")
-    date_naissance = infos.get("date_naissance", "")
-    heure_naissance = infos.get("heure_naissance", "")
-    lieu_naissance = infos.get("lieu_naissance", "")
+    nom = escape_html(str(infos.get("nom", "Analyse Anonyme")))
+    date_naissance = escape_html(str(infos.get("date_naissance", "")))
+    heure_naissance = escape_html(str(infos.get("heure_naissance", "")))
+    lieu_naissance = escape_html(str(infos.get("lieu_naissance", "")))
 
     logo_html = (
         f'<img src="data:image/webp;base64,{logo_base64}" '
@@ -119,6 +119,7 @@ body{{font-family:Georgia,serif;color:#2c3e50;margin:0;padding:40px;}}
 .container{{max-width:800px;margin:0 auto;}}
 h1{{text-align:center;margin:0 0 6px;font-size:24px}}
 .info{{text-align:center;color:#666;font-size:14px;margin:0 0 16px}}
+.fd-birth-header{{display:none}}
 h2{{color:#34495e;border-bottom:2px solid #3498db;padding-bottom:5px;margin-top:28px}}
 p{{text-align:justify;line-height:1.6}}
 .disclaimer{{background:#f8f9fa;border:1px solid #dee2e6;padding:16px;border-radius:8px;font-size:13px;color:#555;margin-top:22px}}
@@ -131,7 +132,10 @@ p{{text-align:justify;line-height:1.6}}
 <p class="info">{date_naissance} — {heure_naissance} — {lieu_naissance}</p>
 {texte_sections_html}
 <div class="disclaimer">
-<strong>Note :</strong> Analyse générée automatiquement depuis ton thème natal, focalisée sur tes appuis et tes axes de croissance. Elle n’est pas une consultation individuelle.
+<strong>À propos de cette lecture :</strong> analyse ciblée des tensions et ressources de ton thème,
+rédigée avec l'aide de l'IA selon ma méthode astrologique. Une consultation permet de confronter
+ces pistes à ton vécu et d'aller plus loin.
+<a href="https://lesfousdastro.fr/prestations">Prendre rendez-vous</a>.
 </div>
 </div>
 </body>
@@ -432,10 +436,10 @@ def forces_defis_complet():
     # ===== PDF + EMAIL + TRACE (même logique que Flash) =====
     # A) HTML dédié PDF (sobre/imprimable)
     def _html_pdf_forces_defis(texte_sections_html: str, infos: dict, logo_base64: str = "") -> str:
-        nom = infos.get("nom", "Analyse Anonyme")
-        date_naissance = infos.get("date_naissance", "")
-        heure_naissance = infos.get("heure_naissance", "")
-        lieu_naissance = infos.get("lieu_naissance", "")
+        nom = escape_html(str(infos.get("nom", "Analyse Anonyme")))
+        date_naissance = escape_html(str(infos.get("date_naissance", "")))
+        heure_naissance = escape_html(str(infos.get("heure_naissance", "")))
+        lieu_naissance = escape_html(str(infos.get("lieu_naissance", "")))
         logo_html = f'<img src="data:image/webp;base64,{logo_base64}" alt="Logo" style="max-width:150px;max-height:80px;margin-bottom:8px" />' if logo_base64 else ""
         return f"""<!DOCTYPE html>
     <html lang="fr"><head><meta charset="utf-8">
@@ -445,6 +449,7 @@ def forces_defis_complet():
     .container{{max-width:800px;margin:0 auto;}}
     h1{{text-align:center;margin:0 0 6px;font-size:24px}}
     .info{{text-align:center;color:#666;font-size:14px;margin:0 0 16px}}
+    .fd-birth-header{{display:none}}
     h2{{color:#34495e;border-bottom:2px solid #3498db;padding-bottom:5px;margin-top:28px}}
     p{{text-align:justify;line-height:1.6}}
     .disclaimer{{background:#f8f9fa;border:1px solid #dee2e6;padding:16px;border-radius:8px;font-size:13px;color:#555;margin-top:22px}}
@@ -455,8 +460,10 @@ def forces_defis_complet():
     <p class="info">{date_naissance} — {heure_naissance} — {lieu_naissance}</p>
     {texte_sections_html}
     <div class="disclaimer">
-        <strong>Note :</strong> Analyse générée automatiquement depuis ton thème natal, focalisée sur tes appuis (FORCES) et tes axes de croissance (DÉFIS). 
-        Elle n’est pas une consultation individuelle.
+        <strong>À propos de cette lecture :</strong> analyse ciblée des tensions et ressources de ton thème,
+        rédigée avec l'aide de l'IA selon ma méthode astrologique. Une consultation permet de confronter
+        ces pistes à ton vécu et d'aller plus loin.
+        <a href="https://lesfousdastro.fr/prestations">Prendre rendez-vous</a>.
     </div>
     </div></body></html>"""
 
