@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Mon ciel natal | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; }
+.ciel-shell { width: min(1050px, calc(100% - 32px)); margin: 48px auto 72px; }
+.ciel-back { display: inline-block; margin-bottom: 18px; color: white; font-weight: 700; text-decoration: none; }
+.ciel-card { margin-bottom: 22px; padding: clamp(24px, 4vw, 38px); border-radius: 25px; background: rgba(255,255,255,.96); box-shadow: 0 20px 40px rgba(0,0,0,.12); }
+.ciel-title { color: #1f628e; text-align: center; }
+.ciel-intro { margin: 8px auto 25px; color: #667; text-align: center; }
+.ciel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.placement { padding: 17px; border: 1px solid rgba(31,98,142,.12); border-radius: 16px; background: #f8fcfc; }
+.placement strong { display: block; margin-bottom: 7px; color: #1f628e; }
+.placement span { display: block; color: #596970; line-height: 1.5; }
+.configuration { margin-top: 12px; padding: 15px 18px; border-left: 4px solid #00a8a8; border-radius: 8px; background: #f2fbfa; }
+.configuration strong { color: #1f628e; text-transform: capitalize; }
+.ciel-empty { padding: 40px; text-align: center; color: #667; }
+.ciel-button { display: inline-block; margin-top: 18px; padding: 11px 18px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 700; text-decoration: none; }
+{% endblock %}
+{% block content %}
+<main class="ciel-shell">
+    {% include 'espace_personnel/_navigation.html' %}
+    {% if not theme %}
+        <section class="ciel-card ciel-empty"><h1 class="ciel-title">Mon ciel natal</h1><p>Enregistre ton profil pour calculer et afficher tes placements.</p><a class="ciel-button" href="{{ url_for('espace_personnel.profil') }}">Compléter mon profil</a></section>
+    {% else %}
+        <section class="ciel-card">
+            <h1 class="ciel-title">Le ciel natal de {{ profil.prenom }}</h1>
+            <p class="ciel-intro">{{ profil.date_naissance.strftime('%d.%m.%Y') }} · {{ profil.heure_naissance.strftime('%H:%M') }} · {{ profil.ville_naissance }}</p>
+            <div class="ciel-grid">
+                {% for nom, placement in theme.get('planetes', {}).items() %}
+                    <article class="placement">
+                        <strong>{{ nom }}{% if placement.get('retrograde') %} ℞{% endif %}</strong>
+                        <span>{{ placement.get('degre_dans_signe', placement.get('degre', '—')) }}° {{ placement.get('signe', '') }}</span>
+                        {% if placement.get('maison') %}<span>Maison {{ placement.get('maison') }}</span>{% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+        <section class="ciel-card">
+            <h2 class="ciel-title">Configurations astrologiques</h2>
+            {% set configurations = theme.get('configurations_majeures', []) %}
+            {% if configurations %}
+                {% for configuration in configurations %}
+                    <article class="configuration"><strong>{{ configuration.get('type', 'Configuration')|replace('_', ' ') }}</strong>{% if configuration.get('planetes') %} · {{ configuration.get('planetes')|join(', ') }}{% endif %}</article>
+                {% endfor %}
+            {% else %}<p class="ciel-intro">Aucune configuration majeure détectée par le moteur actuel.</p>{% endif %}
+        </section>
+    {% endif %}
+</main>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Mon observation | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; }
+.journal-shell { width: min(820px, calc(100% - 32px)); margin: 48px auto 72px; }
+.journal-back { display: inline-block; margin-bottom: 18px; color: white; font-weight: 700; text-decoration: none; }
+.journal-page { position: relative; padding: clamp(30px, 6vw, 62px); border-radius: 12px 26px 26px 12px; background: #fffdf7; box-shadow: -8px 0 0 #e6dbc5, 0 24px 60px rgba(0,0,0,.18); color: #33434c; }
+.journal-page::before { content: ''; position: absolute; top: 0; bottom: 0; left: 34px; width: 1px; background: rgba(208,91,91,.2); }
+.journal-date { color: #00a8a8; font-size: .85rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.journal-title { margin: 10px 0 8px; color: #1f628e; font: 700 clamp(2rem, 6vw, 3.4rem) Georgia, serif; }
+.journal-energy { display: inline-block; margin-bottom: 32px; padding: 7px 13px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-weight: 700; }
+.cycle-source { margin: 0 0 28px; padding: 15px 17px; border-left: 4px solid #00a8a8; border-radius: 11px; background: #eefafa; }
+.cycle-source a { color: #1f628e; font-weight: 800; text-decoration: none; }
+.journal-section { margin-top: 30px; }
+.journal-section h2 { margin-bottom: 10px; color: #1f628e; font: 700 1.15rem Georgia, serif; }
+.journal-section p { white-space: pre-wrap; font: 1.05rem/1.8 Georgia, serif; }
+.journal-empty { color: #98918a; font-style: italic; }
+.journal-actions { display: flex; justify-content: flex-end; margin-top: 42px; padding-top: 22px; border-top: 1px solid #eee5d7; }
+.journal-edit { padding: 11px 18px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 700; text-decoration: none; }
+.journal-flash { margin-bottom: 18px; padding: 12px 15px; border-radius: 12px; background: #e7f8f7; color: #17636c; text-align: center; }
+.transits-list { display: grid; gap: 12px; margin-top: 14px; }
+.transit-item { border-left: 4px solid #00a8a8; border-radius: 8px; background: #f2fbfa; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+.transit-item summary { padding: 14px 16px; color: #1f628e; font-weight: 700; cursor: pointer; }
+.transit-item summary::marker { color: #00a8a8; }
+.transit-aspects { display: grid; gap: 0; padding: 0 16px 12px 34px; }
+.transit-aspect { padding: 10px 0; border-top: 1px solid rgba(31,98,142,.1); }
+.transit-aspect strong { color: #33434c; }
+.transit-reading { margin: 0 16px 12px 34px; color: #52636b; line-height: 1.55; }
+.transit-context { margin: 0 16px 8px 34px; color: #596970; font-size: .9rem; line-height: 1.55; }
+.transit-target-context { margin-top: 5px; color: #69777d; font-size: .85rem; line-height: 1.5; }
+.transit-question { margin: 0 16px 16px 34px; padding: 12px 14px; border-radius: 10px; background: white; color: #17636c; font-weight: 700; line-height: 1.5; }
+.transit-meta { margin-top: 4px; color: #69777d; font-size: .88rem; }
+.transits-group { margin-top: 22px; }
+.transits-group h3 { margin-bottom: 8px; color: #596970; font-size: .95rem; text-transform: uppercase; letter-spacing: .08em; }
+.lab-links { margin-top: 34px; padding: 20px; border-radius: 15px; background: #eefafa; font-family: 'Segoe UI', sans-serif; }
+.lab-links h2 { margin-bottom: 7px; color: #1f628e; font: 700 1.15rem Georgia, serif; }
+.lab-links-intro { color: #60727a; line-height: 1.55; }
+.lab-linked-list { display: grid; gap: 9px; margin-top: 15px; }
+.lab-linked-item { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 11px 13px; border-radius: 11px; background: white; }
+.lab-linked-item strong { color: #1f628e; }
+.lab-linked-item a { color: #00a8a8; font-size: .82rem; font-weight: 800; text-decoration: none; }
+.lab-link-form { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin-top: 18px; padding-top: 17px; border-top: 1px solid rgba(31,98,142,.12); }
+.lab-link-field { display: grid; gap: 6px; }
+.lab-link-wide { grid-column: 1 / -1; }
+.lab-link-field label { color: #1f628e; font-size: .84rem; font-weight: 800; }
+.lab-link-field select, .lab-link-field textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid rgba(31,98,142,.2); border-radius: 10px; background: white; font: inherit; }
+.lab-link-field textarea { min-height: 75px; resize: vertical; }
+.lab-link-submit { grid-column: 1 / -1; justify-self: start; border: 0; border-radius: 999px; padding: 11px 17px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 800; cursor: pointer; }
+.lab-link-empty { margin-top: 14px; color: #7b898e; font-size: .9rem; }
+@media (max-width: 560px) { .journal-page::before { left: 18px; } }
+@media (max-width: 620px) { .lab-link-form { grid-template-columns: 1fr; } .lab-link-wide, .lab-link-submit { grid-column: 1; } .lab-linked-item { align-items: flex-start; flex-direction: column; } }
+{% endblock %}
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="journal-shell">
+    <a class="journal-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour au journal</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="journal-flash {{ categorie }}">{{ message }}</p>{% endfor %}{% endwith %}
+    <article class="journal-page">
+        <div class="journal-date">{{ entree.date_observation.strftime('%d.%m.%Y') }}</div>
+        <h1 class="journal-title">Mon observation</h1>
+        {% if entree.niveau_energie is not none %}<span class="journal-energy">Énergie · {{ entree.niveau_energie }}/10</span>{% endif %}
+        {% if cycle_source %}<div class="cycle-source">Cette observation est reliée à ton cycle lunaire. <a href="{{ url_for('espace_personnel.fiche_cycle_lunaire', cycle_id=cycle_source.id) }}">Revoir le cycle →</a></div>{% endif %}
+        {% if photo_transits and photo_transits.get('contact_journal') %}
+        {% set contact = photo_transits.contact_journal %}
+        <section class="journal-section"><h2>Mon repère dans le calendrier</h2><p>{{ contact.libelle }}</p>{% if contact.domaine %}<p>{{ contact.domaine }}</p>{% endif %}{% if contact.rien_particulier %}<p>Rien de particulier signalé.</p>{% endif %}<a href="{{ url_for('espace_personnel.calendrier', mois=contact.date[:7]) }}">Retrouver ce mois dans le calendrier</a></section>
+        {% endif %}
+        <section class="journal-section"><h2>Ce que j’ai déposé</h2><p class="{% if not entree.situation %}journal-empty{% endif %}">{{ entree.situation or 'Rien de noté.' }}</p></section>
+        <section class="journal-section"><h2>Ce que je ressens</h2><p class="{% if not entree.emotions %}journal-empty{% endif %}">{{ entree.emotions or 'Rien de noté.' }}</p></section>
+        <section class="journal-section"><h2>Ma réaction automatique</h2><p class="{% if not entree.reaction_automatique %}journal-empty{% endif %}">{{ entree.reaction_automatique or 'Rien de noté.' }}</p></section>
+        <section class="journal-section"><h2>Mon choix conscient</h2><p class="{% if not entree.choix_conscient %}journal-empty{% endif %}">{{ entree.choix_conscient or 'Rien de noté.' }}</p></section>
+        {% if entree.notes_libres %}<section class="journal-section"><h2>Mes anciennes notes libres</h2><p>{{ entree.notes_libres }}</p></section>{% endif %}
+        <section class="lab-links" id="liaisons-labo">
+            <h2>Relier cette observation à mon Labo</h2>
+            <p class="lab-links-intro">Associe ce que tu as vécu à un mécanisme que tu souhaites observer dans le temps.</p>
+
+            {% if liaisons_labo %}
+                <div class="lab-linked-list">
+                    {% for liaison in liaisons_labo %}
+                        <div class="lab-linked-item">
+                            <strong>{{ liaison.mecanisme.titre if liaison.mecanisme else 'Mécanisme supprimé' }}</strong>
+                            {% if liaison.mecanisme %}<a href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=liaison.mecanisme.id) }}#observation-{{ liaison.observation.id }}">Voir dans le Labo →</a>{% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if mecanismes_disponibles %}
+                <form class="lab-link-form" method="post" action="{{ url_for('espace_personnel.relier_entree_mecanisme', entree_id=entree.id) }}">
+                    <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
+                    <div class="lab-link-field lab-link-wide"><label for="mecanisme_id">Mécanisme concerné</label><select id="mecanisme_id" name="mecanisme_id" required><option value="">Choisir dans mon Labo</option>{% for mecanisme in mecanismes_disponibles %}<option value="{{ mecanisme.id }}">{{ mecanisme.titre }}</option>{% endfor %}</select></div>
+                    <div class="lab-link-field"><label for="indice_pour">Ce qui montre que le mécanisme était à l’œuvre</label><textarea id="indice_pour" name="indice_pour"></textarea></div>
+                    <div class="lab-link-field"><label for="element_contraire">Ce qui pourrait nuancer cette lecture — facultatif</label><textarea id="element_contraire" name="element_contraire"></textarea></div>
+                    <div class="lab-link-field"><label for="reaction_testee">Autre réaction testée</label><textarea id="reaction_testee" name="reaction_testee"></textarea></div>
+                    <div class="lab-link-field"><label for="resultat_obtenu">Ce qui s’est passé ensuite</label><textarea id="resultat_obtenu" name="resultat_obtenu"></textarea></div>
+                    <button class="lab-link-submit" type="submit">Relier au mécanisme</button>
+                </form>
+            {% elif not liaisons_labo %}
+                <p class="lab-link-empty">Ajoute d’abord un mécanisme dans ton Labo pour pouvoir relier cette observation.</p>
+            {% else %}
+                <p class="lab-link-empty">Cette observation est déjà reliée à tous les mécanismes présents dans ton Labo.</p>
+            {% endif %}
+        </section>
+        {% if photo_transits %}
+            <section class="journal-section">
+                <h2>Le ciel autour de cette observation</h2>
+                {% if photo_transits.get('transits') %}
+                    <div class="transits-group">
+                        <h3>Climat de fond</h3>
+                        <div class="transits-list">
+                            {% for groupe in transits_visibles.get('climat_fond', []) %}
+                                <details class="transit-item" {% if loop.first %}open{% endif %}>
+                                    <summary>{{ groupe.get('planete') }} · {{ groupe.get('aspects')|length }} point{% if groupe.get('aspects')|length != 1 %}s{% endif %} activé{% if groupe.get('aspects')|length != 1 %}s{% endif %} · intensité max {{ groupe.get('intensite_max') }}</summary>
+                                    {% if groupe.get('dynamique') %}<p class="transit-reading">{{ groupe.get('planete') }} {{ groupe.get('dynamique') }}.</p>{% endif %}
+                                    {% if groupe.get('maison_transitee') %}<p class="transit-context"><strong>Lieu du transit :</strong> {{ groupe.get('planete') }} transite ta maison {{ groupe.get('maison_transitee') }} — {{ groupe.get('theme_maison_transitee') }}.</p>{% endif %}
+                                    {% if groupe.get('maison_natale_planete') %}<p class="transit-context"><strong>Position natale :</strong> {{ groupe.get('planete') }} est en maison {{ groupe.get('maison_natale_planete') }} — {{ groupe.get('theme_maison_natale_planete') }}.</p>{% endif %}
+                                    {% if groupe.get('maisons_dirigees_planete') %}<p class="transit-context"><strong>Maisons dirigées par {{ groupe.get('planete') }} :</strong> {% for domaine in groupe.get('maisons_dirigees_planete') %}maison {{ domaine.get('maison') }} — {{ domaine.get('theme') }}{% if not loop.last %} · {% endif %}{% endfor %}.</p>{% endif %}
+                                    {% if groupe.get('question') %}<p class="transit-question">À observer : {{ groupe.get('question') }}</p>{% endif %}
+                                    <div class="transit-aspects">{% for transit in groupe.get('aspects', []) %}<div class="transit-aspect"><strong>{{ transit.get('aspect') }} {{ transit.get('planete_natale') }}</strong><div class="transit-meta">Orbe {{ '%.2f'|format(transit.get('orbe', 0)) }}° · Intensité {{ transit.get('importance', 0) }}</div>{% if transit.get('maison_cible') %}<div class="transit-target-context">{{ transit.get('planete_natale') }} natal{% if transit.get('planete_natale') not in ['Ascendant', 'Descendant', 'Milieu du Ciel', 'Fond du Ciel'] %} en maison {{ transit.get('maison_cible') }} — {{ transit.get('theme_maison_cible') }}{% endif %}.{% if transit.get('maisons_dirigees_cible') %} Dirige : {% for domaine in transit.get('maisons_dirigees_cible') %}maison {{ domaine.get('maison') }} — {{ domaine.get('theme') }}{% if not loop.last %} · {% endif %}{% endfor %}.{% endif %}</div>{% endif %}</div>{% endfor %}</div>
+                                </details>
+                            {% else %}<p class="journal-empty">Aucun transit lent détecté.</p>{% endfor %}
+                        </div>
+                    </div>
+                    <div class="transits-group">
+                        <h3>Déclencheurs rapides</h3>
+                        <div class="transits-list">
+                            {% for groupe in transits_visibles.get('declencheurs', []) %}
+                                <details class="transit-item" {% if groupe.get('planete') == 'Lune' %}open{% endif %}>
+                                    <summary>{{ groupe.get('planete') }} · {{ groupe.get('aspects')|length }} point{% if groupe.get('aspects')|length != 1 %}s{% endif %} activé{% if groupe.get('aspects')|length != 1 %}s{% endif %} · intensité max {{ groupe.get('intensite_max') }}</summary>
+                                    {% if groupe.get('dynamique') %}<p class="transit-reading">{{ groupe.get('planete') }} {{ groupe.get('dynamique') }}.</p>{% endif %}
+                                    {% if groupe.get('maison_transitee') %}<p class="transit-context"><strong>Lieu du transit :</strong> {{ groupe.get('planete') }} transite ta maison {{ groupe.get('maison_transitee') }} — {{ groupe.get('theme_maison_transitee') }}.</p>{% endif %}
+                                    {% if groupe.get('maison_natale_planete') %}<p class="transit-context"><strong>Position natale :</strong> {{ groupe.get('planete') }} est en maison {{ groupe.get('maison_natale_planete') }} — {{ groupe.get('theme_maison_natale_planete') }}.</p>{% endif %}
+                                    {% if groupe.get('maisons_dirigees_planete') %}<p class="transit-context"><strong>Maisons dirigées par {{ groupe.get('planete') }} :</strong> {% for domaine in groupe.get('maisons_dirigees_planete') %}maison {{ domaine.get('maison') }} — {{ domaine.get('theme') }}{% if not loop.last %} · {% endif %}{% endfor %}.</p>{% endif %}
+                                    {% if groupe.get('question') %}<p class="transit-question">À observer : {{ groupe.get('question') }}</p>{% endif %}
+                                    <div class="transit-aspects">{% for transit in groupe.get('aspects', []) %}<div class="transit-aspect"><strong>{{ transit.get('aspect') }} {{ transit.get('planete_natale') }}</strong><div class="transit-meta">Orbe {{ '%.2f'|format(transit.get('orbe', 0)) }}° · Intensité {{ transit.get('importance', 0) }}</div>{% if transit.get('maison_cible') %}<div class="transit-target-context">{{ transit.get('planete_natale') }} natal{% if transit.get('planete_natale') not in ['Ascendant', 'Descendant', 'Milieu du Ciel', 'Fond du Ciel'] %} en maison {{ transit.get('maison_cible') }} — {{ transit.get('theme_maison_cible') }}{% endif %}.{% if transit.get('maisons_dirigees_cible') %} Dirige : {% for domaine in transit.get('maisons_dirigees_cible') %}maison {{ domaine.get('maison') }} — {{ domaine.get('theme') }}{% if not loop.last %} · {% endif %}{% endfor %}.{% endif %}</div>{% endif %}</div>{% endfor %}</div>
+                                </details>
+                            {% else %}<p class="journal-empty">Aucun transit rapide détecté.</p>{% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="journal-empty">Aucun transit majeur retenu pour cette date.</p>
+                {% endif %}
+            </section>
+        {% endif %}
+        <div class="journal-actions"><a class="journal-edit" href="{{ url_for('espace_personnel.modifier', entree_id=entree.id) }}">Modifier cette entrée</a></div>
+    </article>
+</main>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Mon journal de bord | Les Fous d'Astro{% endblock %}
+
+{% block extra_css %}
+body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; }
+.journal-shell { width: min(900px, calc(100% - 32px)); margin: 48px auto 72px; }
+.journal-back { display: inline-block; margin-bottom: 18px; color: white; font-weight: 700; text-decoration: none; }
+.journal-page { padding: clamp(26px, 5vw, 52px); border-radius: 26px; background: rgba(255,255,255,.96); box-shadow: 0 24px 60px rgba(0,0,0,.18); color: #33434c; }
+.journal-header { max-width: 680px; margin: 0 auto 32px; text-align: center; }
+.journal-kicker { color: #00a8a8; font-size: .82rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.journal-title { margin: 8px 0; color: #1f628e; font: 700 clamp(2rem, 6vw, 3.3rem) Georgia, serif; }
+.journal-intro { color: #5d7079; line-height: 1.65; }
+.journal-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 36px; padding: 24px; border-radius: 18px; background: #f4fbfa; }
+.cycle-context { margin: 0 0 20px; padding: 19px 21px; border-radius: 16px; background: linear-gradient(135deg, rgba(31,98,142,.1), rgba(0,168,168,.13)); border-left: 4px solid #00a8a8; }
+.cycle-context-label { color: #00a8a8; font-size: .78rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.cycle-context h2 { margin: 6px 0 8px; color: #1f628e; font: 700 1.2rem Georgia, serif; }
+.cycle-context p { color: #52666f; line-height: 1.6; }
+.cycle-context a { color: #1f628e; font-weight: 800; text-decoration: none; }
+.journal-field { display: grid; gap: 7px; }
+.journal-field--wide { grid-column: 1 / -1; }
+.journal-field label { color: #1f628e; font-size: .9rem; font-weight: 700; }
+.journal-field input, .journal-field select, .journal-field textarea { width: 100%; padding: 12px 14px; border: 1px solid rgba(31,98,142,.22); border-radius: 12px; background: white; color: #263645; font: inherit; box-sizing: border-box; }
+.journal-field textarea { min-height: 92px; resize: vertical; }
+.journal-field--story textarea { min-height: 210px; font: 1.05rem/1.65 Georgia, serif; }
+.journal-field input:focus, .journal-field select:focus, .journal-field textarea:focus { outline: 3px solid rgba(0,168,168,.13); border-color: #00a8a8; }
+.journal-deeper { grid-column: 1 / -1; border: 1px solid rgba(31,98,142,.14); border-radius: 14px; background: rgba(255,255,255,.7); }
+.journal-deeper summary { padding: 14px 16px; color: #1f628e; font-weight: 800; cursor: pointer; }
+.journal-deeper-fields { display: grid; gap: 17px; padding: 4px 16px 17px; }
+.journal-submit { grid-column: 1 / -1; justify-self: start; border: 0; border-radius: 999px; padding: 13px 22px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 800; cursor: pointer; }
+.journal-flash { margin-bottom: 18px; padding: 12px 15px; border-radius: 12px; background: #e7f8f7; color: #17636c; text-align: center; }
+.journal-flash.error { background: #fff0f0; color: #9b3030; }
+.entries-title { margin-bottom: 12px; color: #596970; font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; }
+.entries-list { display: grid; gap: 12px; }
+.journal-entry { display: block; padding: 17px 19px; border: 1px solid rgba(31,98,142,.12); border-radius: 14px; background: #fbfefd; color: inherit; text-decoration: none; }
+.journal-entry:hover { border-color: #00a8a8; transform: translateY(-1px); }
+.journal-entry-date { color: #1f628e; font-weight: 800; }
+.journal-entry-text { margin-top: 5px; color: #66777e; line-height: 1.5; }
+.journal-entry-tag { display: inline-block; margin-top: 8px; padding: 4px 8px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-size: .72rem; font-weight: 800; }
+.journal-empty { padding: 44px 18px; text-align: center; color: #7a898f; }
+.journal-moon { display: block; margin-bottom: 9px; font-size: 2.5rem; }
+@media (max-width: 650px) { .journal-form { grid-template-columns: 1fr; padding: 18px; } .journal-field--wide, .journal-submit { grid-column: 1; } }
+{% endblock %}
+
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="journal-shell">
+    <a class="journal-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+    <a class="journal-back" style="margin-left:18px" href="{{ url_for('espace_personnel.calendrier', mois=date_du_jour[:7]) }}">Mon calendrier</a>
+    <article class="journal-page">
+        <header class="journal-header">
+            <p class="journal-kicker">Observer ce qui se joue</p>
+            <h1 class="journal-title">Mon journal de bord</h1>
+            <p class="journal-intro">Dépose ton vécu, repère tes réactions automatiques et garde une trace du ciel qui accompagnait chaque observation.</p>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for categorie, message in messages %}<p class="journal-flash {{ categorie }}">{{ message }}</p>{% endfor %}
+        {% endwith %}
+
+        {% if cycle_source %}
+            <aside class="cycle-context">
+                <span class="cycle-context-label">Depuis mon cycle lunaire</span>
+                <h2>{{ interpretation_cycle.fil_rouge if interpretation_cycle else 'Observer ce cycle dans ma vie' }}</h2>
+                {% if interpretation_cycle and interpretation_cycle.question_journal %}<p><strong>Question proposée :</strong> {{ interpretation_cycle.question_journal }}</p>{% endif %}
+                <p><a href="{{ url_for('espace_personnel.fiche_cycle_lunaire', cycle_id=cycle_source.id) }}">Revoir le cycle →</a></p>
+            </aside>
+        {% endif %}
+
+        {% if enjeu_source %}
+            <aside class="cycle-context">
+                <span class="cycle-context-label">Depuis mes Transits</span>
+                <h2>Ce qui se joue dans cette période</h2>
+                <p>{{ enjeu_source.contenu }}</p>
+            </aside>
+        {% endif %}
+
+        <form method="post" class="journal-form">
+            <input type="hidden" name="profil_csrf" value="{{ session.espace_profil_csrf }}">
+            {% if contact_source %}
+            <aside class="cycle-context journal-field--wide"><strong>{{ contact_source.libelle }}</strong><p>Ce contact est un repère pour ta note. Tu peux raconter ton vécu, même si rien de particulier ne se passe.</p></aside>
+            <input type="hidden" name="contact_planete" value="{{ contact_source.planete }}">
+            <input type="hidden" name="contact_point" value="{{ contact_source.point }}">
+            <input type="hidden" name="contact_aspect" value="{{ contact_source.aspect }}">
+            <div class="journal-field"><label for="domaine">Domaine — facultatif</label><select id="domaine" name="domaine"><option value="">À préciser si tu le souhaites</option>{% for domaine in domaines_contact %}<option value="{{ domaine }}">{{ domaine }}</option>{% endfor %}</select></div>
+            <div class="journal-field"><label><input type="checkbox" name="rien_particulier" value="oui"> Rien de particulier</label></div>
+            {% endif %}
+            {% if cycle_source %}<input type="hidden" name="cycle_lunaire_id" value="{{ cycle_source.id }}">{% endif %}
+            {% if enjeu_source %}<input type="hidden" name="enjeu_periode_id" value="{{ enjeu_source.id }}">{% endif %}
+            <div class="journal-field"><label for="date_observation">Date de l’observation</label><input id="date_observation" name="date_observation" type="date" value="{{ date_du_jour }}" required></div>
+            <div class="journal-field"><label for="niveau_energie">Niveau d’énergie — facultatif</label><select id="niveau_energie" name="niveau_energie"><option value="">Je ne souhaite pas le noter</option>{% for niveau in range(1, 11) %}<option value="{{ niveau }}">{{ niveau }}</option>{% endfor %}</select></div>
+            <div class="journal-field journal-field--wide journal-field--story"><label for="situation">{{ "Que souhaites-tu garder de cette journée ?" if contact_source else "Ce que j’ai envie de déposer" }}</label><textarea id="situation" name="situation" placeholder="Raconte librement ce qui s’est passé, ce qui t’a marquée ou ce qui fait écho pour toi…">{% if enjeu_source %}Ce qui me parle dans cet enjeu : {% endif %}</textarea></div>
+            <details class="journal-deeper">
+                <summary>Aller plus loin dans mon observation — facultatif</summary>
+                <div class="journal-deeper-fields">
+                    <div class="journal-field"><label for="emotions">Ce que je ressens</label><input id="emotions" name="emotions" type="text" maxlength="500" placeholder="Les émotions présentes…"></div>
+                    <div class="journal-field"><label for="reaction_automatique">Ma réaction automatique</label><textarea id="reaction_automatique" name="reaction_automatique"></textarea></div>
+                    <div class="journal-field"><label for="choix_conscient">Le choix conscient que je peux faire</label><textarea id="choix_conscient" name="choix_conscient"></textarea></div>
+                </div>
+            </details>
+            <button type="submit" class="journal-submit">Enregistrer dans mon journal</button>
+        </form>
+
+        <h2 class="entries-title">Mes anciennes observations</h2>
+        {% if entrees %}
+            <div class="entries-list">
+                {% for entree in entrees %}
+                    <a class="journal-entry" href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">
+                        <div class="journal-entry-date">{{ entree.date_observation.strftime('%d.%m.%Y') }}{% if entree.niveau_energie is not none %} · Énergie {{ entree.niveau_energie }}/10{% endif %}</div>
+                        {% if entree.situation %}<p class="journal-entry-text">{{ entree.situation|truncate(180) }}</p>{% elif entree.emotions %}<p class="journal-entry-text">{{ entree.emotions }}</p>{% endif %}
+                        {% if entree.cycle_lunaire_id %}<span class="journal-entry-tag">Reliée à un cycle lunaire</span>{% endif %}
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="journal-empty"><span class="journal-moon">☾</span>Ta première observation viendra ouvrir ce journal.</div>
+        {% endif %}
+    </article>
+</main>
+{% endblock %}

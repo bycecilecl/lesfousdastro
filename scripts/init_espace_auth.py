@@ -1,4 +1,4 @@
-"""Crée les tables de connexion, de profil et de mails de l'espace personnel.
+"""Crée les tables de l'espace personnel sans modifier les tables existantes.
 
 La commande de démarrage Railway exécute ce script avant Gunicorn. Les
 redémarrages suivants ne modifient pas les tables déjà présentes.
@@ -14,8 +14,11 @@ from sqlalchemy import create_engine, text
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from models.espace_personnel import (  # noqa: E402
-    AbonnementEspace, CycleLunaire, EmailCycleAbonnement,
-    LienConnexionEspace, ProfilAstral, UtilisateurEspace,
+    AbonnementEspace, AnalysePersonnelle, CommandeAnalyseEspace,
+    CycleLunaire, CycleSolaire, DroitAnalyseAchetee, EmailCycleAbonnement,
+    EnjeuPeriode, EntreeJournal, FichierAnalyse, LienConnexionEspace,
+    MecanismeExploration, ObservationMecanisme, ProfilAstral,
+    SectionAnalyse, SuggestionMecanisme, UtilisateurEspace,
 )
 
 
@@ -36,7 +39,18 @@ def main():
                     ProfilAstral.__table__,
                     AbonnementEspace.__table__,
                     CycleLunaire.__table__,
+                    CycleSolaire.__table__,
                     EmailCycleAbonnement.__table__,
+                    AnalysePersonnelle.__table__,
+                    DroitAnalyseAchetee.__table__,
+                    CommandeAnalyseEspace.__table__,
+                    SectionAnalyse.__table__,
+                    EnjeuPeriode.__table__,
+                    SuggestionMecanisme.__table__,
+                    MecanismeExploration.__table__,
+                    ObservationMecanisme.__table__,
+                    EntreeJournal.__table__,
+                    FichierAnalyse.__table__,
                 ],
                 checkfirst=True,
             )

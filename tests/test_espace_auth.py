@@ -14,7 +14,7 @@ from flask import Flask
 
 from extensions import db
 from models.espace_personnel import (
-    AbonnementEspace, CycleLunaire, EmailCycleAbonnement,
+    AbonnementEspace, CycleLunaire, EmailCycleAbonnement, EntreeJournal,
     LienConnexionEspace, ProfilAstral, UtilisateurEspace, utcnow,
 )
 
@@ -301,13 +301,14 @@ class TestEspaceAuth(unittest.TestCase):
         with self.app.app_context():
             self.assertEqual(ProfilAstral.query.count(), 0)
 
-    def test_import_ne_remplace_pas_un_profil_existant(self):
+    def test_import_complete_un_profil_saisi_sans_remplacer_la_naissance(self):
         utilisateur_id = self._connecter_compte("cecilecl@gmail.com")
         with self.app.app_context():
             db.session.add(ProfilAstral(
                 utilisateur_id=utilisateur_id, prenom="Cécile",
                 date_naissance=date(1980, 10, 11), heure_naissance=time(6, 38),
                 ville_naissance="Paris", fuseau_horaire="Europe/Paris",
+                situation_travail="Mon texte saisi dans le formulaire",
             ))
             db.session.commit()
         reponse = self.client.post(
@@ -318,7 +319,85 @@ class TestEspaceAuth(unittest.TestCase):
         self.assertEqual(reponse.status_code, 302)
         with self.app.app_context():
             self.assertEqual(ProfilAstral.query.count(), 1)
-            self.assertEqual(ProfilAstral.query.one().ville_naissance, "Paris")
+            profil = ProfilAstral.query.one()
+            self.assertEqual(profil.ville_naissance, "Paris")
+            self.assertEqual(profil.situation_travail, "Mon texte saisi dans le formulaire")
+            self.assertEqual(AbonnementEspace.query.one().source, "labo_import")
+
+    def test_import_refuse_une_naissance_differente_du_profil_saisi(self):
+        utilisateur_id = self._connecter_compte("cecilecl@gmail.com")
+        with self.app.app_context():
+            db.session.add(ProfilAstral(
+                utilisateur_id=utilisateur_id, prenom="Cécile",
+                date_naissance=date(1980, 10, 12), heure_naissance=time(6, 38),
+                ville_naissance="Paris", fuseau_horaire="Europe/Paris",
+            ))
+            db.session.commit()
+        reponse = self.client.post(
+            "/mon-espace/profil/importer",
+            data={"profil_csrf": "jeton-de-test", "profil_import": (self._fichier_import("cecilecl@gmail.com"), "profil.json")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(reponse.status_code, 400)
+        with self.app.app_context():
+            self.assertEqual(ProfilAstral.query.count(), 1)
+            self.assertEqual(AbonnementEspace.query.count(), 0)
+
+    def test_situation_et_ville_des_cycles_completent_le_profil_sans_recalcul(self):
+        utilisateur_id = self._connecter_compte()
+        with patch.object(module, "calcul_theme", return_value={"planetes": {"Soleil": "Balance"}}):
+            self.client.post("/mon-espace/profil", data=self._donnees_profil())
+        with patch.object(module, "calcul_theme") as calcul:
+            contexte = self.client.post(
+                "/mon-espace/profil/situation",
+                data={"profil_csrf": "jeton-de-test", "situation_amour": "En couple",
+                      "situation_travail": "Projet en cours"},
+            )
+            ville = self.client.post(
+                "/mon-espace/profil/ville-cycles",
+                data={"profil_csrf": "jeton-de-test", "ville_cycles": "Solliès-Pont, France",
+                      "fuseau_cycles": "Europe/Paris", "latitude_cycles": "43.182",
+                      "longitude_cycles": "6.037"},
+            )
+        self.assertEqual((contexte.status_code, ville.status_code), (302, 302))
+        calcul.assert_not_called()
+        with self.app.app_context():
+            profil = ProfilAstral.query.filter_by(utilisateur_id=utilisateur_id).one()
+            self.assertEqual(profil.situation_amour, "En couple")
+            self.assertEqual(profil.ville_cycles, "Solliès-Pont, France")
+            self.assertIn("Soleil", profil.theme_natal)
+
+    def test_journal_conserve_une_observation_et_refuse_un_autre_compte(self):
+        premier_id = self._connecter_compte()
+        reponse = self.client.post(
+            "/mon-espace/journal",
+            data={"profil_csrf": "jeton-de-test", "date_observation": "2026-09-30",
+                  "niveau_energie": "7", "situation": "Une journée chargée"},
+        )
+        self.assertEqual(reponse.status_code, 302)
+        with self.app.app_context():
+            entree = EntreeJournal.query.one()
+            self.assertEqual(entree.utilisateur_id, premier_id)
+            entree_id = entree.id
+        self.assertEqual(self.client.get(f"/mon-espace/journal/{entree_id}").status_code, 200)
+        self._connecter_compte("guillaume@example.com")
+        self.assertEqual(self.client.get(f"/mon-espace/journal/{entree_id}").status_code, 404)
+        self.assertEqual(self.client.post(
+            f"/mon-espace/journal/{entree_id}/supprimer",
+            data={"profil_csrf": "jeton-de-test"},
+        ).status_code, 404)
+        with self.app.app_context():
+            self.assertEqual(EntreeJournal.query.count(), 1)
+
+    def test_journal_refuse_une_ecriture_sans_jeton(self):
+        self._connecter_compte()
+        reponse = self.client.post(
+            "/mon-espace/journal",
+            data={"date_observation": "2026-09-30", "situation": "Texte"},
+        )
+        self.assertEqual(reponse.status_code, 400)
+        with self.app.app_context():
+            self.assertEqual(EntreeJournal.query.count(), 0)
 
     def test_import_du_brouillon_n_envoie_rien_et_refuse_le_doublon(self):
         self._compte_avec_mail()
@@ -380,6 +459,108 @@ class TestEspaceAuth(unittest.TestCase):
             email_id = EmailCycleAbonnement.query.one().id
         self._connecter_compte("cecilecl.cyp@gmail.com")
         self.assertEqual(self.client.get(f"/mon-espace/emails-cycle/{email_id}").status_code, 404)
+
+    def test_apercu_lunaire_ne_facture_pas_et_generation_unique_sur_clic(self):
+        self._compte_avec_mail()
+        with self.app.app_context():
+            profil = ProfilAstral.query.one()
+            profil.theme_natal = json.dumps({"planetes": {"Lune": {"longitude": 220.0}}})
+            profil.ville_cycles = "Solliès-Pont"
+            profil.fuseau_cycles = "Europe/Paris"
+            profil.latitude_cycles = 43.18
+            profil.longitude_cycles = 6.04
+            db.session.commit()
+
+        theme = {
+            "instant_utc": "2026-10-12T03:47:00+00:00",
+            "instant_local": "2026-10-12T05:47:00+02:00",
+            "angles_deg": {}, "aspects_avec_natal": [], "planetes": {},
+        }
+        with patch("utils.revolution_lunaire.calculer_theme_revolution_lunaire", return_value=theme.copy()), \
+             patch("utils.revolution_lunaire.prochaine_revolution_lunaire", return_value=utcnow() + timedelta(days=29)), \
+             patch("utils.revolution_lunaire.priorites_interpretation", return_value={}), \
+             patch("utils.interpretation_cycle_lunaire.generer_interpretation_avec_claude", return_value=(
+                 {"fil_rouge": "Un cycle à observer"}, {"tokens_entree": 10, "tokens_sortie": 20},
+             )) as claude:
+            apercu = self.client.get("/mon-espace/cycles-lunaires/apercu")
+            self.assertEqual(apercu.status_code, 200)
+            claude.assert_not_called()
+
+            sans_jeton = self.client.post("/mon-espace/cycles-lunaires/apercu")
+            self.assertEqual(sans_jeton.status_code, 400)
+            claude.assert_not_called()
+
+            with self.client.session_transaction() as donnees:
+                jeton = donnees["espace_formulaire_csrf"]
+            premiere = self.client.post(
+                "/mon-espace/cycles-lunaires/apercu", data={"espace_csrf": jeton},
+            )
+            seconde = self.client.post(
+                "/mon-espace/cycles-lunaires/apercu", data={"espace_csrf": jeton},
+            )
+        self.assertEqual((premiere.status_code, seconde.status_code), (302, 302))
+        claude.assert_called_once()
+        with self.app.app_context():
+            self.assertEqual(CycleLunaire.query.count(), 1)
+            self.assertEqual(CycleLunaire.query.one().statut, "genere")
+
+    def test_apercu_lunaire_refuse_un_compte_gratuit(self):
+        self._connecter_compte("gratuit@example.com")
+        self.assertEqual(self.client.get("/mon-espace/cycles-lunaires/apercu").status_code, 403)
+
+    def test_brouillon_cycle_un_seul_appel_et_aucun_envoi(self):
+        self._compte_avec_mail()
+        self._importer_brouillon_test()
+        with self.app.app_context():
+            email = EmailCycleAbonnement.query.one()
+            email.statut = "prepare"
+            email.objet = None
+            email.contenu_texte = None
+            email.contenu_html = None
+            email.declencheur_factuel = json.dumps({"prompt": "Contrat factuel", "portee": "complet"})
+            db.session.commit()
+            email_id = email.id
+        self.client.get(f"/mon-espace/emails-cycle/{email_id}")
+        with self.client.session_transaction() as donnees:
+            jeton = donnees["espace_formulaire_csrf"]
+        with patch("utils.email_cycle_abonnement.generer_texte_email_cycle", return_value="OBJET: Ton cycle\nLe mouvement du mois\nUn texte.") as claude, \
+             patch.object(module, "envoyer_email_avec_analyse") as envoyer:
+            sans_jeton = self.client.post(f"/mon-espace/emails-cycle/{email_id}/generer")
+            premier = self.client.post(
+                f"/mon-espace/emails-cycle/{email_id}/generer", data={"espace_csrf": jeton},
+            )
+            second = self.client.post(
+                f"/mon-espace/emails-cycle/{email_id}/generer", data={"espace_csrf": jeton},
+            )
+        self.assertEqual((sans_jeton.status_code, premier.status_code, second.status_code), (400, 302, 302))
+        claude.assert_called_once()
+        envoyer.assert_not_called()
+        with self.app.app_context():
+            email = EmailCycleAbonnement.query.one()
+            self.assertEqual(email.statut, "brouillon")
+            self.assertEqual(email.objet, "Ton cycle")
+
+    def test_echec_brouillon_ne_relance_pas_claude(self):
+        self._compte_avec_mail()
+        self._importer_brouillon_test()
+        with self.app.app_context():
+            email = EmailCycleAbonnement.query.one()
+            email.statut = "prepare"
+            email.objet = None
+            email.contenu_texte = None
+            email.contenu_html = None
+            email.declencheur_factuel = json.dumps({"prompt": "Contrat factuel", "portee": "complet"})
+            db.session.commit()
+            email_id = email.id
+        self.client.get(f"/mon-espace/emails-cycle/{email_id}")
+        with self.client.session_transaction() as donnees:
+            jeton = donnees["espace_formulaire_csrf"]
+        with patch("utils.email_cycle_abonnement.generer_texte_email_cycle", side_effect=RuntimeError("tronqué")) as claude:
+            self.client.post(f"/mon-espace/emails-cycle/{email_id}/generer", data={"espace_csrf": jeton})
+            self.client.post(f"/mon-espace/emails-cycle/{email_id}/generer", data={"espace_csrf": jeton})
+        claude.assert_called_once()
+        with self.app.app_context():
+            self.assertEqual(EmailCycleAbonnement.query.one().statut, "generation_echec")
 
 
 if __name__ == "__main__":

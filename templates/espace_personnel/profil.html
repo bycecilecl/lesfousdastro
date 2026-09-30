@@ -13,8 +13,10 @@
   .profil-champ.large, .profil-aide, .profil-submit { grid-column: 1 / -1; }
   .profil-champ label { color: #1f628e; font-weight: 700; }
   .profil-champ input { box-sizing: border-box; width: 100%; padding: .8rem; border: 1px solid #b9d4d7; border-radius: 10px; font: inherit; }
+  .profil-champ textarea { box-sizing: border-box; width: 100%; min-height: 100px; padding: .8rem; border: 1px solid #b9d4d7; border-radius: 10px; font: inherit; resize: vertical; }
   .profil-aide { margin: 0; color: #607580; font-size: .9rem; }
   .profil-submit { justify-self: start; padding: .8rem 1.3rem; border: 0; border-radius: 30px; background: #1f628e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+  .profil-carte + .profil-carte { margin-top: 1.3rem; }
   @media (max-width: 600px) { .profil-form { grid-template-columns: 1fr; } }
 {% endblock %}
 {% block content %}
@@ -26,7 +28,7 @@
 {% set valeur_lon = saisie.get('longitude') if saisie is not none else (profil.longitude if profil and profil.longitude is not none else '') %}
 {% set valeur_fuseau = saisie.get('fuseau_horaire') if saisie is not none else (profil.fuseau_horaire if profil else '') %}
 <div class="profil-shell">
-  <a class="profil-retour" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+  {% include 'espace_personnel/_navigation.html' %}
   <section class="profil-carte">
     <h1>Mon profil astral</h1>
     <p>Ces coordonnées servent à calculer ton thème natal. Elles restent dans ton espace personnel et n’envoient aucun rapport par e-mail.</p>
@@ -46,11 +48,41 @@
       <p class="profil-aide" id="lieu-statut">Choisis une ville dans la liste : ses coordonnées et son fuseau seront ajoutés automatiquement.</p>
       <button class="profil-submit" type="submit">{{ 'Mettre à jour mon profil' if profil else 'Créer mon profil astral' }}</button>
     </form>
+    {% if profil %}<p><a href="{{ url_for('espace_personnel.ciel_natal') }}">Voir mon ciel natal calculé →</a></p>{% endif %}
   </section>
+  {% if profil %}
+  <section class="profil-carte" id="ville-cycles">
+    <h2>Ville de mes cycles lunaires</h2>
+    <p>Ce lieu sert aux prochains cycles. Il ne change pas ton thème natal.</p>
+    <form method="post" class="profil-form" action="{{ url_for('espace_personnel.modifier_ville_cycles') }}">
+      <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
+      <div class="profil-champ large"><label for="ville_cycles">Ville de mes cycles</label><input id="ville_cycles" name="ville_cycles" list="suggestions-lieux-cycles" autocomplete="off" value="{{ profil.ville_cycles or '' }}" required><datalist id="suggestions-lieux-cycles"></datalist></div>
+      <input id="latitude_cycles" name="latitude_cycles" type="hidden" value="{{ profil.latitude_cycles if profil.latitude_cycles is not none else '' }}">
+      <input id="longitude_cycles" name="longitude_cycles" type="hidden" value="{{ profil.longitude_cycles if profil.longitude_cycles is not none else '' }}">
+      <input id="fuseau_cycles" name="fuseau_cycles" type="hidden" value="{{ profil.fuseau_cycles or '' }}">
+      <p class="profil-aide" id="cycles-statut">Choisis une suggestion pour enregistrer les coordonnées et le fuseau.</p>
+      <button class="profil-submit" type="submit">Enregistrer la ville de mes cycles</button>
+    </form>
+  </section>
+  <section class="profil-carte" id="situation-actuelle">
+    <h2>Ma situation actuelle</h2>
+    <p>Ces repères sont facultatifs. Ils pourront contextualiser tes prochains cycles.</p>
+    <form method="post" class="profil-form" action="{{ url_for('espace_personnel.modifier_situation_actuelle') }}">
+      <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
+      <div class="profil-champ large"><label for="situation_foyer">Foyer / logement</label><textarea id="situation_foyer" name="situation_foyer" maxlength="5000">{{ profil.situation_foyer or '' }}</textarea></div>
+      <div class="profil-champ large"><label for="situation_amour">Amour / relations</label><textarea id="situation_amour" name="situation_amour" maxlength="5000">{{ profil.situation_amour or '' }}</textarea></div>
+      <div class="profil-champ large"><label for="situation_travail">Travail / projets</label><textarea id="situation_travail" name="situation_travail" maxlength="5000">{{ profil.situation_travail or '' }}</textarea></div>
+      <div class="profil-champ large"><label for="situation_enfants">Enfants / famille</label><textarea id="situation_enfants" name="situation_enfants" maxlength="5000">{{ profil.situation_enfants or '' }}</textarea></div>
+      <div class="profil-champ large"><label for="situation_sante">Santé / énergie</label><textarea id="situation_sante" name="situation_sante" maxlength="5000">{{ profil.situation_sante or '' }}</textarea></div>
+      <div class="profil-champ large"><label for="preoccupation_actuelle">Ce qui te préoccupe en ce moment</label><textarea id="preoccupation_actuelle" name="preoccupation_actuelle" maxlength="5000">{{ profil.preoccupation_actuelle or '' }}</textarea></div>
+      <button class="profil-submit" type="submit">Enregistrer ma situation actuelle</button>
+    </form>
+  </section>
+  {% endif %}
   {% if peut_importer %}
   <section class="profil-carte" style="margin-top: 1.3rem;">
-    <h2>Reprendre mon profil du labo</h2>
-    <p>Pour les deux comptes de test uniquement. Le fichier doit correspondre à l’adresse e-mail de ce compte. Il est importé une seule fois et ne passe pas par Git.</p>
+    <h2>{{ 'Compléter mon profil avec les données du labo' if profil else 'Reprendre mon profil du labo' }}</h2>
+    <p>Pour les deux comptes de test uniquement. Le fichier doit correspondre à l’adresse e-mail de ce compte. Si tu as déjà saisi ta naissance, elle sera conservée ; les renseignements manquants et les droits de test seront ajoutés.</p>
     <form method="post" action="{{ url_for('espace_personnel.importer_profil_labo') }}" enctype="multipart/form-data" class="profil-form">
       <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
       <div class="profil-champ large"><label for="profil_import">Fichier de profil du labo</label><input id="profil_import" name="profil_import" type="file" accept=".json,application/json" required></div>
@@ -104,6 +136,48 @@
   });
   ville.addEventListener('change', choisirVille);
   ville.addEventListener('blur', choisirVille);
+  const villeCycles = document.getElementById('ville_cycles');
+  if (!villeCycles) return;
+  const suggestionsCycles = document.getElementById('suggestions-lieux-cycles');
+  const latitudeCycles = document.getElementById('latitude_cycles');
+  const longitudeCycles = document.getElementById('longitude_cycles');
+  const fuseauCycles = document.getElementById('fuseau_cycles');
+  const statutCycles = document.getElementById('cycles-statut');
+  let resultatsCycles = [];
+  let attenteCycles;
+  function choisirVilleCycles() {
+    const lieu = resultatsCycles.find(item => item.label === villeCycles.value);
+    if (!lieu) return;
+    latitudeCycles.value = lieu.lat;
+    longitudeCycles.value = lieu.lon;
+    fuseauCycles.value = lieu.tzid || '';
+    statutCycles.textContent = lieu.tzid ? `Coordonnées trouvées · ${lieu.tzid}` : 'Fuseau indisponible pour cette ville.';
+  }
+  villeCycles.addEventListener('input', () => {
+    latitudeCycles.value = '';
+    longitudeCycles.value = '';
+    fuseauCycles.value = '';
+    clearTimeout(attenteCycles);
+    const recherche = villeCycles.value.trim();
+    if (recherche.length < 2) return;
+    attenteCycles = setTimeout(async () => {
+      try {
+        const reponse = await fetch(`/api/geocode?q=${encodeURIComponent(recherche)}`);
+        if (!reponse.ok) throw new Error('geocode');
+        const donnees = await reponse.json();
+        resultatsCycles = donnees.results || [];
+        suggestionsCycles.replaceChildren(...resultatsCycles.map(item => {
+          const option = document.createElement('option');
+          option.value = item.label;
+          return option;
+        }));
+      } catch (_) {
+        statutCycles.textContent = 'La recherche de ville est momentanément indisponible.';
+      }
+    }, 250);
+  });
+  villeCycles.addEventListener('change', choisirVilleCycles);
+  villeCycles.addEventListener('blur', choisirVilleCycles);
 })();
 </script>
 {% endblock %}

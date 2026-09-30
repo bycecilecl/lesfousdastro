@@ -1,20 +1,458 @@
 {% extends "base.html" %}
+
 {% block title %}Mon espace astral | Les Fous d'Astro{% endblock %}
+
 {% block extra_css %}
-  .espace-accueil { max-width: 720px; margin: 4rem auto; padding: 2.5rem; background: #fff; border-radius: 22px; box-shadow: 0 15px 40px #092d4a24; color: #22465b; }
-  .espace-accueil h1 { color: #1f628e; margin-bottom: 1rem; }
-  .espace-accueil p { line-height: 1.6; margin-bottom: 1.2rem; }
-  .espace-accueil button { padding: .7rem 1.2rem; border: 0; border-radius: 30px; background: #1f628e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.3; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.2); }
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: 60px;
+    padding-top: 20px;
+    color: white;
+}
+
+.badge-d-wrap { margin-bottom: 1.25rem; }
+
+.badge-d {
+    display: inline-block;
+    background: white;
+    color: #1f628e;
+    font-size: 2.3rem;
+    font-weight: 700;
+    padding: 0.45rem 1.6rem;
+    border-radius: 6px;
+    transform: rotate(-1.5deg);
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.18);
+}
+
+.page-title {
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.header-hook {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.6;
+    max-width: 680px;
+    margin: 0 auto 1.5rem;
+}
+
+.dev-user-switcher {
+    margin: 0 auto 22px;
+    padding: 12px 16px;
+    border: 2px dashed #f0b429;
+    border-radius: 12px;
+    background: #fff8df;
+    color: #684d00;
+    text-align: center;
+}
+.dev-user-switcher form { display: inline-flex; align-items: center; gap: 10px; }
+.dev-user-switcher select, .dev-user-switcher button { padding: 7px 10px; font: inherit; }
+.dev-user-switcher form + form { margin-left: 18px; }
+
+.form-container {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 35px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.section-title {
+    color: #1f628e;
+    margin-bottom: 20px;
+    font-size: 1.35rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #1f628e, #00a8a8);
+    margin: 10px auto 0;
+    border-radius: 2px;
+}
+
+.espace-grid {
+    display: grid;
+    grid-template-columns: 1.45fr 0.75fr;
+    gap: 22px;
+    margin-top: 20px;
+}
+
+.espace-aside {
+    display: grid;
+    gap: 22px;
+    align-content: start;
+}
+
+.espace-muted { color: #666; font-size: 0.95rem; line-height: 1.5; text-align: center; }
+
+.journal-entry {
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(31,98,142,0.1);
+    text-align: left;
+}
+.journal-entry-link { display: block; color: inherit; text-decoration: none; }
+.journal-entry-link:hover .journal-entry-date { color: #00a8a8; }
+.journal-entry:last-child { border-bottom: none; }
+
+.journal-entry-date {
+    color: #1f628e;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.journal-entry-text {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.espace-empty {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.espace-moon { font-size: 2.6rem; margin-bottom: 10px; }
+
+.espace-empty h4 { color: #1f628e; font-size: 1.15rem; margin-bottom: 6px; }
+
+.espace-soon {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: linear-gradient(45deg, #00a8a8, #1f628e);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.espace-stat { text-align: center; padding: 28px; }
+
+.espace-number {
+    display: block;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #00a8a8;
+    margin: 6px 0 2px;
+}
+.espace-profile-link {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 10px 17px;
+    border-radius: 999px;
+    background: linear-gradient(45deg, #00a8a8, #1f628e);
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+}
+.espace-profile-link--secondary {
+    background: white;
+    color: #1f628e;
+    border: 1px solid rgba(31,98,142,.2);
+}
+.profile-card { margin-bottom: 22px; text-align: center; }
+.profile-avatar {
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
+    color: white;
+    background: linear-gradient(135deg, #1f628e, #00a8a8);
+    box-shadow: 0 8px 22px rgba(31,98,142,.2);
+}
+.profile-name { color: #1f628e; font-size: 1.25rem; margin-bottom: 6px; }
+.profile-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.dashboard-card-icon { display: block; font-size: 1.8rem; margin-bottom: 4px; }
+.dashboard-card .espace-profile-link { margin-top: 14px; }
+.dashboard-card-note { margin-top: 7px; }
+.dashboard-card--coach {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 22px;
+    border: 2px solid rgba(0,168,168,.24);
+    text-align: left;
+}
+.dashboard-card--coach .dashboard-card-icon { margin: 0; font-size: 3rem; }
+.dashboard-card--coach .section-title { align-items: flex-start; margin-bottom: 7px; text-align: left; }
+.dashboard-card--coach .section-title::after { margin-left: 0; }
+.dashboard-card--coach .espace-muted { text-align: left; }
+.dashboard-plan {
+    display: inline-block;
+    margin-top: 9px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #e8f7f6;
+    color: #17636c;
+    font-size: .76rem;
+    font-weight: 800;
+}
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+.dashboard-card--lunar { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px; text-align: left; }
+.dashboard-card--lunar .dashboard-card-icon { margin: 0; font-size: 2.8rem; }
+.dashboard-card--lunar .section-title { align-items: flex-start; margin-bottom: 7px; text-align: left; }
+.dashboard-card--lunar .section-title::after { margin-left: 0; }
+.lunar-dashboard-meta { margin-top: 6px; color: #1f628e; font-size: .86rem; font-weight: 800; }
+
+.journal-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 30px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid rgba(31,98,142,0.14);
+}
+
+.journal-field { display: grid; gap: 7px; }
+.journal-field--wide { grid-column: 1 / -1; }
+.journal-field label { color: #1f628e; font-size: .9rem; font-weight: 700; }
+.journal-field input,
+.journal-field select,
+.journal-field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(31,98,142,.22);
+    border-radius: 12px;
+    background: #fff;
+    color: #263645;
+    font: inherit;
+}
+.journal-field textarea { min-height: 92px; resize: vertical; }
+.journal-field input:focus,
+.journal-field select:focus,
+.journal-field textarea:focus {
+    outline: 3px solid rgba(0,168,168,.13);
+    border-color: #00a8a8;
+}
+.journal-submit {
+    grid-column: 1 / -1;
+    justify-self: start;
+    border: 0;
+    border-radius: 999px;
+    padding: 13px 22px;
+    background: linear-gradient(45deg, #00a8a8, #1f628e);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+.journal-submit:hover { filter: brightness(1.08); }
+.journal-flash {
+    margin-bottom: 18px;
+    padding: 12px 15px;
+    border-radius: 12px;
+    background: #e7f8f7;
+    color: #17636c;
+    text-align: center;
+}
+.journal-flash.error { background: #fff0f0; color: #9b3030; }
+
+@media (max-width: 768px) {
+    .container { padding: 15px; }
+    .espace-grid { grid-template-columns: 1fr; }
+    .form-container { padding: 25px; }
+    .journal-form { grid-template-columns: 1fr; }
+    .journal-field--wide, .journal-submit { grid-column: 1; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .dashboard-card--coach { grid-template-columns: 1fr; text-align: center; }
+    .dashboard-card--coach .section-title { align-items: center; text-align: center; }
+    .dashboard-card--coach .section-title::after { margin-left: auto; }
+    .dashboard-card--coach .espace-muted { text-align: center; }
+    .dashboard-card--lunar { grid-column: 1; grid-template-columns: 1fr; text-align: center; }
+    .dashboard-card--lunar .section-title { align-items: center; text-align: center; }
+    .dashboard-card--lunar .section-title::after { margin-left: auto; }
+}
+.home-revolutions{margin-top:28px}.home-revolutions>h2{color:white;margin:0 0 16px}.home-revolutions .dashboard-grid{gap:20px}.home-revolutions .espace-muted,.home-revolutions .lunar-dashboard-meta{text-align:left}.home-day-summary{text-align:center;font-size:14px;line-height:1.5;font-weight:400}
 {% endblock %}
+
 {% block content %}
-<section class="espace-accueil">
-  <h1>Bienvenue dans ton espace, {{ utilisateur.prenom }}.</h1>
-  <p>Ton compte est bien enregistré avec l'adresse {{ utilisateur.email }}.</p>
-  <p>Tu peux maintenant renseigner tes coordonnées de naissance. Le journal de bord et la bibliothèque de rapports seront ajoutés progressivement.</p>
-  <p><a href="{{ url_for('espace_personnel.profil') }}">Mettre à jour mon profil astral</a></p>
-  <p><a href="{{ url_for('espace_personnel.emails_cycle') }}">Voir mes mails de cycle</a></p>
-  <form method="post" action="{{ url_for('espace_personnel.deconnexion') }}">
-    <button type="submit">Me déconnecter</button>
-  </form>
-</section>
+<div class="stars" id="stars"></div>
+<div class="container">
+    {% include 'espace_personnel/_navigation.html' %}
+    <div class="header">
+        <div class="badge-d-wrap">
+            <div class="badge-d">☾ Journal de conscience ☾</div>
+        </div>
+        <h1 class="page-title">Mon espace astral</h1>
+        <p class="header-hook">Un endroit pour observer ce qui se joue, relier ton vécu aux énergies du moment et transformer les automatismes en choix conscients.</p>
+    </div>
+
+    <div class="form-container profile-card">
+        <h3 class="section-title">✨ Mon profil astral</h3>
+        <div class="profile-avatar">☾</div>
+        {% if profil %}
+            <h4 class="profile-name">{{ profil.prenom }}</h4>
+            <p class="espace-muted">
+                Né{% if profil.prenom and not profil.prenom.endswith('e') %}{% endif %} le {{ profil.date_naissance.strftime('%d.%m.%Y') }}
+                à {{ profil.heure_naissance.strftime('%H:%M') }} · {{ profil.ville_naissance }}
+            </p>
+            <div class="profile-actions">
+                <a class="espace-profile-link" href="{{ url_for('espace_personnel.ciel_natal') }}">Voir mon ciel natal</a>
+                <a class="espace-profile-link espace-profile-link--secondary" href="{{ url_for('espace_personnel.profil') }}">Mettre à jour mon profil</a>
+            </div>
+        {% else %}
+            <p class="espace-muted">Renseigne tes informations de naissance pour calculer ton ciel natal et relier tes observations aux transits.</p>
+            <a class="espace-profile-link" href="{{ url_for('espace_personnel.profil') }}">Créer mon profil astral</a>
+        {% endif %}
+    </div>
+
+    <section class="form-container dashboard-card dashboard-card--coach">
+        <span class="dashboard-card-icon">🧭</span>
+        <div>
+            <h3 class="section-title">Mon accompagnement</h3>
+            <p class="espace-muted">Retrouve ton fil rouge, tes enjeux du moment, la question de ton cycle et les dernières traces de ton journal.</p>
+            <span class="dashboard-plan">{{ droits_abonnement.libelle }}</span>
+        </div>
+        <a class="espace-profile-link" href="{{ url_for('espace_personnel.accompagnement') }}">Voir où j’en suis</a>
+    </section>
+
+
+    <div class="dashboard-grid">
+        <div class="form-container espace-stat dashboard-card">
+            <span class="dashboard-card-icon">🗓️</span>
+            <h3 class="section-title">Calendrier et énergies en cours</h3>
+            {% if resume_contacts %}<span class="espace-number">{{ resume_contacts[0].nombre }}</span><p class="espace-muted">transit{% if resume_contacts[0].nombre != 1 %}s{% endif %} à explorer</p>{% for evenement in resume_contacts[1:] %}<p class="espace-muted">{{ evenement.titre }}</p>{% endfor %}{% elif resume_indisponible %}<p class="espace-muted">Le résumé du jour est momentanément indisponible.</p>{% else %}<p class="espace-muted">Retrouve tes observations et les repères de ta formule, jour après jour.</p>{% endif %}
+            <a class="espace-profile-link" href="{{ url_for('espace_personnel.calendrier') }}">Ouvrir mon calendrier</a>
+        </div>
+            <div class="form-container espace-stat dashboard-card">
+                <span class="dashboard-card-icon">📖</span>
+                <h3 class="section-title">Journal de bord</h3>
+                <span class="espace-number">{{ entrees|length }}</span>
+                <p class="espace-muted">observation{% if entrees|length != 1 %}s{% endif %} enregistrée{% if entrees|length != 1 %}s{% endif %}</p>
+                <a class="espace-profile-link" href="{{ url_for('espace_personnel.journal') }}">Entrer dans mon journal</a>
+            </div>
+            <div class="form-container espace-stat dashboard-card">
+                <span class="dashboard-card-icon">🧪</span>
+                <h3 class="section-title">Labo de conscience</h3>
+                <span class="espace-number">{{ nb_mecanismes_en_cours }}</span>
+                <p class="espace-muted">mécanisme{% if nb_mecanismes_en_cours != 1 %}s{% endif %} exploré{% if nb_mecanismes_en_cours != 1 %}s{% endif %} en cours</p>
+                <a class="espace-profile-link" href="{{ url_for('espace_personnel.laboratoire') }}">Entrer dans mon labo</a>
+            </div>
+            <div class="form-container espace-stat dashboard-card">
+                <h3 class="section-title">🗂️ Mes analyses</h3>
+                <span class="espace-number">{{ analyses|length }}</span>
+                <p class="espace-muted">analyse{% if analyses|length != 1 %}s{% endif %} dans ta bibliothèque</p>
+                <a class="espace-profile-link" href="{{ url_for('espace_personnel.mes_analyses') }}">Voir toute la collection</a>
+            </div>
+            <div class="form-container espace-stat dashboard-card">
+                <span class="dashboard-card-icon">✉️</span>
+                <h3 class="section-title">Mes emails de cycle</h3>
+                <p class="espace-muted">Prépare et relis tes emails avant le moindre envoi.</p>
+                <a class="espace-profile-link" href="{{ url_for('espace_personnel.emails_cycle') }}">Voir mes brouillons</a>
+            </div>
+
+    </div>
+    <section class="home-revolutions"><h2>Mes révolutions solaire et lunaire</h2><div class="dashboard-grid">
+            <div class="form-container dashboard-card dashboard-card--lunar">
+                <span class="dashboard-card-icon">☀️</span>
+                <div><h3 class="section-title">Ma dernière révolution solaire</h3>
+                {% if cycle_solaire %}<p class="espace-muted">Ta révolution solaire est enregistrée.</p><p class="lunar-dashboard-meta">{% if date_rs_locale %}Retour du {{ date_rs_locale.strftime("%d.%m.%Y à %H:%M") }} · {% endif %}{{ cycle_solaire.ville }}</p>{% else %}<p class="espace-muted">Aucune révolution solaire enregistrée.</p>{% endif %}
+                </div><a class="espace-profile-link" href="{{ url_for('espace_personnel.revolutions_solaires') }}">Voir mes années</a>
+            </div>
+            <div class="form-container dashboard-card dashboard-card--lunar">
+                <span class="dashboard-card-icon">🌙</span>
+                <div>
+                    <h3 class="section-title">Ma dernière révolution lunaire</h3>
+                    {% if cycle_lunaire and cycle_lunaire.interpretation %}
+                        <p class="espace-muted" style="text-align:left">Ton interprétation personnalisée est disponible.</p>
+                        <p class="lunar-dashboard-meta">{% if date_cycle_locale %}Cycle du {{ date_cycle_locale.strftime('%d.%m.%Y à %H:%M') }} · {% endif %}{{ cycle_lunaire.ville }}</p>
+                    {% elif profil and profil.ville_cycles %}
+                        <p class="espace-muted" style="text-align:left">Découvre la tonalité et le fil rouge de ton prochain cycle.</p>
+                        <p class="lunar-dashboard-meta">Ville utilisée : {{ profil.ville_cycles }}</p>
+                    {% else %}
+                        <p class="espace-muted" style="text-align:left">Renseigne la ville utilisée pour calculer tes cycles lunaires.</p>
+                    {% endif %}
+                </div>
+                <a class="espace-profile-link" href="{{ url_for('espace_personnel.cycles_lunaires') }}">Voir mes cycles</a>
+            </div></div></section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function createStars() {
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.animationDuration = (2 + Math.random() * 3) + 's';
+            starsContainer.appendChild(star);
+        }
+    }
+    createStars();
+</script>
 {% endblock %}

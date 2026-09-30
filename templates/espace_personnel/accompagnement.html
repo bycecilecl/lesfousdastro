@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Mon accompagnement | Les Fous d'Astro{% endblock %}
+
+{% block extra_css %}
+body {
+    min-height: 100vh;
+    background: linear-gradient(145deg, #164f78 0%, #00a8a8 52%, #c0f0f7 100%);
+    color: #263d48;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.coach-shell { width: min(1080px, calc(100% - 32px)); margin: 52px auto 80px; }
+.coach-back { display: inline-block; margin-bottom: 22px; color: white; font-weight: 800; text-decoration: none; }
+.coach-hero { margin-bottom: 25px; color: white; text-align: center; }
+.coach-kicker { margin-bottom: 8px; font-size: .8rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.coach-plan { display:inline-block; margin-bottom:13px; padding:6px 12px; border:1px solid rgba(255,255,255,.4); border-radius:999px; background:rgba(255,255,255,.13); font-size:.78rem; font-weight:900; }
+.coach-title { margin: 0; font: 700 clamp(2.3rem, 6vw, 4.25rem)/1.05 Georgia, serif; }
+.coach-intro { max-width: 680px; margin: 14px auto 0; color: rgba(255,255,255,.9); font-size: 1.05rem; line-height: 1.65; }
+.coach-grid { display: grid; grid-template-columns: 1.35fr .75fr; gap: 22px; align-items: start; }
+.coach-column { display: grid; gap: 22px; }
+.coach-card { padding: clamp(24px, 4vw, 38px); border-radius: 25px; background: rgba(255,255,255,.96); box-shadow: 0 20px 48px rgba(8,51,72,.17); }
+.coach-card--lead { border-top: 6px solid #00a8a8; }
+.coach-label { margin-bottom: 7px; color: #00a8a8; font-size: .76rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.coach-card h2 { margin: 0 0 13px; color: #164f78; font: 700 clamp(1.4rem, 3vw, 2rem) Georgia, serif; }
+.coach-card h3 { margin: 0 0 7px; color: #164f78; font-size: 1.05rem; }
+.coach-text { color: #526a75; line-height: 1.72; white-space: pre-line; }
+.coach-meta { color: #71838b; font-size: .86rem; line-height: 1.5; }
+.coach-button { display: inline-block; margin-top: 18px; padding: 11px 17px; border-radius: 999px; background: linear-gradient(45deg,#00a8a8,#1f628e); color: white; font-weight: 800; text-decoration: none; }
+.coach-button--light { background: #eef8f8; color: #17636c; }
+.issue-group + .issue-group { margin-top: 28px; padding-top: 25px; border-top: 1px solid rgba(31,98,142,.12); }
+.issue-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 15px; margin-bottom: 13px; }
+.issue-heading h3 { margin: 0; font: 700 1.25rem Georgia, serif; }
+.issue-count { color: #00a8a8; font-weight: 900; }
+.issue-list { display: grid; gap: 12px; }
+.issue { padding: 17px; border: 1px solid rgba(31,98,142,.12); border-radius: 15px; background: #f8fcfc; }
+.issue p { color: #4f646d; line-height: 1.58; }
+.issue-source { display: inline-block; margin-bottom: 8px; padding: 4px 9px; border-radius: 999px; background: #e8f7f6; color: #17636c; font-size: .72rem; font-weight: 900; }
+.issue-link { display: inline-block; margin-top: 10px; color: #1f628e; font-size: .88rem; font-weight: 800; text-decoration: none; }
+.empty-state { padding: 18px; border: 1px dashed rgba(31,98,142,.25); border-radius: 14px; color: #71838b; line-height: 1.55; }
+.question { padding: 21px; border-radius: 17px; background: linear-gradient(135deg,#eefafa,#fff8e9); color: #344f5a; font: 700 1.12rem/1.65 Georgia, serif; }
+.trace-list { display: grid; gap: 11px; }
+.trace { display: block; padding: 14px; border-radius: 13px; background: #f7fbfb; color: inherit; text-decoration: none; }
+.trace-date { color: #00a8a8; font-size: .78rem; font-weight: 900; text-transform: uppercase; }
+.trace p { margin-top: 5px; color: #60747c; line-height: 1.45; }
+.status-list { display: grid; gap: 13px; }
+.status-item { padding-bottom: 13px; border-bottom: 1px solid rgba(31,98,142,.1); }
+.status-item:last-child { padding-bottom: 0; border-bottom: 0; }
+.status-value { color: #164f78; font-weight: 800; }
+@media (max-width: 790px) {
+    .coach-grid { grid-template-columns: 1fr; }
+    .coach-shell { margin-top: 34px; }
+}
+{% endblock %}
+
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="coach-shell">
+    <a class="coach-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+
+    <header class="coach-hero">
+        <p class="coach-kicker">Ton fil conducteur</p>
+        <span class="coach-plan">{{ droits_abonnement.libelle }}</span>
+        {% if droits_abonnement.date_fin %}<p class="coach-meta" style="color:white">Accès jusqu’au {{ droits_abonnement.date_fin.strftime('%d.%m.%Y') }}</p>{% endif %}
+        <h1 class="coach-title">Mon accompagnement</h1>
+        <p class="coach-intro">Ici, on relie ce que tu vis, les mouvements déjà calculés et les traces que tu laisses dans ton journal. Le ciel fournit le décor ; ta vie garde tout de même le premier rôle.</p>
+    </header>
+
+    <div class="coach-grid">
+        <div class="coach-column">
+            <section class="coach-card coach-card--lead">
+                <p class="coach-label">Le mouvement actuel</p>
+                <h2>{% if profil %}Où tu en es, {{ profil.prenom }}{% else %}Ton fil rouge{% endif %}</h2>
+                {% if not droits_abonnement.cycle_lunaire %}
+                    <p class="coach-text">Ton espace reste à toi : retrouve tes analyses, explore leurs enjeux et note ce qui évolue dans ton journal.</p>
+                    <a class="coach-button" href="{{ url_for('espace_personnel.mes_analyses') }}">Voir mes analyses</a>
+                {% elif interpretation_cycle.get('fil_rouge') or interpretation_cycle.get('tonalite') %}
+                    <p class="coach-text">{{ interpretation_cycle.get('fil_rouge') or interpretation_cycle.get('tonalite') }}</p>
+                    {% if cycle_lunaire %}<p class="coach-meta">Cycle lunaire commencé le {{ cycle_lunaire.debut_cycle_utc.strftime('%d.%m.%Y') }} · {{ cycle_lunaire.ville }}</p>{% endif %}
+                {% elif prochain_cycle_lunaire %}
+                    <p class="coach-text">Ton prochain cycle lunaire est déjà enregistré, mais aucun cycle interprété n’est actif aujourd’hui.</p>
+                    <p class="coach-meta">Prochain cycle : {{ prochain_cycle_lunaire.debut_cycle_utc.strftime('%d.%m.%Y') }} · {{ prochain_cycle_lunaire.ville }}</p>
+                {% else %}
+                    <p class="empty-state">Aucun fil lunaire actif n’est encore disponible. Tu peux continuer à utiliser ton journal et tes analyses pendant que le ciel fait semblant de respecter les délais.</p>
+                {% endif %}
+            </section>
+
+            <section class="coach-card" id="mes-enjeux">
+                <p class="coach-label">Ce qui mérite ton attention</p>
+                <h2>Les enjeux de mes analyses</h2>
+                <p class="coach-meta">Ces pistes proviennent de tes rapports enregistrés. Pour les transits, consulte la période du rapport : leur présence ici ne signifie pas qu’ils sont encore actifs aujourd’hui.</p>
+
+                <div class="issue-group">
+                    <div class="issue-heading"><h3>Enjeux de période</h3><span class="issue-count">{{ enjeux_moment|length }}</span></div>
+                    {% if enjeux_moment %}
+                        <div class="issue-list">
+                            {% for enjeu in enjeux_moment[:5] %}
+                            <article class="issue">
+                                <span class="issue-source">{{ enjeu.analyse.titre }}</span>
+                                <p>{{ enjeu.objet.contenu }}</p>
+                                <a class="issue-link" href="{{ url_for('espace_personnel.journal', enjeu_id=enjeu.objet.id) }}">Écrire à ce sujet dans mon journal →</a>
+                            </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty-state">Aucun enjeu temporaire n’a encore été extrait de tes analyses. Tes rapports restent disponibles dans « Mes analyses ».</p>
+                    {% endif %}
+                </div>
+
+                <div class="issue-group">
+                    <div class="issue-heading"><h3>Enjeux de fond</h3><span class="issue-count">{{ enjeux_fond|length }}</span></div>
+                    {% if enjeux_fond %}
+                        <div class="issue-list">
+                            {% for enjeu in enjeux_fond[:5] %}
+                            <article class="issue">
+                                <span class="issue-source">{{ enjeu.analyse.titre }}</span>
+                                <p>{{ enjeu.objet.contenu }}</p>
+                                <a class="issue-link" href="{{ url_for('espace_personnel.journal', enjeu_id=enjeu.objet.id) }}">Écrire à ce sujet dans mon journal →</a>
+                            </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty-state">Aucun enjeu de fond n’a encore été extrait de « Mes Potentiels & Défis ».</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            {% if droits_abonnement.cycle_lunaire %}
+            <section class="coach-card">
+                <p class="coach-label">Ton point d’observation</p>
+                <h2>La question du cycle</h2>
+                {% if interpretation_cycle.get('question_journal') %}
+                    <div class="question">{{ interpretation_cycle.get('question_journal') }}</div>
+                    <a class="coach-button" href="{{ url_for('espace_personnel.journal', cycle_id=cycle_lunaire.id) }}">Répondre dans mon journal</a>
+                {% else %}
+                    <p class="empty-state">Aucune question de cycle active aujourd’hui. Tu peux tout de même déposer ce qui se joue maintenant.</p>
+                    <a class="coach-button coach-button--light" href="{{ url_for('espace_personnel.journal') }}">Ouvrir mon journal</a>
+                {% endif %}
+            </section>
+            {% endif %}
+        </div>
+
+        <aside class="coach-column">
+            <section class="coach-card">
+                <p class="coach-label">Le cadre</p>
+                <h2>Mes repères</h2>
+                <p class="coach-meta">{% if droits_abonnement.code == 'boussole_lunaire' %}Un email par cycle lunaire, à partir de la RL et du natal. Ton journal reste personnel et ne nourrit pas cette formule.{% elif droits_abonnement.actif %}Deux emails par mois : RS, RL, transits et contexte de vie. Le suivi peut tenir compte de ton journal.{% else %}Profil, journal, rapports et archives restent consultables.{% endif %}</p>
+                <a class="issue-link" href="{{ url_for('espace_personnel.mes_analyses') }}">Mes rapports →</a>
+                <a class="issue-link" href="{{ url_for('espace_personnel.revolutions_solaires') }}">Mes RS enregistrées →</a>
+                <div class="status-list">
+                    {% if droits_abonnement.revolution_solaire %}
+                    <div class="status-item">
+                        <h3>Révolution Solaire</h3>
+                        {% if cycle_solaire %}<p class="status-value">Année {{ cycle_solaire.annee }} · {{ cycle_solaire.ville }}</p><p class="coach-meta">Active jusqu’au {{ cycle_solaire.fin_cycle_utc.strftime('%d.%m.%Y') }}</p>
+                        {% else %}<p class="coach-meta">Aucune RS active enregistrée.</p>{% endif %}
+                    </div>
+                    {% endif %}
+                    {% if droits_abonnement.cycle_lunaire %}
+                    <div class="status-item">
+                        <h3>Cycle lunaire</h3>
+                        {% if cycle_lunaire %}<p class="status-value">Depuis le {{ cycle_lunaire.debut_cycle_utc.strftime('%d.%m.%Y') }}</p><p class="coach-meta">{{ cycle_lunaire.ville }}</p>
+                        {% elif prochain_cycle_lunaire %}<p class="status-value">Prochain le {{ prochain_cycle_lunaire.debut_cycle_utc.strftime('%d.%m.%Y') }}</p><p class="coach-meta">{{ prochain_cycle_lunaire.ville }}</p>
+                        {% else %}<p class="coach-meta">Aucun cycle enregistré.</p>{% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="status-item">
+                        <h3>Dernier email enregistré</h3>
+                        {% if dernier_email %}<p class="status-value">{{ dernier_email.objet or 'Boussole du cycle' }}</p><p class="coach-meta">Statut : {{ dernier_email.statut }}</p><a class="issue-link" href="{{ url_for('espace_personnel.fiche_email_cycle', email_id=dernier_email.id) }}">Voir cet email →</a>
+                        {% else %}<p class="coach-meta">Aucun email de cycle enregistré.</p>{% endif %}
+                    </div>
+                </div>
+                <a class="coach-button coach-button--light" href="{{ url_for('espace_personnel.profil') }}#situation-actuelle">Actualiser mes domaines de vie</a>
+            </section>
+
+            <section class="coach-card">
+                <p class="coach-label">Ce que tu as déjà observé</p>
+                <h2>Mes dernières traces</h2>
+                {% if dernieres_entrees %}
+                    <div class="trace-list">
+                        {% for entree in dernieres_entrees %}
+                        <a class="trace" href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">
+                            <span class="trace-date">{{ entree.date_observation.strftime('%d.%m.%Y') }}</span>
+                            <p>{{ (entree.situation or entree.emotions or 'Observation enregistrée.')|truncate(135) }}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="empty-state">Ton journal est encore vide. C’est très calme. Presque suspect.</p>
+                {% endif %}
+                <a class="coach-button" href="{{ url_for('espace_personnel.journal') }}">Ouvrir mon journal de bord</a>
+            </section>
+        </aside>
+    </div>
+</main>
+{% endblock %}

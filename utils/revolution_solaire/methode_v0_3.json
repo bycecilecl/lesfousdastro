@@ -1,0 +1,84 @@
+{
+  "version": "0.3.0",
+  "statut": "brouillon en révision méthodologique",
+  "cadre_calcul": {
+    "zodiaque": "tropical",
+    "maisons": "Placidus",
+    "lieu": "lieu où la personne se trouve à l'instant exact du retour solaire",
+    "lune_noire": "moyenne",
+    "noeud_nord": "Nœud Nord",
+    "noeud_sud": "Nœud Sud"
+  },
+  "orbes": {
+    "aspects_rs_natal": 3.0,
+    "aspects_rs_natal_angles": 4.0,
+    "angularite_rs": 8.0,
+    "aspect_interne_luminaire": 6.0,
+    "aspect_interne_planete": 5.0,
+    "quinconce": 3.0,
+    "aspect_interne_point_symbolique": 3.0
+  },
+  "principe_directeur": "La révolution solaire est d'abord étudiée pour ses dynamiques propres. Ses facteurs annuels sont ensuite mis en résonance avec le thème natal, qui en précise la portée durable.",
+  "ordre_analyse": [
+    {
+      "id": "dynamique_rs",
+      "titre": "La dynamique propre de ta révolution solaire",
+      "priorites": [
+        "Ascendant de RS, maître ou maîtres de RS, Soleil et Lune de RS",
+        "Angularités et maisons de RS les plus occupées",
+        "Aspects internes et figures majeures de la RS"
+      ]
+    },
+    {
+      "id": "maitre_annee",
+      "titre": "Le maître de l'année",
+      "priorites": [
+        "Ascendant profecté et maître traditionnel de l'année",
+        "Position natale et position en RS du maître de l'année",
+        "Diviseur et participant lorsque les directions primaires seront disponibles"
+      ]
+    },
+    {
+      "id": "resonances_natales",
+      "titre": "Les résonances avec ton thème natal",
+      "priorites": [
+        "Ascendant natal, son maître et les maisons qu’il gouverne",
+        "Maisons natales activées par les facteurs de RS",
+        "Contacts RS-natal utiles et répétitions de configurations"
+      ]
+    },
+    {
+      "id": "points_symboliques",
+      "titre": "Points symboliques complémentaires",
+      "priorites": [
+        "Nœuds lunaires, Lune Noire et Part de Fortune seulement comme confirmations"
+      ]
+    },
+    {
+      "id": "synthese",
+      "titre": "Synthèse annuelle",
+      "priorites": [
+        "Relier les dynamiques RS aux résonances natales confirmées",
+        "Nommer les tensions sans fatalisme",
+        "Proposer des pistes concrètes d’observation ou de choix"
+      ]
+    }
+  ],
+  "regles_redaction": [
+    "Commencer par décrire les dynamiques propres de la révolution solaire.",
+    "Mettre ensuite ces dynamiques en résonance avec le thème natal.",
+    "Ne jamais interpréter la conjonction Soleil RS-Soleil natal : elle définit le retour solaire.",
+    "Distinguer explicitement les maisons RS et les maisons natales.",
+    "Présenter les configurations comme des dynamiques symboliques et leurs manifestations concrètes plausibles, sans annoncer un fait précis comme certain.",
+    "Lire le quinconce comme une tension d’ajustement proche du carré, mais plus indirecte ou moins consciente.",
+    "Ne pas annoncer maladie, décès, grossesse, infidélité, catastrophe ou résultat financier.",
+    "Ne pas déduire de dates précises tant que les outils de datation ne sont pas calculés.",
+    "Employer le tutoiement et des exemples concrets, sans vocabulaire ésotérique creux."
+  ],
+  "evolutions_prevues": [
+    "pondération des facteurs",
+    "transits annuels et datation",
+    "comparaison de plusieurs années vécues",
+    "règles d'interprétation validées par retour d'expérience"
+  ]
+}

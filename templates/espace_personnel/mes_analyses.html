@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Mes analyses | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+  .analyses-shell { width: min(850px, calc(100% - 32px)); margin: 3rem auto 4rem; }
+  .analyses-card { margin-top: 1rem; padding: clamp(24px, 5vw, 40px); border-radius: 22px; background: #fff; box-shadow: 0 15px 40px #092d4a24; color: #263645; }
+  .analyses-card h1, .analyses-card h2 { color: #1f628e; }
+  .analyses-card p { line-height: 1.55; }
+  .analyses-liste { list-style: none; padding: 0; }
+  .analyses-liste li { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid #d7e5e8; }
+  .analyses-liste a { color: #1f628e; font-weight: 700; }
+  .analyses-import { display: grid; gap: .8rem; }
+  .analyses-import button { justify-self: start; padding: .7rem 1.1rem; border: 0; border-radius: 24px; background: #1f628e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+  .analyses-message { padding: .8rem 1rem; border-radius: 10px; background: #e7f8f7; }
+  .analyses-message.error { color: #9b3030; background: #fff0f0; }
+  .analyses-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem; }
+  .analyses-tile { padding: 1.2rem; border: 1px solid #d7e5e8; border-radius: 16px; background: #f9fcfc; }
+  .analyses-tile h3 { color: #1f628e; margin-bottom: .45rem; }
+  .analyses-tile p { color: #53656b; margin-bottom: .8rem; }
+  .analyses-tile summary { color: #1f628e; font-weight: 700; cursor: pointer; }
+  .analyses-tile form { display: grid; gap: .6rem; margin-top: .8rem; }
+  .analyses-tile input { max-width: 100%; }
+  .analyses-tile button { padding: .65rem 1rem; border: 0; border-radius: 999px; background: #1f628e; color: #fff; font-weight: 700; cursor: pointer; }
+  .analyses-tile a { color: #1f628e; font-weight: 700; }
+{% endblock %}
+{% block content %}
+<main class="analyses-shell">
+  {% include 'espace_personnel/_navigation.html' %}
+  <section class="analyses-card">
+    <h1>Mes analyses</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for categorie, message in messages %}<p class="analyses-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
+    {% if analyses %}<ul class="analyses-liste">
+      {% for analyse in analyses %}<li><span>{{ analyse.titre }}</span><a href="{{ url_for('espace_personnel.lire_analyse', analyse_id=analyse.id) }}" target="_blank" rel="noopener">Lire le PDF ↗</a></li>{% endfor %}
+    </ul>{% else %}<p>Aucune analyse dans ta bibliothèque pour le moment.</p>{% endif %}
+  </section>
+  {% if peut_importer %}
+  <section class="analyses-card">
+    <h2>Reprendre mes archives du labo</h2>
+    <p>Pour les deux comptes de test. Cet import privé rassemble les analyses et leurs PDF, le journal, les RS et les RL déjà enregistrées. Il n’envoie aucun e-mail.</p>
+    <form class="analyses-import" method="post" action="{{ url_for('espace_personnel.importer_archives_labo') }}" enctype="multipart/form-data">
+      <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
+      <label for="archives_import">Fichier des archives</label>
+      <input id="archives_import" type="file" name="archives_import" accept=".json,application/json" required>
+      <button type="submit">Importer mes archives</button>
+    </form>
+  </section>
+  {% endif %}
+  {% if analyses_a_explorer %}
+  <section class="analyses-card">
+    <h2>À explorer</h2>
+    <p>Les analyses qui ne figurent pas encore dans ta bibliothèque.</p>
+    <div class="analyses-grid">
+      {% for item in analyses_a_explorer %}
+      <article class="analyses-tile">
+        <h3>{{ item.titre }}</h3>
+        <p>{{ item.description }}</p>
+        <details>
+          <summary>Importer cette analyse</summary>
+          <form method="post" action="{{ url_for('espace_personnel.importer_analyse') }}" enctype="multipart/form-data">
+            <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
+            <input type="hidden" name="type_analyse" value="{{ item.type }}">
+            <label>Rapport PDF des Fous d’Astro <input type="file" name="rapport" accept=".pdf,application/pdf" required></label>
+            <label>Date du rapport, si tu la connais <input type="date" name="date_generation"></label>
+            <button type="submit">Ajouter à ma bibliothèque</button>
+          </form>
+        </details>
+        <p><a href="{{ url_for('pages_bp.analyses') }}">Découvrir cette analyse ↗</a></p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

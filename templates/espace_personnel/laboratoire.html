@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Labo de conscience | Les Fous d'Astro{% endblock %}
+
+{% block extra_css %}
+body {
+    background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+}
+.lab-shell { width: min(980px, calc(100% - 32px)); margin: 48px auto 72px; }
+.lab-back { display: inline-block; margin-bottom: 18px; color: white; font-weight: 700; text-decoration: none; }
+.lab-page { padding: clamp(26px, 5vw, 52px); border-radius: 26px; background: rgba(255,255,255,.96); box-shadow: 0 24px 60px rgba(0,0,0,.18); color: #33434c; }
+.lab-header { max-width: 720px; margin: 0 auto 32px; text-align: center; }
+.lab-kicker { color: #00a8a8; font-size: .82rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.lab-title { margin: 8px 0; color: #1f628e; font: 700 clamp(2rem, 6vw, 3.3rem) Georgia, serif; }
+.lab-intro { color: #5d7079; line-height: 1.65; }
+.lab-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 34px; }
+.lab-stat { padding: 18px 14px; border-radius: 16px; background: #edf9f8; text-align: center; }
+.lab-stat strong { display: block; color: #00a8a8; font-size: 2rem; }
+.lab-stat span { color: #52636b; font-size: .86rem; }
+.lab-section-title { margin-bottom: 15px; color: #596970; font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; }
+.lab-filters { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 26px; padding: 18px; border-radius: 16px; background: #f4fafb; }
+.lab-filter-field { display: grid; gap: 6px; }
+.lab-filter-field label { color: #1f628e; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.lab-filter-field select { width: 100%; padding: 10px 12px; border: 1px solid rgba(31,98,142,.2); border-radius: 10px; background: white; color: #33434c; font: inherit; }
+.lab-filter-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.lab-filter-button { border: 0; cursor: pointer; }
+.lab-active-link { display: inline-block; margin-bottom: 16px; color: #1f628e; font-size: .86rem; font-weight: 800; text-decoration: none; }
+.lab-active-link.is-active { color: #007f83; text-decoration: underline; }
+.mechanism-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.mechanism-card { display: flex; flex-direction: column; padding: 20px; border: 1px solid rgba(31,98,142,.14); border-radius: 17px; background: #fbfefd; }
+.mechanism-source { margin-bottom: 7px; color: #00a8a8; font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.mechanism-card h2 { margin-bottom: 10px; color: #1f628e; font: 700 1.3rem Georgia, serif; }
+.mechanism-excerpt { flex: 1; color: #60727a; line-height: 1.55; }
+.mechanism-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 17px; }
+.mechanism-tag { padding: 6px 10px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-size: .76rem; font-weight: 700; }
+.mechanism-tag--status { background: #eef2fb; color: #405981; }
+.mechanism-tracking { margin-top: 14px; color: #526b73; font-size: .82rem; font-weight: 700; }
+.mechanism-tracking--empty { color: #a0694d; }
+.mechanism-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(31,98,142,.1); }
+.mechanism-date { color: #849198; font-size: .78rem; }
+.lab-button { display: inline-block; padding: 9px 15px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 800; text-decoration: none; font-size: .84rem; }
+.lab-empty { padding: 48px 20px; border: 1px dashed rgba(31,98,142,.24); border-radius: 18px; text-align: center; color: #60727a; }
+.lab-empty-symbol { display: block; margin-bottom: 10px; font-size: 2.5rem; }
+.lab-analyses { margin-top: 30px; padding: 22px; border-radius: 17px; background: linear-gradient(135deg, #e7f8f7, #edf3fb); text-align: center; }
+.lab-analyses h2 { color: #1f628e; font: 700 1.25rem Georgia, serif; }
+.lab-analyses p { margin: 7px auto 14px; max-width: 620px; color: #60727a; line-height: 1.55; }
+@media (max-width: 700px) { .mechanism-grid { grid-template-columns: 1fr; } .lab-stats { gap: 8px; } .lab-stat { padding: 14px 8px; } .mechanism-footer { align-items: flex-start; flex-direction: column; } .lab-filters { grid-template-columns: 1fr; } }
+{% endblock %}
+
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="lab-shell">
+    <a class="lab-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+    <article class="lab-page">
+        <header class="lab-header">
+            <p class="lab-kicker">Observer · Comprendre · Transformer</p>
+            <h1 class="lab-title">Labo de conscience</h1>
+            <p class="lab-intro">Un espace pour confronter les mécanismes révélés par tes analyses à ton expérience réelle, sans transformer une hypothèse en vérité gravée dans le marbre cosmique.</p>
+        </header>
+
+        <section class="lab-stats" aria-label="Résumé du laboratoire">
+            <div class="lab-stat"><strong>{{ statistiques.en_cours }}</strong><span>en cours</span></div>
+            <div class="lab-stat"><strong>{{ statistiques.en_transformation }}</strong><span>en transformation</span></div>
+            <div class="lab-stat"><strong>{{ statistiques.depasses }}</strong><span>probablement dépassé{% if statistiques.depasses != 1 %}s{% endif %}</span></div>
+        </section>
+
+        <h2 class="lab-section-title">Mes mécanismes</h2>
+        <form class="lab-filters" method="get">
+            <div class="lab-filter-field">
+                <label for="analyse">Analyse d’origine</label>
+                <select id="analyse" name="analyse">
+                    <option value="">Toutes les analyses</option>
+                    {% for analyse in analyses %}<option value="{{ analyse.id }}" {% if analyse.id == analyse_selectionnee %}selected{% endif %}>{{ analyse.titre }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="lab-filter-field">
+                <label for="statut">Statut</label>
+                <select id="statut" name="statut">
+                    <option value="">Tous les statuts</option>
+                    {% for valeur, libelle in statuts.items() %}<option value="{{ valeur }}" {% if valeur == statut_selectionne %}selected{% endif %}>{{ libelle }}</option>{% endfor %}
+                </select>
+            </div>
+            {% if actifs_seulement %}<input type="hidden" name="actifs" value="1">{% endif %}
+            {% if jamais_observes %}<input type="hidden" name="jamais_observes" value="1">{% endif %}
+            <div class="lab-filter-actions">
+                <button class="lab-button lab-filter-button" type="submit">Filtrer</button>
+                {% if filtres_actifs %}<a class="lab-button" href="{{ url_for('espace_personnel.laboratoire') }}">Tout afficher</a>{% endif %}
+            </div>
+        </form>
+        <a class="lab-active-link {% if actifs_seulement %}is-active{% endif %}" href="{% if actifs_seulement %}{{ url_for('espace_personnel.laboratoire') }}{% else %}{{ url_for('espace_personnel.laboratoire', actifs=1) }}{% endif %}">{% if actifs_seulement %}✓ Mécanismes à observer maintenant{% else %}Voir uniquement les mécanismes à observer maintenant{% endif %}</a>
+        <a class="lab-active-link {% if jamais_observes %}is-active{% endif %}" href="{% if jamais_observes %}{{ url_for('espace_personnel.laboratoire') }}{% else %}{{ url_for('espace_personnel.laboratoire', jamais_observes=1) }}{% endif %}">{% if jamais_observes %}✓ Mécanismes jamais observés{% else %}Voir les mécanismes jamais observés{% endif %}</a>
+        {% if mecanismes %}
+            <div class="mechanism-grid">
+                {% for mecanisme in mecanismes %}
+                    {% set analyse = analyses_par_id.get(mecanisme.analyse_id) %}
+                    {% set suivi = suivis_par_mecanisme.get(mecanisme.id) %}
+                    <article class="mechanism-card">
+                        <p class="mechanism-source">{{ analyse.titre if analyse else 'Analyse personnelle' }}</p>
+                        <h2>{{ mecanisme.titre }}</h2>
+                        <p class="mechanism-excerpt">{{ mecanisme.hypothese }}</p>
+                        <div class="mechanism-tags">
+                            <span class="mechanism-tag">{{ ressentis.get(mecanisme.ressenti, mecanisme.ressenti) }}</span>
+                            <span class="mechanism-tag mechanism-tag--status">{{ statuts.get(mecanisme.statut, mecanisme.statut) }}</span>
+                        </div>
+                        {% if suivi %}
+                            <p class="mechanism-tracking">{{ suivi.nombre }} observation{% if suivi.nombre != 1 %}s{% endif %} · dernier suivi le {{ suivi.derniere_date.strftime('%d.%m.%Y') }}</p>
+                        {% else %}
+                            <p class="mechanism-tracking mechanism-tracking--empty">Jamais observé</p>
+                        {% endif %}
+                        <footer class="mechanism-footer">
+                            <span class="mechanism-date">Mis à jour le {{ mecanisme.date_modification.strftime('%d.%m.%Y') }}</span>
+                            <a class="lab-button" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}">Ouvrir</a>
+                        </footer>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="lab-empty">
+                <span class="lab-empty-symbol">🧪</span>
+                {% if filtres_actifs %}Aucun mécanisme ne correspond à ces filtres.{% else %}Aucun mécanisme n’est encore en observation. Choisis une analyse et relève une première piste à explorer.{% endif %}
+            </div>
+        {% endif %}
+
+        <aside class="lab-analyses">
+            <h2>Partir d’une analyse</h2>
+            <p>Retrouve tes rapports, ouvre celui que tu souhaites approfondir et ajoute les mécanismes qui méritent d’être observés.</p>
+            <a class="lab-button" href="{{ url_for('espace_personnel.mes_analyses') }}">Voir mes analyses</a>
+        </aside>
+    </article>
+</main>
+{% endblock %}

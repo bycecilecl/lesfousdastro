@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% block title %}Aperçu de mon cycle lunaire | Les Fous d'Astro{% endblock %}
+
+{% block extra_css %}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.3; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.2); }
+}
+
+.lunar-shell { width: min(1000px, calc(100% - 32px)); margin: 48px auto 72px; position: relative; z-index: 1; }
+
+.lunar-back {
+    display: inline-block;
+    margin-bottom: 18px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.lunar-back:hover { color: white; }
+
+.lunar-page {
+    padding: clamp(26px, 5vw, 50px);
+    border-radius: 25px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #4a5568;
+}
+
+.lunar-header { max-width: 740px; margin: 0 auto 34px; text-align: center; }
+.lunar-symbol { font-size: 3.2rem; color: #00a8a8; }
+.lunar-kicker { color: #00a8a8; font-size: .8rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.lunar-title { margin: 8px 0; color: #1f628e; font: 700 clamp(2rem, 5vw, 3rem) 'Segoe UI', sans-serif; }
+.lunar-intro { color: #5b6b78; line-height: 1.65; }
+.lunar-date {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #1f628e, #00a8a8);
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(31,98,142,0.25);
+}
+.cycle-switcher { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px auto 0; }
+.cycle-switcher a { padding: 8px 13px; border: 1px solid rgba(31,98,142,.2); border-radius: 999px; background: white; color: #1f628e; font-size: .84rem; font-weight: 800; text-decoration: none; transition: .2s ease; }
+.cycle-switcher a:hover { border-color: #00a8a8; transform: translateY(-1px); }
+.cycle-switcher a.is-active { border-color: transparent; background: #e7f8f7; color: #17636c; box-shadow: inset 0 0 0 2px rgba(0,168,168,.22); pointer-events: none; }
+
+.lunar-section { margin-top: 34px; }
+.lunar-section > h2 {
+    color: #1f628e;
+    font: 700 1.4rem 'Segoe UI', sans-serif;
+    text-align: center;
+    margin-bottom: 0;
+}
+.lunar-section > h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #1f628e, #00a8a8);
+    margin: 12px auto 22px;
+    border-radius: 2px;
+}
+
+.lunar-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.lunar-card { padding: 18px; border: 2px solid #c0f0f7; border-radius: 16px; background: rgba(192,240,247,0.15); }
+.lunar-card strong { display: block; color: #1f628e; }
+.lunar-card span { display: block; margin-top: 6px; color: #5b6b78; font-size: .88rem; }
+
+.planet-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.planet-row { display: flex; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 14px; background: rgba(192,240,247,0.18); }
+.planet-row strong { color: #1f628e; }
+.planet-row span { color: #5b6b78; text-align: right; }
+
+.house-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.house-item { padding: 12px; border-radius: 12px; background: rgba(192,240,247,0.15); border: 1px solid rgba(31,98,142,0.08); font-size: .86rem; color: #4a5568; }
+.house-item strong { color: #1f628e; }
+
+.aspect-list { display: grid; gap: 10px; }
+.aspect-item { padding: 14px 16px; border-left: 4px solid #00a8a8; border-radius: 10px; background: rgba(192,240,247,0.15); }
+.aspect-item strong { color: #1f628e; }
+.aspect-item span { display: block; margin-top: 4px; color: #6b7885; font-size: .83rem; }
+
+.lunar-details { margin-top: 16px; border: 1px solid rgba(31,98,142,0.18); border-radius: 14px; background: white; overflow: hidden; }
+.lunar-details summary { padding: 15px 18px; color: #1f628e; font-weight: 800; cursor: pointer; }
+.lunar-details .aspect-list { padding: 0 18px 18px; }
+
+.priority-box {
+    position: relative;
+    overflow: hidden;
+    padding: 28px;
+    border: 1px solid rgba(31,98,142,0.25);
+    border-radius: 22px;
+    background: linear-gradient(120deg, rgba(31,98,142,0.10), rgba(0,168,168,0.14), rgba(192,240,247,0.25));
+    box-shadow: 0 14px 32px rgba(31,98,142,0.08);
+}
+.priority-box::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 5px;
+    background: linear-gradient(180deg, #1f628e, #00a8a8, #c0f0f7);
+}
+.priority-lead { max-width: 640px; margin: 0 auto 20px; text-align: center; color: #4a5568; line-height: 1.55; }
+.priority-list { display: grid; gap: 10px; }
+.priority-item { padding: 13px 16px; border-radius: 12px; background: rgba(255,255,255,0.75); color: #445; box-shadow: 0 2px 8px rgba(31,98,142,0.05); }
+.priority-item strong { color: #1f628e; }
+
+.generate-box {
+    margin-top: 30px;
+    padding: 28px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #1f628e, #00a8a8);
+    color: white;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+.generate-box h2 { font: 700 1.5rem 'Segoe UI', sans-serif; margin-bottom: 8px; color: white; }
+.generate-box p { margin: 8px auto 18px; max-width: 620px; color: rgba(255,255,255,0.9); line-height: 1.55; }
+.generate-button {
+    border: 0;
+    border-radius: 999px;
+    padding: 14px 26px;
+    background: white;
+    color: #1f628e;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.generate-button:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.2); }
+.generation-error { margin-top: 14px; color: #ffe3d1; font-weight: 700; }
+
+.reading {
+    margin-top: 34px;
+    padding: clamp(24px, 4vw, 38px);
+    border: 1px solid rgba(31,98,142,0.15);
+    border-radius: 22px;
+    background: white;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+.reading h2 { color: #1f628e; font: 700 1.6rem 'Segoe UI', sans-serif; text-align: center; margin-bottom: 0; }
+.reading h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #1f628e, #00a8a8);
+    margin: 12px auto 22px;
+    border-radius: 2px;
+}
+.reading h3 { margin: 22px 0 8px; color: #1f628e; font: 700 1.05rem 'Segoe UI', sans-serif; }
+.reading p, .reading li { color: #4a5568; line-height: 1.7; white-space: pre-line; }
+.reading ul { padding-left: 20px; }
+.reading-domain { margin-top: 14px; padding: 16px; border-radius: 14px; background: rgba(192,240,247,0.18); }
+.reading-domain h3 { margin: 0 0 6px; }
+.reading-highlight { margin-top: 22px; padding: 18px; border-radius: 16px; background: linear-gradient(135deg, rgba(192,240,247,0.35), rgba(31,98,142,0.08)); border: 1px solid rgba(31,98,142,0.1); }
+.reading-fil { margin-bottom: 28px; padding: 24px; border-radius: 18px; background: linear-gradient(135deg, #1f628e, #00a8a8); color: white; text-align: center; }
+.reading-fil span { display: block; margin-bottom: 7px; color: rgba(255,255,255,.78); font-size: .76rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.reading-fil p { color: white; font: 700 1.25rem/1.55 Georgia, serif; }
+.reading-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 22px; }
+.cycle-journal { margin-top: 24px; padding: 22px; border-radius: 17px; background: #f4fbfa; text-align: center; }
+.cycle-journal h3 { margin: 0 0 7px; }
+.cycle-journal p { margin-bottom: 15px; }
+.cycle-journal-button { display: inline-block; padding: 12px 19px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 800; text-decoration: none; }
+.cycle-journal-links { display: grid; gap: 8px; margin-top: 17px; text-align: left; }
+.cycle-journal-links a { padding: 10px 12px; border-radius: 10px; background: white; color: #1f628e; font-weight: 700; text-decoration: none; }
+.reading-column { padding: 18px; border-radius: 15px; background: rgba(192,240,247,.18); }
+.reading-column h3 { margin-top: 0; }
+.technical-foundations { margin-top: 34px; border: 1px solid rgba(31,98,142,.18); border-radius: 18px; background: rgba(255,255,255,.7); overflow: hidden; }
+.technical-foundations > summary { padding: 18px 22px; color: #1f628e; font-weight: 800; cursor: pointer; text-align: center; }
+.technical-content { padding: 0 24px 28px; }
+.usage-note { margin-top: 18px; color: #99a3ad; font-size: .75rem; text-align: right; }
+
+.lunar-empty {
+    padding: 44px 22px;
+    border: 2px dashed rgba(31,98,142,0.3);
+    border-radius: 20px;
+    text-align: center;
+    color: #56626d;
+    background: rgba(255,255,255,0.5);
+}
+.lunar-empty a { color: #1f628e; font-weight: 800; text-decoration: underline; }
+
+@media (max-width: 650px) {
+    .lunar-grid, .planet-grid { grid-template-columns: 1fr; }
+    .house-grid { grid-template-columns: repeat(2, 1fr); }
+    .reading-columns { grid-template-columns: 1fr; }
+}
+{% endblock %}
+
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<div class="stars" id="stars"></div>
+<main class="lunar-shell">
+    <a class="lunar-back" href="{% if cycle_enregistre %}{{ url_for('espace_personnel.cycles_lunaires') }}{% else %}{{ url_for('espace_personnel.accueil') }}{% endif %}">← {% if cycle_enregistre %}Mes cycles lunaires{% else %}Retour à mon espace{% endif %}</a>
+    <article class="lunar-page">
+        <header class="lunar-header">
+            <div class="lunar-symbol">🌙</div>
+            <p class="lunar-kicker">Mon rendez-vous lunaire</p>
+            <h1 class="lunar-title">Mon cycle lunaire</h1>
+            {% if theme %}
+                <p class="lunar-intro">Calculé pour {{ lieu_revolution }} à partir du retour exact de la Lune sur sa position natale.</p>
+                <span class="lunar-date">{{ theme.date_locale.strftime('%d.%m.%Y à %H:%M') }}</span>
+                {% if cycles_navigation|length > 1 %}
+                    {% set mois_fr = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'] %}
+                    <nav class="cycle-switcher" aria-label="Choisir un cycle lunaire">
+                        {% for cycle_nav in cycles_navigation %}
+                            <a class="{% if cycle_enregistre and cycle_nav.id == cycle_enregistre.id %}is-active{% endif %}" href="{{ url_for('espace_personnel.fiche_cycle_lunaire', cycle_id=cycle_nav.id) }}">{{ mois_fr[cycle_nav.debut_cycle_utc.month] }} {{ cycle_nav.debut_cycle_utc.year }}</a>
+                        {% endfor %}
+                    </nav>
+                {% endif %}
+            {% endif %}
+        </header>
+
+        {% if not profil or not profil.theme_natal %}
+            <div class="lunar-empty">Ton thème natal doit d’abord être calculé. <a href="{{ url_for('espace_personnel.profil') }}">Compléter mon profil</a></div>
+        {% elif erreur %}
+            <div class="lunar-empty">Le calcul n’a pas pu aboutir : {{ erreur }}</div>
+        {% elif theme %}
+            {% if interpretation %}
+                <section class="reading">
+                    <div class="reading-fil"><span>Le fil rouge de ton cycle</span><p>{{ interpretation.fil_rouge }}</p></div>
+                    <h2>La lecture de ton cycle</h2>
+                    <h3>Tonalité générale</h3><p>{{ interpretation.tonalite }}</p>
+                    <h3>Domaines activés</h3>
+                    {% for domaine in interpretation.domaines_actives %}<article class="reading-domain"><h3>{{ domaine.titre }}</h3><p>{{ domaine.lecture }}</p></article>{% endfor %}
+                    <h3>Dynamique émotionnelle</h3><p>{{ interpretation.dynamique_emotionnelle }}</p>
+                    <div class="reading-columns">
+                        <article class="reading-column"><h3>Tensions possibles</h3><ul>{% for tension in interpretation.tensions %}<li>{{ tension }}</li>{% endfor %}</ul></article>
+                        <article class="reading-column"><h3>Ressources disponibles</h3><ul>{% for ressource in interpretation.ressources %}<li>{{ ressource }}</li>{% endfor %}</ul></article>
+                    </div>
+                    <div class="reading-highlight"><h3>Question pour ton journal</h3><p>{{ interpretation.question_journal }}</p></div>
+                    <div class="reading-highlight"><h3>Expérience à tenter</h3><p>{{ interpretation.experience }}</p></div>
+                    {% if cycle_enregistre %}
+                        <div class="cycle-journal">
+                            <h3>Faire vivre ce cycle dans mon journal</h3>
+                            <p>Pars de la question proposée, puis note ce que tu observes réellement. Rien n’est enregistré avant que tu valides ton entrée.</p>
+                            <a class="cycle-journal-button" href="{{ url_for('espace_personnel.journal', cycle_id=cycle_enregistre.id) }}">Écrire dans mon journal à partir de ce cycle</a>
+                            {% if entrees_cycle %}
+                                <div class="cycle-journal-links">
+                                    {% for entree in entrees_cycle %}<a href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">{{ entree.date_observation.strftime('%d.%m.%Y') }} · Voir mon observation →</a>{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    {% if usage_ia %}<p class="usage-note">{{ usage_ia.tokens_total }} tokens utilisés pour cette interprétation</p>{% endif %}
+                </section>
+            {% else %}
+                <section class="generate-box">
+                    <h2>Interpréter ce cycle</h2>
+                    {% if peut_generer %}
+                        <p>Claude utilisera les priorités techniques pour construire une lecture personnalisée de ce cycle. La génération démarre seulement quand tu cliques.</p>
+                        <form method="post"><input type="hidden" name="espace_csrf" value="{{ espace_csrf }}"><button class="generate-button" type="submit">Générer et enregistrer mon interprétation</button></form>
+                    {% else %}
+                        <p>Une génération a déjà été lancée pour ce cycle. Contacte-nous si elle n’a pas abouti ; aucun nouvel appel payant ne partira automatiquement.</p>
+                    {% endif %}
+                    {% if erreur_generation %}<p class="generation-error">{{ erreur_generation }}</p>{% endif %}
+                </section>
+            {% endif %}
+
+            <details class="technical-foundations">
+                <summary>Voir les fondations astrologiques utilisées</summary>
+                <div class="technical-content">
+                    <section class="lunar-section priority-box">
+                        <h2>Priorités d’interprétation</h2>
+                        <p class="priority-lead">Les facteurs retenus pour construire la lecture, sans donner le même poids à tout le ciel.</p>
+                        <div class="priority-list">
+                            <div class="priority-item"><strong>Ascendant du cycle :</strong> {{ theme.priorites.ascendant.signe }} {{ '%.2f'|format(theme.priorites.ascendant.degre) }}° · maître {{ theme.priorites.maitre_ascendant }}</div>
+                            <div class="priority-item"><strong>Lune :</strong> {{ theme.priorites.lune.signe }} {{ '%.2f'|format(theme.priorites.lune.degre) }}° en maison {{ theme.priorites.lune.maison }}</div>
+                            {% for occupation in theme.priorites.maisons_occupees %}{% if occupation.nombre >= 2 %}<div class="priority-item"><strong>Maison {{ occupation.maison }} chargée :</strong> {{ occupation.planetes|join(', ') }}</div>{% endif %}{% endfor %}
+                            {% for facteur in theme.priorites.planetes_angulaires %}<div class="priority-item"><strong>Planète angulaire :</strong> {{ facteur.planete }} proche de {{ facteur.angle }} · orbe {{ '%.2f'|format(facteur.orbe) }}°</div>{% endfor %}
+                            {% for aspect in theme.priorites.aspects_internes_serres %}<div class="priority-item"><strong>Aspect interne :</strong> {{ aspect.point_1 }} {{ aspect.aspect }} {{ aspect.point_2 }} · orbe {{ '%.2f'|format(aspect.orbe) }}°</div>{% endfor %}
+                            {% for aspect in theme.priorites.contacts_nataux_majeurs %}<div class="priority-item"><strong>Contact natal majeur :</strong> {{ aspect.planete_revolution }} {{ aspect.aspect }} {{ aspect.point_natal }} natal · orbe {{ '%.2f'|format(aspect.orbe) }}°</div>{% endfor %}
+                        </div>
+                    </section>
+                    <section class="lunar-section"><h2>Les angles du cycle</h2><div class="lunar-grid">{% for nom in ['Ascendant', 'MC', 'Descendant', 'FC'] %}{% set angle = theme.angles.get(nom) %}<article class="lunar-card"><strong>{{ nom }}</strong><span>{{ angle.signe }} · {{ '%.2f'|format(angle.degre) }}°</span></article>{% endfor %}</div></section>
+                    <section class="lunar-section"><h2>Les planètes de la révolution</h2><div class="planet-grid">{% for nom, planete in theme.planetes.items() %}<div class="planet-row"><strong>{{ nom }}</strong><span>{{ planete.signe }} {{ '%.2f'|format(planete.degre) }}° · maison {{ planete.maison }}{% if planete.retrograde %} · rétrograde{% endif %}</span></div>{% endfor %}</div></section>
+                    <section class="lunar-section"><h2>Les maisons</h2><div class="house-grid">{% for nom, maison in theme.maisons.items() %}<div class="house-item"><strong>{{ nom }}</strong><br>{{ maison.signe }} {{ '%.2f'|format(maison.degre) }}°</div>{% endfor %}</div></section>
+                    <section class="lunar-section"><h2>Aspects avec le natal</h2><div class="aspect-list">{% for aspect in theme.aspects_nataux_principaux %}<article class="aspect-item"><strong>{{ aspect.planete_revolution }} {{ aspect.aspect }} {{ aspect.point_natal }} natal</strong><span>Orbe {{ '%.2f'|format(aspect.orbe) }}°</span></article>{% else %}<p>Aucun aspect inférieur à 2°.</p>{% endfor %}</div><details class="lunar-details"><summary>Voir les {{ theme.aspects_avec_natal|length }} aspects techniques</summary><div class="aspect-list">{% for aspect in theme.aspects_avec_natal %}<article class="aspect-item"><strong>{{ aspect.planete_revolution }} {{ aspect.aspect }} {{ aspect.point_natal }} natal</strong><span>Orbe {{ '%.2f'|format(aspect.orbe) }}°</span></article>{% endfor %}</div></details></section>
+                    <section class="lunar-section"><h2>Aspects internes de la révolution</h2><div class="aspect-list">{% for aspect in theme.aspects_revolution %}<article class="aspect-item"><strong>{{ aspect.point_1 }} {{ aspect.aspect }} {{ aspect.point_2 }}</strong><span>Orbe {{ '%.2f'|format(aspect.orbe) }}°</span></article>{% endfor %}</div></section>
+                </div>
+            </details>
+        {% endif %}
+    </article>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function createStars() {
+        const starsContainer = document.getElementById('stars');
+        if (!starsContainer) return;
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.animationDuration = (2 + Math.random() * 3) + 's';
+            starsContainer.appendChild(star);
+        }
+    }
+    createStars();
+</script>
+{% endblock %}

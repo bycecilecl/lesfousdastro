@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Mon calendrier | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+body{background:linear-gradient(135deg,#1f628e,#00a8a8);min-height:100vh}.cal{max-width:1400px;margin:40px auto;padding:0 20px 40px;color:#183b4b;font:16px/1.5 system-ui}.cal *{box-sizing:border-box}.cal .back{color:white}.cal .head{color:white;margin:20px 0}.cal h1{font-size:32px;margin:10px 0}.cal .layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:22px}.cal .card{background:white;border:1px solid #dbe6e7;border-radius:20px;padding:22px}.cal h2{margin-top:0}.cal label{margin-right:12px;display:inline-block}.cal input{accent-color:#087f86}.cal .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:18px}.cal .weekday{text-align:center;font-size:12px;font-weight:700;padding:8px}.cal .day{min-height:112px;border:1px solid #dce8e9;background:white;border-radius:10px;padding:8px;text-align:left;cursor:pointer;color:inherit;font:inherit}.cal .day:hover,.cal .day.selected{outline:2px solid #168e91;background:#eefafa}.cal .num{font-weight:750}.cal .pill{display:block;font-size:11px;line-height:1.3;padding:4px;margin-top:4px;border-radius:5px;background:#fbe8df;color:#883f21;overflow-wrap:anywhere}.cal .moon{background:#eee9fa;color:#594487}.cal .journal{background:#dff1e5;color:#256741}.cal .muted{color:#617883;font-size:13px}.cal .event{padding:14px 0;border-bottom:1px solid #e1ebeb}.cal .event strong{display:block}.cal .exact{color:#a34c24}.cal .action{display:inline-block;background:#087f86;color:white;border-radius:22px;padding:9px 15px;text-decoration:none}.cal .nav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}.cal .periods{margin-top:24px}.cal .period{padding:10px 0;border-bottom:1px solid #e1ebeb}.cal .track{height:8px;background:#f4f0ed;border-radius:8px;margin-top:6px;position:relative;overflow:hidden}.cal .bar{position:absolute;height:8px;background:#dd9675;border-radius:8px}.cal .note{white-space:pre-wrap}.cal .notice{background:#fff3d5;padding:12px;border-radius:12px}.cal .foot{font-size:12px;color:white;margin-top:20px}@media(max-width:1050px){.cal .layout{grid-template-columns:1fr}.cal .day{min-height:90px}}@media(max-width:550px){.cal{padding:0 8px 24px}.cal .card{padding:12px}.cal .day{padding:4px;min-height:95px}.cal .grid{gap:2px}.cal .pill{font-size:9px}}
+.cal .cal-month-picker{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 22px;padding:12px 16px;background:#f2f8f8;border-radius:14px}.cal .cal-month-picker label{font-weight:650;margin:0}.cal .cal-month-picker input{font:inherit;color:#183b4b;border:1px solid #b9d5d7;background:#fff;border-radius:10px;padding:9px 12px;max-width:100%;cursor:pointer}.cal .cal-month-picker input:focus-visible{outline:3px solid #83c9cc;outline-offset:2px}
+.cal #cal-grid{display:block}.cal .cal-weekdays,.cal .cal-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.cal .cal-week{margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #dce8e9}.cal .cal-week .day{min-height:85px;align-self:stretch}.cal .cal-band{position:relative;text-align:left;min-height:42px;padding:5px 8px 15px;border:1px solid #e2ac8d;border-radius:9px;background:#f9dfcd;color:#753719;font:600 11px/1.3 system-ui;cursor:pointer;min-width:0}.cal .cal-band:hover,.cal .cal-band:focus-visible{outline:2px solid #b65d2e;outline-offset:1px}.cal .cal-band-label{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cal .cal-star{position:absolute;bottom:1px;transform:translateX(-50%);font-size:13px}.cal .continues-before{border-left:2px dashed #b65d2e;border-top-left-radius:0;border-bottom-left-radius:0}.cal .continues-after{border-right:2px dashed #b65d2e;border-top-right-radius:0;border-bottom-right-radius:0}.cal .periods summary{cursor:pointer;font-weight:700;color:#1f628e;padding:12px 0}.cal .cal-blank{background:#f5f8f8;border-radius:10px}@media(max-width:550px){.cal .cal-band{font-size:10px;padding-left:4px;padding-right:4px}.cal .cal-weekdays,.cal .cal-week{gap:2px}}
+
+/* Les rubans partagent la même ligne de grille que les cases, sans les déplacer. */
+.cal .cal-week{gap:0;margin-bottom:0;padding-bottom:0;border-bottom:0;isolation:isolate}
+.cal .cal-week .day,.cal .cal-blank{border-radius:0;border:0;border-right:1px solid #dce8e9;border-bottom:1px solid #dce8e9;background:#fff;min-height:calc(112px + var(--band-lanes)*34px);padding:9px 8px calc(12px + var(--band-lanes)*34px);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;min-width:0}
+.cal .cal-blank{background:#f5f8f8}
+.cal .cal-week .day.selected{outline:0;box-shadow:inset 0 0 0 2px #168e91;background:#eefafa}
+.cal .cal-week .day:hover{outline:0;background:#f1fafa}
+.cal .cal-week .day:focus-visible{outline:2px solid #168e91;outline-offset:-3px}
+.cal #cal-grid{border:1px solid #dce8e9;border-radius:14px;overflow:hidden}
+.cal .cal-weekdays{gap:0;background:#f5f9fa;border-bottom:1px solid #dce8e9}
+.cal .cal-band{grid-row:1;align-self:end;z-index:2;margin:0 3px calc(8px + var(--band-lane)*34px);min-height:28px;height:28px;padding:5px 8px;border:0;border-left:3px solid #c87749;border-radius:5px;background:#f5d9c5;color:#703c24;font:600 11px/18px system-ui;box-shadow:0 1px 2px #75371912}
+.cal .cal-band-label{padding-right:10px;line-height:18px}
+.cal .cal-star{bottom:-3px;font-size:11px;line-height:12px;color:#9a4c22;text-shadow:0 0 3px #fff}
+.cal .continues-before{border-left:0;border-top-left-radius:0;border-bottom-left-radius:0;margin-left:0}
+.cal .continues-after{border-right:0;border-top-right-radius:0;border-bottom-right-radius:0;margin-right:0}
+@media(max-width:550px){.cal .cal-week .day,.cal .cal-blank{padding-left:4px;padding-right:4px;min-height:calc(125px + var(--band-lanes)*34px)}.cal .cal-band{font-size:9px;padding-left:4px;padding-right:4px}.cal .pill{font-size:9px}}
+
+.cal .cal-star{top:50%;bottom:auto;transform:translate(-50%,-50%);line-height:1;font-size:12px;text-shadow:none;pointer-events:none}
+.cal .cal-band-label{padding-right:0}
+.cal .cal-planet-filters{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:14px}.cal .cal-planet-filters label{font-size:13px;background:#f2f7f7;border-radius:20px;padding:5px 9px}.cal .cal-slow{background:#e1edf3;border-left-color:#507d93;color:#275267}.cal .cal-ruler{background:#eee2f7;border-left:4px solid #8553a1;color:#56346e}.cal .cal-ruler-badge{font-size:12px;font-weight:700;color:#653883;background:#eee2f7;border-radius:8px;padding:8px}
+
+/* Palette par planète ; la maîtrise reste un liseré distinct. */
+.cal [data-planet="Lune"]{--planet-bg:#fff2b3;--planet-fg:#594500;--planet-line:#c39712}
+.cal [data-planet="Soleil"]{--planet-bg:#ffe0b2;--planet-fg:#753800;--planet-line:#d57b16}
+.cal [data-planet="Mercure"]{--planet-bg:#d9e8ff;--planet-fg:#193d78;--planet-line:#4378bd}
+.cal [data-planet="Vénus"]{--planet-bg:#fbe0ed;--planet-fg:#78294d;--planet-line:#c65d8c}
+.cal [data-planet="Mars"]{--planet-bg:#ffdada;--planet-fg:#832c2c;--planet-line:#cf5555}
+.cal [data-planet="Jupiter"]{--planet-bg:#e1edf3;--planet-fg:#275267;--planet-line:#507d93}
+.cal [data-planet="Saturne"]{--planet-bg:#e7d5c5;--planet-fg:#543824;--planet-line:#916342}
+.cal [data-planet="Uranus"]{--planet-bg:#bc9677;--planet-fg:#302014;--planet-line:#805638}
+.cal [data-planet="Neptune"]{--planet-bg:#d9f3ff;--planet-fg:#215269;--planet-line:#53a1c2}
+.cal [data-planet="Pluton"]{--planet-bg:#a4384b;--planet-fg:#ffffff;--planet-line:#792438}
+.cal .cal-band[data-planet]{background:var(--planet-bg);color:var(--planet-fg);border-left-color:var(--planet-line)}
+.cal .cal-band[data-planet] .cal-star{color:inherit}
+.cal .cal-band[data-planet].cal-ruler{border-left:4px solid #8553a1;box-shadow:inset 0 2px 0 #8553a1}
+.cal .cal-band[data-planet]:hover,.cal .cal-band[data-planet]:focus-visible{outline-color:var(--planet-line)}
+.cal .cal-planet-filters label[data-planet]{background:var(--planet-bg);color:var(--planet-fg)}
+.cal .cal-planet-filters label[data-planet] input{accent-color:var(--planet-line)}
+.cal .period[data-planet] .bar{background:var(--planet-line)}
+.cal .pill.moon{background:#fff2b3;color:#594500}
+.cal .cal-view-selector{margin-top:16px}.cal .cal-view-selector select{padding:9px 12px;border:1px solid #b9d5d7;border-radius:10px;background:white;color:#183b4b;font:inherit}.cal .pill.solar{background:#ffe0b2;color:#753800}
+.cal .cal-background{margin:18px 0;padding:18px;border:1px solid #bed8dc;border-radius:14px;background:#f5fafb}.cal .cal-background h2{font-size:1.15rem;margin:0 0 8px}.cal .cal-background-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:9px}.cal .cal-background-contact{display:block;width:100%;text-align:left;cursor:pointer;border:0;border-left:4px solid var(--planet-line);border-radius:8px;padding:12px;background:var(--planet-bg);color:var(--planet-fg);font:inherit}.cal .cal-background-contact strong,.cal .cal-background-contact small{display:block}.cal .cal-background-contact small{margin-top:5px;line-height:1.4}.cal .cal-background-contact.cal-ruler{box-shadow:inset 0 2px #8553a1}.cal .cal-background-contact:focus-visible{outline:2px solid #168e91;outline-offset:2px}
+.cal .cal-climate{background:#edf3f4;color:#305666;border-left:3px solid #7e9ea5;box-shadow:none;font-weight:600}.cal .cal-climate span{float:right}.cal .cal-focus-choice{display:block;text-align:left;width:100%;padding:12px;margin:8px 0;border:1px solid #c7dde0;border-radius:10px;background:#f3f8f9;color:#254d60;font:inherit;cursor:pointer}.cal #cal-compact{border:0;cursor:pointer;margin:12px 0}.cal #cal-compact[hidden]{display:none}
+
+.cal .cal-background-list{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+.cal .cal-background-planet{display:grid;gap:8px;min-width:0}
+.cal .cal-background-list-secondary{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:10px}
+.cal .cal-background-list-secondary .cal-background-contact{font-size:.88rem;padding:9px 11px}
+.cal .cal-background-list-secondary .cal-background-contact small{font-size:.78rem;margin-top:3px}
+@media(max-width:700px){.cal .cal-background-list{grid-template-columns:1fr}.cal .cal-background-list-secondary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.cal .cal-background-list-secondary{grid-template-columns:1fr}}
+.cal .pill.station{background:#eef0f3;color:#384557;border-left:2px solid #728096}.cal .cal-motion{background:#f0f7f7;border-radius:8px;padding:10px;line-height:1.5}
+.cal .cal-week .day.today{background:#e5f5f5;border-top:3px solid #087f86}.cal .today-label{display:block;font-size:10px;color:#08686e;font-weight:700}
+.cal .cal-contact{padding:14px 0;border-bottom:1px solid #dce8e9}.cal .cal-contact-details>summary{cursor:pointer;font-weight:700;font-size:16px;color:#183b4b}.cal .cal-contact-details[open]>summary{margin-bottom:12px}.cal .cal-contact>.action,.cal .cal-contact>p{margin:10px 0 0}.cal .cal-contact .event{border:0}
+{% endblock %}
+{% block content %}
+<main class="cal">{% include 'espace_personnel/_navigation.html' %}<header class="head"><h1>Mon calendrier{% if profil %} · {{ profil.prenom }}{% endif %}</h1><p>Ton ciel, ton vécu, au même endroit. · {{ droits.libelle }}</p></header>
+<div class="layout"><section class="card"><div class="nav">{% if precedent %}<a href="{{ url_for('espace_personnel.calendrier', mois=precedent) }}">← Mois précédent</a>{% endif %}<h2>{{ titre_mois }}</h2>{% if suivant %}<a href="{{ url_for('espace_personnel.calendrier', mois=suivant) }}">Mois suivant →</a>{% endif %}</div>
+<form class="cal-month-picker" method="get" action="{{ url_for('espace_personnel.calendrier') }}"><label for="cal-month">Aller à un mois</label><input id="cal-month" type="month" name="mois" min="1900-01" max="2100-12" value="{{ mois }}" aria-describedby="cal-month-help" required><span id="cal-month-help" class="muted">Le calendrier s’actualise à la sélection.</span><noscript><button type="submit">Afficher</button></noscript></form>
+{% if message %}<p class="notice">{{ message }}</p>{% endif %}
+{% if not profil or not profil.theme_natal %}<p class="notice">Complète ton <a href="{{ url_for('espace_personnel.profil') }}">profil astral</a> pour afficher tes repères personnels.</p>{% endif %}
+<div>{% if donnees.mars %}<label><input id="cal-mars" type="checkbox" checked> Transits personnels</label>{% endif %}{% if donnees.lune %}<label><input id="cal-moon" type="checkbox" checked> Cycles lunaires</label>{% endif %}<label><input id="cal-journal" type="checkbox" checked> Journal</label></div>
+{% if donnees.mars %}<div class="cal-view-selector"><label for="cal-view">Afficher</label> <select id="cal-view"><option value="personal">Mes transits personnels</option><option value="fast">Tous les contacts rapides</option><option value="rs">Échos à ma révolution solaire</option><option value="lunar">Exploration lunaire</option></select><p id="cal-view-help" class="muted"></p><p id="cal-view-empty" class="muted" role="status"></p></div><div class="cal-planet-filters">{% for planete in donnees.planetes_disponibles if planete != "Lune" %}<label data-planet="{{ planete }}"><input id="cal-planet-{{ planete }}" type="checkbox" checked> {{ planete }}</label>{% endfor %}</div><p class="muted">Liseré violet : contact au maître de ton Ascendant{% if donnees.maitres_ascendant %} ({{ donnees.maitres_ascendant|join(', ') }}){% endif %}.</p>{% endif %}
+<p class="muted">Clique sur une date pour lire tes observations ou en ajouter. {% if donnees.mars %}Rapides : bandes à 1°. Lentes : une bande « Climat de fond », dépliable au clic. ★ indique le jour du passage exact. Clique sur une bande pour le détail.{% endif %} Heures : {{ donnees.fuseau }}.</p>
+{% if not droits.cycle_lunaire %}<p class="muted">Ton journal est accessible gratuitement. Les repères lunaires sont inclus dans Boussole ; les transits personnels dans Accompagnement astral.</p>{% elif not droits.transits_personnalises %}<p class="muted">Les transits personnels sont réservés à Accompagnement astral.</p>{% endif %}
+<button type="button" id="cal-compact" class="action" hidden>← Revenir à la vue compacte</button><div class="grid" id="cal-grid"></div><noscript>Active JavaScript pour consulter les journées. Ton <a href="{{ url_for('espace_personnel.journal') }}">journal</a> reste accessible.</noscript>
+<section id="cal-background" class="cal-background" tabindex="-1" hidden aria-label="Transits de fond du mois en cours"></section>
+{% if donnees.mars %}<details class="periods"><summary>Voir les périodes détaillées</summary><p class="muted">La Lune reste limitée à 1° ; les autres périodes détaillées utilisent 3°. Les lentes restent visibles comme climat de fond. Les rapides suivent les trois critères de personnalisation. Les bandes couvrent le mois affiché ; les dates indiquent la période complète lorsqu’elle a pu être bornée.</p><div id="cal-periods"></div></details>{% endif %}</section>
+<aside class="card" id="cal-detail" aria-live="polite"></aside></div><p class="foot">Calendrier personnel · Rapides : fenêtres à 1°. Lentes : périodes à 3° dans les cases. Les pistes de lecture sont générales. Tes observations sont relues depuis ton journal à chaque chargement de page.</p></main>
+{% endblock %}
+{% block scripts %}<script>
+const calData={{ donnees|tojson }};
+{% include "espace_personnel/_calendrier_interactions.js" %}
+</script>{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Modifier mon observation | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+  .modifier-shell { width: min(800px, calc(100% - 32px)); margin: 3rem auto 4rem; }
+  .modifier-card { margin-top: 1rem; padding: clamp(25px, 5vw, 42px); border-radius: 24px; background: #fff; box-shadow: 0 16px 40px #092d4a24; color: #263645; }
+  .modifier-card h1 { color: #1f628e; }
+  .modifier-form { display: grid; gap: 1rem; }
+  .modifier-form label { display: grid; gap: .4rem; color: #1f628e; font-weight: 700; }
+  .modifier-form input, .modifier-form select, .modifier-form textarea { box-sizing: border-box; width: 100%; padding: .8rem; border: 1px solid #b9d4d7; border-radius: 10px; font: inherit; }
+  .modifier-form textarea { min-height: 120px; }
+  .modifier-form button { justify-self: start; padding: .8rem 1.2rem; border: 0; border-radius: 24px; background: #1f628e; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+{% endblock %}
+{% block content %}
+<main class="modifier-shell">
+  {% include 'espace_personnel/_navigation.html' %}
+  <section class="modifier-card">
+    <h1>Modifier mon observation</h1>
+    <form method="post" class="modifier-form">
+      <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
+      <label>Date<input name="date_observation" type="date" value="{{ entree.date_observation.strftime('%Y-%m-%d') }}" required></label>
+      <label>Énergie<select name="niveau_energie"><option value="">Non renseignée</option>{% for niveau in range(1, 11) %}<option value="{{ niveau }}" {% if entree.niveau_energie == niveau %}selected{% endif %}>{{ niveau }}/10</option>{% endfor %}</select></label>
+      <label>Ce que j’ai déposé<textarea name="situation" maxlength="10000">{{ entree.situation or '' }}</textarea></label>
+      <label>Ce que je ressens<textarea name="emotions" maxlength="10000">{{ entree.emotions or '' }}</textarea></label>
+      <label>Ma réaction automatique<textarea name="reaction_automatique" maxlength="10000">{{ entree.reaction_automatique or '' }}</textarea></label>
+      <label>Mon choix conscient<textarea name="choix_conscient" maxlength="10000">{{ entree.choix_conscient or '' }}</textarea></label>
+      <label>Notes libres<textarea name="notes_libres" maxlength="10000">{{ entree.notes_libres or '' }}</textarea></label>
+      <button type="submit">Enregistrer les modifications</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

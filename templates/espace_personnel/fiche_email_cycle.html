@@ -13,7 +13,7 @@
 {% endblock %}
 {% block content %}
 <div class="mail-shell">
-  <a class="mail-retour" href="{{ url_for('espace_personnel.emails_cycle') }}">← Mes mails de cycle</a>
+  {% include 'espace_personnel/_navigation.html' %}
   <article class="mail-carte">
     <h1>{{ email.objet or 'Mail en préparation' }}</h1>
     <p>État : <strong>{{ email.statut }}</strong>{% if email.date_envoi %} · Envoyé le {{ email.date_envoi.strftime('%d/%m/%Y à %H:%M') }}{% endif %}</p>
@@ -21,6 +21,16 @@
       {% for categorie, message in messages %}<p class="mail-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
     {% endwith %}
     {% if email.contenu_texte %}<div class="mail-corps">{{ email.contenu_texte }}</div>{% endif %}
+    {% if email.statut in ['generation_en_cours', 'generation_echec'] %}
+      <p>La génération a été lancée, mais aucun brouillon complet n’est disponible. Aucun nouvel appel à Claude ne partira automatiquement ; contacte-nous pour vérifier ce cycle.</p>
+    {% endif %}
+    {% if peut_generer %}
+      <form method="post" action="{{ url_for('espace_personnel.generer_brouillon_email_cycle', email_id=email.id) }}">
+        <input type="hidden" name="espace_csrf" value="{{ session.get('espace_formulaire_csrf', '') }}">
+        <p>Le contrat factuel est prêt. Ce clic lance un seul appel à Claude ; le texte restera un brouillon à relire.</p>
+        <button class="mail-bouton" type="submit">Générer le brouillon</button>
+      </form>
+    {% endif %}
     {% if droits.cycle_lunaire and email.statut == 'brouillon' and email.objet and email.contenu_texte %}
       <form method="post" action="{{ url_for('espace_personnel.envoyer_brouillon_cycle', email_id=email.id) }}">
         <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">

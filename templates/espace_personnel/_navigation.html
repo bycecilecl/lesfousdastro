@@ -1,0 +1,17 @@
+<style>
+  .espace-nav { display: flex; flex-wrap: wrap; gap: .6rem; margin: 0 0 1.2rem; }
+  .espace-nav a { display: inline-block; padding: .55rem .9rem; border-radius: 999px; background: #fff; color: #1f628e; font-weight: 700; text-decoration: none; box-shadow: 0 4px 16px #092d4a20; }
+  .espace-nav a:hover, .espace-nav a:focus-visible { background: #dff7f4; }
+</style>
+<nav class="espace-nav" aria-label="Navigation de mon espace">
+  <a href="{{ url_for('espace_personnel.accueil') }}">Accueil</a>
+  <a href="{{ url_for('espace_personnel.profil') }}">Mon profil</a>
+  <a href="{{ url_for('espace_personnel.journal') }}">Mon journal</a>
+  <a href="{{ url_for('espace_personnel.calendrier') }}">Mon calendrier</a>
+  <a href="{{ url_for('espace_personnel.accompagnement') }}">Mon accompagnement</a>
+  <a href="{{ url_for('espace_personnel.laboratoire') }}">Mon labo</a>
+  <a href="{{ url_for('espace_personnel.revolutions_solaires') }}">Mes années</a>
+  <a href="{{ url_for('espace_personnel.cycles_lunaires') }}">Mes cycles lunaires</a>
+  <a href="{{ url_for('espace_personnel.mes_analyses') }}">Mes analyses</a>
+  <a href="{{ url_for('espace_personnel.emails_cycle') }}">Mes mails de cycle</a>
+</nav>

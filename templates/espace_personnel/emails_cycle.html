@@ -15,10 +15,17 @@
 {% endblock %}
 {% block content %}
 <div class="mails-shell">
-  <a class="mails-retour" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+  {% include 'espace_personnel/_navigation.html' %}
   <section class="mails-carte">
     <h1>Mes mails de cycle</h1>
     <p>Les brouillons restent privés tant que tu ne décides pas de les envoyer. Un mail envoyé reste dans ton historique.</p>
+    {% if profil and droits.cycle_lunaire %}
+      <form class="mails-import" method="post" action="{{ url_for('espace_personnel.preparer_email_cycle') }}">
+        <input type="hidden" name="espace_csrf" value="{{ session.get('espace_formulaire_csrf', '') }}">
+        <button type="submit">Préparer le prochain mail de cycle</button>
+      </form>
+      <p>Cette étape calcule les faits astrologiques sans appeler Claude et sans envoyer de mail.</p>
+    {% endif %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for categorie, message in messages %}<p class="mails-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
     {% endwith %}

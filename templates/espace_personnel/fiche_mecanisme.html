@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}{{ mecanisme.titre }} | Les Fous d'Astro{% endblock %}
+{% macro formulaire_observation(action, observation=None) %}
+<form method="post" action="{{ action }}" class="observation-form">
+    <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
+    <div class="meca-field"><label>Date</label><input name="date_observation" type="date" value="{{ observation.date_observation.strftime('%Y-%m-%d') if observation else date_du_jour }}" required></div>
+    <div class="meca-field meca-wide"><label>Situation vécue</label><textarea name="situation" required>{{ observation.situation if observation else '' }}</textarea></div>
+    <div class="meca-field meca-wide"><label>Ma réaction automatique</label><textarea name="reaction_automatique">{{ observation.reaction_automatique or '' if observation else '' }}</textarea></div>
+    <div class="meca-field meca-wide"><label>Ce qui montre que le mécanisme était à l’œuvre</label><textarea name="indice_pour">{{ observation.indice_pour or '' if observation else '' }}</textarea></div>
+    <div class="meca-field meca-wide"><label>Ce qui pourrait nuancer cette lecture — facultatif</label><textarea name="element_contraire">{{ observation.element_contraire or '' if observation else '' }}</textarea></div>
+    <div class="meca-field meca-wide"><label>Une autre réaction que j’ai testée</label><textarea name="reaction_testee">{{ observation.reaction_testee or '' if observation else '' }}</textarea></div>
+    <div class="meca-field meca-wide"><label>Ce qui s’est passé ensuite</label><textarea name="resultat_obtenu">{{ observation.resultat_obtenu or '' if observation else '' }}</textarea></div>
+    <div class="meca-field meca-wide"><label>Notes libres</label><textarea name="notes_libres">{{ observation.notes_libres or '' if observation else '' }}</textarea></div>
+    <div class="observation-form-actions meca-wide"><button class="meca-button" type="submit">Enregistrer</button><a class="meca-button meca-button--secondary" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}#journal-mecanisme">Annuler</a></div>
+</form>
+{% endmacro %}
+{% block extra_css %}
+body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%); font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+.meca-shell { width: min(820px, calc(100% - 32px)); margin: 48px auto 72px; }
+.meca-back { display: inline-block; margin-bottom: 18px; color: white; font-weight: 700; text-decoration: none; }
+.meca-card { position: relative; padding: clamp(28px, 5vw, 52px); border-radius: 12px 26px 26px 12px; background: #fffdf7; box-shadow: -8px 0 0 #e6dbc5, 0 24px 60px rgba(0,0,0,.18); color: #33434c; }
+.meca-card h1 { margin-bottom: 8px; color: #1f628e; font: 700 clamp(1.8rem, 5vw, 3rem) Georgia, serif; }
+.meca-source { margin-bottom: 28px; color: #00a8a8; font-weight: 700; }
+.meca-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+.meca-badge { padding: 6px 11px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-size: .82rem; font-weight: 700; }
+.evolution-box { margin: 26px 0 32px; padding: 20px; border-radius: 16px; background: linear-gradient(135deg, #eefafa, #f5f8fc); border: 1px solid rgba(0,168,168,.18); }
+.evolution-box h2 { margin-bottom: 14px; color: #1f628e; font: 700 1.15rem Georgia, serif; }
+.evolution-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.evolution-fact { padding: 12px; border-radius: 11px; background: rgba(255,255,255,.72); }
+.evolution-fact strong { display: block; margin-bottom: 4px; color: #17636c; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
+.evolution-reactions { margin-top: 15px; }
+.evolution-reactions h3 { margin-bottom: 7px; color: #1f628e; font-size: .9rem; }
+.evolution-reactions ul { margin: 0; padding-left: 20px; }
+.evolution-reactions li { margin-top: 6px; font: .95rem/1.5 Georgia, serif; }
+.meca-section { margin-top: 27px; }
+.meca-section h2 { margin-bottom: 9px; color: #1f628e; font: 700 1.08rem Georgia, serif; }
+.meca-section p { white-space: pre-wrap; font: 1.02rem/1.75 Georgia, serif; }
+.meca-empty { color: #98918a; font-style: italic; }
+.meca-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 34px; padding-top: 22px; border-top: 1px solid #eee5d7; }
+.meca-button { display: inline-block; border: 0; border-radius: 999px; padding: 12px 19px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 700; text-decoration: none; cursor: pointer; }
+.meca-button--secondary { background: white; border: 1px solid #00a8a8; color: #1f628e; }
+.meca-form { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
+.meca-field { display: grid; gap: 7px; }
+.meca-wide { grid-column: 1 / -1; }
+.meca-field label { color: #1f628e; font-size: .88rem; font-weight: 700; }
+.meca-field input, .meca-field select, .meca-field textarea { width: 100%; padding: 11px 13px; border: 1px solid rgba(31,98,142,.22); border-radius: 10px; background: white; font: inherit; }
+.meca-field textarea { min-height: 105px; resize: vertical; }
+.meca-flash { margin-bottom: 18px; padding: 12px 15px; border-radius: 12px; background: #e7f8f7; color: #17636c; text-align: center; }
+.meca-flash.error { background: #fff0f0; color: #9b3030; }
+.meca-journal { margin-top: 24px; }
+.journal-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.journal-heading h2 { color: #1f628e; font: 700 1.45rem Georgia, serif; }
+.journal-heading p { margin-top: 5px; color: #69787e; }
+.observation-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 22px; padding: 20px; border-radius: 16px; background: #f2fbfa; }
+.observation-form-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.observations-list { display: grid; gap: 16px; margin-top: 24px; }
+.observation-entry { padding: 20px; border: 1px solid #eee5d7; border-radius: 14px; background: rgba(255,255,255,.7); }
+.observation-date { color: #00a8a8; font-size: .82rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.observation-section { margin-top: 15px; }
+.observation-section h3 { margin-bottom: 5px; color: #1f628e; font-size: .9rem; }
+.observation-section p { white-space: pre-wrap; font: 1rem/1.65 Georgia, serif; }
+.observation-edit { display: inline-block; margin-top: 18px; color: #1f628e; font-size: .84rem; font-weight: 800; text-decoration: none; }
+.observation-empty { margin-top: 26px; padding: 30px 15px; border: 1px dashed #dfd5c3; border-radius: 14px; color: #8c8982; text-align: center; }
+@media (max-width: 650px) { .meca-form { grid-template-columns: 1fr; } .meca-wide { grid-column: 1; } }
+@media (max-width: 650px) { .observation-form { grid-template-columns: 1fr; } }
+@media (max-width: 650px) { .evolution-facts { grid-template-columns: 1fr; } }
+{% endblock %}
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="meca-shell">
+    <a class="meca-back" href="{{ url_for('espace_personnel.laboratoire') }}">← Retour au labo</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="meca-flash {{ categorie }}">{{ message }}</p>{% endfor %}{% endwith %}
+    <article class="meca-card">
+        {% if mode_modification %}
+            <h1>Modifier le mécanisme</h1>
+            <p class="meca-source">Issu de {{ analyse.titre }}</p>
+            <form method="post" class="meca-form">
+                <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
+                <div class="meca-field meca-wide"><label for="titre">Titre</label><input id="titre" name="titre" value="{{ mecanisme.titre }}" required></div>
+                <div class="meca-field meca-wide"><label for="extrait_source">Extrait source</label><textarea id="extrait_source" name="extrait_source">{{ mecanisme.extrait_source or '' }}</textarea></div>
+                <div class="meca-field meca-wide"><label for="hypothese">Hypothèse</label><textarea id="hypothese" name="hypothese" required>{{ mecanisme.hypothese }}</textarea></div>
+                <div class="meca-field meca-wide"><label for="effets_possibles">Effets possibles</label><textarea id="effets_possibles" name="effets_possibles">{{ mecanisme.effets_possibles or '' }}</textarea></div>
+                <div class="meca-field"><label for="ressenti">Mon ressenti</label><select id="ressenti" name="ressenti">{% for valeur, libelle in ressentis.items() %}<option value="{{ valeur }}" {% if valeur == mecanisme.ressenti %}selected{% endif %}>{{ libelle }}</option>{% endfor %}</select></div>
+                <div class="meca-field"><label for="statut">Statut</label><select id="statut" name="statut">{% for valeur, libelle in statuts.items() %}<option value="{{ valeur }}" {% if valeur == mecanisme.statut %}selected{% endif %}>{{ libelle }}</option>{% endfor %}</select></div>
+                <div class="meca-field meca-wide"><label for="indices_pour">Indices qui vont dans ce sens</label><textarea id="indices_pour" name="indices_pour">{{ mecanisme.indices_pour or '' }}</textarea></div>
+                <div class="meca-field meca-wide"><label for="elements_contraires">Éléments qui contredisent</label><textarea id="elements_contraires" name="elements_contraires">{{ mecanisme.elements_contraires or '' }}</textarea></div>
+                <div class="meca-field meca-wide"><label for="situations_observees">Situations dans lesquelles cela apparaît</label><textarea id="situations_observees" name="situations_observees">{{ mecanisme.situations_observees or '' }}</textarea></div>
+                <div class="meca-field meca-wide"><label for="piste_experimentation">Une autre manière de réagir à tester</label><textarea id="piste_experimentation" name="piste_experimentation">{{ mecanisme.piste_experimentation or '' }}</textarea></div>
+                <div class="meca-actions meca-wide"><button class="meca-button" type="submit">Enregistrer</button><a class="meca-button meca-button--secondary" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}">Annuler</a></div>
+            </form>
+        {% else %}
+            <h1>{{ mecanisme.titre }}</h1>
+            <p class="meca-source">Issu de {{ analyse.titre }}</p>
+            <div class="meca-badges"><span class="meca-badge">{{ ressentis.get(mecanisme.ressenti) }}</span><span class="meca-badge">{{ statuts.get(mecanisme.statut) }}</span></div>
+            <section class="evolution-box">
+                <h2>Mon évolution</h2>
+                <div class="evolution-facts">
+                    <div class="evolution-fact"><strong>Observations</strong>{{ synthese_evolution.nombre_observations }}</div>
+                    <div class="evolution-fact"><strong>Dernière observation</strong>{% if synthese_evolution.derniere_observation %}{{ synthese_evolution.derniere_observation.strftime('%d.%m.%Y') }}{% else %}Aucune pour le moment{% endif %}</div>
+                    <div class="evolution-fact"><strong>Statut actuel</strong>{{ statuts.get(mecanisme.statut, mecanisme.statut) }}</div>
+                </div>
+                <div class="evolution-reactions">
+                    <h3>Réactions alternatives déjà testées</h3>
+                    {% if synthese_evolution.reactions_testees %}
+                        <ul>{% for reaction in synthese_evolution.reactions_testees %}<li>{{ reaction }}</li>{% endfor %}</ul>
+                    {% else %}
+                        <p class="meca-empty">Aucune réaction alternative consignée pour le moment.</p>
+                    {% endif %}
+                </div>
+            </section>
+            <section class="meca-section"><h2>Extrait du rapport</h2><p class="{% if not mecanisme.extrait_source %}meca-empty{% endif %}">{{ mecanisme.extrait_source or 'Aucun extrait ajouté.' }}</p></section>
+            <section class="meca-section"><h2>Hypothèse à explorer</h2><p>{{ mecanisme.hypothese }}</p></section>
+            <section class="meca-section"><h2>Effets possibles dans ma vie</h2><p class="{% if not mecanisme.effets_possibles %}meca-empty{% endif %}">{{ mecanisme.effets_possibles or 'Rien de noté.' }}</p></section>
+            <section class="meca-section"><h2>Indices qui vont dans ce sens</h2><p class="{% if not mecanisme.indices_pour %}meca-empty{% endif %}">{{ mecanisme.indices_pour or 'Rien de noté.' }}</p></section>
+            <section class="meca-section"><h2>Éléments qui contredisent</h2><p class="{% if not mecanisme.elements_contraires %}meca-empty{% endif %}">{{ mecanisme.elements_contraires or 'Rien de noté.' }}</p></section>
+            <section class="meca-section"><h2>Situations dans lesquelles cela apparaît</h2><p class="{% if not mecanisme.situations_observees %}meca-empty{% endif %}">{{ mecanisme.situations_observees or 'Rien de noté.' }}</p></section>
+            <section class="meca-section"><h2>Une autre manière de réagir à tester</h2><p class="{% if not mecanisme.piste_experimentation %}meca-empty{% endif %}">{{ mecanisme.piste_experimentation or 'Rien de noté.' }}</p></section>
+            <div class="meca-actions"><a class="meca-button" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id, mode='modifier') }}">Modifier ce mécanisme</a></div>
+        {% endif %}
+    </article>
+    <section class="meca-card meca-journal" id="journal-mecanisme">
+        <div class="journal-heading">
+            <div><h2>Journal de ce mécanisme</h2><p>{{ observations_mecanisme|length }} observation{% if observations_mecanisme|length != 1 %}s{% endif %} consignée{% if observations_mecanisme|length != 1 %}s{% endif %}</p></div>
+            {% if not afficher_ajout_observation %}<a class="meca-button" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id, ajouter_observation=1) }}#journal-mecanisme">Ajouter une observation</a>{% endif %}
+        </div>
+
+        {% if afficher_ajout_observation %}
+            {{ formulaire_observation(url_for('espace_personnel.ajouter_observation_mecanisme', mecanisme_id=mecanisme.id)) }}
+        {% endif %}
+
+        {% if observations_mecanisme %}
+            <div class="observations-list">
+                {% for observation in observations_mecanisme %}
+                    <article class="observation-entry" id="observation-{{ observation.id }}">
+                        {% if observation_a_modifier and observation_a_modifier.id == observation.id %}
+                            {{ formulaire_observation(url_for('espace_personnel.modifier_observation_mecanisme', observation_id=observation.id), observation) }}
+                        {% else %}
+                            <div class="observation-date">{{ observation.date_observation.strftime('%d.%m.%Y') }}</div>
+                            <section class="observation-section"><h3>Situation vécue</h3><p>{{ observation.situation }}</p></section>
+                            {% if observation.reaction_automatique %}<section class="observation-section"><h3>Réaction automatique</h3><p>{{ observation.reaction_automatique }}</p></section>{% endif %}
+                            {% if observation.indice_pour %}<section class="observation-section"><h3>Ce qui montre que le mécanisme était à l’œuvre</h3><p>{{ observation.indice_pour }}</p></section>{% endif %}
+                            {% if observation.element_contraire %}<section class="observation-section"><h3>Ce qui pourrait nuancer cette lecture</h3><p>{{ observation.element_contraire }}</p></section>{% endif %}
+                            {% if observation.reaction_testee %}<section class="observation-section"><h3>Autre réaction testée</h3><p>{{ observation.reaction_testee }}</p></section>{% endif %}
+                            {% if observation.resultat_obtenu %}<section class="observation-section"><h3>Ce qui s’est passé ensuite</h3><p>{{ observation.resultat_obtenu }}</p></section>{% endif %}
+                            {% if observation.notes_libres %}<section class="observation-section"><h3>Notes</h3><p>{{ observation.notes_libres }}</p></section>{% endif %}
+                            <a class="observation-edit" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id, modifier_observation=observation.id) }}#observation-{{ observation.id }}">Modifier cette observation</a>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% elif not afficher_ajout_observation %}
+            <div class="observation-empty">Aucune situation consignée pour le moment. La prochaine fois que ce mécanisme apparaît, viens déposer ce qui s’est joué ici.</div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

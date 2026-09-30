@@ -1,31 +1,76 @@
-"""Droits explicites des formules de l'espace ; le compte gratuit reste accessible."""
+"""Règles d'accès de l'espace personnel et des formules d'accompagnement."""
 
 from datetime import datetime, timezone
 
 
-FORMULES = {
-    "espace_gratuit": {"emails_par_mois": 0, "cycle_lunaire": False, "revolution_solaire": False},
-    "boussole_lunaire": {"emails_par_mois": 1, "cycle_lunaire": True, "revolution_solaire": False},
-    "accompagnement_astral": {"emails_par_mois": 2, "cycle_lunaire": True, "revolution_solaire": True},
-    "beta_accompagnement": {"emails_par_mois": 2, "cycle_lunaire": True, "revolution_solaire": True},
+FORMULES_ABONNEMENT = {
+    "espace_gratuit": {
+        "libelle": "Espace gratuit",
+        "cycle_lunaire": False,
+        "revolution_solaire": False,
+        "transits_personnalises": False,
+        "journal_contextualise": False,
+        "emails_par_mois": 0,
+    },
+    "boussole_lunaire": {
+        "libelle": "Boussole lunaire",
+        "cycle_lunaire": True,
+        "revolution_solaire": False,
+        "transits_personnalises": False,
+        "journal_contextualise": False,
+        "emails_par_mois": 1,
+    },
+    "accompagnement_astral": {
+        "libelle": "Accompagnement astral",
+        "cycle_lunaire": True,
+        "revolution_solaire": True,
+        "transits_personnalises": True,
+        "journal_contextualise": True,
+        "emails_par_mois": 2,
+    },
+    "beta_accompagnement": {
+        "libelle": "Accompagnement astral — bêta",
+        "cycle_lunaire": True,
+        "revolution_solaire": True,
+        "transits_personnalises": True,
+        "journal_contextualise": True,
+        "emails_par_mois": 2,
+    },
 }
 
+STATUTS_ACTIFS = {"actif", "test"}
 
-def _instant(valeur):
+
+def _instant_comparable(valeur):
+    """Normalise les dates SQLite, parfois relues sans fuseau horaire."""
     if valeur is None:
         return None
-    if valeur.tzinfo is None:
-        return valeur.replace(tzinfo=timezone.utc)
-    return valeur.astimezone(timezone.utc)
+    if valeur.tzinfo is not None:
+        return valeur.astimezone(timezone.utc).replace(tzinfo=None)
+    return valeur
 
 
 def acces_abonnement(abonnement, maintenant=None):
-    """Calcule les droits actifs sans confondre espace gratuit et abonnement."""
-    instant = _instant(maintenant or datetime.now(timezone.utc))
-    actif = bool(abonnement and abonnement.statut in {"actif", "test"})
+    """Retourne les droits effectifs ; l'espace gratuit reste toujours ouvert."""
+    instant = _instant_comparable(maintenant or datetime.now(timezone.utc))
+    actif = bool(abonnement and abonnement.statut in STATUTS_ACTIFS)
+
     if actif:
-        debut = _instant(abonnement.date_debut)
-        fin = _instant(abonnement.date_fin)
-        actif = (debut is None or debut <= instant) and (fin is None or instant < fin)
-    code = abonnement.formule if actif and abonnement.formule in FORMULES else "espace_gratuit"
-    return {"code": code, "actif": code != "espace_gratuit", **FORMULES[code]}
+        debut = _instant_comparable(abonnement.date_debut)
+        fin = _instant_comparable(abonnement.date_fin)
+        actif = (debut is None or debut <= instant) and (fin is None or fin > instant)
+
+    code_formule = (
+        abonnement.formule
+        if actif and abonnement.formule in FORMULES_ABONNEMENT
+        else "espace_gratuit"
+    )
+    droits = dict(FORMULES_ABONNEMENT[code_formule])
+    droits.update({
+        "code": code_formule,
+        "actif": code_formule != "espace_gratuit",
+        "statut": abonnement.statut if abonnement else "gratuit",
+        "date_debut": abonnement.date_debut if abonnement and actif else None,
+        "date_fin": abonnement.date_fin if abonnement and actif else None,
+    })
+    return droits

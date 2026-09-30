@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Mes cycles lunaires | Les Fous d'Astro{% endblock %}
+
+{% block extra_css %}
+body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%); font-family: 'Segoe UI', sans-serif; }
+.cycles-shell { width: min(940px, calc(100% - 32px)); margin: 48px auto 72px; }
+.cycles-back { display: inline-block; margin-bottom: 18px; color: white; font-weight: 700; text-decoration: none; }
+.cycles-page { padding: clamp(26px, 5vw, 48px); border-radius: 25px; background: rgba(255,255,255,.96); box-shadow: 0 20px 45px rgba(0,0,0,.12); color: #4a5568; }
+.cycles-header { max-width: 680px; margin: 0 auto 34px; text-align: center; }
+.cycles-symbol { font-size: 3rem; }
+.cycles-kicker { color: #00a8a8; font-size: .8rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.cycles-title { margin: 7px 0 10px; color: #1f628e; font-size: clamp(2rem, 5vw, 3rem); }
+.cycles-intro { color: #66727c; line-height: 1.6; }
+.cycles-list { display: grid; gap: 17px; }
+.cycle-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px; padding: 21px; border: 1px solid rgba(31,98,142,.14); border-radius: 18px; background: linear-gradient(135deg, rgba(192,240,247,.22), rgba(255,255,255,.9)); }
+.cycle-moon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #1f628e, #00a8a8); color: white; font-size: 1.8rem; }
+.cycle-date { color: #1f628e; font-size: 1.12rem; font-weight: 800; }
+.cycle-place { margin-top: 4px; color: #75808a; font-size: .84rem; }
+.cycle-fil { margin-top: 9px; color: #4d5964; font: italic 1rem/1.5 Georgia, serif; }
+.cycle-button { display: inline-block; padding: 10px 16px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 800; text-decoration: none; white-space: nowrap; }
+.cycles-empty { padding: 42px 20px; border: 1px dashed rgba(31,98,142,.25); border-radius: 18px; text-align: center; }
+.cycles-empty a { display: inline-block; margin-top: 16px; color: #1f628e; font-weight: 800; }
+.cycles-next { text-align: center; margin: 0 0 28px; }
+@media (max-width: 650px) { .cycle-card { grid-template-columns: 1fr; text-align: center; } .cycle-moon { margin: 0 auto; } }
+{% endblock %}
+
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="cycles-shell">
+    <a class="cycles-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+    <section class="cycles-page">
+        <header class="cycles-header">
+            <div class="cycles-symbol">🌙</div>
+            <p class="cycles-kicker">Un cycle après l’autre</p>
+            <h1 class="cycles-title">Mes cycles lunaires</h1>
+            <p class="cycles-intro">Retrouve les tonalités qui ont accompagné chaque période et observe ce qui s’est réellement manifesté dans ta vie.</p>
+        </header>
+        {% if droits.cycle_lunaire %}
+            <p class="cycles-next"><a class="cycle-button" href="{{ url_for('espace_personnel.apercu_cycle_lunaire') }}">Voir mon prochain cycle lunaire</a></p>
+        {% endif %}
+        {% if cycles %}
+            <div class="cycles-list">
+                {% for element in cycles %}
+                    {% set cycle = element.cycle %}
+                    <article class="cycle-card">
+                        <div class="cycle-moon">☾</div>
+                        <div>
+                            <p class="cycle-date">{% if element.date_locale %}Cycle du {{ element.date_locale.strftime('%d.%m.%Y') }}{% else %}Cycle lunaire{% endif %}</p>
+                            <p class="cycle-place">{{ cycle.ville }}</p>
+                            {% if element.interpretation %}<p class="cycle-fil">« {{ element.interpretation.fil_rouge }} »</p>{% endif %}
+                        </div>
+                        <a class="cycle-button" href="{{ url_for('espace_personnel.fiche_cycle_lunaire', cycle_id=cycle.id) }}">Explorer</a>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="cycles-empty">Aucun cycle lunaire n’est encore enregistré dans cet espace.</div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

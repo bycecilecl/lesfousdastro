@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Mes révolutions solaires | Les Fous d'Astro{% endblock %}
+
+{% block extra_css %}
+body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%); font-family: 'Segoe UI', sans-serif; }
+.solar-shell { width: min(940px, calc(100% - 32px)); margin: 48px auto 72px; }
+.solar-back { display: inline-block; margin-bottom: 18px; color: white; font-weight: 700; text-decoration: none; }
+.solar-page { padding: clamp(26px, 5vw, 48px); border-radius: 25px; background: rgba(255,255,255,.96); box-shadow: 0 20px 45px rgba(0,0,0,.12); color: #4a5568; }
+.solar-header { max-width: 680px; margin: 0 auto 34px; text-align: center; }
+.solar-symbol { font-size: 3rem; }
+.solar-kicker { color: #e07b00; font-size: .8rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.solar-title { margin: 7px 0 10px; color: #1f628e; font-size: clamp(2rem, 5vw, 3rem); }
+.solar-intro { color: #66727c; line-height: 1.6; }
+.solar-list { display: grid; gap: 17px; }
+.solar-card { display: grid; grid-template-columns: auto 1fr; gap: 20px; padding: 21px; border: 1px solid rgba(31,98,142,.14); border-radius: 18px; background: linear-gradient(135deg, rgba(255,238,193,.45), rgba(255,255,255,.9)); }
+.solar-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #f0b429, #e07b00); color: white; font-size: 1.8rem; }
+.solar-date { color: #1f628e; font-size: 1.12rem; font-weight: 800; }
+.solar-meta { margin-top: 5px; color: #75808a; font-size: .9rem; line-height: 1.55; }
+.solar-report { margin-top: 11px; color: #4d5964; font: italic 1rem/1.5 Georgia, serif; }
+.solar-state { display: inline-block; margin-top: 11px; padding: 5px 10px; border-radius: 999px; background: rgba(224,123,0,.12); color: #a35900; font-size: .8rem; font-weight: 800; }
+.solar-empty { padding: 42px 20px; border: 1px dashed rgba(31,98,142,.25); border-radius: 18px; text-align: center; line-height: 1.55; }
+.solar-filter { display:flex; flex-wrap:wrap; align-items:end; gap:10px; margin:0 0 25px; padding:16px; border-radius:14px; background:#f3f8f9; }
+.solar-filter label { color:#31566a; font-weight:700; font-size:.9rem; }
+.solar-filter input { display:block; width:90px; margin-top:5px; padding:8px; border:1px solid #b6d0d8; border-radius:8px; font:inherit; }
+.solar-filter button { padding:10px 16px; border:0; border-radius:999px; color:white; background:#1f628e; font-weight:700; cursor:pointer; }
+.solar-filter a { align-self:center; color:#1f628e; }
+.solar-details { margin-top:13px; padding:9px 12px; border:1px solid #d8e6e9; border-radius:10px; background:white; }
+.solar-details summary { color:#1f628e; font-weight:700; cursor:pointer; }
+.solar-details ul { margin:9px 0 2px; padding-left:20px; line-height:1.6; }
+.solar-details a { color:#1f628e; }
+.solar-muted { color:#66727c; font-size:.86rem; }
+
+@media (max-width: 650px) { .solar-card { grid-template-columns: 1fr; text-align: center; } .solar-icon { margin: 0 auto; } }
+{% endblock %}
+
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="solar-shell">
+    <a class="solar-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+    <section class="solar-page">
+        <header class="solar-header">
+            <div class="solar-symbol">☀️</div>
+            <p class="solar-kicker">Un an, un ciel, un fil rouge</p>
+            <h1 class="solar-title">Mes révolutions solaires</h1>
+            <p class="solar-intro">Ta révolution solaire pose le décor de l’année. Les cycles lunaires et les emails du cycle viennent ensuite montrer quand ce décor se réveille dans la vraie vie.</p>
+        </header>
+        <form class="solar-filter" method="get" action="{{ url_for('espace_personnel.revolutions_solaires') }}">
+            <label>De <input type="number" name="debut" min="1900" max="2100" value="{{ debut_filtre or '' }}" required></label>
+            <label>à <input type="number" name="fin" min="1900" max="2100" value="{{ fin_filtre or '' }}" required></label>
+            <button type="submit">Voir ces années</button>
+            {% if debut_filtre %}<a href="{{ url_for('espace_personnel.revolutions_solaires') }}">Toutes mes années</a>{% endif %}
+        </form>
+        {% if debut_filtre %}<p class="solar-meta">Années {{ debut_filtre }} à {{ fin_filtre }}</p>{% endif %}
+        {% if cycles %}
+            <div class="solar-list">
+            {% for element in cycles %}
+                {% set cycle = element.cycle %}
+                <article class="solar-card">
+                    <div class="solar-icon">☀</div>
+                    <div>
+                        <p class="solar-date">Révolution solaire {{ cycle.annee }}</p>
+                        <p class="solar-meta">Du {% if element.retour_local %}{{ element.retour_local.strftime('%d.%m.%Y à %H:%M') }}{% else %}{{ cycle.debut_cycle_utc.strftime('%d.%m.%Y') }}{% endif %} · {{ cycle.ville }}</p>
+                        {% if element.ascendant %}<p class="solar-meta">Ascendant annuel : {{ element.ascendant.signe }}{% if element.ascendant.degre is defined %} {{ element.ascendant.degre }}°{% endif %}</p>{% endif %}
+                        <p class="solar-meta">{{ element.nombre_rl }} cycle{% if element.nombre_rl != 1 %}s{% endif %} lunaire{% if element.nombre_rl != 1 %}s{% endif %} relié{% if element.nombre_rl != 1 %}s{% endif %} à cette année.</p>
+                        {% if element.themes %}
+                            <details class="solar-details"><summary>Domaines qui reviennent dans le calcul</summary>
+                                <ul>{% for theme in element.themes %}<li>{{ theme.libelle }}</li>{% endfor %}</ul>
+                                <p class="solar-muted">Ce sont des convergences à étudier, pas une interprétation du vécu.</p>
+                            </details>
+                        {% endif %}
+                        {% if element.activations %}
+                            <details class="solar-details"><summary>{{ element.activations|length }} périodes de transits à explorer</summary>
+                                <ul>{% for periode in element.activations %}<li>{{ periode.debut }} – {{ periode.fin }}{% if periode.climat %} · {{ periode.climat }}{% endif %} · <a href="{{ url_for('espace_personnel.calendrier', mois=periode.mois) }}">Voir le mois</a></li>{% endfor %}</ul>
+                            </details>
+                        {% endif %}
+                        {% if cycle.rapport_html %}
+                            <p class="solar-report">Le rapport annuel est disponible dans cette fiche.</p>
+                            <a class="solar-state" href="{{ url_for('espace_personnel.lire_rapport_revolution_solaire', cycle_id=cycle.id) }}" target="_blank" rel="noopener">Lire le rapport annuel ↗</a>
+                        {% else %}
+                            <span class="solar-state">Cadre technique enregistré</span>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div class="solar-empty">Aucune révolution solaire enregistrée pour ces années. Le lieu de chaque anniversaire doit être renseigné pour les calculer correctement.</div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}
