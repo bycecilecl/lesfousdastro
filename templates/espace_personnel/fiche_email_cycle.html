@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Brouillon de cycle | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+  .mail-shell { width: min(900px, calc(100% - 32px)); margin: 3rem auto 4rem; }
+  .mail-retour { color: white; font-weight: 700; }
+  .mail-carte { margin-top: 1rem; padding: clamp(24px, 5vw, 38px); border-radius: 22px; background: #fff; box-shadow: 0 15px 40px #092d4a24; color: #263645; }
+  .mail-carte h1 { color: #1f628e; }
+  .mail-carte p { line-height: 1.55; }
+  .mail-corps { white-space: pre-wrap; line-height: 1.65; font-family: inherit; overflow-wrap: anywhere; }
+  .mail-message { padding: .8rem 1rem; border-radius: 10px; background: #e7f8f7; }
+  .mail-message.error { color: #9b3030; background: #fff0f0; }
+  .mail-bouton { padding: .8rem 1.2rem; border: 0; border-radius: 26px; background: #1f628e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+{% endblock %}
+{% block content %}
+<div class="mail-shell">
+  <a class="mail-retour" href="{{ url_for('espace_personnel.emails_cycle') }}">← Mes mails de cycle</a>
+  <article class="mail-carte">
+    <h1>{{ email.objet or 'Mail en préparation' }}</h1>
+    <p>État : <strong>{{ email.statut }}</strong>{% if email.date_envoi %} · Envoyé le {{ email.date_envoi.strftime('%d/%m/%Y à %H:%M') }}{% endif %}</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for categorie, message in messages %}<p class="mail-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
+    {% if email.contenu_texte %}<div class="mail-corps">{{ email.contenu_texte }}</div>{% endif %}
+    {% if droits.cycle_lunaire and email.statut == 'brouillon' and email.objet and email.contenu_texte %}
+      <form method="post" action="{{ url_for('espace_personnel.envoyer_brouillon_cycle', email_id=email.id) }}">
+        <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
+        <p>Destinataire : {{ utilisateur.email }}. L’envoi est définitif ; vérifie le texte avant de continuer.</p>
+        <button class="mail-bouton" type="submit">Envoyer ce mail à mon adresse</button>
+      </form>
+    {% endif %}
+  </article>
+</div>
+{% endblock %}

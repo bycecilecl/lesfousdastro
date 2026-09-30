@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Mes mails de cycle | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+  .mails-shell { width: min(820px, calc(100% - 32px)); margin: 3rem auto 4rem; }
+  .mails-retour { color: white; font-weight: 700; }
+  .mails-carte { margin-top: 1rem; padding: clamp(24px, 5vw, 38px); border-radius: 22px; background: #fff; box-shadow: 0 15px 40px #092d4a24; color: #263645; }
+  .mails-carte h1, .mails-carte h2 { color: #1f628e; }
+  .mails-carte p { line-height: 1.55; }
+  .mails-liste { list-style: none; padding: 0; }
+  .mails-liste li { padding: 1rem 0; border-bottom: 1px solid #d7e5e8; }
+  .mails-message { padding: .8rem 1rem; border-radius: 10px; background: #e7f8f7; }
+  .mails-message.error { color: #9b3030; background: #fff0f0; }
+  .mails-import { display: grid; gap: .8rem; }
+  .mails-import button { justify-self: start; padding: .7rem 1.1rem; border: 0; border-radius: 24px; background: #1f628e; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+{% endblock %}
+{% block content %}
+<div class="mails-shell">
+  <a class="mails-retour" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+  <section class="mails-carte">
+    <h1>Mes mails de cycle</h1>
+    <p>Les brouillons restent privés tant que tu ne décides pas de les envoyer. Un mail envoyé reste dans ton historique.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for categorie, message in messages %}<p class="mails-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
+    {% if not profil %}
+      <p>Commence par <a href="{{ url_for('espace_personnel.profil') }}">créer ton profil astral</a>.</p>
+    {% elif emails %}
+      <ul class="mails-liste">
+        {% for email in emails %}
+          <li><a href="{{ url_for('espace_personnel.fiche_email_cycle', email_id=email.id) }}">{{ email.objet or 'Mail en préparation' }}</a> · {{ email.statut }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Aucun mail de cycle dans ton espace pour le moment.</p>
+    {% endif %}
+  </section>
+  {% if peut_importer and droits.cycle_lunaire %}
+  <section class="mails-carte">
+    <h2>Importer un brouillon du labo</h2>
+    <p>Pour les comptes de test uniquement. L’import n’envoie aucun e-mail et refuse les doublons.</p>
+    <form class="mails-import" method="post" action="{{ url_for('espace_personnel.importer_brouillon_cycle') }}" enctype="multipart/form-data">
+      <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
+      <label for="brouillon_import">Fichier du brouillon</label>
+      <input id="brouillon_import" type="file" name="brouillon_import" accept=".json,application/json" required>
+      <button type="submit">Importer le brouillon</button>
+    </form>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

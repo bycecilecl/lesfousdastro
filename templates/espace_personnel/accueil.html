@@ -10,7 +10,9 @@
 <section class="espace-accueil">
   <h1>Bienvenue dans ton espace, {{ utilisateur.prenom }}.</h1>
   <p>Ton compte est bien enregistré avec l'adresse {{ utilisateur.email }}.</p>
-  <p>Le profil astral, le journal de bord et la bibliothèque de rapports seront ajoutés progressivement. Rien à remplir pour le moment : cette première étape vérifie que tu peux te connecter et retrouver ton compte.</p>
+  <p>Tu peux maintenant renseigner tes coordonnées de naissance. Le journal de bord et la bibliothèque de rapports seront ajoutés progressivement.</p>
+  <p><a href="{{ url_for('espace_personnel.profil') }}">Mettre à jour mon profil astral</a></p>
+  <p><a href="{{ url_for('espace_personnel.emails_cycle') }}">Voir mes mails de cycle</a></p>
   <form method="post" action="{{ url_for('espace_personnel.deconnexion') }}">
     <button type="submit">Me déconnecter</button>
   </form>
