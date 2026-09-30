@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Connexion à mon espace | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+  .espace-connexion { max-width: 540px; margin: 4rem auto; padding: 2rem; background: #fff; border-radius: 22px; box-shadow: 0 15px 40px #092d4a24; color: #22465b; }
+  .espace-connexion h1 { color: #1f628e; text-align: center; margin-bottom: 1rem; }
+  .espace-connexion p { line-height: 1.55; margin-bottom: 1.2rem; }
+  .espace-connexion label { display: block; font-weight: 700; margin-bottom: .5rem; }
+  .espace-connexion input { width: 100%; padding: .8rem; margin-bottom: 1.2rem; border: 1px solid #b9d4d7; border-radius: 10px; font: inherit; }
+  .espace-connexion button { width: 100%; padding: .9rem 1.2rem; border: 0; border-radius: 30px; background: #1f628e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+  .espace-connexion .message { padding: 1rem; border-radius: 10px; background: #e7f8f7; }
+  .espace-connexion .erreur { background: #fff0f0; color: #9b3030; }
+  .espace-connexion .cf-turnstile { margin: 0 0 1.2rem; }
+{% endblock %}
+{% block content %}
+<section class="espace-connexion">
+  <h1>Mon espace astral</h1>
+  <p>Ton espace prend forme. Pour cette première ouverture, la connexion est réservée aux personnes invitées.</p>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for categorie, message in messages %}<p class="message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+  {% endwith %}
+  {% if erreur %}<p class="message erreur" role="alert">{{ erreur }}</p>{% endif %}
+  {% if confirmation %}
+    <p class="message" role="status">Si ton adresse fait partie des invitations, un lien vient de t'être envoyé. Regarde aussi dans tes courriers indésirables.</p>
+  {% else %}
+    <form method="post">
+      <label for="espace-prenom">Ton prénom</label>
+      <input id="espace-prenom" name="prenom" autocomplete="given-name" placeholder="Pour créer ton compte">
+      <label for="espace-email">Ton adresse e-mail</label>
+      <input id="espace-email" type="email" name="email" autocomplete="email" required>
+      <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+      <button type="submit">Recevoir mon lien de connexion</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}
+{% block scripts %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endblock %}

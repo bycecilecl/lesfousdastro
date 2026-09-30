@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Mon espace astral | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+  .espace-accueil { max-width: 720px; margin: 4rem auto; padding: 2.5rem; background: #fff; border-radius: 22px; box-shadow: 0 15px 40px #092d4a24; color: #22465b; }
+  .espace-accueil h1 { color: #1f628e; margin-bottom: 1rem; }
+  .espace-accueil p { line-height: 1.6; margin-bottom: 1.2rem; }
+  .espace-accueil button { padding: .7rem 1.2rem; border: 0; border-radius: 30px; background: #1f628e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+{% endblock %}
+{% block content %}
+<section class="espace-accueil">
+  <h1>Bienvenue dans ton espace, {{ utilisateur.prenom }}.</h1>
+  <p>Ton compte est bien enregistré avec l'adresse {{ utilisateur.email }}.</p>
+  <p>Le profil astral, le journal de bord et la bibliothèque de rapports seront ajoutés progressivement. Rien à remplir pour le moment : cette première étape vérifie que tu peux te connecter et retrouver ton compte.</p>
+  <form method="post" action="{{ url_for('espace_personnel.deconnexion') }}">
+    <button type="submit">Me déconnecter</button>
+  </form>
+</section>
+{% endblock %}

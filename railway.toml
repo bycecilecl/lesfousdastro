@@ -1,2 +1,2 @@
 [deploy]
-startCommand = "gunicorn main:app --workers 4 --threads 2 --timeout 300"
+startCommand = '/bin/sh -c "python scripts/init_espace_auth.py || echo Espace-personnel-tables-indisponibles >&2; exec gunicorn espace_wsgi:app --workers 4 --threads 2 --timeout 300"'
