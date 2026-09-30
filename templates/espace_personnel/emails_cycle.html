@@ -1,57 +1,101 @@
 {% extends "base.html" %}
 {% block title %}Mes mails de cycle | Les Fous d'Astro{% endblock %}
+
 {% block extra_css %}
-  .mails-shell { width: min(820px, calc(100% - 32px)); margin: 3rem auto 4rem; }
-  .mails-retour { color: white; font-weight: 700; }
-  .mails-carte { margin-top: 1rem; padding: clamp(24px, 5vw, 38px); border-radius: 22px; background: #fff; box-shadow: 0 15px 40px #092d4a24; color: #263645; }
-  .mails-carte h1, .mails-carte h2 { color: #1f628e; }
-  .mails-carte p { line-height: 1.55; }
-  .mails-liste { list-style: none; padding: 0; }
-  .mails-liste li { padding: 1rem 0; border-bottom: 1px solid #d7e5e8; }
-  .mails-message { padding: .8rem 1rem; border-radius: 10px; background: #e7f8f7; }
-  .mails-message.error { color: #9b3030; background: #fff0f0; }
-  .mails-import { display: grid; gap: .8rem; }
-  .mails-import button { justify-self: start; padding: .7rem 1.1rem; border: 0; border-radius: 24px; background: #1f628e; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 52%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, sans-serif; }
+.mails-shell { width: min(960px, calc(100% - 32px)); margin: 0 auto 72px; }
+.mails-retour { display: inline-block; margin: 0 0 20px; color: white; font-weight: 700; text-decoration: none; }
+.mails-entete { margin: 22px auto 28px; max-width: 690px; color: white; text-align: center; }
+.mails-kicker { margin-bottom: 8px; color: #d5f8f5; font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.mails-entete h1 { margin: 0 0 10px; color: white; font-size: clamp(2rem, 5vw, 3rem); }
+.mails-entete p:last-child { line-height: 1.55; }
+.mails-carte { margin-top: 20px; padding: clamp(24px, 4vw, 38px); border-radius: 24px; background: rgba(255,255,255,.97); box-shadow: 0 18px 42px #092d4a25; color: #263645; }
+.mails-carte h2 { margin: 0 0 8px; color: #1f628e; font-size: 1.35rem; }
+.mails-carte > p { color: #5d7079; line-height: 1.55; }
+.mails-action { display: inline-block; padding: 12px 20px; border: 0; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font: 700 .95rem 'Segoe UI', Tahoma, sans-serif; text-decoration: none; cursor: pointer; }
+.mails-action:hover { filter: brightness(1.08); }
+.mails-preparer { margin-top: 19px; }
+.mails-note { margin-top: 12px; color: #607580; font-size: .88rem; }
+.mails-liste { display: grid; gap: 13px; margin-top: 22px; }
+.mails-item { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 20px; border: 1px solid #d9e9eb; border-radius: 17px; background: #f8fcfc; }
+.mails-item h3 { margin: 0 0 7px; color: #1f628e; font-size: 1.05rem; line-height: 1.4; }
+.mails-item p { color: #687b83; font-size: .87rem; }
+.mails-statut { display: inline-block; margin-top: 10px; padding: 5px 10px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-size: .75rem; font-weight: 800; }
+.mails-statut--archive { background: #eef2fb; color: #405981; }
+.mails-vide { margin-top: 20px; padding: 26px; border: 1px dashed #b9d4d7; border-radius: 16px; color: #607580; text-align: center; }
+.mails-message { margin: 14px 0; padding: 12px 15px; border-radius: 12px; background: #e7f8f7; color: #17636c; }
+.mails-message.error { color: #9b3030; background: #fff0f0; }
+.mails-import summary { color: #1f628e; font-weight: 700; cursor: pointer; }
+.mails-import p { margin: 12px 0; color: #5d7079; line-height: 1.55; }
+.mails-import-form { display: grid; gap: 12px; max-width: 440px; margin-top: 18px; }
+.mails-import-form label { color: #1f628e; font-weight: 700; }
+.mails-import-form input[type="file"] { width: 100%; font: inherit; }
+.mails-import-form .mails-action { justify-self: start; }
+@media (max-width: 620px) { .mails-item { align-items: flex-start; flex-direction: column; } }
 {% endblock %}
+
 {% block content %}
-<div class="mails-shell">
-  {% include 'espace_personnel/_navigation.html' %}
-  <section class="mails-carte">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="mails-shell">
+  <a class="mails-retour" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+  <header class="mails-entete">
+    <p class="mails-kicker">Mes cycles · mes messages</p>
     <h1>Mes mails de cycle</h1>
-    <p>Les brouillons restent privés tant que tu ne décides pas de les envoyer. Un mail envoyé reste dans ton historique.</p>
-    {% if profil and droits.cycle_lunaire %}
-      <form class="mails-import" method="post" action="{{ url_for('espace_personnel.preparer_email_cycle') }}">
-        <input type="hidden" name="espace_csrf" value="{{ session.get('espace_formulaire_csrf', '') }}">
-        <button type="submit">Préparer le prochain mail de cycle</button>
-      </form>
-      <p>Cette étape calcule les faits astrologiques sans appeler Claude et sans envoyer de mail.</p>
-    {% endif %}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for categorie, message in messages %}<p class="mails-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
-    {% endwith %}
+    <p>Prépare tes brouillons, relis-les et retrouve les messages de tes cycles précédents.</p>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for categorie, message in messages %}<p class="mails-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+  {% endwith %}
+
+  {% if profil and droits.cycle_lunaire %}
+  <section class="mails-carte">
+    <h2>Préparer mon prochain mail</h2>
+    <p>Le premier clic rassemble les données astrologiques du cycle. Tu pourras lire le résultat avant toute génération de texte ou tout envoi.</p>
+    <form class="mails-preparer" method="post" action="{{ url_for('espace_personnel.preparer_email_cycle') }}">
+      <input type="hidden" name="espace_csrf" value="{{ session.get('espace_formulaire_csrf', '') }}">
+      <button class="mails-action" type="submit">Préparer le prochain mail de cycle</button>
+    </form>
+    <p class="mails-note">Cette étape n’appelle pas Claude et n’envoie aucun e-mail.</p>
+  </section>
+  {% endif %}
+
+  <section class="mails-carte">
+    <h2>Mes brouillons et archives</h2>
     {% if not profil %}
       <p>Commence par <a href="{{ url_for('espace_personnel.profil') }}">créer ton profil astral</a>.</p>
     {% elif emails %}
-      <ul class="mails-liste">
+      {% set libelles_statut = {'prepare': 'Données prêtes', 'brouillon': 'Brouillon', 'archive': 'Archive', 'envoye': 'Envoyé', 'envoi_en_cours': 'Envoi en cours', 'envoi_incertain': 'Envoi à vérifier'} %}
+      <div class="mails-liste">
         {% for email in emails %}
-          <li><a href="{{ url_for('espace_personnel.fiche_email_cycle', email_id=email.id) }}">{{ email.objet or 'Mail en préparation' }}</a> · {{ email.statut }}</li>
+          <article class="mails-item">
+            <div>
+              <h3>{{ email.objet or 'Mail en préparation' }}</h3>
+              <p>Créé le {{ (email.date_generation or email.date_creation).strftime('%d.%m.%Y') }}</p>
+              <span class="mails-statut {% if email.statut == 'archive' %}mails-statut--archive{% endif %}">{{ libelles_statut.get(email.statut, email.statut|replace('_', ' ')|capitalize) }}</span>
+            </div>
+            <a class="mails-action" href="{{ url_for('espace_personnel.fiche_email_cycle', email_id=email.id) }}">Ouvrir</a>
+          </article>
         {% endfor %}
-      </ul>
+      </div>
     {% else %}
-      <p>Aucun mail de cycle dans ton espace pour le moment.</p>
+      <p class="mails-vide">Aucun mail de cycle dans ton espace pour le moment.</p>
     {% endif %}
   </section>
+
   {% if peut_importer and droits.cycle_lunaire %}
   <section class="mails-carte">
-    <h2>Importer un brouillon du labo</h2>
-    <p>Pour les comptes de test uniquement. L’import n’envoie aucun e-mail et refuse les doublons.</p>
-    <form class="mails-import" method="post" action="{{ url_for('espace_personnel.importer_brouillon_cycle') }}" enctype="multipart/form-data">
-      <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
-      <label for="brouillon_import">Fichier du brouillon</label>
-      <input id="brouillon_import" type="file" name="brouillon_import" accept=".json,application/json" required>
-      <button type="submit">Importer le brouillon</button>
-    </form>
+    <details class="mails-import">
+      <summary>Importer un brouillon du labo</summary>
+      <p>Pour les comptes de test uniquement. L’import n’envoie aucun e-mail et refuse les doublons.</p>
+      <form class="mails-import-form" method="post" action="{{ url_for('espace_personnel.importer_brouillon_cycle') }}" enctype="multipart/form-data">
+        <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
+        <label for="brouillon_import">Fichier du brouillon</label>
+        <input id="brouillon_import" type="file" name="brouillon_import" accept=".json,application/json" required>
+        <button class="mails-action" type="submit">Importer le brouillon</button>
+      </form>
+    </details>
   </section>
   {% endif %}
-</div>
+</main>
 {% endblock %}

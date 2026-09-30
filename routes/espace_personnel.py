@@ -21,7 +21,7 @@ from extensions import db
 from models.espace_personnel import (
     AbonnementEspace, AnalysePersonnelle, CycleLunaire, CycleSolaire, DroitAnalyseAchetee,
     EmailCycleAbonnement, EnjeuPeriode, EntreeJournal, FichierAnalyse,
-    MecanismeExploration, ObservationMecanisme, ProfilAstral,
+    MecanismeExploration, ObservationMecanisme, ProfilAstral, SuggestionMecanisme,
     UtilisateurEspace,
 )
 from utils.acces_abonnement import acces_abonnement
@@ -491,6 +491,21 @@ def laboratoire():
         and (not actifs_seulement or mecanisme.statut not in termines)
         and (not jamais_observes or mecanisme.id not in suivis)
     ]
+    suggestions_a_examiner = (
+        SuggestionMecanisme.query
+        .filter(
+            SuggestionMecanisme.analyse_id.in_(analyses_par_id),
+            SuggestionMecanisme.statut == "proposee",
+        )
+        .order_by(SuggestionMecanisme.priorite.asc())
+        .all()
+        if analyses_par_id else []
+    )
+    if analyse_selectionnee:
+        suggestions_a_examiner = [
+            suggestion for suggestion in suggestions_a_examiner
+            if suggestion.analyse_id == analyse_selectionnee
+        ]
     statistiques = {
         "en_cours": sum(m.statut not in termines for m in mecanismes_tous),
         "en_transformation": sum(m.statut == "en_transformation" for m in mecanismes_tous),
@@ -507,7 +522,82 @@ def laboratoire():
         actifs_seulement=actifs_seulement,
         jamais_observes=jamais_observes,
         filtres_actifs=bool(analyse_selectionnee or statut_selectionne or actifs_seulement or jamais_observes),
+        suggestions_a_examiner=suggestions_a_examiner,
+        espace_csrf=_jeton_formulaire_portail(),
     )
+
+
+@espace_personnel_bp.route("/suggestions/<int:suggestion_id>/accepter", methods=["POST"])
+def accepter_suggestion(suggestion_id):
+    utilisateur = _compte_connecte()
+    if utilisateur is None:
+        return redirect(url_for("espace_personnel.connexion"))
+    if not _verifier_formulaire_portail():
+        abort(400)
+    suggestion = (
+        SuggestionMecanisme.query
+        .join(AnalysePersonnelle, AnalysePersonnelle.id == SuggestionMecanisme.analyse_id)
+        .filter(
+            SuggestionMecanisme.id == suggestion_id,
+            AnalysePersonnelle.utilisateur_id == utilisateur.id,
+        )
+        .first_or_404()
+    )
+    if suggestion.statut != "proposee":
+        flash("Cette piste a déjà été traitée.", "error")
+    else:
+        try:
+            manifestations = json.loads(suggestion.manifestations_possibles or "[]")
+            if not isinstance(manifestations, list):
+                manifestations = []
+        except (TypeError, ValueError):
+            manifestations = []
+        reclamation = db.session.execute(
+            update(SuggestionMecanisme)
+            .where(SuggestionMecanisme.id == suggestion.id, SuggestionMecanisme.statut == "proposee")
+            .values(statut="acceptee")
+        )
+        if reclamation.rowcount == 1:
+            db.session.add(MecanismeExploration(
+                analyse_id=suggestion.analyse_id,
+                titre=suggestion.titre,
+                extrait_source=suggestion.extrait_source,
+                hypothese=suggestion.hypothese,
+                effets_possibles="\n".join(f"• {item}" for item in manifestations) or None,
+                ressenti="a_observer",
+                statut="a_explorer",
+            ))
+            db.session.commit()
+            flash("Cette piste a été ajoutée à ton Labo.", "success")
+        else:
+            db.session.rollback()
+            flash("Cette piste a déjà été traitée.", "error")
+    return redirect(url_for("espace_personnel.laboratoire") + "#mes-mecanismes")
+
+
+@espace_personnel_bp.route("/suggestions/<int:suggestion_id>/rejeter", methods=["POST"])
+def rejeter_suggestion(suggestion_id):
+    utilisateur = _compte_connecte()
+    if utilisateur is None:
+        return redirect(url_for("espace_personnel.connexion"))
+    if not _verifier_formulaire_portail():
+        abort(400)
+    suggestion = (
+        SuggestionMecanisme.query
+        .join(AnalysePersonnelle, AnalysePersonnelle.id == SuggestionMecanisme.analyse_id)
+        .filter(
+            SuggestionMecanisme.id == suggestion_id,
+            AnalysePersonnelle.utilisateur_id == utilisateur.id,
+        )
+        .first_or_404()
+    )
+    if suggestion.statut == "proposee":
+        suggestion.statut = "rejetee"
+        db.session.commit()
+        flash("Cette piste a été écartée.", "success")
+    else:
+        flash("Cette piste a déjà été traitée.", "error")
+    return redirect(url_for("espace_personnel.laboratoire") + "#suggestions-ia")
 
 
 def _mecanisme_du_compte(mecanisme_id, utilisateur_id):
@@ -1137,14 +1227,30 @@ def _rs_archivee_pour_instant(profil_id, instant_utc):
     return None, None
 
 
+def _preparer_theme_cycle_lunaire(theme):
+    """Reconstruit les champs de présentation absents du JSON technique enregistré."""
+    from utils.revolution_lunaire import priorites_interpretation
+    from utils.transits.calcul_transits import longitude_to_signe
+
+    theme["date_locale"] = datetime.fromisoformat(theme["instant_local"])
+    theme["angles"] = {
+        nom: longitude_to_signe(longitude)
+        for nom, longitude in theme["angles_deg"].items()
+    }
+    theme["aspects_nataux_principaux"] = [
+        aspect for aspect in theme.get("aspects_avec_natal", [])
+        if aspect["orbe"] <= 2
+    ]
+    theme["priorites"] = priorites_interpretation(theme)
+    return theme
+
+
 @espace_personnel_bp.route("/cycles-lunaires/apercu", methods=["GET", "POST"])
 def apercu_cycle_lunaire():
     """Aperçu gratuit à calculer ; Claude intervient seulement sur POST autorisé."""
     from utils.revolution_lunaire import (
         calculer_theme_revolution_lunaire, prochaine_revolution_lunaire,
-        priorites_interpretation,
     )
-    from utils.transits.calcul_transits import longitude_to_signe
 
     utilisateur = _compte_connecte()
     if utilisateur is None:
@@ -1216,16 +1322,7 @@ def apercu_cycle_lunaire():
                 entrees_cycle = EntreeJournal.query.filter_by(
                     cycle_lunaire_id=cycle.id, utilisateur_id=utilisateur.id,
                 ).order_by(EntreeJournal.date_observation.desc()).all()
-            theme["date_locale"] = datetime.fromisoformat(theme["instant_local"])
-            theme["angles"] = {
-                nom: longitude_to_signe(longitude)
-                for nom, longitude in theme["angles_deg"].items()
-            }
-            theme["aspects_nataux_principaux"] = [
-                aspect for aspect in theme.get("aspects_avec_natal", [])
-                if aspect["orbe"] <= 2
-            ]
-            theme["priorites"] = priorites_interpretation(theme)
+            _preparer_theme_cycle_lunaire(theme)
             cycles_navigation = CycleLunaire.query.filter_by(profil_id=profil.id).order_by(
                 CycleLunaire.debut_cycle_utc.asc()
             ).all()
@@ -1311,7 +1408,7 @@ def fiche_cycle_lunaire(cycle_id):
     cycle = CycleLunaire.query.filter_by(id=cycle_id, profil_id=profil_astral.id).first_or_404()
     try:
         theme = json.loads(cycle.theme_technique)
-        theme["date_locale"] = datetime.fromisoformat(theme["instant_local"])
+        _preparer_theme_cycle_lunaire(theme)
         interpretation = json.loads(cycle.interpretation) if cycle.interpretation else None
     except (KeyError, TypeError, ValueError):
         abort(404)
@@ -1327,6 +1424,7 @@ def fiche_cycle_lunaire(cycle_id):
         theme=theme, erreur=None, erreur_generation=None, interpretation=interpretation,
         usage_ia=usage_ia, cycle_enregistre=cycle, entrees_cycle=entrees_cycle,
         cycles_navigation=cycles_navigation, lieu_revolution=cycle.ville,
+        peut_generer=False, espace_csrf=_jeton_formulaire_portail(),
     )
 
 
@@ -1341,6 +1439,17 @@ def mes_analyses():
     types_termines = {analyse.type_analyse for analyse in analyses if analyse.statut == "terminee"}
     analyses_a_explorer = [item for item in CATALOGUE_ANALYSES if item["type"] not in types_termines]
     droits_par_type = {droit.type_analyse: droit for droit in droits_achetes if droit.statut != "terminee"}
+    ids_analyses = [analyse.id for analyse in analyses]
+    nombres_mecanismes = {}
+    nombres_suggestions = {}
+    if ids_analyses:
+        for mecanisme in MecanismeExploration.query.filter(MecanismeExploration.analyse_id.in_(ids_analyses)).all():
+            nombres_mecanismes[mecanisme.analyse_id] = nombres_mecanismes.get(mecanisme.analyse_id, 0) + 1
+        for suggestion in SuggestionMecanisme.query.filter(
+            SuggestionMecanisme.analyse_id.in_(ids_analyses),
+            SuggestionMecanisme.statut == "proposee",
+        ).all():
+            nombres_suggestions[suggestion.analyse_id] = nombres_suggestions.get(suggestion.analyse_id, 0) + 1
     if not session.get("espace_profil_csrf"):
         session["espace_profil_csrf"] = secrets.token_urlsafe(32)
     return render_template(
@@ -1348,6 +1457,8 @@ def mes_analyses():
         analyses=analyses, peut_importer=import_profil_autorise(utilisateur) and not analyses,
         analyses_a_explorer=analyses_a_explorer,
         droits_par_type=droits_par_type,
+        nombres_mecanismes=nombres_mecanismes,
+        nombres_suggestions=nombres_suggestions,
     )
 
 

@@ -1,17 +1,20 @@
 """L'import des archives conserve les PDF et isole les comptes personnels."""
 
 import base64
-from datetime import date, time
+from datetime import date, datetime, time, timedelta
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 from flask import Flask
 
 from extensions import db
 from models.espace_personnel import (
-    AnalysePersonnelle, FichierAnalyse, MecanismeExploration, ProfilAstral,
+    AnalysePersonnelle, CycleLunaire, FichierAnalyse, MecanismeExploration, ProfilAstral,
+    SuggestionMecanisme,
     UtilisateurEspace,
 )
 from utils.import_espace_labo import TABLES, importer_archives
@@ -146,6 +149,77 @@ class TestArchivesEspace(unittest.TestCase):
             db.session.rollback()
             self.assertEqual(AnalysePersonnelle.query.count(), 0)
             self.assertEqual(FichierAnalyse.query.count(), 0)
+
+    def test_cycle_lunaire_archive_sans_champs_de_presentation_souvre(self):
+        utilisateur_id, profil_id, _ = self.comptes[0]
+        theme = {
+            "instant_local": "2026-10-12T05:47:00+02:00",
+            "angles_deg": {"Ascendant": 180, "MC": 90, "Descendant": 0, "FC": 270},
+            "planetes": {}, "maisons": {},
+            "aspects_avec_natal": [], "aspects_revolution": [],
+        }
+        with self.app.app_context():
+            profil = db.session.get(ProfilAstral, profil_id)
+            profil.theme_natal = "{}"
+            cycle = CycleLunaire(
+                profil_id=profil_id, cle_cycle="2026-10-12",
+                debut_cycle_utc=datetime(2026, 10, 12),
+                fin_cycle_utc=datetime(2026, 10, 12) + timedelta(days=29),
+                ville="Paris", fuseau_horaire="Europe/Paris",
+                latitude=48.85, longitude=2.35,
+                theme_technique=json.dumps(theme), statut="technique",
+            )
+            db.session.add(cycle)
+            db.session.commit()
+            cycle_id = cycle.id
+        with self.client.session_transaction() as session:
+            session["utilisateur_espace_id"] = utilisateur_id
+        priorites = {
+            "ascendant": {"signe": "Balance", "degre": 0},
+            "maitre_ascendant": "Vénus",
+            "lune": {"signe": "Balance", "degre": 0, "maison": 1},
+            "maisons_occupees": [], "planetes_angulaires": [],
+            "aspects_internes_serres": [], "contacts_nataux_majeurs": [],
+        }
+        with patch("utils.revolution_lunaire.priorites_interpretation", return_value=priorites):
+            reponse = self.client.get(f"/mon-espace/cycles-lunaires/{cycle_id}")
+        self.assertEqual(reponse.status_code, 200)
+        self.assertIn("Les angles du cycle".encode(), reponse.data)
+
+    def test_suggestion_importee_visible_et_acceptation_unique(self):
+        utilisateur_id, profil_id, email = self.comptes[0]
+        paquet = self._paquet()
+        paquet["donnees"]["suggestions_mecanisme"] = [{
+            "id": 70, "analyse_id": 42, "titre": "Piste du rapport",
+            "hypothese": "À vérifier dans mon vécu", "extrait_source": "Extrait du rapport",
+            "statut": "proposee", "priorite": 1,
+        }]
+        with self.app.app_context():
+            importer_archives(paquet, email=email, utilisateur_id=utilisateur_id, profil_id=profil_id)
+            db.session.commit()
+            suggestion_id = SuggestionMecanisme.query.one().id
+        with self.client.session_transaction() as session:
+            session["utilisateur_espace_id"] = utilisateur_id
+        reponse = self.client.get("/mon-espace/laboratoire")
+        self.assertEqual(reponse.status_code, 200)
+        self.assertIn("Piste du rapport".encode(), reponse.data)
+        analyses = self.client.get("/mon-espace/mes-analyses")
+        self.assertEqual(analyses.status_code, 200)
+        self.assertIn("1 piste extraite".encode(), analyses.data)
+        with self.client.session_transaction() as session:
+            jeton = session["espace_formulaire_csrf"]
+        url = f"/mon-espace/suggestions/{suggestion_id}/accepter"
+        self.assertEqual(self.client.post(url).status_code, 400)
+        with self.client.session_transaction() as session:
+            session["utilisateur_espace_id"] = self.comptes[1][0]
+        self.assertEqual(self.client.post(url, data={"espace_csrf": jeton}).status_code, 404)
+        with self.client.session_transaction() as session:
+            session["utilisateur_espace_id"] = utilisateur_id
+        self.assertEqual(self.client.post(url, data={"espace_csrf": jeton}).status_code, 302)
+        self.assertEqual(self.client.post(url, data={"espace_csrf": jeton}).status_code, 302)
+        with self.app.app_context():
+            self.assertEqual(MecanismeExploration.query.count(), 2)
+            self.assertEqual(SuggestionMecanisme.query.one().statut, "acceptee")
 
 
 if __name__ == "__main__":

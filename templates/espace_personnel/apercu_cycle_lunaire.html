@@ -290,6 +290,8 @@ body {
                     {% if peut_generer %}
                         <p>Claude utilisera les priorités techniques pour construire une lecture personnalisée de ce cycle. La génération démarre seulement quand tu cliques.</p>
                         <form method="post"><input type="hidden" name="espace_csrf" value="{{ espace_csrf }}"><button class="generate-button" type="submit">Générer et enregistrer mon interprétation</button></form>
+                    {% elif cycle_enregistre and cycle_enregistre.statut == 'technique' %}
+                        <p>Le calcul de ce cycle est disponible, mais son interprétation n’a pas encore été générée.</p>
                     {% else %}
                         <p>Une génération a déjà été lancée pour ce cycle. Contacte-nous si elle n’a pas abouti ; aucun nouvel appel payant ne partira automatiquement.</p>
                     {% endif %}

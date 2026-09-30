@@ -45,6 +45,11 @@ body {
 .lab-analyses { margin-top: 30px; padding: 22px; border-radius: 17px; background: linear-gradient(135deg, #e7f8f7, #edf3fb); text-align: center; }
 .lab-analyses h2 { color: #1f628e; font: 700 1.25rem Georgia, serif; }
 .lab-analyses p { margin: 7px auto 14px; max-width: 620px; color: #60727a; line-height: 1.55; }
+.lab-suggestions { margin-top: 32px; }
+.suggestion-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.suggestion-actions form { margin: 0; }
+.suggestion-actions button { border: 0; cursor: pointer; }
+.suggestion-actions .lab-button--secondary { border: 1px solid rgba(31,98,142,.25); background: white; color: #1f628e; }
 @media (max-width: 700px) { .mechanism-grid { grid-template-columns: 1fr; } .lab-stats { gap: 8px; } .lab-stat { padding: 14px 8px; } .mechanism-footer { align-items: flex-start; flex-direction: column; } .lab-filters { grid-template-columns: 1fr; } }
 {% endblock %}
 
@@ -65,7 +70,7 @@ body {
             <div class="lab-stat"><strong>{{ statistiques.depasses }}</strong><span>probablement dépassé{% if statistiques.depasses != 1 %}s{% endif %}</span></div>
         </section>
 
-        <h2 class="lab-section-title">Mes mécanismes</h2>
+        <h2 class="lab-section-title" id="mes-mecanismes">Mes mécanismes</h2>
         <form class="lab-filters" method="get">
             <div class="lab-filter-field">
                 <label for="analyse">Analyse d’origine</label>
@@ -120,6 +125,33 @@ body {
                 <span class="lab-empty-symbol">🧪</span>
                 {% if filtres_actifs %}Aucun mécanisme ne correspond à ces filtres.{% else %}Aucun mécanisme n’est encore en observation. Choisis une analyse et relève une première piste à explorer.{% endif %}
             </div>
+        {% endif %}
+
+        {% if suggestions_a_examiner %}
+            <section class="lab-suggestions" id="suggestions-ia">
+                <h2 class="lab-section-title">Pistes extraites de mes analyses · à examiner</h2>
+                <p class="lab-intro">Ces pistes ne deviennent des mécanismes à suivre que si tu choisis de les ajouter.</p>
+                <div class="mechanism-grid">
+                    {% for suggestion in suggestions_a_examiner %}
+                        {% set analyse = analyses_par_id.get(suggestion.analyse_id) %}
+                        <article class="mechanism-card">
+                            <p class="mechanism-source">{{ analyse.titre if analyse else 'Analyse personnelle' }}</p>
+                            <h2>{{ suggestion.titre }}</h2>
+                            <p class="mechanism-excerpt">{{ suggestion.hypothese }}</p>
+                            <div class="suggestion-actions">
+                                <form method="post" action="{{ url_for('espace_personnel.accepter_suggestion', suggestion_id=suggestion.id) }}">
+                                    <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
+                                    <button class="lab-button" type="submit">Ajouter à mon labo</button>
+                                </form>
+                                <form method="post" action="{{ url_for('espace_personnel.rejeter_suggestion', suggestion_id=suggestion.id) }}">
+                                    <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
+                                    <button class="lab-button lab-button--secondary" type="submit">Écarter</button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
         {% endif %}
 
         <aside class="lab-analyses">

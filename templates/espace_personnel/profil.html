@@ -1,22 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Mon profil astral | Les Fous d'Astro{% endblock %}
 {% block extra_css %}
-  .profil-shell { width: min(720px, calc(100% - 32px)); margin: 3rem auto 4rem; }
-  .profil-retour { display: inline-block; margin-bottom: 1rem; color: #fff; font-weight: 700; }
-  .profil-carte { padding: clamp(24px, 5vw, 42px); border-radius: 24px; background: #fff; box-shadow: 0 16px 40px #092d4a24; color: #263645; }
-  .profil-carte h1 { margin: 0 0 .7rem; color: #1f628e; }
-  .profil-carte p { line-height: 1.55; }
-  .profil-message { margin: 1rem 0; padding: .8rem 1rem; border-radius: 10px; background: #e7f8f7; }
+  body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 52%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, sans-serif; }
+  .profil-shell { width: min(960px, calc(100% - 32px)); margin: 0 auto 72px; }
+  .profil-retour { display: inline-block; margin: 0 0 20px; color: #fff; font-weight: 700; text-decoration: none; }
+  .profil-entete { margin: 22px auto 26px; text-align: center; color: #fff; }
+  .profil-kicker { margin-bottom: 8px; color: #d5f8f5; font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .profil-entete h1 { margin: 0 0 10px; color: #fff; font-size: clamp(2rem, 5vw, 3rem); }
+  .profil-entete p:last-child { max-width: 650px; margin: 0 auto; line-height: 1.55; }
+  .profil-carte { margin-top: 20px; padding: clamp(24px, 4vw, 38px); border-radius: 24px; background: rgba(255,255,255,.97); box-shadow: 0 18px 42px #092d4a25; color: #263645; }
+  .profil-carte h2 { margin: 0 0 9px; color: #1f628e; font-size: 1.35rem; }
+  .profil-carte > p { color: #5d7079; line-height: 1.55; }
+  .profil-message { margin: 16px 0; padding: 12px 15px; border-radius: 12px; background: #e7f8f7; color: #17636c; }
   .profil-message.error { color: #9b3030; background: #fff0f0; }
-  .profil-form { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; margin-top: 1.5rem; }
-  .profil-champ { display: grid; gap: .4rem; }
+  .profil-form { display: grid; gap: 17px 20px; grid-template-columns: 1fr 1fr; margin-top: 24px; }
+  .profil-champ { display: grid; gap: 7px; min-width: 0; }
   .profil-champ.large, .profil-aide, .profil-submit { grid-column: 1 / -1; }
-  .profil-champ label { color: #1f628e; font-weight: 700; }
-  .profil-champ input { box-sizing: border-box; width: 100%; padding: .8rem; border: 1px solid #b9d4d7; border-radius: 10px; font: inherit; }
-  .profil-champ textarea { box-sizing: border-box; width: 100%; min-height: 100px; padding: .8rem; border: 1px solid #b9d4d7; border-radius: 10px; font: inherit; resize: vertical; }
-  .profil-aide { margin: 0; color: #607580; font-size: .9rem; }
-  .profil-submit { justify-self: start; padding: .8rem 1.3rem; border: 0; border-radius: 30px; background: #1f628e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
-  .profil-carte + .profil-carte { margin-top: 1.3rem; }
+  .profil-champ label { color: #1f628e; font-size: .9rem; font-weight: 700; }
+  .profil-champ input, .profil-champ textarea { width: 100%; padding: 12px 14px; border: 1px solid #b9d4d7; border-radius: 12px; background: #fff; color: #263645; font: inherit; }
+  .profil-champ textarea { min-height: 100px; resize: vertical; }
+  .profil-champ input:focus, .profil-champ textarea:focus { outline: 3px solid #00a8a822; border-color: #00a8a8; }
+  .profil-aide { margin: -5px 0 0; color: #607580; font-size: .86rem; line-height: 1.5; }
+  .profil-submit { justify-self: start; padding: 12px 20px; border: 0; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: #fff; font: 700 .95rem 'Segoe UI', Tahoma, sans-serif; cursor: pointer; }
+  .profil-submit:hover { filter: brightness(1.08); }
+  .profil-lien { display: inline-block; margin-top: 18px; color: #1f628e; font-weight: 700; text-decoration: none; }
+  .profil-lien:hover { text-decoration: underline; }
+  .profil-import { margin-top: 24px; }
+  .profil-import summary { color: #1f628e; font-weight: 700; cursor: pointer; }
+  .profil-import p { margin-top: 12px; color: #5d7079; line-height: 1.55; }
   @media (max-width: 600px) { .profil-form { grid-template-columns: 1fr; } }
 {% endblock %}
 {% block content %}
@@ -27,11 +38,13 @@
 {% set valeur_lat = saisie.get('latitude') if saisie is not none else (profil.latitude if profil and profil.latitude is not none else '') %}
 {% set valeur_lon = saisie.get('longitude') if saisie is not none else (profil.longitude if profil and profil.longitude is not none else '') %}
 {% set valeur_fuseau = saisie.get('fuseau_horaire') if saisie is not none else (profil.fuseau_horaire if profil else '') %}
-<div class="profil-shell">
-  {% include 'espace_personnel/_navigation.html' %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="profil-shell">
+  <a class="profil-retour" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+  <header class="profil-entete"><p class="profil-kicker">Mes repères personnels</p><h1>Mon profil astral</h1><p>Retrouve tes données de naissance, le lieu de tes cycles et les repères que tu choisis de partager.</p></header>
   <section class="profil-carte">
-    <h1>Mon profil astral</h1>
-    <p>Ces coordonnées servent à calculer ton thème natal. Elles restent dans ton espace personnel et n’envoient aucun rapport par e-mail.</p>
+    <h2>Mes données de naissance</h2>
+    <p>Ces coordonnées servent à calculer ton thème natal.</p>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for categorie, message in messages %}<p class="profil-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
     {% endwith %}
@@ -48,7 +61,7 @@
       <p class="profil-aide" id="lieu-statut">Choisis une ville dans la liste : ses coordonnées et son fuseau seront ajoutés automatiquement.</p>
       <button class="profil-submit" type="submit">{{ 'Mettre à jour mon profil' if profil else 'Créer mon profil astral' }}</button>
     </form>
-    {% if profil %}<p><a href="{{ url_for('espace_personnel.ciel_natal') }}">Voir mon ciel natal calculé →</a></p>{% endif %}
+    {% if profil %}<a class="profil-lien" href="{{ url_for('espace_personnel.ciel_natal') }}">Voir mon ciel natal calculé →</a>{% endif %}
   </section>
   {% if profil %}
   <section class="profil-carte" id="ville-cycles">
@@ -80,17 +93,18 @@
   </section>
   {% endif %}
   {% if peut_importer %}
-  <section class="profil-carte" style="margin-top: 1.3rem;">
-    <h2>{{ 'Compléter mon profil avec les données du labo' if profil else 'Reprendre mon profil du labo' }}</h2>
-    <p>Pour les deux comptes de test uniquement. Le fichier doit correspondre à l’adresse e-mail de ce compte. Si tu as déjà saisi ta naissance, elle sera conservée ; les renseignements manquants et les droits de test seront ajoutés.</p>
+  <section class="profil-carte">
+    <details class="profil-import"><summary>{{ 'Compléter mon profil avec les données du labo' if profil else 'Reprendre mon profil du labo' }}</summary>
+    <p>Pour les comptes de test uniquement. Si tu as déjà saisi ta naissance, elle sera conservée ; les renseignements manquants et les droits de test seront ajoutés.</p>
     <form method="post" action="{{ url_for('espace_personnel.importer_profil_labo') }}" enctype="multipart/form-data" class="profil-form">
       <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
       <div class="profil-champ large"><label for="profil_import">Fichier de profil du labo</label><input id="profil_import" name="profil_import" type="file" accept=".json,application/json" required></div>
       <button class="profil-submit" type="submit">Importer mon profil</button>
     </form>
+    </details>
   </section>
   {% endif %}
-</div>
+</main>
 {% endblock %}
 {% block scripts %}
 <script>

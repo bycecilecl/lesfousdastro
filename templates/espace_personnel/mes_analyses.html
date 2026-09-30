@@ -58,7 +58,12 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                         <h2>{{ analyse.titre }}</h2>
                         {% if analyse.date_generation %}<p>Générée le {{ analyse.date_generation.strftime('%d.%m.%Y') }}</p>{% endif %}
                         {% if analyse.chemin_resultat %}<a class="analyse-link" href="{{ url_for('espace_personnel.lire_analyse', analyse_id=analyse.id) }}" target="_blank" rel="noopener">Lire mon analyse</a>{% else %}<span class="analyse-link analyse-link--disabled">Résultat indisponible</span>{% endif %}
-                        <a class="analyse-link" href="{{ url_for('espace_personnel.laboratoire', analyse=analyse.id) }}">Explorer dans mon labo</a>
+                        <a class="analyse-link" href="{{ url_for('espace_personnel.laboratoire', analyse=analyse.id) }}">
+                            {% if nombres_mecanismes.get(analyse.id) %}Voir mes {{ nombres_mecanismes[analyse.id] }} mécanisme{% if nombres_mecanismes[analyse.id] > 1 %}s{% endif %}
+                            {% elif nombres_suggestions.get(analyse.id) %}Examiner {{ nombres_suggestions[analyse.id] }} piste{% if nombres_suggestions[analyse.id] > 1 %}s{% endif %}
+                            {% else %}Explorer dans mon labo{% endif %}
+                        </a>
+                        {% if nombres_suggestions.get(analyse.id) %}<p>{{ nombres_suggestions[analyse.id] }} piste{% if nombres_suggestions[analyse.id] > 1 %}s{% endif %} extraite{% if nombres_suggestions[analyse.id] > 1 %}s{% endif %} à examiner dans le labo</p>{% endif %}
                     </article>
                 {% endfor %}
             </div>
