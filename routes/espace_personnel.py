@@ -27,6 +27,7 @@ from models.espace_personnel import (
 from utils.acces_abonnement import acces_abonnement
 from utils.calcul_theme import calcul_theme
 from utils.acces_espace import (
+    activer_accompagnement_beta,
     consommer_lien_connexion,
     creer_lien_connexion,
     email_invite,
@@ -292,8 +293,8 @@ def connexion():
                 "Voici ton lien de connexion à ton espace astral :\n\n"
                 f"{lien}\n\n"
                 "Il est valable 20 minutes et ne peut être utilisé qu'une fois.\n\n"
-                "L'espace ouvre progressivement : tes informations de compte sont déjà "
-                "accessibles, et les autres rubriques arriveront ensuite.\n\n"
+                "Une fois connecté(e), tu retrouveras les rubriques accessibles "
+                "à ton compte dans ton espace astral.\n\n"
                 "Les Fous d'Astro"
             )
             if not envoyer_email_avec_analyse(
@@ -323,6 +324,11 @@ def valider_connexion(jeton):
     if utilisateur is None:
         flash("Ce lien est invalide ou a expiré. Demande-en un nouveau.", "error")
         return redirect(url_for("espace_personnel.connexion"))
+    try:
+        activer_accompagnement_beta(utilisateur)
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Activation de l'accompagnement bêta impossible")
     session.clear()
     session["utilisateur_espace_id"] = utilisateur.id
     session["espace_connecte_le"] = datetime.now(timezone.utc).isoformat()
@@ -337,6 +343,11 @@ def accueil():
     if utilisateur is None or utilisateur.actif != 1:
         session.pop("utilisateur_espace_id", None)
         return redirect(url_for("espace_personnel.connexion"))
+    try:
+        activer_accompagnement_beta(utilisateur)
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Activation de l'accompagnement bêta impossible")
     profil_astral = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
     abonnement = AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first()
     droits_abonnement = acces_abonnement(abonnement)

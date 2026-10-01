@@ -9,7 +9,7 @@ from flask import url_for
 from sqlalchemy import func, update
 
 from extensions import db
-from models.espace_personnel import LienConnexionEspace, UtilisateurEspace, utcnow
+from models.espace_personnel import AbonnementEspace, LienConnexionEspace, UtilisateurEspace, utcnow
 
 
 DUREE_LIEN_MINUTES = 20
@@ -28,6 +28,27 @@ def email_invite(email):
     )
     invites = {normaliser_email(adresse) for adresse in adresses.split(",")}
     return normaliser_email(email) in invites
+
+
+def activer_accompagnement_beta(utilisateur):
+    """Accorde trois mois de bêta aux seules adresses explicitement désignées."""
+    adresses = os.getenv("ESPACE_BETA_EMAILS", "")
+    invites = {normaliser_email(adresse) for adresse in adresses.split(",") if adresse.strip()}
+    if normaliser_email(utilisateur.email) not in invites:
+        return False
+    if AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first() is not None:
+        return False
+    debut = utcnow()
+    db.session.add(AbonnementEspace(
+        utilisateur_id=utilisateur.id,
+        formule="beta_accompagnement",
+        statut="test",
+        date_debut=debut,
+        date_fin=debut + timedelta(days=90),
+        source="invitation_beta",
+    ))
+    db.session.commit()
+    return True
 
 
 def trouver_ou_creer_utilisateur(email, prenom=""):

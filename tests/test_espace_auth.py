@@ -13,6 +13,8 @@ from urllib.parse import urlparse
 from flask import Flask
 
 from extensions import db
+from utils.acces_abonnement import acces_abonnement
+from utils.acces_espace import activer_accompagnement_beta
 from models.espace_personnel import (
     AbonnementEspace, CycleLunaire, EmailCycleAbonnement, EntreeJournal,
     LienConnexionEspace, ProfilAstral, UtilisateurEspace, utcnow,
@@ -65,6 +67,25 @@ class TestEspaceAuth(unittest.TestCase):
         lien = re.search(r"https?://[^\s]+", texte).group()
         self.assertEqual(urlparse(lien).netloc, "lesfousdastro.fr")
         return reponse, urlparse(lien).path
+
+    def test_beta_ciblee_donne_acces_complet_pendant_trois_mois(self):
+        with self.app.app_context(), patch.dict(
+            "os.environ", {"ESPACE_BETA_EMAILS": "angelikvarin2@gmail.com"}
+        ):
+            invitee = UtilisateurEspace(prenom="Angélique", email="angelikvarin2@gmail.com")
+            autre = UtilisateurEspace(prenom="Autre", email="autre@example.com")
+            db.session.add_all([invitee, autre])
+            db.session.commit()
+            self.assertFalse(activer_accompagnement_beta(autre))
+            self.assertTrue(activer_accompagnement_beta(invitee))
+            self.assertFalse(activer_accompagnement_beta(invitee))
+            abonnement = AbonnementEspace.query.filter_by(utilisateur_id=invitee.id).one()
+            droits = acces_abonnement(abonnement)
+            self.assertEqual(droits["code"], "beta_accompagnement")
+            self.assertTrue(droits["cycle_lunaire"])
+            self.assertTrue(droits["transits_personnalises"])
+            self.assertEqual(droits["emails_par_mois"], 2)
+            self.assertEqual((abonnement.date_fin - abonnement.date_debut).days, 90)
 
     def test_ciel_collectif_jour_choisi_et_borne_du_mois(self):
         self._connecter_compte()
