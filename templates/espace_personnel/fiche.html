@@ -53,7 +53,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 {% block content %}
 {% include 'espace_personnel/_navigation.html' %}
 <main class="journal-shell">
-    <a class="journal-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour au journal</a>
+    <a class="journal-back" href="{{ url_for('espace_personnel.journal') }}">← Retour au journal</a>
     {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="journal-flash {{ categorie }}">{{ message }}</p>{% endfor %}{% endwith %}
     <article class="journal-page">
         <div class="journal-date">{{ entree.date_observation.strftime('%d.%m.%Y') }}</div>

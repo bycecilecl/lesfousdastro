@@ -380,6 +380,14 @@ def accueil():
 
     resume_contacts = []
     resume_indisponible = False
+    nombre_transits_collectifs = None
+    try:
+        from utils.ciel_collectif import ciel_collectif_mois
+        aujourd_hui = datetime.now(ZoneInfo("Europe/Paris")).date()
+        ciel = ciel_collectif_mois(aujourd_hui.year, aujourd_hui.month, jour_reference=aujourd_hui)
+        nombre_transits_collectifs = len(ciel["evenements"])
+    except Exception:
+        current_app.logger.exception("Repères du ciel collectif indisponibles")
     if profil_astral and profil_astral.theme_natal and droits_abonnement["transits_personnalises"]:
         try:
             from utils.resume_calendrier import resume_du_jour
@@ -403,10 +411,41 @@ def accueil():
         nb_mecanismes_en_cours=nb_mecanismes_en_cours,
         resume_contacts=resume_contacts,
         resume_indisponible=resume_indisponible,
+        nombre_transits_collectifs=nombre_transits_collectifs,
         cycle_solaire=cycle_solaire,
         cycle_lunaire=cycle_lunaire,
         date_rs_locale=date_rs_locale,
         date_cycle_locale=date_cycle_locale,
+    )
+
+
+@espace_personnel_bp.route("/ciel-du-moment")
+def ciel_collectif():
+    """Affiche les aspects du ciel actuel, sans données de naissance."""
+    utilisateur = _compte_connecte()
+    if utilisateur is None:
+        return redirect(url_for("espace_personnel.connexion"))
+    from utils.ciel_collectif import ciel_collectif_mois
+
+    aujourd_hui = datetime.now(ZoneInfo("Europe/Paris")).date()
+    mois_brut = request.args.get("mois", aujourd_hui.strftime("%Y-%m"))
+    try:
+        annee, mois = map(int, mois_brut.split("-"))
+        ciel = ciel_collectif_mois(annee, mois, jour_reference=aujourd_hui)
+    except (TypeError, ValueError):
+        abort(400)
+    premier = date(annee, mois, 1)
+    precedent = premier - timedelta(days=1)
+    suivant = (premier.replace(day=28) + timedelta(days=4)).replace(day=1)
+    return render_template(
+        "espace_personnel/ciel_collectif.html",
+        utilisateur_espace=utilisateur,
+        ciel=ciel,
+        mois=premier,
+        titre_mois=("janvier", "février", "mars", "avril", "mai", "juin", "juillet",
+                    "août", "septembre", "octobre", "novembre", "décembre")[mois - 1],
+        precedent=precedent.strftime("%Y-%m"),
+        suivant=suivant.strftime("%Y-%m"),
     )
 
 

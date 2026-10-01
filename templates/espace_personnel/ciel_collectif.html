@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Transits majeurs du ciel | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+body { min-height: 100vh; background: linear-gradient(135deg, #1f628e, #00a8a8 55%, #c0f0f7); font-family: 'Segoe UI', Tahoma, sans-serif; }
+.ciel-shell { width: min(1000px, calc(100% - 32px)); margin: 0 auto 72px; }
+.ciel-back { display: inline-block; margin: 6px 0 20px; color: #fff; font-weight: 700; text-decoration: none; }
+.ciel-card { padding: clamp(24px, 5vw, 46px); border-radius: 24px; background: #f9fdfd; box-shadow: 0 22px 45px #092d4a24; }
+.ciel-card h1 { margin: 0 0 12px; color: #1f628e; font-size: clamp(2rem, 5vw, 3rem); }
+.ciel-intro { max-width: 720px; color: #526a75; line-height: 1.6; }
+.ciel-month { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin: 30px 0; padding: 16px 0; border-top: 1px solid #d8e8eb; border-bottom: 1px solid #d8e8eb; }
+.ciel-month h2 { margin: 0; color: #1f628e; text-transform: capitalize; }
+.ciel-month a { color: #1f628e; font-weight: 700; text-decoration: none; }
+.ciel-section { margin-top: 32px; }
+.ciel-section h2 { color: #1f628e; font-size: 1.35rem; }
+.ciel-section>p { color: #61747d; line-height: 1.55; }
+.ciel-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin: 18px 0 0; padding: 0; list-style: none; }
+.ciel-event { padding: 17px 18px; border: 1px solid #d8e8eb; border-left: 4px solid #00a8a8; border-radius: 14px; background: #fff; }
+.ciel-event--slow { border-left-color: #9d3c4d; }
+.ciel-event strong { display: block; color: #1f628e; }
+.ciel-event span { display: block; margin-top: 6px; color: #58707b; font-size: .9rem; }
+.ciel-empty { margin-top: 16px; padding: 16px; border-radius: 12px; background: #eef8f8; color: #526a75; }
+.ciel-note { margin-top: 34px; color: #647981; font-size: .9rem; line-height: 1.55; }
+{% endblock %}
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="ciel-shell">
+  <a class="ciel-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+  <div class="ciel-card">
+    <h1>Transits majeurs du ciel</h1>
+    <p class="ciel-intro">Les aspects entre planètes du moment, pour tout le monde. Ils décrivent un contexte collectif : tes transits personnels restent dans ton calendrier.</p>
+    <nav class="ciel-month" aria-label="Choisir le mois du ciel collectif">
+      <a href="{{ url_for('espace_personnel.ciel_collectif', mois=precedent) }}">← Mois précédent</a>
+      <h2>{{ titre_mois }} {{ mois.year }}</h2>
+      <a href="{{ url_for('espace_personnel.ciel_collectif', mois=suivant) }}">Mois suivant →</a>
+    </nav>
+    <section class="ciel-section">
+      <h2>Climat lent au {{ ciel.jour_reference.strftime('%d/%m/%Y') }}</h2>
+      <p>Jupiter à Pluton : les aspects encore actifs à moins de 3°.</p>
+      {% if ciel.climat %}<ul class="ciel-list">{% for transit in ciel.climat %}
+        <li class="ciel-event ciel-event--slow"><strong>{{ transit.titre }}</strong><span>Orbe {{ '%.2f'|format(transit.orbe) }}°</span></li>
+      {% endfor %}</ul>{% else %}<p class="ciel-empty">Aucun aspect entre planètes lentes à moins de 3° à cette date.</p>{% endif %}
+    </section>
+    <section class="ciel-section">
+      <h2>Temps forts de {{ titre_mois }}</h2>
+      <p>Rapprochements les plus serrés entre planètes lentes, ou du Soleil, de Vénus et de Mars avec une planète lente.</p>
+      {% if ciel.evenements %}
+      <ul class="ciel-list">
+        {% for transit in ciel.evenements %}<li class="ciel-event{% if transit.lentes %} ciel-event--slow{% endif %}"><strong>{{ transit.titre }}</strong><span>{% if transit.station %}Station vers le {{ transit.date.strftime('%d/%m') }}{% else %}Plus serré vers le {{ transit.date.strftime('%d/%m') }} · orbe {{ '%.2f'|format(transit.orbe) }}°{% endif %}</span></li>{% endfor %}
+      </ul>
+      {% else %}<p class="ciel-empty">Aucun rapprochement retenu ce mois-ci selon ces critères.</p>{% endif %}
+    </section>
+    <p class="ciel-note">Calcul géocentrique à 12 h UTC chaque jour. Les dates indiquent le relevé le plus proche, pas une heure exacte. Les aspects dissociés et les quinconces sont écartés ; la Lune et Mercure n'entrent pas dans cette sélection.</p>
+  </div>
+</main>
+{% endblock %}

@@ -380,6 +380,13 @@ body {
 
     <div class="dashboard-grid">
         <div class="form-container espace-stat dashboard-card">
+            <span class="dashboard-card-icon">✦</span>
+            <h3 class="section-title">Transits majeurs du ciel</h3>
+            {% if nombre_transits_collectifs is not none %}<span class="espace-number">{{ nombre_transits_collectifs }}</span>{% endif %}
+            <p class="espace-muted">{% if nombre_transits_collectifs is none %}Les repères du ciel sont momentanément indisponibles.{% else %}repère{% if nombre_transits_collectifs != 1 %}s{% endif %} collectifs ce mois-ci, indépendants de ton thème natal{% endif %}</p>
+            <a class="espace-profile-link" href="{{ url_for('espace_personnel.ciel_collectif') }}">Explorer le ciel du moment</a>
+        </div>
+        <div class="form-container espace-stat dashboard-card">
             <span class="dashboard-card-icon">🗓️</span>
             <h3 class="section-title">Calendrier et énergies en cours</h3>
             {% if resume_contacts %}<span class="espace-number">{{ resume_contacts[0].nombre }}</span><p class="espace-muted">transit{% if resume_contacts[0].nombre != 1 %}s{% endif %} à explorer</p>{% for evenement in resume_contacts[1:] %}<p class="espace-muted">{{ evenement.titre }}</p>{% endfor %}{% elif resume_indisponible %}<p class="espace-muted">Le résumé du jour est momentanément indisponible.</p>{% else %}<p class="espace-muted">Retrouve tes observations et les repères de ta formule, jour après jour.</p>{% endif %}
