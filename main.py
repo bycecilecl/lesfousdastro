@@ -297,6 +297,8 @@ app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
 app.register_blueprint(blog_bp)
 app.register_blueprint(site_bp)
+from routes.conversion import conversion_bp
+app.register_blueprint(conversion_bp)
 app.register_blueprint(profil_amoureux_module)
 app.register_blueprint(gift_api_bp)
 app.register_blueprint(gift_bp)
@@ -868,10 +870,8 @@ def telecharger_point_astral(nom_fichier):
         
         # Créer le répertoire de sortie si nécessaire
         import os
-        output_dir = "generated_pdfs"
-        os.makedirs(output_dir, exist_ok=True)
-        
-        pdf_path = os.path.join(output_dir, f"{nom_fichier}.pdf")
+        from utils.client_pdf_storage import private_pdf_path
+        pdf_path = private_pdf_path()
         
         # Conversion HTML vers PDF
         success = html_to_pdf(html_content, pdf_path)
@@ -927,6 +927,8 @@ def apercu_point_astral(nom_fichier):
 
 from services.generation_access import install_generation_guards
 install_generation_guards(app)
+from services.pdf_access import install_pdf_access
+install_pdf_access(app)
 
 atexit.register(cleanup_weaviate)
 

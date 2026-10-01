@@ -18,20 +18,17 @@ def private_pdf_path() -> str:
 
 
 def upload_client_pdf(pdf_path: str, *, key_prefix: str, download_filename: str) -> str:
-    """Upload a private report and always remove its local temporary copy."""
+    """Upload a private report; remove the local copy only after success."""
+    # Keep a failed upload available for manual recovery, outside /static.
+    result = upload_file_and_presign(
+        pdf_path, key_prefix=key_prefix, content_type="application/pdf",
+        download_filename=download_filename,
+    )
+    url = result.get("url") or result.get("presigned_url")
+    if not url:
+        raise RuntimeError("URL S3 présignée manquante")
     try:
-        result = upload_file_and_presign(
-            pdf_path,
-            key_prefix=key_prefix,
-            content_type="application/pdf",
-            download_filename=download_filename,
-        )
-        url = result.get("url") or result.get("presigned_url")
-        if not url:
-            raise RuntimeError("URL S3 présignée manquante")
-        return url
-    finally:
-        try:
-            os.remove(pdf_path)
-        except FileNotFoundError:
-            pass
+        os.remove(pdf_path)
+    except FileNotFoundError:
+        pass
+    return url

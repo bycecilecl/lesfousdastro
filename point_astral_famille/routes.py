@@ -844,9 +844,7 @@ def point_astral_famille_complet():
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
         nom_fichier = f"Point_Astral_Famille_{nom}_{timestamp}"
 
-        output_dir = os.path.join(current_app.static_folder, "pdfs")
-        os.makedirs(output_dir, exist_ok=True)
-        pdf_path = os.path.join(output_dir, f"{nom_fichier}.pdf")
+        pdf_path = private_pdf_path()
 
         # --- C) Construire le HTML PDF (avec carte + disclaimers) ---
         html_pdf = generer_html_final_harmonise_pdf_only(
@@ -859,31 +857,10 @@ def point_astral_famille_complet():
         html_to_pdf(html_pdf, pdf_path)
         print(f"✅ PDF généré: {pdf_path}")
 
-        # URL locale (fallback)
-        pdf_url = url_for(
-            "point_astral_famille.telecharger_point_astral",
-            nom_fichier=nom_fichier,
-            _external=True
+        # No public fallback: preserve the private file if S3 fails.
+        pdf_final_url = upload_client_pdf(
+            pdf_path, key_prefix="point_astral_famille", download_filename=f"{nom_fichier}.pdf"
         )
-        # --- Upload S3 (non bloquant pour la suite) ---
-        try:
-            s3_info = upload_file_and_presign(
-                pdf_path,
-                key_prefix="point_astral_famille",
-                content_type="application/pdf"
-            )
-            download_url = s3_info.get("url") or s3_info.get("presigned_url")
-            if not download_url:
-                raise KeyError(f"URL présignée manquante: {s3_info!r}")
-            print(f"✅ Upload S3 OK → {download_url}")
-        except Exception as e:
-            print(f"❌ Upload S3 KO ({e}) → fallback local")
-            download_url = None
-
-        # --- D) Choisir l’URL finale à renvoyer ---
-        pdf_final_url = download_url or pdf_url  # S3 si dispo, sinon local
-        if not download_url:
-            warnings_list.append("Upload S3 indisponible, lien local utilisé.")
 
         # --- E) Envoi d’email NON bloquant ---
         try:

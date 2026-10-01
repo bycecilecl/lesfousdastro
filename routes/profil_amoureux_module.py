@@ -631,9 +631,7 @@ def profil_amoureux_complet():
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
         nom_fichier = f"Profil_Amoureux_{nom_clean}_{timestamp}"
 
-        output_dir = os.path.join(current_app.static_folder, "pdfs")
-        os.makedirs(output_dir, exist_ok=True)
-        pdf_path = os.path.join(output_dir, f"{nom_fichier}.pdf")
+        pdf_path = private_pdf_path()
 
         html_pdf = generer_html_final_amour_pdf(
             texte_modules_html=html_content,
@@ -644,35 +642,11 @@ def profil_amoureux_complet():
         html_to_pdf(html_pdf, pdf_path)
         print(f"✅ PDF généré : {pdf_path}")
 
-        # URL locale pour téléchargement (fallback)
-        pdf_url_local = url_for(
-            "profil_amoureux_module.telecharger_profil_amoureux_pdf",
-            nom_fichier=nom_fichier,
-            _external=True,
+        # No public fallback: preserve the private file if S3 fails.
+        pdf_final_url = upload_client_pdf(
+            pdf_path, key_prefix="profil_amoureux", download_filename=f"{nom_fichier}.pdf"
         )
-
-        # ═══════════════════════════════════════════════════════════
-        # 7) UPLOAD S3 (optionnel)
-        # ═══════════════════════════════════════════════════════════
         warnings = []
-        download_url = None
-        
-        try:
-            print("☁️ Étape 5: Upload S3...")
-            s3_info = upload_file_and_presign(
-                pdf_path,
-                key_prefix="profil_amoureux",
-                content_type="application/pdf",
-            )
-            download_url = s3_info.get("url") or s3_info.get("presigned_url")
-            if not download_url:
-                raise KeyError(f"URL présignée manquante: {s3_info!r}")
-            print(f"✅ Upload S3 → {download_url[:60]}...")
-        except Exception as e:
-            print(f"❌ Upload S3 KO ({e}) → fallback local")
-            warnings.append("Upload S3 indisponible, lien local utilisé.")
-
-        pdf_final_url = download_url or pdf_url_local
 
         # --- Mémo anti-reload pour Profil Amoureux ---
         try:

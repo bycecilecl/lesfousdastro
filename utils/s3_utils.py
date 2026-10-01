@@ -1,5 +1,6 @@
 # utils/s3_utils.py
 import os, uuid, mimetypes, boto3
+from werkzeug.utils import secure_filename
 from datetime import datetime, timezone
 
 _S3_BUCKET  = os.getenv("S3_BUCKET_NAME")
@@ -42,7 +43,7 @@ def upload_file_and_presign(local_path: str,
         _s3.upload_file(local_path, _S3_BUCKET, key, ExtraArgs=extra)
 
         # 🔖 Nom sympa pour le téléchargement
-        base_name = download_filename or os.path.basename(local_path)
+        base_name = secure_filename(download_filename or os.path.basename(local_path)) or "rapport.pdf"
         disposition = f'inline; filename="{base_name}"'
 
         # URL présignée (avec hints navigateurs)

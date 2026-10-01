@@ -679,13 +679,24 @@ input[type="time"]:focus, input[type="email"]:focus {
 .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #00a8a8; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .analysis-result { display: none; }
-.analysis-actions { display: flex; gap: 15px; justify-content: center; padding: 20px; background: #f8f9fa; }
+.free-analysis-offer { margin-top:28px; padding:18px 20px; background:#f8fafb; border:1px solid #e3e9ed; border-radius:10px; text-align:left; font-size:14px; line-height:1.6; color:#53616b; }
+.free-analysis-offer-actions { text-align:center; }
+.free-analysis-offer strong { font-weight:600; }
+.free-analysis-offer blockquote { padding:0; border:0; font-size:13px; color:#5b6871; }
+.free-analysis-offer footer { margin-top:7px; font-size:12px; }
+.free-analysis-offer a { color:#345f78; }
+.free-analysis-offer button { font-size:14px; line-height:1.4; }
+
+.analysis-actions { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; padding: 20px; background: #f8f9fa; }
 .explore-btn { padding: 12px 25px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }
 .explore-btn:first-child { background: linear-gradient(135deg, #1f628e, #00a8a8); color: white; }
 .explore-btn:last-child { background: #6c757d; color: white; }
 .explore-btn:hover { transform: translateY(-2px); }
 
 .payment-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2500; }
+.analysis-actions button:last-child { background: transparent; color: #1f628e; border: 1px solid #1f628e; }
+.analysis-actions button { white-space: normal; max-width: 100%; min-height:44px; }
+@media (max-width: 600px) { .analysis-actions { padding: 12px; gap: 8px; } .analysis-actions button { width:100%; } .payment-buttons { flex-wrap:wrap; } }
 .payment-modal-content { background: white; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
 .payment-modal-header { background: linear-gradient(135deg, #FFD700, #FFA500); color: #333; padding: 20px; text-align: center; border-radius: 20px 20px 0 0; }
 .payment-modal-body { padding: 30px; }
@@ -819,7 +830,7 @@ input[type="time"]:focus, input[type="email"]:focus {
     <div class="qui-suis-je">
     <img src="{{ url_for('static', filename='images/cecilecl-astrologue.webp') }}" alt="Cécile, astrologue" class="qsj-photo" style="width:220px; height:220px; object-fit:cover;">
     <div class="qsj-texte">
-        <strong>Cécile CL — Astrologue &amp; Développeuse</strong>
+        <strong>Cécile CL, Astrologue &amp; Développeuse</strong>
         <p><em>Je ne lis pas les étoiles au hasard. Je les code.</em></p>
         <p>Ex-informaticienne, je sentais que ma vie ne me ressemblait pas vraiment. Un voyage en Inde a tout chamboulé et m’a poussée à chercher qui j’étais profondément. Ce cheminement m’a menée à l’astrologie, qui m’a aidée à mieux comprendre mon fonctionnement et à me sentir plus en paix.</p>
         <p>J’ai réuni mes deux univers, astrologie et informatique, pour créer ces analyses et aider chacun à mieux se connaître et à vivre une vie qui lui ressemble.</p>
@@ -926,24 +937,24 @@ input[type="time"]:focus, input[type="email"]:focus {
                         <span class="status coral">Clique pour sélectionner</span>
                         <div class="card-tooltip">
                             <strong>Ce que tu reçois</strong>
-                            Ton Big 3 — Ascendant, Soleil et Lune — ton identité profonde, ton monde intérieur, un premier éclairage sur ton enfance et tes dynamiques parentales, les grands axes de ton thème et une synthèse personnalisée.
+                            Ton Big 3 (Ascendant, Soleil et Lune), ton identité profonde, ton monde intérieur, un premier éclairage sur ton enfance et tes dynamiques parentales, les grands axes de ton thème et une synthèse personnalisée.
                             <br><br>
                             <em>Une lecture globale pour mieux comprendre ton fonctionnement.</em>
                         </div>
                     </div>
 
-                      <div class="option-card coral" onclick="addToCart('point_astral_famille', 'Point Astral – Racines familiales', 42, this)">
+                      <div class="option-card coral" onclick="addToCart('point_astral_famille', 'Point Astral Racines familiales', 42, this)">
                         <span class="icon">
                             <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
                         </span>
-                        <h4>Point Astral – Racines familiales</h4>
+                        <h4>Point Astral Racines familiales</h4>
                         <p>Le Point Astral Essentiel en version approfondie, enrichi d’une analyse de ton enfance, de tes racines et de tes dynamiques parentales.</p>
                         <div class="price">42€</div>
                         <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                         <span class="status coral">Clique pour sélectionner</span>
                         <div class="card-tooltip">
                             <strong>Ce que tu reçois</strong>
-                            Une lecture approfondie de ton thème natal : ton identité, ton monde intérieur, tes grands axes et dynamiques principales — comme dans le Point Astral Essentiel, mais de façon plus complète.
+                            Une lecture approfondie de ton thème natal : ton identité, ton monde intérieur, tes grands axes et dynamiques principales, comme dans le Point Astral Essentiel, mais de façon plus complète.
                             <br><br>
                             Elle explore aussi tes racines, ton foyer intérieur, les pôles mère et père, ta place dans la famille et les schémas transmis qui influencent encore ta vie.
                             <br><br>
@@ -1010,7 +1021,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                         <span class="transits-icon" aria-hidden="true">⚡</span>
                         <div class="transits-copy">
                             <h4>Point Transits</h4>
-                            <p>Découvre les dynamiques astrologiques qui traversent ta période actuelle — ou explore une date passée ou future.</p>
+                            <p>Découvre les dynamiques astrologiques qui traversent ta période actuelle, ou explore une date passée ou future.</p>
                         </div>
                         <div class="transits-price">
                             19€
@@ -1027,7 +1038,7 @@ input[type="time"]:focus, input[type="email"]:focus {
 
                 <div class="packs-section">
                     <h2 class="section-title">🎁 Packs des Analyses Cosmiques</h2>
-                    <p style="text-align:center; color:white; margin-bottom:30px; opacity:0.9;">Économise en combinant plusieurs analyses — avec l'option 3 questions incluse dans chaque pack</p>
+                    <p style="text-align:center; color:white; margin-bottom:30px; opacity:0.9;">Économise en combinant plusieurs analyses. L'option 3 questions de clarification est disponible en supplément (+25€).</p>
                     <div class="packs-grid">
 
                         <div class="pack-card essence-special" onclick="selectPack('essence')" style="border:2px solid #FFD700;">
@@ -1105,7 +1116,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             <div class="gender-options" style="margin-bottom:20px;">
                 <div class="gender-option">
                     <input type="radio" id="transit-date-today" name="transit_date_mode_choice" value="today" checked onchange="toggleTransitCustomDate()">
-                    <label for="transit-date-today">Aujourd’hui — découvrir mon ciel actuel</label>
+                    <label for="transit-date-today">Aujourd’hui : découvrir mon ciel actuel</label>
                 </div>
                 <div class="gender-option">
                     <input type="radio" id="transit-date-custom" name="transit_date_mode_choice" value="custom" onchange="toggleTransitCustomDate()">
@@ -1139,9 +1150,28 @@ input[type="time"]:focus, input[type="email"]:focus {
             </div>
         </div>
         <div class="analysis-actions">
-            <button class="explore-btn" onclick="choosePointAstralFromFreeAnalysis()">✨ Découvrir mon Point Astral — 25€</button>
-            <button class="explore-btn" onclick="closeFreeAnalysisModal()">Plus tard</button>
+            <button class="explore-btn" onclick="choosePointAstralFromFreeAnalysis()">✨ Point Astral Essentiel à 25 €</button>
+            <button class="explore-btn" onclick="postponeFreeAnalysis()">Plus tard</button>
         </div>
+    </div>
+</div>
+
+<div class="payment-modal" id="offerFeedback" onclick="event.target === this && saveOfferFeedback('')" role="dialog" aria-modal="true" aria-label="Question facultative">
+    <div class="payment-modal-content" style="padding:24px;">
+        <h3>Qu’est-ce qui te retient aujourd’hui ?</h3>
+        <p>Réponse facultative. Ton analyse est déjà fermée.</p>
+        <select id="offerFeedbackReason" aria-label="Ta réponse" style="width:100%;padding:12px;margin:16px 0;">
+            <option value="">Choisir une réponse</option>
+            <option value="enough">L’analyse gratuite me suffit</option>
+            <option value="choice">Je ne sais pas quelle analyse choisir</option>
+            <option value="sample">Je veux voir un rapport complet</option>
+            <option value="price">Le prix me freine</option>
+            <option value="personalization">Je ne comprends pas ce qui est personnalisé</option>
+            <option value="not_ready">Je ne suis pas prête maintenant</option>
+            <option value="other">Autre</option>
+        </select>
+        <button type="button" class="payment-btn stripe-btn" onclick="saveOfferFeedback(document.getElementById('offerFeedbackReason').value)">Envoyer ma réponse</button>
+        <button type="button" class="payment-btn cancel-btn" onclick="saveOfferFeedback('')">Fermer sans répondre</button>
     </div>
 </div>
 
@@ -1169,7 +1199,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             <div class="payment-buttons">
                 <button class="payment-btn stripe-btn" onclick="confirmPayment()">Payer avec Stripe</button>
                 <div id="paypal-button-container" style="width:100%;"></div>
-                <button class="payment-btn cancel-btn" onclick="closePaymentConfirmationModal()">Annuler</button>
+                <button class="payment-btn cancel-btn" onclick="closePaymentConfirmationModal(); exploreMoreAnalyses()">Revenir aux autres analyses</button>
             </div>
         </div>
     </div>
@@ -1179,6 +1209,9 @@ input[type="time"]:focus, input[type="email"]:focus {
 {% block scripts %}
 <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency={{ PAYPAL_CURRENCY }}&intent=capture&components=buttons"></script>
 <script>
+    const trackConversion = (event, params) => window.fdaTrack?.(event, params);
+    let freeAnalysisStage = 'loading';
+    let freeAnalysisPending = false;
     let paypalRendered = false;
     let cart = [];
     let selectedPack = null;
@@ -1200,6 +1233,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             paypal.Buttons({
                 style: { layout: 'vertical', shape: 'pill', label: 'paypal', tagline: false },
                 createOrder: async () => {
+                    (window.pendingOrder?.items || []).forEach(item => trackConversion('begin_checkout', {product:item.id,location:'paypal'}));
                     const response = await fetch('/payments/create-order', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1220,10 +1254,11 @@ input[type="time"]:focus, input[type="email"]:focus {
                         if (!response.ok) throw new Error('Capture PayPal échouée');
                         window.location.href = '/paiement-effectue?provider=paypal';
                     } catch (err) {
+                        trackConversion('checkout_error', {location:'paypal',error_type:'payment'});
                         showNotification('Erreur lors du traitement du paiement.', 'warning');
                     }
                 },
-                onError: (err) => { showNotification('⚠️ Paiement PayPal indisponible, réessaie ou choisis Stripe.', 'warning'); },
+                onError: (err) => { trackConversion('checkout_error', {location:'paypal',error_type:'payment'}); showNotification('⚠️ Paiement PayPal indisponible, réessaie ou choisis Stripe.', 'warning'); },
                 onCancel: (data) => { showNotification('💳 Paiement annulé.', 'info'); }
             })
             .render('#paypal-button-container')
@@ -1323,6 +1358,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             element.classList.remove('selected');
         } else {
             cart.push({ id, name, price, ...details });
+            if (price > 0) trackConversion('add_to_cart', {product:id, location:'catalog'});
             element.classList.add('selected');
             setTimeout(() => {
                 const cartSection = document.getElementById('cartSection');
@@ -1412,6 +1448,10 @@ input[type="time"]:focus, input[type="email"]:focus {
     }
 
     function processFreeAnalyses(freeAnalyses, paidAnalyses) {
+        if (freeAnalysisPending) return;
+        freeAnalysisPending = true;
+        freeAnalysisStage = 'loading';
+        trackConversion('free_analysis_start', {location:'home'});
         showFreeAnalysisModal();
         const userData = {
             nom: document.getElementById('nom').value,
@@ -1436,6 +1476,9 @@ input[type="time"]:focus, input[type="email"]:focus {
         })
         .then(data => {
             if (data.ok) {
+                freeAnalysisStage = data.limited ? 'error' : 'success';
+                trackConversion(data.limited ? 'free_analysis_error' : 'free_analysis_success', {location:'free_result',error_type:data.limited ? 'quota' : undefined});
+                if (!data.limited && document.getElementById('freeAnalysisModal').style.display !== 'none') trackConversion('offer_view', {product:'flash_astral', location:'free_result'});
                 document.getElementById('analysisStatus').innerHTML = '🎉 Votre analyse est prête !';
                 document.getElementById('analysisResult').style.display = 'block';
                 document.getElementById('loadingSpinner').style.display = 'none';
@@ -1446,11 +1489,13 @@ input[type="time"]:focus, input[type="email"]:focus {
             }
         })
         .catch(error => {
+            freeAnalysisStage = 'error';
+            trackConversion('free_analysis_error', {location:'free_result',error_type:'generation'});
             document.getElementById('analysisStatus').innerHTML = '❌ Erreur lors de la génération';
             document.getElementById('freeAnalysisContent').innerHTML = `<div style="text-align:center;color:#ff4757;"><h4>⚠️ Erreur temporaire</h4><p>Impossible de générer votre analyse. Veuillez réessayer.</p></div>`;
             document.getElementById('analysisResult').style.display = 'block';
             document.getElementById('loadingSpinner').style.display = 'none';
-        });
+        }).finally(() => { freeAnalysisPending = false; });
     }
 
     function addPaymentContinueButton(paidAnalyses) {
@@ -1458,6 +1503,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         if (actionsDiv) {
             const continueBtn = document.createElement('button');
             continueBtn.className = 'explore-btn';
+            continueBtn.dataset.paymentContinue = '1';
             continueBtn.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
             continueBtn.style.color = '#333';
             continueBtn.innerHTML = '💳 Continuer vers le paiement';
@@ -1468,6 +1514,7 @@ input[type="time"]:focus, input[type="email"]:focus {
 
     function showFreeAnalysisModal() {
         const modal = document.getElementById('freeAnalysisModal');
+        modal.querySelectorAll('[data-payment-continue]').forEach(button => button.remove());
         document.getElementById('analysisStatus').innerHTML = '🌟 Calcul de votre thème natal en cours...';
         document.getElementById('analysisResult').style.display = 'none';
         document.getElementById('loadingSpinner').style.display = 'block';
@@ -1480,35 +1527,42 @@ input[type="time"]:focus, input[type="email"]:focus {
     }
 
     function closeFreeAnalysisModal() {
-        document.getElementById('freeAnalysisModal').style.display = 'none';
-        document.getElementById('analysisStatus').innerHTML = '🌟 Préparation de votre analyse...';
-        document.getElementById('analysisResult').style.display = 'none';
-        document.getElementById('loadingSpinner').style.display = 'block';
-        showNotification('✨ Votre analyse gratuite a été générée ! Prêt(e) pour aller plus loin ?', 'success');
-        setTimeout(() => { document.querySelector('.options-grid').scrollIntoView({ behavior: 'smooth' }); }, 2000);
+        const modal = document.getElementById('freeAnalysisModal');
+        if (modal.style.display !== 'none') trackConversion('free_analysis_close', {location:'free_result',stage:freeAnalysisStage});
+        modal.style.display = 'none';
+    }
+
+    function postponeFreeAnalysis() {
+        closeFreeAnalysisModal();
+        if (freeAnalysisStage === 'success') document.getElementById('offerFeedback').style.display = 'flex';
+    }
+
+    function saveOfferFeedback(reason) {
+        if (reason) trackConversion('offer_feedback', {reason});
+        document.getElementById('offerFeedback').style.display = 'none';
     }
 
     function exploreMoreAnalyses() {
         closeFreeAnalysisModal();
-        setTimeout(() => {
-            const cards = document.querySelectorAll('.option-card:not(.free)');
-            cards.forEach(card => { card.style.animation = 'pulse 2s ease-in-out 3'; });
-        }, 500);
+        document.querySelector('.options-grid').scrollIntoView({behavior:'smooth', block:'start'});
     }
 
     function choosePointAstralFromFreeAnalysis() {
+        trackConversion('paid_offer_click', {product:'flash_astral',location:'free_result'});
         const pointAstralCard = document.getElementById('flash_astral');
         closeFreeAnalysisModal();
-
         if (!pointAstralCard) return;
-
+        if (selectedPack || cart.some(item => item.id === 'flash_transits' || item.id === 'point_astral_famille')) {
+            showNotification('Ta sélection contient déjà un pack ou une analyse à commander séparément. Vérifie ton panier avant de choisir le Point Astral Essentiel.', 'warning');
+            document.getElementById('cartSection').scrollIntoView({behavior:'smooth',block:'start'});
+            return;
+        }
         if (!cart.some(item => item.id === 'flash_astral')) {
             addToCart('flash_astral', 'Point Astral Essentiel', 25, pointAstralCard);
         }
-
-        setTimeout(() => {
-            pointAstralCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
+        removeFromCart('gratuite');
+        showNotification('Point Astral Essentiel ajouté : 25 €', 'success');
+        proceedToPayment();
     }
 
     function showNotification(message, type = 'info') {
@@ -1584,7 +1638,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                     <input type="checkbox" id="clarifCheck" ${isChecked ? 'checked' : ''} onchange="toggleClarification(this.checked)">
                     <div class="clarif-upsell-text">
                         <div class="clarif-upsell-title">✉️ Ajouter l'option 3 questions de clarification</div>
-                        <div class="clarif-upsell-desc">Tu m'envoies 3 questions après réception — Cécile répond par email sous 7 jours ouvrés. Instructions incluses dans l'email de livraison.</div>
+                        <div class="clarif-upsell-desc">Tu m'envoies 3 questions après réception. Cécile répond par email sous 7 jours ouvrés. Instructions incluses dans l'email de livraison.</div>
                     </div>
                     <div class="clarif-upsell-price">+25€</div>
                 </label>`;
@@ -1630,7 +1684,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         selectedPack = pack;
         document.querySelectorAll('.pack-card').forEach(c => c.classList.remove('selected'));
         event.currentTarget.classList.add('selected');
-        showNotification(`✅ ${pack.name} sélectionné — ${pack.price}€`, 'success');
+        showNotification(`✅ ${pack.name} sélectionné : ${pack.price}€`, 'success');
         updateCartDisplay();
         setTimeout(() => {
             const cartSection = document.getElementById('cartSection');
@@ -1724,6 +1778,7 @@ input[type="time"]:focus, input[type="email"]:focus {
     function confirmPayment() {
         const orderData = window.pendingOrder;
         if (!orderData || !orderData.userInfo) { showNotification('❌ Erreur: données manquantes', 'warning'); return; }
+        orderData.items.forEach(item => trackConversion('begin_checkout', {product:item.id,location:'stripe'}));
         closePaymentConfirmationModal();
 
         let productKey = 'flash_astral';

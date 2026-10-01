@@ -621,9 +621,7 @@ def analyse_karmique_complete():
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
         nom_fichier = f"Analyse_Karmique_{nom}_{timestamp}"
 
-        output_dir = os.path.join(current_app.static_folder, "pdfs")
-        os.makedirs(output_dir, exist_ok=True)
-        pdf_path = os.path.join(output_dir, f"{nom_fichier}.pdf")
+        pdf_path = private_pdf_path()
 
         # 5) HTML PDF final
         html_pdf = generer_html_final_karmique_pdf(
@@ -636,31 +634,10 @@ def analyse_karmique_complete():
         # 6) Génération PDF
         ok_pdf = html_to_pdf(html_pdf, pdf_path)
 
-        pdf_url = None
-        if ok_pdf:
-            pdf_url = url_for(
-                "analyse_karmique.telecharger_analyse_karmique",
-                nom_fichier=nom_fichier,
-                _external=True
-            )
-
-        # 7) Upload S3
-        download_url = None
-        if ok_pdf and pdf_path:
-            try:
-                s3_info = upload_file_and_presign(
-                    pdf_path,
-                    key_prefix="analyse_karmique",
-                    content_type="application/pdf"
-                )
-                download_url = s3_info.get("url") or s3_info.get("presigned_url")
-                if not download_url:
-                    raise KeyError(f"URL présignée manquante: {s3_info!r}")
-                logger.info("✅ Upload S3 OK → %s", download_url)
-            except Exception as e:
-                logger.warning("❌ Upload S3 KO (%s) → fallback local", e)
-
-        pdf_final_url = download_url or pdf_url
+        # No public fallback: preserve the private file if S3 fails.
+        pdf_final_url = upload_client_pdf(
+            pdf_path, key_prefix="analyse_karmique", download_filename=f"{nom_fichier}.pdf"
+        )
 
         # 8) Envoi email
         try:

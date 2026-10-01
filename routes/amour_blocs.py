@@ -1,3 +1,4 @@
+from utils.client_pdf_storage import private_pdf_path, upload_client_pdf
 from services.generation_access import paid_analysis
 # routes/amour_blocs.py
 
@@ -317,9 +318,7 @@ def amour_complet():
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
         nom_fichier = f"Analyse_Amoureuse_{nom}_{timestamp}"
 
-        output_dir = os.path.join(current_app.static_folder, "pdfs")
-        os.makedirs(output_dir, exist_ok=True)
-        pdf_path = os.path.join(output_dir, f"{nom_fichier}.pdf")
+        pdf_path = private_pdf_path()
 
         html_pdf = generer_html_final_amour_pdf_only(
             texte_modules_html=html_content,
@@ -330,31 +329,11 @@ def amour_complet():
         html_to_pdf(html_pdf, pdf_path)
         print(f"✅ PDF Amour généré : {pdf_path}")
 
-        # URL locale pour téléchargement (blueprint)
-        pdf_url_local = url_for(
-            "amour_blocs.telecharger_amour_pdf",
-            nom_fichier=nom_fichier,
-            _external=True,
+        # No public fallback: preserve the private file if S3 fails.
+        pdf_final_url = upload_client_pdf(
+            pdf_path, key_prefix="analyse_amour", download_filename=f"{nom_fichier}.pdf"
         )
-
-        # 7) Upload S3 (facultatif, comme Point Astral)
         warnings = []
-        try:
-            s3_info = upload_file_and_presign(
-                pdf_path,
-                key_prefix="analyse_amour",
-                content_type="application/pdf",
-            )
-            download_url = s3_info.get("url") or s3_info.get("presigned_url")
-            if not download_url:
-                raise KeyError(f"URL présignée manquante: {s3_info!r}")
-            print(f"✅ Upload S3 Analyse Amour → {download_url}")
-        except Exception as e:
-            print(f"❌ Upload S3 KO pour Analyse Amour ({e}) → fallback local")
-            download_url = None
-            warnings.append("Upload S3 indisponible, lien local utilisé.")
-
-        pdf_final_url = download_url or pdf_url_local
 
         # 8) Email (optionnel, comme pour Point Astral)
         try:

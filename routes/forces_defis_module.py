@@ -484,26 +484,16 @@ def forces_defis_complet():
     nom_slug = (infos.get("nom","Anonyme").replace(" ", "_") or "Anonyme")
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
     fname = f"Forces_Defis_{nom_slug}_{timestamp}"
-    outdir = os.path.join(current_app.static_folder, "pdfs")
-    os.makedirs(outdir, exist_ok=True)
-    pdf_path = os.path.join(outdir, f"{fname}.pdf")
+    pdf_path = private_pdf_path()
     html_to_pdf(
         html_pdf,
         pdf_path,
         page_header="Mes Potentiels & Défis - Les Fous d'Astro",
     )
 
-    # E) URL finale (S3 si dispo, sinon locale)
-    pdf_final_url = None
-    try:
-        s3_info = upload_file_and_presign(pdf_path, key_prefix="forces_defis", content_type="application/pdf")
-        pdf_final_url = s3_info.get("url") or s3_info.get("presigned_url")
-    except Exception as e:
-        current_app.logger.info("[FD] Pas d'upload S3 (%s) → lien local.", e)
-
-    if not pdf_final_url:
-        rel = os.path.relpath(pdf_path, current_app.static_folder).replace("\\", "/")
-        pdf_final_url = url_for("static", filename=rel, _external=True)
+    pdf_final_url = upload_client_pdf(
+        pdf_path, key_prefix="forces_defis", download_filename=f"{fname}.pdf"
+    )
 
         # --- Mémo anti-reload pour Forces & Défis ---
     try:
