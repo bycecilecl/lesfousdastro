@@ -6,6 +6,7 @@ from calendar import monthrange
 from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
 from itertools import combinations, groupby
+from statistics import median
 
 import swisseph as swe
 
@@ -44,6 +45,74 @@ def _positions(jour: date) -> dict[str, tuple[float, float]]:
     """Longitude et vitesse géocentriques à 12 h UTC."""
     return _positions_instant(datetime(jour.year, jour.month, jour.day, 12,
                                        tzinfo=timezone.utc))
+
+
+def _vitesse_instant(planete: str, instant: datetime) -> float:
+    instant = instant.astimezone(timezone.utc)
+    julien = swe.julday(instant.year, instant.month, instant.day,
+                        instant.hour + instant.minute / 60 + instant.second / 3600)
+    return swe.calc_ut(julien, PLANETES_SWISSEPH[planete], swe.FLG_SPEED)[0][3]
+
+
+def _vitesse_reference(annee: int, mois: int, planete: str) -> float:
+    """Vitesse directe habituelle estimée autour du mois, propre à chaque planète."""
+    centre = datetime(annee, mois, 15, 12, tzinfo=timezone.utc)
+    vitesses = [_vitesse_instant(planete, centre + timedelta(days=15 * n))
+                for n in range(-12, 13)]
+    directes = [vitesse for vitesse in vitesses if vitesse > 0]
+    return median(directes or [abs(vitesse) for vitesse in vitesses])
+
+
+@lru_cache(maxsize=36)
+def _periodes_stationnaires_mois(annee: int, mois: int) -> list[dict]:
+    """Jours proches de la vitesse nulle autour d'un changement de direction."""
+    debut = date(annee, mois, 1)
+    fin = (debut.replace(day=28) + timedelta(days=4)).replace(day=1)
+    plage = [debut - timedelta(days=30) + timedelta(days=n)
+             for n in range((fin - debut).days + 61)]
+    periodes = []
+    for planete in PLANETES_MOUVEMENT:
+        # 20 % de la vitesse directe habituelle : seuil relatif, non universel.
+        seuil = _vitesse_reference(annee, mois, planete) * .20
+        vitesses = {}
+        stationnaires = {}
+        for jour in plage:
+            minuit = datetime(jour.year, jour.month, jour.day, tzinfo=timezone.utc)
+            mesures = [_vitesse_instant(planete, minuit + timedelta(hours=heure))
+                       for heure in (0, 12, 18)]
+            vitesses[jour] = mesures[1]
+            stationnaires[jour] = min(abs(vitesse) for vitesse in mesures) <= seuil
+        deja_vus = set()
+        dernier_signe = None
+        dernier_jour = None
+        for jour in plage:
+            vitesse = vitesses[jour]
+            if vitesse == 0:
+                continue
+            signe = 1 if vitesse > 0 else -1
+            if dernier_signe is None or signe == dernier_signe:
+                dernier_signe, dernier_jour = signe, jour
+                continue
+            gauche = dernier_jour if stationnaires[dernier_jour] else jour
+            droite = jour
+            while stationnaires.get(gauche - timedelta(days=1), False):
+                gauche -= timedelta(days=1)
+            while stationnaires.get(droite + timedelta(days=1), False):
+                droite += timedelta(days=1)
+            cle = (gauche, droite)
+            dernier_signe, dernier_jour = signe, jour
+            if cle in deja_vus or droite < debut or gauche >= fin:
+                continue
+            deja_vus.add(cle)
+            periodes.append({
+                "planete": planete, "debut": max(gauche, debut),
+                "fin": min(droite, fin - timedelta(days=1)),
+                "avant_mois": gauche < debut, "apres_mois": droite >= fin,
+                "changement": jour,
+                "direction": "rétrograde" if vitesses[jour] < 0 else "direct",
+            })
+    periodes.sort(key=lambda periode: (periode["debut"], periode["planete"]))
+    return periodes
 
 
 def _aspect(longitude_a: float, longitude_b: float):
@@ -167,6 +236,8 @@ def _mois_calcule(annee: int, mois: int):
     stations = []
     entrees_signes = []
     precedentes = _positions(debut - timedelta(days=1))
+    directions = {planete: (1 if precedentes[planete][1] > 0 else -1)
+                  for planete in PLANETES_MOUVEMENT}
     for numero in range(jours):
         jour = debut + timedelta(days=numero)
         positions = _positions(jour)
@@ -176,13 +247,17 @@ def _mois_calcule(annee: int, mois: int):
             if cle not in meilleurs or orbe < meilleurs[cle][1]:
                 meilleurs[cle] = (jour, orbe)
         for planete in PLANETES_MOUVEMENT:
-            avant, apres = precedentes[planete][1], positions[planete][1]
-            if avant * apres < 0:
+            apres = positions[planete][1]
+            direction = 1 if apres > 0 else -1 if apres < 0 else 0
+            if direction and direction != directions[planete]:
                 stations.append({
                     "date": jour,
                     "titre": f"{planete} stationnaire, puis {'direct' if apres > 0 else 'rétrograde'}",
                     "planete": planete,
+                    "direction": "direct" if apres > 0 else "rétrograde",
                 })
+            if direction:
+                directions[planete] = direction
             signe_avant = int(precedentes[planete][0] // 30)
             signe_apres = int(positions[planete][0] // 30)
             if signe_avant != signe_apres:
@@ -211,7 +286,8 @@ def _mois_calcule(annee: int, mois: int):
 
 
 def ciel_collectif_mois(annee: int, mois: int, *, jour_reference: date | None = None,
-                       inclure_periodes: bool = False) -> dict:
+                       inclure_periodes: bool = False,
+                       inclure_stations: bool = False) -> dict:
     """Climat lent du jour et principaux rapprochements du mois, sans natal."""
     positions_par_jour, temps_forts, stations, entrees_signes = _mois_calcule(annee, mois)
     jour_reference = jour_reference or datetime.now(timezone.utc).date()
@@ -260,4 +336,6 @@ def ciel_collectif_mois(annee: int, mois: int, *, jour_reference: date | None = 
             "temps_forts": temps_forts, "stations": stations,
             "entrees_signes": entrees_signes, "evenements": evenements,
             "groupes_dates": groupes_dates, "retrogradations": retrogradations,
-            "periodes_aspects": _periodes_aspects_mois(annee, mois) if inclure_periodes else []}
+            "periodes_aspects": _periodes_aspects_mois(annee, mois) if inclure_periodes else [],
+            "periodes_stationnaires": _periodes_stationnaires_mois(annee, mois)
+            if inclure_periodes or inclure_stations else []}

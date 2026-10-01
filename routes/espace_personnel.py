@@ -439,7 +439,8 @@ def ciel_collectif():
         )
         if (jour_choisi.year, jour_choisi.month) != (annee, mois):
             abort(400)
-        ciel = ciel_collectif_mois(annee, mois, jour_reference=jour_choisi)
+        ciel = ciel_collectif_mois(annee, mois, jour_reference=jour_choisi,
+                                  inclure_stations=True)
     except (TypeError, ValueError):
         abort(400)
     figures_jour = figures_ciel_collectif(jour_choisi)
@@ -1198,6 +1199,12 @@ def calendrier():
             "retrogradations": [{**periode, "debut": periode["debut"].isoformat(),
                                   "fin": periode["fin"].isoformat()}
                                  for periode in ciel["retrogradations"]],
+            "periodes_stationnaires": [
+                {**periode, "debut": periode["debut"].isoformat(),
+                 "fin": periode["fin"].isoformat(),
+                 "changement": periode["changement"].isoformat()}
+                for periode in ciel["periodes_stationnaires"]
+            ],
         }
     except Exception:
         current_app.logger.exception("Calcul du ciel collectif indisponible pour le calendrier")

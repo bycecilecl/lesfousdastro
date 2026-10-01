@@ -4,11 +4,29 @@ import unittest
 from datetime import date, datetime, timezone
 from unittest.mock import patch
 
-from utils.ciel_collectif import _aspect, _periodes_aspects_mois, ciel_collectif_mois
+from utils.ciel_collectif import (
+    _aspect, _periodes_aspects_mois, _periodes_stationnaires_mois, ciel_collectif_mois,
+)
 from utils.figures_ciel_collectif import _figures, figures_ciel_collectif
 
 
 class TestCielCollectif(unittest.TestCase):
+    def test_station_couvre_plusieurs_jours_autour_du_changement_de_sens(self):
+        changement = datetime(2026, 10, 4, tzinfo=timezone.utc)
+
+        def vitesse(_planete, instant):
+            return (instant - changement).total_seconds() / 86400 * .1
+
+        _periodes_stationnaires_mois.cache_clear()
+        with patch("utils.ciel_collectif._vitesse_reference", return_value=1), \
+             patch("utils.ciel_collectif._vitesse_instant", side_effect=vitesse):
+            periodes = _periodes_stationnaires_mois(2026, 10)
+        venus = next(p for p in periodes if p["planete"] == "Vénus")
+        self.assertLess(venus["debut"], venus["changement"])
+        self.assertGreater(venus["fin"], venus["changement"])
+        self.assertEqual(venus["direction"], "direct")
+        _periodes_stationnaires_mois.cache_clear()
+
     def test_aspect_collectif_occupe_sa_periode_a_trois_degres(self):
         depart = datetime(2026, 10, 1, tzinfo=timezone.utc)
 

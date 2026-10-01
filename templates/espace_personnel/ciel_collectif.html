@@ -51,6 +51,11 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e, #00a8a8 5
 .ciel-retro-list { display: flex; flex-wrap: wrap; gap: 9px; margin: 16px 0 0; padding: 0; list-style: none; }
 .ciel-retro-list li { padding: 9px 13px; border: 1px solid #eddfc6; border-radius: 12px; background: #fffcf6; color: #6d542d; font-size: .9rem; }
 .ciel-retro-list strong { color: #865b20; }
+.ciel-movement-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 15px; }
+.ciel-movement-groups h3 { margin: 0; color: #1f628e; font-size: 1rem; }
+.ciel-movement-groups .ciel-retro-list { margin-top: 10px; }
+.ciel-movement-groups .ciel-retro-list--slow li { border-color: #cedee9; background: #f3f8fb; color: #294d65; }
+.ciel-movement-groups .ciel-retro-list--slow strong { color: #294d65; }
 {% endblock %}
 {% block content %}
 {% include 'espace_personnel/_navigation.html' %}
@@ -86,7 +91,17 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e, #00a8a8 5
     <section class="ciel-section">
       <h2>Rétrogradations de {{ titre_mois }}</h2>
       <p>Mercure à Pluton. Les périodes coupées par le début ou la fin du mois continuent hors de cette fenêtre.</p>
-      {% if ciel.retrogradations %}<ul class="ciel-retro-list">{% for periode in ciel.retrogradations %}<li><strong>{{ periode.planete }}</strong> · {% if periode.avant_mois %}déjà rétrograde le 1er{% else %}du {{ periode.debut.day }}{% endif %} {% if periode.apres_mois %}→ se poursuit après le mois{% else %}→ {{ periode.fin.day }} {{ titre_mois }}{% endif %}</li>{% endfor %}</ul>{% else %}<p class="ciel-empty">Aucune planète de Mercure à Pluton rétrograde ce mois-ci.</p>{% endif %}
+      {% set retro_personnelles = ciel.retrogradations | selectattr('planete', 'in', ['Mercure', 'Vénus', 'Mars']) | list %}
+      {% set retro_lentes = ciel.retrogradations | rejectattr('planete', 'in', ['Mercure', 'Vénus', 'Mars']) | list %}
+      {% if ciel.retrogradations %}<div class="ciel-movement-groups">
+        <div><h3>Mercure, Vénus et Mars</h3>{% if retro_personnelles %}<ul class="ciel-retro-list">{% for periode in retro_personnelles %}<li><strong>{{ periode.planete }}</strong> · {% if periode.avant_mois %}déjà rétrograde le 1er{% else %}du {{ periode.debut.day }}{% endif %} {% if periode.apres_mois %}→ se poursuit après le mois{% else %}→ {{ periode.fin.day }} {{ titre_mois }}{% endif %}</li>{% endfor %}</ul>{% else %}<p>Aucune rétrogradation ce mois-ci.</p>{% endif %}</div>
+        <div><h3>Jupiter à Pluton</h3>{% if retro_lentes %}<ul class="ciel-retro-list ciel-retro-list--slow">{% for periode in retro_lentes %}<li><strong>{{ periode.planete }}</strong> · {% if periode.avant_mois %}déjà rétrograde le 1er{% else %}du {{ periode.debut.day }}{% endif %} {% if periode.apres_mois %}→ se poursuit après le mois{% else %}→ {{ periode.fin.day }} {{ titre_mois }}{% endif %}</li>{% endfor %}</ul>{% else %}<p>Aucune rétrogradation ce mois-ci.</p>{% endif %}</div>
+      </div>{% else %}<p class="ciel-empty">Aucune planète de Mercure à Pluton rétrograde ce mois-ci.</p>{% endif %}
+    </section>
+    <section class="ciel-section">
+      <h2>Phases stationnaires de {{ titre_mois }}</h2>
+      <p>Les jours où chaque planète ralentit près de son changement de direction (vitesse au plus égale à 20 % de sa vitesse directe habituelle).</p>
+      {% if ciel.periodes_stationnaires %}<ul class="ciel-retro-list">{% for periode in ciel.periodes_stationnaires %}<li><strong>{{ periode.planete }}</strong> · du {{ periode.debut.strftime('%d/%m') }} au {{ periode.fin.strftime('%d/%m') }}{% if periode.avant_mois %} · commencée avant le mois{% endif %}{% if periode.apres_mois %} · continue après le mois{% endif %} · passage {{ periode.direction }} le {{ periode.changement.strftime('%d/%m') }}</li>{% endfor %}</ul>{% else %}<p class="ciel-empty">Aucune phase stationnaire retenue ce mois-ci.</p>{% endif %}
     </section>
     <section class="ciel-section">
       <h2>Climat lent au {{ ciel.jour_reference.strftime('%d/%m/%Y') }}</h2>
