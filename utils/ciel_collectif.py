@@ -28,14 +28,22 @@ NATURE_ASPECT = {
 }
 
 
-def _positions(jour: date) -> dict[str, tuple[float, float]]:
-    """Longitude et vitesse géocentriques à 12 h UTC."""
-    julien = swe.julday(jour.year, jour.month, jour.day, 12)
+def _positions_instant(instant: datetime) -> dict[str, tuple[float, float]]:
+    """Longitude et vitesse géocentriques à un instant UTC."""
+    instant = instant.astimezone(timezone.utc)
+    julien = swe.julday(instant.year, instant.month, instant.day,
+                        instant.hour + instant.minute / 60 + instant.second / 3600)
     return {
         nom: (valeurs[0] % 360, valeurs[3])
         for nom in PLANETES_CARTE
         for valeurs in (swe.calc_ut(julien, PLANETES_SWISSEPH[nom], swe.FLG_SPEED)[0],)
     }
+
+
+def _positions(jour: date) -> dict[str, tuple[float, float]]:
+    """Longitude et vitesse géocentriques à 12 h UTC."""
+    return _positions_instant(datetime(jour.year, jour.month, jour.day, 12,
+                                       tzinfo=timezone.utc))
 
 
 def _aspect(longitude_a: float, longitude_b: float):
@@ -56,6 +64,96 @@ def _paires(positions: dict[str, tuple[float, float]]):
         aspect = _aspect(positions[premiere][0], positions[seconde][0])
         if aspect is not None:
             yield premiere, seconde, aspect[0], aspect[1]
+
+
+@lru_cache(maxsize=36)
+def _periodes_aspects_mois(annee: int, mois: int) -> list[dict]:
+    """Fenêtres collectives à 3° et passages exacts, sans aspect dissocié."""
+    debut = datetime(annee, mois, 1, tzinfo=timezone.utc)
+    fin = (debut.replace(day=28) + timedelta(days=4)).replace(day=1)
+    pas = timedelta(hours=6)
+    instants = [debut - pas]
+    while instants[-1] < fin + pas:
+        instants.append(instants[-1] + pas)
+    positions = {instant: _positions_instant(instant) for instant in instants}
+    actifs = {}
+    periodes = []
+
+    def paire_active(instant, cle):
+        premiere, seconde, aspect = cle
+        valeurs = positions.get(instant) or _positions_instant(instant)
+        resultat = _aspect(valeurs[premiere][0], valeurs[seconde][0])
+        return resultat is not None and resultat[0] == aspect and resultat[1] <= 3
+
+    def borne(a, b, cle, etat_a):
+        while (b - a).total_seconds() > 1:
+            milieu = a + (b - a) / 2
+            if paire_active(milieu, cle) == etat_a:
+                a = milieu
+            else:
+                b = milieu
+        return a + (b - a) / 2
+
+    for index, instant in enumerate(instants):
+        presents = {
+            (premiere, seconde, aspect)
+            for premiere, seconde, aspect, orbe in _paires(positions[instant])
+            if orbe <= 3
+        }
+        if index == 0:
+            actifs = {cle: None for cle in presents}
+            continue
+        precedent = instants[index - 1]
+        for cle in actifs.keys() - presents:
+            sortie = borne(precedent, instant, cle, True)
+            if sortie > debut and (actifs[cle] or debut) < fin:
+                periodes.append((cle, actifs[cle], sortie))
+        for cle in presents - actifs.keys():
+            actifs[cle] = borne(precedent, instant, cle, False)
+        actifs = {cle: actifs[cle] for cle in presents}
+    periodes.extend((cle, entree, None) for cle, entree in actifs.items()
+                    if (entree or debut) < fin)
+
+    resultat = []
+    for (premiere, seconde, aspect), entree, sortie in periodes:
+        if (sortie is not None and sortie <= debut) or (entree is not None and entree >= fin):
+            continue
+        angle = next(angle for nom, angle, _ in ASPECTS if nom == aspect)
+        cibles = {angle, (-angle) % 360}
+        exacts = []
+        for a, b in zip(instants, instants[1:]):
+            if b <= (entree or instants[0]) or a >= (sortie or instants[-1]):
+                continue
+            for cible in cibles:
+                def ecart(t):
+                    valeurs = positions.get(t) or _positions_instant(t)
+                    return ((valeurs[premiere][0] - valeurs[seconde][0] - cible + 180) % 360) - 180
+                gauche, droite = ecart(a), ecart(b)
+                if gauche * droite > 0 or abs(gauche - droite) >= 180:
+                    continue
+                lo, hi = a, b
+                while (hi - lo).total_seconds() > 1:
+                    milieu = lo + (hi - lo) / 2
+                    if (ecart(milieu) >= 0) == (gauche >= 0):
+                        lo = milieu
+                    else:
+                        hi = milieu
+                exact = lo + (hi - lo) / 2
+                if (abs(ecart(exact)) < .001 and debut <= exact < fin
+                        and (entree is None or entree <= exact)
+                        and (sortie is None or exact <= sortie)
+                        and paire_active(exact, (premiere, seconde, aspect))):
+                    if all(abs((exact - ancien).total_seconds()) > 60 for ancien in exacts):
+                        exacts.append(exact)
+        resultat.append({
+            "titre": f"{premiere} {aspect} {seconde}",
+            "aspect": aspect, "nature": NATURE_ASPECT[aspect],
+            "start": entree.isoformat() if entree and entree > debut else None,
+            "end": sortie.isoformat() if sortie and sortie < fin else None,
+            "exacts": [instant.isoformat() for instant in sorted(exacts)],
+        })
+    resultat.sort(key=lambda periode: (periode["start"] or "", periode["titre"]))
+    return resultat
 
 
 @lru_cache(maxsize=36)
@@ -112,7 +210,8 @@ def _mois_calcule(annee: int, mois: int):
     return positions_par_jour, temps_forts, stations, entrees_signes
 
 
-def ciel_collectif_mois(annee: int, mois: int, *, jour_reference: date | None = None) -> dict:
+def ciel_collectif_mois(annee: int, mois: int, *, jour_reference: date | None = None,
+                       inclure_periodes: bool = False) -> dict:
     """Climat lent du jour et principaux rapprochements du mois, sans natal."""
     positions_par_jour, temps_forts, stations, entrees_signes = _mois_calcule(annee, mois)
     jour_reference = jour_reference or datetime.now(timezone.utc).date()
@@ -160,4 +259,5 @@ def ciel_collectif_mois(annee: int, mois: int, *, jour_reference: date | None = 
     return {"jour_reference": jour_reference, "climat": climat,
             "temps_forts": temps_forts, "stations": stations,
             "entrees_signes": entrees_signes, "evenements": evenements,
-            "groupes_dates": groupes_dates, "retrogradations": retrogradations}
+            "groupes_dates": groupes_dates, "retrogradations": retrogradations,
+            "periodes_aspects": _periodes_aspects_mois(annee, mois) if inclure_periodes else []}

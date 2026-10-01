@@ -1,13 +1,40 @@
 """Le ciel collectif ne dépend d'aucun thème natal."""
 
 import unittest
-from datetime import date
+from datetime import date, datetime, timezone
+from unittest.mock import patch
 
-from utils.ciel_collectif import _aspect, ciel_collectif_mois
+from utils.ciel_collectif import _aspect, _periodes_aspects_mois, ciel_collectif_mois
 from utils.figures_ciel_collectif import _figures, figures_ciel_collectif
 
 
 class TestCielCollectif(unittest.TestCase):
+    def test_aspect_collectif_occupe_sa_periode_a_trois_degres(self):
+        depart = datetime(2026, 10, 1, tzinfo=timezone.utc)
+
+        def positions(instant):
+            jours = (instant - depart).total_seconds() / 86400
+            return {"Vénus": (214 + jours, 1), "Pluton": (307, 0)}
+
+        def paires(valeurs):
+            aspect = _aspect(valeurs["Vénus"][0], valeurs["Pluton"][0])
+            if aspect:
+                yield "Vénus", "Pluton", *aspect
+
+        _periodes_aspects_mois.cache_clear()
+        with patch("utils.ciel_collectif._positions_instant", side_effect=positions), \
+             patch("utils.ciel_collectif._paires", side_effect=paires):
+            periodes = _periodes_aspects_mois(2026, 10)
+        carre = next(p for p in periodes if p["titre"] == "Vénus carré Pluton")
+        self.assertIsNone(carre["start"])
+        self.assertTrue(carre["end"].startswith("2026-10-07"))
+        self.assertEqual(len(carre["exacts"]), 1)
+        self.assertAlmostEqual(
+            abs((datetime.fromisoformat(carre["exacts"][0]) - datetime(2026, 10, 4, tzinfo=timezone.utc)).total_seconds()),
+            0, delta=1,
+        )
+        _periodes_aspects_mois.cache_clear()
+
     def test_aspect_dissocie_exclu(self):
         self.assertIsNone(_aspect(29.8, 30.2))
         self.assertIsNone(_aspect(359.8, 0.2))

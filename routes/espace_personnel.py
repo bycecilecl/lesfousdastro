@@ -1190,10 +1190,11 @@ def calendrier():
     })
     try:
         from utils.ciel_collectif import ciel_collectif_mois
-        ciel = ciel_collectif_mois(annee, mois)
+        ciel = ciel_collectif_mois(annee, mois, inclure_periodes=True)
         donnees["ciel_collectif"] = {
             "evenements": [{**evenement, "date": evenement["date"].isoformat()}
                            for evenement in ciel["evenements"]],
+            "periodes_aspects": ciel["periodes_aspects"],
             "retrogradations": [{**periode, "debut": periode["debut"].isoformat(),
                                   "fin": periode["fin"].isoformat()}
                                  for periode in ciel["retrogradations"]],

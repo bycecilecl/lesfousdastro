@@ -54,10 +54,13 @@ let selectedGroup=null;
 let focusedSlow=null;
 let selectedClimate=null;
 const skyEvents=calData.ciel_collectif?.evenements||[];
+const skyPeriods=calData.ciel_collectif?.periodes_aspects||[];
 const skyRetro=calData.ciel_collectif?.retrogradations||[];
 const skyClass=e=>e.station?'sky-station':e.entree_signe?'sky-entree':e.nature==='tension'?'sky-tension':e.nature==='fluide'?'sky-fluide':'sky-neutral';
-const skyEventsOn=date=>skyEvents.filter(e=>e.date===date);
+const skyEventsOn=date=>skyEvents.filter(e=>e.date===date&&(e.station||e.entree_signe));
+const skyPeriodsOn=day=>skyPeriods.filter(p=>overlaps(p,day));
 const skyRetroOn=date=>skyRetro.filter(p=>p.debut<=date&&date<=p.fin);
+let selectedSkyPeriod=null;
 function exactDays(g){return [...new Set(g.contacts.flatMap(c=>c.exacts||[]).map(localKey))]}
 function movementDetails(p){
  const m=p.mouvements?.[selected.date];let h='';
@@ -91,13 +94,16 @@ function contactDetails(g){
 }
 function detailCal(){let h;
  if(el('view')?.value==='sky'){
-  const d=selected;
-  h=`<h2>Ciel collectif · ${escapeCal(new Intl.DateTimeFormat('fr-FR',{timeZone:calData.fuseau,day:'numeric',month:'long'}).format(new Date(d.debut)))}</h2><p class="muted">Ces repères concernent le ciel du moment, indépendamment de ton thème natal. Relevé quotidien à 12 h UTC, sans heure exacte de passage.</p>`;
+ const d=selected;
+  h=`<h2>Ciel collectif · ${escapeCal(new Intl.DateTimeFormat('fr-FR',{timeZone:calData.fuseau,day:'numeric',month:'long'}).format(new Date(d.debut)))}</h2><p class="muted">Aspects actifs à moins de 3° d’orbe, indépendants de ton thème natal. ★ marque un passage exact calculé.</p>`;
+  if(selectedSkyPeriod!==null){const p=skyPeriods[selectedSkyPeriod];h+=`<div class="cal-sky-detail ${skyClass(p)}"><strong>${escapeCal(p.titre)}</strong><p>Période à 3° : ${p.start?fmt(p.start):'déjà active avant le mois'} → ${p.end?fmt(p.end):'se poursuit après le mois'}</p>${p.exacts.length?`<p>${p.exacts.map(x=>'★ Exact : '+fmt(x)).join('<br>')}</p>`:'<p>Pas de passage exact pendant ce mois.</p>'}</div>`;}
   const retro=skyRetroOn(d.date);
   if(retro.length)h+='<h3>Rétrogradations en cours</h3>'+retro.map(p=>`<div class="cal-sky-detail sky-station"><strong>${escapeCal(p.planete)} rétrograde</strong><p>Du ${escapeCal(p.debut)} au ${escapeCal(p.fin)}${p.avant_mois?' · déjà rétrograde au début du mois':''}${p.apres_mois?' · se poursuit après le mois':''}</p></div>`).join('');
+  const aspects=skyPeriodsOn(d);
+  if(aspects.length)h+='<h3>Aspects actifs</h3>'+aspects.map(p=>`<div class="cal-sky-detail ${skyClass(p)}"><strong>${escapeCal(p.titre)}</strong><p>Orbe inférieur ou égal à 3°${p.exacts.filter(x=>localKey(x)===d.date).length?' · ★ exact ce jour':''}</p></div>`).join('');
   const events=skyEventsOn(d.date);
-  if(events.length)h+='<h3>Temps forts du jour</h3>'+events.map(e=>`<div class="cal-sky-detail ${skyClass(e)}"><strong>${escapeCal(e.titre)}</strong><p>${e.station?'Changement de direction relevé ce jour':e.entree_signe?'Changement de signe relevé ce jour':'Rapprochement le plus serré du mois · orbe '+Number(e.orbe).toFixed(2)+'°'}</p></div>`).join('');
-  else h+='<p class="muted">Aucun temps fort collectif retenu pour ce jour.</p>';
+  if(events.length)h+='<h3>Mouvements du jour</h3>'+events.map(e=>`<div class="cal-sky-detail ${skyClass(e)}"><strong>${escapeCal(e.titre)}</strong><p>${e.station?'Changement de direction relevé ce jour':'Changement de signe relevé ce jour'}</p></div>`).join('');
+  if(!aspects.length&&!events.length&&!retro.length)h+='<p class="muted">Aucun transit collectif retenu pour ce jour.</p>';
   if(checked('journal')){const notes=calData.notes.filter(n=>n.date===d.date);if(notes.length)h+='<h3>Mon journal</h3>'+notes.map(n=>`<div class="event"><p class="note">${escapeCal(n.texte)}</p><a href="${escapeCal(n.url)}">Lire mon observation</a></div>`).join('')}
   h+=`<p><a class="action" href="${escapeCal(calData.journal_url)}?date=${d.date}">Écrire pour cette date</a></p>`;
   el('detail').innerHTML=h;return;
@@ -116,28 +122,32 @@ function drawCal(){
  if(el('compact'))el('compact').hidden=view==='sky'||focusedSlow===null;
  if(el('personal-filters'))el('personal-filters').hidden=view==='sky';
  document.querySelector('.cal-view-selector')?.setAttribute('data-sky',view==='sky');
- if(el('instructions'))el('instructions').textContent=view==='sky'?'Clique sur une date pour voir les transits collectifs retenus et tes observations. Les bandes violettes indiquent les rétrogradations du mois.':personalInstructions;
- if(el('view-help'))el('view-help').textContent={personal:calData.mars?'Les lentes dessinent le climat de fond. Soleil, Vénus et Mars sont retenus pour leur duo natal ou leur contact au maître d’Ascendant. Les passages de Mercure restent dans les contacts rapides.':'Ton journal et tes repères disponibles sont affichés ici.',rs:'Contacts faisant écho à un duo de la RS en cours impliquant Jupiter à Pluton. Ce ne sont pas des contacts directs aux positions de RS.',fast:'Soleil, Mercure, Vénus et Mars : tous les contacts calculés à 1°, sans filtre natal ou RS. Les quinconces et les contacts rapides aux nœuds restent exclus.',lunar:'Exploration facultative : les contacts lunaires à 1°, avec leurs horaires. Ils ne figurent pas dans les transits personnels.',sky:'Aspects majeurs, stations, changements de signe et rétrogradations du ciel collectif, sans lien nécessaire avec ton thème natal.'}[view];
+ if(el('instructions'))el('instructions').textContent=view==='sky'?'Les bandes montrent les aspects pendant toute leur période à 3° ; ★ marque le passage exact. Les rétrogradations sont regroupées par semaine. Clique sur un aspect ou une date pour les détails.':personalInstructions;
+ if(el('view-help'))el('view-help').textContent={personal:calData.mars?'Les lentes dessinent le climat de fond. Soleil, Vénus et Mars sont retenus pour leur duo natal ou leur contact au maître d’Ascendant. Les passages de Mercure restent dans les contacts rapides.':'Ton journal et tes repères disponibles sont affichés ici.',rs:'Contacts faisant écho à un duo de la RS en cours impliquant Jupiter à Pluton. Ce ne sont pas des contacts directs aux positions de RS.',fast:'Soleil, Mercure, Vénus et Mars : tous les contacts calculés à 1°, sans filtre natal ou RS. Les quinconces et les contacts rapides aux nœuds restent exclus.',lunar:'Exploration facultative : les contacts lunaires à 1°, avec leurs horaires. Ils ne figurent pas dans les transits personnels.',sky:'Aspects majeurs pendant toute leur période à 3°, stations, changements de signe et rétrogradations du ciel collectif.'}[view];
  if(el('view-empty'))el('view-empty').textContent=view==='sky'?(calData.ciel_collectif?'':'Les calculs du ciel collectif sont momentanément indisponibles.'):groups.some(enabled)?'':(view==='rs'?'Aucun écho RS retenu pour ce mois avec les RS enregistrées et les filtres actuels.':'');
  let h='<div class="cal-weekdays">'+['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(x=>`<div class="weekday">${x}</div>`).join('')+'</div>';
  const cells=Array(calData.decalage).fill(null).concat(calData.jours);while(cells.length%7)cells.push(null);
  for(let w=0;w<cells.length;w+=7){const week=cells.slice(w,w+7);let bands=[];
- if(view==='sky')skyRetro.forEach((p,index)=>{const columns=week.map((d,i)=>d&&p.debut<=d.date&&d.date<=p.fin?i:-1).filter(i=>i>=0);if(columns.length)bands.push({retro:p,index,first:columns[0],last:columns.at(-1)})});
+ if(view==='sky'){
+  skyPeriods.forEach((p,index)=>{const columns=week.map((d,i)=>d&&overlaps(p,d)?i:-1).filter(i=>i>=0);if(columns.length)bands.push({skyPeriod:p,index,first:columns[0],last:columns.at(-1)})});
+  for(let i=0;i<7;){if(!week[i]||!skyRetroOn(week[i].date).length){i++;continue}const first=i;let retro=[];while(i<7&&week[i]&&skyRetroOn(week[i].date).length){retro.push(...skyRetroOn(week[i].date));i++}bands.push({retroGroup:[...new Set(retro)],first,last:i-1});}
+ }
  if(view!=='sky'&&checked('mars'))groups.forEach((g,index)=>{if(!enabled(g)||(g.lente&&focusedSlow!==index))return;const columns=week.map((d,i)=>d&&visibleDay(g,d)?i:-1).filter(i=>i>=0);if(columns.length)bands.push({g,index,first:columns[0],last:columns.at(-1)})});
  if(view!=='sky'&&focusedSlow===null&&checked('mars')){
   const perDay=week.map(d=>d?groups.map((g,index)=>({g,index})).filter(({g})=>g.lente&&enabled(g)&&overlaps(g,d)).map(x=>x.index):[]);
   for(let i=0;i<7;){if(!perDay[i].length){i++;continue}const first=i;let ids=[];while(i<7&&perDay[i].length){ids.push(...perDay[i]);i++}ids=[...new Set(ids)];const planets=new Set(ids.map(n=>groups[n].planete));bands.push({climate:ids,first,last:i-1,g:{label:'Climat de fond · '+planets.size+' planète'+(planets.size>1?'s':'')}});}
  }
- bands.sort((a,b)=>a.first-b.first||b.last-a.last);const hasClimate=bands.some(b=>b.climate);const lanes=hasClimate?[6]:[];
- for(const b of bands){if(b.climate){b.lane=0;continue}let lane=lanes.findIndex(end=>end<b.first);if(lane<0)lane=lanes.length;lanes[lane]=b.last;b.lane=lane;}
+ bands.sort((a,b)=>a.first-b.first||b.last-a.last);const hasClimate=bands.some(b=>b.climate||b.retroGroup);const lanes=hasClimate?[6]:[];
+ for(const b of bands){if(b.climate||b.retroGroup){b.lane=0;continue}let lane=lanes.findIndex(end=>end<b.first);if(lane<0)lane=lanes.length;lanes[lane]=b.last;b.lane=lane;}
  h+=`<div class="cal-week" style="--band-lanes:${Math.max(1,lanes.length)}">`;week.forEach((d,i)=>{if(!d){h+=`<div class="cal-blank" style="grid-column:${i+1};grid-row:1"></div>`;return}h+=`<button class="day ${d.date===localKey(new Date())?'today':''} ${d.date===selected.date&&selectedGroup===null?'selected':''}" style="grid-column:${i+1};grid-row:1" data-date="${d.date}" ${d.date===localKey(new Date())?'aria-current="date"':''} aria-label="${d.date}"><span class="num">${d.numero}${d.date===localKey(new Date())?'<small class="today-label">Aujourd’hui</small>':''}</span>`;h+=view==='sky'?skyEventsOn(d.date).map(e=>`<span class="pill sky ${skyClass(e)}">${escapeCal(e.titre)}</span>`).join(''):calData.events.filter(e=>eventVisible(e)&&localKey(e.date)===d.date).map(e=>`<span class="pill ${e.kind==='station'?'station':e.kind==='solar'?'solar':'moon'}">${escapeCal(e.label)}</span>`).join('');const n=calData.notes.filter(n=>n.date===d.date).length;if(checked('journal')&&n)h+=`<span class="pill journal">${n} note(s)</span>`;h+='</button>'});
  for(const b of bands){const {g,index,first,last,lane}=b;
- if(b.retro){const p=b.retro;h+=`<div class="cal-band cal-sky-retro" style="grid-column:${first+1} / ${last+2};grid-row:1;--band-lane:${lane}" title="${escapeCal(p.planete)} rétrograde du ${escapeCal(p.debut)} au ${escapeCal(p.fin)}">${escapeCal(p.planete)} rétrograde</div>`;continue;}
+ if(b.retroGroup){const planets=[...new Set(b.retroGroup.map(p=>p.planete))];h+=`<div class="cal-band cal-sky-retro" style="grid-column:${first+1} / ${last+2};grid-row:1;--band-lane:${lane}" title="${escapeCal(planets.join(', '))} rétrograde${planets.length>1?'s':''}">Rétrogrades · ${escapeCal(planets.join(', '))}</div>`;continue;}
+ if(b.skyPeriod){const p=b.skyPeriod;const exact=p.exacts.map(localKey);let stars='',firstStar=null;for(let i=first;i<=last;i++)if(exact.includes(week[i].date)){const pos=((i-first+.5)/(last-first+1))*100;if(firstStar===null)firstStar=pos;stars+=`<span class="cal-star" style="left:${pos}%" title="Passage exact le ${week[i].date}">★</span>`;}h+=`<button class="cal-band cal-sky-band ${skyClass(p)}" style="grid-column:${first+1} / ${last+2};grid-row:1;--band-lane:${lane}" data-sky-period="${index}" data-date="${week[first].date}" title="${escapeCal(p.titre)} · période à 3°"><span class="cal-band-label" style="${firstStar===null?'':`max-width:calc(${firstStar}% - 13px)`}">${p.start&&+new Date(p.start)<+new Date(week[first].debut)?'← ':''}${escapeCal(p.titre)}${p.end&&+new Date(p.end)>+new Date(week[last].fin)?' →':''}</span>${stars}</button>`;continue;}
  if(b.climate){h+=`<button class="cal-band cal-climate" style="grid-column:${first+1} / ${last+2};grid-row:1;--band-lane:${lane}" data-climate="${b.climate.join(',')}" aria-label="${escapeCal(g.label)} : accéder aux transits de fond du mois en cours">${escapeCal(g.label)} <span aria-hidden="true">＋</span></button>`;continue;}
 const before=bounds(g)[0]<+new Date(week[first].debut),after=bounds(g)[1]>+new Date(week[last].fin);const exact=exactDays(g);let stars='';let firstStar=null;for(let i=first;i<=last;i++)if(exact.includes(week[i].date)){const pos=((i-first+.5)/(last-first+1))*100;if(firstStar===null)firstStar=pos;stars+=`<span class="cal-star" style="left:${pos}%" title="Passage exact le ${week[i].date}">★</span>`;}
  h+=`<button data-planet="${escapeCal(g.planete)}" class="cal-band ${g.maitre?'cal-ruler':''} ${g.lente?'cal-slow':''} ${before?'continues-before':''} ${after?'continues-after':''}" style="grid-column:${first+1} / ${last+2};grid-row:1;--band-lane:${lane}" data-group="${index}" title="${escapeCal(g.label)} · ${fmt(g.start)} → ${fmt(g.end)}" aria-label="${escapeCal(g.label)} du ${fmt(g.start)} au ${fmt(g.end)}${exact.length?', passage exact : '+exact.join(', '):''}"><span class="cal-band-label" style="${firstStar===null?'':`max-width:calc(${firstStar}% - 13px)`}">${before?'← ':''}${escapeCal(g.label)}${g.maitre?' · Maître d’Asc.':''}${after?' →':''}</span>${stars}</button>`}
  h+='</div>'}
- el('grid').innerHTML=h;el('grid').querySelectorAll('[data-date]').forEach(b=>b.onclick=()=>{selected=calData.jours.find(d=>d.date===b.dataset.date);selectedGroup=null;selectedClimate=null;drawCal()});el('grid').querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{selectedGroup=+b.dataset.group;selectedClimate=null;drawCal()});el('grid').querySelectorAll('[data-climate]').forEach(b=>b.onclick=()=>{const panel=el('background');panel?.scrollIntoView?.({behavior:'smooth',block:'start'});panel?.focus?.({preventScroll:true})});if(el('periods'))el('periods').parentElement.hidden=view==='sky'||!checked('mars');drawPeriods();drawBackground();detailCal();}
+ el('grid').innerHTML=h;el('grid').querySelectorAll('.day[data-date]').forEach(b=>b.onclick=()=>{selected=calData.jours.find(d=>d.date===b.dataset.date);selectedGroup=null;selectedClimate=null;selectedSkyPeriod=null;drawCal()});el('grid').querySelectorAll('[data-sky-period]').forEach(b=>b.onclick=()=>{selected=calData.jours.find(d=>d.date===b.dataset.date);selectedSkyPeriod=+b.dataset.skyPeriod;drawCal()});el('grid').querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{selectedGroup=+b.dataset.group;selectedClimate=null;drawCal()});el('grid').querySelectorAll('[data-climate]').forEach(b=>b.onclick=()=>{const panel=el('background');panel?.scrollIntoView?.({behavior:'smooth',block:'start'});panel?.focus?.({preventScroll:true})});if(el('periods'))el('periods').parentElement.hidden=view==='sky'||!checked('mars');drawPeriods();drawBackground();detailCal();}
 function drawBackground(){
  const panel=el('background');if(!panel)return;
  const entries=groups.map((g,index)=>({g,index})).filter(({g})=>g.lente&&enabled(g));
@@ -156,4 +166,4 @@ function syncCalendarView(){
  if(el('affichage'))el('affichage').value=view;
  document.querySelectorAll('.cal .nav a').forEach(a=>{const url=new URL(a.href);url.searchParams.set('affichage',view);a.href=url.toString()});
 }
-['mars','moon','journal','view',...(calData.planetes_disponibles||[]).map(p=>'planet-'+p)].forEach(id=>{if(el(id))el(id).onchange=()=>{if(id==='view')syncCalendarView();focusedSlow=null;selectedGroup=null;selectedClimate=null;drawCal()}});syncCalendarView();drawCal();
+['mars','moon','journal','view',...(calData.planetes_disponibles||[]).map(p=>'planet-'+p)].forEach(id=>{if(el(id))el(id).onchange=()=>{if(id==='view')syncCalendarView();focusedSlow=null;selectedGroup=null;selectedClimate=null;selectedSkyPeriod=null;drawCal()}});syncCalendarView();drawCal();
