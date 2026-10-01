@@ -25,6 +25,7 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
 .plan-summary { min-height:58px; color:#60727b; line-height:1.55; }
 .plan-price { margin:24px 0 5px; color:var(--navy); font-size:2.65rem; font-weight:900; }
 .plan-price span { font-size:1rem; font-weight:700; color:#65737a; }
+.plan-price--pending { display:flex; align-items:center; min-height:3.2rem; font-size:1.35rem; line-height:1.25; }
 .plan-list { display:grid; gap:12px; margin:24px 0 30px; padding:0; list-style:none; }
 .plan-list li { position:relative; padding-left:28px; line-height:1.5; color:#40545d; }
 .plan-list li::before { content:"✓"; position:absolute; left:0; top:0; color:var(--teal); font-weight:900; }
@@ -90,7 +91,7 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
                 <p class="plan-label">L'accompagnement au fil de l'année</p>
                 <h2>Accompagnement astral</h2>
                 <p class="plan-summary">Une lecture croisée de ton année, du mois et de ce que tu vis réellement.</p>
-                <p class="plan-price">14,99 € <span>/ mois</span></p>
+                <p class="plan-price plan-price--pending">Tarif annoncé à l’ouverture</p>
                 <ul class="plan-list">
                     <li>Deux emails personnalisés par mois</li>
                     <li>Révolution Solaire technique incluse comme cadre annuel</li>
