@@ -5,7 +5,7 @@ from __future__ import annotations
 from calendar import monthrange
 from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
-from itertools import combinations
+from itertools import combinations, groupby
 
 import swisseph as swe
 
@@ -17,6 +17,11 @@ RAPIDES_RETENUES = ("Soleil", "Vénus", "Mars")
 PLANETES = RAPIDES_RETENUES + LENTES
 ASPECTS = (("conjonction", 0, 0), ("sextile", 60, 2), ("carré", 90, 3),
            ("trigone", 120, 4), ("opposition", 180, 6))
+NATURE_ASPECT = {
+    "carré": "tension", "opposition": "tension",
+    "trigone": "fluide", "sextile": "fluide",
+    "conjonction": "neutre",
+}
 
 
 def _positions(jour: date) -> dict[str, tuple[float, float]]:
@@ -83,6 +88,8 @@ def _mois_calcule(annee: int, mois: int):
             temps_forts.append({
                 "date": jour,
                 "titre": f"{premiere} {aspect} {seconde}",
+                "aspect": aspect,
+                "nature": NATURE_ASPECT[aspect],
                 "orbe": round(orbe, 2),
                 "lentes": premiere in LENTES and seconde in LENTES,
             })
@@ -97,14 +104,21 @@ def ciel_collectif_mois(annee: int, mois: int, *, jour_reference: date | None = 
     if jour_reference not in positions_par_jour:
         jour_reference = date(annee, mois, 1)
     climat = [
-        {"titre": f"{premiere} {aspect} {seconde}", "orbe": round(orbe, 2)}
+        {"titre": f"{premiere} {aspect} {seconde}", "aspect": aspect,
+         "nature": NATURE_ASPECT[aspect], "orbe": round(orbe, 2)}
         for premiere, seconde, aspect, orbe in _paires(positions_par_jour[jour_reference])
         if premiere in LENTES and seconde in LENTES and orbe <= 3
     ]
     climat.sort(key=lambda item: item["orbe"])
     evenements = [*temps_forts, *(
-        {**station, "station": True, "lentes": True} for station in stations
+        {**station, "station": True, "lentes": True, "nature": "station"}
+        for station in stations
     )]
     evenements.sort(key=lambda item: (item["date"], not item["lentes"], item.get("orbe", 0)))
+    groupes_dates = [
+        {"date": jour, "evenements": list(groupe)}
+        for jour, groupe in groupby(evenements, key=lambda item: item["date"])
+    ]
     return {"jour_reference": jour_reference, "climat": climat,
-            "temps_forts": temps_forts, "stations": stations, "evenements": evenements}
+            "temps_forts": temps_forts, "stations": stations,
+            "evenements": evenements, "groupes_dates": groupes_dates}

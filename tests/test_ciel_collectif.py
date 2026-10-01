@@ -19,6 +19,26 @@ class TestCielCollectif(unittest.TestCase):
         self.assertTrue(any("Pluton stationnaire" in titre for titre in titres))
         self.assertTrue(all("Mercure" not in titre and "Lune" not in titre for titre in titres))
         self.assertEqual(ciel["jour_reference"], date(2026, 10, 1))
+        self.assertEqual(
+            [groupe["date"] for groupe in ciel["groupes_dates"]],
+            sorted({evenement["date"] for evenement in ciel["evenements"]}),
+        )
+        self.assertEqual(
+            sum(len(groupe["evenements"]) for groupe in ciel["groupes_dates"]),
+            len(ciel["evenements"]),
+        )
+        self.assertEqual(
+            next(e for e in ciel["evenements"] if e["titre"] == "Mars opposition Pluton")["nature"],
+            "tension",
+        )
+        self.assertEqual(
+            next(e for e in ciel["evenements"] if e["titre"] == "Mars trigone Neptune")["nature"],
+            "fluide",
+        )
+        self.assertEqual(
+            next(e for e in ciel["evenements"] if e.get("station"))["nature"],
+            "station",
+        )
 
 
 if __name__ == "__main__":

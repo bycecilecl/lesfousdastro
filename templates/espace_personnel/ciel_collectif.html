@@ -14,10 +14,24 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e, #00a8a8 5
 .ciel-section h2 { color: #1f628e; font-size: 1.35rem; }
 .ciel-section>p { color: #61747d; line-height: 1.55; }
 .ciel-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin: 18px 0 0; padding: 0; list-style: none; }
-.ciel-event { padding: 17px 18px; border: 1px solid #d8e8eb; border-left: 4px solid #00a8a8; border-radius: 14px; background: #fff; }
-.ciel-event--slow { border-left-color: #9d3c4d; }
+.ciel-event { padding: 17px 18px; border: 1px solid #d8e8eb; border-left: 5px solid #87939c; border-radius: 14px; background: #fff; }
+.ciel-event--tension { border-left-color: #c44c56; background: #fffafa; }
+.ciel-event--fluide { border-left-color: #168f91; background: #f8fdfc; }
+.ciel-event--neutre { border-left-color: #87939c; background: #fafbfc; }
+.ciel-event--station { border-left-color: #a1682c; background: #fffcf6; }
 .ciel-event strong { display: block; color: #1f628e; }
 .ciel-event span { display: block; margin-top: 6px; color: #58707b; font-size: .9rem; }
+.ciel-legend { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 22px 0 8px; color: #526a75; font-size: .88rem; }
+.ciel-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.ciel-legend i { display: inline-block; width: 6px; height: 18px; border-radius: 4px; background: #87939c; }
+.ciel-legend .ciel-legend--tension i { background: #c44c56; }
+.ciel-legend .ciel-legend--fluide i { background: #168f91; }
+.ciel-legend .ciel-legend--station i { background: #a1682c; }
+.ciel-days { display: grid; gap: 19px; margin-top: 22px; }
+.ciel-day { display: grid; grid-template-columns: 94px minmax(0, 1fr); gap: 14px; align-items: start; }
+.ciel-day time { display: block; padding-top: 11px; color: #1f628e; font-weight: 800; text-transform: capitalize; }
+.ciel-day .ciel-list { margin: 0; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); }
+@media (max-width: 620px) { .ciel-day { grid-template-columns: 1fr; gap: 7px; } .ciel-day time { padding: 0; } }
 .ciel-empty { margin-top: 16px; padding: 16px; border-radius: 12px; background: #eef8f8; color: #526a75; }
 .ciel-note { margin-top: 34px; color: #647981; font-size: .9rem; line-height: 1.55; }
 {% endblock %}
@@ -33,20 +47,33 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e, #00a8a8 5
       <h2>{{ titre_mois }} {{ mois.year }}</h2>
       <a href="{{ url_for('espace_personnel.ciel_collectif', mois=suivant) }}">Mois suivant →</a>
     </nav>
+    <div class="ciel-legend" aria-label="Légende des aspects">
+      <span class="ciel-legend--tension"><i aria-hidden="true"></i>Carré ou opposition · tension</span>
+      <span class="ciel-legend--fluide"><i aria-hidden="true"></i>Trigone ou sextile · fluide</span>
+      <span><i aria-hidden="true"></i>Conjonction · neutre</span>
+      <span class="ciel-legend--station"><i aria-hidden="true"></i>Station planétaire</span>
+    </div>
     <section class="ciel-section">
       <h2>Climat lent au {{ ciel.jour_reference.strftime('%d/%m/%Y') }}</h2>
       <p>Jupiter à Pluton : les aspects encore actifs à moins de 3°.</p>
       {% if ciel.climat %}<ul class="ciel-list">{% for transit in ciel.climat %}
-        <li class="ciel-event ciel-event--slow"><strong>{{ transit.titre }}</strong><span>Orbe {{ '%.2f'|format(transit.orbe) }}°</span></li>
+        <li class="ciel-event ciel-event--{{ transit.nature }}"><strong>{{ transit.titre }}</strong><span>Orbe {{ '%.2f'|format(transit.orbe) }}°</span></li>
       {% endfor %}</ul>{% else %}<p class="ciel-empty">Aucun aspect entre planètes lentes à moins de 3° à cette date.</p>{% endif %}
     </section>
     <section class="ciel-section">
       <h2>Temps forts de {{ titre_mois }}</h2>
       <p>Rapprochements les plus serrés entre planètes lentes, ou du Soleil, de Vénus et de Mars avec une planète lente.</p>
       {% if ciel.evenements %}
-      <ul class="ciel-list">
-        {% for transit in ciel.evenements %}<li class="ciel-event{% if transit.lentes %} ciel-event--slow{% endif %}"><strong>{{ transit.titre }}</strong><span>{% if transit.station %}Station vers le {{ transit.date.strftime('%d/%m') }}{% else %}Plus serré vers le {{ transit.date.strftime('%d/%m') }} · orbe {{ '%.2f'|format(transit.orbe) }}°{% endif %}</span></li>{% endfor %}
-      </ul>
+      <div class="ciel-days">
+        {% for groupe in ciel.groupes_dates %}
+        <div class="ciel-day">
+          <time datetime="{{ groupe.date.isoformat() }}">{{ groupe.date.day }} {{ titre_mois }}</time>
+          <ul class="ciel-list">
+            {% for transit in groupe.evenements %}<li class="ciel-event ciel-event--{{ transit.nature }}"><strong>{{ transit.titre }}</strong><span>{% if transit.station %}Station relevée ce jour{% else %}Rapprochement le plus serré · orbe {{ '%.2f'|format(transit.orbe) }}°{% endif %}</span></li>{% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+      </div>
       {% else %}<p class="ciel-empty">Aucun rapprochement retenu ce mois-ci selon ces critères.</p>{% endif %}
     </section>
     <p class="ciel-note">Calcul géocentrique à 12 h UTC chaque jour. Les dates indiquent le relevé le plus proche, pas une heure exacte. Les aspects dissociés et les quinconces sont écartés ; la Lune et Mercure n'entrent pas dans cette sélection.</p>
