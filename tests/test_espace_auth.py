@@ -66,6 +66,14 @@ class TestEspaceAuth(unittest.TestCase):
         self.assertEqual(urlparse(lien).netloc, "lesfousdastro.fr")
         return reponse, urlparse(lien).path
 
+    def test_ciel_collectif_jour_choisi_et_borne_du_mois(self):
+        self._connecter_compte()
+        reponse = self.client.get("/mon-espace/ciel-du-moment?mois=2026-10&jour=2026-10-01")
+        self.assertEqual(reponse.status_code, 200)
+        self.assertIn(b"T-carr", reponse.data)
+        hors_mois = self.client.get("/mon-espace/ciel-du-moment?mois=2026-10&jour=2026-11-01")
+        self.assertEqual(hors_mois.status_code, 400)
+
     def _connecter_compte(self, email="cecile@example.com"):
         with self.app.app_context():
             utilisateur = UtilisateurEspace(prenom="Cécile", email=email)

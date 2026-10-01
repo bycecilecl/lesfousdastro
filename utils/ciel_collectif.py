@@ -15,6 +15,10 @@ from utils.transits.calcul_transits import PLANETES_SWISSEPH
 LENTES = ("Jupiter", "Saturne", "Uranus", "Neptune", "Pluton")
 RAPIDES_RETENUES = ("Soleil", "Vénus", "Mars")
 PLANETES = RAPIDES_RETENUES + LENTES
+PLANETES_CARTE = ("Soleil", "Lune", "Mercure", "Vénus", "Mars") + LENTES
+PLANETES_MOUVEMENT = ("Mercure", "Vénus", "Mars") + LENTES
+SIGNES = ("Bélier", "Taureau", "Gémeaux", "Cancer", "Lion", "Vierge",
+          "Balance", "Scorpion", "Sagittaire", "Capricorne", "Verseau", "Poissons")
 ASPECTS = (("conjonction", 0, 0), ("sextile", 60, 2), ("carré", 90, 3),
            ("trigone", 120, 4), ("opposition", 180, 6))
 NATURE_ASPECT = {
@@ -29,7 +33,7 @@ def _positions(jour: date) -> dict[str, tuple[float, float]]:
     julien = swe.julday(jour.year, jour.month, jour.day, 12)
     return {
         nom: (valeurs[0] % 360, valeurs[3])
-        for nom in PLANETES
+        for nom in PLANETES_CARTE
         for valeurs in (swe.calc_ut(julien, PLANETES_SWISSEPH[nom], swe.FLG_SPEED)[0],)
     }
 
@@ -63,6 +67,7 @@ def _mois_calcule(annee: int, mois: int):
     positions_par_jour = {}
     meilleurs = {}
     stations = []
+    entrees_signes = []
     precedentes = _positions(debut - timedelta(days=1))
     for numero in range(jours):
         jour = debut + timedelta(days=numero)
@@ -72,12 +77,22 @@ def _mois_calcule(annee: int, mois: int):
             cle = (premiere, seconde, aspect)
             if cle not in meilleurs or orbe < meilleurs[cle][1]:
                 meilleurs[cle] = (jour, orbe)
-        for planete in LENTES:
+        for planete in PLANETES_MOUVEMENT:
             avant, apres = precedentes[planete][1], positions[planete][1]
             if avant * apres < 0:
                 stations.append({
                     "date": jour,
                     "titre": f"{planete} stationnaire, puis {'direct' if apres > 0 else 'rétrograde'}",
+                    "planete": planete,
+                })
+            signe_avant = int(precedentes[planete][0] // 30)
+            signe_apres = int(positions[planete][0] // 30)
+            if signe_avant != signe_apres:
+                entrees_signes.append({
+                    "date": jour,
+                    "titre": f"{planete} entre en {SIGNES[signe_apres]}",
+                    "planete": planete,
+                    "signe": SIGNES[signe_apres],
                 })
         precedentes = positions
 
@@ -94,12 +109,12 @@ def _mois_calcule(annee: int, mois: int):
                 "lentes": premiere in LENTES and seconde in LENTES,
             })
     temps_forts.sort(key=lambda item: (item["date"], not item["lentes"], item["orbe"]))
-    return positions_par_jour, temps_forts, stations
+    return positions_par_jour, temps_forts, stations, entrees_signes
 
 
 def ciel_collectif_mois(annee: int, mois: int, *, jour_reference: date | None = None) -> dict:
     """Climat lent du jour et principaux rapprochements du mois, sans natal."""
-    positions_par_jour, temps_forts, stations = _mois_calcule(annee, mois)
+    positions_par_jour, temps_forts, stations, entrees_signes = _mois_calcule(annee, mois)
     jour_reference = jour_reference or datetime.now(timezone.utc).date()
     if jour_reference not in positions_par_jour:
         jour_reference = date(annee, mois, 1)
@@ -113,12 +128,36 @@ def ciel_collectif_mois(annee: int, mois: int, *, jour_reference: date | None = 
     evenements = [*temps_forts, *(
         {**station, "station": True, "lentes": True, "nature": "station"}
         for station in stations
+    ), *(
+        {**entree, "entree_signe": True, "nature": "entree"}
+        for entree in entrees_signes
     )]
-    evenements.sort(key=lambda item: (item["date"], not item["lentes"], item.get("orbe", 0)))
+    evenements.sort(key=lambda item: (item["date"], not item.get("lentes", False), item.get("orbe", 0)))
     groupes_dates = [
         {"date": jour, "evenements": list(groupe)}
         for jour, groupe in groupby(evenements, key=lambda item: item["date"])
     ]
+    retrogradations = []
+    jours_du_mois = sorted(positions_par_jour)
+    for planete in PLANETES_MOUVEMENT:
+        debut_retro = None
+        for jour in jours_du_mois:
+            retrograde = positions_par_jour[jour][planete][1] < 0
+            if retrograde and debut_retro is None:
+                debut_retro = jour
+            elif not retrograde and debut_retro is not None:
+                retrogradations.append({"planete": planete, "debut": debut_retro,
+                                        "fin": jour - timedelta(days=1),
+                                        "avant_mois": debut_retro == jours_du_mois[0],
+                                        "apres_mois": False})
+                debut_retro = None
+        if debut_retro is not None:
+            retrogradations.append({"planete": planete, "debut": debut_retro,
+                                    "fin": jours_du_mois[-1],
+                                    "avant_mois": debut_retro == jours_du_mois[0],
+                                    "apres_mois": True})
+    retrogradations.sort(key=lambda item: (item["debut"], item["planete"]))
     return {"jour_reference": jour_reference, "climat": climat,
             "temps_forts": temps_forts, "stations": stations,
-            "evenements": evenements, "groupes_dates": groupes_dates}
+            "entrees_signes": entrees_signes, "evenements": evenements,
+            "groupes_dates": groupes_dates, "retrogradations": retrogradations}

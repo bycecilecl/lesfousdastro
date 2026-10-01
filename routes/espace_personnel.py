@@ -426,26 +426,37 @@ def ciel_collectif():
     if utilisateur is None:
         return redirect(url_for("espace_personnel.connexion"))
     from utils.ciel_collectif import ciel_collectif_mois
+    from utils.figures_ciel_collectif import figures_ciel_collectif
 
     aujourd_hui = datetime.now(ZoneInfo("Europe/Paris")).date()
     mois_brut = request.args.get("mois", aujourd_hui.strftime("%Y-%m"))
     try:
         annee, mois = map(int, mois_brut.split("-"))
-        ciel = ciel_collectif_mois(annee, mois, jour_reference=aujourd_hui)
+        premier = date(annee, mois, 1)
+        jour_brut = request.args.get("jour")
+        jour_choisi = date.fromisoformat(jour_brut) if jour_brut else (
+            aujourd_hui if (aujourd_hui.year, aujourd_hui.month) == (annee, mois) else premier
+        )
+        if (jour_choisi.year, jour_choisi.month) != (annee, mois):
+            abort(400)
+        ciel = ciel_collectif_mois(annee, mois, jour_reference=jour_choisi)
     except (TypeError, ValueError):
         abort(400)
-    premier = date(annee, mois, 1)
+    figures_jour = figures_ciel_collectif(jour_choisi)
     precedent = premier - timedelta(days=1)
     suivant = (premier.replace(day=28) + timedelta(days=4)).replace(day=1)
     return render_template(
         "espace_personnel/ciel_collectif.html",
         utilisateur_espace=utilisateur,
         ciel=ciel,
+        jour_choisi=jour_choisi,
+        figures_jour=figures_jour,
         mois=premier,
         titre_mois=("janvier", "février", "mars", "avril", "mai", "juin", "juillet",
                     "août", "septembre", "octobre", "novembre", "décembre")[mois - 1],
         precedent=precedent.strftime("%Y-%m"),
         suivant=suivant.strftime("%Y-%m"),
+        dernier_jour=(suivant - timedelta(days=1)).isoformat(),
     )
 
 

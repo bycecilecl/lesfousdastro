@@ -19,6 +19,7 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e, #00a8a8 5
 .ciel-event--fluide { border-left-color: #168f91; background: #f8fdfc; }
 .ciel-event--neutre { border-left-color: #87939c; background: #fafbfc; }
 .ciel-event--station { border-left-color: #a1682c; background: #fffcf6; }
+.ciel-event--entree { border-left-color: #826aa5; background: #fbf9ff; }
 .ciel-event strong { display: block; color: #1f628e; }
 .ciel-event span { display: block; margin-top: 6px; color: #58707b; font-size: .9rem; }
 .ciel-legend { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 22px 0 8px; color: #526a75; font-size: .88rem; }
@@ -27,13 +28,29 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e, #00a8a8 5
 .ciel-legend .ciel-legend--tension i { background: #c44c56; }
 .ciel-legend .ciel-legend--fluide i { background: #168f91; }
 .ciel-legend .ciel-legend--station i { background: #a1682c; }
+.ciel-legend .ciel-legend--entree i { background: #826aa5; }
 .ciel-days { display: grid; gap: 19px; margin-top: 22px; }
 .ciel-day { display: grid; grid-template-columns: 94px minmax(0, 1fr); gap: 14px; align-items: start; }
 .ciel-day time { display: block; padding-top: 11px; color: #1f628e; font-weight: 800; text-transform: capitalize; }
+.ciel-day time a { color: inherit; text-decoration: underline; text-decoration-color: #99c6cb; text-underline-offset: 3px; }
 .ciel-day .ciel-list { margin: 0; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); }
 @media (max-width: 620px) { .ciel-day { grid-template-columns: 1fr; gap: 7px; } .ciel-day time { padding: 0; } }
 .ciel-empty { margin-top: 16px; padding: 16px; border-radius: 12px; background: #eef8f8; color: #526a75; }
 .ciel-note { margin-top: 34px; color: #647981; font-size: .9rem; line-height: 1.55; }
+.ciel-figures-section { margin-top: 28px; }
+.ciel-date-form { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin: 16px 0; }
+.ciel-date-form label { display: grid; gap: 5px; color: #1f628e; font-size: .9rem; font-weight: 700; }
+.ciel-date-form input { padding: 9px 12px; border: 1px solid #b6d5db; border-radius: 9px; background: #fff; color: #263645; font: inherit; }
+.ciel-date-form button { padding: 10px 16px; border: 0; border-radius: 999px; background: #1f628e; color: #fff; font: 700 .9rem 'Segoe UI', sans-serif; cursor: pointer; }
+.ciel-figures { padding: 18px; border: 1px solid #d8e8eb; border-radius: 16px; background: #fff; }
+.ciel-figures h3 { margin: 0 0 10px; color: #1f628e; font-size: 1.1rem; }
+.ciel-figures ul { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.ciel-figures strong { color: #9d3c4d; }
+.ciel-figures span { display: block; margin-top: 4px; color: #61747d; font-size: .88rem; line-height: 1.4; }
+.ciel-figures p { color: #61747d; font-size: .9rem; line-height: 1.5; }
+.ciel-retro-list { display: flex; flex-wrap: wrap; gap: 9px; margin: 16px 0 0; padding: 0; list-style: none; }
+.ciel-retro-list li { padding: 9px 13px; border: 1px solid #eddfc6; border-radius: 12px; background: #fffcf6; color: #6d542d; font-size: .9rem; }
+.ciel-retro-list strong { color: #865b20; }
 {% endblock %}
 {% block content %}
 {% include 'espace_personnel/_navigation.html' %}
@@ -52,7 +69,25 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e, #00a8a8 5
       <span class="ciel-legend--fluide"><i aria-hidden="true"></i>Trigone ou sextile · fluide</span>
       <span><i aria-hidden="true"></i>Conjonction · neutre</span>
       <span class="ciel-legend--station"><i aria-hidden="true"></i>Station planétaire</span>
+      <span class="ciel-legend--entree"><i aria-hidden="true"></i>Entrée en signe</span>
     </div>
+    <section class="ciel-section ciel-figures-section">
+      <h2>Figures du {{ jour_choisi.day }} {{ titre_mois }}</h2>
+      <p>Choisis une date pour voir les configurations formées par les planètes <em>au même moment</em>.</p>
+      <form class="ciel-date-form" method="get" action="{{ url_for('espace_personnel.ciel_collectif') }}">
+        <input type="hidden" name="mois" value="{{ mois.strftime('%Y-%m') }}">
+        <label for="ciel-jour">Jour à regarder<input id="ciel-jour" type="date" name="jour" value="{{ jour_choisi.isoformat() }}" min="{{ mois.isoformat() }}" max="{{ dernier_jour }}" required></label>
+        <button type="submit">Afficher ce jour</button>
+      </form>
+      <div class="ciel-figures">
+        {% if figures_jour %}<ul>{% for figure in figures_jour %}<li><strong>{{ figure.nom }}</strong><span>{{ figure.detail }}</span></li>{% endfor %}</ul>{% else %}<p>Aucune figure majeure retenue ce jour.</p>{% endif %}
+      </div>
+    </section>
+    <section class="ciel-section">
+      <h2>Rétrogradations de {{ titre_mois }}</h2>
+      <p>Mercure à Pluton. Les périodes coupées par le début ou la fin du mois continuent hors de cette fenêtre.</p>
+      {% if ciel.retrogradations %}<ul class="ciel-retro-list">{% for periode in ciel.retrogradations %}<li><strong>{{ periode.planete }}</strong> · {% if periode.avant_mois %}déjà rétrograde le 1er{% else %}du {{ periode.debut.day }}{% endif %} {% if periode.apres_mois %}→ se poursuit après le mois{% else %}→ {{ periode.fin.day }} {{ titre_mois }}{% endif %}</li>{% endfor %}</ul>{% else %}<p class="ciel-empty">Aucune planète de Mercure à Pluton rétrograde ce mois-ci.</p>{% endif %}
+    </section>
     <section class="ciel-section">
       <h2>Climat lent au {{ ciel.jour_reference.strftime('%d/%m/%Y') }}</h2>
       <p>Jupiter à Pluton : les aspects encore actifs à moins de 3°.</p>
@@ -62,21 +97,21 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e, #00a8a8 5
     </section>
     <section class="ciel-section">
       <h2>Temps forts de {{ titre_mois }}</h2>
-      <p>Rapprochements les plus serrés entre planètes lentes, ou du Soleil, de Vénus et de Mars avec une planète lente.</p>
+      <p>Rapprochements les plus serrés entre planètes lentes, ou du Soleil, de Vénus et de Mars avec une planète lente ; stations et entrées en signe de Mercure à Pluton.</p>
       {% if ciel.evenements %}
       <div class="ciel-days">
         {% for groupe in ciel.groupes_dates %}
         <div class="ciel-day">
-          <time datetime="{{ groupe.date.isoformat() }}">{{ groupe.date.day }} {{ titre_mois }}</time>
+          <time datetime="{{ groupe.date.isoformat() }}"><a href="{{ url_for('espace_personnel.ciel_collectif', mois=mois.strftime('%Y-%m'), jour=groupe.date.isoformat()) }}">{{ groupe.date.day }} {{ titre_mois }}</a></time>
           <ul class="ciel-list">
-            {% for transit in groupe.evenements %}<li class="ciel-event ciel-event--{{ transit.nature }}"><strong>{{ transit.titre }}</strong><span>{% if transit.station %}Station relevée ce jour{% else %}Rapprochement le plus serré · orbe {{ '%.2f'|format(transit.orbe) }}°{% endif %}</span></li>{% endfor %}
+            {% for transit in groupe.evenements %}<li class="ciel-event ciel-event--{{ transit.nature }}"><strong>{{ transit.titre }}</strong><span>{% if transit.station %}Changement de direction relevé ce jour{% elif transit.entree_signe %}Passage de signe relevé ce jour{% else %}Rapprochement le plus serré · orbe {{ '%.2f'|format(transit.orbe) }}°{% endif %}</span></li>{% endfor %}
           </ul>
         </div>
         {% endfor %}
       </div>
       {% else %}<p class="ciel-empty">Aucun rapprochement retenu ce mois-ci selon ces critères.</p>{% endif %}
     </section>
-    <p class="ciel-note">Calcul géocentrique à 12 h UTC chaque jour. Les dates indiquent le relevé le plus proche, pas une heure exacte. Les aspects dissociés et les quinconces sont écartés ; la Lune et Mercure n'entrent pas dans cette sélection.</p>
+    <p class="ciel-note">Calcul géocentrique à 12 h UTC chaque jour. Les dates indiquent le relevé le plus proche, pas une heure exacte. Les figures retiennent Soleil, Vénus, Mars et Jupiter à Pluton ; les aspects dissociés et les quinconces sont écartés. Mercure entre dans les repères de mouvement.</p>
   </div>
 </main>
 {% endblock %}

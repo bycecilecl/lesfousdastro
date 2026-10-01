@@ -4,6 +4,7 @@ import unittest
 from datetime import date
 
 from utils.ciel_collectif import _aspect, ciel_collectif_mois
+from utils.figures_ciel_collectif import _figures, figures_ciel_collectif
 
 
 class TestCielCollectif(unittest.TestCase):
@@ -17,7 +18,10 @@ class TestCielCollectif(unittest.TestCase):
         titres = {evenement["titre"] for evenement in ciel["evenements"]}
         self.assertIn("Mars opposition Pluton", titres)
         self.assertTrue(any("Pluton stationnaire" in titre for titre in titres))
-        self.assertTrue(all("Mercure" not in titre and "Lune" not in titre for titre in titres))
+        self.assertTrue(all(
+            "Mercure" not in evenement["titre"] and "Lune" not in evenement["titre"]
+            for evenement in ciel["temps_forts"]
+        ))
         self.assertEqual(ciel["jour_reference"], date(2026, 10, 1))
         self.assertEqual(
             [groupe["date"] for groupe in ciel["groupes_dates"]],
@@ -39,6 +43,48 @@ class TestCielCollectif(unittest.TestCase):
             next(e for e in ciel["evenements"] if e.get("station"))["nature"],
             "station",
         )
+
+    def test_figures_et_mouvements_octobre_2026(self):
+        figures = figures_ciel_collectif(date(2026, 10, 1))
+        self.assertTrue(any(
+            figure["nom"] == "T-carré" and set(figure["planetes"]) == {"Vénus", "Mars", "Pluton"}
+            for figure in figures
+        ))
+        ciel = ciel_collectif_mois(2026, 10, jour_reference=date(2026, 10, 1))
+        evenements = {(e["date"], e["titre"]) for e in ciel["evenements"]}
+        self.assertIn((date(2026, 10, 3), "Vénus stationnaire, puis rétrograde"), evenements)
+        self.assertIn((date(2026, 10, 24), "Mercure stationnaire, puis rétrograde"), evenements)
+        self.assertIn((date(2026, 10, 25), "Vénus entre en Balance"), evenements)
+        self.assertTrue(any(
+            p["planete"] == "Vénus" and p["debut"] == date(2026, 10, 3) and p["apres_mois"]
+            for p in ciel["retrogradations"]
+        ))
+
+    def test_grand_carre_et_diamant_sont_des_figures_completes(self):
+        def aspect(a, b, nom):
+            return {"premiere": a, "seconde": b, "aspect": nom}
+
+        grand_carre = [
+            aspect("Soleil", "Mars", "opposition"),
+            aspect("Vénus", "Saturne", "opposition"),
+            aspect("Soleil", "Vénus", "carré"),
+            aspect("Soleil", "Saturne", "carré"),
+            aspect("Mars", "Vénus", "carré"),
+            aspect("Mars", "Saturne", "carré"),
+        ]
+        noms = [f["nom"] for f in _figures(grand_carre)]
+        self.assertEqual(noms, ["Grand carré"])
+
+        diamant = [
+            aspect("Soleil", "Jupiter", "trigone"),
+            aspect("Soleil", "Uranus", "trigone"),
+            aspect("Jupiter", "Uranus", "trigone"),
+            aspect("Mars", "Soleil", "opposition"),
+            aspect("Mars", "Jupiter", "sextile"),
+            aspect("Mars", "Uranus", "sextile"),
+        ]
+        noms = [f["nom"] for f in _figures(diamant)]
+        self.assertEqual(noms, ["Diamant (cerf-volant)"])
 
 
 if __name__ == "__main__":
