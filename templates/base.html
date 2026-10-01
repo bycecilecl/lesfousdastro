@@ -7,8 +7,13 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-553N1CDR9Q');
+        gtag('config', 'G-553N1CDR9Q', {
+            page_location: location.origin + location.pathname,
+            page_referrer: '', page_title: 'Les Fous d’Astro',
+            allow_google_signals: false, allow_ad_personalization_signals: false
+        });
     </script>
+    <script src="{{ url_for('static', filename='conversion.js') }}" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/webp" sizes="64x64" href="{{ url_for('static', filename='images/logo_les_fous_dastro_favicon64.webp') }}">
@@ -38,8 +43,8 @@
         .navbar__brand:hover { transform: scale(1.05); }
         .navbar__toggle { display: none; background: none; border: 2px solid rgba(255,255,255,0.3); color: white; font-size: 1.2rem; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
         .navbar__toggle:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
-        .navbar__links { display: flex; list-style: none; margin: 0; padding: 0; gap: 8px; }
-        .navbar__links a { color: rgba(255,255,255,0.9); text-decoration: none; padding: 10px 16px; border-radius: 25px; font-weight: 500; font-size: 0.95rem; transition: all 0.3s ease; border: 1px solid transparent; }
+        .navbar__links { display: flex; list-style: none; margin: 0; padding: 0; gap: 2px; }
+        .navbar__links a { color: rgba(255,255,255,0.9); text-decoration: none; padding: 10px 9px; border-radius: 25px; font-weight: 500; font-size: 0.9rem; white-space: nowrap; transition: all 0.3s ease; border: 1px solid transparent; }
         .navbar__links a:hover { background: rgba(255,255,255,0.15); color: white; border-color: rgba(255,255,255,0.2); }
         .navbar__links a.active { background: rgba(255,255,255,0.2); color: white; border-color: rgba(255,255,255,0.3); }
         .navbar__links a[target="_blank"]::after { content: ' ↗'; font-size: 0.8rem; opacity: 0.7; }
@@ -141,13 +146,15 @@
         .footer-badges { display: flex; gap: 15px; }
         .security-badge { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); padding: 6px 12px; border-radius: 15px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.2); }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1200px) {
             .navbar__toggle { display: block; }
             .navbar__links { position: absolute; top: 100%; left: 0; right: 0; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%); flex-direction: column; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); transform: translateY(-10px); opacity: 0; visibility: hidden; transition: all 0.3s ease; gap: 0; }
             .nav-open .navbar__links { transform: translateY(0); opacity: 1; visibility: visible; }
             .navbar__links a { display: block; margin: 8px 0; padding: 15px 20px; border-radius: 12px; text-align: center; }
             .navbar__inner { padding: 0 15px; height: 60px; }
             .navbar__brand { font-size: 1.3rem; }
+        }
+        @media (max-width: 768px) {
             .footer-content { grid-template-columns: 1fr; gap: 30px; padding: 40px 20px 20px; }
             .footer-bottom-content { flex-direction: column; text-align: center; gap: 15px; }
             .footer-badges { flex-direction: column; align-items: center; }
@@ -168,6 +175,7 @@
             <ul class="navbar__links">
                 <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Analyses 💫</a></li>
                 <li><a href="{{ url_for('pages_bp.analyses') }}" class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
+                <li><a href="{{ url_for('pages_bp.abonnements') }}" class="{% if request.path == url_for('pages_bp.abonnements') %}active{% endif %}">Abonnements</a></li>
                 <li><a href="{{ url_for('blog.blog_index') }}" class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
                 <li><a href="{{ url_for('site_bp.temoignages') }}" class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
                 <li><a href="{{ url_for('pages_bp.prestations') }}" class="{% if request.path == url_for('pages_bp.prestations') %}active{% endif %}">Prestations</a></li>

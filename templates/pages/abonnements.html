@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Les Abonnements | Les Fous d'Astro{% endblock %}
+{% block meta_description %}Découvre les futurs abonnements des Fous d'Astro : une météo lunaire personnelle ou un accompagnement astrologique contextualisé tout au long de l'année.{% endblock %}
+
+{% block extra_css %}
+:root { --navy:#1f628e; --navy-dark:#123f5d; --teal:#00a8a8; --mist:#eafafa; --pink:#d3b1c2; --ink:#243943; }
+body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48%,#c0f0f7 100%); font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:var(--ink); }
+.subscriptions-page { position:relative; overflow:hidden; }
+.subscriptions-page::before,.subscriptions-page::after { content:""; position:absolute; border-radius:50%; filter:blur(2px); pointer-events:none; }
+.subscriptions-page::before { width:380px; height:380px; top:70px; right:-170px; background:rgba(211,177,194,.22); }
+.subscriptions-page::after { width:290px; height:290px; bottom:130px; left:-140px; background:rgba(255,255,255,.13); }
+.subscriptions-wrap { position:relative; z-index:1; width:min(1120px,calc(100% - 32px)); margin:0 auto; padding:72px 0 84px; }
+.subscriptions-hero { max-width:790px; margin:0 auto 48px; text-align:center; color:white; }
+.subscriptions-kicker { display:inline-block; margin-bottom:16px; padding:7px 14px; border:1px solid rgba(255,255,255,.35); border-radius:999px; background:rgba(255,255,255,.12); font-size:.8rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.subscriptions-hero h1 { margin:0 0 18px; font-size:clamp(2.35rem,6vw,4.5rem); line-height:1.02; }
+.subscriptions-hero p { margin:0 auto; max-width:690px; font-size:clamp(1.05rem,2vw,1.25rem); line-height:1.7; color:rgba(255,255,255,.9); }
+.plans { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; align-items:stretch; margin-top:32px; }
+.plan { position:relative; display:flex; flex-direction:column; padding:34px; border:1px solid rgba(255,255,255,.5); border-radius:28px; background:rgba(255,255,255,.96); box-shadow:0 24px 55px rgba(10,54,77,.2); }
+.plan--premium { border:2px solid #ffe3a8; transform:translateY(-8px); }
+.plan-ribbon { position:absolute; top:18px; right:18px; padding:6px 11px; border-radius:999px; background:#fff0c7; color:#765500; font-size:.72rem; font-weight:900; text-transform:uppercase; }
+.plan-label { margin:0 0 8px; color:var(--teal); font-size:.82rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+.plan h2 { margin:0 0 8px; color:var(--navy-dark); font-size:1.75rem; }
+.plan-summary { min-height:58px; color:#60727b; line-height:1.55; }
+.plan-price { margin:24px 0 5px; color:var(--navy); font-size:2.65rem; font-weight:900; }
+.plan-price span { font-size:1rem; font-weight:700; color:#65737a; }
+.plan-list { display:grid; gap:12px; margin:24px 0 30px; padding:0; list-style:none; }
+.plan-list li { position:relative; padding-left:28px; line-height:1.5; color:#40545d; }
+.plan-list li::before { content:"✓"; position:absolute; left:0; top:0; color:var(--teal); font-weight:900; }
+.plan-list li.is-not::before { content:"—"; color:#a5afb4; }
+.plan-list li.is-not { color:#7f8a8f; }
+.plan-button { margin-top:auto; padding:13px 19px; border-radius:999px; background:#dce3e6; color:#68777e; font-weight:800; text-align:center; }
+.plan-note { margin:14px 0 0; color:#829096; font-size:.8rem; line-height:1.45; text-align:center; }
+.free-space,.comparison { margin-top:28px; padding:clamp(26px,4vw,42px); border-radius:28px; background:rgba(255,255,255,.95); box-shadow:0 20px 45px rgba(10,54,77,.16); }
+.free-space { display:grid; grid-template-columns:1fr auto; gap:28px; align-items:center; }
+.section-kicker { margin-bottom:8px; color:var(--teal); font-size:.78rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+.free-space h2,.comparison h2 { margin:0 0 10px; color:var(--navy-dark); }
+.free-space p,.comparison p { color:#60727b; line-height:1.65; }
+.free-link { display:inline-block; padding:12px 18px; border-radius:999px; background:linear-gradient(45deg,var(--teal),var(--navy)); color:white; font-weight:800; text-decoration:none; white-space:nowrap; }
+.comparison-table { width:100%; margin-top:22px; border-collapse:collapse; }
+.comparison-table th,.comparison-table td { padding:14px 12px; border-bottom:1px solid rgba(31,98,142,.12); text-align:center; }
+.comparison-table th:first-child,.comparison-table td:first-child { text-align:left; }
+.comparison-table th { color:var(--navy); }
+.fine-print { max-width:760px; margin:28px auto 0; color:rgba(255,255,255,.83); font-size:.86rem; line-height:1.55; text-align:center; }
+@media(max-width:760px){ .plans{grid-template-columns:1fr}.plan--premium{transform:none}.free-space{grid-template-columns:1fr}.comparison{overflow-x:auto}.comparison-table{min-width:620px} }
+{% endblock %}
+
+{% block content %}
+<div class="subscriptions-page">
+    <div class="subscriptions-wrap">
+        <header class="subscriptions-hero">
+            <span class="subscriptions-kicker">Les abonnements — bientôt</span>
+            <h1>Ton ciel ne s'arrête pas après un PDF.</h1>
+            <p>Une lecture régulière pour comprendre le climat du moment, suivre ce qui se répète et éviter de découvrir trois mois plus tard que Saturne avait encore déplacé les meubles sans prévenir.</p>
+        </header>
+
+        <section class="free-space" aria-labelledby="espace-gratuit">
+            <div>
+                <p class="section-kicker">Toujours gratuit</p>
+                <h2 id="espace-gratuit">Ton espace astral personnel</h2>
+                <p>Profil astral, analyses et journal : cet espace reste gratuit. Il est actuellement ouvert sur invitation pendant les tests.</p>
+            </div>
+            <a class="free-link" href="{{ url_for('espace_personnel.connexion') }}">Accéder à mon espace</a>
+        </section>
+
+        <section class="plans" aria-label="Formules d'abonnement">
+            <article class="plan">
+                <p class="plan-label">La météo personnelle du mois</p>
+                <h2>Boussole lunaire</h2>
+                <p class="plan-summary">Un rendez-vous mensuel pour comprendre la tonalité émotionnelle de ton nouveau cycle lunaire.</p>
+                <p class="plan-price">4,99 € <span>/ mois</span></p>
+                <ul class="plan-list">
+                    <li>Une Révolution Lunaire interprétée avec ton thème natal</li>
+                    <li>Un email par cycle lunaire</li>
+                    <li>Les domaines de vie et mouvements émotionnels du mois</li>
+                    <li>Une lecture simple, personnelle et directement utilisable</li>
+                    <li class="is-not">Sans journal ni situation personnelle</li>
+                    <li class="is-not">Sans cadre annuel de Révolution Solaire</li>
+                    <li class="is-not">Sans suivi personnalisé des transits</li>
+                </ul>
+                <span class="plan-button">Bientôt disponible</span>
+                <p class="plan-note">Un cycle, un email. Le ciel parle déjà beaucoup, inutile de lui donner un mégaphone.</p>
+            </article>
+
+            <article class="plan plan--premium">
+                <span class="plan-ribbon">Le plus personnalisé</span>
+                <p class="plan-label">L'accompagnement au fil de l'année</p>
+                <h2>Accompagnement astral</h2>
+                <p class="plan-summary">Une lecture croisée de ton année, du mois et de ce que tu vis réellement.</p>
+                <p class="plan-price">14,99 € <span>/ mois</span></p>
+                <ul class="plan-list">
+                    <li>Deux emails personnalisés par mois</li>
+                    <li>Révolution Solaire technique incluse comme cadre annuel</li>
+                    <li>Révolution Lunaire reliée au natal et à la RS</li>
+                    <li>Transits, lunaisons et résonances importantes</li>
+                    <li>Prise en compte de tes domaines de vie actualisés</li>
+                    <li>Journal utilisé pour contextualiser les analyses</li>
+                    <li>Questions et fils conducteurs qui évoluent avec toi</li>
+                </ul>
+                <span class="plan-button">Bientôt disponible</span>
+                <p class="plan-note">Le grand rapport narratif de Révolution Solaire reste une analyse premium vendue séparément.</p>
+            </article>
+        </section>
+
+        <section class="comparison" aria-labelledby="comparaison">
+            <p class="section-kicker">Comparer sans sortir un tableur de la NASA</p>
+            <h2 id="comparaison">Quelle formule pour toi ?</h2>
+            <table class="comparison-table">
+                <thead><tr><th>Ce que tu reçois</th><th>Boussole lunaire</th><th>Accompagnement astral</th></tr></thead>
+                <tbody>
+                    <tr><td>Emails personnels</td><td>1 par cycle</td><td>2 par mois</td></tr>
+                    <tr><td>Révolution Lunaire + natal</td><td>Oui</td><td>Oui</td></tr>
+                    <tr><td>Révolution Solaire technique</td><td>Non</td><td>Oui</td></tr>
+                    <tr><td>Transits et lunaisons personnalisés</td><td>Non</td><td>Oui</td></tr>
+                    <tr><td>Journal et situation actuelle</td><td>Non</td><td>Oui</td></tr>
+                    <tr><td>Extraction initiale des mécanismes</td><td>Non</td><td>Incluse avec limites</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <p class="fine-print">Cette page présente le projet en cours de construction. Les contenus, tarifs et modalités pourront évoluer avant l'ouverture officielle des abonnements.</p>
+    </div>
+</div>
+{% endblock %}

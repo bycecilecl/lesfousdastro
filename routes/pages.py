@@ -50,6 +50,10 @@ def injecter_cle_turnstile():
 def analyses():
     return render_template("pages/analyses.html", active="analyses")
 
+@pages_bp.route("/abonnements")
+def abonnements():
+    return render_template("pages/abonnements.html", active="abonnements")
+
 @pages_bp.route("/formations")
 def formations():
     return render_template("pages/formations.html", active="formations")
