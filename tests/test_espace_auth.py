@@ -149,11 +149,30 @@ class TestEspaceAuth(unittest.TestCase):
             self.assertEqual(LienConnexionEspace.query.count(), 1)
             self.assertEqual(UtilisateurEspace.query.first().prenom, "Cécile")
         self.assertEqual(self.client.get(chemin).status_code, 302)
+        with self.client.session_transaction() as donnees:
+            self.assertTrue(donnees.permanent)
+            self.assertIn("espace_connecte_le", donnees)
         accueil = self.client.get("/mon-espace/")
         self.assertEqual(accueil.status_code, 200)
         self.assertIn(b"espace_personnel/accueil.html", accueil.data)
-        self.client.post("/mon-espace/deconnexion")
+        with self.client.session_transaction() as donnees:
+            jeton = donnees["espace_formulaire_csrf"]
+        self.assertEqual(self.client.post("/mon-espace/deconnexion").status_code, 400)
+        self.client.post("/mon-espace/deconnexion", data={"espace_csrf": jeton})
         self.assertEqual(self.client.get("/mon-espace/").status_code, 302)
+
+    def test_session_de_connexion_expire_apres_quatorze_jours(self):
+        _, chemin = self._demander_lien()
+        reponse = self.client.get(chemin)
+        self.assertIn("Expires=", reponse.headers["Set-Cookie"])
+        self.assertEqual(self.app.permanent_session_lifetime, timedelta(days=14))
+        with self.client.session_transaction() as donnees:
+            donnees["espace_connecte_le"] = (utcnow() - timedelta(days=15)).isoformat()
+        acces = self.client.get("/mon-espace/")
+        self.assertEqual(acces.status_code, 302)
+        self.assertEqual(acces.headers["Location"], "/mon-espace/connexion")
+        with self.client.session_transaction() as donnees:
+            self.assertNotIn("utilisateur_espace_id", donnees)
 
     def test_lien_a_usage_unique(self):
         _, chemin = self._demander_lien()

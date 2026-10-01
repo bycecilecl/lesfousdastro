@@ -37,6 +37,12 @@ from utils.email_sender import envoyer_email_avec_analyse
 
 
 espace_personnel_bp = Blueprint("espace_personnel", __name__, url_prefix="/mon-espace")
+DUREE_SESSION_ESPACE = timedelta(days=14)
+
+
+@espace_personnel_bp.record_once
+def configurer_session_espace(etat):
+    etat.app.permanent_session_lifetime = DUREE_SESSION_ESPACE
 
 RESSENTIS_MECANISME = {
     "me_parle": "Ça me parle clairement",
@@ -112,6 +118,26 @@ def _verifier_formulaire_portail():
     return hmac.compare_digest(
         request.form.get("espace_csrf", ""), _jeton_formulaire_portail()
     )
+
+
+@espace_personnel_bp.before_request
+def verifier_session_espace():
+    if not session.get("utilisateur_espace_id"):
+        return None
+    debut = session.get("espace_connecte_le")
+    if debut:
+        try:
+            instant = datetime.fromisoformat(debut)
+            expire = instant.tzinfo is None or datetime.now(timezone.utc) - instant >= DUREE_SESSION_ESPACE
+        except (TypeError, ValueError):
+            expire = True
+        if expire:
+            session.clear()
+            if request.endpoint != "espace_personnel.connexion":
+                return redirect(url_for("espace_personnel.connexion"))
+            return None
+    _jeton_formulaire_portail()
+    return None
 
 
 def _photo_transits_journal(theme, jour):
@@ -231,6 +257,8 @@ def verifier_turnstile():
 @espace_personnel_bp.route("/connexion", methods=["GET", "POST"])
 def connexion():
     if request.method == "GET":
+        if _compte_connecte() is not None:
+            return redirect(url_for("espace_personnel.accueil"))
         return render_template("espace_personnel/connexion.html")
     if not verifier_turnstile():
         return render_template(
@@ -295,8 +323,10 @@ def valider_connexion(jeton):
     if utilisateur is None:
         flash("Ce lien est invalide ou a expiré. Demande-en un nouveau.", "error")
         return redirect(url_for("espace_personnel.connexion"))
+    session.clear()
     session["utilisateur_espace_id"] = utilisateur.id
-    session.permanent = False
+    session["espace_connecte_le"] = datetime.now(timezone.utc).isoformat()
+    session.permanent = True
     return redirect(url_for("espace_personnel.accueil"))
 
 
@@ -2191,5 +2221,7 @@ def envoyer_brouillon_cycle(email_id):
 
 @espace_personnel_bp.route("/deconnexion", methods=["POST"])
 def deconnexion():
-    session.pop("utilisateur_espace_id", None)
+    if not _verifier_formulaire_portail():
+        abort(400)
+    session.clear()
     return redirect(url_for("espace_personnel.connexion"))

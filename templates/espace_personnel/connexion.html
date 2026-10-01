@@ -1,36 +1,67 @@
 {% extends "base.html" %}
 {% block title %}Connexion à mon espace | Les Fous d'Astro{% endblock %}
+
 {% block extra_css %}
-  .espace-connexion { max-width: 540px; margin: 4rem auto; padding: 2rem; background: #fff; border-radius: 22px; box-shadow: 0 15px 40px #092d4a24; color: #22465b; }
-  .espace-connexion h1 { color: #1f628e; text-align: center; margin-bottom: 1rem; }
-  .espace-connexion p { line-height: 1.55; margin-bottom: 1.2rem; }
-  .espace-connexion label { display: block; font-weight: 700; margin-bottom: .5rem; }
-  .espace-connexion input { width: 100%; padding: .8rem; margin-bottom: 1.2rem; border: 1px solid #b9d4d7; border-radius: 10px; font: inherit; }
-  .espace-connexion button { width: 100%; padding: .9rem 1.2rem; border: 0; border-radius: 30px; background: #1f628e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
-  .espace-connexion .message { padding: 1rem; border-radius: 10px; background: #e7f8f7; }
-  .espace-connexion .erreur { background: #fff0f0; color: #9b3030; }
-  .espace-connexion .cf-turnstile { margin: 0 0 1.2rem; }
+body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 54%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, sans-serif; }
+.connexion-shell { display: grid; place-items: center; min-height: calc(100vh - 70px); width: min(1020px, calc(100% - 32px)); margin: 0 auto; padding: 44px 0 68px; }
+.connexion-panel { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); width: 100%; overflow: hidden; border-radius: 28px; background: #fff; box-shadow: 0 28px 65px #092d4a3d; }
+.connexion-intro { display: flex; flex-direction: column; justify-content: center; padding: clamp(32px, 5vw, 60px); background: linear-gradient(155deg, #164d73 0%, #1f628e 52%, #008f96 100%); color: #fff; }
+.connexion-symbole { display: grid; place-items: center; width: 64px; height: 64px; margin-bottom: 28px; border: 1px solid #ffffff70; border-radius: 50%; background: #ffffff1c; font-size: 2rem; }
+.connexion-kicker { margin-bottom: 12px; color: #c0f0f7; font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.connexion-intro h1 { margin: 0 0 20px; color: #fff; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.12; }
+.connexion-intro p:last-child { max-width: 320px; color: #edf9f9; line-height: 1.65; }
+.connexion-formulaire { padding: clamp(30px, 5vw, 58px); color: #263645; }
+.connexion-formulaire h2 { margin: 0 0 12px; color: #1f628e; font-size: clamp(1.6rem, 3vw, 2rem); }
+.connexion-texte { margin-bottom: 27px; color: #566b76; line-height: 1.6; }
+.connexion-formulaire label { display: block; margin-bottom: 8px; color: #1f628e; font-size: .9rem; font-weight: 700; }
+.connexion-formulaire input[type="email"], .connexion-formulaire input[type="text"] { width: 100%; padding: 13px 15px; border: 1px solid #b9d4d7; border-radius: 12px; background: #fff; color: #263645; font: inherit; }
+.connexion-formulaire input:focus { outline: 3px solid #00a8a822; border-color: #00a8a8; }
+.connexion-prenom { margin-top: 17px; }
+.connexion-prenom summary { color: #1f628e; font-size: .88rem; font-weight: 700; cursor: pointer; }
+.connexion-prenom label { margin-top: 13px; }
+.connexion-formulaire .cf-turnstile { margin: 23px 0; }
+.connexion-bouton { width: 100%; padding: 14px 20px; border: 0; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: #fff; font: 700 1rem 'Segoe UI', Tahoma, sans-serif; cursor: pointer; }
+.connexion-bouton:hover { filter: brightness(1.08); }
+.connexion-note { margin-top: 15px; color: #71818a; font-size: .83rem; line-height: 1.5; text-align: center; }
+.connexion-message { margin: 0 0 20px; padding: 14px 16px; border-radius: 12px; background: #e7f8f7; color: #17636c; line-height: 1.55; }
+.connexion-message.error, .connexion-message.erreur { background: #fff0f0; color: #9b3030; }
+@media (max-width: 720px) { .connexion-shell { padding-top: 24px; } .connexion-panel { grid-template-columns: 1fr; } .connexion-intro { padding: 28px; } .connexion-symbole { width: 48px; height: 48px; margin-bottom: 16px; font-size: 1.5rem; } .connexion-intro h1 { margin-bottom: 8px; } .connexion-intro p:last-child { max-width: none; } }
 {% endblock %}
+
 {% block content %}
-<section class="espace-connexion">
-  <h1>Mon espace astral</h1>
-  <p>Ton espace prend forme. Pour cette première ouverture, la connexion est réservée aux personnes invitées.</p>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for categorie, message in messages %}<p class="message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
-  {% endwith %}
-  {% if erreur %}<p class="message erreur" role="alert">{{ erreur }}</p>{% endif %}
-  {% if confirmation %}
-    <p class="message" role="status">Si ton adresse fait partie des invitations, un lien vient de t'être envoyé. Regarde aussi dans tes courriers indésirables.</p>
-  {% else %}
-    <form method="post">
-      <label for="espace-prenom">Ton prénom</label>
-      <input id="espace-prenom" name="prenom" autocomplete="given-name" placeholder="Pour créer ton compte">
-      <label for="espace-email">Ton adresse e-mail</label>
-      <input id="espace-email" type="email" name="email" autocomplete="email" required>
-      <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
-      <button type="submit">Recevoir mon lien de connexion</button>
-    </form>
-  {% endif %}
-</section>
+<main class="connexion-shell">
+  <div class="connexion-panel">
+    <div class="connexion-intro">
+      <div class="connexion-symbole" aria-hidden="true">☾</div>
+      <p class="connexion-kicker">Les Fous d'Astro · ton espace</p>
+      <h1>Ton ciel, au même endroit.</h1>
+      <p>Retrouve tes analyses, ton journal et les cycles que tu explores, sans perdre le fil entre deux visites.</p>
+    </div>
+    <section class="connexion-formulaire" aria-labelledby="connexion-titre">
+      <h2 id="connexion-titre">Se connecter</h2>
+      <p class="connexion-texte">Reçois un lien personnel par e-mail. Après l’avoir ouvert, tu resteras connecté pendant 14 jours sur cet appareil.</p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for categorie, message in messages %}<p class="connexion-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+      {% endwith %}
+      {% if erreur %}<p class="connexion-message erreur" role="alert">{{ erreur }}</p>{% endif %}
+      {% if confirmation %}
+        <p class="connexion-message" role="status">Si ton adresse fait partie des invitations, le lien est en route. Pense à vérifier les courriers indésirables.</p>
+      {% else %}
+        <form method="post">
+          <label for="espace-email">Adresse e-mail</label>
+          <input id="espace-email" type="email" name="email" autocomplete="email" required>
+          <details class="connexion-prenom">
+            <summary>Première connexion ? Ajouter mon prénom</summary>
+            <label for="espace-prenom">Prénom</label>
+            <input id="espace-prenom" type="text" name="prenom" autocomplete="given-name" maxlength="100" placeholder="Facultatif">
+          </details>
+          <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+          <button class="connexion-bouton" type="submit">Recevoir mon lien de connexion</button>
+        </form>
+        <p class="connexion-note">Lien à usage unique, valable 20 minutes. Aucun mot de passe à retenir.</p>
+      {% endif %}
+    </section>
+  </div>
+</main>
 {% endblock %}
 {% block scripts %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endblock %}
