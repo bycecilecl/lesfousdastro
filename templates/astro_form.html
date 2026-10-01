@@ -663,6 +663,13 @@ input[type="time"]:focus, input[type="email"]:focus {
 }
 .transits-offer:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(95,67,178,.18); border-color: #8B5CF6; }
 .transits-offer.selected { border-color: #00a8a8; box-shadow: 0 0 0 3px rgba(0,168,168,.12); }
+.transits-offer + .transits-offer { margin-top: 16px; }
+.rs-offer { border-color: rgba(233, 145, 24, .55); cursor: default; }
+.rs-offer:hover { transform: none; box-shadow: none; border-color: rgba(233, 145, 24, .55); }
+.rs-offer .transits-copy h4, .rs-offer .transits-price { color: #a34d08; }
+.rs-offer .transits-cta { background: linear-gradient(135deg,#f2a20a,#d66d10); }
+.rs-offer .rs-step { margin-top: 7px; font-size: .91rem; }
+.rs-offer .rs-more { display: inline-block; margin-top: 9px; color: #a34d08; font-weight: 700; }
 .transits-icon { font-size: 3.2rem; line-height: 1; }
 .transits-copy h4 { color: #1f628e; font-size: 1.35rem; margin: 0 0 7px; }
 .transits-copy p { color: #59636e; margin: 0; line-height: 1.5; }
@@ -1034,6 +1041,19 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <em>Détail complet et exemple de rapport en bas de la page Guide des analyses.</em>
                         </div>
                     </div>
+                    <article class="transits-offer rs-offer" aria-label="Ma Révolution Solaire, disponible à partir du 9 octobre 2026">
+                        <span class="transits-icon" aria-hidden="true">☀️</span>
+                        <div class="transits-copy">
+                            <h4>Ma Révolution Solaire</h4>
+                            <p>Une lecture de ton année solaire, de ses résonances avec ton thème natal et des périodes qui peuvent en réveiller les thèmes.</p>
+                            <p class="rs-step">Tu pourras choisir l'année et le lieu de ton retour solaire, puis donner quelques repères sur ce que tu vis, si tu le souhaites.</p>
+                            <a class="rs-more" href="/analyses#revolution-solaire">Découvrir ce que contient le rapport</a>
+                        </div>
+                        <div class="transits-price">
+                            42€
+                            <span class="transits-cta">Disponible à partir du 9 octobre</span>
+                        </div>
+                    </article>
                 </section>
 
                 <div class="packs-section">
