@@ -1188,6 +1188,19 @@ def calendrier():
         "mars": bool(theme) and droits["transits_personnalises"],
         "lune": droits["cycle_lunaire"],
     })
+    try:
+        from utils.ciel_collectif import ciel_collectif_mois
+        ciel = ciel_collectif_mois(annee, mois)
+        donnees["ciel_collectif"] = {
+            "evenements": [{**evenement, "date": evenement["date"].isoformat()}
+                           for evenement in ciel["evenements"]],
+            "retrogradations": [{**periode, "debut": periode["debut"].isoformat(),
+                                  "fin": periode["fin"].isoformat()}
+                                 for periode in ciel["retrogradations"]],
+        }
+    except Exception:
+        current_app.logger.exception("Calcul du ciel collectif indisponible pour le calendrier")
+        donnees["ciel_collectif"] = None
     precedent = (debut - timedelta(days=1)).strftime("%Y-%m")
     suivant = fin.strftime("%Y-%m")
     reponse = current_app.make_response(render_template(
