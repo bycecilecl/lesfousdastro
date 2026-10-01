@@ -12,9 +12,10 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
 .subscriptions-page::after { width:290px; height:290px; bottom:130px; left:-140px; background:rgba(255,255,255,.13); }
 .subscriptions-wrap { position:relative; z-index:1; width:min(1120px,calc(100% - 32px)); margin:0 auto; padding:72px 0 84px; }
 .subscriptions-hero { max-width:790px; margin:0 auto 48px; text-align:center; color:white; }
-.subscriptions-kicker { display:inline-block; margin-bottom:16px; padding:7px 14px; border:1px solid rgba(255,255,255,.35); border-radius:999px; background:rgba(255,255,255,.12); font-size:.8rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
-.subscriptions-hero h1 { margin:0 0 18px; font-size:clamp(2.35rem,6vw,4.5rem); line-height:1.02; }
-.subscriptions-hero p { margin:0 auto; max-width:690px; font-size:clamp(1.05rem,2vw,1.25rem); line-height:1.7; color:rgba(255,255,255,.9); }
+.subscriptions-hero .badge-d-wrap { margin-bottom:18px; }
+.subscriptions-hero .subscriptions-status { margin:0 0 12px; color:#d4f9f9; font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.subscriptions-hero .subscriptions-tagline { margin:0 auto 16px; color:rgba(255,255,255,.78); font-size:1rem; line-height:1.5; }
+.subscriptions-hero .subscriptions-description { margin:0 auto; max-width:690px; font-size:clamp(1.05rem,2vw,1.2rem); line-height:1.7; color:rgba(255,255,255,.94); }
 .plans { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; align-items:stretch; margin-top:32px; }
 .plan { position:relative; display:flex; flex-direction:column; padding:34px; border:1px solid rgba(255,255,255,.5); border-radius:28px; background:rgba(255,255,255,.96); box-shadow:0 24px 55px rgba(10,54,77,.2); }
 .plan--premium { border:2px solid #ffe3a8; transform:translateY(-8px); }
@@ -49,9 +50,11 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
 <div class="subscriptions-page">
     <div class="subscriptions-wrap">
         <header class="subscriptions-hero">
-            <span class="subscriptions-kicker">Les abonnements — bientôt</span>
-            <h1>Ton ciel ne s'arrête pas après un PDF.</h1>
-            <p>Une lecture régulière pour comprendre le climat du moment, suivre ce qui se répète et éviter de découvrir trois mois plus tard que Saturne avait encore déplacé les meubles sans prévenir.</p>
+            <div class="badge-d-wrap"><div class="badge-d">✦ Les abonnements ✦</div></div>
+            <h1 class="sr-only">Les abonnements</h1>
+            <p class="subscriptions-status">Bientôt disponibles</p>
+            <p class="subscriptions-tagline">Ton ciel ne s'arrête pas après un PDF.</p>
+            <p class="subscriptions-description">Une lecture régulière pour comprendre le climat du moment, suivre ce qui se répète et éviter de découvrir trois mois plus tard que Saturne avait encore déplacé les meubles sans prévenir.</p>
         </header>
 
         <section class="free-space" aria-labelledby="espace-gratuit">
