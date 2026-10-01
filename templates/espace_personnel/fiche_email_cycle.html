@@ -1,43 +1,53 @@
 {% extends "base.html" %}
 {% block title %}Brouillon de cycle | Les Fous d'Astro{% endblock %}
 {% block extra_css %}
-  .mail-shell { width: min(900px, calc(100% - 32px)); margin: 3rem auto 4rem; }
-  .mail-retour { color: white; font-weight: 700; }
-  .mail-carte { margin-top: 1rem; padding: clamp(24px, 5vw, 38px); border-radius: 22px; background: #fff; box-shadow: 0 15px 40px #092d4a24; color: #263645; }
-  .mail-carte h1 { color: #1f628e; }
+  body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 52%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, sans-serif; }
+  .mail-shell { width: min(960px, calc(100% - 32px)); margin: 0 auto 72px; }
+  .mail-retour { display: inline-block; margin: 0 0 20px; color: white; font-weight: 700; text-decoration: none; }
+  .mail-carte { padding: clamp(24px, 4vw, 42px); border-radius: 24px; background: rgba(255,255,255,.97); box-shadow: 0 18px 42px #092d4a25; color: #263645; }
+  .mail-carte h1 { margin: 0 0 14px; color: #1f628e; font-size: clamp(1.65rem, 4vw, 2.5rem); line-height: 1.2; overflow-wrap: anywhere; }
   .mail-carte p { line-height: 1.55; }
-  .mail-corps { white-space: pre-wrap; line-height: 1.65; font-family: inherit; overflow-wrap: anywhere; }
+  .mail-meta { margin-bottom: 26px; color: #607580; }
+  .mail-statut { display: inline-block; padding: 5px 11px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-size: .85rem; font-weight: 700; }
+  .mail-corps { padding-top: 6px; color: #334650; font-size: 1rem; line-height: 1.7; overflow-wrap: anywhere; }
+  .mail-corps h2 { margin: 30px 0 12px; color: #1f628e; font-size: 1.35rem; line-height: 1.3; }
+  .mail-corps p { margin: 0 0 18px; line-height: 1.7; }
+  .mail-corps strong { color: #214f69; }
   .mail-message { padding: .8rem 1rem; border-radius: 10px; background: #e7f8f7; }
   .mail-message.error { color: #9b3030; background: #fff0f0; }
-  .mail-bouton { padding: .8rem 1.2rem; border: 0; border-radius: 26px; background: #1f628e; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+  .mail-action { margin-top: 26px; padding-top: 22px; border-top: 1px solid #d9e9eb; }
+  .mail-action p { margin-bottom: 14px; color: #607580; }
+  .mail-bouton { padding: .8rem 1.2rem; border: 0; border-radius: 26px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: #fff; font: 700 .95rem 'Segoe UI', Tahoma, sans-serif; cursor: pointer; }
 {% endblock %}
 {% block content %}
-<div class="mail-shell">
-  {% include 'espace_personnel/_navigation.html' %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="mail-shell">
+  <a class="mail-retour" href="{{ url_for('espace_personnel.emails_cycle') }}">← Retour à mes mails de cycle</a>
   <article class="mail-carte">
     <h1>{{ email.objet or 'Mail en préparation' }}</h1>
-    <p>État : <strong>{{ email.statut }}</strong>{% if email.date_envoi %} · Envoyé le {{ email.date_envoi.strftime('%d/%m/%Y à %H:%M') }}{% endif %}</p>
+    {% set libelles_statut = {'prepare': 'Données prêtes', 'brouillon': 'Brouillon', 'archive': 'Archive', 'envoye': 'Envoyé', 'envoi_en_cours': 'Envoi en cours', 'envoi_incertain': 'Envoi à vérifier'} %}
+    <p class="mail-meta"><span class="mail-statut">{{ libelles_statut.get(email.statut, email.statut|replace('_', ' ')|capitalize) }}</span>{% if email.date_envoi %} · Envoyé le {{ email.date_envoi.strftime('%d/%m/%Y à %H:%M') }}{% endif %}</p>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for categorie, message in messages %}<p class="mail-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
     {% endwith %}
-    {% if email.contenu_texte %}<div class="mail-corps">{{ email.contenu_texte }}</div>{% endif %}
+    {% if contenu_apercu %}<div class="mail-corps">{{ contenu_apercu }}</div>{% endif %}
     {% if email.statut in ['generation_en_cours', 'generation_echec'] %}
       <p>La génération a été lancée, mais aucun brouillon complet n’est disponible. Aucun nouvel appel à Claude ne partira automatiquement ; contacte-nous pour vérifier ce cycle.</p>
     {% endif %}
     {% if peut_generer %}
-      <form method="post" action="{{ url_for('espace_personnel.generer_brouillon_email_cycle', email_id=email.id) }}">
+      <form class="mail-action" method="post" action="{{ url_for('espace_personnel.generer_brouillon_email_cycle', email_id=email.id) }}">
         <input type="hidden" name="espace_csrf" value="{{ session.get('espace_formulaire_csrf', '') }}">
         <p>Le contrat factuel est prêt. Ce clic lance un seul appel à Claude ; le texte restera un brouillon à relire.</p>
         <button class="mail-bouton" type="submit">Générer le brouillon</button>
       </form>
     {% endif %}
     {% if droits.cycle_lunaire and email.statut == 'brouillon' and email.objet and email.contenu_texte %}
-      <form method="post" action="{{ url_for('espace_personnel.envoyer_brouillon_cycle', email_id=email.id) }}">
+      <form class="mail-action" method="post" action="{{ url_for('espace_personnel.envoyer_brouillon_cycle', email_id=email.id) }}">
         <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
         <p>Destinataire : {{ utilisateur.email }}. L’envoi est définitif ; vérifie le texte avant de continuer.</p>
         <button class="mail-bouton" type="submit">Envoyer ce mail à mon adresse</button>
       </form>
     {% endif %}
   </article>
-</div>
+</main>
 {% endblock %}

@@ -2112,6 +2112,8 @@ def importer_brouillon_cycle():
 
 @espace_personnel_bp.route("/emails-cycle/<int:email_id>")
 def fiche_email_cycle(email_id):
+    from utils.rendu_brouillon_cycle import rendu_brouillon_cycle
+
     utilisateur_id = session.get("utilisateur_espace_id")
     utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
     if utilisateur is None or utilisateur.actif != 1:
@@ -2137,6 +2139,7 @@ def fiche_email_cycle(email_id):
     return render_template(
         "espace_personnel/fiche_email_cycle.html", utilisateur=utilisateur,
         email=email, droits=droits, peut_generer=peut_generer,
+        contenu_apercu=rendu_brouillon_cycle(email.contenu_texte),
     )
 
 
