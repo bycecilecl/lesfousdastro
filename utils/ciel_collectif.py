@@ -216,6 +216,7 @@ def _periodes_aspects_mois(annee: int, mois: int) -> list[dict]:
                         exacts.append(exact)
         resultat.append({
             "titre": f"{premiere} {aspect} {seconde}",
+            "planetes": [premiere, seconde],
             "aspect": aspect, "nature": NATURE_ASPECT[aspect],
             "start": entree.isoformat() if entree and entree > debut else None,
             "end": sortie.isoformat() if sortie and sortie < fin else None,
