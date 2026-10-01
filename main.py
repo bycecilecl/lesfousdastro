@@ -297,8 +297,15 @@ app.register_blueprint(forces_defis_module_bp)
 app.register_blueprint(checkout_bp)
 app.register_blueprint(blog_bp)
 app.register_blueprint(site_bp)
-from routes.conversion import conversion_bp
-app.register_blueprint(conversion_bp)
+# Optional conversion telemetry may not be included in this deployment.
+try:
+    from routes.conversion import conversion_bp
+except ModuleNotFoundError as exc:
+    if exc.name != "routes.conversion":
+        raise
+    app.logger.warning("Suivi conversion absent : démarrage sans statistiques conversion.")
+else:
+    app.register_blueprint(conversion_bp)
 app.register_blueprint(profil_amoureux_module)
 app.register_blueprint(gift_api_bp)
 app.register_blueprint(gift_bp)
