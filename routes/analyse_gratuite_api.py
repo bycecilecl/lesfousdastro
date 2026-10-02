@@ -68,6 +68,23 @@ def _texte_analyse_vers_html(texte):
     return "".join(f'<p style="margin:0 0 16px;">{p}</p>' for p in paragraphes)
 
 
+def _assurer_nakshatra_dans_texte(texte, nakshatra):
+    """Ajoute une phrase factuelle avant la question finale si l'IA l'a omis."""
+    if nakshatra not in NAKSHATRAS or nakshatra.casefold() in texte.casefold():
+        return texte
+    lignes = texte.split("\n")
+    non_vides = [i for i, ligne in enumerate(lignes) if ligne.strip()]
+    index = non_vides[-1] if non_vides else 0
+    if len(non_vides) > 1 and lignes[index].rstrip().endswith("?"):
+        index = non_vides[-2]
+    phrase = (
+        f"Ta Lune en nakshatra {nakshatra} apporte aussi un angle védique "
+        "à ton rapport aux émotions."
+    )
+    lignes[index] = lignes[index].rstrip() + " " + phrase
+    return "\n".join(lignes)
+
+
 def _generer_texte_analyse_gratuite(prompt):
     """Choisit le fournisseur du gratuit sans modifier le fournisseur global."""
     provider = (
@@ -240,6 +257,16 @@ def api_analyse_gratuite():
 
         positions_str = formater_positions_planetes(theme['planetes'])
         aspects_str   = formater_aspects(theme['aspects'])
+        nakshatra = theme.get("planetes_vediques", {}).get("Lune", {}).get("nakshatra")
+        consigne_nakshatra = ""
+        if nakshatra in NAKSHATRAS:
+            consigne_nakshatra = (
+                f"Nakshatra lunaire calculé : {nakshatra}. Dans le deuxième "
+                "paragraphe, intègre une phrase qui nomme ce nakshatra et "
+                "le relie prudemment au fonctionnement émotionnel décrit. "
+                "Si sa symbolique t'est incertaine, reste factuel. "
+                "N'invente ni événement de vie ni certitude psychologique."
+            )
 
         # 🤖 5) Prompt : un aperçu concret qui ouvre vers le Point Astral
         prompt = dedent(
@@ -259,12 +286,8 @@ def api_analyse_gratuite():
             Tu peux ajouter une ou deux images sarcastiques, concrètes et
             mémorables. Elles doivent éclairer une contradiction du thème,
             jamais se moquer de la personne ni banaliser une difficulté.
-            Tu fondes l'analyse sur l'astrologie occidentale tropicale. Tu peux
-            utiliser le Nakshatra lunaire fourni comme éclairage complémentaire
-            s'il enrichit réellement l'un des mécanismes retenus. Son nom sera
-            affiché séparément : ne le répète pas dans le texte. N'en déduis
-            pas automatiquement une affirmation
-            karmique ou un événement de vie.
+            Tu fondes l'analyse sur l'astrologie occidentale tropicale.
+            {consigne_nakshatra}
 
             Personne analysée : {theme.get("nom", "la personne")}
             Genre déclaré obligatoire : {genre_label}
@@ -297,12 +320,13 @@ def api_analyse_gratuite():
 
             - Commence directement par une dynamique humaine, jamais par un placement.
             - Ne fais pas une liste de placements.
-            - Cite au maximum trois termes astrologiques dans tout le texte.
+            - Cite au maximum quatre termes astrologiques dans tout le texte,
+              dont le nakshatra lunaire s'il est fourni.
             - Ne répète pas plusieurs fois la même idée.
             - N'invente aucun placement ni aucun aspect.
             - Pour toute manifestation concrète, croise les facteurs disponibles
               dans ce thème (planètes, signes, maisons, aspects, angles, maîtrises
-              et, s'il est pertinent, Nakshatra lunaire). Ne transforme jamais
+              et le Nakshatra lunaire). Ne transforme jamais
               le symbolisme isolé d'un seul facteur en certitude biographique.
             - Évite les compliments invérifiables comme « magnétique »,
               « charismatique », « exceptionnel » ou « don naturel ».
@@ -317,7 +341,7 @@ def api_analyse_gratuite():
             - Respecte obligatoirement le genre déclaré dans tous les adjectifs
               et participes.
             - Deux paragraphes courts, puis la question finale.
-            - Entre 120 et 150 mots. Ne dépasse jamais 150 mots.
+            - Entre 110 et 130 mots. Ne dépasse jamais 130 mots.
             """
         ).strip()
 
@@ -325,9 +349,9 @@ def api_analyse_gratuite():
 
         # 🤖 6) Appel à l'IA
         texte = _generer_texte_analyse_gratuite(prompt)
+        texte = _assurer_nakshatra_dans_texte(texte, nakshatra)
         print("✅ Analyse IA reçue :", texte[:100] + "...")
         texte_html = _texte_analyse_vers_html(texte)
-        nakshatra = theme.get("planetes_vediques", {}).get("Lune", {}).get("nakshatra")
         nakshatra_txt = ""
         nakshatra_html = ""
         if nakshatra in NAKSHATRAS:
