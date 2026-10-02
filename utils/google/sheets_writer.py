@@ -33,7 +33,7 @@ def _get_client():
         raise FileNotFoundError(f"Credentials introuvables : {path}")
     return gspread.service_account(filename=path)
 
-def ajouter_email_au_sheet(email, nom="Inconnu"):
+def ajouter_email_au_sheet(email, nom="Inconnu", analysis_id=None):
     if not email:
         raise ValueError("Email vide")
 
@@ -52,10 +52,26 @@ def ajouter_email_au_sheet(email, nom="Inconnu"):
     date = now.strftime("%Y-%m-%d")
     heure = now.strftime("%H:%M:%S")
 
-    sheet.append_row([email, nom, date, heure])
+    row = [email, nom, date, heure]
+    if analysis_id:
+        row.append(analysis_id)
+    sheet.append_row(row)
     print(f"✅ Email ajouté à Google Sheet : {email}, {nom}, {date}, {heure}")
 
-    # --- Placements -> Google Sheets (onglet "placements") -----------------------
+
+def ajouter_reponse_analyse_gratuite(analysis_id, reponse):
+    """Inscrit le frein déclaré sur la ligne de l'analyse gratuite concernée."""
+    sh = _get_spreadsheet(_get_client())
+    sheet = sh.sheet1
+    for row_number, value in enumerate(sheet.col_values(5), start=1):
+        if value != analysis_id:
+            continue
+        if sheet.cell(row_number, 6).value != reponse:
+            sheet.update_cell(row_number, 6, reponse)
+        return True
+    return False
+
+# --- Placements -> Google Sheets (onglet "placements") -----------------------
 
 def _get_spreadsheet(client):
     """Ouvre la feuille soit par ID (si SHEETS_SPREADSHEET_ID), soit par titre."""

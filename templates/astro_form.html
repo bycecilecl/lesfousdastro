@@ -698,11 +698,12 @@ input[type="time"]:focus, input[type="email"]:focus {
 .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #00a8a8; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 .analysis-result { display: none; }
-.free-analysis-offer { margin-top:28px; padding:18px 20px; background:#f8fafb; border:1px solid #e3e9ed; border-radius:10px; text-align:left; font-size:14px; line-height:1.6; color:#53616b; }
+.free-analysis-nakshatra { margin:0 0 18px; color:#60717c; font-size:14px; line-height:1.5; }
+.free-analysis-nakshatra strong { font-weight:600; }
+.free-analysis-offer { margin-top:16px; padding:14px 18px; background:#f8fafb; border:1px solid #e3e9ed; border-radius:10px; text-align:left; font-size:14px; line-height:1.55; color:#53616b; }
+.free-analysis-offer p { margin:0 0 7px; }
 .free-analysis-offer-actions { text-align:center; }
 .free-analysis-offer strong { font-weight:600; }
-.free-analysis-offer blockquote { padding:0; border:0; font-size:13px; color:#5b6871; }
-.free-analysis-offer footer { margin-top:7px; font-size:12px; }
 .free-analysis-offer a { color:#345f78; }
 .free-analysis-offer button { font-size:14px; line-height:1.4; }
 
@@ -1284,6 +1285,8 @@ input[type="time"]:focus, input[type="email"]:focus {
     const trackConversion = (event, params) => window.fdaTrack?.(event, params);
     let freeAnalysisStage = 'loading';
     let freeAnalysisPending = false;
+    let freeAnalysisId = null;
+    let offerFeedbackPending = false;
     let paypalRendered = false;
     let cart = [];
     let selectedPack = null;
@@ -1589,6 +1592,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         if (freeAnalysisPending) return;
         freeAnalysisPending = true;
         freeAnalysisStage = 'loading';
+        freeAnalysisId = null;
         trackConversion('free_analysis_start', {location:'home'});
         showFreeAnalysisModal();
         const userData = {
@@ -1615,6 +1619,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         .then(data => {
             if (data.ok) {
                 freeAnalysisStage = data.limited ? 'error' : 'success';
+                freeAnalysisId = data.analysis_id || null;
                 trackConversion(data.limited ? 'free_analysis_error' : 'free_analysis_success', {location:'free_result',error_type:data.limited ? 'quota' : undefined});
                 if (!data.limited && document.getElementById('freeAnalysisModal').style.display !== 'none') trackConversion('offer_view', {product:'flash_astral', location:'free_result'});
                 document.getElementById('analysisStatus').innerHTML = '🎉 Votre analyse est prête !';
@@ -1675,9 +1680,31 @@ input[type="time"]:focus, input[type="email"]:focus {
         if (freeAnalysisStage === 'success') document.getElementById('offerFeedback').style.display = 'flex';
     }
 
-    function saveOfferFeedback(reason) {
-        if (reason) trackConversion('offer_feedback', {reason});
-        document.getElementById('offerFeedback').style.display = 'none';
+    async function saveOfferFeedback(reason) {
+        if (!reason) {
+            document.getElementById('offerFeedback').style.display = 'none';
+            return;
+        }
+        if (offerFeedbackPending) return;
+        if (!freeAnalysisId) {
+            showNotification('Réponse impossible à enregistrer dans le fichier pour le moment.', 'warning');
+            return;
+        }
+        offerFeedbackPending = true;
+        try {
+            const response = await fetch('/api/analyse_gratuite/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({analysis_id: freeAnalysisId, reason})
+            });
+            if (!response.ok) throw new Error('Enregistrement indisponible');
+            trackConversion('offer_feedback', {reason});
+            document.getElementById('offerFeedback').style.display = 'none';
+        } catch (error) {
+            showNotification('Réponse impossible à enregistrer dans le fichier. Réessaie dans un instant.', 'warning');
+        } finally {
+            offerFeedbackPending = false;
+        }
     }
 
     function exploreMoreAnalyses() {

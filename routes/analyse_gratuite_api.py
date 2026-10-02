@@ -1,12 +1,13 @@
 # routes/analyse_gratuite_api.py
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, render_template, current_app
 from utils.openai_utils import interroger_llm
 from utils.calcul_theme import calcul_theme
 from utils.utils_analyse import analyse_gratuite
 from utils.formatage import formater_positions_planetes, formater_aspects
 from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.enregistrement_placements import enregistrer_placements_utilisateur
-from utils.google.sheets_writer import ajouter_email_au_sheet
+from utils.google.sheets_writer import ajouter_email_au_sheet, ajouter_reponse_analyse_gratuite
+from utils.calculs_astrologiques import NAKSHATRAS
 from utils.email_sender import envoyer_email_avec_analyse
 from utils.email_quota import check_and_log_email_quota
 from utils.brevo_contacts import ajouter_contact_brevo
@@ -17,10 +18,44 @@ import textwrap
 from textwrap import dedent
 from dotenv import load_dotenv
 import os
+import uuid
 
 load_dotenv()
 
 gratuite_api_bp = Blueprint("gratuite_api_bp", __name__)
+
+RAISONS_ANALYSE_GRATUITE = {
+    "enough": "L’analyse gratuite me suffit",
+    "choice": "Je ne sais pas quelle analyse choisir",
+    "sample": "Je veux voir un rapport complet",
+    "price": "Le prix me freine",
+    "personalization": "Je ne comprends pas ce qui est personnalisé",
+    "not_ready": "Je ne suis pas prête maintenant",
+    "other": "Autre",
+}
+
+
+@gratuite_api_bp.post("/api/analyse_gratuite/feedback")
+def enregistrer_reponse_analyse_gratuite():
+    data = request.get_json(silent=True) or {}
+    if (
+        not isinstance(data, dict)
+        or not isinstance(data.get("reason"), str)
+        or data["reason"] not in RAISONS_ANALYSE_GRATUITE
+    ):
+        return jsonify({"ok": False}), 400
+    try:
+        analysis_id = str(uuid.UUID(data.get("analysis_id", "")))
+    except (ValueError, TypeError, AttributeError):
+        return jsonify({"ok": False}), 400
+    try:
+        saved = ajouter_reponse_analyse_gratuite(
+            analysis_id, RAISONS_ANALYSE_GRATUITE[data["reason"]]
+        )
+    except Exception:
+        current_app.logger.exception("Échec de l'enregistrement du retour de l'analyse gratuite")
+        return jsonify({"ok": False}), 503
+    return jsonify({"ok": saved}), 200 if saved else 404
 
 
 def _texte_analyse_vers_html(texte):
@@ -226,8 +261,9 @@ def api_analyse_gratuite():
             jamais se moquer de la personne ni banaliser une difficulté.
             Tu fondes l'analyse sur l'astrologie occidentale tropicale. Tu peux
             utiliser le Nakshatra lunaire fourni comme éclairage complémentaire
-            s'il enrichit réellement l'un des mécanismes retenus. Ne le cite pas
-            artificiellement et n'en déduis pas automatiquement une affirmation
+            s'il enrichit réellement l'un des mécanismes retenus. Son nom sera
+            affiché séparément : ne le répète pas dans le texte. N'en déduis
+            pas automatiquement une affirmation
             karmique ou un événement de vie.
 
             Personne analysée : {theme.get("nom", "la personne")}
@@ -291,6 +327,20 @@ def api_analyse_gratuite():
         texte = _generer_texte_analyse_gratuite(prompt)
         print("✅ Analyse IA reçue :", texte[:100] + "...")
         texte_html = _texte_analyse_vers_html(texte)
+        nakshatra = theme.get("planetes_vediques", {}).get("Lune", {}).get("nakshatra")
+        nakshatra_txt = ""
+        nakshatra_html = ""
+        if nakshatra in NAKSHATRAS:
+            explication = (
+                "En astrologie védique, il situe ta Lune dans l’une des "
+                "27 divisions du zodiaque sidéral."
+            )
+            nakshatra_txt = f"Ton nakshatra lunaire : {nakshatra}. {explication}"
+            nakshatra_html = (
+                '<p class="free-analysis-nakshatra">'
+                f"<strong>Ton nakshatra lunaire : {escape(nakshatra)}.</strong> "
+                f"{explication}</p>"
+            )
 
         # 📧 7) Envoi email + Google Sheets (comme dans l'ancienne version)
         prenom = theme['nom'].split()[0]
@@ -300,11 +350,14 @@ def api_analyse_gratuite():
         # Ajout au Google Sheet — logs détaillés
         print(f"[LEAD] Tentative d'ajout au Google Sheet — email='{email}', prenom='{prenom}'")
 
+        analysis_id = str(uuid.uuid4())
+        sheet_saved = False
         try:
             if not email or "@" not in email:
                 raise ValueError(f"Email invalide: {email!r}")
 
-            ajouter_email_au_sheet(email, prenom)
+            ajouter_email_au_sheet(email, prenom, analysis_id=analysis_id)
+            sheet_saved = True
             try:
                 contact_brevo_ok = ajouter_contact_brevo(
                     email=email,
@@ -340,6 +393,8 @@ def api_analyse_gratuite():
 
             {texte}
 
+            {nakshatra_txt}
+
             Cet aperçu met en lumière un mécanisme central, mais pas encore ses origines,
             les situations dans lesquelles il s'active ni les ressources qui permettent de mieux le vivre.
             Le Point Astral Essentiel relie ces différentes dimensions dans une analyse personnalisée de 4 à 6 pages.
@@ -359,6 +414,7 @@ def api_analyse_gratuite():
             <p>Allez, voici ce que disent tes étoiles :</p>
             <div style="margin:30px 0; padding:20px; background:#f9f6ff; border-radius:12px; line-height:1.8;">
             {texte_html}
+            {nakshatra_html}
             </div>
             <p><strong>Ton aperçu s'arrête là où l'exploration commence.</strong><br><br>
             Il met en lumière un mécanisme central, mais pas encore ses origines,
@@ -402,39 +458,18 @@ def api_analyse_gratuite():
         <div class="analysis-summary">
             <h4>🌟 Bonjour {nom_html}, voici ton profil astrologique :</h4>
             <div style="margin: 20px 0; line-height: 1.6;">{texte_html}</div>
+            {nakshatra_html}
             
             <div class="free-analysis-offer">
-                <p style="margin-bottom:15px; color:#555;">
-                    Cet aperçu montre un mécanisme central. Le <strong>Point Astral Essentiel</strong>
-                    te fait découvrir les grandes dynamiques qui structurent l’ensemble de ton thème.
-                    Ton PDF personnalisé d’environ 4 à 6 pages relie ton Ascendant, ton Soleil et ta Lune,
-                    ton fonctionnement émotionnel, tes fondations et les grands axes de ta personnalité.
-                    Il se termine par une synthèse qui relie ces dimensions.
-                </p>
-                <p><strong>Prix total : 25 €.</strong> Réception par email après paiement et génération,
-                    généralement en quelques minutes.
-                </p>
+                <p>Le <strong>Point Astral Essentiel</strong> relie les grandes dynamiques
+                    de ton thème dans un PDF personnalisé de 4 à 6 pages.</p>
+                <p><strong>25 € au total.</strong> Reçu par email après le paiement et la génération.</p>
                 <div class="free-analysis-offer-actions">
-                <blockquote style="margin:16px 0;">
-                    « Tu as réussi à mettre en mot ce qui se passe à l’intérieur de moi, et que j’ai du mal à expliquer. »
-                    <footer>Cynthia, avis sur la version antérieure du Point Astral.
-                    <a href="/static/temoignages/2025_10_Cynthia_flash_astral.webp" target="_blank" rel="noopener">Lire l’avis original</a></footer>
-                </blockquote>
-                <p>
-                </p>
-
-                <button type="button" onclick="choosePointAstralFromFreeAnalysis()"
-                style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
-                border:0;border-radius:8px;text-decoration:none;font-weight:bold;cursor:pointer;
-                width:80%;max-width:300px;">
-                Comprendre les mécanismes de mon thème à 25 €
-                </button>
-                <br>
                 <a href="/static/pdfs/Exemple_Flash_Astral_Cecile.pdf" target="_blank" rel="noopener"
-                style="display:inline-block;margin-top:10px;font-size:14px;min-height:44px;padding:12px;color:#1f628e;text-decoration:underline;">
+                style="display:inline-block;font-size:14px;min-height:44px;padding:12px;color:#1f628e;text-decoration:underline;">
                 Lire le rapport complet d’exemple (PDF)
                 </a>
-                <br><button type="button" onclick="exploreMoreAnalyses()" style="background:none;border:0;color:#1f628e;padding:12px;text-decoration:underline;cursor:pointer;">Voir les autres analyses</button>
+                <br><button type="button" onclick="exploreMoreAnalyses()" style="background:none;border:0;color:#1f628e;padding:8px;text-decoration:underline;cursor:pointer;">Voir les autres analyses</button>
                 </div>
             </div>
         </div>
@@ -496,6 +531,7 @@ def api_analyse_gratuite():
         return jsonify({
             "ok": True, 
             "html": html,
+            "analysis_id": analysis_id if sheet_saved else None,
             "debug": debug_data  # Tu peux récupérer ça côté JS si besoin
         })
 
