@@ -21,7 +21,7 @@ from extensions import db
 from models.espace_personnel import (
     AbonnementEspace, AnalysePersonnelle, CycleLunaire, CycleSolaire, DroitAnalyseAchetee,
     EmailCycleAbonnement, EnjeuPeriode, EntreeJournal, FichierAnalyse,
-    MecanismeExploration, ObservationMecanisme, ProfilAstral, SuggestionMecanisme,
+    MecanismeExploration, ObservationMecanisme, ProfilAstral, SectionAnalyse, SuggestionMecanisme,
     UtilisateurEspace,
 )
 from utils.acces_abonnement import acces_abonnement
