@@ -97,6 +97,7 @@ Tu conserves la voix du rapport : même tutoiement, même genre grammatical, mê
 Tu n’imites pas ses maladresses et tu n’augmentes jamais son degré de certitude.""" + regles_karmiques + """
 Réponds exclusivement avec un objet JSON valide, sans markdown ni commentaire."""
 
+    sections_texte = "\n\n".join(sections_valides)
     utilisateur = f"""À partir des sections ci-dessous, propose entre {NOMBRE_MIN_SUGGESTIONS} et {NOMBRE_MAX_SUGGESTIONS} mécanismes possibles à explorer progressivement.
 
 Contrat JSON obligatoire :
@@ -134,7 +135,7 @@ Règles :
 - ne fusionne pas plusieurs mécanismes sous un intitulé vague et ne répète pas la même piste sous deux noms différents.
 
 SECTIONS DU RAPPORT
-{"\n\n".join(sections_valides)}"""
+{sections_texte}"""
 
     return [
         {"role": "system", "content": systeme},

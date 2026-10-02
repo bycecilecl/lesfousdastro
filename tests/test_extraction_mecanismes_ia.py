@@ -4,6 +4,18 @@ from utils.extraction_mecanismes_ia import construire_messages_extraction
 
 
 class TestExtractionMecanismesIA(unittest.TestCase):
+    def test_sections_sont_incluses_dans_le_prompt_utilisateur(self):
+        sections = [
+            {"cle_section": "defis", "titre": "Tes Défis", "contenu": "Un premier passage."},
+            {"cle_section": "potentiels", "titre": "Tes Potentiels", "contenu": "Un autre passage."},
+        ]
+
+        message = construire_messages_extraction(sections)[1]["content"]
+
+        self.assertIn("SECTION [defis] — Tes Défis\nUn premier passage.", message)
+        self.assertIn("SECTION [potentiels] — Tes Potentiels\nUn autre passage.", message)
+        self.assertIn("Un premier passage.\n\nSECTION [potentiels]", message)
+
     def test_ajoute_les_garde_fous_karmiques_uniquement_au_karmique(self):
         sections = [{
             "cle_section": "synthese",
