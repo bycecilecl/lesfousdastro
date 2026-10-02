@@ -57,6 +57,9 @@ body {
 {% include 'espace_personnel/_navigation.html' %}
 <main class="lab-shell">
     <a class="lab-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for categorie, message in messages %}<p class="lab-empty" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
     <article class="lab-page">
         <header class="lab-header">
             <p class="lab-kicker">Observer · Comprendre · Transformer</p>

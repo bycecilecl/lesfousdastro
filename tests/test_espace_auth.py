@@ -16,8 +16,9 @@ from extensions import db
 from utils.acces_abonnement import acces_abonnement
 from utils.acces_espace import activer_accompagnement_beta
 from models.espace_personnel import (
-    AbonnementEspace, CycleLunaire, EmailCycleAbonnement, EntreeJournal,
-    LienConnexionEspace, ProfilAstral, UtilisateurEspace, utcnow,
+    AbonnementEspace, AnalysePersonnelle, CycleLunaire, EmailCycleAbonnement,
+    EntreeJournal, LienConnexionEspace, ProfilAstral, SectionAnalyse,
+    SuggestionMecanisme, UtilisateurEspace, utcnow,
 )
 
 
@@ -446,6 +447,57 @@ class TestEspaceAuth(unittest.TestCase):
         self.assertEqual(reponse.status_code, 400)
         with self.app.app_context():
             self.assertEqual(EntreeJournal.query.count(), 0)
+
+    def test_journal_ne_cree_pas_de_note_vide(self):
+        self._connecter_compte()
+        reponse = self.client.post(
+            "/mon-espace/journal",
+            data={"profil_csrf": "jeton-de-test", "date_observation": "2026-09-30"},
+        )
+        self.assertEqual(reponse.status_code, 200)
+        with self.app.app_context():
+            self.assertEqual(EntreeJournal.query.count(), 0)
+
+    def test_extraction_mecanismes_est_payante_et_unique_par_analyse(self):
+        from utils.extraction_mecanismes_ia import SuggestionExtraite
+
+        utilisateur_id = self._connecter_compte()
+        with self.app.app_context():
+            analyse = AnalysePersonnelle(
+                utilisateur_id=utilisateur_id, type_analyse="forces_defis",
+                titre="Mes Potentiels & Défis", statut="terminee",
+            )
+            db.session.add(analyse)
+            db.session.flush()
+            db.session.add(SectionAnalyse(
+                analyse_id=analyse.id, cle_section="defis", titre="Tes Défis",
+                contenu="Une piste à observer dans le quotidien.", ordre=1,
+            ))
+            db.session.commit()
+            analyse_id = analyse.id
+        with self.client.session_transaction() as donnees:
+            donnees["espace_formulaire_csrf"] = "jeton-formulaire"
+        chemin = f"/mon-espace/mes-analyses/{analyse_id}/suggestions/generer"
+        donnees = {"espace_csrf": "jeton-formulaire"}
+        with patch("utils.extraction_mecanismes_ia.generer_suggestions_avec_claude") as generer:
+            self.assertEqual(self.client.post(chemin, data=donnees).status_code, 403)
+            generer.assert_not_called()
+            with self.app.app_context():
+                db.session.add(AbonnementEspace(
+                    utilisateur_id=utilisateur_id, formule="accompagnement_astral", statut="test",
+                ))
+                db.session.commit()
+            generer.return_value = ([SuggestionExtraite(
+                titre="Anticiper le rejet", hypothese="Une hypothèse à examiner.",
+                manifestations_possibles=["Une situation possible"],
+                extrait_source="Une piste à observer dans le quotidien.",
+                cle_section="defis", references_astrologiques=[], priorite=1,
+            )], {"tokens_total": 100})
+            self.assertEqual(self.client.post(chemin, data=donnees).status_code, 302)
+            self.assertEqual(self.client.post(chemin, data=donnees).status_code, 302)
+            generer.assert_called_once()
+        with self.app.app_context():
+            self.assertEqual(SuggestionMecanisme.query.filter_by(analyse_id=analyse_id).count(), 1)
 
     def test_import_du_brouillon_n_envoie_rien_et_refuse_le_doublon(self):
         self._compte_avec_mail()

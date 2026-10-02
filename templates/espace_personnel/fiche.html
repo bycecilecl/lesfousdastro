@@ -62,7 +62,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
         {% if cycle_source %}<div class="cycle-source">Cette observation est reliée à ton cycle lunaire. <a href="{{ url_for('espace_personnel.fiche_cycle_lunaire', cycle_id=cycle_source.id) }}">Revoir le cycle →</a></div>{% endif %}
         {% if photo_transits and photo_transits.get('contact_journal') %}
         {% set contact = photo_transits.contact_journal %}
-        <section class="journal-section"><h2>Mon repère dans le calendrier</h2><p>{{ contact.libelle }}</p>{% if contact.domaine %}<p>{{ contact.domaine }}</p>{% endif %}{% if contact.rien_particulier %}<p>Rien de particulier signalé.</p>{% endif %}<a href="{{ url_for('espace_personnel.calendrier', mois=contact.date[:7]) }}">Retrouver ce mois dans le calendrier</a></section>
+        <section class="journal-section"><h2>Mon repère dans le calendrier</h2><p>{{ contact.libelle }}</p>{% if contact.domaine %}<p>{{ contact.domaine }}</p>{% endif %}<a href="{{ url_for('espace_personnel.calendrier', mois=contact.date[:7]) }}">Retrouver ce mois dans le calendrier</a></section>
         {% endif %}
         <section class="journal-section"><h2>Ce que j’ai déposé</h2><p class="{% if not entree.situation %}journal-empty{% endif %}">{{ entree.situation or 'Rien de noté.' }}</p></section>
         <section class="journal-section"><h2>Ce que je ressens</h2><p class="{% if not entree.emotions %}journal-empty{% endif %}">{{ entree.emotions or 'Rien de noté.' }}</p></section>

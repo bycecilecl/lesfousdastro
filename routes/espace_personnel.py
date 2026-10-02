@@ -70,6 +70,9 @@ CATALOGUE_ANALYSES = (
     {"type": "analyse_karmique", "titre": "Analyse karmique", "description": "Les axes profonds d’évolution de ton thème."},
     {"type": "transits", "titre": "Transits", "description": "Les énergies qui activent ton thème actuellement."},
 )
+TYPES_EXTRACTION_MECANISMES = {
+    "racines_familiales", "profil_amoureux", "forces_defis", "analyse_karmique", "transits",
+}
 TITRES_PDF_PAR_ANALYSE = {
     "point_astral_essentiel": ("point astral", "flash astral"),
     "racines_familiales": ("racines familiales", "point astral racines", "point astral", "flash astral"),
@@ -1076,6 +1079,8 @@ def journal():
             valeurs = {champ: request.form.get(champ, "").strip() or None for champ in champs}
             if any(valeur and len(valeur) > 10000 for valeur in valeurs.values()):
                 flash("Un texte dépasse 10 000 caractères.", "error")
+            elif not any(valeurs.values()) and energie is None:
+                flash("Écris quelques mots ou indique ton niveau d’énergie avant d’enregistrer.", "error")
             else:
                 photo = None
                 if profil_astral and profil_astral.theme_natal:
@@ -1090,7 +1095,6 @@ def journal():
                     photo["contact_journal"] = {
                         **contact_source,
                         "domaine": request.form.get("domaine") if request.form.get("domaine") in DOMAINES else None,
-                        "rien_particulier": request.form.get("rien_particulier") == "oui",
                     }
                 entree = EntreeJournal(
                     utilisateur_id=utilisateur.id,
@@ -1554,14 +1558,14 @@ def mes_analyses():
     ids_analyses = [analyse.id for analyse in analyses]
     nombres_mecanismes = {}
     nombres_suggestions = {}
+    analyses_deja_extraites = set()
     if ids_analyses:
         for mecanisme in MecanismeExploration.query.filter(MecanismeExploration.analyse_id.in_(ids_analyses)).all():
             nombres_mecanismes[mecanisme.analyse_id] = nombres_mecanismes.get(mecanisme.analyse_id, 0) + 1
-        for suggestion in SuggestionMecanisme.query.filter(
-            SuggestionMecanisme.analyse_id.in_(ids_analyses),
-            SuggestionMecanisme.statut == "proposee",
-        ).all():
-            nombres_suggestions[suggestion.analyse_id] = nombres_suggestions.get(suggestion.analyse_id, 0) + 1
+        for suggestion in SuggestionMecanisme.query.filter(SuggestionMecanisme.analyse_id.in_(ids_analyses)).all():
+            analyses_deja_extraites.add(suggestion.analyse_id)
+            if suggestion.statut == "proposee":
+                nombres_suggestions[suggestion.analyse_id] = nombres_suggestions.get(suggestion.analyse_id, 0) + 1
     if not session.get("espace_profil_csrf"):
         session["espace_profil_csrf"] = secrets.token_urlsafe(32)
     return render_template(
@@ -1571,7 +1575,123 @@ def mes_analyses():
         droits_par_type=droits_par_type,
         nombres_mecanismes=nombres_mecanismes,
         nombres_suggestions=nombres_suggestions,
+        analyses_deja_extraites=analyses_deja_extraites,
+        types_extraction_mecanismes=TYPES_EXTRACTION_MECANISMES,
+        droits_abonnement=acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first()),
+        espace_csrf=_jeton_formulaire_portail(),
     )
+
+
+@espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/suggestions/generer", methods=["POST"])
+def generer_suggestions_mecanismes(analyse_id):
+    """Un clic explicite et un seul appel IA pour proposer des pistes vérifiables."""
+    from utils.analyse_sections import (
+        extraire_sections_analyse_karmique, extraire_sections_forces_defis,
+        extraire_sections_point_astral, extraire_sections_profil_amoureux,
+        extraire_sections_transits,
+    )
+    from utils.extraction_mecanismes_ia import generer_suggestions_avec_claude
+
+    utilisateur = _compte_connecte()
+    if utilisateur is None:
+        return redirect(url_for("espace_personnel.connexion"))
+    if not _verifier_formulaire_portail():
+        abort(400)
+    droits = acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first())
+    if not droits["journal_contextualise"]:
+        abort(403)
+    analyse = AnalysePersonnelle.query.filter_by(id=analyse_id, utilisateur_id=utilisateur.id).first_or_404()
+    extracteurs = {
+        "racines_familiales": extraire_sections_point_astral,
+        "profil_amoureux": extraire_sections_profil_amoureux,
+        "forces_defis": extraire_sections_forces_defis,
+        "analyse_karmique": extraire_sections_analyse_karmique,
+        "transits": extraire_sections_transits,
+    }
+    if analyse.type_analyse not in extracteurs:
+        abort(404)
+    if SuggestionMecanisme.query.filter_by(analyse_id=analyse.id).first():
+        flash("Les pistes de cette analyse ont déjà été extraites.", "error")
+        return redirect(url_for("espace_personnel.mes_analyses"))
+
+    maintenant = datetime.now(timezone.utc)
+    reclamation = db.session.execute(
+        update(AnalysePersonnelle)
+        .where(
+            AnalysePersonnelle.id == analyse.id,
+            AnalysePersonnelle.utilisateur_id == utilisateur.id,
+            (AnalysePersonnelle.statut == "terminee")
+            | ((AnalysePersonnelle.statut == "extraction_en_cours")
+               & (AnalysePersonnelle.date_modification < maintenant - timedelta(minutes=20))),
+        )
+        .values(statut="extraction_en_cours", date_modification=maintenant)
+    )
+    if reclamation.rowcount != 1:
+        db.session.rollback()
+        flash("Une extraction est déjà en cours pour cette analyse.", "error")
+        return redirect(url_for("espace_personnel.mes_analyses"))
+    db.session.commit()
+
+    try:
+        sections = SectionAnalyse.query.filter_by(analyse_id=analyse.id).order_by(SectionAnalyse.ordre).all()
+        nouvelles_sections = []
+        if not sections:
+            fichier = FichierAnalyse.query.filter_by(analyse_id=analyse.id).first()
+            if fichier is None:
+                raise ValueError("Le PDF de cette analyse est introuvable.")
+            nouvelles_sections = extracteurs[analyse.type_analyse](fichier.contenu)
+            if not nouvelles_sections:
+                raise ValueError("Aucune section reconnue dans ce PDF.")
+            sections_source = nouvelles_sections
+        else:
+            sections_source = [
+                {"cle_section": item.cle_section, "titre": item.titre, "contenu": item.contenu}
+                for item in sections
+            ]
+        if sum(len(item["contenu"]) for item in sections_source) > 100_000:
+            raise ValueError("Ce rapport est trop long pour une extraction fiable.")
+        suggestions, usage = generer_suggestions_avec_claude(
+            sections_source, type_analyse=analyse.type_analyse,
+        )
+        if SuggestionMecanisme.query.filter_by(analyse_id=analyse.id).first():
+            raise ValueError("Les pistes de cette analyse existent déjà.")
+        for section in nouvelles_sections:
+            db.session.add(SectionAnalyse(
+                analyse_id=analyse.id,
+                cle_section=section["cle_section"], titre=section["titre"],
+                contenu=section["contenu"], ordre=section["ordre"], source_format="pdf_importe",
+            ))
+        db.session.flush()
+        sections_par_cle = {
+            section.cle_section: section for section in
+            SectionAnalyse.query.filter_by(analyse_id=analyse.id).all()
+        }
+        for suggestion in suggestions:
+            section_source = sections_par_cle.get(suggestion.cle_section)
+            db.session.add(SuggestionMecanisme(
+                analyse_id=analyse.id,
+                section_id=section_source.id if section_source else None,
+                titre=suggestion.titre, hypothese=suggestion.hypothese,
+                manifestations_possibles=json.dumps(suggestion.manifestations_possibles, ensure_ascii=False),
+                extrait_source=suggestion.extrait_source,
+                references_astrologiques=json.dumps(suggestion.references_astrologiques, ensure_ascii=False),
+                priorite=suggestion.priorite, statut="proposee",
+            ))
+        analyse.statut = "terminee"
+        db.session.commit()
+    except Exception as erreur:
+        db.session.rollback()
+        current_app.logger.exception("Extraction des mécanismes impossible pour l’analyse %s", analyse_id)
+        db.session.execute(
+            update(AnalysePersonnelle)
+            .where(AnalysePersonnelle.id == analyse_id, AnalysePersonnelle.statut == "extraction_en_cours")
+            .values(statut="terminee")
+        )
+        db.session.commit()
+        flash(str(erreur) if isinstance(erreur, ValueError) else "L’extraction n’a pas abouti ; aucune piste n’a été enregistrée.", "error")
+    else:
+        flash(f"{len(suggestions)} pistes à examiner dans ton labo · {usage['tokens_total']} tokens utilisés.", "success")
+    return redirect(url_for("espace_personnel.laboratoire") + "#suggestions-ia")
 
 
 @espace_personnel_bp.route("/mes-analyses/importer", methods=["POST"])

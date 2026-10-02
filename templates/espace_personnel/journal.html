@@ -77,12 +77,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
         <form method="post" class="journal-form">
             <input type="hidden" name="profil_csrf" value="{{ session.espace_profil_csrf }}">
             {% if contact_source %}
-            <aside class="cycle-context journal-field--wide"><strong>{{ contact_source.libelle }}</strong><p>Ce contact est un repère pour ta note. Tu peux raconter ton vécu, même si rien de particulier ne se passe.</p></aside>
+            <aside class="cycle-context journal-field--wide"><strong>{{ contact_source.libelle }}</strong></aside>
             <input type="hidden" name="contact_planete" value="{{ contact_source.planete }}">
             <input type="hidden" name="contact_point" value="{{ contact_source.point }}">
             <input type="hidden" name="contact_aspect" value="{{ contact_source.aspect }}">
-            <div class="journal-field"><label for="domaine">Domaine — facultatif</label><select id="domaine" name="domaine"><option value="">À préciser si tu le souhaites</option>{% for domaine in domaines_contact %}<option value="{{ domaine }}">{{ domaine }}</option>{% endfor %}</select></div>
-            <div class="journal-field"><label><input type="checkbox" name="rien_particulier" value="oui"> Rien de particulier</label></div>
+            <div class="journal-field journal-field--wide"><label for="domaine">Domaine — facultatif</label><select id="domaine" name="domaine"><option value="">À préciser si tu le souhaites</option>{% for domaine in domaines_contact %}<option value="{{ domaine }}">{{ domaine }}</option>{% endfor %}</select></div>
             {% endif %}
             {% if cycle_source %}<input type="hidden" name="cycle_lunaire_id" value="{{ cycle_source.id }}">{% endif %}
             {% if enjeu_source %}<input type="hidden" name="enjeu_periode_id" value="{{ enjeu_source.id }}">{% endif %}
