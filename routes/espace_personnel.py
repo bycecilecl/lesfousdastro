@@ -358,7 +358,7 @@ def accueil():
         EntreeJournal.query.filter_by(utilisateur_id=utilisateur.id)
         .order_by(EntreeJournal.date_observation.desc()).all()
     )
-    analyses = AnalysePersonnelle.query.filter_by(utilisateur_id=utilisateur.id).all()
+    analyses = AnalysePersonnelle.query.filter_by(utilisateur_id=utilisateur.id).filter(AnalysePersonnelle.statut != "remplacee").all()
     analyse_ids = [analyse.id for analyse in analyses]
     nb_mecanismes_en_cours = 0
     if analyse_ids:
@@ -524,7 +524,7 @@ def accompagnement():
     enjeux_rows = (
         db.session.query(EnjeuPeriode, AnalysePersonnelle)
         .join(AnalysePersonnelle, AnalysePersonnelle.id == EnjeuPeriode.analyse_id)
-        .filter(AnalysePersonnelle.utilisateur_id == utilisateur.id)
+        .filter(AnalysePersonnelle.utilisateur_id == utilisateur.id, AnalysePersonnelle.statut != "remplacee")
         .order_by(AnalysePersonnelle.date_creation.desc(), EnjeuPeriode.ordre.asc()).all()
     )
     for enjeu, analyse in enjeux_rows:
@@ -554,6 +554,7 @@ def laboratoire():
         return redirect(url_for("espace_personnel.connexion"))
     analyses = AnalysePersonnelle.query.filter_by(utilisateur_id=utilisateur.id).all()
     analyses_par_id = {analyse.id: analyse for analyse in analyses}
+    ids_analyses_actives = {analyse.id for analyse in analyses if analyse.statut != "remplacee"}
     mecanismes_tous = (
         MecanismeExploration.query.filter(MecanismeExploration.analyse_id.in_(analyses_par_id))
         .order_by(MecanismeExploration.date_modification.desc()).all()
@@ -581,7 +582,7 @@ def laboratoire():
     termines = {"apaise", "probablement_depasse", "non_pertinent"}
     mecanismes = [
         mecanisme for mecanisme in mecanismes_tous
-        if (not analyse_selectionnee or mecanisme.analyse_id == analyse_selectionnee)
+        if (mecanisme.analyse_id in ids_analyses_actives if not analyse_selectionnee else mecanisme.analyse_id == analyse_selectionnee)
         and (not statut_selectionne or mecanisme.statut == statut_selectionne)
         and (not actifs_seulement or mecanisme.statut not in termines)
         and (not jamais_observes or mecanisme.id not in suivis)
@@ -601,10 +602,13 @@ def laboratoire():
             suggestion for suggestion in suggestions_a_examiner
             if suggestion.analyse_id == analyse_selectionnee
         ]
+    else:
+        suggestions_a_examiner = [suggestion for suggestion in suggestions_a_examiner if suggestion.analyse_id in ids_analyses_actives]
+    mecanismes_actifs = [m for m in mecanismes_tous if m.analyse_id in ids_analyses_actives]
     statistiques = {
-        "en_cours": sum(m.statut not in termines for m in mecanismes_tous),
-        "en_transformation": sum(m.statut == "en_transformation" for m in mecanismes_tous),
-        "depasses": sum(m.statut == "probablement_depasse" for m in mecanismes_tous),
+        "en_cours": sum(m.statut not in termines for m in mecanismes_actifs),
+        "en_transformation": sum(m.statut == "en_transformation" for m in mecanismes_actifs),
+        "depasses": sum(m.statut == "probablement_depasse" for m in mecanismes_actifs),
     }
     return render_template(
         "espace_personnel/laboratoire.html",
@@ -635,6 +639,7 @@ def accepter_suggestion(suggestion_id):
         .filter(
             SuggestionMecanisme.id == suggestion_id,
             AnalysePersonnelle.utilisateur_id == utilisateur.id,
+            AnalysePersonnelle.statut != "remplacee",
         )
         .first_or_404()
     )
@@ -683,6 +688,7 @@ def rejeter_suggestion(suggestion_id):
         .filter(
             SuggestionMecanisme.id == suggestion_id,
             AnalysePersonnelle.utilisateur_id == utilisateur.id,
+            AnalysePersonnelle.statut != "remplacee",
         )
         .first_or_404()
     )
@@ -1550,7 +1556,9 @@ def mes_analyses():
     utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
     if utilisateur is None or utilisateur.actif != 1:
         return redirect(url_for("espace_personnel.connexion"))
-    analyses = AnalysePersonnelle.query.filter_by(utilisateur_id=utilisateur.id).order_by(AnalysePersonnelle.date_creation.desc()).all()
+    toutes_analyses = AnalysePersonnelle.query.filter_by(utilisateur_id=utilisateur.id).order_by(AnalysePersonnelle.date_creation.desc()).all()
+    analyses = [analyse for analyse in toutes_analyses if analyse.statut != "remplacee"]
+    anciennes_analyses = [analyse for analyse in toutes_analyses if analyse.statut == "remplacee"]
     droits_achetes = DroitAnalyseAchetee.query.filter_by(utilisateur_id=utilisateur.id).all()
     types_termines = {analyse.type_analyse for analyse in analyses if analyse.statut == "terminee"}
     analyses_a_explorer = [item for item in CATALOGUE_ANALYSES if item["type"] not in types_termines]
@@ -1570,13 +1578,15 @@ def mes_analyses():
         session["espace_profil_csrf"] = secrets.token_urlsafe(32)
     return render_template(
         "espace_personnel/mes_analyses.html", utilisateur=utilisateur,
-        analyses=analyses, peut_importer=import_profil_autorise(utilisateur) and not analyses,
+        analyses=analyses, anciennes_analyses=anciennes_analyses,
+        peut_importer=import_profil_autorise(utilisateur) and not toutes_analyses,
         analyses_a_explorer=analyses_a_explorer,
         droits_par_type=droits_par_type,
         nombres_mecanismes=nombres_mecanismes,
         nombres_suggestions=nombres_suggestions,
         analyses_deja_extraites=analyses_deja_extraites,
         types_extraction_mecanismes=TYPES_EXTRACTION_MECANISMES,
+        types_importables={item["type"] for item in CATALOGUE_ANALYSES},
         droits_abonnement=acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first()),
         espace_csrf=_jeton_formulaire_portail(),
     )
@@ -1743,6 +1753,75 @@ def importer_analyse():
         flash("Ce rapport n’a pas pu être ajouté.", "error")
     else:
         flash("Ton rapport a été ajouté à Mes analyses.", "success")
+    return redirect(url_for("espace_personnel.mes_analyses"))
+
+
+@espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/remplacer", methods=["POST"])
+def remplacer_analyse(analyse_id):
+    """Conserve l'ancien PDF et ses pistes, puis crée une version vierge avec le nouveau PDF."""
+    utilisateur = _compte_connecte()
+    if utilisateur is None:
+        return redirect(url_for("espace_personnel.connexion"))
+    jeton = session.get("espace_profil_csrf", "")
+    if not jeton or not hmac.compare_digest(request.form.get("profil_csrf", ""), jeton):
+        abort(400)
+    analyse = AnalysePersonnelle.query.filter_by(id=analyse_id, utilisateur_id=utilisateur.id).first_or_404()
+    if analyse.statut != "terminee" or analyse.type_analyse not in {item["type"] for item in CATALOGUE_ANALYSES}:
+        abort(409)
+    ancien_fichier = FichierAnalyse.query.filter_by(analyse_id=analyse.id).first_or_404()
+    fichier = request.files.get("rapport")
+    if fichier is None or not fichier.filename:
+        flash("Choisis le nouveau rapport PDF.", "error")
+        return redirect(url_for("espace_personnel.mes_analyses"))
+    contenu = fichier.read(15 * 1024 * 1024 + 1)
+    try:
+        _verifier_rapport_fda(contenu, analyse.type_analyse)
+    except ValueError as erreur:
+        flash(str(erreur), "error")
+        return redirect(url_for("espace_personnel.mes_analyses"))
+    empreinte = hashlib.sha256(contenu).hexdigest()
+    if empreinte == ancien_fichier.empreinte_sha256:
+        flash("Ce PDF est déjà celui de cette analyse.", "error")
+        return redirect(url_for("espace_personnel.mes_analyses"))
+    date_generation = datetime.now(timezone.utc)
+    date_brute = request.form.get("date_generation", "").strip()
+    if date_brute:
+        try:
+            date_generation = datetime.combine(date.fromisoformat(date_brute), time.min)
+        except ValueError:
+            flash("La date du rapport n’est pas valide.", "error")
+            return redirect(url_for("espace_personnel.mes_analyses"))
+    nom = f"{uuid.uuid4().hex}.pdf"
+    try:
+        reclamation = db.session.execute(
+            update(AnalysePersonnelle)
+            .where(AnalysePersonnelle.id == analyse.id,
+                   AnalysePersonnelle.utilisateur_id == utilisateur.id,
+                   AnalysePersonnelle.statut == "terminee")
+            .values(statut="remplacee")
+        )
+        if reclamation.rowcount != 1:
+            db.session.rollback()
+            flash("Ce rapport a déjà été remplacé. Recharge la page.", "error")
+            return redirect(url_for("espace_personnel.mes_analyses"))
+        nouvelle_analyse = AnalysePersonnelle(
+            utilisateur_id=utilisateur.id, type_analyse=analyse.type_analyse,
+            titre=analyse.titre, statut="terminee", chemin_resultat=nom,
+            date_generation=date_generation,
+        )
+        db.session.add(nouvelle_analyse)
+        db.session.flush()
+        db.session.add(FichierAnalyse(
+            analyse_id=nouvelle_analyse.id, nom_fichier=nom,
+            contenu=contenu, empreinte_sha256=empreinte,
+        ))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Remplacement du rapport impossible pour l’analyse %s", analyse_id)
+        flash("Le remplacement a échoué ; l’ancien rapport reste disponible.", "error")
+    else:
+        flash("Le nouveau PDF est en place. L’ancienne version et ses pistes restent dans les archives.", "success")
     return redirect(url_for("espace_personnel.mes_analyses"))
 
 

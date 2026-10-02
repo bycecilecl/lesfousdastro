@@ -13,17 +13,22 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 .analyses-grid--compact { grid-template-columns: repeat(auto-fill, minmax(230px, 260px)); justify-content: center; }
 .analyse-item { display: flex; flex-direction: column; padding: 20px; border: 1px solid rgba(31,98,142,.13); border-radius: 18px; background: #f8fcfc; }
 .analyse-item h2 { margin-bottom: 8px; color: #1f628e; font-size: 1.15rem; }
-.analyse-item p { flex: 1; color: #65737a; line-height: 1.55; }
+.analyse-item p { color: #65737a; line-height: 1.55; }
+.analyse-item .analyse-meta { margin: 0 0 12px; font-size: .9rem; }
 .analyse-status { align-self: flex-start; margin-bottom: 12px; padding: 5px 10px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-size: .76rem; font-weight: 800; text-transform: uppercase; }
-.analyse-link { display: inline-block; align-self: flex-start; margin-top: 10px; padding: 10px 16px; border: 0; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
+.analyse-link { display: flex; width: 100%; min-height: 46px; align-items: center; justify-content: center; box-sizing: border-box; padding: 10px 14px; border: 0; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font: inherit; font-size: .94rem; font-weight: 700; line-height: 1.2; text-align: center; text-decoration: none; cursor: pointer; }
 .analyse-link--secondary { border: 1px solid rgba(31,98,142,.25); background: white; color: #1f628e; }
 .analyse-link--disabled { background: #d9dee1; color: #65737a; cursor: default; }
 .analyses-empty { padding: 24px; color: #777; text-align: center; }
-.analyse-actions { display: grid; align-items: start; margin-top: 8px; }
+.analyse-actions { display: grid; gap: 10px; margin-top: auto; padding-top: 16px; }
 .analyse-actions form { margin: 0; }
-.import-disclosure { margin-top: 10px; }
-.import-disclosure summary { display: inline-block; padding: 10px 16px; border: 1px solid rgba(31,98,142,.25); border-radius: 999px; background: white; color: #1f628e; font-weight: 700; cursor: pointer; list-style: none; }
+.import-disclosure summary { display: flex; min-height: 46px; align-items: center; justify-content: center; box-sizing: border-box; padding: 10px 14px; border: 1px solid rgba(31,98,142,.25); border-radius: 999px; background: white; color: #1f628e; font-size: .94rem; font-weight: 700; line-height: 1.2; text-align: center; cursor: pointer; list-style: none; }
 .import-disclosure summary::-webkit-details-marker { display: none; }
+.replace-disclosure summary { border: 0; background: transparent; color: #1f628e; font-size: .85rem; text-decoration: underline; text-underline-offset: 3px; }
+.analyse-text-link { color: #1f628e; font-size: .88rem; font-weight: 700; text-align: center; text-decoration: underline; text-underline-offset: 3px; }
+.analyse-description { margin-bottom: 0; }
+.analyse-archive-list { display: grid; gap: 10px; max-width: 660px; margin: 0 auto; }
+.analyse-archive-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 18px; padding: 10px 0; border-bottom: 1px solid #dce9ef; }
 .import-form { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; padding: 16px; border-radius: 14px; background: #eef8f8; }
 .import-field { display: grid; gap: 7px; }
 .import-field label { color: #1f628e; font-size: .88rem; font-weight: 700; }
@@ -56,20 +61,30 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                     <article class="analyse-item">
                         <span class="analyse-status">{{ analyse.statut }}</span>
                         <h2>{{ analyse.titre }}</h2>
-                        {% if analyse.date_generation %}<p>Générée le {{ analyse.date_generation.strftime('%d.%m.%Y') }}</p>{% endif %}
+                        {% if analyse.date_generation %}<p class="analyse-meta">Générée le {{ analyse.date_generation.strftime('%d.%m.%Y') }}</p>{% endif %}
+                        {% if nombres_mecanismes.get(analyse.id) or nombres_suggestions.get(analyse.id) %}<p class="analyse-meta">{% if nombres_mecanismes.get(analyse.id) %}{{ nombres_mecanismes[analyse.id] }} mécanisme{% if nombres_mecanismes[analyse.id] > 1 %}s{% endif %}{% endif %}{% if nombres_mecanismes.get(analyse.id) and nombres_suggestions.get(analyse.id) %} · {% endif %}{% if nombres_suggestions.get(analyse.id) %}{{ nombres_suggestions[analyse.id] }} piste{% if nombres_suggestions[analyse.id] > 1 %}s{% endif %} à examiner{% endif %}</p>{% endif %}
+                        <div class="analyse-actions">
                         {% if analyse.chemin_resultat %}<a class="analyse-link" href="{{ url_for('espace_personnel.lire_analyse', analyse_id=analyse.id) }}" target="_blank" rel="noopener">Lire mon analyse</a>{% else %}<span class="analyse-link analyse-link--disabled">Résultat indisponible</span>{% endif %}
-                        <a class="analyse-link" href="{{ url_for('espace_personnel.laboratoire', analyse=analyse.id) }}">
-                            {% if nombres_mecanismes.get(analyse.id) %}Voir mes {{ nombres_mecanismes[analyse.id] }} mécanisme{% if nombres_mecanismes[analyse.id] > 1 %}s{% endif %}
-                            {% elif nombres_suggestions.get(analyse.id) %}Examiner {{ nombres_suggestions[analyse.id] }} piste{% if nombres_suggestions[analyse.id] > 1 %}s{% endif %}
-                            {% else %}Explorer dans mon labo{% endif %}
-                        </a>
+                        <a class="analyse-link" href="{{ url_for('espace_personnel.laboratoire', analyse=analyse.id) }}">Ouvrir mon labo</a>
                         {% if droits_abonnement.journal_contextualise and analyse.type_analyse in types_extraction_mecanismes and analyse.statut == 'terminee' and analyse.chemin_resultat and analyse.id not in analyses_deja_extraites %}
                         <form method="post" action="{{ url_for('espace_personnel.generer_suggestions_mecanismes', analyse_id=analyse.id) }}">
                             <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
                             <button class="analyse-link analyse-link--secondary" type="submit">Extraire des pistes avec l’IA</button>
                         </form>
                         {% endif %}
-                        {% if nombres_suggestions.get(analyse.id) %}<p>{{ nombres_suggestions[analyse.id] }} piste{% if nombres_suggestions[analyse.id] > 1 %}s{% endif %} extraite{% if nombres_suggestions[analyse.id] > 1 %}s{% endif %} à examiner dans le labo</p>{% endif %}
+                        {% if analyse.statut == 'terminee' and analyse.type_analyse in types_importables and analyse.chemin_resultat %}
+                        <details class="import-disclosure replace-disclosure">
+                            <summary>Remplacer ce PDF</summary>
+                            <form class="import-form" method="post" action="{{ url_for('espace_personnel.remplacer_analyse', analyse_id=analyse.id) }}" enctype="multipart/form-data">
+                                <input name="profil_csrf" type="hidden" value="{{ session.get('espace_profil_csrf', '') }}">
+                                <p>Vérifie le nom sur le PDF. L’ancienne version et ses pistes seront conservées dans les archives.</p>
+                                <div class="import-field"><label for="remplacement-{{ analyse.id }}">Nouveau rapport PDF — 15 Mo maximum</label><input id="remplacement-{{ analyse.id }}" name="rapport" type="file" accept="application/pdf,.pdf" required></div>
+                                <div class="import-field"><label for="remplacement-date-{{ analyse.id }}">Date du nouveau rapport — facultatif</label><input id="remplacement-date-{{ analyse.id }}" name="date_generation" type="date"></div>
+                                <button class="import-submit" type="submit">Confirmer le remplacement</button>
+                            </form>
+                        </details>
+                        {% endif %}
+                        </div>
                     </article>
                 {% endfor %}
             </div>
@@ -77,6 +92,21 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             <p class="analyses-empty">Aucune analyse n’est encore reliée à cet espace.</p>
         {% endif %}
     </section>
+
+    {% if anciennes_analyses %}
+    <section class="analyses-card">
+        <h2 class="analyses-title">Anciennes versions</h2>
+        <p class="analyses-intro">Leurs PDF et leurs éventuelles pistes restent accessibles ici.</p>
+        <div class="analyse-archive-list">
+            {% for analyse in anciennes_analyses %}
+            <div class="analyse-archive-row">
+                <span>{{ analyse.titre }}{% if analyse.date_generation %} · {{ analyse.date_generation.strftime('%d.%m.%Y') }}{% endif %}</span>
+                <span><a href="{{ url_for('espace_personnel.lire_analyse', analyse_id=analyse.id) }}" target="_blank" rel="noopener">Lire l’ancien PDF</a> · <a href="{{ url_for('espace_personnel.laboratoire', analyse=analyse.id) }}">Voir ses pistes</a></span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
 
     {% if peut_importer %}
     <section class="analyses-card">
@@ -100,20 +130,21 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                 <article class="analyse-item">
                     <span class="analyse-status">{% if droit %}{{ droit.statut|replace('_', ' ') }}{% else %}À découvrir{% endif %}</span>
                     <h2>{{ analyse.titre }}</h2>
-                    <p>{{ analyse.description }}</p>
+                    <p class="analyse-description">{{ analyse.description }}</p>
                     <div class="analyse-actions">
                         <details class="import-disclosure">
                             <summary>Importer cette analyse</summary>
                             <form class="import-form" method="post" action="{{ url_for('espace_personnel.importer_analyse') }}" enctype="multipart/form-data">
                                 <input name="profil_csrf" type="hidden" value="{{ session.get('espace_profil_csrf', '') }}">
                                 <input name="type_analyse" type="hidden" value="{{ analyse.type }}">
+                                <p>Vérifie le nom sur le PDF avant de l’ajouter.</p>
                                 <div class="import-field"><label for="rapport-{{ analyse.type }}">Rapport PDF — 15 Mo maximum</label><input id="rapport-{{ analyse.type }}" name="rapport" type="file" accept="application/pdf,.pdf" required></div>
                                 <div class="import-field"><label for="date-{{ analyse.type }}">Date du rapport — facultatif</label><input id="date-{{ analyse.type }}" name="date_generation" type="date"></div>
                                 <button class="import-submit" type="submit">Ajouter à mon espace</button>
                             </form>
                         </details>
 
-                        <a class="analyse-link analyse-link--secondary" href="{{ url_for('pages_bp.analyses') }}#analyses">Découvrir cette analyse</a>
+                        <a class="analyse-text-link" href="{{ url_for('pages_bp.analyses') }}#analyses">Découvrir l’analyse →</a>
                     </div>
                 </article>
             {% endfor %}

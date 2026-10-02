@@ -1,6 +1,7 @@
 """Connexion réelle à l'espace : compte persistant et lien à usage unique."""
 
 import importlib.util
+import hashlib
 import io
 import json
 from datetime import date, time, timedelta
@@ -16,7 +17,7 @@ from extensions import db
 from utils.acces_abonnement import acces_abonnement
 from utils.acces_espace import activer_accompagnement_beta
 from models.espace_personnel import (
-    AbonnementEspace, AnalysePersonnelle, CycleLunaire, EmailCycleAbonnement,
+    AbonnementEspace, AnalysePersonnelle, CycleLunaire, EmailCycleAbonnement, FichierAnalyse,
     EntreeJournal, LienConnexionEspace, ProfilAstral, SectionAnalyse,
     SuggestionMecanisme, UtilisateurEspace, utcnow,
 )
@@ -107,6 +108,62 @@ class TestEspaceAuth(unittest.TestCase):
             donnees["espace_profil_csrf"] = "jeton-de-test"
         return utilisateur_id
 
+    def test_remplacer_pdf_conserve_l_ancienne_version_et_isole_les_pistes(self):
+        utilisateur_id = self._connecter_compte()
+        ancien_pdf = b"%PDF-1.4\nancien rapport\n%%EOF"
+        nouveau_pdf = b"%PDF-1.4\nnouveau rapport\n%%EOF"
+        with self.app.app_context():
+            analyse = AnalysePersonnelle(
+                utilisateur_id=utilisateur_id, type_analyse="forces_defis",
+                titre="Mes Potentiels & Défis", statut="terminee",
+                chemin_resultat="ancien.pdf",
+            )
+            db.session.add(analyse)
+            db.session.flush()
+            analyse_id = analyse.id
+            db.session.add(FichierAnalyse(
+                analyse_id=analyse_id, nom_fichier="ancien.pdf", contenu=ancien_pdf,
+                empreinte_sha256=hashlib.sha256(ancien_pdf).hexdigest(),
+            ))
+            db.session.add(SuggestionMecanisme(
+                analyse_id=analyse_id, titre="Piste de l’ancien rapport",
+                hypothese="À vérifier", extrait_source="Un extrait", statut="proposee", priorite=1,
+            ))
+            db.session.commit()
+        chemin = f"/mon-espace/mes-analyses/{analyse_id}/remplacer"
+        donnees = lambda: {
+            "profil_csrf": "jeton-de-test",
+            "rapport": (io.BytesIO(nouveau_pdf), "nouveau.pdf"),
+        }
+        with patch.object(module, "_verifier_rapport_fda", return_value=None):
+            self.assertEqual(self.client.post(chemin, data=donnees()).status_code, 302)
+            self.assertEqual(self.client.post(chemin, data=donnees()).status_code, 409)
+        with self.app.app_context():
+            ancienne = db.session.get(AnalysePersonnelle, analyse_id)
+            self.assertEqual(ancienne.statut, "remplacee")
+            self.assertEqual(FichierAnalyse.query.filter_by(analyse_id=analyse_id).one().contenu, ancien_pdf)
+            self.assertEqual(SuggestionMecanisme.query.filter_by(analyse_id=analyse_id).count(), 1)
+            nouvelle = AnalysePersonnelle.query.filter_by(utilisateur_id=utilisateur_id, statut="terminee").one()
+            self.assertEqual(FichierAnalyse.query.filter_by(analyse_id=nouvelle.id).one().contenu, nouveau_pdf)
+            self.assertEqual(SuggestionMecanisme.query.filter_by(analyse_id=nouvelle.id).count(), 0)
+
+    def test_remplacer_pdf_exige_le_proprietaire_et_le_jeton(self):
+        utilisateur_id = self._connecter_compte()
+        with self.app.app_context():
+            db.session.add(AnalysePersonnelle(
+                utilisateur_id=utilisateur_id, type_analyse="forces_defis",
+                titre="Mes Potentiels & Défis", statut="terminee",
+            ))
+            db.session.commit()
+            analyse_id = AnalysePersonnelle.query.one().id
+        chemin = f"/mon-espace/mes-analyses/{analyse_id}/remplacer"
+        self.assertEqual(self.client.post(chemin).status_code, 400)
+        with self.client.session_transaction() as donnees:
+            donnees["utilisateur_espace_id"] = utilisateur_id + 1
+        with self.app.app_context():
+            db.session.add(UtilisateurEspace(id=utilisateur_id + 1, prenom="Autre", email="autre@example.com"))
+            db.session.commit()
+        self.assertEqual(self.client.post(chemin, data={"profil_csrf": "jeton-de-test"}).status_code, 404)
     def _donnees_profil(self):
         return {
             "prenom": "Cécile",

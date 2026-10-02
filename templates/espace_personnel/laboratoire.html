@@ -79,7 +79,7 @@ body {
                 <label for="analyse">Analyse d’origine</label>
                 <select id="analyse" name="analyse">
                     <option value="">Toutes les analyses</option>
-                    {% for analyse in analyses %}<option value="{{ analyse.id }}" {% if analyse.id == analyse_selectionnee %}selected{% endif %}>{{ analyse.titre }}</option>{% endfor %}
+                    {% for analyse in analyses %}<option value="{{ analyse.id }}" {% if analyse.id == analyse_selectionnee %}selected{% endif %}>{{ analyse.titre }}{% if analyse.statut == 'remplacee' %} (ancienne version){% endif %}</option>{% endfor %}
                 </select>
             </div>
             <div class="lab-filter-field">
@@ -104,7 +104,7 @@ body {
                     {% set analyse = analyses_par_id.get(mecanisme.analyse_id) %}
                     {% set suivi = suivis_par_mecanisme.get(mecanisme.id) %}
                     <article class="mechanism-card">
-                        <p class="mechanism-source">{{ analyse.titre if analyse else 'Analyse personnelle' }}</p>
+                        <p class="mechanism-source">{{ analyse.titre if analyse else 'Analyse personnelle' }}{% if analyse and analyse.statut == 'remplacee' %} · ancienne version{% endif %}</p>
                         <h2>{{ mecanisme.titre }}</h2>
                         <p class="mechanism-excerpt">{{ mecanisme.hypothese }}</p>
                         <div class="mechanism-tags">
@@ -138,10 +138,10 @@ body {
                     {% for suggestion in suggestions_a_examiner %}
                         {% set analyse = analyses_par_id.get(suggestion.analyse_id) %}
                         <article class="mechanism-card">
-                            <p class="mechanism-source">{{ analyse.titre if analyse else 'Analyse personnelle' }}</p>
+                            <p class="mechanism-source">{{ analyse.titre if analyse else 'Analyse personnelle' }}{% if analyse and analyse.statut == 'remplacee' %} · ancienne version{% endif %}</p>
                             <h2>{{ suggestion.titre }}</h2>
                             <p class="mechanism-excerpt">{{ suggestion.hypothese }}</p>
-                            <div class="suggestion-actions">
+                            {% if not analyse or analyse.statut != 'remplacee' %}<div class="suggestion-actions">
                                 <form method="post" action="{{ url_for('espace_personnel.accepter_suggestion', suggestion_id=suggestion.id) }}">
                                     <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
                                     <button class="lab-button" type="submit">Ajouter à mon labo</button>
@@ -150,7 +150,7 @@ body {
                                     <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
                                     <button class="lab-button lab-button--secondary" type="submit">Écarter</button>
                                 </form>
-                            </div>
+                            </div>{% endif %}
                         </article>
                     {% endfor %}
                 </div>
