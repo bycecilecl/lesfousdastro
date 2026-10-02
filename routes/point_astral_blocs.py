@@ -1,3 +1,4 @@
+from html import escape
 from services.generation_access import paid_analysis
 # routes/point_astral_blocs.py - VERSION HARMONISÉE
 from flask import Blueprint, render_template, session, send_from_directory, abort, request, url_for,current_app
@@ -337,12 +338,10 @@ def point_astral_blocs_complet():
 
     # === DEBUG DÉTAILLÉ SESSION ===
     logger.info("=== DEBUG SESSION COMPLET START ===")
-    logger.info("Session keys: %s", list(session.keys()))
 
     
     # Récupération des infos depuis la session
     infos = session.get("infos_utilisateur")
-    logger.info("infos_utilisateur raw: %s", infos)
     logger.info("infos_utilisateur type: %s", type(infos))
 
     if not infos:
@@ -351,15 +350,12 @@ def point_astral_blocs_complet():
         
         # Chercher des variations possibles
         possible_keys = [k for k in session.keys() if 'info' in k.lower() or 'user' in k.lower()]
-        logger.info("Clés possibles trouvées: %s", possible_keys)
         
-        return f"❌ Données manquantes. Session keys: {list(session.keys())}. Possible keys: {possible_keys}. Veuillez recommencer depuis le formulaire."
+        return "Données manquantes. Veuillez recommencer depuis le formulaire.", 400
     
-    logger.info("✅ infos_utilisateur trouvé: %s", infos)
 
         # === Pare-chocs données critiques (avant tout calcul/génération) ===
     order_id = (session.get("last_payment") or {}).get("order_id")
-    logger.info("last_payment: %s", session.get("last_payment"))
     logger.info("order_id: %s", order_id)
 
     email = (infos.get("email") or "").strip()
@@ -369,21 +365,7 @@ def point_astral_blocs_complet():
     lon  = infos.get("lon")
     tzid = infos.get("tzid")
 
-    logger.info("=== DONNÉES EXTRAITES ===")
-    logger.info("email: %r", email)
-    logger.info("nom: %r", nom)
-    logger.info("lieu: %r", lieu)
-    logger.info("lat: %r", lat)
-    logger.info("lon: %r", lon)
-    logger.info("tzid: %r", tzid)
-    logger.info("date_naissance: %r", infos.get("date_naissance"))
-    logger.info("heure_naissance: %r", infos.get("heure_naissance"))
-
-    # Log d’état complet pour corréler avec /payments/capture-order
-    logger.info(
-        "[GEN] START order=%s email=%s nom=%s lieu=%r lat=%r lon=%r tzid=%r",
-        order_id, email, nom, lieu, lat, lon, tzid
-    )
+    logger.info("[GEN] START Point Astral")
 
     # Champs obligatoires côté astro : lat/lon/tzid (+ date/heure)
     required_fields = {
@@ -444,8 +426,6 @@ def point_astral_blocs_complet():
 
     # Protection “appel direct sans paiement” (sauf QA)
     if not session.get("last_payment"):
-        logger.warning("[GEN] ABORT — aucun paiement en session — email=%s nom=%s", email, nom)
-        logger.info("Session pour debug paiement: %s", dict(session))
         return render_template(
             "erreur.html",
             titre="Paiement requis",
@@ -487,11 +467,9 @@ def point_astral_blocs_complet():
     
     task_id = session.get('current_task_id')
     print(f"Début analyse Point Astral avec progression - Task ID: {task_id}")
-    print(f"🔍 DEBUG SESSION COMPLÈTE: {infos}")
     print(f"🔍 DEBUG CLÉS SESSION: {list(infos.keys()) if infos else 'None'}")
     print(f"\n{'='*60}")
     print(f"🎬 Point_Astral_Bloc DÉBUT ANALYSE Point ASTRAL BLOCS (harmonisé)")
-    print(f"👤Point_Astral_Bloc Nom: {infos.get('nom', 'Anonyme')}")
     print(f"{'='*60}")
     
     try:
@@ -505,7 +483,6 @@ def point_astral_blocs_complet():
         # 2) Calcul du thème IDENTIQUE à l'ancien système
         print("🔧 Point_Astral_Bloc Étape 1: Calcul du thème...")
         if infos.get('lat') and infos.get('lon'):
-            print(f"🎯 Coordonnées précises: {infos['lat']}, {infos['lon']}")
             data_theme = calcul_theme_safe(
                 nom=infos["nom"],
                 date_naissance=infos["date_naissance"],
@@ -1025,10 +1002,10 @@ def generer_html_final_harmonise_pdf_only(
 ) -> str:
     """Génère le HTML final pour le PDF (avec carte astrale + disclaimers)."""
 
-    nom = infos_personnelles.get("nom", "Analyse Anonyme")
-    date_naissance = infos_personnelles.get("date_naissance", "")
-    heure_naissance = infos_personnelles.get("heure_naissance", "")
-    lieu_naissance = infos_personnelles.get("lieu_naissance", "")
+    nom = escape(str(infos_personnelles.get("nom", "Analyse Anonyme")))
+    date_naissance = escape(str(infos_personnelles.get("date_naissance", "")))
+    heure_naissance = escape(str(infos_personnelles.get("heure_naissance", "")))
+    lieu_naissance = escape(str(infos_personnelles.get("lieu_naissance", "")))
 
     # Fragments sûrs (évite les antislashs dans f-strings)
     logo_html = (

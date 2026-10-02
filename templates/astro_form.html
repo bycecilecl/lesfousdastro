@@ -670,6 +670,18 @@ input[type="time"]:focus, input[type="email"]:focus {
 .rs-offer .transits-cta { background: linear-gradient(135deg,#f2a20a,#d66d10); }
 .rs-offer .rs-step { margin-top: 7px; font-size: .91rem; }
 .rs-offer .rs-more { display: inline-block; margin-top: 9px; color: #a34d08; font-weight: 700; }
+.rs-offer.rs-available { cursor: pointer; }
+.rs-offer.rs-available:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(231,119,22,.18); border-color: #e77716; }
+.rs-year-select { appearance: none; width: 100%; border: 2px solid rgba(231,119,22,.35); border-radius: 12px; padding: 13px 46px 13px 15px; color: #8c480d; background: #fffaf3; font: inherit; font-weight: 800; cursor: pointer; }
+.rs-year-select:focus { outline: 3px solid rgba(242,162,10,.22); border-color: #e77716; }
+.rs-context-details { border-top: 1px solid #f0d9bd; margin: 8px 0 20px; padding-top: 14px; }
+.rs-context-details summary { color: #a45410; cursor: pointer; font-weight: 800; }
+.rs-context-details summary span { color: #8c7766; font-size: .75rem; text-transform: uppercase; }
+.rs-context-details p { color: #6b625a; font-size: .88rem; line-height: 1.45; }
+.rs-context-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rs-context-grid label { color: #85572f; display: flex; flex-direction: column; font-size: .86rem; font-weight: 700; gap: 4px; }
+.rs-context-grid textarea { border: 1px solid #efd9c3; border-radius: 8px; padding: 8px; font: inherit; resize: vertical; }
+.rs-context-full { grid-column: 1 / -1; }
 .transits-icon { font-size: 3.2rem; line-height: 1; }
 .transits-copy h4 { color: #1f628e; font-size: 1.35rem; margin: 0 0 7px; }
 .transits-copy p { color: #59636e; margin: 0; line-height: 1.5; }
@@ -1041,17 +1053,17 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <em>Détail complet et exemple de rapport en bas de la page Guide des analyses.</em>
                         </div>
                     </div>
-                    <article class="transits-offer rs-offer" aria-label="Ma Révolution Solaire, disponible à partir du 9 octobre 2026">
+                    <article class="transits-offer rs-offer{% if rs_sales_open %} rs-available{% endif %}"{% if rs_sales_open %} data-product-id="revolution_solaire" onclick="openRevolutionSolaireModal(this)" role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openRevolutionSolaireModal(this); }"{% else %} aria-label="Ma Révolution Solaire, disponible à partir du 9 octobre 2026"{% endif %}>
                         <span class="transits-icon" aria-hidden="true">☀️</span>
                         <div class="transits-copy">
                             <h4>Ma Révolution Solaire</h4>
                             <p>Une lecture de ton année solaire, de ses résonances avec ton thème natal et des périodes qui peuvent en réveiller les thèmes.</p>
                             <p class="rs-step">Tu pourras choisir l'année et le lieu de ton retour solaire, puis donner quelques repères sur ce que tu vis, si tu le souhaites.</p>
-                            <a class="rs-more" href="/analyses#revolution-solaire">Découvrir ce que contient le rapport</a>
+                            <a class="rs-more" href="/analyses#revolution-solaire" onclick="event.stopPropagation()">Découvrir ce que contient le rapport</a>
                         </div>
                         <div class="transits-price">
                             42€
-                            <span class="transits-cta">Disponible à partir du 9 octobre</span>
+                            <span class="transits-cta">{% if rs_sales_open %}Choisir mon année{% else %}Disponible à partir du 9 octobre{% endif %}</span>
                         </div>
                     </article>
                 </section>
@@ -1210,6 +1222,46 @@ input[type="time"]:focus, input[type="email"]:focus {
     </div>
 </div>
 
+{% if rs_sales_open %}
+<!-- Les données du retour solaire sont demandées avant le paiement. -->
+<div class="payment-modal" id="revolutionSolaireModal" onclick="event.target === this && closeRevolutionSolaireModal()">
+    <div class="payment-modal-content" onclick="event.stopPropagation()" style="max-width:540px;">
+        <div class="payment-modal-header" style="background:linear-gradient(135deg,#e77716,#b85b0b);color:white;"><h3>☀️ Prépare ta Révolution solaire</h3></div>
+        <div class="payment-modal-body">
+            <p style="color:#555;line-height:1.5;margin-top:0;">Choisis l’année étudiée et le lieu où tu passeras ton anniversaire. Le lieu détermine les maisons de ton thème annuel.</p>
+            <div class="form-group" style="margin-bottom:18px;">
+                <label for="rs_annee_choice">Année du retour solaire</label>
+                <select id="rs_annee_choice" class="rs-year-select" required></select>
+            </div>
+            <div class="form-group" style="margin-bottom:20px;">
+                <label for="rs_lieu_choice">Lieu de ton anniversaire cette année-là</label>
+                <input type="text" id="rs_lieu_choice" list="rs-lieu-suggestions" autocomplete="off" placeholder="Ex. Paris, France" required>
+                <datalist id="rs-lieu-suggestions"></datalist>
+                <input type="hidden" id="rs_lat_choice"><input type="hidden" id="rs_lon_choice"><input type="hidden" id="rs_tzid_choice">
+                <small style="display:block;color:#6b7280;margin-top:6px;">Sélectionne une ville parmi les suggestions.</small>
+            </div>
+            <details class="rs-context-details">
+                <summary>Ajouter des repères sur ce que tu vis <span>facultatif</span></summary>
+                <p>Ils servent à contextualiser le rapport. Tu peux tout laisser vide.</p>
+                <div class="rs-context-grid">
+                    <label>Travail<textarea id="rs_travail" rows="2" maxlength="300"></textarea></label>
+                    <label>Amour<textarea id="rs_amour" rows="2" maxlength="300"></textarea></label>
+                    <label>Foyer et famille<textarea id="rs_foyer_famille" rows="2" maxlength="300"></textarea></label>
+                    <label>Enfants<textarea id="rs_enfants" rows="2" maxlength="300"></textarea></label>
+                    <label>Argent<textarea id="rs_argent" rows="2" maxlength="300"></textarea></label>
+                    <label>Santé<textarea id="rs_sante" rows="2" maxlength="300"></textarea></label>
+                    <label class="rs-context-full">Ta préoccupation du moment<textarea id="rs_preoccupation" rows="3" maxlength="300"></textarea></label>
+                </div>
+            </details>
+            <div class="payment-buttons">
+                <button type="button" class="payment-btn stripe-btn" onclick="confirmRevolutionSolaire()" style="background:linear-gradient(135deg,#e77716,#b85b0b);">Ajouter à ma sélection</button>
+                <button type="button" class="payment-btn cancel-btn" onclick="closeRevolutionSolaireModal()">Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Modal Paiement -->
 <div class="payment-modal" id="paymentConfirmationModal" onclick="event.target === this && closePaymentConfirmationModal()">
     <div class="payment-modal-content" onclick="event.stopPropagation()">
@@ -1238,6 +1290,10 @@ input[type="time"]:focus, input[type="email"]:focus {
     let psychologyTimer = null;
     let psychologyTimeLeft = 600;
     let pendingTransitCard = null;
+    let pendingRevolutionSolaireCard = null;
+    let rsLieuResults = [];
+    let rsLieuDebounce;
+    const rsContexteChamps = ['travail', 'amour', 'foyer_famille', 'enfants', 'argent', 'sante', 'preoccupation'];
 
     function ensurePayPalButtons(order) {
         const container = document.getElementById('paypal-button-container');
@@ -1356,6 +1412,64 @@ input[type="time"]:focus, input[type="email"]:focus {
         });
     }
 
+    function openRevolutionSolaireModal(element) {
+        const existingItem = cart.find(item => item.id === 'revolution_solaire');
+        if (existingItem) { removeFromCart('revolution_solaire'); element.classList.remove('selected'); return; }
+        if (selectedPack || cart.some(item => item.price > 0)) {
+            showNotification('La Révolution solaire se commande séparément des autres analyses.', 'warning');
+            return;
+        }
+        pendingRevolutionSolaireCard = element;
+        const anneeSelect = document.getElementById('rs_annee_choice');
+        const anneeCourante = new Date().getFullYear();
+        const anneeNaissance = Number(document.getElementById('date_naissance')?.value?.slice(0, 4));
+        const premiereAnnee = Number.isInteger(anneeNaissance) && anneeNaissance >= 1900 && anneeNaissance <= anneeCourante
+            ? anneeNaissance : anneeCourante - 50;
+        anneeSelect.innerHTML = Array.from({length: anneeCourante + 6 - premiereAnnee}, (_, index) => premiereAnnee + index)
+            .map(annee => `<option value="${annee}"${annee === anneeCourante ? ' selected' : ''}>Révolution solaire ${annee}</option>`).join('');
+        ['rs_lieu_choice', 'rs_lat_choice', 'rs_lon_choice', 'rs_tzid_choice'].forEach(id => { document.getElementById(id).value = ''; });
+        rsContexteChamps.forEach(champ => { document.getElementById(`rs_${champ}`).value = ''; });
+        document.getElementById('revolutionSolaireModal').style.display = 'flex';
+    }
+
+    function closeRevolutionSolaireModal() {
+        document.getElementById('revolutionSolaireModal').style.display = 'none';
+        pendingRevolutionSolaireCard = null;
+    }
+
+    function fillRsLieuCoordinates() {
+        const input = document.getElementById('rs_lieu_choice');
+        const selected = rsLieuResults.find(result => result.label === input.value);
+        document.getElementById('rs_lat_choice').value = selected?.lat ?? '';
+        document.getElementById('rs_lon_choice').value = selected?.lon ?? '';
+        document.getElementById('rs_tzid_choice').value = selected?.tzid || '';
+    }
+
+    function confirmRevolutionSolaire() {
+        fillRsLieuCoordinates();
+        const annee = Number(document.getElementById('rs_annee_choice').value);
+        const lieu = document.getElementById('rs_lieu_choice').value.trim();
+        const lat = document.getElementById('rs_lat_choice').value;
+        const lon = document.getElementById('rs_lon_choice').value;
+        const tzid = document.getElementById('rs_tzid_choice').value;
+        if (!Number.isInteger(annee) || annee < 1900 || annee > 2100) {
+            showNotification('Choisis une année de retour solaire valide.', 'warning'); return;
+        }
+        if (!lieu || !lat || !lon || !tzid) {
+            showNotification('Choisis le lieu du retour solaire dans les suggestions.', 'warning'); return;
+        }
+        const contexteRs = Object.fromEntries(rsContexteChamps.map(champ =>
+            [champ, document.getElementById(`rs_${champ}`).value.trim()]).filter(([, valeur]) => valeur));
+        const card = pendingRevolutionSolaireCard;
+        closeRevolutionSolaireModal();
+        addToCart('revolution_solaire', 'Ma Révolution Solaire', 42, card,
+            {anneeRs: annee, lieuRs: lieu, latRs: lat, lonRs: lon, tzidRs: tzid, contexteRs});
+    }
+
+    function formatRevolutionSolaire(item) {
+        return item?.id === 'revolution_solaire' ? `${item.anneeRs} · ${item.lieuRs}` : '';
+    }
+
     function formatTransitPeriod(item) {
         if (item.id !== 'flash_transits') return '';
         if (item.transitDateMode === 'custom' && item.transitDate) {
@@ -1368,6 +1482,10 @@ input[type="time"]:focus, input[type="email"]:focus {
 
     function addToCart(id, name, price, element, details = {}) {
         if (selectedPack) { showNotification('Vous avez sélectionné un pack. Désélectionnez-le d\'abord.', 'warning'); return; }
+        if (price > 0 && (id === 'revolution_solaire' || cart.some(item => item.id === 'revolution_solaire')) &&
+            (id !== 'revolution_solaire' || cart.some(item => item.price > 0 && item.id !== 'revolution_solaire'))) {
+            showNotification('La Révolution solaire se commande séparément des autres analyses.', 'warning'); return;
+        }
         if (id !== 'flash_transits' && price > 0 && cart.some(item => item.id === 'flash_transits')) {
             showNotification('Point Transits se commande séparément des autres analyses.', 'warning');
             return;
@@ -1639,7 +1757,8 @@ input[type="time"]:focus, input[type="email"]:focus {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'cart-item';
                 const transitPeriod = formatTransitPeriod(item);
-                itemDiv.innerHTML = `<span>${item.name}${transitPeriod ? `<small style="display:block;color:#666;">Date explorée : ${transitPeriod}</small>` : ''}</span><span>${item.price === 0 ? 'Gratuit' : item.price + '€'}<span class="remove-item" onclick="removeFromCart('${item.id}')">✕</span></span>`;
+                const retourSolaire = formatRevolutionSolaire(item);
+                itemDiv.innerHTML = `<span>${item.name}${transitPeriod ? `<small style="display:block;color:#666;">Date explorée : ${transitPeriod}</small>` : ''}${retourSolaire ? `<small style="display:block;color:#666;">${retourSolaire}</small>` : ''}</span><span>${item.price === 0 ? 'Gratuit' : item.price + '€'}<span class="remove-item" onclick="removeFromCart('${item.id}')">✕</span></span>`;
                 cartItems.appendChild(itemDiv);
                 total += item.price;
             });
@@ -1691,6 +1810,9 @@ input[type="time"]:focus, input[type="email"]:focus {
     }
 
     function selectPack(packId) {
+        if (cart.some(item => item.id === 'revolution_solaire')) {
+            showNotification('Retire d’abord la Révolution solaire pour choisir un pack.', 'warning'); return;
+        }
         const packs = {
             origines: { id: 'pack_origines', name: '🌑 Pack Origines', price: 83, analyses: ['point_astral_famille', 'analyse_karmique'] },
             essence: { id: 'pack_essence', name: '✨ Pack Essence', price: 49, analyses: ['flash_astral', 'forces_defis', 'profil_amoureux'] },
@@ -1748,6 +1870,13 @@ input[type="time"]:focus, input[type="email"]:focus {
         const transitItem = cart.find(item => item.id === 'flash_transits');
         orderData.userInfo.transitDateMode = transitItem?.transitDateMode || 'today';
         orderData.userInfo.transitDate = transitItem?.transitDate || '';
+        const rsItem = cart.find(item => item.id === 'revolution_solaire');
+        orderData.userInfo.anneeRs = rsItem?.anneeRs || '';
+        orderData.userInfo.lieuRs = rsItem?.lieuRs || '';
+        orderData.userInfo.latRs = rsItem?.latRs || '';
+        orderData.userInfo.lonRs = rsItem?.lonRs || '';
+        orderData.userInfo.tzidRs = rsItem?.tzidRs || '';
+        orderData.userInfo.contexteRs = rsItem?.contexteRs || {};
         showPaymentConfirmationModal(orderData);
     }
 
@@ -1781,6 +1910,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                 <div class="items-summary">
                     ${itemsHtml}
                     ${orderData.items.some(item => item.id === 'flash_transits') ? `<p style="margin:10px 0 0;color:#5f43b2;"><strong>Date explorée :</strong> ${formatTransitPeriod(orderData.items.find(item => item.id === 'flash_transits'))}</p>` : ''}
+                    ${orderData.items.some(item => item.id === 'revolution_solaire') ? `<p style="margin:10px 0 0;color:#b85b0b;"><strong>Retour solaire :</strong> ${orderData.userInfo.anneeRs} à ${orderData.userInfo.lieuRs}</p>` : ''}
                     <div class="payment-total"><span><strong>Total :</strong></span><span><strong>${total}€</strong></span></div>
                 </div>
             </div>`;
@@ -1822,6 +1952,12 @@ input[type="time"]:focus, input[type="email"]:focus {
             'gender': orderData.userInfo.gender,
             'transit_date_mode': orderData.userInfo.transitDateMode,
             'transit_date': orderData.userInfo.transitDate,
+            'annee_rs': orderData.userInfo.anneeRs,
+            'lieu_rs': orderData.userInfo.lieuRs,
+            'lat_rs': orderData.userInfo.latRs,
+            'lon_rs': orderData.userInfo.lonRs,
+            'tzid_rs': orderData.userInfo.tzidRs,
+            'contexte_rs_json': JSON.stringify(orderData.userInfo.contexteRs),
             'product_key': productKey,
             'type_commande': orderData.type,
             'items': JSON.stringify(orderData.items),
@@ -1879,6 +2015,30 @@ input[type="time"]:focus, input[type="email"]:focus {
 
     input.addEventListener('change', () => fillHiddenFromLabel(input.value));
     input.addEventListener('blur', () => fillHiddenFromLabel(input.value));
+
+    const rsLieuInput = document.getElementById('rs_lieu_choice');
+    if (rsLieuInput) {
+        const rsLieuDatalist = document.getElementById('rs-lieu-suggestions');
+        rsLieuInput.addEventListener('input', () => {
+            const query = rsLieuInput.value.trim();
+            ['rs_lat_choice', 'rs_lon_choice', 'rs_tzid_choice'].forEach(id => { document.getElementById(id).value = ''; });
+            clearTimeout(rsLieuDebounce);
+            if (query.length < 2) { rsLieuDatalist.innerHTML = ''; return; }
+            rsLieuDebounce = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    rsLieuResults = data.results || [];
+                    rsLieuDatalist.replaceChildren(...rsLieuResults.map(result => {
+                        const option = document.createElement('option'); option.value = result.label; return option;
+                    }));
+                } catch (error) { console.warn('Geocode RS error:', error); }
+            }, 250);
+        });
+        rsLieuInput.addEventListener('change', fillRsLieuCoordinates);
+        rsLieuInput.addEventListener('blur', fillRsLieuCoordinates);
+    }
 
     createStars();
     updateCartDisplay();

@@ -119,19 +119,19 @@ def api_analyse_gratuite():
             html_limit = f"""
                 <div style="padding:20px; border-radius:12px; background:#fff3cd; border:1px solid #ffeeba; color:#856404; text-align:center; font-family:sans-serif;">
                     <strong>🚫 Limite atteinte</strong><br><br>
-                    👉 Pour continuer ton exploration, découvre ton <strong>Point Astral complet</strong> :<br>
+                    👉 Pour continuer ton exploration, découvre ton <strong>Point Astral Essentiel à 25 €</strong> :<br>
                     <ul style="text-align:left; display:inline-block; margin:10px auto; padding:0; list-style:disc;">
-                        <li>Lecture approfondie & psychologiques (4 pages)</li>
+                        <li>Lecture des grandes dynamiques de ton thème (environ 4 à 6 pages)</li>
                         <li>PDF personnalisé à télécharger</li>
                     </ul>
                     <br>
                     <a href="/#flash_astral" style="display:inline-block; padding:12px 20px; background:#856404; color:#fff; border-radius:8px; text-decoration:none; font-weight:bold;">
-                        💫 Découvrir mon Point Astral
+                        💫 Découvrir mon Point Astral Essentiel à 25 €
                     </a>
                 </div>
             """
             print(f"[QUOTA] Bloqué: email={email} ({email_count}), ip={ip} ({ip_count})")
-            return jsonify({"ok": True, "html": html_limit}), 200
+            return jsonify({"ok": True, "limited": True, "html": html_limit}), 200
 
         # Optionnel : log pour savoir qu'on a autorisé et où on en est
         print(f"[QUOTA] Autorisé: email={email} ({email_count}), ip={ip} ({ip_count})")
@@ -344,7 +344,10 @@ def api_analyse_gratuite():
             les situations dans lesquelles il s'active ni les ressources qui permettent de mieux le vivre.
             Le Point Astral Essentiel relie ces différentes dimensions dans une analyse personnalisée de 4 à 6 pages.
 
-            👉 Découvrir mon Point Astral Essentiel — 25 € : https://lesfousdastro.fr/#flash_astral
+            Exemple complet : https://lesfousdastro.fr/static/pdfs/Exemple_Flash_Astral_Cecile.pdf
+            Réception par email après paiement et génération, généralement en quelques minutes.
+
+            👉 Découvrir mon Point Astral Essentiel à 25 € : https://lesfousdastro.fr/?utm_source=newsletter&utm_campaign=free_analysis#flash_astral
 
             À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).
             Les Fous d'Astro by Cécile CL ✨
@@ -361,11 +364,13 @@ def api_analyse_gratuite():
             Il met en lumière un mécanisme central, mais pas encore ses origines,
             les situations dans lesquelles il s'active ni les ressources qui permettent de mieux le vivre.
             Le <strong>Point Astral Essentiel</strong> relie ces dimensions dans une analyse personnalisée de 4 à 6 pages.</p>
+            <p><a href="https://lesfousdastro.fr/static/pdfs/Exemple_Flash_Astral_Cecile.pdf">Lire un rapport complet d’exemple (PDF)</a></p>
+            <p>Réception par email après paiement et génération, généralement en quelques minutes.</p>
             <p style="text-align:center; margin-top:30px;">
-            <a href="https://lesfousdastro.fr/#flash_astral"
+            <a href="https://lesfousdastro.fr/?utm_source=newsletter&utm_campaign=free_analysis#flash_astral"
             style="display:inline-block;padding:14px 28px;background:#1f628e;color:white;
             border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">
-            Comprendre les mécanismes de mon thème — 25 €
+            Comprendre les mécanismes de mon thème à 25 €
             </a>
             </p>
             <p style="margin-top:40px;">À très vite sur les réseaux...en vrai, ou dans les étoiles si on se croise jamais (c'est triste mais c'est une possibilité).<br>
@@ -398,25 +403,39 @@ def api_analyse_gratuite():
             <h4>🌟 Bonjour {nom_html}, voici ton profil astrologique :</h4>
             <div style="margin: 20px 0; line-height: 1.6;">{texte_html}</div>
             
-            <div style="margin-top:25px; padding:20px; background:rgba(31,98,142,0.1);
-            border-radius:15px; text-align:center;">
+            <div class="free-analysis-offer">
                 <p style="margin-bottom:15px; color:#555;">
                     Cet aperçu montre un mécanisme central. Le <strong>Point Astral Essentiel</strong>
-                    explore ses origines, ses contextes d'activation et les ressources de ton thème
-                    dans une analyse personnalisée de 4 à 6 pages.
+                    te fait découvrir les grandes dynamiques qui structurent l’ensemble de ton thème.
+                    Ton PDF personnalisé d’environ 4 à 6 pages relie ton Ascendant, ton Soleil et ta Lune,
+                    ton fonctionnement émotionnel, tes fondations et les grands axes de ta personnalité.
+                    Il se termine par une synthèse qui relie ces dimensions.
+                </p>
+                <p><strong>Prix total : 25 €.</strong> Réception par email après paiement et génération,
+                    généralement en quelques minutes.
+                </p>
+                <div class="free-analysis-offer-actions">
+                <blockquote style="margin:16px 0;">
+                    « Tu as réussi à mettre en mot ce qui se passe à l’intérieur de moi, et que j’ai du mal à expliquer. »
+                    <footer>Cynthia, avis sur la version antérieure du Point Astral.
+                    <a href="/static/temoignages/2025_10_Cynthia_flash_astral.webp" target="_blank" rel="noopener">Lire l’avis original</a></footer>
+                </blockquote>
+                <p>
                 </p>
 
                 <button type="button" onclick="choosePointAstralFromFreeAnalysis()"
                 style="display:inline-block;padding:12px 24px;background:#1f628e;color:white;
                 border:0;border-radius:8px;text-decoration:none;font-weight:bold;cursor:pointer;
                 width:80%;max-width:300px;">
-                Comprendre les mécanismes de mon thème — 25 €
+                Comprendre les mécanismes de mon thème à 25 €
                 </button>
                 <br>
                 <a href="/static/pdfs/Exemple_Flash_Astral_Cecile.pdf" target="_blank" rel="noopener"
-                style="display:inline-block;margin-top:14px;font-size:13px;color:#1f628e;text-decoration:underline;">
-                Voir un exemple avant de choisir
+                style="display:inline-block;margin-top:10px;font-size:14px;min-height:44px;padding:12px;color:#1f628e;text-decoration:underline;">
+                Lire le rapport complet d’exemple (PDF)
                 </a>
+                <br><button type="button" onclick="exploreMoreAnalyses()" style="background:none;border:0;color:#1f628e;padding:12px;text-decoration:underline;cursor:pointer;">Voir les autres analyses</button>
+                </div>
             </div>
         </div>
     """
@@ -458,7 +477,7 @@ def api_analyse_gratuite():
     #             </p>
 
     #             <a href="/static/pdfs/Exemple_Flash_Astral_Cecile.pdf" target="_blank"
-    #             style="font-size:13px;color:#1f628e;text-decoration:underline;">
+    #             style="font-size:16px;min-height:44px;padding:12px;color:#1f628e;text-decoration:underline;">
     #             📄 Voir un exemple du Point Astral avant d'acheter
     #             </a>
     #         </div>
@@ -473,7 +492,6 @@ def api_analyse_gratuite():
             'ascendant': theme.get('ascendant', 'Non calculé')
         }
 
-        print(f"🔍 DEBUG URL pour placements : {debug_data['placements_url']}")
         
         return jsonify({
             "ok": True, 
