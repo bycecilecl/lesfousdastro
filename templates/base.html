@@ -28,6 +28,7 @@
 
     <title>{% block title %}Les Fous d'Astro | Analyses astrologiques personnalisées{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}Analyses astrologiques personnalisées : Point astral, profil karmique, profil amoureux. Une lecture approfondie de ton ciel, créée par une vraie astrologue.{% endblock %}">
+    {% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -177,6 +178,7 @@
                 <li><a href="{{ url_for('pages_bp.analyses') }}" class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
                 <li><a href="{{ url_for('pages_bp.abonnements') }}" class="{% if request.path == url_for('pages_bp.abonnements') %}active{% endif %}">Abonnements</a></li>
                 <li><a href="{{ url_for('blog.blog_index') }}" class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
+                <li><a href="{{ url_for('blog.bd_index') }}" class="{% if request.path.startswith('/bd') %}active{% endif %}">BD</a></li>
                 <li><a href="{{ url_for('site_bp.temoignages') }}" class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
                 <li><a href="{{ url_for('pages_bp.prestations') }}" class="{% if request.path == url_for('pages_bp.prestations') %}active{% endif %}">Prestations</a></li>
                 <li><a href="{{ url_for('pages_bp.contact') }}" class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>

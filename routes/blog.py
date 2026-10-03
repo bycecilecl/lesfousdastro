@@ -1,10 +1,11 @@
 # routes/blog.py
 from pathlib import Path
+from html.parser import HTMLParser
 import os
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
-from flask import Blueprint, render_template, abort, url_for, Response
+from flask import Blueprint, render_template, abort, url_for, Response, request, make_response
 import markdown
 import yaml
 from services.bludit_blog import published_pages
@@ -54,6 +55,22 @@ BLUDIT_CATEGORIES = {
     "astrologie-vedique": "Astrologie védique",
     "astrologie-uranienne": "Astrologie uranienne",
 }
+
+BD_THEMES = {
+    "bases": "Les bases",
+    "placements": "Les placements",
+    "aspects": "Les aspects",
+}
+
+
+class _FirstImage(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.src = ""
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "img" and not self.src:
+            self.src = dict(attrs).get("src", "")
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -151,19 +168,7 @@ def article_from_bludit(page: dict) -> dict | None:
     title = str(page.get("title") or slug)
     description = str(page.get("description") or "")
     date = str(page.get("dateRaw") or page.get("date") or "")[:10]
-    bludit_origin = os.getenv("BLUDIT_BLOG_URL", "").rstrip("/")
-
-    def media_url(value: str) -> str:
-        if bludit_origin and value.startswith(bludit_origin + "/bl-content/uploads/"):
-            return "/blog/media/" + value.split("/bl-content/uploads/", 1)[1]
-        if value.startswith("/bl-content/uploads/"):
-            return "/blog/media/" + value.split("/bl-content/uploads/", 1)[1]
-        return value
-
-    content = str(page.get("content") or "")
-    if bludit_origin:
-        content = content.replace(bludit_origin + "/bl-content/uploads/", "/blog/media/")
-    content = content.replace('"/bl-content/uploads/', '"/blog/media/')
+    content = bludit_content(page)
 
     return {
         "title": title,
@@ -176,10 +181,64 @@ def article_from_bludit(page: dict) -> dict | None:
         "category": category,
         "cat": cat,
         "tag": category or "Article",
-        "image": media_url(str(page.get("coverImage") or "")),
+        "image": bludit_media_url(str(page.get("coverImage") or "")),
         "image_alt": title,
         "content": content,
     }
+
+
+def bludit_media_url(value: str) -> str:
+    origin = os.getenv("BLUDIT_BLOG_URL", "").rstrip("/")
+    if origin and value.startswith(origin + "/bl-content/uploads/"):
+        return "/blog/media/" + value.split("/bl-content/uploads/", 1)[1]
+    if value.startswith("/bl-content/uploads/"):
+        return "/blog/media/" + value.split("/bl-content/uploads/", 1)[1]
+    return value
+
+
+def bludit_content(page: dict) -> str:
+    content = str(page.get("content") or "")
+    origin = os.getenv("BLUDIT_BLOG_URL", "").rstrip("/")
+    if origin:
+        content = content.replace(origin + "/bl-content/uploads/", "/blog/media/")
+    return content.replace('"/bl-content/uploads/', '"/blog/media/')
+
+
+def bd_from_bludit(page: dict) -> dict | None:
+    """Turn a published Bludit page in category BD into a comic page."""
+    if (page.get("type") != "published"
+            or str(page.get("category") or "").lower() not in {"bd", "bandes-dessinees"}):
+        return None
+    slug = page.get("slug")
+    if not isinstance(slug, str) or not slug or "/" in slug or ".." in slug:
+        return None
+    tags = page.get("tags") or {}
+    tag_keys = tags.keys() if isinstance(tags, dict) else tags if isinstance(tags, list) else []
+    aliases = {"les-bases": "bases", "les-placements": "placements", "les-aspects": "aspects"}
+    theme = next((aliases.get(str(tag).lower(), str(tag).lower()) for tag in tag_keys
+                  if aliases.get(str(tag).lower(), str(tag).lower()) in BD_THEMES), "")
+    content = bludit_content(page)
+    cover = bludit_media_url(str(page.get("coverImage") or ""))
+    parser = _FirstImage()
+    parser.feed(content)
+    if not cover:
+        cover = parser.src
+    return {
+        "slug": slug,
+        "title": str(page.get("title") or slug),
+        "description": str(page.get("description") or ""),
+        "date": str(page.get("dateRaw") or page.get("date") or "")[:10],
+        "theme": theme,
+        "theme_label": BD_THEMES.get(theme, "À découvrir"),
+        "cover": cover,
+        "has_panel": bool(parser.src),
+        "content": content,
+    }
+
+
+def charger_bd() -> list[dict]:
+    pages = (bd_from_bludit(page) for page in published_pages())
+    return sorted((page for page in pages if page), key=lambda page: page["date"], reverse=True)
 
 
 @blog_bp.route("/blog/media/<path:filename>")
@@ -203,6 +262,34 @@ def blog_media(filename):
     except OSError:
         abort(404)
     return Response(body, content_type=content_type, headers={"Cache-Control": "public, max-age=86400"})
+
+
+@blog_bp.route("/bd", strict_slashes=False)
+def bd_index():
+    theme = request.args.get("theme", "")
+    if theme and theme not in BD_THEMES:
+        abort(404)
+    pages = charger_bd()
+    visible_pages = [page for page in pages if page["theme"] == theme] if theme else pages
+    response = make_response(render_template(
+        "bd/index.html", pages=visible_pages, themes=BD_THEMES, active_theme=theme,
+        counts={key: sum(page["theme"] == key for page in pages) for key in BD_THEMES},
+    ))
+    if not visible_pages:
+        response.headers["X-Robots-Tag"] = "noindex"
+    return response
+
+
+@blog_bp.route("/bd/<slug>", strict_slashes=False)
+def bd_page(slug):
+    pages = charger_bd()
+    for index, page in enumerate(pages):
+        if page["slug"] == slug:
+            return render_template("bd/page.html", page=page,
+                                   newer=pages[index - 1] if index else None,
+                                   older=pages[index + 1] if index + 1 < len(pages) else None,
+                                   canonical_url=url_for("blog.bd_page", slug=slug, _external=True))
+    abort(404)
 
 
 @blog_bp.route("/blog", strict_slashes=False)

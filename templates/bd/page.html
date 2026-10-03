@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} — BD des Fous d'Astro{% endblock %}
+{% block meta_description %}{{ page.description or "Lis cette planche des Fous d'Astro pour découvrir l'astrologie en BD." }}{% endblock %}
+
+{% block extra_css %}
+.bd-read { min-height: 70vh; background: #f4fbfd; color: #17334c; }
+.bd-read__header { padding: 54px 22px 50px; text-align: center; color: white; background: linear-gradient(155deg, #101f3e, #1f628e 65%, #168f94); }
+.bd-read__back { display: inline-block; margin-bottom: 25px; color: #c5f3ee; font-weight: 700; text-decoration: none; }
+.bd-read__back:hover { color: white; text-decoration: underline; }
+.bd-read__theme { margin: 0 0 12px; text-transform: uppercase; letter-spacing: .16em; color: #b8f0e9; font-size: .77rem; font-weight: 800; }
+.bd-read h1 { max-width: 900px; margin: 0 auto 15px; font-size: clamp(2rem, 4vw, 3.4rem); line-height: 1.13; }
+.bd-read__intro { max-width: 700px; margin: 0 auto; line-height: 1.65; color: #e7f4f7; font-size: 1.06rem; }
+.bd-read__wrap { max-width: 900px; margin: 0 auto; padding: 38px 20px 90px; }
+.bd-read__paper { padding: 28px; border-radius: 20px; background: white; box-shadow: 0 10px 34px rgba(21, 72, 107, .11); }
+.bd-read__content { font-size: 1.02rem; line-height: 1.7; overflow-wrap: anywhere; }
+.bd-read__content p { margin: 0 0 1.4rem; }
+.bd-read__content img, .bd-read__cover { display: block; width: auto !important; max-width: 100% !important; height: auto !important; margin: 0 auto 25px; border-radius: 8px; }
+.bd-read__enlarge { display: block; width: fit-content; margin: -12px auto 28px; font-size: .9rem; font-weight: 700; color: #1f628e; }
+.bd-read__content figure { margin: 0 0 24px; text-align: center; }
+.bd-read__content figcaption { margin-top: 8px; color: #617587; font-size: .86rem; }
+.bd-read__content a { color: #1f628e; text-decoration: underline; }
+.bd-read__content h2 { color: #1f628e; margin: 2rem 0 1rem; }
+.bd-read__links { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; margin-top: 32px; }
+.bd-read__links a { flex: 1; display: block; padding: 18px 20px; border-radius: 14px; background: #e6f5f6; color: #174f72; text-decoration: none; font-weight: 700; }
+.bd-read__links a:hover { background: #ccebed; }
+.bd-read__links a:last-child { text-align: right; }
+.bd-read__footer { margin-top: 31px; text-align: center; }
+.bd-read__footer a { color: #1f628e; font-weight: 700; }
+@media (max-width: 640px) { .bd-read__header { padding: 45px 19px; } .bd-read__paper { padding: 16px; } .bd-read__wrap { padding: 19px 11px 70px; } .bd-read__links { flex-direction: column; } .bd-read__links a:last-child { text-align: left; } }
+{% endblock %}
+
+{% block content %}
+<article class="bd-read">
+  <header class="bd-read__header">
+    <a class="bd-read__back" href="{{ url_for('blog.bd_index') }}">← Toutes les BD</a>
+    <p class="bd-read__theme">{{ page.theme_label }}</p>
+    <h1>{{ page.title }}</h1>
+    {% if page.description %}<p class="bd-read__intro">{{ page.description }}</p>{% endif %}
+  </header>
+  <div class="bd-read__wrap">
+    <div class="bd-read__paper">
+      {% if page.cover and not page.has_panel %}<img class="bd-read__cover" src="{{ page.cover }}" alt="{{ page.title }}">{% endif %}
+      <div class="bd-read__content">{{ page.content | safe }}</div>
+    </div>
+    {% if older or newer %}
+    <nav class="bd-read__links" aria-label="Autres planches">
+      {% if older %}<a href="{{ url_for('blog.bd_page', slug=older.slug) }}">← {{ older.title }}</a>{% endif %}
+      {% if newer %}<a href="{{ url_for('blog.bd_page', slug=newer.slug) }}">{{ newer.title }} →</a>{% endif %}
+    </nav>
+    {% endif %}
+    <p class="bd-read__footer">Envie de comprendre le sujet plus en détail ? <a href="{{ url_for('blog.blog_index') }}">Explore le blog</a>.</p>
+  </div>
+</article>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.bd-read__content img, .bd-read__cover').forEach((image) => {
+    const link = document.createElement('a');
+    link.href = image.currentSrc || image.src;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.className = 'bd-read__enlarge';
+    link.textContent = 'Ouvrir la planche en grand ↗';
+    link.setAttribute('aria-label', 'Ouvrir en grand : ' + (image.alt || 'planche BD'));
+    image.insertAdjacentElement('afterend', link);
+  });
+</script>
+{% endblock %}
