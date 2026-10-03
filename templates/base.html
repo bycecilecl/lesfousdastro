@@ -189,7 +189,13 @@
         {% block content %}{% endblock %}
     </main>
 
+    {% if blog_preview %}
+    <footer style="padding:28px 20px; text-align:center; background:#1f628e; color:white;">
+        Aperçu privé du blog des Fous d'Astro. Aucun formulaire actif.
+    </footer>
+    {% else %}
     {% include "_footer.html" %}
+    {% endif %}
 
     <script type="text/javascript">
         var sc_project=12490079;

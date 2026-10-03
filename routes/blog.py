@@ -1,8 +1,13 @@
 # routes/blog.py
 from pathlib import Path
-from flask import Blueprint, render_template, abort, url_for
+import os
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+
+from flask import Blueprint, render_template, abort, url_for, Response
 import markdown
 import yaml
+from services.bludit_blog import published_pages
 
 blog_bp = Blueprint("blog", __name__)
 
@@ -27,6 +32,27 @@ CATEGORIES_MAP = {
     "carnets d'astrologue": "carnets",
     "astrologie védique": "vedique",
     "astrologie uranienne": "uranienne"
+}
+
+BLUDIT_CATEGORIES = {
+    "bases": "Les Bases",
+    "signe": "Signes astrologiques",
+    "planete": "Planètes",
+    "maison": "Maisons",
+    "analyses": "Analyses de thèmes",
+    "astropapote": "Astropapote",
+    "carnets": "Carnets d'astrologue",
+    "vedique": "Astrologie védique",
+    "uranienne": "Astrologie uranienne",
+    # Keep recognizing categories created manually in Bludit before import.
+    "les-bases": "Les Bases",
+    "signes-astrologiques": "Signes astrologiques",
+    "planetes": "Planètes",
+    "maisons": "Maisons",
+    "analyses-de-themes": "Analyses de thèmes",
+    "carnets-dastrologue": "Carnets d'astrologue",
+    "astrologie-vedique": "Astrologie védique",
+    "astrologie-uranienne": "Astrologie uranienne",
 }
 
 
@@ -54,15 +80,6 @@ def lire_article_md(path: Path) -> dict:
         content,
         extensions=["extra", "nl2br"]
     )
-
-    print("ARTICLE LU :", slug)
-    print("LONGUEUR CONTENU MD :", len(content))
-    print("DÉBUT CONTENU :", content[:100])
-    print("FICHIER :", path)
-    print("RAW START :", raw[:300])
-    print("CONTENT LENGTH :", len(content))
-    print("HTML LENGTH :", len(html_content))
-    print("CATÉGORIE :", meta.get("category"))
 
     categories = meta.get("categories")
 
@@ -104,21 +121,93 @@ def lire_article_md(path: Path) -> dict:
 def charger_articles() -> list[dict]:
     articles = []
 
-    if not ARTICLES_DIR.exists():
-        return articles
+    if ARTICLES_DIR.exists():
+        for path in ARTICLES_DIR.glob("*.md"):
+            article = lire_article_md(path)
+            articles.append(article)
 
-    for path in ARTICLES_DIR.glob("*.md"):
-        article = lire_article_md(path)
-        articles.append(article)
+    # An article imported into Bludit replaces its Markdown version only when
+    # explicitly published there. Its /blog/<slug> address stays the same.
+    by_slug = {article["slug"]: article for article in articles}
+    for page in published_pages():
+        article = article_from_bludit(page)
+        if article:
+            by_slug[article["slug"]] = article
 
-    return sorted(articles, key=lambda a: a.get("date", ""), reverse=True)
+    return sorted(by_slug.values(), key=lambda a: a.get("date", ""), reverse=True)
+
+
+def article_from_bludit(page: dict) -> dict | None:
+    """Adapt a public Bludit page to the existing blog templates."""
+    slug = page.get("slug")
+    if not isinstance(slug, str) or not slug or "/" in slug or ".." in slug:
+        return None
+    category_key = str(page.get("category") or "").strip()
+    category = BLUDIT_CATEGORIES.get(category_key, category_key)
+    cat = CATEGORIES_MAP.get(category.lower())
+    if not cat:
+        # Bludit's welcome page and unrelated pages must not enter this blog.
+        return None
+    title = str(page.get("title") or slug)
+    description = str(page.get("description") or "")
+    date = str(page.get("dateRaw") or page.get("date") or "")[:10]
+    bludit_origin = os.getenv("BLUDIT_BLOG_URL", "").rstrip("/")
+
+    def media_url(value: str) -> str:
+        if bludit_origin and value.startswith(bludit_origin + "/bl-content/uploads/"):
+            return "/blog/media/" + value.split("/bl-content/uploads/", 1)[1]
+        if value.startswith("/bl-content/uploads/"):
+            return "/blog/media/" + value.split("/bl-content/uploads/", 1)[1]
+        return value
+
+    content = str(page.get("content") or "")
+    if bludit_origin:
+        content = content.replace(bludit_origin + "/bl-content/uploads/", "/blog/media/")
+    content = content.replace('"/bl-content/uploads/', '"/blog/media/')
+
+    return {
+        "title": title,
+        "slug": slug,
+        "description": description,
+        "excerpt": description,
+        "date": date,
+        "categories": [category] if category else [],
+        "cats": [cat],
+        "category": category,
+        "cat": cat,
+        "tag": category or "Article",
+        "image": media_url(str(page.get("coverImage") or "")),
+        "image_alt": title,
+        "content": content,
+    }
+
+
+@blog_bp.route("/blog/media/<path:filename>")
+def blog_media(filename):
+    """Serve Bludit's uploaded images through the public blog domain."""
+    if (not filename or "\\" in filename or any(part in (".", "..", "") for part in filename.split("/"))
+            or Path(filename).suffix.lower() not in {".jpg", ".jpeg", ".png", ".gif", ".webp"}):
+        abort(404)
+    bludit_origin = os.getenv("BLUDIT_BLOG_URL", "").rstrip("/")
+    if not bludit_origin.startswith("https://"):
+        abort(404)
+    source = bludit_origin + "/bl-content/uploads/" + quote(filename, safe="/")
+    try:
+        with urlopen(Request(source, headers={"User-Agent": "LesFousDAstroBlog/1.0"}), timeout=5) as upstream:
+            content_type = upstream.headers.get_content_type()
+            if content_type not in {"image/jpeg", "image/png", "image/gif", "image/webp"}:
+                abort(404)
+            body = upstream.read(8 * 1024 * 1024 + 1)
+            if len(body) > 8 * 1024 * 1024:
+                abort(404)
+    except OSError:
+        abort(404)
+    return Response(body, content_type=content_type, headers={"Cache-Control": "public, max-age=86400"})
 
 
 @blog_bp.route("/blog", strict_slashes=False)
 def blog_index():
     articles = charger_articles()
-    print("ARTICLES TROUVÉS :", len(articles))
-    print([a["slug"] for a in articles])
     return render_template("blog/index.html", articles=articles)
 
 
