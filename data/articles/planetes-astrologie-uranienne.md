@@ -114,7 +114,7 @@ Apollon représente la connaissance, l'apprentissage, la science, mais aussi le 
 
 ## Admète
 
-![Admète](/static/blog/images/dans-articles/ademete.webp)
+![Admète](/static/blog/images/dans-articles/admete.webp)
 
 Admète nous fait penser à Mercure ! Sauf qu'on pourrait dire qu'il n'a pas de bras. Du coup, j'aurais tendance à y voir quelqu'un qui médite, ou qui se concentre — et justement, Admète nous parle de ça : concentration, profondeur, consolidation, stabilité, endurance. Mais côté plus négatif, on peut y voir l'arrêt, donc le blocage, le fait de ne plus rien faire, d'être inactif — et donc, aussi, la mort.
 
