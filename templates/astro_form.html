@@ -1063,7 +1063,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <a class="rs-more" href="/analyses#revolution-solaire" onclick="event.stopPropagation()">Découvrir ce que contient le rapport</a>
                         </div>
                         <div class="transits-price">
-                            42€
+                            {{ rs_price_label }}€
                             <span class="transits-cta">{% if rs_sales_open %}Choisir mon année{% else %}Disponible à partir du 9 octobre{% endif %}</span>
                         </div>
                     </article>
@@ -1465,7 +1465,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             [champ, document.getElementById(`rs_${champ}`).value.trim()]).filter(([, valeur]) => valeur));
         const card = pendingRevolutionSolaireCard;
         closeRevolutionSolaireModal();
-        addToCart('revolution_solaire', 'Ma Révolution Solaire', 42, card,
+        addToCart('revolution_solaire', 'Ma Révolution Solaire', {{ rs_price_euros|tojson }}, card,
             {anneeRs: annee, lieuRs: lieu, latRs: lat, lonRs: lon, tzidRs: tzid, contexteRs});
     }
 
