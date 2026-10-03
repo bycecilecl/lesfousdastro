@@ -24,9 +24,11 @@ from point_astral_famille.routes import generer_point_astral_famille_pdf_s3
 from routes.forces_defis_module import generer_forces_defis_pdf_s3
 from routes.profil_amoureux_module import generer_profil_amoureux_pdf_s3
 from routes.analyse_karmique import generer_analyse_karmique_pdf_s3
+from routes.revolution_solaire_module import generer_revolution_solaire_pdf_s3, _demande_depuis_commande
 import traceback
 from services.analysis_orders import (catalog_items, create_order, bind_provider, owned_order,
     confirm_stripe, restore_order, run_job, JobBusy, JobReview, claim_notice)
+from services.analysis_incidents import notifier_generation_interrompue
 from models.analysis_orders import AnalysisJob
 from extensions import db
 
@@ -157,6 +159,20 @@ def checkout():
     if not cart_items:
         current_app.logger.warning("❌ [CHECKOUT] Panier vide")
         abort(400, description="Panier vide.")
+
+    if any(isinstance(item, dict) and (item.get("key") or item.get("id")) == "revolution_solaire"
+           for item in cart_items):
+        infos = session.get("infos_utilisateur")
+        if not isinstance(infos, dict):
+            abort(400, description="Informations de naissance manquantes.")
+        for champ in ("annee_rs", "lieu_rs", "lat_rs", "lon_rs", "tzid_rs"):
+            infos[champ] = (request.form.get(champ) or "").strip()[:250]
+        infos["contexte_rs_json"] = (request.form.get("contexte_rs_json") or "{}").strip()
+        try:
+            _demande_depuis_commande(infos)
+        except ValueError as erreur:
+            abort(400, description=str(erreur))
+        session.modified = True
     
     current_app.logger.info(f"🛒 [CHECKOUT] Panier: {cart_items}")
     # try:
@@ -611,7 +627,7 @@ def traiter_analyses():
     # Forces & Défis reste en arrière-plan : sa rédaction Claude peut dépasser
     # le délai maximal du proxy HTTP alors que le rapport finit correctement.
     # ============================================================
-    if len(valid_products) == 1 and valid_products[0] != "forces_defis":
+    if len(valid_products) == 1 and valid_products[0] not in {"forces_defis", "revolution_solaire"}:
         current_app.logger.info("🟢 Achat solo détecté : affichage direct")
 
         product_id = valid_products[0]
@@ -803,6 +819,9 @@ def _generer_analyse_pack(product_id, pending):
 
         infos = pending.get("infos_utilisateur") or {}
 
+        if product_id == "revolution_solaire":
+            return generer_revolution_solaire_pdf_s3(infos)
+
         # =====================================================
         # POINT ASTRAL
         # =====================================================
@@ -926,6 +945,25 @@ def generer_pack_et_envoyer_email(valid_products, infos_client, pending):
             resultat = generer_analyse_pack(product_id, pending)
         except (JobBusy, JobReview):
             return  # Aucun email présentant un pack partiel comme terminé.
+        except Exception:
+            if product_id in {"forces_defis", "revolution_solaire"}:
+                try:
+                    avis = notifier_generation_interrompue(
+                        commande_id=pending["secure_order_id"],
+                        produit=product_id,
+                        email_client=infos_client.get("email"),
+                        nom_client=infos_client.get("nom"),
+                    )
+                    current_app.logger.error(
+                        "Analyse non livrée, commande %s, notification admin=%s client=%s",
+                        pending["secure_order_id"], avis["admin"], avis["client"],
+                    )
+                except Exception:
+                    current_app.logger.exception(
+                        "Notification d'incident impossible pour la commande %s",
+                        pending.get("secure_order_id"),
+                    )
+            raise
 
         if resultat:
             analyses_generees.append(resultat)

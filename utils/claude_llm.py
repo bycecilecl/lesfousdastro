@@ -34,6 +34,8 @@ def ask_claude(
     system: str = "",
     max_tokens: int = 1200,
     temperature: float = 0.7,
+    single_attempt: bool = False,
+    stop_sequences: list[str] | None = None,
 ) -> str:
     kwargs = {
         "model": MODEL,
@@ -49,10 +51,19 @@ def ask_claude(
             {"type": "text", "text": system}
         ]
 
-    resp = CLIENT.messages.create(**kwargs)
+    if stop_sequences:
+        kwargs["stop_sequences"] = stop_sequences
+
+    client = CLIENT.with_options(max_retries=0) if single_attempt else CLIENT
+    resp = client.messages.create(**kwargs)
     logger.info("Claude stop_reason=%s", resp.stop_reason)
     logger.info("Claude input_tokens=%s", resp.usage.input_tokens)
     logger.info("Claude output_tokens=%s", resp.usage.output_tokens)
+
+    if single_attempt and resp.stop_reason == "max_tokens":
+        raise BlocTronqueError(resp.content[0].text.strip())
+    if single_attempt and resp.stop_reason not in {"end_turn", "stop_sequence"}:
+        raise RuntimeError("Réponse Claude non terminée : aucun rapport à livrer.")
 
     if resp.stop_reason == "max_tokens":
         retry_max_tokens = int(max_tokens * 1.5)

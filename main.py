@@ -51,6 +51,7 @@ from routes.analyse_gratuite_api import gratuite_api_bp
 from routes.point_astral_blocs import point_astral_blocs_bp
 from point_astral_famille.routes import point_astral_famille_bp
 from routes.transits import transits_bp
+from routes.revolution_solaire_module import revolution_solaire_module
 from routes.forces_defis_module import forces_defis_module_bp
 from utils.karmique.karmique_score import calculer_poids_karmique
 from utils.karmique.karmique_context import build_global_context
@@ -230,7 +231,7 @@ def _log_time(resp):
         dt = (time.perf_counter() - g._t0) * 1000
         current_app.logger.info(
             "⏱️ %s %s -> %d in %.1f ms",
-            request.method, request.path, resp.status_code, dt
+            request.method, request.url_rule.rule if request.url_rule else "<sans route>", resp.status_code, dt
         )
     except Exception:
         pass
@@ -289,6 +290,7 @@ app.register_blueprint(gratuite_api_bp)
 app.register_blueprint(point_astral_blocs_bp)
 app.register_blueprint(point_astral_famille_bp)
 app.register_blueprint(transits_bp)
+app.register_blueprint(revolution_solaire_module)
 app.register_blueprint(payments_bp)
 app.register_blueprint(legal_bp)
 app.register_blueprint(stripe_webhook_bp)
@@ -418,7 +420,8 @@ def enforce_https_and_root():
 @main_bp.route("/")
 def index():
     infos = session.get("infos_utilisateur", {})
-    return render_template("astro_form.html", infos=infos)
+    from config.revolution_solaire_launch import ventes_ouvertes
+    return render_template("astro_form.html", infos=infos, rs_sales_open=ventes_ouvertes())
 
 @main_bp.route("/analyses")
 def analyses():
@@ -829,7 +832,7 @@ def analyse_point_astral_route():
                    infos_personnelles['heure_naissance'], infos_personnelles['lieu_naissance']]):
             return "Toutes les informations de naissance sont requises", 400
 
-        print(f"🚀 Main Génération Point Astral BLOCS pour {infos_personnelles['nom']}")
+        app.logger.info("Démarrage génération Point Astral")
         
         # Stockage en session
         session["infos_utilisateur"] = infos_personnelles

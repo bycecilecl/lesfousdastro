@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def interroger_llm(prompt, system_prompt=None, max_tokens=12000, single_attempt=True):
+def interroger_llm(prompt, system_prompt=None, max_tokens=12000):
     from utils.claude_llm import CLIENT, MODEL, BlocTronqueError
 
     payload = dict(model=MODEL, max_tokens=max_tokens, temperature=0.7,
@@ -17,7 +17,8 @@ def interroger_llm(prompt, system_prompt=None, max_tokens=12000, single_attempt=
           + json.dumps(payload, ensure_ascii=False, indent=2)
           + '\n=== FIN REQUÊTE CLAUDE ===\n', flush=True)
 
-    # Streaming pour les rapports longs ; pas de retry SDK ni de régénération.
+    # Streaming pour les rapports longs. Une réponse coupée est retentée une
+    # seule fois avec 50 % de tokens supplémentaires, comme le client partagé.
     client = CLIENT.with_options(max_retries=0)
     with client.messages.stream(**payload) as stream:
         response = stream.get_final_message()
@@ -27,7 +28,18 @@ def interroger_llm(prompt, system_prompt=None, max_tokens=12000, single_attempt=
                 MODEL, response.stop_reason,
                 response.usage.input_tokens, response.usage.output_tokens)
     if response.stop_reason == 'max_tokens':
-        raise BlocTronqueError(text)
+        payload['max_tokens'] = int(max_tokens * 1.5)
+        logger.warning('FD Claude tronqué à %s tokens : seconde tentative à %s tokens',
+                       max_tokens, payload['max_tokens'])
+        with client.messages.stream(**payload) as stream:
+            response = stream.get_final_message()
+        text = '\n'.join(block.text for block in response.content
+                         if getattr(block, 'type', None) == 'text').strip()
+        logger.info('FD Claude seconde tentative stop_reason=%s input_tokens=%s output_tokens=%s',
+                    response.stop_reason, response.usage.input_tokens,
+                    response.usage.output_tokens)
+        if response.stop_reason == 'max_tokens':
+            raise BlocTronqueError(text)
     if not text:
         raise ValueError('Analyse Claude vide : aucun rapport à livrer.')
     return text

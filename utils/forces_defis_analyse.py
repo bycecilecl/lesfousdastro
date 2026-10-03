@@ -802,7 +802,7 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
 
     try:
         import inspect
-        options = dict(single_attempt=True, max_tokens=12000,
+        options = dict(max_tokens=12000,
                        system_prompt="Tu rédiges une interprétation astrologique symbolique. "
                        "Ton direct, incarné, psychologique et mordant, avec une pointe d'humour noir pertinente. "
                        "Respecte les faits calculés et le contexte des maisons ; formule les vécus supposés "
