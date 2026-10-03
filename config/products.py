@@ -45,7 +45,7 @@ def load_products():
         },
         "revolution_solaire": {
             "label": "Ma Révolution Solaire",
-            "price_cents": 4200,
+            "price_cents": _int_env("REVOLUTION_SOLAIRE_PRICE_CENTS", 4200),
             "success_route": "revolution_solaire_module.resultat",
             # Le catalogue est chargé au démarrage ; la date est vérifiée au paiement.
             "enabled": _bool_env("REVOLUTION_SOLAIRE_SALES_ENABLED"),
