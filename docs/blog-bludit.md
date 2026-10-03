@@ -5,6 +5,7 @@
 - Le site Flask continue de lire les 42 articles Markdown actuellement en ligne.
 - Il peut aussi lire les **articles publiés** d’une installation Bludit distincte, via son API en lecture seule.
 - Quand un article Bludit porte le même slug qu’un ancien article, il prend sa place à la **même adresse `/blog/<slug>`**. Un brouillon Bludit ne change rien au site public.
+- Les images téléversées dans Bludit passent par `/blog/media/...` sur Les Fous d’Astro, pour rester sur le domaine public du blog. Les anciennes images déjà hébergées sur Les Fous d’Astro restent à leur adresse actuelle.
 - Les réponses de Bludit sont conservées une minute en mémoire. Si Bludit devient momentanément indisponible, le dernier résultat connu reste utilisable au plus une heure ; les anciens articles Markdown restent disponibles.
 - L’importateur prépare les 42 anciens articles comme **brouillons**, avec leur titre, leur slug, leur date, leur description, leur contenu HTML et leur image à la une. Les catégories multiples deviennent une catégorie principale et une étiquette secondaire.
 - Un ZIP Bludit 3.22.0 propre est préparé dans `preproduction/fous-blog-edition-test-20261002.zip` (à côté du dépôt). Il ne contient aucune donnée du Journal. Il convertit aussi les nouvelles images JPG/PNG en WebP et interdit l’indexation du domaine d’édition.

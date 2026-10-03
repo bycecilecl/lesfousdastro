@@ -1,6 +1,10 @@
 # routes/blog.py
 from pathlib import Path
-from flask import Blueprint, render_template, abort, url_for
+import os
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+
+from flask import Blueprint, render_template, abort, url_for, Response
 import markdown
 import yaml
 from services.bludit_blog import published_pages
@@ -147,6 +151,19 @@ def article_from_bludit(page: dict) -> dict | None:
     title = str(page.get("title") or slug)
     description = str(page.get("description") or "")
     date = str(page.get("dateRaw") or page.get("date") or "")[:10]
+    bludit_origin = os.getenv("BLUDIT_BLOG_URL", "").rstrip("/")
+
+    def media_url(value: str) -> str:
+        if bludit_origin and value.startswith(bludit_origin + "/bl-content/uploads/"):
+            return "/blog/media/" + value.split("/bl-content/uploads/", 1)[1]
+        if value.startswith("/bl-content/uploads/"):
+            return "/blog/media/" + value.split("/bl-content/uploads/", 1)[1]
+        return value
+
+    content = str(page.get("content") or "")
+    if bludit_origin:
+        content = content.replace(bludit_origin + "/bl-content/uploads/", "/blog/media/")
+    content = content.replace('"/bl-content/uploads/', '"/blog/media/')
 
     return {
         "title": title,
@@ -159,10 +176,33 @@ def article_from_bludit(page: dict) -> dict | None:
         "category": category,
         "cat": cat,
         "tag": category or "Article",
-        "image": page.get("coverImage") or "",
+        "image": media_url(str(page.get("coverImage") or "")),
         "image_alt": title,
-        "content": page.get("content") or "",
+        "content": content,
     }
+
+
+@blog_bp.route("/blog/media/<path:filename>")
+def blog_media(filename):
+    """Serve Bludit's uploaded images through the public blog domain."""
+    if (not filename or "\\" in filename or any(part in (".", "..", "") for part in filename.split("/"))
+            or Path(filename).suffix.lower() not in {".jpg", ".jpeg", ".png", ".gif", ".webp"}):
+        abort(404)
+    bludit_origin = os.getenv("BLUDIT_BLOG_URL", "").rstrip("/")
+    if not bludit_origin.startswith("https://"):
+        abort(404)
+    source = bludit_origin + "/bl-content/uploads/" + quote(filename, safe="/")
+    try:
+        with urlopen(Request(source, headers={"User-Agent": "LesFousDAstroBlog/1.0"}), timeout=5) as upstream:
+            content_type = upstream.headers.get_content_type()
+            if content_type not in {"image/jpeg", "image/png", "image/gif", "image/webp"}:
+                abort(404)
+            body = upstream.read(8 * 1024 * 1024 + 1)
+            if len(body) > 8 * 1024 * 1024:
+                abort(404)
+    except OSError:
+        abort(404)
+    return Response(body, content_type=content_type, headers={"Cache-Control": "public, max-age=86400"})
 
 
 @blog_bp.route("/blog", strict_slashes=False)
