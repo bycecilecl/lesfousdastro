@@ -30,6 +30,8 @@ def main() -> None:
         prefix = "bl-plugins/fous-blog-import/"
         archive.write(PLUGIN / "plugin.php", prefix + "plugin.php")
         archive.write(PLUGIN / "metadata.json", prefix + "metadata.json")
+        for language in ("fr_FR.json", "en.json"):
+            archive.write(PLUGIN / "languages" / language, prefix + "languages/" + language)
         payload = json.dumps(articles, ensure_ascii=False)
         php = "<?php defined('BLUDIT') or die('Bludit CMS.');\nreturn json_decode(<<<'FOUS_ARTICLES_JSON'\n" + payload + "\nFOUS_ARTICLES_JSON, true);\n"
         archive.writestr(prefix + "articles.php", php)

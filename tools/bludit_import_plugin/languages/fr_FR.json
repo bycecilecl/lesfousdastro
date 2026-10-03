@@ -1,0 +1,6 @@
+{
+  "plugin-data": {
+    "name": "Import des anciens articles",
+    "description": "Copie les 42 articles du blog des Fous d’Astro en brouillons, sans toucher aux articles déjà présents."
+  }
+}

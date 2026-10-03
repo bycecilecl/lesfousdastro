@@ -1,0 +1,6 @@
+{
+  "plugin-data": {
+    "name": "Import existing articles",
+    "description": "Copies the 42 existing Fous d'Astro blog posts as drafts without changing existing pages."
+  }
+}
