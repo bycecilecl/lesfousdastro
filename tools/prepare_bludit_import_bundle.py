@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 from scripts.import_blog_to_bludit import articles_to_import
 
@@ -16,6 +16,14 @@ from scripts.import_blog_to_bludit import articles_to_import
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "tools" / "bludit_import_plugin"
 OUTPUT = ROOT / "preproduction" / "fous-blog-import-brouillons-20261003.zip"
+
+
+def add(archive: ZipFile, name: str, data: bytes, directory: bool = False) -> None:
+    entry = ZipInfo(name)
+    entry.create_system = 3
+    entry.external_attr = (0o40755 if directory else 0o100644) << 16
+    entry.compress_type = ZIP_DEFLATED
+    archive.writestr(entry, data)
 
 
 def main() -> None:
@@ -28,13 +36,15 @@ def main() -> None:
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     with ZipFile(OUTPUT, "w", ZIP_DEFLATED) as archive:
         prefix = "bl-plugins/fous-blog-import/"
-        archive.write(PLUGIN / "plugin.php", prefix + "plugin.php")
-        archive.write(PLUGIN / "metadata.json", prefix + "metadata.json")
+        add(archive, prefix, b"", directory=True)
+        add(archive, prefix + "languages/", b"", directory=True)
+        add(archive, prefix + "plugin.php", (PLUGIN / "plugin.php").read_bytes())
+        add(archive, prefix + "metadata.json", (PLUGIN / "metadata.json").read_bytes())
         for language in ("fr_FR.json", "en.json"):
-            archive.write(PLUGIN / "languages" / language, prefix + "languages/" + language)
+            add(archive, prefix + "languages/" + language, (PLUGIN / "languages" / language).read_bytes())
         payload = json.dumps(articles, ensure_ascii=False)
         php = "<?php defined('BLUDIT') or die('Bludit CMS.');\nreturn json_decode(<<<'FOUS_ARTICLES_JSON'\n" + payload + "\nFOUS_ARTICLES_JSON, true);\n"
-        archive.writestr(prefix + "articles.php", php)
+        add(archive, prefix + "articles.php", php.encode("utf-8"))
     print(f"Prepared {len(articles)} drafts: {OUTPUT}")
 
 
