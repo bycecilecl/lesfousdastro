@@ -1,0 +1,22 @@
+FROM python:3.11-slim-bookworm
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    Flask==3.1.1 \
+    gunicorn==23.0.0 \
+    Markdown==3.6 \
+    PyYAML==6.0.2
+
+COPY routes/blog.py routes/blog.py
+COPY services/bludit_blog.py services/bludit_blog.py
+COPY templates/ templates/
+COPY data/articles/ data/articles/
+COPY static/ static/
+COPY preview_wsgi.py preview_wsgi.py
+
+EXPOSE 8080
+CMD ["gunicorn", "preview_wsgi:app", "--bind", "0.0.0.0:8080", "--workers", "2", "--threads", "2"]

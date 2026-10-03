@@ -26,3 +26,11 @@
 - Vérifier les 42 slugs et les dates. `elements-theme-astral.md` contient une date invalide (`2022-0602-15`) également visible sur la page publique. Son brouillon reçoit provisoirement `2022-06-15` et doit être vérifié avant publication.
 - Une fois les essais validés, activer les variables sur le site public. Les articles qui ne sont pas encore publiés dans Bludit restent servis depuis leurs fichiers Markdown.
 - Le domaine d’édition Bludit est destiné à l’administration ; les lecteurs continuent à utiliser les adresses des Fous d’Astro.
+
+## Essai isolé sur Railway
+
+1. Dans le projet Railway, créer un environnement **Empty Environment** nommé exactement `blog-test`. Ne pas dupliquer `production` : cela copierait aussi sa configuration et ses variables.
+2. Dans `blog-test`, créer un service depuis le dépôt GitHub `bycecilecl/lesfousdastro` et choisir la branche `codex/bludit-blog-updated`. La configuration de cette branche emploie `Dockerfile.blog-preview` et démarre `preview_wsgi:app` uniquement dans cet environnement. Ce petit serveur ne charge ni les paiements, ni les comptes, ni la base de données.
+3. Ajouter un domaine Railway au service pour ouvrir `/blog`. L'aperçu affiche les anciens articles Markdown et porte `X-Robots-Tag: noindex`. Ses autres rubriques et formulaires sont inactifs.
+4. Dans les variables **de ce service d'essai seulement**, définir `BLUDIT_BLOG_URL=https://fous-edition-test.bycecilecl.com` et `BLUDIT_BLOG_API_TOKEN` avec le jeton du plugin API Bludit. Ne jamais placer le jeton dans GitHub ni dans une capture.
+5. Publier un seul brouillon corrigé dans le Bludit d'édition et vérifier son URL `/blog/<slug>` sur le service d'essai : texte, images, date, description et absence d'image de couverture si souhaitée. Le site public Railway reste connecté à `main` et n'est pas modifié par ce test.
