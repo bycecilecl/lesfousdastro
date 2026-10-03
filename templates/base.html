@@ -29,6 +29,7 @@
     <title>{% block title %}Les Fous d'Astro | Analyses astrologiques personnalisées{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}Analyses astrologiques personnalisées : Point astral, profil karmique, profil amoureux. Une lecture approfondie de ton ciel, créée par une vraie astrologue.{% endblock %}">
     {% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
+    {% block extra_head %}{% endblock %}
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }

@@ -2,6 +2,13 @@
 
 {% block title %}{{ page.title }} — BD des Fous d'Astro{% endblock %}
 {% block meta_description %}{{ page.description or "Lis cette planche des Fous d'Astro pour découvrir l'astrologie en BD." }}{% endblock %}
+{% block extra_head %}
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ page.title }} — Les Fous d'Astro">
+<meta property="og:description" content="{{ page.description or "Découvre cette BD astrologique des Fous d'Astro." }}">
+<meta property="og:url" content="{{ canonical_url }}">
+{% if page.cover %}<meta property="og:image" content="{{ request.url_root.rstrip('/') ~ page.cover if page.cover.startswith('/') else page.cover }}">{% endif %}
+{% endblock %}
 
 {% block extra_css %}
 .bd-read { min-height: 70vh; background: #f4fbfd; color: #17334c; }
@@ -17,6 +24,32 @@
 .bd-read__content p { margin: 0 0 1.4rem; }
 .bd-read__content img, .bd-read__cover { display: block; width: auto !important; max-width: 100% !important; height: auto !important; margin: 0 auto 25px; border-radius: 8px; }
 .bd-read__enlarge { display: block; width: fit-content; margin: -12px auto 28px; font-size: .9rem; font-weight: 700; color: #1f628e; }
+.bd-read__hint { margin: 0 0 22px; text-align: center; color: #536b7d; font-size: .94rem; }
+.bd-read__content img, .bd-read__cover { cursor: zoom-in; }
+.bd-read__actions { display: flex; justify-content: center; gap: 10px; margin: 25px 0 0; }
+.bd-read__share, .bd-comment__submit { border: 0; border-radius: 999px; background: #1f628e; color: white; padding: 12px 20px; font: inherit; font-weight: 700; cursor: pointer; }
+.bd-read__share:hover, .bd-comment__submit:hover { background: #174f72; }
+.bd-read__share-status { min-height: 1.5em; margin: 8px 0 0; text-align: center; color: #174f72; }
+.bd-lightbox { max-width: none; max-height: none; width: 100vw; height: 100dvh; border: 0; padding: 0; background: #102035; color: white; }
+.bd-lightbox::backdrop { background: rgba(6, 17, 28, .92); }
+.bd-lightbox__bar { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 18px; background: #102035; }
+.bd-lightbox__bar button { border: 1px solid #b8f0e9; border-radius: 999px; padding: 8px 14px; background: transparent; color: white; font: inherit; cursor: pointer; }
+.bd-lightbox__viewport { display: flex; justify-content: center; align-items: flex-start; overflow: auto; height: calc(100dvh - 56px); padding: 16px; }
+.bd-lightbox__viewport img { display: block; width: auto; max-width: 100%; height: auto; max-height: calc(100dvh - 90px); object-fit: contain; }
+.bd-lightbox.is-zoomed .bd-lightbox__viewport { justify-content: flex-start; }
+.bd-lightbox.is-zoomed .bd-lightbox__viewport img { max-width: none; max-height: none; }
+.bd-comments { margin: 34px 0 0; padding: 28px; border-radius: 20px; background: white; box-shadow: 0 10px 34px rgba(21, 72, 107, .08); }
+.bd-comments h2 { margin: 0 0 8px; color: #17334c; }
+.bd-comments__intro { color: #536b7d; line-height: 1.6; }
+.bd-comments__list { list-style: none; margin: 22px 0; padding: 0; }
+.bd-comments__list li { padding: 18px 0; border-top: 1px solid #d8e9ed; }
+.bd-comments__list p { margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bd-comment { display: grid; gap: 12px; margin-top: 22px; }
+.bd-comment label { font-weight: 700; }
+.bd-comment input, .bd-comment textarea { width: 100%; padding: 12px; border: 1px solid #9ebfc8; border-radius: 10px; font: inherit; }
+.bd-comment textarea { min-height: 125px; resize: vertical; }
+.bd-comment__honeypot { position: absolute; left: -10000px; }
+.bd-comments__notice { padding: 12px 15px; border-radius: 10px; background: #e6f5f6; color: #174f72; }
 .bd-read__content figure { margin: 0 0 24px; text-align: center; }
 .bd-read__content figcaption { margin-top: 8px; color: #617587; font-size: .86rem; }
 .bd-read__content a { color: #1f628e; text-decoration: underline; }
@@ -40,9 +73,33 @@
   </header>
   <div class="bd-read__wrap">
     <div class="bd-read__paper">
+      {% if page.has_panel %}<p class="bd-read__hint">Toutes les planches sont ci-dessous. Touche une image pour l’agrandir.</p>{% endif %}
       {% if page.cover and not page.has_panel %}<img class="bd-read__cover" src="{{ page.cover }}" alt="{{ page.title }}">{% endif %}
       <div class="bd-read__content">{{ page.content | safe }}</div>
+      <div class="bd-read__actions"><button class="bd-read__share" type="button" id="bd-share">Partager cette BD</button></div>
+      <p class="bd-read__share-status" id="bd-share-status" role="status" aria-live="polite"></p>
     </div>
+    <section class="bd-comments" id="commentaires" aria-labelledby="bd-comments-title">
+      <h2 id="bd-comments-title">Commentaires{% if comments %} ({{ comments|length }}){% endif %}</h2>
+      {% if comments %}
+      <ul class="bd-comments__list">
+        {% for comment in comments %}<li><strong>{{ comment.author }}</strong><p>{{ comment.body }}</p></li>{% endfor %}
+      </ul>
+      {% else %}<p class="bd-comments__intro">Aucun commentaire pour le moment. À toi d’ouvrir la conversation !</p>{% endif %}
+      {% if request.args.get('commentaire') == 'en-attente' %}<p class="bd-comments__notice" role="status">Merci ! Ton commentaire est enregistré et sera visible après validation.</p>{% endif %}
+      {% if request.args.get('commentaire') == 'invalide' %}<p class="bd-comments__notice" role="alert">Indique un pseudo de 2 à 60 caractères et un message de 10 à 2 000 caractères.</p>{% endif %}
+      {% if request.args.get('commentaire') == 'patiente' %}<p class="bd-comments__notice" role="alert">Patiente quelques minutes avant d’envoyer un autre commentaire.</p>{% endif %}
+      {% if comments_enabled %}
+      <form class="bd-comment" method="post" action="{{ url_for('blog.bd_comment_submit', slug=page.slug) }}">
+        <input type="hidden" name="csrf" value="{{ session.bd_comment_csrf }}">
+        <div class="bd-comment__honeypot" aria-hidden="true"><label for="bd-website">Site web</label><input id="bd-website" name="website" tabindex="-1" autocomplete="off"></div>
+        <label for="bd-author">Ton pseudo</label><input id="bd-author" name="author" minlength="2" maxlength="60" required autocomplete="nickname">
+        <label for="bd-body">Ton commentaire</label><textarea id="bd-body" name="body" minlength="10" maxlength="2000" required></textarea>
+        <p class="bd-comments__intro">Les commentaires sont vérifiés avant d’être publiés. Ton pseudo sera visible ; aucune adresse e-mail n’est demandée. <a href="{{ url_for('legal_bp.politique_confidentialite') }}">Confidentialité</a></p>
+        <button class="bd-comment__submit" type="submit">Envoyer mon commentaire</button>
+      </form>
+      {% elif blog_preview %}<p class="bd-comments__intro">Le formulaire de commentaires sera disponible sur le site principal.</p>{% endif %}
+    </section>
     {% if older or newer %}
     <nav class="bd-read__links" aria-label="Autres planches">
       {% if older %}<a href="{{ url_for('blog.bd_page', slug=older.slug) }}">← {{ older.title }}</a>{% endif %}
@@ -52,10 +109,16 @@
     <p class="bd-read__footer">Envie de comprendre le sujet plus en détail ? <a href="{{ url_for('blog.blog_index') }}">Explore le blog</a>.</p>
   </div>
 </article>
+<dialog class="bd-lightbox" id="bd-lightbox" aria-label="Planche agrandie">
+  <div class="bd-lightbox__bar"><span>Planche agrandie</span><div><button type="button" id="bd-zoom">Zoom 100 %</button> <button type="button" id="bd-close">Fermer ✕</button></div></div>
+  <div class="bd-lightbox__viewport"><img id="bd-lightbox-image" alt=""></div>
+</dialog>
 {% endblock %}
 
 {% block scripts %}
 <script>
+  const lightbox = document.getElementById('bd-lightbox');
+  const enlarged = document.getElementById('bd-lightbox-image');
   document.querySelectorAll('.bd-read__content img, .bd-read__cover').forEach((image) => {
     const link = document.createElement('a');
     link.href = image.currentSrc || image.src;
@@ -65,6 +128,43 @@
     link.textContent = 'Ouvrir la planche en grand ↗';
     link.setAttribute('aria-label', 'Ouvrir en grand : ' + (image.alt || 'planche BD'));
     image.insertAdjacentElement('afterend', link);
+    image.tabIndex = 0;
+    image.setAttribute('role', 'button');
+    image.setAttribute('aria-label', 'Agrandir : ' + (image.alt || 'planche BD'));
+    const open = () => {
+      enlarged.src = image.currentSrc || image.src;
+      enlarged.alt = image.alt || 'Planche BD agrandie';
+      lightbox.classList.remove('is-zoomed');
+      document.getElementById('bd-zoom').textContent = 'Zoom 100 %';
+      lightbox.showModal();
+    };
+    image.addEventListener('click', (event) => { event.preventDefault(); open(); });
+    image.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
+    });
+  });
+  document.getElementById('bd-close').addEventListener('click', () => lightbox.close());
+  document.getElementById('bd-zoom').addEventListener('click', (event) => {
+    const zoomed = lightbox.classList.toggle('is-zoomed');
+    event.currentTarget.textContent = zoomed ? 'Ajuster à l’écran' : 'Zoom 100 %';
+  });
+  lightbox.addEventListener('click', (event) => { if (event.target === lightbox) lightbox.close(); });
+  const shareStatus = document.getElementById('bd-share-status');
+  document.getElementById('bd-share').addEventListener('click', async () => {
+    const url = {{ canonical_url | tojson }};
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: {{ page.title | tojson }}, url });
+        shareStatus.textContent = 'BD partagée.';
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        shareStatus.textContent = 'Lien copié !';
+      } else {
+        throw new Error('clipboard unavailable');
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') shareStatus.textContent = 'Copie ce lien pour partager la BD : ' + url;
+    }
   });
 </script>
 {% endblock %}

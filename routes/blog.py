@@ -1,11 +1,18 @@
 # routes/blog.py
 from pathlib import Path
 from html.parser import HTMLParser
+import base64
+import binascii
+from datetime import datetime, timedelta, timezone
+import hashlib
+import hmac
 import os
+import secrets
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
-from flask import Blueprint, render_template, abort, url_for, Response, request, make_response
+from flask import Blueprint, render_template, abort, url_for, Response, request, make_response, redirect, session, current_app
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 import markdown
 import yaml
 from services.bludit_blog import published_pages
@@ -63,14 +70,31 @@ BD_THEMES = {
 }
 
 
-class _FirstImage(HTMLParser):
+class _ImageSources(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.src = ""
+        self.sources = []
 
     def handle_starttag(self, tag, attrs):
-        if tag == "img" and not self.src:
-            self.src = dict(attrs).get("src", "")
+        if tag == "img":
+            source = dict(attrs).get("src", "")
+            if source:
+                self.sources.append(source)
+
+
+def bd_image_sources(content: str) -> list[str]:
+    parser = _ImageSources()
+    parser.feed(content)
+    return parser.sources
+
+
+def bd_image_content(content: str, slug: str) -> tuple[str, list[str]]:
+    """Give pasted images real URLs so they can open, zoom and be shared."""
+    sources = bd_image_sources(content)
+    for index, source in enumerate(sources):
+        if source.startswith("data:image/"):
+            content = content.replace(source, url_for("blog.bd_embedded_image", slug=slug, index=index))
+    return content, sources
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -228,10 +252,11 @@ def bd_from_bludit(page: dict) -> dict | None:
                   if aliases.get(tag, tag) in BD_THEMES), "")
     content = bludit_content(page)
     cover = bludit_media_url(str(page.get("coverImage") or ""))
-    parser = _FirstImage()
-    parser.feed(content)
+    content, image_sources = bd_image_content(content, slug)
     if not cover:
-        cover = parser.src
+        cover = image_sources[0] if image_sources else ""
+        if cover.startswith("data:image/"):
+            cover = url_for("blog.bd_embedded_image", slug=slug, index=0)
     return {
         "slug": slug,
         "title": str(page.get("title") or slug),
@@ -240,7 +265,8 @@ def bd_from_bludit(page: dict) -> dict | None:
         "theme": theme,
         "theme_label": BD_THEMES.get(theme, "À découvrir"),
         "cover": cover,
-        "has_panel": bool(parser.src),
+        "has_panel": bool(image_sources),
+        "panel_count": len(image_sources),
         "content": content,
     }
 
@@ -248,6 +274,16 @@ def bd_from_bludit(page: dict) -> dict | None:
 def charger_bd() -> list[dict]:
     pages = (bd_from_bludit(page) for page in published_pages())
     return sorted((page for page in pages if page), key=lambda page: page["date"], reverse=True)
+
+
+def bd_comments_enabled() -> bool:
+    return bool(os.getenv("DATABASE_URL") and current_app.secret_key and
+                (os.getenv("EMAIL_ADMIN") or os.getenv("EMAIL_ENVOI")) and
+                not current_app.config.get("BD_COMMENTS_DISABLED"))
+
+
+def _moderation_signer():
+    return URLSafeTimedSerializer(current_app.secret_key, salt="bd-comment-moderation-v1")
 
 
 @blog_bp.route("/blog/media/<path:filename>")
@@ -273,6 +309,37 @@ def blog_media(filename):
     return Response(body, content_type=content_type, headers={"Cache-Control": "public, max-age=86400"})
 
 
+@blog_bp.route("/bd/<slug>/image/<int:index>")
+def bd_embedded_image(slug, index):
+    """Serve only image data from an already published BD, never a draft."""
+    raw = next((item for item in published_pages() if item.get("slug") == slug
+                and item.get("type") == "published"
+                and str(item.get("category") or "").lower() in {"bd", "bandes-dessinees"}), None)
+    if raw is None:
+        abort(404)
+    original_sources = bd_image_sources(bludit_content(raw))
+    if index >= len(original_sources):
+        abort(404)
+    source = original_sources[index]
+    allowed = {"webp": "image/webp", "png": "image/png", "jpeg": "image/jpeg", "gif": "image/gif"}
+    header, marker, encoded = source.partition(",")
+    image_type = header.removeprefix("data:image/").removesuffix(";base64").lower()
+    if marker != "," or header != f"data:image/{image_type};base64" or image_type not in allowed:
+        abort(404)
+    if len(encoded) > 11 * 1024 * 1024:
+        abort(404)
+    try:
+        body = base64.b64decode(encoded, validate=True)
+    except (binascii.Error, ValueError):
+        abort(404)
+    if not body or len(body) > 8 * 1024 * 1024:
+        abort(404)
+    return Response(body, content_type=allowed[image_type], headers={
+        "Cache-Control": "public, max-age=300",
+        "X-Content-Type-Options": "nosniff",
+    })
+
+
 @blog_bp.route("/bd", strict_slashes=False)
 def bd_index():
     theme = request.args.get("theme", "")
@@ -294,11 +361,97 @@ def bd_page(slug):
     pages = charger_bd()
     for index, page in enumerate(pages):
         if page["slug"] == slug:
+            comments_enabled = bd_comments_enabled()
+            comments = []
+            if comments_enabled:
+                from models.bd_comments import BdComment
+                comments = (BdComment.query.filter_by(bd_slug=slug, status="approved")
+                            .order_by(BdComment.created_at.asc()).all())
+            if comments_enabled and "bd_comment_csrf" not in session:
+                session["bd_comment_csrf"] = secrets.token_urlsafe(32)
             return render_template("bd/page.html", page=page,
                                    newer=pages[index - 1] if index else None,
                                    older=pages[index + 1] if index + 1 < len(pages) else None,
-                                   canonical_url=url_for("blog.bd_page", slug=slug, _external=True))
+                                   canonical_url=url_for("blog.bd_page", slug=slug, _external=True),
+                                   comments=comments, comments_enabled=comments_enabled)
     abort(404)
+
+
+@blog_bp.route("/bd/<slug>/commenter", methods=["POST"])
+def bd_comment_submit(slug):
+    if not bd_comments_enabled():
+        abort(404)
+    from extensions import db
+    from models.bd_comments import BdComment
+    if not any(page["slug"] == slug for page in charger_bd()):
+        abort(404)
+    back = url_for("blog.bd_page", slug=slug) + "#commentaires"
+    if request.content_length and request.content_length > 4096:
+        abort(413)
+    if request.form.get("website", ""):
+        return redirect(back)
+    csrf = session.get("bd_comment_csrf", "")
+    if not csrf or not hmac.compare_digest(request.form.get("csrf", ""), csrf):
+        abort(400)
+    author = " ".join(request.form.get("author", "").split())
+    body = request.form.get("body", "").strip()
+    if not (2 <= len(author) <= 60 and 10 <= len(body) <= 2000):
+        return redirect(url_for("blog.bd_page", slug=slug, commentaire="invalide") + "#commentaires")
+
+    now = datetime.now(timezone.utc)
+    ip_digest = hashlib.sha256((str(current_app.secret_key) + ":" +
+                                (request.remote_addr or "unknown")).encode()).hexdigest()
+    recent = (BdComment.query.filter_by(ip_digest=ip_digest)
+              .filter(BdComment.created_at >= now - timedelta(days=1))
+              .order_by(BdComment.created_at.desc()).limit(10).all())
+    if len(recent) >= 10 or (recent and recent[0].created_at.replace(tzinfo=timezone.utc)
+                             > now - timedelta(minutes=2)):
+        return redirect(url_for("blog.bd_page", slug=slug, commentaire="patiente") + "#commentaires")
+
+    comment = BdComment(bd_slug=slug, author=author, body=body,
+                        status="pending", ip_digest=ip_digest)
+    db.session.add(comment)
+    db.session.commit()
+    session["bd_comment_csrf"] = secrets.token_urlsafe(32)
+
+    from utils.email_sender import envoyer_email_avec_analyse
+    token = _moderation_signer().dumps(comment.id)
+    review_url = url_for("blog.bd_comment_moderate", token=token, _external=True)
+    sent = envoyer_email_avec_analyse(
+        destinataire=os.getenv("EMAIL_ADMIN") or os.getenv("EMAIL_ENVOI"),
+        sujet=f"[BD] Nouveau commentaire sur {slug}",
+        contenu_txt=f"{author} a commenté la BD {slug} :\n\n{body}\n\nModérer : {review_url}",
+    )
+    if not sent:
+        current_app.logger.error("BD comment %s awaiting moderation; notification failed", comment.id)
+    return redirect(url_for("blog.bd_page", slug=slug, commentaire="en-attente") + "#commentaires")
+
+
+@blog_bp.route("/bd/commentaire/moderer/<token>", methods=["GET", "POST"])
+def bd_comment_moderate(token):
+    if not bd_comments_enabled():
+        abort(404)
+    from extensions import db
+    from models.bd_comments import BdComment
+    try:
+        comment_id = _moderation_signer().loads(token, max_age=7 * 24 * 3600)
+    except (BadSignature, SignatureExpired):
+        abort(404)
+    comment = db.session.get(BdComment, comment_id)
+    if comment is None:
+        abort(404)
+    if request.method == "POST" and comment.status == "pending":
+        decision = request.form.get("decision")
+        if decision not in {"approved", "rejected"}:
+            abort(400)
+        comment.status = decision
+        db.session.commit()
+        return redirect(url_for("blog.bd_comment_moderate", token=token))
+    response = make_response(render_template("bd/moderate.html", comment=comment))
+    response.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    return response
 
 
 @blog_bp.route("/blog", strict_slashes=False)
