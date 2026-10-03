@@ -40,6 +40,15 @@ BLUDIT_CATEGORIES = {
     "carnets": "Carnets d'astrologue",
     "vedique": "Astrologie védique",
     "uranienne": "Astrologie uranienne",
+    # Keep recognizing categories created manually in Bludit before import.
+    "les-bases": "Les Bases",
+    "signes-astrologiques": "Signes astrologiques",
+    "planetes": "Planètes",
+    "maisons": "Maisons",
+    "analyses-de-themes": "Analyses de thèmes",
+    "carnets-dastrologue": "Carnets d'astrologue",
+    "astrologie-vedique": "Astrologie védique",
+    "astrologie-uranienne": "Astrologie uranienne",
 }
 
 

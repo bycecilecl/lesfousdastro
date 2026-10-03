@@ -1,0 +1,10 @@
+{
+  "author": "Les Fous d'Astro",
+  "email": "",
+  "website": "",
+  "version": "0.1.0",
+  "releaseDate": "2026-10-03",
+  "license": "MIT",
+  "compatible": "3.22",
+  "notes": "Import non destructif des anciens articles en brouillons"
+}

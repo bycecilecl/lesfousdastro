@@ -39,6 +39,11 @@ CATEGORY_KEYS = {
     "astrologie uranienne": "uranienne",
 }
 
+# The source has a malformed date. Its public page also displays this malformed
+# value, so the original day cannot be verified from the current site alone.
+# Keep the draft importable and flag it for review before publication.
+DATE_TO_REVIEW = {"dominance-elements-theme-astral-feu-terre-air-eau": "2022-06-15"}
+
 
 def prepare(path: Path) -> dict:
     raw = path.read_text(encoding="utf-8")
@@ -51,12 +56,19 @@ def prepare(path: Path) -> dict:
         raise ValueError(f"Invalid slug in {path.name}: {slug}")
 
     raw_date = str(meta.get("date") or "").strip()
+    date_needs_review = False
     try:
         date.fromisoformat(raw_date)
     except ValueError as exc:
-        raise ValueError(f"Invalid date in {path.name}: {raw_date}") from exc
+        if slug not in DATE_TO_REVIEW:
+            raise ValueError(f"Invalid date in {path.name}: {raw_date}") from exc
+        raw_date = DATE_TO_REVIEW[slug]
+        date_needs_review = True
 
-    category = str(meta.get("category") or "").strip()
+    categories = meta.get("categories") or []
+    if isinstance(categories, str):
+        categories = [categories]
+    category = str(meta.get("category") or (categories[0] if categories else "")).strip()
     category_key = CATEGORY_KEYS.get(category.lower())
     if category and not category_key:
         raise ValueError(f"Unknown category in {path.name}: {category}")
@@ -77,6 +89,9 @@ def prepare(path: Path) -> dict:
         "description": str(meta.get("description") or ""),
         "date": raw_date + " 12:00:00",
         "category": category_key or "",
+        "categoryName": category,
+        "tags": ", ".join(str(item).strip() for item in categories[1:] if str(item).strip()),
+        "dateNeedsReview": date_needs_review,
         "coverImage": cover,
         "content": html,
         "type": "draft",
