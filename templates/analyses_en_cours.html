@@ -132,8 +132,11 @@
                     if (data.status === 'review') {
                         stopped = true;
                         document.querySelector('.spinner').style.display = 'none';
-                        document.querySelector('.message').textContent =
-                            "La génération doit être vérifiée. Ton rapport ne sera pas relancé automatiquement.";
+                        document.querySelector('.message').innerHTML =
+                            "Ta commande est enregistrée, mais la génération nécessite une vérification. " +
+                            "Tu n'as rien à repayer. Si tu ne reçois pas de nouvelles, " +
+                            "<a href='mailto:contact@lesfousdastro.fr'>écris-nous</a> " +
+                            "avec l'adresse utilisée pour ta commande.";
                         return;
                     }
                 } catch (error) {

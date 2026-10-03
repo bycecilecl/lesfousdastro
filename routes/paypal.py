@@ -117,7 +117,7 @@ from services.analysis_orders import (
 
 def paypal_beneficiary(data):
     info = data.get('userInfo') or {}
-    return {
+    beneficiary = {
         'nom': info.get('nom'), 'email': info.get('email'),
         'gender': info.get('gender') or info.get('genre') or '',
         'date_naissance': info.get('birthDate'), 'heure_naissance': info.get('birthTime'),
@@ -126,6 +126,23 @@ def paypal_beneficiary(data):
         'transit_date_mode': info.get('transitDateMode') or 'today',
         'transit_date': info.get('transitDate') or '',
     }
+    items = data.get('items') or [{'key': data.get('product_key')}]
+    if any((item.get('key') or item.get('id')) == 'revolution_solaire'
+           for item in items if isinstance(item, dict)):
+        import json
+        from routes.revolution_solaire_module import _demande_depuis_commande
+        beneficiary.update({
+            'annee_rs': info.get('anneeRs'), 'lieu_rs': info.get('lieuRs'),
+            'lat_rs': info.get('latRs'), 'lon_rs': info.get('lonRs'),
+            'tzid_rs': info.get('tzidRs'),
+            'contexte_rs_json': json.dumps(info.get('contexteRs') or {}, ensure_ascii=False),
+        })
+        try:
+            _demande_depuis_commande(beneficiary)
+        except ValueError as error:
+            from werkzeug.exceptions import BadRequest
+            raise BadRequest(str(error)) from error
+    return beneficiary
 
 
 @payments_bp.route('/payments/create-order', methods=['POST'])

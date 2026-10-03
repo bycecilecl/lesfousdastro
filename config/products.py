@@ -43,6 +43,13 @@ def load_products():
             "success_route": "transits.transits_complet",
             "enabled": _bool_env("FLASH_TRANSITS_ENABLED", "1"),
         },
+        "revolution_solaire": {
+            "label": "Ma Révolution Solaire",
+            "price_cents": 4200,
+            "success_route": "revolution_solaire_module.resultat",
+            # Le catalogue est chargé au démarrage ; la date est vérifiée au paiement.
+            "enabled": _bool_env("REVOLUTION_SOLAIRE_SALES_ENABLED"),
+        },
         "forces_defis": {
             "label": "Mes Potentiels et Défis",
             "price_id": os.getenv("FORCES_DEFIS_PRICE_ID", "").strip(),

@@ -31,12 +31,32 @@ class ClaudeTests(unittest.TestCase):
         self.assertIn('données du thème', output.getvalue())
         self.assertIn('ton validé', output.getvalue())
 
-    def test_truncation_never_retries(self):
-        client, stream, module = self.call([SimpleNamespace(type='text', text='incomplet')], 'max_tokens')
+    def test_truncation_retries_once_and_delivers_complete_report(self):
+        _, stream, module = self.call([SimpleNamespace(type='text', text='incomplet')], 'max_tokens')
+        stream.return_value.__enter__.return_value.get_final_message.side_effect = [
+            SimpleNamespace(
+                content=[SimpleNamespace(type='text', text='incomplet')],
+                stop_reason='max_tokens',
+                usage=SimpleNamespace(input_tokens=100, output_tokens=12000),
+            ),
+            SimpleNamespace(
+                content=[SimpleNamespace(type='text', text='rapport complet')],
+                stop_reason='end_turn',
+                usage=SimpleNamespace(input_tokens=100, output_tokens=15000),
+            ),
+        ]
+        with patch.dict(sys.modules, {'utils.claude_llm': module}), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(interroger_llm('test'), 'rapport complet')
+        self.assertEqual(stream.call_count, 2)
+        self.assertEqual(stream.call_args_list[0].kwargs['max_tokens'], 12000)
+        self.assertEqual(stream.call_args_list[1].kwargs['max_tokens'], 18000)
+
+    def test_second_truncation_is_not_delivered(self):
+        _, stream, module = self.call([SimpleNamespace(type='text', text='incomplet')], 'max_tokens')
         with patch.dict(sys.modules, {'utils.claude_llm': module}), contextlib.redirect_stdout(io.StringIO()):
             with self.assertRaises(RuntimeError):
                 interroger_llm('test')
-        stream.assert_called_once()
+        self.assertEqual(stream.call_count, 2)
 
     def test_empty_response_is_not_delivered(self):
         _, stream, module = self.call([])

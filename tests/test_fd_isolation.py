@@ -51,7 +51,7 @@ class IsolationTests(unittest.TestCase):
     def test_solo_forces_defis_uses_background_generation(self):
         source = (ROOT / 'routes/checkout.py').read_text()
         self.assertIn(
-            'if len(valid_products) == 1 and valid_products[0] != "forces_defis":',
+            'if len(valid_products) == 1 and valid_products[0] not in {"forces_defis", "revolution_solaire"}:',
             source,
         )
 
