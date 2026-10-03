@@ -7,6 +7,7 @@ import pytz
 import uuid
 import os
 import csv
+from xml.sax.saxutils import escape
 import openai
 import atexit
 import time  # <— add
@@ -34,7 +35,7 @@ from routes.pages import pages_bp
 from routes.checkout import checkout_bp
 from routes.site import site_bp
 from routes.profil_amoureux_module import profil_amoureux_module
-from routes.blog import charger_articles
+from routes.blog import charger_articles, charger_bd
 
 
 from routes import register_routes
@@ -179,12 +180,12 @@ def before_request_handler():
 
 @app.route('/sitemap.xml')
 def sitemap():
-    today = datetime.utcnow().strftime('%Y-%m-%d')
-
     pages = [
         "https://lesfousdastro.fr/",
         "https://lesfousdastro.fr/analyses",
         "https://lesfousdastro.fr/blog",
+        "https://lesfousdastro.fr/bd",
+        "https://lesfousdastro.fr/abonnements",
         "https://lesfousdastro.fr/temoignages",
         "https://lesfousdastro.fr/prestations",
         "https://lesfousdastro.fr/contact",
@@ -197,6 +198,9 @@ def sitemap():
             f"https://lesfousdastro.fr/blog/{article['slug']}"
         )
 
+    for bd in charger_bd():
+        pages.append(f"https://lesfousdastro.fr/bd/{bd['slug']}")
+
     sitemap_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 """
@@ -204,10 +208,7 @@ def sitemap():
     for page in pages:
         sitemap_xml += f"""
     <url>
-        <loc>{page}</loc>
-        <lastmod>{today}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
+        <loc>{escape(page)}</loc>
     </url>
 """
 
@@ -282,7 +283,7 @@ main_bp = Blueprint("main", __name__)
 
 @app.route('/robots.txt')
 def robots():
-    return app.send_static_file('robots.txt')
+    return app.send_static_file('robot.txt')
 
 # --- Blueprints tiers d'abord si tu veux, peu importe l'ordre entre eux
 app.register_blueprint(geocode_bp)
