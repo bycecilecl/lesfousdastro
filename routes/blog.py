@@ -213,10 +213,19 @@ def bd_from_bludit(page: dict) -> dict | None:
     if not isinstance(slug, str) or not slug or "/" in slug or ".." in slug:
         return None
     tags = page.get("tags") or {}
-    tag_keys = tags.keys() if isinstance(tags, dict) else tags if isinstance(tags, list) else []
+    if isinstance(tags, dict):
+        tag_keys = tags.keys()
+    elif isinstance(tags, list):
+        tag_keys = tags
+    elif isinstance(tags, str):
+        # Bludit 3.22's Page::json() returns comma-separated tag names.
+        tag_keys = tags.split(",")
+    else:
+        tag_keys = []
     aliases = {"les-bases": "bases", "les-placements": "placements", "les-aspects": "aspects"}
-    theme = next((aliases.get(str(tag).lower(), str(tag).lower()) for tag in tag_keys
-                  if aliases.get(str(tag).lower(), str(tag).lower()) in BD_THEMES), "")
+    normalized_tags = (str(tag).strip().lower() for tag in tag_keys)
+    theme = next((aliases.get(tag, tag) for tag in normalized_tags
+                  if aliases.get(tag, tag) in BD_THEMES), "")
     content = bludit_content(page)
     cover = bludit_media_url(str(page.get("coverImage") or ""))
     parser = _FirstImage()
