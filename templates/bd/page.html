@@ -11,8 +11,10 @@
 {% endblock %}
 
 {% block extra_css %}
-.bd-read { min-height: 70vh; background: #f4fbfd; color: #17334c; }
-.bd-read__header { padding: 54px 22px 50px; text-align: center; color: white; background: linear-gradient(155deg, #101f3e, #1f628e 65%, #168f94); }
+.bd-read { min-height: 70vh; background: linear-gradient(160deg, #0d1b2a 0%, #1f628e 35%, #00a8a8 70%, #c0f0f7 100%); color: #17334c; }
+.bd-read__header { padding: 54px 22px 34px; text-align: center; color: white; }
+.bd-read__header .badge-d-wrap { margin-bottom: 22px; }
+.bd-read__header .badge-d { font-size: clamp(1.5rem, 3.5vw, 2.3rem); }
 .bd-read__back { display: inline-block; margin-bottom: 25px; color: #c5f3ee; font-weight: 700; text-decoration: none; }
 .bd-read__back:hover { color: white; text-decoration: underline; }
 .bd-read__theme { margin: 0 0 12px; text-transform: uppercase; letter-spacing: .16em; color: #b8f0e9; font-size: .77rem; font-weight: 800; }
@@ -22,13 +24,16 @@
 .bd-read__paper { padding: 28px; border-radius: 20px; background: white; box-shadow: 0 10px 34px rgba(21, 72, 107, .11); }
 .bd-read__content { font-size: 1.02rem; line-height: 1.7; overflow-wrap: anywhere; }
 .bd-read__content p { margin: 0 0 1.4rem; }
-.bd-read__content img, .bd-read__cover { display: block; width: auto !important; max-width: 100% !important; height: auto !important; margin: 0 auto 25px; border-radius: 8px; }
+.bd-read__content img, .bd-read__cover { display: block; width: auto !important; max-width: min(100%, 440px) !important; height: auto !important; margin: 0 auto 25px; border-radius: 8px; }
 .bd-read__enlarge { display: block; width: fit-content; margin: -12px auto 28px; font-size: .9rem; font-weight: 700; color: #1f628e; }
 .bd-read__hint { margin: 0 0 22px; text-align: center; color: #536b7d; font-size: .94rem; }
 .bd-read__content img, .bd-read__cover { cursor: zoom-in; }
-.bd-read__actions { display: flex; justify-content: center; gap: 10px; margin: 25px 0 0; }
-.bd-read__share, .bd-comment__submit { border: 0; border-radius: 999px; background: #1f628e; color: white; padding: 12px 20px; font: inherit; font-weight: 700; cursor: pointer; }
-.bd-read__share:hover, .bd-comment__submit:hover { background: #174f72; }
+.bd-read__actions { margin: 28px 0 0; text-align: center; }
+.bd-read__actions p { margin: 0 0 12px; font-weight: 700; }
+.bd-read__share-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.bd-read__share-links a, .bd-read__share, .bd-comment__submit { display: inline-block; border: 0; border-radius: 999px; background: #1f628e; color: white; padding: 12px 20px; font: inherit; font-weight: 700; line-height: 1.25; text-decoration: none; cursor: pointer; }
+.bd-read__share-links a:hover, .bd-read__share:hover, .bd-comment__submit:hover { background: #174f72; color: white; }
+.bd-read__share-native[hidden] { display: none; }
 .bd-read__share-status { min-height: 1.5em; margin: 8px 0 0; text-align: center; color: #174f72; }
 .bd-lightbox { max-width: none; max-height: none; width: 100vw; height: 100dvh; border: 0; padding: 0; background: #102035; color: white; }
 .bd-lightbox::backdrop { background: rgba(6, 17, 28, .92); }
@@ -51,6 +56,16 @@
 .bd-comment__honeypot { position: absolute; left: -10000px; }
 .bd-comments__notice { padding: 12px 15px; border-radius: 10px; background: #e6f5f6; color: #174f72; }
 .bd-read__content figure { margin: 0 0 24px; text-align: center; }
+.bd-read__view { display: flex; justify-content: center; margin: 0 0 25px; }
+.bd-read__view[hidden] { display: none; }
+.bd-read__view button { border: 1px solid #bedde4; border-radius: 999px; background: #e6f5f6; color: #174f72; padding: 10px 17px; font: inherit; font-weight: 700; cursor: pointer; }
+.bd-read__view button:hover { background: #ccebed; }
+.bd-read__tiles { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; max-width: 680px; margin: 0 auto; }
+.bd-read__tiles.is-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; }
+.bd-read__content .bd-read__tile { min-width: 0; margin: 0; padding: 12px; border: 1px solid #d8e9ed; border-radius: 14px; background: #f7fbfc; }
+.bd-read__tile-number { display: block; margin: 0 0 8px; color: #536b7d; font-size: .8rem; font-weight: 700; text-align: left; }
+.bd-read__content .bd-read__tile img { width: 100% !important; max-width: 100% !important; margin: 0 0 8px; }
+.bd-read__tile .bd-read__enlarge { margin: 0 auto 3px; font-size: .82rem; }
 .bd-read__content figcaption { margin-top: 8px; color: #617587; font-size: .86rem; }
 .bd-read__content a { color: #1f628e; text-decoration: underline; }
 .bd-read__content h2 { color: #1f628e; margin: 2rem 0 1rem; }
@@ -60,23 +75,34 @@
 .bd-read__links a:last-child { text-align: right; }
 .bd-read__footer { margin-top: 31px; text-align: center; }
 .bd-read__footer a { color: #1f628e; font-weight: 700; }
-@media (max-width: 640px) { .bd-read__header { padding: 45px 19px; } .bd-read__paper { padding: 16px; } .bd-read__wrap { padding: 19px 11px 70px; } .bd-read__links { flex-direction: column; } .bd-read__links a:last-child { text-align: left; } }
+@media (max-width: 640px) { .bd-read__header { padding: 45px 19px; } .bd-read__paper { padding: 16px; } .bd-read__wrap { padding: 19px 11px 70px; } .bd-read__tiles.is-overview { gap: 8px; } .bd-read__tiles.is-overview .bd-read__tile { padding: 7px; } .bd-read__links { flex-direction: column; } .bd-read__links a:last-child { text-align: left; } }
 {% endblock %}
 
 {% block content %}
 <article class="bd-read">
   <header class="bd-read__header">
     <a class="bd-read__back" href="{{ url_for('blog.bd_index') }}">← Toutes les BD</a>
+    <div class="badge-d-wrap"><span class="badge-d">✦ BD Astro ✦</span></div>
     <p class="bd-read__theme">{{ page.theme_label }}</p>
     <h1>{{ page.title }}</h1>
     {% if page.description %}<p class="bd-read__intro">{{ page.description }}</p>{% endif %}
   </header>
   <div class="bd-read__wrap">
     <div class="bd-read__paper">
-      {% if page.has_panel %}<p class="bd-read__hint">Toutes les planches sont ci-dessous. Touche une image pour l’agrandir.</p>{% endif %}
+      {% if page.has_panel %}<p class="bd-read__hint">Lis les planches en défilant. Touche une image pour l’agrandir.</p>{% endif %}
       {% if page.cover and not page.has_panel %}<img class="bd-read__cover" src="{{ page.cover }}" alt="{{ page.title }}">{% endif %}
+      <div class="bd-read__view" id="bd-view" hidden><button type="button" id="bd-view-toggle" aria-pressed="false">Voir toutes les planches</button></div>
       <div class="bd-read__content">{{ page.content | safe }}</div>
-      <div class="bd-read__actions"><button class="bd-read__share" type="button" id="bd-share">Partager cette BD</button></div>
+      <div class="bd-read__actions" aria-label="Partager cette BD">
+        <p>Partager cette BD</p>
+        <div class="bd-read__share-links">
+          <a href="https://www.facebook.com/sharer/sharer.php?u={{ canonical_url | urlencode }}" target="_blank" rel="noopener noreferrer">Facebook ↗</a>
+          <a href="https://wa.me/?text={{ (page.title ~ ' — ' ~ canonical_url) | urlencode }}" target="_blank" rel="noopener noreferrer">WhatsApp ↗</a>
+          <a href="https://www.pinterest.com/pin/create/button/?url={{ canonical_url | urlencode }}" target="_blank" rel="noopener noreferrer">Pinterest ↗</a>
+          <button class="bd-read__share" type="button" id="bd-copy-link">Copier le lien</button>
+          <button class="bd-read__share bd-read__share-native" type="button" id="bd-share-native" hidden>Autres applications</button>
+        </div>
+      </div>
       <p class="bd-read__share-status" id="bd-share-status" role="status" aria-live="polite"></p>
     </div>
     <section class="bd-comments" id="commentaires" aria-labelledby="bd-comments-title">
@@ -119,6 +145,30 @@
 <script>
   const lightbox = document.getElementById('bd-lightbox');
   const enlarged = document.getElementById('bd-lightbox-image');
+  const content = document.querySelector('.bd-read__content');
+  const panels = [...content.querySelectorAll('img')];
+  if (panels.length > 1 && !content.textContent.trim() && !content.querySelector('video, iframe, audio, object')) {
+    const grid = document.createElement('div');
+    grid.className = 'bd-read__tiles';
+    panels.forEach((image, index) => {
+      const tile = document.createElement('figure');
+      tile.className = 'bd-read__tile';
+      const number = document.createElement('span');
+      number.className = 'bd-read__tile-number';
+      number.textContent = `Planche ${index + 1} / ${panels.length}`;
+      tile.append(number, image);
+      grid.appendChild(tile);
+    });
+    content.replaceChildren(grid);
+    const view = document.getElementById('bd-view');
+    const toggle = document.getElementById('bd-view-toggle');
+    view.hidden = false;
+    toggle.addEventListener('click', () => {
+      const overview = grid.classList.toggle('is-overview');
+      toggle.setAttribute('aria-pressed', String(overview));
+      toggle.textContent = overview ? 'Lire les planches en grand' : 'Voir toutes les planches';
+    });
+  }
   document.querySelectorAll('.bd-read__content img, .bd-read__cover').forEach((image) => {
     const link = document.createElement('a');
     link.href = image.currentSrc || image.src;
@@ -150,21 +200,29 @@
   });
   lightbox.addEventListener('click', (event) => { if (event.target === lightbox) lightbox.close(); });
   const shareStatus = document.getElementById('bd-share-status');
-  document.getElementById('bd-share').addEventListener('click', async () => {
-    const url = {{ canonical_url | tojson }};
+  const shareUrl = {{ canonical_url | tojson }};
+  document.getElementById('bd-copy-link').addEventListener('click', async () => {
     try {
-      if (navigator.share) {
-        await navigator.share({ title: {{ page.title | tojson }}, url });
-        shareStatus.textContent = 'BD partagée.';
-      } else if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
         shareStatus.textContent = 'Lien copié !';
       } else {
         throw new Error('clipboard unavailable');
       }
     } catch (error) {
-      if (error.name !== 'AbortError') shareStatus.textContent = 'Copie ce lien pour partager la BD : ' + url;
+      shareStatus.textContent = 'Copie ce lien pour partager la BD : ' + shareUrl;
     }
   });
+  if (navigator.share) {
+    const nativeShare = document.getElementById('bd-share-native');
+    nativeShare.hidden = false;
+    nativeShare.addEventListener('click', async () => {
+      try {
+        await navigator.share({ title: {{ page.title | tojson }}, url: shareUrl });
+      } catch (error) {
+        if (error.name !== 'AbortError') shareStatus.textContent = 'Copie ce lien pour partager la BD : ' + shareUrl;
+      }
+    });
+  }
 </script>
 {% endblock %}
