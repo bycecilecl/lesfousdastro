@@ -16,8 +16,7 @@ class pluginFousBlogImport extends Plugin
 
     private function articles(): array
     {
-        $json = file_get_contents(__DIR__ . '/articles.json');
-        $articles = json_decode($json, true);
+        $articles = require __DIR__ . '/articles.php';
         if (!is_array($articles) || count($articles) !== 42) {
             throw new RuntimeException('Le lot de 42 articles est incomplet.');
         }
