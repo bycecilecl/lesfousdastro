@@ -41,6 +41,8 @@ body {
     position: relative; z-index: 1;
     margin: 0 -20px;
 }
+.article-header .badge-d-wrap { margin-bottom: 22px; }
+.article-header .badge-d { font-size: clamp(1.4rem, 3.5vw, 2rem); }
 .article-header__back {
     display: inline-flex; align-items: center; gap: 6px;
     color: rgba(255,255,255,0.6); text-decoration: none;
@@ -269,6 +271,7 @@ body {
 
 <header class="article-header">
     <a class="article-header__back" href="{{ url_for('blog.blog_index') }}">Retour au blog</a>
+    <div class="badge-d-wrap"><span class="badge-d">✦ Blog Astrologie ✦</span></div>
 
     {% if article.tag %}
     <div>
