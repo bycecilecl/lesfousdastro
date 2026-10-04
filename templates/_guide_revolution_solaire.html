@@ -1,0 +1,63 @@
+<details class="rs-order-guide" id="guide-revolution-solaire">
+    <summary>Comment commander Ma Révolution Solaire ? <span>Voir le tuto en images</span></summary>
+    <div class="rs-order-guide__body">
+        <ol class="rs-order-guide__steps">
+            <li>
+                <div>
+                    <h4>Renseigne tes coordonnées de naissance</h4>
+                    <p>En haut du formulaire, indique tes informations personnelles, ta date, ton heure et ton lieu de naissance. Pour le lieu, clique sur ta ville dans les suggestions.</p>
+                </div>
+                <img src="{{ url_for('static', filename='tutorials/revolution-solaire/naissance.png') }}" alt="Champs de date, heure et lieu de naissance dans le formulaire" width="903" height="232" loading="lazy" decoding="async">
+            </li>
+            <li>
+                <div>
+                    <h4>Choisis Ma Révolution Solaire</h4>
+                    <p>Descends jusqu’à « Ton ciel en mouvement », puis clique sur la carte « Ma Révolution Solaire ».</p>
+                </div>
+                <img src="{{ url_for('static', filename='tutorials/revolution-solaire/choix-analyse.png') }}" alt="Carte Ma Révolution Solaire dans la section Ton ciel en mouvement" width="618" height="165" loading="lazy" decoding="async">
+            </li>
+            <li>
+                <div>
+                    <h4>Choisis l’année et le lieu de ton anniversaire</h4>
+                    <p>Indique l’année à explorer et la ville où tu passes, ou as passé, cet anniversaire. Sélectionne cette ville dans les suggestions.</p>
+                </div>
+                <img src="{{ url_for('static', filename='tutorials/revolution-solaire/annee-et-lieu.png') }}" alt="Fenêtre de choix de l’année et du lieu du retour solaire" width="697" height="672" loading="lazy" decoding="async">
+            </li>
+            <li>
+                <div>
+                    <h4>Ajoute des repères si tu le souhaites</h4>
+                    <p>Les champs sur ta situation et tes préoccupations sont facultatifs. Clique ensuite sur « Ajouter à ma sélection ».</p>
+                </div>
+                <img src="{{ url_for('static', filename='tutorials/revolution-solaire/contexte-facultatif.png') }}" alt="Champs facultatifs et bouton Ajouter à ma sélection" width="753" height="1183" loading="lazy" decoding="async">
+            </li>
+            <li>
+                <div>
+                    <h4>Poursuis depuis Ta Sélection</h4>
+                    <p>Descends jusqu’à « Ta Sélection ». Vérifie l’année et le lieu affichés, accepte l’utilisation de tes données, puis clique sur « Obtenir mon analyse ».</p>
+                </div>
+                <img src="{{ url_for('static', filename='tutorials/revolution-solaire/selection.png') }}" alt="Case de consentement et bouton Obtenir mon analyse dans Ta Sélection" width="903" height="195" loading="lazy" decoding="async">
+            </li>
+            <li>
+                <div>
+                    <h4>Vérifie tes coordonnées avant de payer</h4>
+                    <p>Relis les informations de naissance dans la fenêtre de confirmation. Si elles sont correctes, continue vers le paiement ; sinon, modifie-les.</p>
+                </div>
+                <img src="{{ url_for('static', filename='tutorials/revolution-solaire/confirmation.png') }}" alt="Fenêtre de confirmation des coordonnées de naissance" width="534" height="625" loading="lazy" decoding="async">
+            </li>
+        </ol>
+        <p class="rs-order-guide__tip"><strong>Le point à ne pas rater :</strong> pour les deux lieux, il faut choisir une ville proposée dans la liste. Écrire le nom de la ville sans la sélectionner ne suffit pas.</p>
+    </div>
+</details>
+<script>
+    (function () {
+        function ouvrirGuideDepuisLien() {
+            if (window.location.hash !== '#guide-revolution-solaire') return;
+            const guide = document.getElementById('guide-revolution-solaire');
+            if (!guide) return;
+            guide.open = true;
+            requestAnimationFrame(() => guide.scrollIntoView({block: 'start'}));
+        }
+        window.addEventListener('hashchange', ouvrirGuideDepuisLien);
+        ouvrirGuideDepuisLien();
+    })();
+</script>

@@ -1,0 +1,64 @@
+.rs-order-guide {
+    margin-top: 20px;
+    border: 1px solid rgba(231, 119, 22, .38);
+    border-radius: 16px;
+    background: #fffaf3;
+    box-shadow: 0 8px 20px rgba(120, 67, 14, .08);
+    overflow: hidden;
+    scroll-margin-top: 24px;
+}
+.rs-order-guide > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    color: #8b490f;
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+}
+.rs-order-guide > summary::-webkit-details-marker { display: none; }
+.rs-order-guide > summary span { color: #a45a18; font-size: .87rem; font-weight: 700; white-space: nowrap; }
+.rs-order-guide > summary:focus-visible { outline: 3px solid #e77716; outline-offset: -3px; }
+.rs-order-guide__body { padding: 0 22px 22px; }
+.rs-order-guide__steps { margin: 0; padding: 0; list-style: none; counter-reset: rs-guide; }
+.rs-order-guide__steps > li {
+    display: grid;
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 20px;
+    padding: 24px 0;
+    border-top: 1px solid #f0dfca;
+    counter-increment: rs-guide;
+}
+.rs-order-guide__steps h4 { display: flex; align-items: flex-start; gap: 11px; margin: 0 0 9px; color: #82420d; font-size: 1.05rem; }
+.rs-order-guide__steps h4::before {
+    content: counter(rs-guide);
+    flex: 0 0 27px;
+    height: 27px;
+    border-radius: 50%;
+    background: #dc781d;
+    color: white;
+    text-align: center;
+    line-height: 27px;
+    font-size: .88rem;
+}
+.rs-order-guide__steps p { margin: 0; color: #564e47; line-height: 1.55; }
+.rs-order-guide__steps img {
+    display: block;
+    width: 100%;
+    max-width: 470px;
+    height: auto;
+    border: 1px solid #ead8c5;
+    border-radius: 10px;
+    background: white;
+}
+.rs-order-guide__steps li:nth-child(4) img { max-width: 350px; }
+.rs-order-guide__tip { margin: 0; padding: 16px 18px; border-radius: 10px; background: #fff0dc; color: #5d3b1e; line-height: 1.5; }
+@media (max-width: 700px) {
+    .rs-order-guide > summary { align-items: flex-start; flex-direction: column; gap: 4px; padding: 16px; }
+    .rs-order-guide__body { padding: 0 16px 16px; }
+    .rs-order-guide__steps > li { grid-template-columns: 1fr; gap: 14px; padding: 20px 0; }
+    .rs-order-guide__steps img { max-width: 100%; }
+}
