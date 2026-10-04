@@ -14,7 +14,7 @@ Holà mi amigos !
 
 Un petit article pour revenir sur ma **révolution solaire**, puisque je fais toujours une rétrospective de mon année pour voir si l'astrologie avait effectivement vu les choses venir :p
 
-Ma nouvelle révolution solaire arrive bientôt, alors voici le topo sur l'année qui vient de s'écouler. Elle fut un peu moins chaotique que la précédente, plus tranquille dirons-nous. (Si vous voulez lire ma RS 2020-2021, celle qui m'avait laissé des sueurs froides, c'est par [ici](https://lesfousdastro.fr/etude-de-revolution-solaire-de-2020-2021/).)
+Ma nouvelle révolution solaire arrive bientôt, alors voici le topo sur l'année qui vient de s'écouler. Elle fut un peu moins chaotique que la précédente, plus tranquille dirons-nous. (Si vous voulez lire ma RS 2020-2021, celle qui m'avait laissé des sueurs froides, c'est par [ici](https://lesfousdastro.fr/blog/revolution-solaire-2020-2021-etude-cas).)
 
 
 Je vous mets les grandes définitions, et on regarde ensemble si ça colle avec mon année — je découvre ça en même temps que vous ! ☺️

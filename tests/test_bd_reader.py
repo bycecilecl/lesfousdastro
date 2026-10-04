@@ -53,6 +53,19 @@ class BdReaderTest(unittest.TestCase):
             db.session.remove()
             db.drop_all()
 
+    def test_old_article_urls_redirect_to_matching_blog_articles(self):
+        destinations = {
+            "etude-de-revolution-solaire-de-2020-2021": "revolution-solaire-2020-2021-etude-cas",
+            "introduction-a-lastrologie-uranienne": "astrologie-uranienne-introduction",
+            "la-lune-la-mere-en-astrologie": "la-lune-la-mere-en-astrologie",
+            "les-transneptuniennes-astrologie-uranienne": "planetes-astrologie-uranienne",
+        }
+        for old, new in destinations.items():
+            with self.subTest(old=old):
+                response = self.client.get(f"/{old}/")
+                self.assertEqual(response.status_code, 301)
+                self.assertEqual(response.headers["Location"], f"/blog/{new}")
+
     def test_published_image_is_a_real_url_and_draft_is_not_served(self):
         page = self.client.get("/bd/soleil-saturne")
         self.assertEqual(page.status_code, 200)
