@@ -8,6 +8,10 @@ Pour chaque planche, créer un contenu avec un titre, une courte description et 
 
 Insérer la planche directement dans le corps du contenu, dans l'ordre de lecture. La première image devient automatiquement la vignette de la galerie ; aucune image de couverture supplémentaire n'est nécessaire. Ajouter une description alternative utile à chaque image dans l'éditeur, et quelques lignes de texte sous la planche pour les lecteurs et les moteurs de recherche. La BD apparaît sur `/bd/<slug>` seulement après publication dans Bludit.
 
+### Publication sur Pinterest
+
+Le site expose `/bd/rss.xml`, un flux RSS 2.0 réservé aux BD publiées. Chaque entrée contient le titre, la description, l'URL publique de la BD et sa première image. Les brouillons et les BD sans image en sont exclus. Après déploiement, vérifier que l'adresse `https://lesfousdastro.fr/bd/rss.xml` s'ouvre et qu'une BD de test y figure. Dans Pinterest, utiliser un compte professionnel, revendiquer `lesfousdastro.fr`, puis ouvrir **Paramètres > Créer des Épingles en masse > Publication automatique > Connecter le flux RSS** et choisir un tableau. Pinterest récupère les nouvelles entrées avec un délai pouvant atteindre 24 heures. Le flux propose une image par BD pour renvoyer vers la lecture complète sur le site ; vérifier le rendu de la première épingle avant de généraliser.
+
 ## Ce qui est prêt localement
 
 - Le site Flask continue de lire les 42 articles Markdown actuellement en ligne.

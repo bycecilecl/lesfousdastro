@@ -4,12 +4,14 @@ from html.parser import HTMLParser
 import base64
 import binascii
 from datetime import datetime, timedelta, timezone
+from email.utils import format_datetime
 import hashlib
 import hmac
 import os
 import secrets
-from urllib.parse import quote
+from urllib.parse import quote, urljoin
 from urllib.request import Request, urlopen
+from xml.etree import ElementTree as ET
 
 from flask import Blueprint, render_template, abort, url_for, Response, request, make_response, redirect, session, current_app
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
@@ -274,6 +276,42 @@ def bd_from_bludit(page: dict) -> dict | None:
 def charger_bd() -> list[dict]:
     pages = (bd_from_bludit(page) for page in published_pages())
     return sorted((page for page in pages if page), key=lambda page: page["date"], reverse=True)
+
+
+@blog_bp.route("/bd/rss.xml")
+def bd_rss():
+    """Expose one cover image per published comic to Pinterest's RSS import."""
+    ET.register_namespace("media", "http://search.yahoo.com/mrss/")
+    rss = ET.Element("rss", version="2.0")
+    channel = ET.SubElement(rss, "channel")
+    ET.SubElement(channel, "title").text = "Les Fous d'Astro — BD"
+    ET.SubElement(channel, "link").text = "https://lesfousdastro.fr/bd"
+    ET.SubElement(channel, "description").text = "Les BD astrologiques des Fous d'Astro"
+
+    for page in charger_bd():
+        if not page["cover"]:
+            continue
+        link = "https://lesfousdastro.fr/bd/" + quote(page["slug"], safe="")
+        image = urljoin("https://lesfousdastro.fr", page["cover"])
+        item = ET.SubElement(channel, "item")
+        ET.SubElement(item, "title").text = page["title"]
+        ET.SubElement(item, "description").text = page["description"] or page["title"]
+        ET.SubElement(item, "link").text = link
+        ET.SubElement(item, "guid", isPermaLink="true").text = link
+        if page["date"]:
+            try:
+                published = datetime.strptime(page["date"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            except ValueError:
+                pass
+            else:
+                ET.SubElement(item, "pubDate").text = format_datetime(published)
+        ET.SubElement(item, "{http://search.yahoo.com/mrss/}content", {
+            "url": image,
+            "medium": "image",
+        })
+
+    return Response(ET.tostring(rss, encoding="utf-8", xml_declaration=True),
+                    content_type="application/rss+xml; charset=utf-8")
 
 
 def bd_comments_enabled() -> bool:
