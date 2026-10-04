@@ -9,7 +9,9 @@ from dataclasses import dataclass, asdict, replace
 import os
 from .archives_generation import (verrou_demande, ecrire_json, lire_json, texte_archive, GenerationAbsente)
 
-from .controle_livraison import controler_placements, RapportFactuelInvalide
+from .controle_livraison import (
+    controler_placements, corriger_references_maitrises, RapportFactuelInvalide,
+)
 
 from utils.claude_llm import BlocTronqueError
 from utils.claude_llm import ask_claude
@@ -144,6 +146,14 @@ def _generer_rapport_revolution_solaire(
         ),
         BlocTronqueError,
     )
+
+    premier_controle = controler_placements(texte_markdown, donnees)
+    if premier_controle['erreurs']:
+        texte_corrige, corrections = corriger_references_maitrises(
+            texte_markdown, donnees, premier_controle['erreurs'])
+        if corrections:
+            ecrire_json(dossier, 'corrections_factuelles.json', corrections)
+            texte_markdown = texte_corrige
 
     controle = _controler_avant_livraison(dossier, texte_markdown, preparation)
     # Le générateur HTML est utilisé comme fonction pure de rendu : son écriture

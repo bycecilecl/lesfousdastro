@@ -70,6 +70,46 @@ def _entier(valeur):
     return int(valeur) if str(valeur).isdigit() else ROMAINS.get(str(valeur))
 
 
+def corriger_references_maitrises(texte, donnees, erreurs):
+    """Corrige seulement une confusion natale/RS prouvée par les deux maîtrises.
+
+    Une phrase ambiguë, une liste de maisons ou un autre type d'erreur reste
+    intact et sera traité par le circuit normal de relance de la RS payée.
+    """
+    corrections = []
+    for erreur in erreurs:
+        if erreur.get('code') != 'maitrise_contradictoire' or erreur.get('reference') != 'natales':
+            continue
+        point, maison = erreur.get('point'), erreur.get('annonce')
+        fiche = donnees.get('placements_rs', {}).get(point, {})
+        maisons_rs = {_entier(n) for n in fiche.get('maisons_gouvernees_rs', [])}
+        maisons_rs.update(_entier(n.get('maison')) for n in fiche.get('maisons_gouvernees_interceptees_rs', []))
+        maisons_natales = {_entier(n) for n in fiche.get('maisons_gouvernees_natales', [])}
+        maisons_natales.update(_entier(n.get('maison')) for n in fiche.get('maisons_gouvernees_interceptees_natales', []))
+        if maison not in maisons_rs or maison in maisons_natales:
+            continue
+        extrait = erreur.get('extrait') or ''
+        if not extrait or texte.count(extrait) != 1:
+            continue
+        motif = re.compile(r'\bmaison\s+(?P<numero>\d+|[IVX]+)\s+natale\b', re.I)
+        occurrences = [m for m in motif.finditer(extrait) if _entier(m['numero'].lower()) == maison]
+        if len(occurrences) != 1:
+            continue
+        occurrence = occurrences[0]
+        nouveau_extrait = (
+            extrait[:occurrence.start()] + occurrence.group().replace('natale', 'de révolution solaire')
+            + extrait[occurrence.end():]
+        )
+        if nouveau_extrait == extrait:
+            continue
+        texte = texte.replace(extrait, nouveau_extrait, 1)
+        corrections.append({
+            'code': 'reference_maitrise_rs', 'point': point, 'maison': maison,
+            'avant': extrait, 'apres': nouveau_extrait,
+        })
+    return texte, corrections
+
+
 def _controles_maitrises_aspects(texte, donnees):
     erreurs, avertissements = [], []
     noms = '|'.join(re.escape(n) for n in sorted(AFFICHAGE_VERS_INTERNE, key=len, reverse=True))
