@@ -1,6 +1,7 @@
 """Livraison de la Révolution solaire achetée sur le formulaire principal."""
 import json
 from pathlib import Path
+from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from flask import Blueprint, abort, current_app, redirect, url_for
@@ -9,6 +10,7 @@ from services.analysis_orders import owned_order
 from utils.client_pdf_storage import private_pdf_path, upload_client_pdf
 from utils.pdf_utils import html_to_pdf
 from utils.revolution_solaire.rapport_pdf import habiller_rapport_pdf
+from utils.revolution_solaire.relances import retenter
 
 
 revolution_solaire_module = Blueprint(
@@ -75,23 +77,48 @@ def _demande_depuis_commande(infos: dict) -> dict:
 def generer_revolution_solaire_pdf_s3(infos: dict) -> dict:
     """Un rapport, un PDF privé et un lien de livraison pour la commande."""
     demande = _demande_depuis_commande(infos)
-    rapport = generer_rapport_revolution_solaire(
-        **demande,
-        stockage_dir=Path(current_app.instance_path) / "generations_rs",
+    # Un nouveau cycle de reprise ne doit pas retomber sur les trois archives
+    # d'appels interrompus du cycle précédent.
+    racine = Path(current_app.instance_path) / "generations_rs" / uuid4().hex
+
+    def signaler(etape):
+        def journaliser(numero, essais, erreur):
+            current_app.logger.warning(
+                "RS %s : tentative %s/%s échouée (%s)",
+                etape, numero, essais, type(erreur).__name__, exc_info=True,
+            )
+        return journaliser
+
+    # Une réponse tronquée ou un contrôle factuel refusé doit aboutir à une
+    # nouvelle génération. Chaque tentative garde ses propres archives.
+    rapport = retenter(
+        lambda numero: generer_rapport_revolution_solaire(
+            **demande, stockage_dir=racine / f"tentative_{numero}",
+        ),
+        signaler=signaler("rapport"),
     )
-    pdf_path = private_pdf_path()
     html_pdf = habiller_rapport_pdf(
         rapport.html, personne=demande["personne"], lieu_rs=demande["lieu_rs"],
         annee=demande["annee"],
     )
-    if not html_to_pdf(
-        html_pdf, pdf_path, page_header=f"Révolution solaire {demande['annee']} - Les Fous d'Astro"
-    ):
-        raise RuntimeError("Le rapport est conservé, mais le PDF n'a pas pu être créé.")
-    pdf_url = upload_client_pdf(
-        pdf_path,
-        key_prefix="revolution_solaire",
-        download_filename=f"Revolution_Solaire_{demande['annee']}.pdf",
+
+    def creer_pdf(_numero):
+        pdf_path = private_pdf_path()
+        if not html_to_pdf(
+            html_pdf, pdf_path,
+            page_header=f"Révolution solaire {demande['annee']} - Les Fous d'Astro",
+        ):
+            raise RuntimeError("Le PDF n'a pas pu être créé.")
+        return pdf_path
+
+    pdf_path = retenter(creer_pdf, signaler=signaler("PDF"))
+    pdf_url = retenter(
+        lambda _numero: upload_client_pdf(
+            pdf_path,
+            key_prefix="revolution_solaire",
+            download_filename=f"Revolution_Solaire_{demande['annee']}.pdf",
+        ),
+        signaler=signaler("stockage"),
     )
     return {
         "product_id": "revolution_solaire",

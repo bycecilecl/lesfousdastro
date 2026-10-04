@@ -6,7 +6,7 @@
 import os
 import uuid
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import Blueprint, request, session, redirect, url_for, render_template, abort, current_app, jsonify
 from config.products import PRODUCTS
 import stripe
@@ -704,6 +704,8 @@ def analyse_status(product_id):
         abort(404, description="Analyse introuvable.")
 
     payload = {"status": job.status}
+    if product_id == "revolution_solaire" and job.status == "pending" and isinstance(job.result, dict):
+        payload["retrying"] = bool(job.result.get("retry_count"))
     if (
         job.status == "complete"
         and isinstance(job.result, dict)
@@ -946,7 +948,13 @@ def generer_pack_et_envoyer_email(valid_products, infos_client, pending):
         except (JobBusy, JobReview):
             return  # Aucun email présentant un pack partiel comme terminé.
         except Exception:
-            if product_id in {"forces_defis", "revolution_solaire"}:
+            if product_id == "revolution_solaire":
+                current_app.logger.exception(
+                    "Révolution solaire %s : nouvelle tentative automatique programmée",
+                    pending.get("secure_order_id"),
+                )
+                return
+            if product_id == "forces_defis":
                 try:
                     avis = notifier_generation_interrompue(
                         commande_id=pending["secure_order_id"],
@@ -972,14 +980,29 @@ def generer_pack_et_envoyer_email(valid_products, infos_client, pending):
     if len(analyses_generees) == len(valid_products):
         # Persistent claim also prevents duplicate emails on payment replays.
         claimed = AnalysisJob.query.filter_by(order_id=pending['secure_order_id'],
-            product='__delivery', status='pending').update({'status': 'running'})
+            product='__delivery', status='pending').update({
+                'status': 'running', 'started_at': datetime.now(timezone.utc),
+            })
         db.session.commit()
         if not claimed:
             return
-        envoyer_email_pack_termine(
-            infos_client=infos_client,
-            analyses_generees=analyses_generees,
-        )
+        try:
+            email_envoye = envoyer_email_pack_termine(
+                infos_client=infos_client,
+                analyses_generees=analyses_generees,
+            )
+        except Exception:
+            if valid_products == ["revolution_solaire"]:
+                AnalysisJob.query.filter_by(order_id=pending['secure_order_id'],
+                    product='__delivery', status='running').update({'status': 'pending'})
+                db.session.commit()
+            raise
+        if valid_products == ["revolution_solaire"]:
+            AnalysisJob.query.filter_by(order_id=pending['secure_order_id'],
+                product='__delivery', status='running').update({
+                    'status': 'complete' if email_envoye else 'pending',
+                })
+            db.session.commit()
     else:
         current_app.logger.error("❌ Aucune analyse générée, email non envoyé")
 
@@ -988,7 +1011,7 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
     email = infos_client.get("email")
     if not email:
         current_app.logger.warning("⚠️ Aucun email client : impossible d'envoyer le pack")
-        return
+        return False
 
     prenom = (infos_client.get("nom") or "").split()[0] or "toi"
 
@@ -1052,3 +1075,4 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
         current_app.logger.info(f"✅ Email pack envoyé à {email}")
     else:
         current_app.logger.error(f"❌ Échec envoi email pack à {email}")
+    return bool(ok)

@@ -82,3 +82,24 @@ class VenteRevolutionSolaireTest(TestCase):
             with self.assertRaises(RuntimeError):
                 module.generer_revolution_solaire_pdf_s3(donnees_valides())
         upload.assert_not_called()
+
+    def test_relance_le_rapport_puis_pdf_et_stockage_sans_regenerer_le_rapport(self):
+        app = Flask(__name__)
+        rapport = SimpleNamespace(html="<body><h1>RS</h1><p>Lecture annuelle</p></body>")
+        with app.app_context(), \
+                patch.object(module, "generer_rapport_revolution_solaire",
+                             side_effect=[RuntimeError("Claude temporairement indisponible"), rapport]) as genere, \
+                patch.object(module, "private_pdf_path", return_value="/tmp/rs-test.pdf"), \
+                patch.object(module, "html_to_pdf", side_effect=[False, True]) as pdf, \
+                patch.object(module, "upload_client_pdf",
+                             side_effect=[RuntimeError("S3 indisponible"), "https://example.test/rs.pdf"]) as upload, \
+                patch("utils.revolution_solaire.relances.sleep", return_value=None):
+            resultat = module.generer_revolution_solaire_pdf_s3(donnees_valides())
+        self.assertEqual(resultat["pdf_url"], "https://example.test/rs.pdf")
+        self.assertEqual(genere.call_count, 2)
+        self.assertNotEqual(
+            genere.call_args_list[0].kwargs["stockage_dir"],
+            genere.call_args_list[1].kwargs["stockage_dir"],
+        )
+        self.assertEqual(pdf.call_count, 2)
+        self.assertEqual(upload.call_count, 2)

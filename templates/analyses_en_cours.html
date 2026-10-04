@@ -129,6 +129,11 @@
                         window.location.replace(data.result_url);
                         return;
                     }
+                    if (data.retrying) {
+                        document.querySelector('.message').innerHTML =
+                            "La génération a été interrompue. Elle sera relancée automatiquement : " +
+                            "ta commande est conservée et tu n'as rien à refaire ni à repayer.";
+                    }
                     if (data.status === 'review') {
                         stopped = true;
                         document.querySelector('.spinner').style.display = 'none';

@@ -2,6 +2,7 @@
 import hashlib
 import os
 import secrets
+import time
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from flask import abort, session
@@ -174,6 +175,10 @@ def run_job(order_id, product, generate):
     job = AnalysisJob.query.filter_by(order_id=order.id, product=product).one()
     if job.status == 'complete':
         return job.result
+    relance_rs = product == 'revolution_solaire'
+    ancienne_tentative = job.result if isinstance(job.result, dict) else {}
+    if relance_rs and job.status == 'pending' and ancienne_tentative.get('retry_after', 0) > time.time():
+        raise JobBusy()
     # Atomic compare-and-set, shared by every worker and HTTP/pack path.
     updated = AnalysisJob.query.filter_by(id=job.id, status='pending').update(
         {'status': 'running', 'started_at': datetime.now(timezone.utc)}, synchronize_session=False)
@@ -194,8 +199,15 @@ def run_job(order_id, product, generate):
         return result
     except Exception:
         db.session.rollback()
-        # Never restart an uncertain LLM call automatically, even after a crash.
-        AnalysisJob.query.filter_by(id=job.id, status='running').update({'status': 'review'})
+        if relance_rs:
+            numero = int(ancienne_tentative.get('retry_count', 0)) + 1
+            attente = min(60 * 2 ** min(numero - 1, 6), 3600)
+            AnalysisJob.query.filter_by(id=job.id, status='running').update({
+                'status': 'pending',
+                'result': {'retry_count': numero, 'retry_after': time.time() + attente},
+            })
+        else:
+            AnalysisJob.query.filter_by(id=job.id, status='running').update({'status': 'review'})
         db.session.commit()
         raise
 

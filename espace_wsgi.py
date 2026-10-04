@@ -8,3 +8,6 @@ try:
     app.register_blueprint(espace_personnel_bp)
 except Exception:
     app.logger.exception("Espace personnel indisponible ; application principale conservée")
+
+from services.revolution_solaire_worker import demarrer_relances_rs
+demarrer_relances_rs(app)
