@@ -6,6 +6,7 @@ import os
 import sys
 import types
 import unittest
+from xml.etree import ElementTree as ET
 from pathlib import Path
 from unittest.mock import patch
 
@@ -81,6 +82,25 @@ class BdReaderTest(unittest.TestCase):
         self.page["type"] = "draft"
         self.assertEqual(self.client.get("/bd/soleil-saturne/image/0").status_code, 404)
         self.assertEqual(self.client.post("/bd/soleil-saturne/commenter", data={}).status_code, 404)
+
+    def test_rss_exposes_one_cover_for_each_published_bd(self):
+        self.page.update(dateRaw="2026-10-04 12:00:00", description="Une BD sur les aspects")
+        feed = self.client.get("/bd/rss.xml")
+        self.assertEqual(feed.status_code, 200)
+        self.assertTrue(feed.content_type.startswith("application/rss+xml"))
+        root = ET.fromstring(feed.data)
+        items = root.findall("./channel/item")
+        self.assertEqual(len(items), 1)
+        item = items[0]
+        self.assertEqual(item.findtext("link"), "https://lesfousdastro.fr/bd/soleil-saturne")
+        self.assertEqual(item.findtext("description"), "Une BD sur les aspects")
+        media = item.find("{http://search.yahoo.com/mrss/}content")
+        self.assertEqual(media.attrib["url"],
+                         "https://lesfousdastro.fr/bd/soleil-saturne/image/0")
+        self.assertIsNotNone(item.findtext("pubDate"))
+        self.page["type"] = "draft"
+        self.assertEqual(ET.fromstring(self.client.get("/bd/rss.xml").data)
+                         .findall("./channel/item"), [])
 
     def test_comment_is_hidden_until_email_moderation(self):
         self.client.get("/bd/soleil-saturne")
