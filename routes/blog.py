@@ -454,6 +454,23 @@ def bd_comment_moderate(token):
     return response
 
 
+LEGACY_ARTICLE_SLUGS = {
+    "etude-de-revolution-solaire-de-2020-2021": "revolution-solaire-2020-2021-etude-cas",
+    "introduction-a-lastrologie-uranienne": "astrologie-uranienne-introduction",
+    "la-lune-la-mere-en-astrologie": "la-lune-la-mere-en-astrologie",
+    "les-transneptuniennes-astrologie-uranienne": "planetes-astrologie-uranienne",
+}
+
+
+@blog_bp.route("/etude-de-revolution-solaire-de-2020-2021/", strict_slashes=False)
+@blog_bp.route("/introduction-a-lastrologie-uranienne/", strict_slashes=False)
+@blog_bp.route("/la-lune-la-mere-en-astrologie/", strict_slashes=False)
+@blog_bp.route("/les-transneptuniennes-astrologie-uranienne/", strict_slashes=False)
+def legacy_article_redirect():
+    slug = LEGACY_ARTICLE_SLUGS[request.path.strip("/")]
+    return redirect(url_for("blog.blog_article", slug=slug), code=301)
+
+
 @blog_bp.route("/blog", strict_slashes=False)
 def blog_index():
     articles = charger_articles()
