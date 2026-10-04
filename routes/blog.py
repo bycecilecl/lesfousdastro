@@ -69,6 +69,12 @@ BD_THEMES = {
     "bases": "Les bases",
     "placements": "Les placements",
     "aspects": "Les aspects",
+    "sitcom-astro": "Sitcom astro",
+}
+BD_THEME_ALIASES = {
+    "les-bases": "bases",
+    "les-placements": "placements",
+    "les-aspects": "aspects",
 }
 
 
@@ -231,9 +237,12 @@ def bludit_content(page: dict) -> str:
 
 
 def bd_from_bludit(page: dict) -> dict | None:
-    """Turn a published Bludit page in category BD into a comic page."""
+    """Turn a published Bludit BD or themed category into a comic page."""
+    category = str(page.get("category") or "").strip().lower().replace(" ", "-")
+    category_theme = BD_THEME_ALIASES.get(category, category)
     if (page.get("type") != "published"
-            or str(page.get("category") or "").lower() not in {"bd", "bandes-dessinees"}):
+            or (category not in {"bd", "bandes-dessinees"}
+                and category_theme not in BD_THEMES)):
         return None
     slug = page.get("slug")
     if not isinstance(slug, str) or not slug or "/" in slug or ".." in slug:
@@ -248,10 +257,10 @@ def bd_from_bludit(page: dict) -> dict | None:
         tag_keys = tags.split(",")
     else:
         tag_keys = []
-    aliases = {"les-bases": "bases", "les-placements": "placements", "les-aspects": "aspects"}
-    normalized_tags = (str(tag).strip().lower() for tag in tag_keys)
-    theme = next((aliases.get(tag, tag) for tag in normalized_tags
-                  if aliases.get(tag, tag) in BD_THEMES), "")
+    normalized_tags = (str(tag).strip().lower().replace(" ", "-") for tag in tag_keys)
+    theme = category_theme if category_theme in BD_THEMES else next(
+        (BD_THEME_ALIASES.get(tag, tag) for tag in normalized_tags
+         if BD_THEME_ALIASES.get(tag, tag) in BD_THEMES), "")
     content = bludit_content(page)
     cover = bludit_media_url(str(page.get("coverImage") or ""))
     content, image_sources = bd_image_content(content, slug)

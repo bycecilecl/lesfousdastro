@@ -2,9 +2,9 @@
 
 ## Publier une BD
 
-La rubrique `/bd` lit les pages **publiées** de Bludit dont la catégorie a pour clé `bd` (nom affiché « BD »). Elle reste distincte du blog d'articles. Créer cette catégorie une seule fois dans Bludit.
+La rubrique `/bd` lit les pages **publiées** de Bludit classées dans « BD » ou directement dans une catégorie de thème : « Les bases », « Les placements », « Les aspects » ou « Sitcom astro ». Elle reste distincte du blog d'articles.
 
-Pour chaque planche, créer un contenu avec un titre, une courte description et la catégorie **BD**. Ajouter une des étiquettes `bases`, `placements` ou `aspects` pour son filtre dans la galerie. Sans ces étiquettes, la planche reste visible dans « Toutes les BD » sous « À découvrir ».
+Pour chaque planche, créer un contenu avec un titre et une courte description. Choisir directement sa catégorie de thème, ou la catégorie **BD** avec l'un des mots-clés `bases`, `placements`, `aspects` ou `sitcom-astro` pour son filtre dans la galerie. Avec la catégorie BD sans mot-clé de thème, la planche reste visible dans « Toutes les BD » sous « À découvrir ».
 
 Insérer la planche directement dans le corps du contenu, dans l'ordre de lecture. La première image devient automatiquement la vignette de la galerie ; aucune image de couverture supplémentaire n'est nécessaire. Ajouter une description alternative utile à chaque image dans l'éditeur, et quelques lignes de texte sous la planche pour les lecteurs et les moteurs de recherche. La BD apparaît sur `/bd/<slug>` seulement après publication dans Bludit.
 

@@ -83,6 +83,18 @@ class BdReaderTest(unittest.TestCase):
         self.assertEqual(self.client.get("/bd/soleil-saturne/image/0").status_code, 404)
         self.assertEqual(self.client.post("/bd/soleil-saturne/commenter", data={}).status_code, 404)
 
+    def test_sitcom_astro_keyword_filters_published_bd(self):
+        self.page["tags"] = "Sitcom astro"
+        listing = self.client.get("/bd?theme=sitcom-astro")
+        self.assertEqual(listing.status_code, 200)
+        self.assertIn(b"Soleil conjoint Saturne", listing.data)
+        self.assertIn(b"Sitcom astro", listing.data)
+        self.page["category"] = "Les placements"
+        self.page["tags"] = ""
+        self.assertIn(b"Soleil conjoint Saturne", self.client.get("/bd?theme=placements").data)
+        self.page["category"] = "Sitcom astro"
+        self.assertIn(b"Soleil conjoint Saturne", self.client.get("/bd?theme=sitcom-astro").data)
+
     def test_rss_exposes_one_cover_for_each_published_bd(self):
         self.page.update(dateRaw="2026-10-04 12:00:00", description="Une BD sur les aspects")
         feed = self.client.get("/bd/rss.xml")
