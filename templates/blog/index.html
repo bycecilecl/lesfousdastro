@@ -176,6 +176,17 @@ body {
     transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 60, 90, 0.12);
 }
+.card__doodle {
+    height: 150px;
+    background: #f8f5ed;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+}
+.card__doodle img {
+    display: block;
+    width: 100%; height: 100%;
+    object-fit: contain;
+}
 .card__body {
     padding: 25px 26px 24px;
     display: flex; flex-direction: column; flex: 1;
@@ -329,6 +340,9 @@ body {
             {% for article in articles %}
             <a href="{{ url_for('blog.blog_article', slug=article.slug) }}" class="card-link" data-search="{{ (article.title ~ ' ' ~ article.tag ~ ' ' ~ article.category ~ ' ' ~ article.excerpt) | lower }}">
                 <article class="card" data-cats="{{ article.cats | join(' ') }}">
+                    <div class="card__doodle" aria-hidden="true" data-doodle-slot>
+                        <img src="{{ url_for('static', filename='blog/doodles/planetes-personnages.webp') }}" alt="" width="900" height="600" loading="lazy">
+                    </div>
                     <div class="card__body">
                         <div class="card__meta">
                             <span class="tag tag--{{ article.cat }}">{{ article.tag }}</span>
@@ -364,6 +378,24 @@ body {
 
 {% block scripts %}
 <script>
+(function() {
+    const doodleBank = [
+        "{{ url_for('static', filename='blog/doodles/planetes-personnages.webp') }}",
+        "{{ url_for('static', filename='blog/doodles/roue-zodiaque.webp') }}",
+        "{{ url_for('static', filename='blog/doodles/maisons-astrologiques.webp') }}",
+        "{{ url_for('static', filename='blog/doodles/phases-lune.webp') }}",
+        "{{ url_for('static', filename='blog/doodles/aspects-planetes.webp') }}",
+        "{{ url_for('static', filename='blog/doodles/theme-natal-dessine.webp') }}"
+    ];
+    const doodles = document.querySelectorAll('[data-doodle-slot] img');
+    const shuffled = [...doodleBank];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    doodles.forEach((image, index) => { image.src = shuffled[index % shuffled.length]; });
+})();
+
 (function() {
     const c = document.getElementById('stars');
     for (let i = 0; i < 60; i++) {
