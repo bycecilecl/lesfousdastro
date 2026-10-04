@@ -1,2 +1,9 @@
 [deploy]
 startCommand = '/bin/sh -c "python scripts/init_espace_auth.py || echo Espace-personnel-tables-indisponibles >&2; exec gunicorn espace_wsgi:app --workers 4 --threads 2 --timeout 300"'
+
+# The isolated blog test has no production database, payments or account code.
+[environments.blog-test.build]
+dockerfilePath = "Dockerfile.blog-preview"
+
+[environments.blog-test.deploy]
+startCommand = "gunicorn preview_wsgi:app --bind 0.0.0.0:8080 --workers 2 --threads 2"

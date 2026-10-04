@@ -20,6 +20,7 @@ from models.espace_personnel import (  # noqa: E402
     MecanismeExploration, ObservationMecanisme, ProfilAstral,
     SectionAnalyse, SuggestionMecanisme, UtilisateurEspace,
 )
+from models.bd_comments import BdComment  # noqa: E402
 
 
 def main():
@@ -51,6 +52,7 @@ def main():
                     ObservationMecanisme.__table__,
                     EntreeJournal.__table__,
                     FichierAnalyse.__table__,
+                    BdComment.__table__,
                 ],
                 checkfirst=True,
             )

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Les BD des Fous d'Astro{% if active_theme %} — {{ themes[active_theme] }}{% endif %}{% endblock %}
+{% block meta_description %}Découvre l'astrologie en planches illustrées : les bases, les placements et les aspects avec les personnages des Fous d'Astro.{% endblock %}
+
+{% block extra_css %}
+.bd-page { background: linear-gradient(160deg, #0d1b2a 0%, #1f628e 35%, #00a8a8 70%, #c0f0f7 100%); min-height: 70vh; color: #17334c; }
+.bd-hero { padding: 66px 24px 40px; text-align: center; color: white; }
+.bd-hero .badge-d-wrap { margin-bottom: 22px; }
+.bd-hero .badge-d { font-size: clamp(1.5rem, 3.5vw, 2.3rem); }
+.bd-hero__eyebrow { margin: 0 0 14px; text-transform: uppercase; letter-spacing: .18em; font-size: .78rem; font-weight: 800; color: #b8f0e9; }
+.bd-hero h1 { margin: 0 auto 16px; max-width: 850px; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.12; }
+.bd-hero p:last-child { max-width: 650px; margin: 0 auto; font-size: 1.08rem; line-height: 1.65; color: #e7f4f7; }
+.bd-wrap { max-width: 1160px; margin: 0 auto; padding: 42px 24px 88px; }
+.bd-filters { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 34px; }
+.bd-filter { display: inline-flex; gap: 9px; align-items: center; padding: 11px 17px; border: 1px solid #bedde4; border-radius: 999px; background: white; color: #1f628e; text-decoration: none; font-weight: 700; }
+.bd-filter:hover, .bd-filter[aria-current="page"] { background: #1f628e; border-color: #1f628e; color: white; }
+.bd-filter__count { font-size: .78rem; opacity: .72; }
+.bd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+.bd-card { display: flex; flex-direction: column; overflow: hidden; border-radius: 19px; background: white; box-shadow: 0 8px 28px rgba(21, 72, 107, .09); border: 1px solid #d8e9ed; text-decoration: none; color: inherit; transition: transform .2s, box-shadow .2s; }
+.bd-card:hover { transform: translateY(-4px); box-shadow: 0 15px 36px rgba(21, 72, 107, .17); }
+.bd-card:focus-visible, .bd-filter:focus-visible { outline: 3px solid #e56863; outline-offset: 3px; }
+.bd-card__visual { height: 260px; background: linear-gradient(145deg, #e7f4fa, #f9eef5); display: flex; align-items: center; justify-content: center; }
+.bd-card__visual img { width: 100%; height: 100%; object-fit: contain; }
+.bd-card__placeholder { font-size: 4rem; color: #1f628e; }
+.bd-card__body { padding: 23px 24px 26px; display: flex; flex-direction: column; flex: 1; }
+.bd-card__theme { color: #168f94; text-transform: uppercase; letter-spacing: .1em; font-size: .73rem; font-weight: 800; }
+.bd-card h2 { font-size: 1.25rem; line-height: 1.3; margin: 11px 0 10px; color: #17334c; }
+.bd-card__description { font-size: .92rem; line-height: 1.55; color: #536b7d; margin: 0 0 18px; flex: 1; }
+.bd-card__panels { display: block; margin: 0 0 11px; color: #536b7d; font-size: .85rem; }
+.bd-card__read { font-weight: 800; color: #1f628e; }
+.bd-empty { text-align: center; padding: 70px 24px; border: 1px dashed #acd1d8; border-radius: 20px; background: white; }
+.bd-empty h2 { margin: 0 0 9px; font-size: 1.5rem; }
+.bd-empty p { margin: 0 auto 20px; max-width: 560px; line-height: 1.6; color: #536b7d; }
+.bd-empty a { color: #1f628e; font-weight: 700; }
+@media (max-width: 600px) { .bd-hero { padding: 52px 22px; } .bd-wrap { padding: 30px 17px 70px; } .bd-card__visual { height: 230px; } }
+{% endblock %}
+
+{% block content %}
+<div class="bd-page">
+  <header class="bd-hero">
+    <div class="badge-d-wrap"><span class="badge-d">✦ Les BD des Fous d’Astro ✦</span></div>
+    <h1>Ici, l’astrologie prend vie.</h1>
+    <p>Les planètes ont du caractère. Choisis une BD pour lire toutes ses planches dans l’ordre, puis agrandis celles que tu veux.</p>
+  </header>
+  <div class="bd-wrap">
+    <nav class="bd-filters" aria-label="Thèmes des BD">
+      <a class="bd-filter" href="{{ url_for('blog.bd_index') }}" {% if not active_theme %}aria-current="page"{% endif %}>Toutes les BD</a>
+      {% for key, label in themes.items() %}
+      <a class="bd-filter" href="{{ url_for('blog.bd_index', theme=key) }}" {% if active_theme == key %}aria-current="page"{% endif %}>{{ label }} <span class="bd-filter__count">{{ counts[key] }}</span></a>
+      {% endfor %}
+    </nav>
+    {% if pages %}
+    <div class="bd-grid">
+      {% for page in pages %}
+      <a class="bd-card" href="{{ url_for('blog.bd_page', slug=page.slug) }}">
+        <div class="bd-card__visual">
+          {% if page.cover %}<img src="{{ page.cover }}" alt="Aperçu de {{ page.title }}" loading="lazy">{% else %}<span class="bd-card__placeholder" aria-hidden="true">✦</span>{% endif %}
+        </div>
+        <div class="bd-card__body">
+          <span class="bd-card__theme">{{ page.theme_label }}</span>
+          <h2>{{ page.title }}</h2>
+          {% if page.description %}<p class="bd-card__description">{{ page.description }}</p>{% endif %}
+          {% if page.panel_count %}<span class="bd-card__panels">{{ page.panel_count }} planche{% if page.panel_count > 1 %}s{% endif %}</span>{% endif %}
+          <span class="bd-card__read">Lire la planche →</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="bd-empty">
+      <h2>Les premières planches arrivent</h2>
+      <p>{% if active_theme %}Aucune BD dans ce thème pour le moment. Tu peux découvrir les autres planches.{% else %}La galerie se prépare. En attendant, retrouve les histoires et explications du blog.{% endif %}</p>
+      <a href="{% if active_theme %}{{ url_for('blog.bd_index') }}{% else %}{{ url_for('blog.blog_index') }}{% endif %}">{% if active_theme %}Voir toutes les BD{% else %}Lire le blog{% endif %} →</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

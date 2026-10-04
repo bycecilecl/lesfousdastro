@@ -1,11 +1,11 @@
 # routes/legales.py
-from flask import Blueprint, render_template
+from flask import Blueprint, redirect, render_template, url_for
 
 legal_bp = Blueprint("legal_bp", __name__)
 
 @legal_bp.route("/conditions", endpoint="conditions_utilisation")
 def conditions_utilisation():
-    return render_template("conditions-generales-utilisation.html")
+    return redirect(url_for("legal_bp.conditions_generales_vente"), code=301)
 
 @legal_bp.route("/cgv", endpoint="conditions_generales_vente")
 def conditions_generales_vente():

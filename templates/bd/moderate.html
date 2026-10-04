@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>Modérer un commentaire BD</title></head><body>
+<main style="max-width:720px;margin:55px auto;padding:25px;color:#17334c;min-height:55vh">
+  <h1>Modérer un commentaire</h1>
+  <p style="margin:18px 0">BD : <strong>{{ comment.bd_slug }}</strong></p>
+  <section style="padding:22px;border:1px solid #bedde4;border-radius:14px;background:#f4fbfd">
+    <strong>{{ comment.author }}</strong>
+    <p style="margin-top:12px;white-space:pre-wrap;overflow-wrap:anywhere">{{ comment.body }}</p>
+  </section>
+  <p style="margin:20px 0">Statut : <strong>{{ {'pending':'En attente','approved':'Publié','rejected':'Refusé'}[comment.status] }}</strong></p>
+  {% if comment.status == 'pending' %}
+  <form method="post" style="display:flex;gap:12px;flex-wrap:wrap">
+    <button type="submit" name="decision" value="approved" style="padding:12px 20px;cursor:pointer">Publier</button>
+    <button type="submit" name="decision" value="rejected" style="padding:12px 20px;cursor:pointer">Refuser</button>
+  </form>
+  {% endif %}
+</main>
+</body></html>

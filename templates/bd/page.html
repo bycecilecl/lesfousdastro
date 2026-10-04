@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} — BD des Fous d'Astro{% endblock %}
+{% block meta_description %}{{ page.description or "Lis cette planche des Fous d'Astro pour découvrir l'astrologie en BD." }}{% endblock %}
+{% block extra_head %}
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ page.title }} — Les Fous d'Astro">
+<meta property="og:description" content="{{ page.description or "Découvre cette BD astrologique des Fous d'Astro." }}">
+<meta property="og:url" content="{{ canonical_url }}">
+{% if page.cover %}<meta property="og:image" content="{{ request.url_root.rstrip('/') ~ page.cover if page.cover.startswith('/') else page.cover }}">{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+.bd-read { min-height: 70vh; background: linear-gradient(160deg, #0d1b2a 0%, #1f628e 35%, #00a8a8 70%, #c0f0f7 100%); color: #17334c; }
+.bd-read__header { padding: 54px 22px 34px; text-align: center; color: white; }
+.bd-read__header .badge-d-wrap { margin-bottom: 22px; }
+.bd-read__header .badge-d { font-size: clamp(1.5rem, 3.5vw, 2.3rem); }
+.bd-read__back { display: inline-block; margin-bottom: 25px; color: #c5f3ee; font-weight: 700; text-decoration: none; }
+.bd-read__back:hover { color: white; text-decoration: underline; }
+.bd-read__theme { margin: 0 0 12px; text-transform: uppercase; letter-spacing: .16em; color: #b8f0e9; font-size: .77rem; font-weight: 800; }
+.bd-read h1 { max-width: 900px; margin: 0 auto 15px; font-size: clamp(2rem, 4vw, 3.4rem); line-height: 1.13; }
+.bd-read__intro { max-width: 700px; margin: 0 auto; line-height: 1.65; color: #e7f4f7; font-size: 1.06rem; }
+.bd-read__wrap { max-width: 900px; margin: 0 auto; padding: 38px 20px 90px; }
+.bd-read__paper { padding: 28px; border-radius: 20px; background: white; box-shadow: 0 10px 34px rgba(21, 72, 107, .11); }
+.bd-read__content { font-size: 1.02rem; line-height: 1.7; overflow-wrap: anywhere; }
+.bd-read__content p { margin: 0 0 1.4rem; }
+.bd-read__content img, .bd-read__cover { display: block; width: auto !important; max-width: min(100%, 440px) !important; height: auto !important; margin: 0 auto 25px; border-radius: 8px; }
+.bd-read__enlarge { display: block; width: fit-content; margin: -12px auto 28px; font-size: .9rem; font-weight: 700; color: #1f628e; }
+.bd-read__hint { margin: 0 0 22px; text-align: center; color: #536b7d; font-size: .94rem; }
+.bd-read__content img, .bd-read__cover { cursor: zoom-in; }
+.bd-read__actions { margin: 28px 0 0; text-align: center; }
+.bd-read__actions p { margin: 0 0 12px; font-weight: 700; }
+.bd-read__share-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.bd-read__share-links a, .bd-read__share, .bd-comment__submit { display: inline-block; border: 0; border-radius: 999px; background: #1f628e; color: white; padding: 12px 20px; font: inherit; font-weight: 700; line-height: 1.25; text-decoration: none; cursor: pointer; }
+.bd-read__share-links a:hover, .bd-read__share:hover, .bd-comment__submit:hover { background: #174f72; color: white; }
+.bd-read__share-native[hidden] { display: none; }
+.bd-read__share-status { min-height: 1.5em; margin: 8px 0 0; text-align: center; color: #174f72; }
+.bd-lightbox { max-width: none; max-height: none; width: 100vw; height: 100dvh; border: 0; padding: 0; background: #102035; color: white; }
+.bd-lightbox::backdrop { background: rgba(6, 17, 28, .92); }
+.bd-lightbox__bar { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 18px; background: #102035; }
+.bd-lightbox__bar button { border: 1px solid #b8f0e9; border-radius: 999px; padding: 8px 14px; background: transparent; color: white; font: inherit; cursor: pointer; }
+.bd-lightbox__viewport { display: flex; justify-content: center; align-items: flex-start; overflow: auto; height: calc(100dvh - 56px); padding: 16px; }
+.bd-lightbox__viewport img { display: block; width: auto; max-width: 100%; height: auto; max-height: calc(100dvh - 90px); object-fit: contain; }
+.bd-lightbox.is-zoomed .bd-lightbox__viewport { justify-content: flex-start; }
+.bd-lightbox.is-zoomed .bd-lightbox__viewport img { max-width: none; max-height: none; }
+.bd-comments { margin: 34px 0 0; padding: 28px; border-radius: 20px; background: white; box-shadow: 0 10px 34px rgba(21, 72, 107, .08); }
+.bd-comments h2 { margin: 0 0 8px; color: #17334c; }
+.bd-comments__intro { color: #536b7d; line-height: 1.6; }
+.bd-comments__list { list-style: none; margin: 22px 0; padding: 0; }
+.bd-comments__list li { padding: 18px 0; border-top: 1px solid #d8e9ed; }
+.bd-comments__list p { margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bd-comment { display: grid; gap: 12px; margin-top: 22px; }
+.bd-comment label { font-weight: 700; }
+.bd-comment input, .bd-comment textarea { width: 100%; padding: 12px; border: 1px solid #9ebfc8; border-radius: 10px; font: inherit; }
+.bd-comment textarea { min-height: 125px; resize: vertical; }
+.bd-comment__honeypot { position: absolute; left: -10000px; }
+.bd-comments__notice { padding: 12px 15px; border-radius: 10px; background: #e6f5f6; color: #174f72; }
+.bd-read__content figure { margin: 0 0 24px; text-align: center; }
+.bd-read__view { display: flex; justify-content: center; margin: 0 0 25px; }
+.bd-read__view[hidden] { display: none; }
+.bd-read__view button { border: 1px solid #bedde4; border-radius: 999px; background: #e6f5f6; color: #174f72; padding: 10px 17px; font: inherit; font-weight: 700; cursor: pointer; }
+.bd-read__view button:hover { background: #ccebed; }
+.bd-read__tiles { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; max-width: 680px; margin: 0 auto; }
+.bd-read__tiles.is-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; }
+.bd-read__content .bd-read__tile { min-width: 0; margin: 0; padding: 12px; border: 1px solid #d8e9ed; border-radius: 14px; background: #f7fbfc; }
+.bd-read__tile-number { display: block; margin: 0 0 8px; color: #536b7d; font-size: .8rem; font-weight: 700; text-align: left; }
+.bd-read__content .bd-read__tile img { width: 100% !important; max-width: 100% !important; margin: 0 0 8px; }
+.bd-read__tile .bd-read__enlarge { margin: 0 auto 3px; font-size: .82rem; }
+.bd-read__content figcaption { margin-top: 8px; color: #617587; font-size: .86rem; }
+.bd-read__content a { color: #1f628e; text-decoration: underline; }
+.bd-read__content h2 { color: #1f628e; margin: 2rem 0 1rem; }
+.bd-read__links { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; margin-top: 32px; }
+.bd-read__links a { flex: 1; display: block; padding: 18px 20px; border-radius: 14px; background: #e6f5f6; color: #174f72; text-decoration: none; font-weight: 700; }
+.bd-read__links a:hover { background: #ccebed; }
+.bd-read__links a:last-child { text-align: right; }
+.bd-read__footer { margin-top: 31px; text-align: center; }
+.bd-read__footer a { color: #1f628e; font-weight: 700; }
+@media (max-width: 640px) { .bd-read__header { padding: 45px 19px; } .bd-read__paper { padding: 16px; } .bd-read__wrap { padding: 19px 11px 70px; } .bd-read__tiles.is-overview { gap: 8px; } .bd-read__tiles.is-overview .bd-read__tile { padding: 7px; } .bd-read__links { flex-direction: column; } .bd-read__links a:last-child { text-align: left; } }
+{% endblock %}
+
+{% block content %}
+<article class="bd-read">
+  <header class="bd-read__header">
+    <a class="bd-read__back" href="{{ url_for('blog.bd_index') }}">← Toutes les BD</a>
+    <div class="badge-d-wrap"><span class="badge-d">✦ BD Astro ✦</span></div>
+    <p class="bd-read__theme">{{ page.theme_label }}</p>
+    <h1>{{ page.title }}</h1>
+    {% if page.description %}<p class="bd-read__intro">{{ page.description }}</p>{% endif %}
+  </header>
+  <div class="bd-read__wrap">
+    <div class="bd-read__paper">
+      {% if page.has_panel %}<p class="bd-read__hint">Lis les planches en défilant. Touche une image pour l’agrandir.</p>{% endif %}
+      {% if page.cover and not page.has_panel %}<img class="bd-read__cover" src="{{ page.cover }}" alt="{{ page.title }}">{% endif %}
+      <div class="bd-read__view" id="bd-view" hidden><button type="button" id="bd-view-toggle" aria-pressed="false">Voir toutes les planches</button></div>
+      <div class="bd-read__content">{{ page.content | safe }}</div>
+      <div class="bd-read__actions" aria-label="Partager cette BD">
+        <p>Partager cette BD</p>
+        <div class="bd-read__share-links">
+          <a href="https://www.facebook.com/sharer/sharer.php?u={{ canonical_url | urlencode }}" target="_blank" rel="noopener noreferrer">Facebook ↗</a>
+          <a href="https://wa.me/?text={{ (page.title ~ ' — ' ~ canonical_url) | urlencode }}" target="_blank" rel="noopener noreferrer">WhatsApp ↗</a>
+          <a href="https://www.pinterest.com/pin/create/button/?url={{ canonical_url | urlencode }}" target="_blank" rel="noopener noreferrer">Pinterest ↗</a>
+          <button class="bd-read__share" type="button" id="bd-copy-link">Copier le lien</button>
+          <button class="bd-read__share bd-read__share-native" type="button" id="bd-share-native" hidden>Autres applications</button>
+        </div>
+      </div>
+      <p class="bd-read__share-status" id="bd-share-status" role="status" aria-live="polite"></p>
+    </div>
+    <section class="bd-comments" id="commentaires" aria-labelledby="bd-comments-title">
+      <h2 id="bd-comments-title">Commentaires{% if comments %} ({{ comments|length }}){% endif %}</h2>
+      {% if comments %}
+      <ul class="bd-comments__list">
+        {% for comment in comments %}<li><strong>{{ comment.author }}</strong><p>{{ comment.body }}</p></li>{% endfor %}
+      </ul>
+      {% else %}<p class="bd-comments__intro">Aucun commentaire pour le moment. À toi d’ouvrir la conversation !</p>{% endif %}
+      {% if request.args.get('commentaire') == 'en-attente' %}<p class="bd-comments__notice" role="status">Merci ! Ton commentaire est enregistré et sera visible après validation.</p>{% endif %}
+      {% if request.args.get('commentaire') == 'invalide' %}<p class="bd-comments__notice" role="alert">Indique un pseudo de 2 à 60 caractères et un message de 10 à 2 000 caractères.</p>{% endif %}
+      {% if request.args.get('commentaire') == 'patiente' %}<p class="bd-comments__notice" role="alert">Patiente quelques minutes avant d’envoyer un autre commentaire.</p>{% endif %}
+      {% if comments_enabled %}
+      <form class="bd-comment" method="post" action="{{ url_for('blog.bd_comment_submit', slug=page.slug) }}">
+        <input type="hidden" name="csrf" value="{{ session.bd_comment_csrf }}">
+        <div class="bd-comment__honeypot" aria-hidden="true"><label for="bd-website">Site web</label><input id="bd-website" name="website" tabindex="-1" autocomplete="off"></div>
+        <label for="bd-author">Ton pseudo</label><input id="bd-author" name="author" minlength="2" maxlength="60" required autocomplete="nickname">
+        <label for="bd-body">Ton commentaire</label><textarea id="bd-body" name="body" minlength="10" maxlength="2000" required></textarea>
+        <p class="bd-comments__intro">Les commentaires sont vérifiés avant d’être publiés. Ton pseudo sera visible ; aucune adresse e-mail n’est demandée. <a href="{{ url_for('legal_bp.politique_confidentialite') }}">Confidentialité</a></p>
+        <button class="bd-comment__submit" type="submit">Envoyer mon commentaire</button>
+      </form>
+      {% elif blog_preview %}<p class="bd-comments__intro">Le formulaire de commentaires sera disponible sur le site principal.</p>{% endif %}
+    </section>
+    {% if older or newer %}
+    <nav class="bd-read__links" aria-label="Autres planches">
+      {% if older %}<a href="{{ url_for('blog.bd_page', slug=older.slug) }}">← {{ older.title }}</a>{% endif %}
+      {% if newer %}<a href="{{ url_for('blog.bd_page', slug=newer.slug) }}">{{ newer.title }} →</a>{% endif %}
+    </nav>
+    {% endif %}
+    <p class="bd-read__footer">Envie de comprendre le sujet plus en détail ? <a href="{{ url_for('blog.blog_index') }}">Explore le blog</a>.</p>
+  </div>
+</article>
+<dialog class="bd-lightbox" id="bd-lightbox" aria-label="Planche agrandie">
+  <div class="bd-lightbox__bar"><span>Planche agrandie</span><div><button type="button" id="bd-zoom">Zoom 100 %</button> <button type="button" id="bd-close">Fermer ✕</button></div></div>
+  <div class="bd-lightbox__viewport"><img id="bd-lightbox-image" alt=""></div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const lightbox = document.getElementById('bd-lightbox');
+  const enlarged = document.getElementById('bd-lightbox-image');
+  const content = document.querySelector('.bd-read__content');
+  const panels = [...content.querySelectorAll('img')];
+  if (panels.length > 1 && !content.textContent.trim() && !content.querySelector('video, iframe, audio, object')) {
+    const grid = document.createElement('div');
+    grid.className = 'bd-read__tiles';
+    panels.forEach((image, index) => {
+      const tile = document.createElement('figure');
+      tile.className = 'bd-read__tile';
+      const number = document.createElement('span');
+      number.className = 'bd-read__tile-number';
+      number.textContent = `Planche ${index + 1} / ${panels.length}`;
+      tile.append(number, image);
+      grid.appendChild(tile);
+    });
+    content.replaceChildren(grid);
+    const view = document.getElementById('bd-view');
+    const toggle = document.getElementById('bd-view-toggle');
+    view.hidden = false;
+    toggle.addEventListener('click', () => {
+      const overview = grid.classList.toggle('is-overview');
+      toggle.setAttribute('aria-pressed', String(overview));
+      toggle.textContent = overview ? 'Lire les planches en grand' : 'Voir toutes les planches';
+    });
+  }
+  document.querySelectorAll('.bd-read__content img, .bd-read__cover').forEach((image) => {
+    const link = document.createElement('a');
+    link.href = image.currentSrc || image.src;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.className = 'bd-read__enlarge';
+    link.textContent = 'Ouvrir la planche en grand ↗';
+    link.setAttribute('aria-label', 'Ouvrir en grand : ' + (image.alt || 'planche BD'));
+    image.insertAdjacentElement('afterend', link);
+    image.tabIndex = 0;
+    image.setAttribute('role', 'button');
+    image.setAttribute('aria-label', 'Agrandir : ' + (image.alt || 'planche BD'));
+    const open = () => {
+      enlarged.src = image.currentSrc || image.src;
+      enlarged.alt = image.alt || 'Planche BD agrandie';
+      lightbox.classList.remove('is-zoomed');
+      document.getElementById('bd-zoom').textContent = 'Zoom 100 %';
+      lightbox.showModal();
+    };
+    image.addEventListener('click', (event) => { event.preventDefault(); open(); });
+    image.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
+    });
+  });
+  document.getElementById('bd-close').addEventListener('click', () => lightbox.close());
+  document.getElementById('bd-zoom').addEventListener('click', (event) => {
+    const zoomed = lightbox.classList.toggle('is-zoomed');
+    event.currentTarget.textContent = zoomed ? 'Ajuster à l’écran' : 'Zoom 100 %';
+  });
+  lightbox.addEventListener('click', (event) => { if (event.target === lightbox) lightbox.close(); });
+  const shareStatus = document.getElementById('bd-share-status');
+  const shareUrl = {{ canonical_url | tojson }};
+  document.getElementById('bd-copy-link').addEventListener('click', async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        shareStatus.textContent = 'Lien copié !';
+      } else {
+        throw new Error('clipboard unavailable');
+      }
+    } catch (error) {
+      shareStatus.textContent = 'Copie ce lien pour partager la BD : ' + shareUrl;
+    }
+  });
+  if (navigator.share) {
+    const nativeShare = document.getElementById('bd-share-native');
+    nativeShare.hidden = false;
+    nativeShare.addEventListener('click', async () => {
+      try {
+        await navigator.share({ title: {{ page.title | tojson }}, url: shareUrl });
+      } catch (error) {
+        if (error.name !== 'AbortError') shareStatus.textContent = 'Copie ce lien pour partager la BD : ' + shareUrl;
+      }
+    });
+  }
+</script>
+{% endblock %}
