@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Prestations | Les Fous d'Astro{% endblock %}
-{% block meta_description %}Consultations astrologiques en tête-à-tête avec Cécile : thème natal, dynamiques de couple, révolution solaire. Une lecture vivante, au-delà des rapports automatisés.{% endblock %}
+{% block meta_description %}Tu as une vie qui semble te convenir sur le papier, mais tu ne te sens pas heureuse dedans ? Explore ce décalage avec Cécile, à l'aide de l'astrologie comme support de réflexion.{% endblock %}
 
 {% block extra_css %}
 :root {
@@ -50,22 +50,34 @@ body {
     margin-bottom: 50px;
 }
 .prestations-hero h1 {
-    position: absolute;
-    width: 1px; height: 1px;
-    padding: 0; margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+    color: white;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.2;
+    max-width: 850px;
+    margin: 0 auto 20px;
 }
 .prestations-hero p {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     line-height: 1.7;
     color: white;
     opacity: 0.95;
     max-width: 680px;
     margin: 0 auto;
 }
+.prestations-hero__cta {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 12px 22px;
+    border-radius: 8px;
+    background: white;
+    color: var(--navy-dark);
+    font-weight: 700;
+    text-decoration: none;
+}
+.prestations-hero__cta:hover,
+.prestations-hero__cta:focus-visible { text-decoration: underline; }
+#accompagnement { scroll-margin-top: 90px; }
+#accompagnement .prestation-card__desc { margin-bottom: 18px; }
 
 /* Qui suis-je */
 .prestations-about {
@@ -526,6 +538,10 @@ body {
 }
 
 @media (max-width: 640px) {
+    .prestations-hero .badge-d {
+        font-size: 1.75rem;
+        padding: 0.45rem 0.8rem;
+    }
     .google-carousel__arrow--prev { left: 4px; }
     .google-carousel__arrow--next { right: 4px; }
 
@@ -545,14 +561,16 @@ body {
 
     <section class="prestations-hero">
         <div class="badge-d-wrap">
-            <div class="badge-d">✦ Prestations ✦</div>
+            <div class="badge-d">Consultations</div>
         </div>
-        <h1>Prestations</h1>
-        <p>Au-delà des rapports automatisés, un rendez-vous en tête-à-tête avec moi pour une lecture vivante, et sur mesure.</p>
+        <h1>Tu as une vie qui semble te convenir sur le papier, mais tu ne te sens pas heureuse dedans ?</h1>
+        <p>Je t'accompagne pour comprendre ce décalage, reconnaître ce dont tu as besoin et explorer ce que tu souhaites changer. Nous utilisons ton thème astral comme support de réflexion, sans lui demander de choisir à ta place.</p>
+        <a class="prestations-hero__cta" href="#accompagnement">Voir l'accompagnement</a>
     </section>
 
     <section class="prestations-about">
-        <p>Derrière ces lectures, il y a moi : astrologue depuis plusieurs années (occidentale et védique), ex-IT reconvertie, je pratique une astrologie ludique et sans filtre pour se connaître en profondeur, sans se prendre au sérieux.</p>
+        <p>J'ai travaillé 15 ans dans l'informatique. En 2013, mon voyage en Inde a été le déclic : à mon retour, j'ai compris que la vie que je menais ne m'avait jamais ressemblé. En 2015, j'ai quitté mon travail et Paris pour commencer un profond travail sur moi, auquel l'astrologie a beaucoup contribué.</p>
+        <p>Aujourd'hui, j'accompagne les personnes qui ne se sentent plus à leur place. En les écoutant, je repère souvent des ressources et des possibilités qu'elles n'ont pas encore explorées. Je les aide à reconnaître ce potentiel et à identifier des changements concrets pour avancer vers une vie plus alignée avec ce qui compte pour elles.</p>
         <a href="https://bycecilecl.com" target="_blank" rel="noopener" class="prestations-about__link">Mon parcours et mes autres accompagnements →</a>
     </section>
 
@@ -651,6 +669,32 @@ body {
 
     <div class="prestations-grid">
 
+        <div class="prestation-card" id="accompagnement">
+            <div class="prestation-card__head">
+                <div class="prestation-card__eyebrow">Consultation individuelle</div>
+                <h2 class="prestation-card__title">Accompagnement en connaissance de soi</h2>
+            </div>
+            <div class="prestation-card__body">
+                <p class="prestation-card__desc">
+                    <strong>Tu remarques que tu réagis toujours de la même façon, sans comprendre pourquoi ?</strong> Dans nos échanges, je t'aide à explorer ce qui pourrait nourrir ces réactions : tes besoins, ton histoire, les schémas qui reviennent. Ton thème astral nous sert de support pour poser des questions et ouvrir d'autres façons de voir la situation.
+                </p>
+                <p class="prestation-card__prerequisite">
+                    <strong>Conseillé :</strong> avoir déjà réalisé une Lecture du Thème Natal avec moi, ou reçu le Point Astral et l'Analyse Karmique, nous permet d'aller plus loin dès la séance. Tu peux aussi réserver sans lecture préalable.
+                </p>
+                <p class="prestation-card__format">90 min via Google Meet / WhatsApp + notes personnalisées</p>
+                <div class="prestation-card__footer">
+                    <span class="prestation-card__price">125 €</span>
+                    <button
+                        type="button"
+                        class="prestation-card__request"
+                        data-prestation="Accompagnement en connaissance de soi"
+                    >
+                        Demander cette prestation
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="prestation-card">
             <div class="prestation-card__head">
                 <div class="prestation-card__eyebrow">Consultation individuelle</div>
@@ -695,32 +739,6 @@ body {
                         type="button"
                         class="prestation-card__request"
                         data-prestation="Révolution Solaire"
-                    >
-                        Demander cette prestation
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="prestation-card">
-            <div class="prestation-card__head">
-                <div class="prestation-card__eyebrow">Consultation individuelle</div>
-                <h2 class="prestation-card__title">Accompagnement en connaissance de soi</h2>
-            </div>
-            <div class="prestation-card__body">
-                <p class="prestation-card__desc">
-                    À partir de ton thème natal, je t'aide à mieux comprendre ton fonctionnement, à mettre du sens sur ce que tu traverses et à identifier des pistes concrètes pour avancer. Chaque accompagnement est entièrement personnalisé et s'adapte à ton histoire, à tes objectifs et au moment de vie que tu traverses.
-                </p>
-                <p class="prestation-card__prerequisite">
-                    <strong>Prérequis :</strong> cette prestation s'appuie sur une connaissance approfondie de ton thème natal. Il est donc nécessaire d'avoir réalisé une Lecture du Thème Natal avec moi, ou d'avoir reçu le Point Astral et l'Analyse Karmique.
-                </p>
-                <p class="prestation-card__format">90 min via Google Meet / WhatsApp + notes personnalisées</p>
-                <div class="prestation-card__footer">
-                    <span class="prestation-card__price">125 €</span>
-                    <button
-                        type="button"
-                        class="prestation-card__request"
-                        data-prestation="Accompagnement en connaissance de soi"
                     >
                         Demander cette prestation
                     </button>

@@ -838,6 +838,17 @@ input[type="time"]:focus, input[type="email"]:focus {
         <img src="{{ url_for('static', filename='images/les-fous-dastro-planetes.webp') }}" alt="" class="planetes-deco">
     </div>
 
+    <div class="consultation-section">
+        <a href="{{ url_for('pages_bp.prestations') }}" class="consultation-banner">
+            <img src="/static/icons/ccl-consultations.webp" alt="Cécile, astrologue des Fous d'Astro" class="consultation-portrait" width="120" height="120">
+            <div class="consultation-copy">
+                <div class="consultation-title">Ta vie semble te convenir sur le papier, mais tu ne t'y reconnais plus ?</div>
+                <div class="consultation-description">Je t'aide à comprendre ce décalage et à explorer tes prochaines possibilités, avec l'astrologie comme support de réflexion.</div>
+            </div>
+            <span class="consultation-cta">En parler avec Cécile</span>
+        </a>
+    </div>
+
    <div class="intro-cosmique">
     <h2>Ce qui relie les éléments de ton thème change toute la lecture.</h2>
     <p>Tu peux rechercher la signification de chaque placement séparément. Mais comment comprendre un besoin de sécurité qui coexiste avec une forte envie d’indépendance ?</p>
@@ -861,17 +872,6 @@ input[type="time"]:focus, input[type="email"]:focus {
     </div>
 </div>
 </div>
-
-    <div class="consultation-section">
-        <a href="{{ url_for('pages_bp.prestations') }}" class="consultation-banner">
-            <img src="/static/icons/ccl-consultations.webp" alt="Cécile, astrologue des Fous d'Astro" class="consultation-portrait" width="120" height="120">
-            <div class="consultation-copy">
-                <div class="consultation-title">Tu préfères une lecture en direct ?</div>
-                <div class="consultation-description">Réserve une consultation avec moi pour explorer ton thème, ton vécu et tes questions lors d’un véritable échange.</div>
-            </div>
-            <span class="consultation-cta">Réserver une consultation</span>
-        </a>
-    </div>
 
     <div class="form-container">
         <form id="form-analyse" method="POST">

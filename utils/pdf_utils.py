@@ -3,6 +3,46 @@ import weasyprint
 import os
 from pathlib import Path
 from datetime import datetime
+from html.parser import HTMLParser
+
+
+ACCOMPANIMENT_URL = "https://lesfousdastro.fr/prestations#accompagnement"
+ACCOMPANIMENT_OFFER = f"""
+<aside class="accompaniment-offer" id="accompaniment-offer">
+    <h2>Tu veux aller plus loin ?</h2>
+    <p>Ce rapport t'offre des pistes de réflexion. Si tu souhaites les relier à ton vécu et explorer ce qui se répète pour toi, je propose un accompagnement individuel avec ton thème astral comme support.</p>
+    <p><a href="{ACCOMPANIMENT_URL}">Découvrir l'accompagnement</a><br><span>{ACCOMPANIMENT_URL}</span></p>
+</aside>
+"""
+
+
+class _ClosingTagLocator(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=False)
+        self.body_end = None
+        self.html_end = None
+
+    def handle_endtag(self, tag):
+        if tag == "body":
+            self.body_end = self.getpos()
+        elif tag == "html":
+            self.html_end = self.getpos()
+
+
+def append_accompaniment_offer(html_content):
+    if 'id="accompaniment-offer"' in html_content:
+        return html_content
+
+    parser = _ClosingTagLocator()
+    parser.feed(html_content)
+    position = parser.body_end or parser.html_end
+    if position is None:
+        return html_content + ACCOMPANIMENT_OFFER
+
+    line, column = position
+    lines = html_content.splitlines(keepends=True)
+    offset = sum(len(part) for part in lines[:line - 1]) + column
+    return html_content[:offset] + ACCOMPANIMENT_OFFER + html_content[offset:]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # UTIL : html_to_pdf(html_content, output_path)
@@ -24,7 +64,7 @@ from datetime import datetime
 #   - Idéal quand on génère d’abord un HTML propre puis on le “print” en PDF.
 # ─────────────────────────────────────────────────────────────────────────────
 
-def html_to_pdf(html_content, output_path, page_header="Point Astral - Les Fous d'Astro"):
+def html_to_pdf(html_content, output_path, page_header="Point Astral - Les Fous d'Astro", include_accompaniment_offer=True):
     """
     Convertit du HTML en PDF en utilisant WeasyPrint
     Compatible avec votre code existant
@@ -37,7 +77,7 @@ def html_to_pdf(html_content, output_path, page_header="Point Astral - Les Fous 
         
         # Créer le document HTML avec WeasyPrint
         html_doc = weasyprint.HTML(
-            string=html_content,
+            string=append_accompaniment_offer(html_content) if include_accompaniment_offer else html_content,
             base_url=os.getcwd()  # Pour résoudre les chemins relatifs
         )
         
@@ -103,6 +143,42 @@ def html_to_pdf(html_content, output_path, page_header="Point Astral - Les Fous 
                 font-size: 1.05em;
                 color: #144a6b;
                 margin-bottom: 10px !important;
+            }
+
+            .accompaniment-offer {
+                margin: 28px 0 0;
+                padding: 18px 20px;
+                border: 1px solid #b7d9d7;
+                border-left: 4px solid #00a8a8;
+                background: #f2f9f8;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .accompaniment-offer h2 {
+                margin: 0 0 8px;
+                color: #144a6b;
+                font-size: 15px;
+            }
+
+            .accompaniment-offer p {
+                margin: 0 0 10px;
+                line-height: 1.5;
+            }
+
+            .accompaniment-offer p:last-child {
+                margin-bottom: 0;
+            }
+
+            .accompaniment-offer a {
+                color: #126f7b;
+                font-weight: 700;
+                text-decoration: underline;
+            }
+
+            .accompaniment-offer span {
+                color: #4a5a61;
+                font-size: 9px;
             }
         """
         css = weasyprint.CSS(string=css_text.replace("__PAGE_HEADER__", safe_page_header))
