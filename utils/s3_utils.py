@@ -7,6 +7,18 @@ _S3_BUCKET  = os.getenv("S3_BUCKET_NAME")
 _REGION     = os.getenv("AWS_DEFAULT_REGION", "eu-west-3")
 _EXPIRES    = int(os.getenv("S3_PRESIGN_EXPIRES", "604800"))  # 7 jours
 
+
+def duree_validite_lien_pdf() -> str:
+    """Durée affichée aux clients, identique à celle des URL S3 générées."""
+    if _EXPIRES % 86400 == 0:
+        jours = _EXPIRES // 86400
+        return f"{jours} jour{'s' if jours != 1 else ''}"
+    if _EXPIRES % 3600 == 0:
+        heures = _EXPIRES // 3600
+        return f"{heures} heure{'s' if heures != 1 else ''}"
+    minutes = _EXPIRES // 60
+    return f"{minutes} minute{'s' if minutes != 1 else ''}"
+
 # ✅ s'assure qu'on a bien un client initialisé
 _s3 = boto3.client("s3", region_name=_REGION)
 

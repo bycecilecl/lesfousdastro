@@ -27,6 +27,7 @@ import yagmail
 import logging
 import re
 import html as htmllib
+from utils.s3_utils import duree_validite_lien_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +42,15 @@ def construire_email_analyse(
 ) -> tuple[str, str, str]:
     """Construit l'e-mail commun envoyé avec une analyse téléchargeable."""
     sujet = f"{possessif} {nom_analyse} {etat} ✨"
+    duree_lien = duree_validite_lien_pdf()
     contenu_txt = (
         f"Bonjour {prenom},\n\n"
         f"{possessif} {nom_analyse} {etat} ✨\n\n"
         "Merci pour ta confiance !\n"
         f"📄 Télécharger {possessif.lower()} {nom_analyse}\n"
         f"{pdf_url}\n\n"
-        "Pense à télécharger le document et à le sauvegarder sur ton appareil. "
+        f"Le lien de téléchargement expire {duree_lien} après la génération du rapport. "
+        "Télécharge le PDF et sauvegarde-le sur ton appareil avant cette date. "
         "Si le lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.\n\n"
         "Envie d’explorer une autre facette de ton thème ?\n"
         "Découvrir toutes les analyses : https://lesfousdastro.fr/analyses\n\n"
@@ -65,7 +68,8 @@ def construire_email_analyse(
         "style=\"display:inline-block;padding:14px 28px;background:#1f628e;color:#ffffff;"
         "border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;\">"
         f"📄 Télécharger {htmllib.escape(possessif.lower())} {htmllib.escape(nom_analyse)}</a></div>"
-        "<p>Pense à télécharger le document et à le sauvegarder sur ton appareil. "
+        f"<p><strong>Le lien de téléchargement expire {duree_lien} après la génération du rapport.</strong> "
+        "Télécharge le PDF et sauvegarde-le sur ton appareil avant cette date. "
         "Si le lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.</p>"
         "<p><strong>Envie d’explorer une autre facette de ton thème ?</strong><br>"
         "<a href=\"https://lesfousdastro.fr/analyses\" target=\"_blank\">"

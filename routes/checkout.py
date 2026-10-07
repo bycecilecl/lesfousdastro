@@ -18,7 +18,7 @@ from utils.email_sender import (
 )
 #from utils.brevo_utils import ajouter_contact_brevo
 from threading import Thread
-from utils.s3_utils import upload_file_and_presign
+from utils.s3_utils import upload_file_and_presign, duree_validite_lien_pdf
 from routes.point_astral_blocs import generer_flash_astral_pdf_s3
 from point_astral_famille.routes import generer_point_astral_famille_pdf_s3
 from routes.forces_defis_module import generer_forces_defis_pdf_s3
@@ -1014,6 +1014,7 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
         return False
 
     prenom = (infos_client.get("nom") or "").split()[0] or "toi"
+    duree_lien = duree_validite_lien_pdf()
 
     lignes_txt = []
     lignes_html = []
@@ -1041,7 +1042,8 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
         "Tes analyses sont prêtes ✨\n\n"
         "Merci pour ta confiance !\n"
         + "\n".join(lignes_txt)
-        + "\n\nPense à télécharger les documents et à les sauvegarder sur ton appareil.\n"
+        + f"\n\nLes liens de téléchargement expirent {duree_lien} après la génération de chaque rapport.\n"
+        "Télécharge tous les PDF et sauvegarde-les sur ton appareil avant cette date.\n"
         "Si un lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.\n\n"
         "Envie d’explorer une autre facette de ton thème ?\n"
         "Découvrir toutes les analyses : https://lesfousdastro.fr/analyses\n\n"
@@ -1057,7 +1059,8 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
     <div style='margin:30px 0;'>
     {"".join(lignes_html)}
     </div>
-    <p>Pense à télécharger les documents et à les sauvegarder sur ton appareil.
+    <p><strong>Les liens de téléchargement expirent {duree_lien} après la génération de chaque rapport.</strong><br>
+    Télécharge tous les PDF et sauvegarde-les sur ton appareil avant cette date.
     Si un lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.</p>
     <p><strong>Envie d’explorer une autre facette de ton thème ?</strong><br>
     <a href="https://lesfousdastro.fr/analyses" target="_blank">Découvrir toutes les analyses</a></p>
