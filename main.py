@@ -172,13 +172,8 @@ def before_request_handler():
     
     # 5️⃣ Token bypass (URL, header, cookie)
     BYPASS = os.getenv("MAINT_BYPASS_TOKEN", "").strip()
-    token = (
-        request.args.get("maint_token")
-        or request.headers.get("X-MAINT-TOKEN")
-        or request.cookies.get("maint_token")
-    )
-    
-    if BYPASS and token == BYPASS:
+    from utils.maintenance_access import autoriser_acces_maintenance
+    if autoriser_acces_maintenance(BYPASS):
         return None
     
     # 6️⃣ Sinon → page maintenance
