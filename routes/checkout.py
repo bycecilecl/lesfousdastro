@@ -1034,8 +1034,11 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
         current_app.logger.warning("⚠️ Aucun email client : impossible d'envoyer le pack")
         return False
 
-    prenom = (infos_client.get("nom") or "").split()[0] or "toi"
+    prenom = ((infos_client.get("nom") or "").split() or ["toi"])[0]
     duree_lien = duree_validite_lien_pdf()
+    rs_seule = len(analyses_generees) == 1 and analyses_generees[0].get("product_id") == "revolution_solaire"
+    annonce = "Voici ton analyse ✨" if rs_seule else "Tes analyses sont prêtes ✨"
+    conseil_pdf = "Télécharge le PDF et sauvegarde-le sur ton appareil avant cette date." if rs_seule else "Télécharge tous les PDF et sauvegarde-les sur ton appareil avant cette date."
 
     lignes_txt = []
     lignes_html = []
@@ -1060,11 +1063,11 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
 
     contenu_txt = (
         f"Bonjour {prenom},\n\n"
-        "Tes analyses sont prêtes ✨\n\n"
+        f"{annonce}\n\n"
         "Merci pour ta confiance !\n"
         + "\n".join(lignes_txt)
         + f"\n\nLes liens de téléchargement expirent {duree_lien} après la génération de chaque rapport.\n"
-        "Télécharge tous les PDF et sauvegarde-les sur ton appareil avant cette date.\n"
+        f"{conseil_pdf}\n"
         "Si un lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.\n\n"
         "Envie d’explorer une autre facette de ton thème ?\n"
         "Découvrir toutes les analyses : https://lesfousdastro.fr/analyses\n\n"
@@ -1075,13 +1078,13 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
 
     contenu_html = f"""
     <p>Bonjour {prenom},</p>
-    <p>Tes analyses sont prêtes ✨</p>
+    <p>{annonce}</p>
     <p>Merci pour ta confiance !</p>
     <div style='margin:30px 0;'>
     {"".join(lignes_html)}
     </div>
     <p><strong>Les liens de téléchargement expirent {duree_lien} après la génération de chaque rapport.</strong><br>
-    Télécharge tous les PDF et sauvegarde-les sur ton appareil avant cette date.
+    {conseil_pdf}
     Si un lien ne s’ouvre pas, copie-colle l’URL dans ton navigateur.</p>
     <p><strong>Envie d’explorer une autre facette de ton thème ?</strong><br>
     <a href="https://lesfousdastro.fr/analyses" target="_blank">Découvrir toutes les analyses</a></p>
@@ -1090,7 +1093,7 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
 
     ok = envoyer_email_avec_analyse(
         destinataire=email,
-        sujet="Tes analyses astrologiques sont prêtes ✨",
+        sujet="Ton analyse astrologique est prête ✨" if rs_seule else "Tes analyses astrologiques sont prêtes ✨",
         contenu_txt=contenu_txt,
         contenu_html=contenu_html,
     )

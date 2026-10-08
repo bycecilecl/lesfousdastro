@@ -25,7 +25,7 @@ CHAMPS_CONTEXTE = {
 
 def generer_rapport_revolution_solaire(**demande):
     """Charge le moteur seulement lors d'une génération RS achetée."""
-    from utils.revolution_solaire.service import generer_rapport_revolution_solaire as generer
+    from utils.revolution_solaire.service import generer_rapport_revolution_solaire_v2 as generer
     return generer(**demande)
 
 
@@ -92,11 +92,11 @@ def generer_revolution_solaire_pdf_s3(infos: dict, *, commande_id: str | None = 
             )
         return journaliser
 
-    # Une réponse tronquée ou un contrôle factuel refusé doit aboutir à une
-    # nouvelle génération. Chaque tentative garde ses propres archives.
+    # Les relances reprennent les parties sauvegardées du moteur validé,
+    # sans recommencer les parties déjà complètes.
     rapport = retenter(
         lambda numero: generer_rapport_revolution_solaire(
-            **demande, stockage_dir=racine / f"tentative_{numero}",
+            **demande, stockage_dir=racine / "moteur_valide",
         ),
         signaler=signaler("rapport"),
     )

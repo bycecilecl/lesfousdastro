@@ -8,7 +8,7 @@ import unicodedata
 from .verification_rapport import AFFICHAGE_VERS_INTERNE, ROMAINS
 from .archives_generation import GenerationARevoir
 
-VERSION = 4
+VERSION = 5
 
 _FAUSSE_MAITRISE_POINT = re.compile(
     r"\b(?P<point>Chiron|Lune Noire|Part de Fortune|N[œo]ud Nord|N[œo]ud Sud)"
@@ -97,6 +97,8 @@ def controler_placements(texte, donnees):
                     'source': source, 'cible': cible, 'annonce': annonce,
                     'attendu': int(attendu), 'fait': f'{collection}.{point}.{champ}',
                     'extrait': phrase.strip()})
+    erreurs.extend(_controles_references_locales(texte, donnees))
+    erreurs.extend(_controles_signes(texte, donnees))
     autres_erreurs, avertissements = _controles_maitrises_aspects(texte, donnees)
     erreurs.extend(autres_erreurs)
     erreurs_figures, alertes_figures = _controles_angles_figures(texte, donnees)
@@ -105,7 +107,7 @@ def controler_placements(texte, donnees):
     erreurs_roles, alertes_roles = _controles_composition_figures(texte, donnees)
     erreurs.extend(erreurs_roles)
     avertissements.extend(alertes_roles)
-    return {'version': VERSION, 'portee': 'placements, maîtrises, aspects, angularités et éléments des grands trigones et rôles des T-carrés/diamants explicitement identifiés',
+    return {'version': VERSION, 'portee': 'signes, placements, maîtrises, aspects, angularités et éléments des grands trigones et rôles des T-carrés/diamants explicitement identifiés',
             'avertissements': avertissements,
             'statut': 'bloque' if erreurs else 'aucune_contradiction_identifiee',
             'erreurs': erreurs}
@@ -161,7 +163,7 @@ def _controles_maitrises_aspects(texte, donnees):
     nombre = r'(?:\d+|[ivx]+)\b'
     maitrise = re.compile(
         rf'\b(?P<point>{noms})(?:\s+(?:rs|natale?))?\s+'
-        rf'gouverne(?: aussi)?\s+(?:(?:ta|tes|la|les)\s+)?maisons?\s+'
+        rf'(?:(?:en|dans la maison)\s+(?:maison\s+)?(?:[ivx]+|\d+)(?:\s+rs)?\s*,?\s*)?gouverne(?: aussi)?\s+(?:(?:ta|tes|la|les)\s+)?maisons?\s+'
         rf'(?P<maisons>{nombre}(?:(?:\s*,\s*|\s+et\s+){nombre})*)\s+'
         r'(?P<reference>rs|natales?)\b')
     aspect = re.compile(
@@ -323,3 +325,83 @@ def _controles_composition_figures(texte, donnees):
                     'attendu':sorted(set().union(*roles)),
                     'fait':'configurations_majeures_rs','extrait':phrase.strip()})
     return erreurs, avertissements
+
+def _controles_signes(texte, donnees):
+    """Vérifie les signes seulement lorsque le référentiel est explicite."""
+    erreurs = []
+    noms = '|'.join(re.escape(n) for n in sorted(AFFICHAGE_VERS_INTERNE, key=len, reverse=True))
+    signes = r'belier|taureau|gemeaux|cancer|lion|vierge|balance|scorpion|sagittaire|capricorne|verseau|poissons'
+    simple = re.compile(
+        rf'\b(?P<point>{noms})\s+(?P<source>rs|natale?)\s+'
+        rf'(?:(?:est|se trouve|se situe)\s+)?en\s+(?P<signe>{signes})\b')
+    groupe = re.compile(
+        rf'\b(?P<p1>{noms})(?:\s+rs)?\s+et\s+(?P<p2>{noms})(?:\s+rs)?'
+        rf'\s+en\s+(?P<signe>{signes})\b(?P<suite>[^.!?;\n]{{0,120}})')
+
+    def verifier(point, source, signe, phrase):
+        collection = 'placements_rs' if source == 'rs' else 'placements_natals_verifies'
+        attendu = (donnees.get(collection, {}).get(point) or {}).get('signe')
+        if attendu and _normaliser(attendu) != signe:
+            erreurs.append({'code': 'signe_contradictoire', 'point': point,
+                'source': source, 'annonce': signe, 'attendu': attendu,
+                'fait': f'{collection}.{point}.signe', 'extrait': phrase.strip()})
+
+    for phrase in re.split(r'(?<=[.!?;])\s+|\n', texte):
+        normalise = _normaliser(phrase.replace('*', ''))
+        if re.search(r'\b(si|pas|jamais|pourrait|serait|supposons|exemple)\b|[«»"]', normalise):
+            continue
+        for m in simple.finditer(normalise):
+            verifier(AFFICHAGE_VERS_INTERNE[m['point']],
+                     'rs' if m['source'] == 'rs' else 'natal', m['signe'], phrase)
+        for m in groupe.finditer(normalise):
+            # Une coordination sans référentiel ne suffit pas ; aucun contrôle
+            # des transits ou d'une superposition vers le thème natal ici.
+            if re.search(r'\bnatal\w*\b|\btransit\b', m.group()):
+                continue
+            if not re.search(r'\brs\b', m.group()):
+                continue
+            for nom in (m['p1'], m['p2']):
+                verifier(AFFICHAGE_VERS_INTERNE[nom], 'rs', m['signe'], phrase)
+    return erreurs
+
+
+
+def _controles_references_locales(texte, donnees):
+    """Contrôle les coordinations seulement si chaque planète est explicitement RS.
+
+    Le référentiel n'est jamais deviné à partir du sujet général du rapport.
+    Les références sont oubliées à chaque paragraphe et dès une mention natale.
+    """
+    erreurs = []
+    noms = '|'.join(re.escape(n) for n in sorted(AFFICHAGE_VERS_INTERNE, key=len, reverse=True))
+    references = re.compile(rf"\b(?P<p>{noms})\s+(?P<r>rs|natale?|en transit)\b")
+    paire = re.compile(rf"\b(?P<a>{noms})(?:\s+rs)?\s+et\s+(?P<b>{noms})(?:\s+rs)?\s+en\s+(?:maison\s+)?(?P<m>[ivx]+|\d+)\b")
+    opposition = re.compile(rf"\b(?P<a>{noms})(?:\s+rs)?(?:\s+en\s+(?:maison\s+)?[ivx]+)?(?:, de l'autre cote,)?\s+oppose\s+(?P<b>{noms})(?:\s+rs)?\b")
+    for paragraphe in re.split(r'\n\s*\n|\n(?=#)', texte):
+        normalise = _normaliser(paragraphe.replace('*', ''))
+        if re.search(r'\b(si|pas|jamais|pourrait|serait|supposons|exemple)\b|[«»"]', normalise):
+            continue
+        def est_rs(point, fin):
+            refs = [m['r'] for m in references.finditer(normalise[:fin]) if m['p'] == point]
+            return bool(refs) and refs[-1] == 'rs'
+        for m in paire.finditer(normalise):
+            if not all(est_rs(m[k], m.end()) for k in ('a', 'b')):
+                continue
+            annonce = _entier(m['m'])
+            for k in ('a', 'b'):
+                point = AFFICHAGE_VERS_INTERNE[m[k]]
+                attendu = (donnees.get('placements_rs', {}).get(point) or {}).get('maison')
+                if attendu is not None and annonce != int(attendu):
+                    erreurs.append({'code': 'maison_contradictoire', 'point': point,
+                        'source': 'rs', 'cible': 'rs', 'annonce': annonce, 'attendu': int(attendu),
+                        'fait': f'placements_rs.{point}.maison', 'extrait': m.group(0)})
+        for m in opposition.finditer(normalise):
+            if not all(est_rs(m[k], m.end()) for k in ('a', 'b')):
+                continue
+            points = {AFFICHAGE_VERS_INTERNE[m[k]] for k in ('a', 'b')}
+            aspects = {_normaliser(a.get('aspect', '')) for a in donnees.get('aspects_internes_rs', [])
+                if {a.get('planete1'), a.get('planete2')} == points}
+            if aspects and 'opposition' not in aspects:
+                erreurs.append({'code': 'aspect_contradictoire', 'annonce': 'opposition',
+                    'attendu': sorted(aspects), 'fait': 'aspects_internes_rs', 'extrait': m.group(0)})
+    return erreurs

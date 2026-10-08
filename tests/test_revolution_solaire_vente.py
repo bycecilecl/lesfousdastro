@@ -100,7 +100,7 @@ class VenteRevolutionSolaireTest(TestCase):
             resultat = module.generer_revolution_solaire_pdf_s3(donnees_valides())
         self.assertEqual(resultat["pdf_url"], "https://example.test/rs.pdf")
         self.assertEqual(genere.call_count, 2)
-        self.assertNotEqual(
+        self.assertEqual(
             genere.call_args_list[0].kwargs["stockage_dir"],
             genere.call_args_list[1].kwargs["stockage_dir"],
         )

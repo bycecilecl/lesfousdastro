@@ -78,6 +78,7 @@ def _generer_rapport_revolution_solaire(
     lieu_rs: dict,
     annee: int,
     contexte_client: dict | None = None,
+    preparation_seule: bool = False,
 ) -> RapportRevolutionSolaire:
     """Calcule une RS et rédige séparément son corps et sa synthèse.
 
@@ -144,6 +145,8 @@ def _generer_rapport_revolution_solaire(
             'parametres': {'max_tokens': 14000, 'temperature': 0.65, 'retries': 1, 'stop_sequences': ['<FIN_RAPPORT>']},
         })
         preparation = lire_json(dossier, 'preparation.json')
+    if preparation_seule:
+        return preparation
     donnees = preparation['donnees']
     transits_directeurs = preparation['transits_directeurs']
     releve_technique = preparation['releve_technique']
@@ -272,5 +275,44 @@ def generer_rapport_revolution_solaire(
             raise GenerationAbsente('Confirme la génération avant de lancer le rapport.')
         ecrire_json(dossier, 'demande.json', demande_archive)
         rapport = _generer_rapport_revolution_solaire(dossier=dossier, **demande)
+        ecrire_json(dossier, 'rapport.json', asdict(rapport))
+        return rapport
+
+
+def generer_rapport_revolution_solaire_v2(
+    *, personne, lieu_rs, annee, contexte_client=None, stockage_dir=None,
+    autoriser_generation=True, identifiant_execution=None, moteur_enjeux=False,
+):
+    """Parcours complet V2 : calculs directs, rédaction séquentielle et cache."""
+    from .version_enjeux_detaillee import generer_version_2, VERSION
+    demande = {'personne': personne, 'lieu_rs': lieu_rs, 'annee': annee,
+               'contexte_client': {k:v for k,v in (contexte_client or {}).items() if str(v).strip()},
+               'moteur': VERSION}
+    if identifiant_execution:
+        demande['identifiant_execution'] = identifiant_execution
+    with verrou_demande(demande, stockage_dir) as dossier:
+        resultat = lire_json(dossier, 'rapport.json')
+        if resultat is not None:
+            return RapportRevolutionSolaire(**resultat)
+        if not autoriser_generation:
+            raise GenerationAbsente('Confirme la génération avant de lancer le rapport.')
+        ecrire_json(dossier, 'demande.json', demande)
+        preparation = _generer_rapport_revolution_solaire(
+            dossier=dossier, personne=personne, lieu_rs=lieu_rs, annee=annee,
+            contexte_client=contexte_client, preparation_seule=True)
+        sortie = generer_version_2(dossier, dossier.parent.parent / 'generations_rs_v2')
+        resultat_v2 = lire_json(sortie, 'rapport.json')
+        controle = verifier_rapport_revolution_solaire(
+            resultat_v2['texte_markdown'], preparation['donnees'], preparation.get('transits_directeurs'))
+        diagnostic = controler_placements(resultat_v2['texte_markdown'], preparation['donnees'])
+        diagnostic.update(bloquant=False, texte=controle)
+        if diagnostic['erreurs']:
+            diagnostic['statut'] = 'avertissements_non_bloquants'
+        ecrire_json(dossier, 'controle.json', diagnostic)
+        rapport = RapportRevolutionSolaire(
+            texte_markdown=resultat_v2['texte_markdown'], html=resultat_v2['html'],
+            releve_technique=preparation['releve_technique'], controle_factualite=controle,
+            debut_cycle=preparation['debut_cycle'], fin_cycle=preparation['fin_cycle'],
+            identifiant_generation=dossier.name)
         ecrire_json(dossier, 'rapport.json', asdict(rapport))
         return rapport
