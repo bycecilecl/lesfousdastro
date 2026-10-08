@@ -667,6 +667,11 @@ input[type="time"]:focus, input[type="email"]:focus {
 .rs-offer { border-color: rgba(233, 145, 24, .55); cursor: default; }
 .rs-offer:hover { transform: none; box-shadow: none; border-color: rgba(233, 145, 24, .55); }
 .rs-offer .transits-copy h4, .rs-offer .transits-price { color: #a34d08; }
+/* Tarif de lancement de la Révolution solaire */
+.rs-offer { padding-top: 76px; }
+.rs-launch-badge { position: absolute; top: 14px; right: 16px; display: flex; flex-direction: column; gap: 2px; padding: 7px 12px; border: 1px solid #e9b76d; border-radius: 10px; background: #fff3dc; color: #994b09; text-align: center; font-size: .85rem; line-height: 1.35; }
+.rs-launch-badge strong { font-size: .9rem; }
+@media (max-width: 600px) { .rs-offer { padding-top: 80px; } .rs-launch-badge { right: 12px; top: 12px; font-size: .78rem; } }
 .rs-offer .transits-cta { background: linear-gradient(135deg,#f2a20a,#d66d10); }
 .rs-offer .rs-step { margin-top: 7px; font-size: .91rem; }
 .rs-offer .rs-more { display: inline-block; margin-top: 9px; color: #a34d08; font-weight: 700; }
@@ -1056,6 +1061,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                         </div>
                     </div>
                     <article class="transits-offer rs-offer{% if rs_sales_open %} rs-available{% endif %}"{% if rs_sales_open %} data-product-id="revolution_solaire" onclick="openRevolutionSolaireModal(this)" role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openRevolutionSolaireModal(this); }"{% else %} aria-label="Ma Révolution Solaire, disponible à partir du 9 octobre 2026"{% endif %}>
+                        <span class="rs-launch-badge"><strong>Prix de lancement</strong><span>Jusqu’au 11 octobre inclus</span></span>
                         <span class="transits-icon" aria-hidden="true">☀️</span>
                         <div class="transits-copy">
                             <h4>Ma Révolution Solaire</h4>
