@@ -6,30 +6,8 @@ from datetime import datetime
 
 import pytz
 
-from utils.calcul_theme import calcul_theme
+from .calcul_theme_rs import calcul_theme
 from .calcul_retour_solaire import trouver_retour_solaire
-
-
-_MAITRE_MODERNE = {"Scorpion": "Pluton", "Verseau": "Uranus", "Poissons": "Neptune"}
-
-
-def _harmoniser_maitre_ascendant(theme: dict) -> None:
-    """Conserve la maîtrise moderne RS sans modifier calcul_theme partagé."""
-    signe = ((theme.get("maisons") or {}).get("Maison 1") or {}).get("signe")
-    nom = _MAITRE_MODERNE.get(signe)
-    position = (theme.get("planetes") or {}).get(nom) if nom else None
-    if not position:
-        return
-    from utils.calculs_astrologiques import get_maison_planete
-
-    cuspides = [theme["maisons"][f"Maison {numero}"]["degre"] for numero in range(1, 13)]
-    theme["maitre_ascendant"] = {
-        "nom": nom,
-        "degre": position.get("degre"),
-        "signe": position.get("signe"),
-        "degre_dans_signe": position.get("degre_dans_signe"),
-        "maison": position.get("maison") or get_maison_planete(float(position["degre"]), cuspides),
-    }
 
 
 CHAMPS_NAISSANCE = ("date", "heure", "lieu", "lat", "lon", "tzid")
@@ -108,8 +86,6 @@ def calculer_theme_revolution_solaire(
         dt_naissance_utc=retour["retour_utc"],
         tzid=lieu_rs["tzid"],
     )
-    _harmoniser_maitre_ascendant(theme_natal)
-    _harmoniser_maitre_ascendant(theme_rs)
 
     return {
         "retour": retour,

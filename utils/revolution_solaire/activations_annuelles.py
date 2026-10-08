@@ -18,6 +18,8 @@ AXES = {'Ascendant':'Asc–Dsc','Descendant':'Asc–Dsc',
         'MC':'MC–FC','FC':'MC–FC','Rahu':'Nœuds','Ketu':'Nœuds'}
 PERSONNELLES = {'Soleil','Lune','Mercure','Vénus','Mars'}
 ECART_SIGNES = {'conjonction':0,'sextile':2,'carré':3,'trigone':4,'opposition':6}
+FENETRE_DECLENCHEURS_JOURS = 8
+BONUS_CLIMAT_CONVERGENT = 4
 
 
 def _non_dissocie(e, cibles):
@@ -105,7 +107,7 @@ def _candidats(evenements,facteurs,cibles=None):
     candidats=[]
     for lent in lentes:
         centre=_jour(lent)
-        autour=[e for e in rapides if abs((_jour(e)-centre).days)<=7 and
+        autour=[e for e in rapides if abs((_jour(e)-centre).days)<=FENETRE_DECLENCHEURS_JOURS and
                 (e['cible'] not in {'Rahu','Ketu'} or
                  (lent['reference']==e['reference'] and AXES.get(lent['cible'])=='Nœuds'))]
         # Deux contacts rapides sur des points distincts, ou un contact
@@ -122,6 +124,23 @@ def _candidats(evenements,facteurs,cibles=None):
         score+=8 if meme else 0
         candidats.append({'du':min(jours).isoformat(),'au':max(jours).isoformat(),
             'pic':centre.isoformat(),'score':score,'climat':lent,'declencheurs':retenus})
+    # Deux transits lents au même pic, appuyés par les mêmes contacts de Mars,
+    # forment une convergence plus solide qu'un climat isolé. Les conserver
+    # ensemble évite qu'un écart de score minime efface l'un des deux.
+    for groupe in candidats:
+        declencheurs={(_identite(e),e['date_plus_serree']) for e in groupe['declencheurs']}
+        supplements=[]
+        for autre in candidats:
+            if autre is groupe or autre['pic'] != groupe['pic']:
+                continue
+            if _identite(autre['climat']) == _identite(groupe['climat']):
+                continue
+            commun=declencheurs & {(_identite(e),e['date_plus_serree']) for e in autre['declencheurs']}
+            if len(commun)>=2 and autre['climat'] not in supplements:
+                supplements.append(autre['climat'])
+        if supplements:
+            groupe['climats_supplementaires']=supplements
+            groupe['score']+=BONUS_CLIMAT_CONVERGENT*len(supplements)
     return candidats
 
 
@@ -154,7 +173,7 @@ def transits_pour_rapport(evenements,facteurs,activations,*,theme_natal=None,the
     admissibles=[e for e in evenements if _pertinent(e,facteurs_rs) and _identite(e) and _non_dissocie(e,cibles) and
                  (e['cible'] not in {'Rahu','Ketu'} or e['aspect'] in {'conjonction','opposition','carré'})]
     base=selectionner_transits_directeurs_rs(admissibles,facteurs,maximum=30)
-    preuves=_dedoublonner(e for g in activations for e in [g['climat'],*g['declencheurs']])
+    preuves=_dedoublonner(e for g in activations for e in [g['climat'],*g.get('climats_supplementaires',[]),*g['declencheurs']])
     preuves.sort(key=lambda e:-_score(e,facteurs_rs))
     preuves=preuves[:maximum]
     # Les preuves restent prioritaires. La suite garde l'ordre de pertinence
@@ -177,7 +196,7 @@ def dater_activations(activations,theme_natal,theme_rs,facteurs,debut_utc,fin_ut
     resultat=[]
     for groupe in activations:
         contacts=[]
-        for evenement in [groupe['climat'],*groupe['declencheurs']]:
+        for evenement in [groupe['climat'],*groupe.get('climats_supplementaires',[]),*groupe['declencheurs']]:
             detail=dater_fenetre(evenement,cibles,debut_utc,fin_utc)
             contacts.append({
                 'transit':evenement['planete_transit'],

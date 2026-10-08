@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Révolution solaire {{ annee }} - {{ nom }} | Les Fous d'Astro</title>
+  <style>
+    body { font-family: Georgia, serif; margin: 0; padding: 20px; background: #f5f5f5; color: #2c3e50; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 30px; background: #fff; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,.1); }
+    .logo-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+    .logo { display: block; width: auto; height: auto; max-width: 200px; max-height: 120px; margin: 0 auto 20px; object-fit: contain; }
+    .header { text-align: center; padding: 20px 0; border-bottom: 2px solid #1f628e; margin-bottom: 30px; }
+    .header h1 { color: #1f628e; margin: 0 0 10px; }
+    .personal-info { max-width: 700px; margin: 16px auto 0; font-size: .9em; color: #666; }
+    .personal-info p { margin: 5px 0; }
+    .actions { text-align: center; margin: 30px 0; padding: 20px; background: #f0f8ff; border-radius: 8px; }
+    .btn { display: inline-block; padding: 12px 24px; background: #1f628e; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; }
+    .btn:hover, .btn:focus { background: #144a6b; color: #fff; }
+    .content-wrapper { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+    .rapport-frame { display: block; width: 100%; min-height: 1800px; border: 0; background: #fff; }
+    .warning { color: #865e21; background: #fff8dc; padding: 12px 15px; border-radius: 8px; }
+    .footer-link { text-align: center; margin-top: 30px; }
+    @media (max-width: 640px) { body { padding: 10px; } .container { padding: 18px; } .header h1 { font-size: 1.7rem; } .actions .btn { width: 100%; box-sizing: border-box; } }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="logo-header">
+      <img src="{{ url_for('static', filename='images/logo_les_fous_dastro.webp') }}" alt="Les Fous d'Astro" class="logo">
+    </div>
+    <div class="header">
+      <h1>☀️ Révolution solaire {{ annee }} - {{ nom }}</h1>
+      <div class="personal-info">
+        <p>{{ date_naissance }} — {{ heure_naissance }} — {{ lieu_naissance }}</p>
+        <p>Retour solaire {{ annee }} à {{ lieu_rs }}</p>
+      </div>
+    </div>
+    <div class="actions">
+      {% if pdf_url %}
+        <a href="{{ pdf_url }}" class="btn">📄 Télécharger mon analyse PDF</a>
+      {% else %}
+        <p>Le rapport est prêt ; son PDF est encore en préparation.</p>
+      {% endif %}
+    </div>
+    {% for avertissement in avertissements %}<p class="warning">{{ avertissement }}</p>{% endfor %}
+    <div class="content-wrapper">
+      <iframe id="rs-report-frame" class="rapport-frame" title="Lecture de ta Révolution solaire {{ annee }}" sandbox="allow-same-origin" srcdoc="{{ rapport_html | e }}"></iframe>
+    </div>
+    {% if pdf_url %}
+      <div class="footer-link"><a href="{{ pdf_url }}" class="btn">📄 Télécharger mon analyse PDF</a></div>
+    {% endif %}
+  </main>
+  <script>
+    const rsFrame = document.getElementById('rs-report-frame');
+    function habillerEtAjusterRapport() {
+      const documentRapport = rsFrame.contentDocument;
+      if (!documentRapport) return;
+      if (!documentRapport.getElementById('rs-brand-colors')) {
+        const style = documentRapport.createElement('style');
+        style.id = 'rs-brand-colors';
+        style.textContent = ':root{--plum:#1f628e;--rose:#3498db;--paper:#fff;--mist:#f0f8ff;--line:#d7e7f0}h3{color:#144a6b!important}body{padding-top:26px}';
+        documentRapport.head.appendChild(style);
+      }
+      const hauteur = Math.max(documentRapport.documentElement.scrollHeight, documentRapport.body?.scrollHeight || 0);
+      if (hauteur > 0) rsFrame.style.height = `${hauteur + 24}px`;
+    }
+    rsFrame.addEventListener('load', habillerEtAjusterRapport);
+    window.addEventListener('resize', habillerEtAjusterRapport);
+  </script>
+</body>
+</html>

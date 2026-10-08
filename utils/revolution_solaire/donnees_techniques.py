@@ -8,22 +8,11 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from utils.calculs_astrologiques import get_maison_planete
+from .calculs_astrologiques_rs import get_maison_planete, get_maitres_ascendant
 from utils.configurations_astrologiques import analyser_configurations_majeures
 from .portrait_natal import extraire_portrait_natal_rs
 from .profections import calculer_profection_annuelle
 from .selection import selectionner_facteurs_directeurs_rs
-
-
-_MAITRES_MODERNES = {"Scorpion": "Pluton", "Verseau": "Uranus", "Poissons": "Neptune"}
-_SECONDS_MAITRES = {"Scorpion": "Mars", "Verseau": "Saturne", "Poissons": "Jupiter"}
-
-
-def get_maitres_ascendant(signe):
-    """Préserve les deux maîtres RS sans modifier le moteur natal partagé."""
-    from utils.calculs_astrologiques import get_maitre_ascendant
-
-    return _MAITRES_MODERNES.get(signe, get_maitre_ascendant(signe)), _SECONDS_MAITRES.get(signe)
 
 
 POINTS_RS = (
@@ -127,14 +116,14 @@ def extraire_donnees_revolution_solaire(
     theme_natal: dict,
     theme_rs: dict,
     *,
-    orbe_rs_natal: float = 3.0,
-    orbe_rs_natal_angles: float = 4.0,
+    orbe_rs_natal: float = 6.0,
+    orbe_rs_natal_angles: float = 6.0,
     orbe_angularite: float = 8.0,
     age_profection: int | None = None,
 ) -> dict:
     """Retourne les données techniques utiles à une future interprétation.
 
-    Les orbes de 3° (contacts RS-natal), 4° (contacts angle à angle entre RS
+    Les orbes de 6° (contacts RS-natal), 6° (contacts angle à angle entre RS
     et natal) et 8° (angularité RS) sont des valeurs de méthode explicites.
     """
     if min(orbe_rs_natal, orbe_rs_natal_angles, orbe_angularite) < 0:

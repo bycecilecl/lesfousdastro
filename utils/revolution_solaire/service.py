@@ -7,17 +7,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass, asdict, replace
 import os
+from pathlib import Path
 from .archives_generation import (verrou_demande, ecrire_json, lire_json, texte_archive, GenerationAbsente)
 
-from .controle_livraison import (
-    controler_placements, corriger_references_maitrises, RapportFactuelInvalide,
-)
+from .controle_livraison import controler_placements, corriger_references_maitrises, corriger_fausses_maitrises_points, RapportFactuelInvalide
+from .accords import accorder_formes_inclusives
 
-from utils.claude_llm import BlocTronqueError
-from utils.claude_llm import ask_claude
+from utils.claude_llm import BlocTronqueError, ask_claude
 from utils.revolution_solaire.calcul_retour_solaire import trouver_retour_solaire
 from utils.revolution_solaire.donnees_techniques import extraire_donnees_revolution_solaire
 from utils.revolution_solaire.prompt_rapport_complet import construire_prompt_rapport_complet
+from utils.revolution_solaire.corrections_faits_rs import corriger_contacts_et_roles
+from utils.revolution_solaire.prompt_synthese_contextuelle import construire_prompt_synthese_contextuelle, assembler_rapport
 from utils.revolution_solaire.rapport_html import generer_rapport_html
 from utils.revolution_solaire.rapport_technique import generer_rapport_technique
 from utils.revolution_solaire.themes_prioritaires import detecter_themes_prioritaires_rs
@@ -27,6 +28,17 @@ from utils.revolution_solaire.activations_annuelles import (
     selectionner_activations_annuelles, transits_pour_rapport, dater_activations,
 )
 from utils.revolution_solaire.verification_rapport import verifier_rapport_revolution_solaire
+
+
+def _rediger_avec_claude(prompt: str, parametres: dict) -> str:
+    """Conserve le moteur Claude du test local sans changer les autres analyses."""
+    return ask_claude(
+        prompt,
+        max_tokens=parametres['max_tokens'],
+        temperature=parametres['temperature'],
+        stop_sequences=parametres['stop_sequences'],
+        single_attempt=True,
+    )
 
 
 @dataclass(frozen=True)
@@ -67,7 +79,7 @@ def _generer_rapport_revolution_solaire(
     annee: int,
     contexte_client: dict | None = None,
 ) -> RapportRevolutionSolaire:
-    """Calcule et rédige une RS complète avec le client Claude partagé.
+    """Calcule une RS et rédige séparément son corps et sa synthèse.
 
     Les données factuelles restent calculées localement. Claude reçoit le
     contrat astrologique et rédige uniquement la lecture cliente.
@@ -111,16 +123,18 @@ def _generer_rapport_revolution_solaire(
             donnees,
             transits_directeurs,
             nom=personne["nom"],
+            genre=personne.get('genre', ''),
             annee=annee,
             debut_transits=debut_cycle,
             fin_transits=fin_cycle,
             synthese_interne="",
-            contexte_client={key: value for key, value in (contexte_client or {}).items() if str(value).strip()},
             releve_technique=releve_technique,
             themes_prioritaires=donnees["themes_prioritaires"],
             activations_calculees=activations_datees,
         )
         ecrire_json(dossier, 'preparation.json', {
+            'mode_redaction': 'corps_neutre_puis_synthese',
+            'contexte_client': {key: value for key, value in (contexte_client or {}).items() if str(value).strip()},
             'donnees': donnees, 'transits_directeurs': transits_directeurs,
             'activations_datees': activations_datees,
             'releve_technique': releve_technique, 'debut_cycle': debut_cycle,
@@ -136,16 +150,68 @@ def _generer_rapport_revolution_solaire(
     debut_cycle = preparation['debut_cycle']
     fin_cycle = preparation['fin_cycle']
     prompt = preparation['prompt']
-    texte_markdown = texte_archive(
-        dossier, prompt,
-        lambda contenu: ask_claude(
-            contenu,
-            max_tokens=preparation['parametres']['max_tokens'],
-            temperature=preparation['parametres']['temperature'],
-            stop_sequences=preparation['parametres']['stop_sequences'],
-        ),
-        BlocTronqueError,
-    )
+    if preparation.get('mode_redaction') == 'corps_neutre_puis_synthese':
+        dossier_corps = Path(dossier) / 'corps_neutre'
+        dossier_corps.mkdir(exist_ok=True, mode=0o700)
+        corps = texte_archive(
+            dossier_corps, prompt,
+            lambda contenu: _rediger_avec_claude(contenu, preparation['parametres']),
+            BlocTronqueError,
+        )
+        corps, corrections_points, erreurs_points = corriger_fausses_maitrises_points(corps, donnees)
+        if corrections_points:
+            ecrire_json(dossier, 'corrections_points_corps.json', corrections_points)
+        if erreurs_points:
+            ecrire_json(dossier, 'erreurs_points_corps.json', erreurs_points)
+            raise RapportFactuelInvalide('Une maîtrise impossible reste dans le corps du rapport.')
+        corps = accorder_formes_inclusives(corps, personne.get('genre'))
+        corps, corrections_faits = corriger_contacts_et_roles(corps, donnees)
+        if corrections_faits:
+            ecrire_json(dossier, 'corrections_faits_corps.json', corrections_faits)
+        controle_corps = controler_placements(corps, donnees)
+        if controle_corps['erreurs']:
+            corps, corrections = corriger_references_maitrises(
+                corps, donnees, controle_corps['erreurs'])
+            if corrections:
+                ecrire_json(dossier, 'corrections_corps.json', corrections)
+        controle_corps = controler_placements(corps, donnees)
+        if controle_corps['erreurs']:
+            ecrire_json(dossier, 'controle_corps.json', controle_corps)
+            raise RapportFactuelInvalide(
+                f"{len(controle_corps['erreurs'])} contradiction(s) dans le corps du rapport. "
+                "La synthèse n'a pas été lancée ; le texte reçu est conservé.")
+        dossier_synthese = Path(dossier) / 'synthese_contextuelle'
+        dossier_synthese.mkdir(exist_ok=True, mode=0o700)
+        prompt_synthese = construire_prompt_synthese_contextuelle(
+            corps, preparation.get('contexte_client'), personne.get('genre', ''))
+        ecrire_json(dossier_synthese, 'preparation.json', {'prompt': prompt_synthese})
+        synthese = texte_archive(
+            dossier_synthese, prompt_synthese,
+            lambda contenu: _rediger_avec_claude(contenu, {
+                'max_tokens': 1600, 'temperature': 0.6,
+                'stop_sequences': ['<FIN_SYNTHESE>'],
+            }),
+            BlocTronqueError,
+        )
+        texte_markdown = assembler_rapport(corps, synthese)
+        texte_markdown, corrections_points, erreurs_points = corriger_fausses_maitrises_points(
+            texte_markdown, donnees)
+        if corrections_points:
+            ecrire_json(dossier, 'corrections_points_rapport.json', corrections_points)
+        if erreurs_points:
+            ecrire_json(dossier, 'erreurs_points_rapport.json', erreurs_points)
+            raise RapportFactuelInvalide('Une maîtrise impossible reste dans la synthèse du rapport.')
+        texte_markdown = accorder_formes_inclusives(texte_markdown, personne.get('genre'))
+        texte_markdown, corrections_faits = corriger_contacts_et_roles(texte_markdown, donnees)
+        if corrections_faits:
+            ecrire_json(dossier, 'corrections_faits_rapport.json', corrections_faits)
+    else:
+        # Les générations déjà préparées gardent leur prompt et leur réponse.
+        texte_markdown = texte_archive(
+            dossier, prompt,
+            lambda contenu: _rediger_avec_claude(contenu, preparation['parametres']),
+            BlocTronqueError,
+        )
 
     premier_controle = controler_placements(texte_markdown, donnees)
     if premier_controle['erreurs']:
@@ -158,7 +224,6 @@ def _generer_rapport_revolution_solaire(
     controle = _controler_avant_livraison(dossier, texte_markdown, preparation)
     # Le générateur HTML est utilisé comme fonction pure de rendu : son écriture
     # temporaire est évitée ici afin que la route choisisse elle-même l'emplacement.
-    from pathlib import Path
     import tempfile
 
     with tempfile.TemporaryDirectory() as dossier_html:
@@ -185,13 +250,19 @@ def generer_rapport_revolution_solaire(
     *, personne: dict, lieu_rs: dict, annee: int,
     contexte_client: dict | None = None, stockage_dir=None,
     autoriser_generation: bool = True,
+    identifiant_execution: str | None = None,
 ) -> RapportRevolutionSolaire:
     """Une demande identique réutilise sa sortie ; aucun retry facturé implicite."""
     demande = {
         'personne': personne, 'lieu_rs': lieu_rs, 'annee': annee,
         'contexte_client': {k: v for k, v in (contexte_client or {}).items() if str(v).strip()},
     }
-    with verrou_demande(demande, stockage_dir) as dossier:
+    # Une exécution explicite peut comparer les mêmes données sans écraser
+    # l'ancien rapport. Cet identifiant n'entre jamais dans le prompt.
+    demande_archive = dict(demande)
+    if identifiant_execution:
+        demande_archive['identifiant_execution'] = identifiant_execution
+    with verrou_demande(demande_archive, stockage_dir) as dossier:
         resultat = lire_json(dossier, 'rapport.json')
         if resultat is not None:
             controle = _controler_avant_livraison(
@@ -199,7 +270,7 @@ def generer_rapport_revolution_solaire(
             return replace(RapportRevolutionSolaire(**resultat), controle_factualite=controle)
         if not autoriser_generation:
             raise GenerationAbsente('Confirme la génération avant de lancer le rapport.')
-        ecrire_json(dossier, 'demande.json', demande)
+        ecrire_json(dossier, 'demande.json', demande_archive)
         rapport = _generer_rapport_revolution_solaire(dossier=dossier, **demande)
         ecrire_json(dossier, 'rapport.json', asdict(rapport))
         return rapport

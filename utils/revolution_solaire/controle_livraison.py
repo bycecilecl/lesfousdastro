@@ -10,6 +10,51 @@ from .archives_generation import GenerationARevoir
 
 VERSION = 4
 
+_FAUSSE_MAITRISE_POINT = re.compile(
+    r"\b(?P<point>Chiron|Lune Noire|Part de Fortune|N[œo]ud Nord|N[œo]ud Sud)"
+    r"(?:\s+RS)?\s+gouverne\s+(?P<article>ta|la)\s+maison\s+"
+    r"(?P<maison>\d+|[IVX]+)\b(?P<periode>\s+cette année)?"
+    r"(?P<avec>,\s+avec\s+(?P<maitre>Soleil|Lune|Mercure|Vénus|Mars|Jupiter|Saturne|Uranus|Neptune|Pluton))?",
+    re.IGNORECASE,
+)
+
+
+def corriger_fausses_maitrises_points(texte, donnees):
+    """Corrige une confusion placement/maîtrise seulement si les faits la prouvent."""
+    corrections, erreurs = [], []
+    placements = donnees.get('placements_rs') or {}
+    gouvernances = donnees.get('maisons_gouvernees_rs') or {}
+
+    def remplacer(match):
+        point = match.group('point')
+        canonique = {'chiron': 'Chiron', 'lune noire': 'Lune Noire',
+                     'part de fortune': 'Part de Fortune', 'noeud nord': 'Rahu',
+                     'noeud sud': 'Ketu'}[_normaliser(point)]
+        numero = _entier(match.group('maison').lower())
+        placement = placements.get(canonique) or {}
+        autre = match.group('maitre')
+        if autre:
+            autre = {nom.lower(): nom for nom in (
+                'Soleil', 'Lune', 'Mercure', 'Vénus', 'Mars', 'Jupiter',
+                'Saturne', 'Uranus', 'Neptune', 'Pluton')}.get(autre.lower(), autre)
+        maisons_autre = gouvernances.get(autre) or []
+        if not maisons_autre and autre:
+            maisons_autre = (placements.get(autre) or {}).get('maisons_gouvernees_rs') or []
+        if numero is None or placement.get('maison') != numero or (
+            autre and numero not in {_entier(item) for item in maisons_autre}
+        ):
+            erreurs.append({'code': 'maitrise_impossible_point', 'extrait': match.group(0)})
+            return match.group(0)
+        maison = match.group('maison')
+        periode = match.group('periode') or ''
+        nouveau = f"{point} se trouve en maison {maison} RS{periode}"
+        if autre:
+            nouveau += f" ; {autre} en est le maître"
+        corrections.append({'code': 'placement_pas_maitrise', 'avant': match.group(0), 'apres': nouveau})
+        return nouveau
+
+    return _FAUSSE_MAITRISE_POINT.sub(remplacer, texte), corrections, erreurs
+
 class RapportFactuelInvalide(GenerationARevoir):
     """La réponse payée est conservée mais sa livraison est suspendue."""
 

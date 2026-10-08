@@ -24,6 +24,7 @@ spec.loader.exec_module(module)
 def donnees_valides():
     return {
         "nom": "Test", "date_naissance": "1980-10-11", "heure_naissance": "06:38",
+        "gender": "male",
         "lieu_naissance": "Chalon-sur-Saône", "lat": "46.78", "lon": "4.85",
         "tzid": "Europe/Paris", "annee_rs": "2014", "lieu_rs": "Paris",
         "lat_rs": "48.85", "lon_rs": "2.35", "tzid_rs": "Europe/Paris",
@@ -49,6 +50,7 @@ class VenteRevolutionSolaireTest(TestCase):
         self.assertEqual(demande["annee"], 2014)
         self.assertEqual(demande["lieu_rs"]["tzid"], "Europe/Paris")
         self.assertEqual(demande["contexte_client"]["amour"], "Question relationnelle")
+        self.assertEqual(demande["personne"]["genre"], "male")
         for erreur in (
             {"annee_rs": "1899"}, {"tzid_rs": "Invalid/Zone"},
             {"contexte_rs_json": json.dumps({"amour": "x" * 301})},
@@ -65,6 +67,7 @@ class VenteRevolutionSolaireTest(TestCase):
                 patch.object(module, "upload_client_pdf", return_value="https://example.test/rs.pdf") as upload:
             resultat = module.generer_revolution_solaire_pdf_s3(donnees_valides())
         self.assertEqual(resultat["pdf_url"], "https://example.test/rs.pdf")
+        self.assertIn("Lecture annuelle", resultat["rapport_html"])
         self.assertEqual(genere.call_args.kwargs["annee"], 2014)
         html_pdf = pdf.call_args.args[0]
         self.assertIn('data:image/webp;base64,', html_pdf)
@@ -103,3 +106,25 @@ class VenteRevolutionSolaireTest(TestCase):
         )
         self.assertEqual(pdf.call_count, 2)
         self.assertEqual(upload.call_count, 2)
+
+    def test_relance_worker_retrouve_les_archives_de_la_commande(self):
+        app = Flask(__name__)
+        rapport = SimpleNamespace(html="<body><h1>RS</h1><p>Lecture annuelle</p></body>")
+        with app.app_context(), \
+                patch.object(module, "generer_rapport_revolution_solaire", return_value=rapport) as genere, \
+                patch.object(module, "private_pdf_path", return_value="/tmp/rs-test.pdf"), \
+                patch.object(module, "html_to_pdf", return_value=True), \
+                patch.object(module, "upload_client_pdf", side_effect=[
+                    RuntimeError("S3 indisponible"), RuntimeError("S3 indisponible"),
+                    RuntimeError("S3 indisponible"), "https://example.test/rs.pdf",
+                ]), \
+                patch("utils.revolution_solaire.relances.sleep", return_value=None):
+            with self.assertRaises(RuntimeError):
+                module.generer_revolution_solaire_pdf_s3(
+                    donnees_valides(), commande_id="commande-payee-123",
+                )
+            module.generer_revolution_solaire_pdf_s3(
+                donnees_valides(), commande_id="commande-payee-123",
+            )
+        archives = [appel.kwargs["stockage_dir"] for appel in genere.call_args_list]
+        self.assertEqual(archives, [archives[0], archives[0]])

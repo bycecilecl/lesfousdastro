@@ -757,6 +757,25 @@ def analyse_resultat(product_id):
             pdf_url=result.get("pdf_url"),
         )
 
+    if product_id == "revolution_solaire" and result.get("rapport_html"):
+        infos = dict(secure_order.beneficiary or {})
+        try:
+            naissance = datetime.fromisoformat(infos.get("date_naissance") or "").strftime("%d/%m/%Y")
+        except ValueError:
+            naissance = infos.get("date_naissance") or ""
+        return render_template(
+            "revolution_solaire_result.html",
+            rapport_html=result["rapport_html"],
+            pdf_url=result.get("pdf_url"),
+            nom=infos.get("nom") or "",
+            annee=infos.get("annee_rs") or "",
+            date_naissance=naissance,
+            heure_naissance=infos.get("heure_naissance") or "",
+            lieu_naissance=infos.get("lieu_naissance") or "",
+            lieu_rs=infos.get("lieu_rs") or "",
+            avertissements=[],
+        )
+
     return render_template(
         "analyse_suivi.html",
         pdf_url=result.get("pdf_url"),
@@ -822,7 +841,9 @@ def _generer_analyse_pack(product_id, pending):
         infos = pending.get("infos_utilisateur") or {}
 
         if product_id == "revolution_solaire":
-            return generer_revolution_solaire_pdf_s3(infos)
+            return generer_revolution_solaire_pdf_s3(
+                infos, commande_id=pending.get("secure_order_id"),
+            )
 
         # =====================================================
         # POINT ASTRAL

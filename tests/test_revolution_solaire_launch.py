@@ -27,7 +27,22 @@ class OuvertureRevolutionSolaireTest(unittest.TestCase):
             for instant, drapeau, attendu in scenarios:
                 with self.subTest(instant=instant, drapeau=drapeau):
                     DateSimulee.valeur = instant
-                    with patch.dict(os.environ, {"REVOLUTION_SOLAIRE_SALES_ENABLED": drapeau}):
+                    with patch.dict(os.environ, {"REVOLUTION_SOLAIRE_SALES_ENABLED": drapeau,
+                                               "APP_MAINTENANCE": "0", "PAYMENTS_SANDBOX": "0"}):
+                        self.assertEqual(launch.ventes_ouvertes(), attendu)
+
+    def test_essai_anticipe_seulement_en_maintenance_et_sandbox(self):
+        with patch.object(launch, "datetime", DateSimulee):
+            DateSimulee.valeur = "2026-10-08T16:00:00"
+            for maintenance, sandbox, attendu in (
+                ("1", "1", True), ("0", "1", False), ("1", "0", False),
+            ):
+                with self.subTest(maintenance=maintenance, sandbox=sandbox):
+                    with patch.dict(os.environ, {
+                        "REVOLUTION_SOLAIRE_SALES_ENABLED": "1",
+                        "APP_MAINTENANCE": maintenance,
+                        "PAYMENTS_SANDBOX": sandbox,
+                    }):
                         self.assertEqual(launch.ventes_ouvertes(), attendu)
 
 

@@ -1,5 +1,6 @@
 """Livraison de la Révolution solaire achetée sur le formulaire principal."""
 import json
+import hashlib
 from pathlib import Path
 from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -60,6 +61,7 @@ def _demande_depuis_commande(infos: dict) -> dict:
             "nom": infos["nom"], "date": infos["date_naissance"],
             "heure": infos["heure_naissance"], "lieu": infos["lieu_naissance"],
             "lat": lat, "lon": lon, "tzid": infos["tzid"],
+            "genre": infos.get("gender") or infos.get("genre") or "",
         },
         "lieu_rs": {
             "lieu": infos["lieu_rs"], "lat": lat_rs, "lon": lon_rs,
@@ -74,12 +76,13 @@ def _demande_depuis_commande(infos: dict) -> dict:
     }
 
 
-def generer_revolution_solaire_pdf_s3(infos: dict) -> dict:
+def generer_revolution_solaire_pdf_s3(infos: dict, *, commande_id: str | None = None) -> dict:
     """Un rapport, un PDF privé et un lien de livraison pour la commande."""
     demande = _demande_depuis_commande(infos)
-    # Un nouveau cycle de reprise ne doit pas retomber sur les trois archives
-    # d'appels interrompus du cycle précédent.
-    racine = Path(current_app.instance_path) / "generations_rs" / uuid4().hex
+    # Une commande payée retrouve ses réponses Claude après un échec PDF/S3
+    # ou une relance du worker. Les trois tentatives IA restent séparées.
+    cle = hashlib.sha256(commande_id.encode()).hexdigest() if commande_id else uuid4().hex
+    racine = Path(current_app.instance_path) / "generations_rs" / cle
 
     def signaler(etape):
         def journaliser(numero, essais, erreur):
@@ -124,6 +127,7 @@ def generer_revolution_solaire_pdf_s3(infos: dict) -> dict:
         "product_id": "revolution_solaire",
         "label": "Ma Révolution Solaire",
         "pdf_url": pdf_url,
+        "rapport_html": rapport.html,
         "s3_ready": True,
     }
 
