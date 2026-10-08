@@ -109,6 +109,14 @@ def local_to_utc(date_str: str, heure_str: str, tzid: str) -> datetime:
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
+@app.route("/static/pdfs/Exemple_Revolution_Solaire_Cecile_2014.pdf")
+def exemple_revolution_solaire_2014():
+    """Conserve l'ancien lien public, même si le dossier des PDF est monté séparément."""
+    return send_from_directory(
+        os.path.join(app.static_folder, "exemples"),
+        "Exemple_Revolution_Solaire_Cecile_2014.pdf",
+    )
+
 @app.route("/test-deploiement-beta")
 def test_deploiement_beta():
     return "NOUVELLE VERSION BETA OK", 200
