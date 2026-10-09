@@ -208,10 +208,13 @@ def generer_rapport_technique(
             "",
             "## Le maître de l'année",
             f"- Profection annuelle : {profection['age']} ans, cycle {profection['cycle']}.",
+            f"- Maison annuelle activée : M{profection.get('maison_annuelle', profection['age'] % 12 + 1)} ; signe profecté : {asc_profecte['signe']} ; maître de l’année : {maitre_annee['nom']}.",
+            "- La maison annuelle du cycle traditionnel, la position en maisons natales et la position en maisons RS sont trois repères distincts ; ne les confonds pas.",
             (
-                f"- Ascendant profecté : {asc_profecte['signe']} "
+                f"- Position de l’Ascendant profecté dans la carte RS (pas la maison annuelle) : {asc_profecte['signe']} "
                 f"{asc_profecte['degre_dans_signe']:.2f}° — M{asc_profecte['maison_rs']} RS"
             ),
+            *([f"- Position de l’Ascendant profecté dans les maisons natales : M{asc_profecte['maison_natale']} natale (distincte du cycle annuel et de la maison RS)."] if asc_profecte.get("maison_natale") else []),
             f"- Maître traditionnel de l'année : {maitre_annee['nom']}",
             _format_point(f"{maitre_annee['nom']} natal", maitre_annee.get("natal"), maison_reference="natale"),
             _format_point(f"{maitre_annee['nom']} RS", maitre_annee.get("rs")),

@@ -10,8 +10,9 @@ from unittest.mock import Mock, patch
 from flask import Flask
 os.environ.setdefault('ANTHROPIC_API_KEY', 'sk-test')
 import test_revolution_solaire_vente as vente
-from utils.revolution_solaire import service, version_enjeux_detaillee as moteur
+from utils.revolution_solaire import service, version_archive_enjeux as moteur
 from utils.revolution_solaire.archives_generation import ecrire_json
+from utils.revolution_solaire.outils_redaction_rs import BlocTronqueError
 
 class LivraisonMoteurValideTest(unittest.TestCase):
     def test_reprise_parties_pdf_stockage_et_cache_sans_v1(self):
@@ -21,14 +22,14 @@ class LivraisonMoteurValideTest(unittest.TestCase):
             def preparer(*, dossier, **kwargs):
                 assert kwargs['preparation_seule']
                 preparation={'donnees':{},'prompt':'RELEVÉ TECHNIQUE CALCULÉ — source astrologique unique\nDONNEES\nPLAN DES CHAPITRES CALCULÉ',
-                    'releve_technique':'Faits calculés','debut_cycle':'2014-10-11','fin_cycle':'2015-10-11'}
+                    'transits_directeurs':[], 'activations_datees':[], 'releve_technique':'Faits calculés','debut_cycle':'2014-10-11','fin_cycle':'2015-10-11'}
                 ecrire_json(dossier,'preparation.json',preparation)
                 return preparation
             stack.enter_context(patch.object(service,'_generer_rapport_revolution_solaire',side_effect=preparer))
             v1=stack.enter_context(patch.object(service,'ask_claude',side_effect=AssertionError('V1 interdite')))
             llm=stack.enter_context(patch.object(moteur,'ask_llm',side_effect=[
-                '# Ta révolution solaire 2014\n\n## Premier enjeu\nLecture.',RuntimeError('Connexion interrompue'),
-                '## Autre enjeu\nSuite.', '## 1er – 7 mai 2015 : activation\nPériode.', 'Synthèse personnelle.']))
+                BlocTronqueError('# Ta révolution solaire 2014\n\n## Premier enjeu\nLecture. '), 'Suite conservée.', RuntimeError('Connexion interrompue'),
+                'Synthèse personnelle.']))
             def pdf(html,path,**kwargs):
                 Path(path).write_bytes(b'%PDF-test');return True
             stack.enter_context(patch.object(moteur,'html_to_pdf',side_effect=pdf))
@@ -37,18 +38,20 @@ class LivraisonMoteurValideTest(unittest.TestCase):
             upload=stack.enter_context(patch.object(vente.module,'upload_client_pdf',return_value='https://example.invalid/pdf-prive'))
             stack.enter_context(patch('utils.revolution_solaire.relances.sleep'))
             resultat=vente.module.generer_revolution_solaire_pdf_s3(vente.donnees_valides(),commande_id='commande-test-payee')
-            self.assertEqual(llm.call_count,5)
+            self.assertEqual(llm.call_count,4)
             v1.assert_not_called()
-            self.assertIn('PLAN LIBRE PAR ENJEUX',llm.call_args_list[0].args[0])
-            self.assertIn('Lecture.',llm.call_args_list[2].args[0])
+            self.assertIn('Après le socle obligatoire',llm.call_args_list[0].args[0])
+            self.assertIn('Lecture.',llm.call_args_list[1].args[0])
+            self.assertEqual([c.kwargs['max_tokens'] for c in llm.call_args_list[:2]], [14000, 28000])
+            self.assertIn('Suite conservée.',resultat['rapport_html'])
             self.assertNotIn('Question relationnelle',llm.call_args_list[0].args[0])
             self.assertIn('Question relationnelle',llm.call_args_list[-1].args[0])
-            self.assertIn('Début mai 2015',resultat['rapport_html'])
+            self.assertIn('Lecture.',resultat['rapport_html'])
             self.assertIn('Synthèse personnelle',resultat['rapport_html'])
             self.assertEqual(resultat['product_id'],'revolution_solaire')
             upload.assert_called_once()
             vente.module.generer_revolution_solaire_pdf_s3(vente.donnees_valides(),commande_id='commande-test-payee')
-            self.assertEqual(llm.call_count,5)
+            self.assertEqual(llm.call_count,4)
 
     def test_mail_analyse_seule_singulier_et_pack_inchange(self):
         path=Path(__file__).resolve().parents[1]/'routes/checkout.py'

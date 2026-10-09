@@ -284,7 +284,7 @@ def generer_rapport_revolution_solaire_v2(
     autoriser_generation=True, identifiant_execution=None, moteur_enjeux=False,
 ):
     """Parcours complet V2 : calculs directs, rédaction séquentielle et cache."""
-    from .version_enjeux_detaillee import generer_version_2, VERSION
+    from .version_archive_enjeux import generer_version_2, VERSION
     demande = {'personne': personne, 'lieu_rs': lieu_rs, 'annee': annee,
                'contexte_client': {k:v for k,v in (contexte_client or {}).items() if str(v).strip()},
                'moteur': VERSION}

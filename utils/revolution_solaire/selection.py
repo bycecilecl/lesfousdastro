@@ -44,9 +44,17 @@ def _selectionner_resonances_natales(
         point_natal = aspect.get("point_natal")
         # Un angle RS au contact d'une planète natale est aussi un signal fort,
         # même si l'angle ne figurait pas parmi les planètes directrices.
+        conjonction_angulaire_serree = (
+            point_rs in ANGLES
+            and point_natal in PLANETES_MAJEURES
+            and str(aspect.get("aspect", "")).lower() == "conjonction"
+            and aspect.get("orbe") is not None
+            and float(aspect["orbe"]) <= 2.5
+        )
         est_prioritaire = (
             (point_rs in points_rs and (point_natal in points_natals or point_natal in ANGLES))
             or (point_rs in ANGLES and point_natal in points_natals)
+            or conjonction_angulaire_serree
         )
         if est_prioritaire:
             contacts.append(dict(aspect))

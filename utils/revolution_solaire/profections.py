@@ -73,6 +73,7 @@ def calculer_profection_annuelle(
     return {
         "age": age,
         "cycle": age % 12,
+        "maison_annuelle": age % 12 + 1,
         "convention": "profection annuelle traditionnelle, un signe par année",
         "ascendant_natal": {
             "degre": round(ascendant_natal, 2),
@@ -83,6 +84,7 @@ def calculer_profection_annuelle(
             "degre": round(degre_profecte, 2),
             "signe": signe,
             "degre_dans_signe": round(degre_profecte % 30, 2),
+            "maison_natale": get_maison_planete(degre_profecte, _cuspides(theme_natal)),
             "maison_rs": get_maison_planete(degre_profecte, _cuspides(theme_rs)),
         },
         "maitre_annee": {
