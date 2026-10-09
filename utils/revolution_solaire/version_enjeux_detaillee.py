@@ -20,7 +20,7 @@ from .outils_redaction_rs import ask_llm, catalogue_reperes, inserer_reperes as 
 from utils.claude_llm import BlocTronqueError
 from utils.pdf_utils import html_to_pdf
 
-VERSION = "version_2_detaillee_enjeux_libres_1"
+VERSION = "version_2_detaillee_enjeux_libres_2"
 
 
 def chapitres_partie(preparation, numero):
@@ -122,6 +122,10 @@ N'invente aucun identifiant. CATALOGUE :
         mission = cadre + "\nLis les enjeux déjà développés dans la mémoire. Rédige seulement les autres enjeux réellement marquants et leurs liens natals distincts. Vérifie les facteurs essentiels encore absents ; développe-les ici sans refaire les premiers chapitres. Ne crée aucun chapitre pour remplir un domaine secondaire."
     else:
         mission = "Rédige les grandes périodes d'activation par les transits calculés, au maximum cinq. Utilise des titres naturels comme « Fin février – début mars 2027 », avec l'année, sans dates précises en titres. Pour chacune : ce qui s'active spécifiquement, ce qui change et un exemple inédit. Préserve la cible RS ou natale de chaque transit. Ne réexplique pas les enjeux annuels. Aucun inventaire de planètes."
+    if numero < 3:
+        mission += "\nDéveloppe uniquement les enjeux annuels. Ne rédige aucune chronologie, aucun aperçu des temps forts, aucun chapitre de périodes et ne cite aucune date de transit. Les périodes seront traitées exclusivement dans la partie 3."
+    else:
+        mission += "\nTu es la seule partie chargée de la chronologie. Développe au maximum cinq grandes périodes, chacune une seule fois. Commence directement par la première période, sans introduction ni aperçu récapitulant les cinq périodes."
     budget = '1 650 à 1 900 mots AU TOTAL pour cette partie, tous ses chapitres réunis' if numero < 3 else '200 à 250 mots par période, 1 250 mots au maximum pour toute cette partie'
     donnees = preparation['prompt'].split('RELEVÉ TECHNIQUE CALCULÉ — source astrologique unique', 1)[-1]
     donnees = donnees.split('PLAN DES CHAPITRES CALCULÉ', 1)[0]
