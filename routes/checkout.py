@@ -1036,9 +1036,9 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
 
     prenom = ((infos_client.get("nom") or "").split() or ["toi"])[0]
     duree_lien = duree_validite_lien_pdf()
-    rs_seule = len(analyses_generees) == 1 and analyses_generees[0].get("product_id") == "revolution_solaire"
-    annonce = "Voici ton analyse ✨" if rs_seule else "Tes analyses sont prêtes ✨"
-    conseil_pdf = "Télécharge le PDF et sauvegarde-le sur ton appareil avant cette date." if rs_seule else "Télécharge tous les PDF et sauvegarde-les sur ton appareil avant cette date."
+    analyse_seule = len(analyses_generees) == 1
+    annonce = "Voici ton analyse ✨" if analyse_seule else "Tes analyses sont prêtes ✨"
+    conseil_pdf = "Télécharge le PDF et sauvegarde-le sur ton appareil avant cette date." if analyse_seule else "Télécharge tous les PDF et sauvegarde-les sur ton appareil avant cette date."
 
     lignes_txt = []
     lignes_html = []
@@ -1093,7 +1093,7 @@ def envoyer_email_pack_termine(infos_client, analyses_generees):
 
     ok = envoyer_email_avec_analyse(
         destinataire=email,
-        sujet="Ton analyse astrologique est prête ✨" if rs_seule else "Tes analyses astrologiques sont prêtes ✨",
+        sujet="Ton analyse astrologique est prête ✨" if analyse_seule else "Tes analyses astrologiques sont prêtes ✨",
         contenu_txt=contenu_txt,
         contenu_html=contenu_html,
     )

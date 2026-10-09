@@ -50,7 +50,7 @@ class LivraisonMoteurValideTest(unittest.TestCase):
             vente.module.generer_revolution_solaire_pdf_s3(vente.donnees_valides(),commande_id='commande-test-payee')
             self.assertEqual(llm.call_count,5)
 
-    def test_mail_rs_singulier_et_pack_inchange(self):
+    def test_mail_analyse_seule_singulier_et_pack_inchange(self):
         path=Path(__file__).resolve().parents[1]/'routes/checkout.py'
         tree=ast.parse(path.read_text())
         fn=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='envoyer_email_pack_termine')
@@ -59,12 +59,16 @@ class LivraisonMoteurValideTest(unittest.TestCase):
         ns={'current_app':app,'duree_validite_lien_pdf':lambda:'7 jours','envoyer_email_avec_analyse':envoi}
         exec(compile(ast.Module(body=[fn],type_ignores=[]),str(path),'exec'),ns)
         rs={'product_id':'revolution_solaire','label':'Ma Révolution Solaire','pdf_url':'https://example.invalid/pdf'}
-        ns['envoyer_email_pack_termine']({'email':'test@example.invalid','nom':'Camille'},[rs])
-        message=envoi.call_args.kwargs
-        for cle in ('contenu_txt','contenu_html'):
-            self.assertIn('Voici ton analyse',message[cle])
-            self.assertNotIn('Tes analyses',message[cle])
-            self.assertIn('Télécharge le PDF',message[cle])
+        for produit in ('revolution_solaire', 'flash_astral', 'profil_amoureux', 'analyse_karmique', 'transits'):
+            with self.subTest(produit=produit):
+                analyse = dict(rs, product_id=produit)
+                ns['envoyer_email_pack_termine']({'email':'test@example.invalid','nom':'Camille'},[analyse])
+                message=envoi.call_args.kwargs
+                self.assertEqual(message['sujet'], 'Ton analyse astrologique est prête ✨')
+                for cle in ('contenu_txt','contenu_html'):
+                    self.assertIn('Voici ton analyse',message[cle])
+                    self.assertNotIn('Tes analyses',message[cle])
+                    self.assertIn('Télécharge le PDF',message[cle])
         ns['envoyer_email_pack_termine']({'email':'test@example.invalid'},[rs,{'product_id':'flash_astral'}])
         self.assertIn('Tes analyses sont prêtes',envoi.call_args.kwargs['contenu_txt'])
         self.assertIn('Tes analyses astrologiques',envoi.call_args.kwargs['sujet'])
