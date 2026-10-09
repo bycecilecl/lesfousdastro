@@ -24,7 +24,7 @@ def generer_rapport_html(texte_markdown: str, chemin: Path, *, nom: str, annee: 
 <div class="disclaimer">
   <p><strong>⚠ À propos de cette révolution solaire :</strong><br>
   Elle propose une lecture symbolique des dynamiques de ton année. L'astrologie éclaire des tendances et des périodes possibles ; elle ne remplace ni ton discernement, ni une décision personnelle, médicale, juridique ou financière.</p>
-  <p><strong>Note technique :</strong> Les positions, maisons et aspects sont calculés automatiquement. L'interprétation est rédigée avec l'aide d'un système d'IA : de petites répétitions ou imprécisions de formulation peuvent parfois apparaître. Rien ne remplace un échange humain pour approfondir ton vécu et ton thème.</p>
+  <p><strong>Note technique :</strong> Les positions, maisons et aspects sont calculés automatiquement. L'interprétation est rédigée avec l'aide d'un système d'IA : des répétitions, des imprécisions de formulation ou des confusions entre certaines configurations techniques peuvent apparaître. Ces imprécisions peuvent également affecter certains passages de l'interprétation. Rien ne remplace un échange humain pour approfondir ton vécu et ton thème.</p>
 </div>
 """
     html = f"""<!doctype html>
