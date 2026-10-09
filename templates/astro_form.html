@@ -581,6 +581,8 @@ input[type="time"]:focus, input[type="email"]:focus {
     display: none;
 }
 
+#cartSection { scroll-margin-top: 110px; }
+
 .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(31,98,142,0.1); }
 .cart-item:last-child { border-bottom: none; font-weight: bold; font-size: 1.2rem; color: #1f628e; }
 .remove-item { color: #ff4757; cursor: pointer; font-weight: bold; padding: 5px 10px; border-radius: 5px; transition: background 0.3s ease; }
@@ -1513,7 +1515,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             setTimeout(() => {
                 const cartSection = document.getElementById('cartSection');
                 if (cartSection && cartSection.style.display !== 'none') {
-                    cartSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    cartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }, 300);
         }
@@ -1866,7 +1868,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         updateCartDisplay();
         setTimeout(() => {
             const cartSection = document.getElementById('cartSection');
-            if (cartSection && cartSection.style.display !== 'none') cartSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (cartSection && cartSection.style.display !== 'none') cartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 300);
     }
 
