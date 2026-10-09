@@ -117,7 +117,7 @@ un marqueur invisible <!-- REPERES: R1,R2 -->. Les libellés seront ajoutés par
 N'invente aucun identifiant. CATALOGUE :
 """ + json.dumps(catalogue_reperes(preparation['donnees']), ensure_ascii=False)
     if numero == 1:
-        mission = cadre + "\nRédige l'ouverture puis les deux ou trois enjeux les plus structurants. Réserve les autres enjeux marquants à la partie suivante, sans faire de résumé final."
+        mission = cadre + "\nOuvre obligatoirement par le signe de l’Ascendant RS fourni dans les données : nomme-le et interprète ce qu’il colore dans l’année à venir (posture, manière d’aborder les expériences et dynamique personnelle). Relie ensuite cette orientation à son maître ou ses maîtres, leurs placements et leurs aspects calculés. La seule mention dans les repères techniques ne suffit pas ; un aspect à l’Ascendant ne remplace pas l’interprétation de son signe. Poursuis avec les deux ou trois enjeux les plus structurants. Réserve les autres enjeux marquants à la partie suivante, sans faire de résumé final."
     elif numero == 2:
         mission = cadre + "\nLis les enjeux déjà développés dans la mémoire. Rédige seulement les autres enjeux réellement marquants et leurs liens natals distincts. Vérifie les facteurs essentiels encore absents ; développe-les ici sans refaire les premiers chapitres. Ne crée aucun chapitre pour remplir un domaine secondaire."
     else:
