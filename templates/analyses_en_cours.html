@@ -85,6 +85,8 @@
         <h1>{% if nombre_analyses == 1 %}Ton analyse est{% else %}Tes analyses sont{% endif %} en préparation ✨</h1>
         <div class="spinner"></div>
         <p class="message">
+            La préparation peut prendre plusieurs minutes, parfois un peu plus longtemps.<br>
+            Tu peux fermer cette page : la génération continue et tu recevras le résultat par email.<br><br>
             Ta commande contient <strong>{{ nombre_analyses }} analyse{% if nombre_analyses != 1 %}s{% endif %}</strong>.<br>
             {% if nombre_analyses == 1 %}Elle est générée{% else %}Elles sont générées{% endif %} en arrière-plan et tu recevras un email dès qu'{% if nombre_analyses == 1 %}elle sera prête{% else %}elles seront prêtes{% endif %}.
         </p>
