@@ -2020,61 +2020,59 @@ input[type="time"]:focus, input[type="email"]:focus {
         paypalRendered = false;
     }
 
-    // Géocodage
-    const input = document.getElementById('lieu_naissance');
-    const datalist = document.getElementById('suggestions-lieux');
-    const latEl = document.getElementById('lat');
-    const lonEl = document.getElementById('lon');
-    const tzidEl = document.getElementById('tzid');
-    let lastResults = [];
-    let debounce;
-
-    input.addEventListener('input', () => {
-        const q = input.value.trim();
-        clearTimeout(debounce);
-        if (q.length < 2) { datalist.innerHTML = ''; return; }
-        debounce = setTimeout(async () => {
-            try {
-                const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
-                if (!res.ok) return;
-                const data = await res.json();
-                lastResults = data.results || [];
-                datalist.innerHTML = lastResults.map(r => `<option value="${r.label}"></option>`).join('');
-            } catch (e) { console.warn('Geocode error:', e); }
-        }, 250);
-    });
-
-    function fillHiddenFromLabel(label) {
-        const r = lastResults.find(x => x.label === label);
-        if (r) { latEl.value = r.lat; lonEl.value = r.lon; tzidEl.value = r.tzid || ''; }
-    }
-
-    input.addEventListener('change', () => fillHiddenFromLabel(input.value));
-    input.addEventListener('blur', () => fillHiddenFromLabel(input.value));
-
-    const rsLieuInput = document.getElementById('rs_lieu_choice');
-    if (rsLieuInput) {
-        const rsLieuDatalist = document.getElementById('rs-lieu-suggestions');
-        rsLieuInput.addEventListener('input', () => {
-            const query = rsLieuInput.value.trim();
-            ['rs_lat_choice', 'rs_lon_choice', 'rs_tzid_choice'].forEach(id => { document.getElementById(id).value = ''; });
-            clearTimeout(rsLieuDebounce);
-            if (query.length < 2) { rsLieuDatalist.innerHTML = ''; return; }
-            rsLieuDebounce = setTimeout(async () => {
+    // Géocodage : conserver immédiatement une sélection et ignorer les réponses obsolètes.
+    function brancherSelectionVille(inputId, datalistId, coordinates, onResults) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const datalist = document.getElementById(datalistId);
+        let results = [];
+        let debounce;
+        let revision = 0;
+        function enregistrerSelection() {
+            const selected = results.find(result => result.label === input.value.trim());
+            if (!selected) return false;
+            coordinates.forEach(([id, key]) => {
+                document.getElementById(id).value = selected[key] ?? '';
+            });
+            return true;
+        }
+        input.addEventListener('input', () => {
+            clearTimeout(debounce);
+            const currentRevision = ++revision;
+            // Une sélection de la liste émet aussi « input », notamment sur mobile.
+            if (enregistrerSelection()) return;
+            coordinates.forEach(([id]) => { document.getElementById(id).value = ''; });
+            results = [];
+            onResults(results);
+            datalist.replaceChildren();
+            const query = input.value.trim();
+            if (query.length < 2) return;
+            debounce = setTimeout(async () => {
                 try {
                     const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
                     if (!response.ok) return;
                     const data = await response.json();
-                    rsLieuResults = data.results || [];
-                    rsLieuDatalist.replaceChildren(...rsLieuResults.map(result => {
-                        const option = document.createElement('option'); option.value = result.label; return option;
+                    if (currentRevision !== revision || input.value.trim() !== query) return;
+                    results = data.results || [];
+                    onResults(results);
+                    datalist.replaceChildren(...results.map(result => {
+                        const option = document.createElement('option');
+                        option.value = result.label;
+                        return option;
                     }));
-                } catch (error) { console.warn('Geocode RS error:', error); }
+                    enregistrerSelection();
+                } catch (error) { console.warn('Geocode error:', error); }
             }, 250);
         });
-        rsLieuInput.addEventListener('change', fillRsLieuCoordinates);
-        rsLieuInput.addEventListener('blur', fillRsLieuCoordinates);
+        input.addEventListener('change', enregistrerSelection);
+        input.addEventListener('blur', enregistrerSelection);
     }
+    brancherSelectionVille('lieu_naissance', 'suggestions-lieux',
+        [['lat', 'lat'], ['lon', 'lon'], ['tzid', 'tzid']], () => {});
+    brancherSelectionVille('rs_lieu_choice', 'rs-lieu-suggestions',
+        [['rs_lat_choice', 'lat'], ['rs_lon_choice', 'lon'], ['rs_tzid_choice', 'tzid']],
+        results => { rsLieuResults = results; });
+
 
     createStars();
     updateCartDisplay();
