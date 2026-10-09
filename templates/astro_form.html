@@ -923,8 +923,9 @@ input[type="time"]:focus, input[type="email"]:focus {
                 <div class="form-row">
                     <div class="form-group full-width">
                         <label for="lieu_naissance">Lieu de naissance</label>
-                        <input type="text" name="lieu_naissance" id="lieu_naissance" required placeholder="Ville, Pays" autocomplete="off" list="suggestions-lieux"/>
+                        <input type="text" name="lieu_naissance" id="lieu_naissance" required placeholder="Ville, Pays" autocomplete="off" list="suggestions-lieux" aria-describedby="birth-place-help"/>
                         <datalist id="suggestions-lieux"></datalist>
+                        <small id="birth-place-help" style="display:block;color:#6b7280;margin-top:6px;">Attends l’apparition des suggestions, puis sélectionne impérativement ta ville dans la liste pour qu’elle soit reconnue. Saisir son nom ne suffit pas.</small>
                         <input type="hidden" name="lat" id="lat" />
                         <input type="hidden" name="lon" id="lon" />
                         <input type="hidden" name="tzid" id="tzid" />
@@ -1244,10 +1245,10 @@ input[type="time"]:focus, input[type="email"]:focus {
             </div>
             <div class="form-group" style="margin-bottom:20px;">
                 <label for="rs_lieu_choice">Lieu de ton anniversaire cette année-là</label>
-                <input type="text" id="rs_lieu_choice" list="rs-lieu-suggestions" autocomplete="off" placeholder="Ex. Paris, France" required>
+                <input type="text" id="rs_lieu_choice" list="rs-lieu-suggestions" aria-describedby="rs-place-help" autocomplete="off" placeholder="Ex. Paris, France" required>
                 <datalist id="rs-lieu-suggestions"></datalist>
                 <input type="hidden" id="rs_lat_choice"><input type="hidden" id="rs_lon_choice"><input type="hidden" id="rs_tzid_choice">
-                <small style="display:block;color:#6b7280;margin-top:6px;">Sélectionne une ville parmi les suggestions.</small>
+                <small id="rs-place-help" style="display:block;color:#6b7280;margin-top:6px;">Attends l’apparition des suggestions, puis sélectionne impérativement ta ville dans la liste pour qu’elle soit reconnue. Saisir son nom ne suffit pas.</small>
             </div>
             <details class="rs-context-details">
                 <summary>Ajouter des repères sur ce que tu vis <span>facultatif</span></summary>
