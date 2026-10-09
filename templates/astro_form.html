@@ -1116,15 +1116,15 @@ input[type="time"]:focus, input[type="email"]:focus {
         <p class="testimonials-subtitle">Des retours reçus après la découverte de leur analyse astrologique</p>
         <div class="testimonials-grid">
             <a class="testimonial-proof" href="{{ url_for('site_bp.temoignages') }}" aria-label="Voir les avis sur le Profil amoureux">
-                <img src="{{ url_for('static', filename='temoignages/2025_12_sarah_profil_amoureux.webp') }}" alt="Retour client authentique sur le Profil amoureux" loading="lazy">
+                <img src="{{ url_for('static', filename='temoignages/2025_12_sarah_profil_amoureux.webp') }}" alt="Retour client authentique sur le Profil amoureux" loading="lazy" width="886" height="698">
                 <span>Profil amoureux</span>
             </a>
             <a class="testimonial-proof" href="{{ url_for('site_bp.temoignages') }}" aria-label="Voir les avis sur l'Analyse karmique">
-                <img src="{{ url_for('static', filename='temoignages/2026_05_celine_karmique.webp') }}" alt="Retour client authentique sur l'Analyse karmique" loading="lazy">
+                <img src="{{ url_for('static', filename='temoignages/2026_05_celine_karmique.webp') }}" alt="Retour client authentique sur l'Analyse karmique" loading="lazy" width="1170" height="1177">
                 <span>Analyse karmique</span>
             </a>
             <a class="testimonial-proof" href="{{ url_for('site_bp.temoignages') }}" aria-label="Voir les avis sur le Point Astral Racines">
-                <img src="{{ url_for('static', filename='temoignages/2026_07_sarah_point_astral_v2.webp') }}" alt="Retour client authentique sur le Point Astral Racines" loading="lazy">
+                <img src="{{ url_for('static', filename='temoignages/2026_07_sarah_point_astral_v2.webp') }}" alt="Retour client authentique sur le Point Astral Racines" loading="lazy" width="600" height="697">
                 <span>Point Astral Racines</span>
             </a>
         </div>
@@ -1494,6 +1494,14 @@ input[type="time"]:focus, input[type="email"]:focus {
         return "aujourd’hui";
     }
 
+    function defilerVersSelection() {
+        const panier = document.getElementById('cartSection');
+        if (!panier || panier.style.display === 'none') return;
+        const mobile = window.innerWidth <= 768;
+        const cible = mobile ? document.getElementById('submitBtn') : panier;
+        cible.scrollIntoView({ behavior: 'smooth', block: mobile ? 'center' : 'start' });
+    }
+
     function addToCart(id, name, price, element, details = {}) {
         if (selectedPack) { showNotification('Vous avez sélectionné un pack. Désélectionnez-le d\'abord.', 'warning'); return; }
         if (price > 0 && (id === 'revolution_solaire' || cart.some(item => item.id === 'revolution_solaire')) &&
@@ -1515,7 +1523,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             setTimeout(() => {
                 const cartSection = document.getElementById('cartSection');
                 if (cartSection && cartSection.style.display !== 'none') {
-                    cartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    defilerVersSelection();
                 }
             }, 300);
         }
@@ -1868,7 +1876,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         updateCartDisplay();
         setTimeout(() => {
             const cartSection = document.getElementById('cartSection');
-            if (cartSection && cartSection.style.display !== 'none') cartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (cartSection && cartSection.style.display !== 'none') defilerVersSelection();
         }, 300);
     }
 
