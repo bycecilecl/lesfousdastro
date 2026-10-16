@@ -5,6 +5,13 @@ from zoneinfo import ZoneInfo
 
 
 DATE_OUVERTURE = date(2026, 10, 9)
+DEBUT_OFFRE_WEEKEND = date(2026, 10, 16)  # Ouverture anticipée validée pour les essais de Cécile.
+FIN_OFFRE_WEEKEND = date(2026, 10, 19)  # Borne exclue : fin du dimanche 18.
+
+
+def offre_weekend_active() -> bool:
+    aujourd_hui = datetime.now(ZoneInfo("Europe/Paris")).date()
+    return DEBUT_OFFRE_WEEKEND <= aujourd_hui < FIN_OFFRE_WEEKEND
 
 
 def ventes_ouvertes() -> bool:

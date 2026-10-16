@@ -4,6 +4,11 @@
 
 {% block meta_description %}Analyses astrologiques personnalisées : Point astral, profil karmique, profil amoureux. Une lecture approfondie de ton ciel, créée par une vraie astrologue.{% endblock %}
 
+{% block extra_head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='offres_rs_weekend.css') }}">
+{% endblock %}
+
 {% block extra_css %}
 * {
     margin: 0;
@@ -1058,6 +1063,9 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <em>Détail complet et exemple de rapport en bas de la page Guide des analyses.</em>
                         </div>
                     </div>
+                    {% if rs_weekend_offer %}
+                    {% include "_offres_rs_weekend.html" %}
+                    {% else %}
                     <article class="transits-offer rs-offer{% if rs_sales_open %} rs-available{% endif %}"{% if rs_sales_open %} data-product-id="revolution_solaire" onclick="openRevolutionSolaireModal(this)" role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openRevolutionSolaireModal(this); }"{% else %} aria-label="Ma Révolution Solaire, disponible à partir du 9 octobre 2026"{% endif %}>
 
                         <span class="transits-icon" aria-hidden="true">☀️</span>
@@ -1072,6 +1080,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <span class="transits-cta">{% if rs_sales_open %}Choisir mon année{% else %}Disponible à partir du 9 octobre{% endif %}</span>
                         </div>
                     </article>
+                    {% endif %}
                     {% include "_guide_revolution_solaire.html" %}
                 </section>
 
@@ -1300,6 +1309,8 @@ input[type="time"]:focus, input[type="email"]:focus {
     let psychologyTimeLeft = 600;
     let pendingTransitCard = null;
     let pendingRevolutionSolaireCard = null;
+    let pendingRevolutionSolaireProduct = 'revolution_solaire';
+    const rsProducts = ['revolution_solaire', 'pack_rs_forces_defis'];
     let rsLieuResults = [];
     let rsLieuDebounce;
     const rsContexteChamps = ['travail', 'amour', 'foyer_famille', 'enfants', 'argent', 'sante', 'preoccupation'];
@@ -1421,14 +1432,15 @@ input[type="time"]:focus, input[type="email"]:focus {
         });
     }
 
-    function openRevolutionSolaireModal(element) {
-        const existingItem = cart.find(item => item.id === 'revolution_solaire');
-        if (existingItem) { removeFromCart('revolution_solaire'); element.classList.remove('selected'); return; }
-        if (selectedPack || cart.some(item => item.price > 0)) {
+    function openRevolutionSolaireModal(element, productId = 'revolution_solaire') {
+        const existingItem = cart.find(item => rsProducts.includes(item.id));
+        if (existingItem?.id === productId) { removeFromCart(productId); return; }
+        if (selectedPack || cart.some(item => item.price > 0 && !rsProducts.includes(item.id))) {
             showNotification('La Révolution solaire se commande séparément des autres analyses.', 'warning');
             return;
         }
         pendingRevolutionSolaireCard = element;
+        pendingRevolutionSolaireProduct = productId;
         const anneeSelect = document.getElementById('rs_annee_choice');
         const anneeCourante = new Date().getFullYear();
         const anneeNaissance = Number(document.getElementById('date_naissance')?.value?.slice(0, 4));
@@ -1444,6 +1456,7 @@ input[type="time"]:focus, input[type="email"]:focus {
     function closeRevolutionSolaireModal() {
         document.getElementById('revolutionSolaireModal').style.display = 'none';
         pendingRevolutionSolaireCard = null;
+        pendingRevolutionSolaireProduct = 'revolution_solaire';
     }
 
     function fillRsLieuCoordinates() {
@@ -1470,13 +1483,17 @@ input[type="time"]:focus, input[type="email"]:focus {
         const contexteRs = Object.fromEntries(rsContexteChamps.map(champ =>
             [champ, document.getElementById(`rs_${champ}`).value.trim()]).filter(([, valeur]) => valeur));
         const card = pendingRevolutionSolaireCard;
+        const productId = pendingRevolutionSolaireProduct;
+        const pack = productId === 'pack_rs_forces_defis';
         closeRevolutionSolaireModal();
-        addToCart('revolution_solaire', 'Ma Révolution Solaire', {{ rs_price_euros|tojson }}, card,
+        cart.filter(item => rsProducts.includes(item.id)).forEach(item => removeFromCart(item.id));
+        addToCart(productId, pack ? 'Révolution Solaire + Forces et Défis' : 'Ma Révolution Solaire',
+            pack ? {{ rs_pack_price_euros|tojson }} : {{ rs_price_euros|tojson }}, card,
             {anneeRs: annee, lieuRs: lieu, latRs: lat, lonRs: lon, tzidRs: tzid, contexteRs});
     }
 
     function formatRevolutionSolaire(item) {
-        return item?.id === 'revolution_solaire' ? `${item.anneeRs} · ${item.lieuRs}` : '';
+        return rsProducts.includes(item?.id) ? `${item.anneeRs} · ${item.lieuRs}` : '';
     }
 
     function formatTransitPeriod(item) {
@@ -1499,8 +1516,8 @@ input[type="time"]:focus, input[type="email"]:focus {
 
     function addToCart(id, name, price, element, details = {}) {
         if (selectedPack) { showNotification('Vous avez sélectionné un pack. Désélectionnez-le d\'abord.', 'warning'); return; }
-        if (price > 0 && (id === 'revolution_solaire' || cart.some(item => item.id === 'revolution_solaire')) &&
-            (id !== 'revolution_solaire' || cart.some(item => item.price > 0 && item.id !== 'revolution_solaire'))) {
+        if (price > 0 && (rsProducts.includes(id) || cart.some(item => rsProducts.includes(item.id))) &&
+            (!rsProducts.includes(id) || cart.some(item => item.price > 0 && item.id !== id))) {
             showNotification('La Révolution solaire se commande séparément des autres analyses.', 'warning'); return;
         }
         if (id !== 'flash_transits' && price > 0 && cart.some(item => item.id === 'flash_transits')) {
@@ -1515,6 +1532,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             cart.push({ id, name, price, ...details });
             if (price > 0) trackConversion('add_to_cart', {product:id, location:'catalog'});
             element.classList.add('selected');
+            element.querySelector('.rs-weekend-select')?.setAttribute('aria-pressed', 'true');
             setTimeout(() => {
                 const cartSection = document.getElementById('cartSection');
                 if (cartSection && cartSection.style.display !== 'none') {
@@ -1772,6 +1790,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         });
         document.querySelectorAll(`[data-product-id="${id}"]`).forEach(card => {
             card.classList.remove('selected');
+            card.querySelector('.rs-weekend-select')?.setAttribute('aria-pressed', 'false');
         });
         updateCartDisplay();
     }
@@ -1844,14 +1863,14 @@ input[type="time"]:focus, input[type="email"]:focus {
 
     function updateSubmitButtonText() {
         const submitBtn = document.getElementById('submitBtn');
-        let totalItems = selectedPack ? 2 : cart.length;
+        let totalItems = selectedPack ? 2 : cart.reduce((total, item) => total + (item.id === 'pack_rs_forces_defis' ? 2 : 1), 0);
         if (totalItems === 0) { submitBtn.textContent = '✨ Sélectionnez une analyse ✨'; submitBtn.disabled = true; }
         else if (totalItems === 1) { submitBtn.textContent = '✨ Obtenir mon analyse ✨'; submitBtn.disabled = false; }
         else { submitBtn.textContent = '✨ Obtenir mes analyses ✨'; submitBtn.disabled = false; }
     }
 
     function selectPack(packId) {
-        if (cart.some(item => item.id === 'revolution_solaire')) {
+        if (cart.some(item => rsProducts.includes(item.id))) {
             showNotification('Retire d’abord la Révolution solaire pour choisir un pack.', 'warning'); return;
         }
         const packs = {
@@ -1911,7 +1930,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         const transitItem = cart.find(item => item.id === 'flash_transits');
         orderData.userInfo.transitDateMode = transitItem?.transitDateMode || 'today';
         orderData.userInfo.transitDate = transitItem?.transitDate || '';
-        const rsItem = cart.find(item => item.id === 'revolution_solaire');
+        const rsItem = cart.find(item => rsProducts.includes(item.id));
         orderData.userInfo.anneeRs = rsItem?.anneeRs || '';
         orderData.userInfo.lieuRs = rsItem?.lieuRs || '';
         orderData.userInfo.latRs = rsItem?.latRs || '';
@@ -1951,7 +1970,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                 <div class="items-summary">
                     ${itemsHtml}
                     ${orderData.items.some(item => item.id === 'flash_transits') ? `<p style="margin:10px 0 0;color:#5f43b2;"><strong>Date explorée :</strong> ${formatTransitPeriod(orderData.items.find(item => item.id === 'flash_transits'))}</p>` : ''}
-                    ${orderData.items.some(item => item.id === 'revolution_solaire') ? `<p style="margin:10px 0 0;color:#b85b0b;"><strong>Retour solaire :</strong> ${orderData.userInfo.anneeRs} à ${orderData.userInfo.lieuRs}</p>` : ''}
+                    ${orderData.items.some(item => rsProducts.includes(item.id)) ? `<p style="margin:10px 0 0;color:#b85b0b;"><strong>Retour solaire :</strong> ${orderData.userInfo.anneeRs} à ${orderData.userInfo.lieuRs}</p>` : ''}
                     <div class="payment-total"><span><strong>Total :</strong></span><span><strong>${total}€</strong></span></div>
                 </div>
             </div>`;

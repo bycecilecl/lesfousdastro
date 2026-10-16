@@ -1,0 +1,44 @@
+.rs-weekend { color: #243e52; font-family: 'Segoe UI', Tahoma, sans-serif; }
+.rs-weekend *, .rs-weekend *::before, .rs-weekend *::after { box-sizing: border-box; }
+.rs-weekend-heading { text-align: center; margin-bottom: 28px; }
+.rs-weekend-date { display: inline-block; border: 1px solid #d5e8e9; border-radius: 30px; background: #f0f9f8; color: #177579; padding: 8px 15px; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; }
+.rs-weekend-heading h2 { font-size: clamp(24px, 3.2vw, 32px); line-height: 1.2; color: #1f628e; margin: 16px auto 12px; max-width: 670px; }
+.rs-weekend-heading p { color: #65737f; font-size: 15px; line-height: 1.6; margin: 0; }
+.rs-weekend-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: stretch; }
+.rs-weekend-card { display: flex; flex-direction: column; position: relative; padding: 26px; border: 2px solid #eed4a8; border-radius: 22px; background: linear-gradient(145deg, #fffaf0, #fff 58%); transition: border-color .18s, box-shadow .18s; }
+.rs-weekend-pack { border-color: #62a9ab; background: linear-gradient(145deg, #eaf8f7, #fff 65%); box-shadow: 0 8px 24px #1775790c; }
+.rs-weekend-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 23px; }
+.rs-weekend-badge { border-radius: 6px; padding: 7px 10px; background: #ffecd2; color: #9a5611; font-size: 10px; font-weight: 800; letter-spacing: .8px; }
+.rs-weekend-pack .rs-weekend-badge { background: #197c7e; color: #fff; }
+.rs-weekend-choice { width: 21px; height: 21px; flex: 0 0 21px; border: 1.5px solid #c5d0d5; border-radius: 50%; background: #fff; }
+.rs-weekend-symbol { font-size: 33px; line-height: 1.2; margin-bottom: 14px; }
+.rs-weekend-symbol span { font-size: 19px; color: #76a5a5; vertical-align: 4px; }
+.rs-weekend-card h3 { font-size: 24px; line-height: 1.22; letter-spacing: -.5px; color: #1f628e; margin: 0 0 12px; min-height: 59px; }
+.rs-weekend-description { margin: 0 0 22px; color: #65717d; line-height: 1.6; font-size: 14px; min-height: 66px; }
+.rs-weekend-card ul { list-style: none; padding: 0; margin: 0 0 26px; }
+.rs-weekend-card li { position: relative; padding-left: 22px; margin: 0 0 11px; color: #3d5363; font-size: 13px; line-height: 1.5; }
+.rs-weekend-card li::before { content: '✓'; color: #b16b17; position: absolute; left: 0; font-weight: 800; }
+.rs-weekend-pack li::before { color: #197c7e; }
+.rs-weekend-bottom { margin-top: auto; padding-top: 20px; border-top: 1px solid #e9e7df; }
+.rs-weekend-price { display: flex; gap: 12px; align-items: baseline; min-height: 59px; }
+.rs-weekend-price del { color: #88929b; font-size: 18px; }
+.rs-weekend-price strong { font-size: 49px; line-height: 1.1; font-weight: 800; letter-spacing: -2px; color: #af5e0d; }
+.rs-weekend-price strong span { font-size: 29px; letter-spacing: -1px; }
+.rs-weekend-pack .rs-weekend-price strong { color: #197c7e; }
+.rs-weekend-duo { font-size: 14px; color: #6a7f87; }
+.rs-weekend-price-note { margin: 1px 0 19px; font-size: 12px; color: #7a725f; min-height: 18px; }
+.rs-weekend-pack .rs-weekend-price-note { color: #197c7e; font-weight: 700; }
+.rs-weekend-select { width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; border: 0; border-radius: 11px; padding: 14px 10px; background: linear-gradient(120deg, #e79b22, #d47a16); color: #fff; font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; }
+.rs-weekend-pack .rs-weekend-select { background: linear-gradient(120deg, #208b8e, #197176); }
+.rs-weekend-select:focus-visible { outline: 3px solid #1f628e; outline-offset: 4px; }
+.rs-weekend-card.selected { border-color: #197c7e; box-shadow: 0 0 0 3px #197c7e22; }
+.rs-weekend-card.selected .rs-weekend-choice { border-color: #197c7e; background: #197c7e; box-shadow: inset 0 0 0 4px #fff; }
+.rs-weekend-validity { margin: 17px 0 0; text-align: center; font-size: 11px; color: #829099; }
+@media (max-width: 650px) {
+  .rs-weekend-grid { grid-template-columns: 1fr; gap: 18px; }
+  .rs-weekend-card { padding: 23px; }
+  .rs-weekend-card h3, .rs-weekend-description { min-height: 0; }
+  .rs-weekend-heading { margin-bottom: 22px; }
+}
+
+.rs-weekend { margin-top: 28px; }

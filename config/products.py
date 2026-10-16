@@ -1,5 +1,9 @@
  # config/products.py
 import os
+from config.revolution_solaire_launch import offre_weekend_active, ventes_ouvertes
+
+PACK_RS_FORCES_DEFIS = "pack_rs_forces_defis"
+PRODUITS_AVEC_RS = frozenset({"revolution_solaire", PACK_RS_FORCES_DEFIS})
 
 def _bool_env(name, default=""):
     return (os.getenv(name, default) or "").strip().lower() in {"1","true","on","yes"}
@@ -49,6 +53,12 @@ def load_products():
             "success_route": "revolution_solaire_module.resultat",
             # Le catalogue est chargé au démarrage ; la date est vérifiée au paiement.
             "enabled": _bool_env("REVOLUTION_SOLAIRE_SALES_ENABLED"),
+        },
+        PACK_RS_FORCES_DEFIS: {
+            "label": "Révolution Solaire + Forces et Défis",
+            "price_cents": 5000,
+            "included_products": ["revolution_solaire", "forces_defis"],
+            "enabled": _bool_env("REVOLUTION_SOLAIRE_SALES_ENABLED") and _bool_env("FORCES_DEFIS_ENABLED", "1"),
         },
         "forces_defis": {
             "label": "Mes Potentiels et Défis",
@@ -122,4 +132,31 @@ except Exception as e:
     print(f"❌ Erreur chargement produits: {e}")
     PRODUCTS = {}
 
-__all__ = ["PRODUCTS", "DEFAULT_PRODUCT"]
+def get_product(key):
+    """Prix et disponibilité vérifiés à chaque commande, sans redémarrage."""
+    product = PRODUCTS.get(key)
+    if product is None:
+        return None
+    if key == PACK_RS_FORCES_DEFIS and not offre_weekend_active():
+        return None
+    if key == "revolution_solaire" and offre_weekend_active():
+        return {**product, "price_cents": 4200}
+    return product
+
+
+def presentation_offre_rs():
+    """Le formulaire et la page Analyses affichent le tarif du serveur."""
+    product = get_product("revolution_solaire") or load_products()["revolution_solaire"]
+    euros = product["price_cents"] / 100
+    pack = get_product(PACK_RS_FORCES_DEFIS)
+    return {
+        "rs_sales_open": ventes_ouvertes(),
+        "rs_price_euros": euros,
+        "rs_price_label": f"{euros:.2f}".rstrip("0").rstrip(".").replace(".", ","),
+        "rs_weekend_offer": bool(pack and ventes_ouvertes()),
+        "rs_pack_price_euros": pack["price_cents"] / 100 if pack else None,
+    }
+
+
+__all__ = ["PRODUCTS", "DEFAULT_PRODUCT", "get_product", "presentation_offre_rs",
+           "PACK_RS_FORCES_DEFIS", "PRODUITS_AVEC_RS"]

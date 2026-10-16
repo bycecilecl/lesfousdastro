@@ -424,14 +424,9 @@ def enforce_https_and_root():
 @main_bp.route("/")
 def index():
     infos = session.get("infos_utilisateur", {})
-    from config.products import PRODUCTS, load_products
-    from config.revolution_solaire_launch import ventes_ouvertes
-    rs_product = PRODUCTS.get("revolution_solaire") or load_products()["revolution_solaire"]
-    rs_price_euros = rs_product["price_cents"] / 100
-    rs_price_label = f"{rs_price_euros:.2f}".rstrip("0").rstrip(".").replace(".", ",")
+    from config.products import presentation_offre_rs
     return render_template(
-        "astro_form.html", infos=infos, rs_sales_open=ventes_ouvertes(),
-        rs_price_euros=rs_price_euros, rs_price_label=rs_price_label,
+        "astro_form.html", infos=infos, **presentation_offre_rs(),
     )
 
 @main_bp.route("/analyses")

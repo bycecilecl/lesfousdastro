@@ -4,7 +4,7 @@ import requests
 from flask import Blueprint, request, jsonify, session, current_app
 import logging
 from requests.auth import HTTPBasicAuth
-from config.products import PRODUCTS
+from config.products import PRODUCTS, PRODUITS_AVEC_RS
 
 
 payments_bp = Blueprint("payments", __name__)
@@ -127,7 +127,7 @@ def paypal_beneficiary(data):
         'transit_date': info.get('transitDate') or '',
     }
     items = data.get('items') or [{'key': data.get('product_key')}]
-    if any((item.get('key') or item.get('id')) == 'revolution_solaire'
+    if any((item.get('key') or item.get('id')) in PRODUITS_AVEC_RS
            for item in items if isinstance(item, dict)):
         import json
         from routes.revolution_solaire_module import _demande_depuis_commande

@@ -9,7 +9,7 @@ from flask import abort, session
 from sqlalchemy.exc import IntegrityError
 from extensions import db
 from models.analysis_orders import AnalysisOrder, AnalysisJob, GiftGrant
-from config.products import PRODUCTS
+from config.products import PRODUCTS, get_product, PRODUITS_AVEC_RS
 from config.revolution_solaire_launch import ventes_ouvertes
 
 
@@ -31,9 +31,9 @@ def catalog_items(items):
         if not isinstance(item, dict):
             abort(400, 'Produit invalide.')
         key = item.get('key') or item.get('id')
-        if key == 'revolution_solaire' and not ventes_ouvertes():
+        if key in PRODUITS_AVEC_RS and not ventes_ouvertes():
             abort(400, 'La Révolution solaire sera disponible à partir du 9 octobre.')
-        product = PRODUCTS.get(key)
+        product = get_product(key)
         # One beneficiary per order; quantities >1 cannot create additional rights.
         if not product or str(item.get('quantity', 1)) != '1':
             abort(400, 'Produit inconnu ou quantité différente de 1.')
@@ -47,7 +47,9 @@ def catalog_items(items):
         normalized.append({'key': key, 'quantity': 1, 'price_cents': cents})
     if 'flash_transits' in products and len(products) != 1:
         abort(400, 'Le Point Transits doit être commandé séparément.')
-    if 'revolution_solaire' in products and len(products) != 1:
+    if 'revolution_solaire' in products and not (
+        len(normalized) == 1 and normalized[0]['key'] in PRODUITS_AVEC_RS
+    ):
         abort(400, 'La Révolution solaire doit être commandée séparément.')
     return normalized, products
 

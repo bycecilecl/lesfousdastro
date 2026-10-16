@@ -48,7 +48,8 @@ def injecter_cle_turnstile():
 
 @pages_bp.route("/analyses")
 def analyses():
-    return render_template("pages/analyses.html", active="analyses")
+    from config.products import presentation_offre_rs
+    return render_template("pages/analyses.html", active="analyses", **presentation_offre_rs())
 
 @pages_bp.route("/abonnements")
 def abonnements():

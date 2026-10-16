@@ -50,7 +50,7 @@ def reprendre_commandes_rs(app):
 
         app.logger.info("Reprise automatique RS : commande %s", commande.id)
         generer_pack_et_envoyer_email(
-            ["revolution_solaire"], dict(commande.beneficiary),
+            list(commande.products), dict(commande.beneficiary),
             {"secure_order_id": commande.id, "fallback_urls": {}},
         )
 

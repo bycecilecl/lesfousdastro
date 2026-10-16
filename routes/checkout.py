@@ -8,7 +8,7 @@ import uuid
 import json
 from datetime import datetime, timezone
 from flask import Blueprint, request, session, redirect, url_for, render_template, abort, current_app, jsonify
-from config.products import PRODUCTS
+from config.products import PRODUCTS, PRODUITS_AVEC_RS
 import stripe
 from config.gift_codes import get_gift_code, is_code_used, mark_code_as_used
 from utils.email_sender import (
@@ -160,7 +160,7 @@ def checkout():
         current_app.logger.warning("❌ [CHECKOUT] Panier vide")
         abort(400, description="Panier vide.")
 
-    if any(isinstance(item, dict) and (item.get("key") or item.get("id")) == "revolution_solaire"
+    if any(isinstance(item, dict) and (item.get("key") or item.get("id")) in PRODUITS_AVEC_RS
            for item in cart_items):
         infos = session.get("infos_utilisateur")
         if not isinstance(infos, dict):
@@ -220,8 +220,12 @@ def checkout():
     payment_product_keys = []   # ce qui est effectivement payé (peut contenir pack_essence)
     analysis_product_keys = []  # ce qui sera généré comme analyses
     total_cents = 0
+
+    # Le montant conservé dans la commande fait aussi foi chez Stripe,
+    # même si la promotion se termine entre la validation et le paiement.
+    secure_order = create_order("stripe", cart_items, session["infos_utilisateur"], PAYMENTS_SANDBOX)
     
-    for item in cart_items:
+    for item in secure_order.items:
         # 👇 Accepte soit "key", soit "id" venant du frontend
         pk = item.get("key") or item.get("id")
         qty = item.get("quantity", 1)
@@ -231,7 +235,7 @@ def checkout():
             current_app.logger.warning(f"⚠️ [CHECKOUT] Produit inconnu ignoré: {pk}")
             continue
         
-        price_cents = product.get("price_cents") or 0
+        price_cents = item["price_cents"]
         total_cents += price_cents * qty
         price_id = ""  # Prix fixé depuis le catalogue serveur, y compris chez Stripe.
 
@@ -280,8 +284,6 @@ def checkout():
         f"Payés: {payment_product_keys} | Analyses: {analysis_product_keys}"
     )
     
-    secure_order = create_order("stripe", cart_items, session["infos_utilisateur"], PAYMENTS_SANDBOX)
-
     # 4) Créer la session Stripe
     try:
         checkout_session = stripe.checkout.Session.create(
@@ -1013,12 +1015,12 @@ def generer_pack_et_envoyer_email(valid_products, infos_client, pending):
                 analyses_generees=analyses_generees,
             )
         except Exception:
-            if valid_products == ["revolution_solaire"]:
+            if "revolution_solaire" in valid_products:
                 AnalysisJob.query.filter_by(order_id=pending['secure_order_id'],
                     product='__delivery', status='running').update({'status': 'pending'})
                 db.session.commit()
             raise
-        if valid_products == ["revolution_solaire"]:
+        if "revolution_solaire" in valid_products:
             AnalysisJob.query.filter_by(order_id=pending['secure_order_id'],
                 product='__delivery', status='running').update({
                     'status': 'complete' if email_envoye else 'pending',
