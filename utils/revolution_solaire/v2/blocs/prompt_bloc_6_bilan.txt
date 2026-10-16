@@ -26,6 +26,7 @@ Dans le bilan général, aborde brièvement l’axe des Nœuds lunaires RS, ses 
 
 INSTRUCTIONS PRÉCISÉES
 - Ne commente jamais les données absentes ou les éléments non retenus. Parle uniquement des informations fournies, sans expliquer ce qui manque.
+- Nomme les aspects utiles et explique leur effet concret. Aucun degré ni orbe dans le texte.
 - Quand tu privilégies une période pour un sujet, explique quel transit active quel facteur du thème et pourquoi cela concerne ce sujet. Sans appui de datation fourni, ne privilégie aucune période.
 - Commence le bilan général par le titre de niveau 2 « ## Bilan général » et la partie personnalisée par « ## Bilan personnalisé ».
 - Utilise au moins trois métaphores visuelles différentes.

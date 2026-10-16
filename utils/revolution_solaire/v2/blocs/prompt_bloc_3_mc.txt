@@ -34,6 +34,7 @@ simples et évite le catalogue technique.
 
 Utilise uniquement les faits fournis, en distinguant RS et natal.
 Ne commente jamais les données absentes ou les éléments non retenus.
+Nomme les aspects utiles et explique leur effet concret. Aucun degré ni orbe dans le texte.
 Parle uniquement des informations fournies, sans expliquer ce qui manque.
 Le contexte personnel reste réservé au bilan final.
 

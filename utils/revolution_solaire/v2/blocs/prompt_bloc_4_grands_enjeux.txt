@@ -38,6 +38,7 @@ Aborde Chiron RS s’il est angulaire ou conjoint à une planète. Intègre-le �
 
 Utilise uniquement les faits fournis, en distinguant RS et natal.
 Ne commente jamais les données absentes ou les éléments non retenus.
+Nomme les aspects utiles et explique leur effet concret. Aucun degré ni orbe dans le texte.
 Parle uniquement des informations fournies, sans expliquer ce qui manque.
 N’inclus ni les transits, ni le bilan final, ni le contexte personnel.
 

@@ -31,6 +31,7 @@ Mémoire déjà rédigée (conservée par le moteur) :
 
 2. **Contenus à exclure**
    - Ne commente jamais les données absentes ou les éléments non retenus. Parle uniquement des informations fournies, sans expliquer ce qui manque.
+   - Nomme les aspects utiles et explique leur effet concret. Aucun degré ni orbe dans le texte.
    - Ne pas reprendre la posture annuelle déjà développée, les maîtres de l’Ascendant, la profection, la lecture du MC, les transits, ni la conclusion.
    - Ne jamais mentionner le signe du Soleil en RS.
    - Le Soleil RS retrouve toujours le signe du Soleil natal et se projette dans la même maison natale. Ne présente ni ce signe ni cette projection comme une particularité de l’année.
