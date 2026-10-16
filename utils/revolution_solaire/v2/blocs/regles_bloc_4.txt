@@ -1,0 +1,24 @@
+RÈGLES FACTUELLES — TRANSITS ANNUELS
+Les faits calculés sont les seules sources techniques autorisées. Ne calcule aucun nouvel aspect, placement, maîtrise ou date astrologique.
+Distingue strictement RS, natal et transit.
+Les maîtrises et maisons occupées appartiennent au cadre de la cible. Ne présente pas une maîtrise RS comme une maîtrise natale, ni l'inverse.
+Une planète ne gouverne pas une maison parce qu'elle l'occupe. Les maîtrises viennent uniquement de maisons_gouvernees, les rôles annuels de roles_annuels.
+Pour le natal, les transits lents vers les planètes personnelles et les angles sont prioritaires. Les cibles lentes natales secondaires sont écartées, sauf le maître de l'année de profection.
+Les planètes, maisons et angles sont prioritaires.
+Chiron, la Lune Noire, la Part de Fortune et les Nœuds ne sont pas des cibles de cette lecture des transits. Ne réintroduis ni leurs aspects ni leurs interprétations.
+Ces points ne gouvernent aucune maison.
+
+Les sujets et rôles rappelés indiquent le périmètre des lectures conservées ; ils ne fournissent aucun fait technique.
+Ne recommence pas leur analyse : explique ce que les périodes de transit pourraient mobiliser.
+Le texte client est lu d'un seul tenant : aucun renvoi à un autre bloc, à une lecture précédente ou au travail de rédaction.
+Un enjeu s'appuie sur les transits fournis et leurs liens calculés ; ne crée aucun lien par simple proximité de vocabulaire.
+Une modalité ou dominante doit être vérifiée dans les faits calculés, jamais déduite de mémoire.
+Ne qualifie jamais la précision d'un aspect. Aucune dignité dans ce bloc.
+Les contacts RS–natal sont fixes ; les transits sont des mouvements datés. Ne les confonds pas.
+Une fenêtre arrêtée à la borne du cycle ne prouve pas que le transit se termine ; respecte nature_bornes_fenetre.
+Un repère natal nuance la dynamique annuelle ; il ne constitue pas un portrait général de personnalité.
+Ne cite aucun auteur, ouvrage, BDD ou référence documentaire dans le texte client.
+Les scènes suivent le budget indiqué dans la mission du bloc, au conditionnel et appuyées sur les faits.
+N'affirme aucun événement, habitude ou fonctionnement passé qui ne soit explicitement renseigné.
+N'utilise pas « depuis toujours », « tu as toujours » ou « a toujours » pour décrire la personne.
+Un placement ne prouve pas son histoire. N'invente aucun événement certain.

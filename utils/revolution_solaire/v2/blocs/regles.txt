@@ -1,0 +1,29 @@
+RÈGLES FACTUELLES
+Les faits calculés sont les seules sources techniques autorisées. Ne calcule aucun nouvel aspect, placement, maîtrise ou date.
+Distingue strictement RS, natal et transit.
+Les planètes, maisons et angles sont prioritaires.
+Les aspects impliquant Rahu, Ketu ou Chiron sont exclus : aspects internes RS/natals et contacts RS–natal.
+Ne réintroduis pas ces aspects à partir des positions, de l'axe nodal ou des fiches interprétatives.
+Les positions des Nœuds restent utilisables lorsqu'elles sont fournies ; aucun développement des Nœuds n'est obligatoire.
+Chiron ne fait pas partie de cette lecture : aucun développement ni interprétation de ses positions, aspects ou superpositions.
+La Lune Noire est abordée seulement si elle est dans les faits du bloc.
+La Part de Fortune est exclue de cette lecture : aucun développement de ses positions, aspects, contacts ou superpositions ; ne la réintroduis pas depuis les fiches ou une mémoire précédente.
+Les Nœuds, Chiron, la Lune Noire et la Part de Fortune ne gouvernent aucune maison.
+
+Une analyse précédente est une interprétation et non une source de nouveaux faits.
+Ne répète jamais une lecture déjà développée. Appuie-toi dessus en une proposition et fais avancer sur un angle nouveau, sans annoncer ce que tu ajoutes.
+Le texte client est lu d'un seul tenant : aucun renvoi à un autre bloc, à une lecture précédente ou au travail de rédaction. Intègre directement le lien utile sans annoncer qu'il a déjà été traité.
+Pour expliquer une idée, utilise les faits placés dans sa section de repartition_des_faits, pas tous les faits disponibles.
+Une dignité, modalité ou dominante doit être vérifiée dans les faits calculés, jamais déduite de mémoire.
+Le Soleil RS a toujours le même signe et la même dignité que le Soleil natal. Ne présente jamais sa dignité (chute, exaltation…) comme une particularité de l’année ; ne la mentionner qu’une fois, comme trait natal. Seuls la maison RS et les aspects RS sont propres à l’année.
+Un fait natal aide à comprendre l'année ; il ne demande pas un portrait complet de la personne.
+Explique ce qui se joue cette année, plutôt que de définir le caractère de la personne.
+Les fiches de la BDD aident l'interprétation ; elles n'ajoutent aucun fait.
+Ne cite aucun auteur, ouvrage, BDD ou référence documentaire dans le texte client. Utilise directement les repères interprétatifs dans la voix demandée.
+Un aspect serré ne change pas de nature : un sextile n'implique ni même degré ni retour de planète.
+Les contacts RS–natal sont des liens fixes du thème annuel ; ne les présente pas comme des transits successifs.
+Les scènes suivent le budget indiqué dans la mission du bloc, au conditionnel et appuyées sur les faits.
+N'affirme aucun événement, habitude ou fonctionnement passé qui ne soit explicitement renseigné.
+N'utilise pas « depuis toujours », « tu as toujours » ou « a toujours » pour décrire la personne.
+Un placement ne prouve pas son histoire.
+N'invente aucun événement certain.

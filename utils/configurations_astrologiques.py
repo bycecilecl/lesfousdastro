@@ -2632,9 +2632,39 @@ def analyser_conjonctions(
 
 #     return configurations
 
+def detecter_triangles_mineurs(aspects):
+    """Un trigone et deux sextiles partageant une troisième planète.
+
+    Utilise les aspects déjà retenus par le calculateur appelant, avec leurs
+    orbes exacts. Aucun aspect supplémentaire n'est calculé ici.
+    """
+    index = {}
+    for brut in aspects:
+        aspect = normaliser_aspect(brut)
+        if (aspect and aspect["aspect"] in {"trigone", "sextile"}
+                and aspect["planete1"] in CORPS_CONFIGURATIONS_MAJEURES
+                and aspect["planete2"] in CORPS_CONFIGURATIONS_MAJEURES):
+            index[(frozenset((aspect["planete1"], aspect["planete2"])), aspect["aspect"])] = aspect
+    corps = sorted({nom for paire, _ in index for nom in paire})
+    resultat = []
+    for trio in combinations(corps, 3):
+        for sommet in trio:
+            base = [nom for nom in trio if nom != sommet]
+            trigone = index.get((frozenset(base), "trigone"))
+            sextiles = [index.get((frozenset((sommet, nom)), "sextile")) for nom in base]
+            if trigone and all(sextiles):
+                resultat.append({
+                    "id": "triangle_mineur_" + "_".join(trio), "type": "triangle_mineur",
+                    "etat": "valide", "planetes": list(trio), "nb_planetes": 3,
+                    "planete_focale": sommet, "aspects_constitutifs": [trigone, *sextiles],
+                })
+    return resultat
+
+
 def analyser_configurations_majeures(
     aspects: List[Dict[str, Any]],
     positions: Dict[str, Dict[str, Any]],
+    *, inclure_triangles_mineurs: bool = False,
 ) -> List[Dict[str, Any]]:
     """
     Détecte l'ensemble des grandes configurations du thème.
@@ -2702,6 +2732,8 @@ def analyser_configurations_majeures(
     configurations.extend(grands_trigones)
     configurations.extend(diamants)
     configurations.extend(grands_carres)
+    if inclure_triangles_mineurs:
+        configurations.extend(detecter_triangles_mineurs(aspects))
 
     configurations = enrichir_configurations_avec_positions(
         configurations,

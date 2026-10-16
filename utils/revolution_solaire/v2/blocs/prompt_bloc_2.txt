@@ -1,0 +1,73 @@
+BLOC 2 — SOLEIL ET LUNE : DIRECTION ET BESOINS
+
+Écris directement cette partie du rapport dans la voix demandée.
+Le texte sera conservé puis assemblé aux autres blocs sans réécriture globale.
+Vise environ 650 à 1 000 mots pour tout le bloc. Écris selon ce qu'il reste à expliquer. Les deux sections n'ont pas besoin d'être aussi longues. N'ajoute pas de texte juste pour atteindre un nombre de mots.
+Les données sont présentées dans cet ordre : les faits calculés, puis le résumé du bloc précédent.
+Les positions viennent uniquement des faits calculés. Le résumé indique ce qui a déjà été expliqué et comment.
+Le Soleil RS a toujours le même signe et la même dignité que le Soleil natal. Ne présente jamais sa dignité comme une particularité de l'année ; si elle n'a pas encore été mentionnée, une seule proposition, comme trait natal. Seules la maison RS et les aspects RS sont propres à l'année.
+Associe un signe à une maison uniquement d'après les cuspides fournies, jamais de mémoire.
+Ne prête aucun passé à la personne : pas de « depuis toujours », « a toujours », « plus ancien », « vieille habitude ». Décris l'année en cours.
+Aucune comparaison avec une autre année : une seule révolution solaire est étudiée. Le bloc précédent concerne cette même année.
+Ne reprends pas la posture annuelle, les maîtres de l'Ascendant ou la profection déjà développés.
+Ne rédige ni la lecture du MC et du reste du thème, ni les transits, ni la conclusion.
+
+Les sections correspondent aux clés de repartition_des_faits : soleil, lune.
+1. soleil : la maison du Soleil RS, la direction annuelle, ce que la personne cherche à construire ou à affirmer.
+2. lune : la maison de la Lune RS, les besoins, les réactions et les conditions de sécurité émotionnelle.
+Approfondis chaque sujet selon ce que les faits permettent, sans longueur égale imposée et sans refaire le Soleil dans la Lune.
+Explique ensemble ce que le Soleil indique pour l'année, le rôle du maître de sa maison RS et la maison natale où il tombe. Donne davantage de place à la Lune si elle apporte davantage de choses nouvelles.
+À partir des faits fournis, explique si la direction donnée par le Soleil et les besoins indiqués par la Lune se soutiennent ou se heurtent.
+Dans la synthèse Soleil–Lune, rappelle brièvement leur aspect calculé lorsqu'il est fourni, y compris dans deja_traites, sans recommencer son interprétation. Une conjonction ne signifie ni degré exactement identique ni besoins et direction identiques ; n'en déduis pas à elle seule un même décor de maisons.
+Ne déduis pas une phase lunaire si elle n'est pas fournie.
+
+OÙ EXPLIQUER CHAQUE FAIT
+Chaque fait nouveau est développé uniquement dans la section où il est listé dans repartition_des_faits.
+Un fait concernant les deux sections reste développé là où il est listé ; l'autre section le rappelle en une proposition.
+Cette répartition indique un lieu de développement, pas une obligation de commenter chaque fait.
+Les faits de deja_traites restent des références vérifiables : leurs mécanismes ne sont pas à expliquer une deuxième fois.
+La mémoire du bloc précédent indique les mécanismes abordés et leurs rôles.
+faits_deja_cites liste les références repérées dans le texte. Cela ne prouve pas que leur interprétation est juste.
+Les faits de references_de_contexte servent à comprendre ou vérifier les autres faits. Ne leur consacre pas de passage à part.
+Les faits non repérés restent disponibles ; un fait disponible ne justifie pas de refaire un mécanisme déjà expliqué.
+Une même planète peut avoir plusieurs rôles : un Soleil déjà étudié comme maître de l'année peut recevoir ici
+sa lecture solaire annuelle. Apporte ce nouvel angle sans refaire les aspects et mécanismes déjà développés.
+Si memoire_editoriale_bloc_1.dignite_solaire_deja_mentionnee est vrai, toute nouvelle mention de la dignité du Soleil est interdite dans ce bloc, même comme trait natal.
+Chaque paragraphe doit faire avancer la lecture par un mécanisme, un fait ou un rôle distinct.
+Explique chaque mécanisme une seule fois. Les scènes suivantes montrent des conséquences différentes, jamais le même ressort reformulé.
+
+LIENS AVEC LE NATAL
+Au bon moment, explique en une ou deux phrases ce qu'ajoutent la maison natale où tombe le Soleil ou la Lune RS
+et son contact avec un point natal, seulement si cela aide à mieux comprendre le sujet.
+Les contacts appartiennent au point_rs étudié. Distingue toujours Soleil RS et Soleil natal, Lune RS et Lune natale.
+REPERES_CALCULES contient des phrases construites depuis le dossier calculé. Respecte leurs associations entre objet, cadre et maison ; ne les transforme pas en nouvelles positions.
+Distingue la projection d'un luminaire et celle d'une cuspide : la maison natale qui accueille le Soleil RS n'accueille pas nécessairement toute sa maison RS. Une cuspide ne représente pas la projection de toute l'étendue de la maison.
+Distingue le maître de la cuspide de la maison RS et le maître de la profection. Ces rôles dépendent de cadres différents ; ne reprends pas la lecture de la profection.
+
+ASPECTS ET INTERPRÉTATION
+Nomme et explique les aspects lorsqu'ils éclairent le mécanisme.
+Distingue un aspect entre deux points RS d'un contact entre un point RS et un point natal, même s'ils parlent du même sujet. Précise RS ou natal pour chaque point et ne mélange pas les deux aspects.
+Utilise les fiches de la BDD sans reproduire leurs formulations communes ni leurs exemples similaires.
+Intègre deux à quatre situations concrètes dans le bloc, réparties entre ses grands mécanismes : un échange, une décision, une action ou une conséquence observable.
+Prévois au moins une situation dans chacune des sections soleil et lune.
+Formule-les au conditionnel, sans inventer de date. Chaque situation illustre un ressort différent.
+Varie les ouvertures des scènes ; ne les commence pas systématiquement par « Tu pourrais ».
+Aucun contexte personnel avant la conclusion. Respecte le genre fourni, sans point médian.
+
+SORTIE
+Retourne un objet JSON contenant texte (Markdown client) et memoire (suivi interne).
+La mémoire contient mecanismes (sujet, role, resume) et faits_cites (reference, extrait exact du texte).
+Le champ resume explique en une phrase simple ce qui se joue pour la personne, sans image ni formule mystérieuse.
+Il ne contient aucune maison, aucun numéro ni position planétaire.
+Il résume le mécanisme annuel développé, pas un portrait général de personnalité natale.
+sujet et role ne contiennent pas de maison numérotée.
+Le champ role distingue notamment « Soleil RS : direction annuelle » et « Lune RS : besoins émotionnels ».
+Ne liste que les aspects et contacts explicitement écrits avec leurs deux points et cadres RS/natal.
+Ne recopie pas la répartition et ne propose pas de pistes demandant de refaire un mécanisme déjà écrit.
+Aucun identifiant de fait ni commentaire de contrôle dans le texte client.
+
+APPUIS DE LA MÉMOIRE
+Pour chaque mécanisme, appuis liste les clés exactes des faits calculés reçus qui soutiennent ce que tu as écrit.
+Inclue les positions, maîtrises, aspects, contacts ou figures utiles à ce mécanisme ; ne recopie pas toutes les données du bloc.
+N'invente aucune clé et ne cite aucun fait absent des données reçues. Un identifiant de mémoire seul n'apporte pas un nouveau fait calculé.
+appuis reste interne. faits_cites conserve son rôle distinct : repérer les aspects ou contacts explicitement nommés dans le texte.

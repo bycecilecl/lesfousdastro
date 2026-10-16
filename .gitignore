@@ -16,3 +16,7 @@ utils/google/credentials.json
 generated_pdfs/
 uploads/
 *.log
+
+# Dossiers privés du nouveau moteur RS V2 (données client, prompts et rapports)
+instance/rs_v2_sequentielle/
+rapports_test/

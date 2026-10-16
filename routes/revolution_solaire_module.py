@@ -1,6 +1,7 @@
 """Livraison de la Révolution solaire achetée sur le formulaire principal."""
 import json
 import hashlib
+import shutil
 from pathlib import Path
 from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -9,8 +10,6 @@ from flask import Blueprint, abort, current_app, redirect, url_for
 
 from services.analysis_orders import owned_order
 from utils.client_pdf_storage import private_pdf_path, upload_client_pdf
-from utils.pdf_utils import html_to_pdf
-from utils.revolution_solaire.rapport_pdf import habiller_rapport_pdf
 from utils.revolution_solaire.relances import retenter
 
 
@@ -25,7 +24,7 @@ CHAMPS_CONTEXTE = {
 
 def generer_rapport_revolution_solaire(**demande):
     """Charge le moteur seulement lors d'une génération RS achetée."""
-    from utils.revolution_solaire.service import generer_rapport_revolution_solaire_v2 as generer
+    from utils.revolution_solaire.v2.blocs.service_formulaire import generer_rapport_formulaire as generer
     return generer(**demande)
 
 
@@ -80,7 +79,7 @@ def generer_revolution_solaire_pdf_s3(infos: dict, *, commande_id: str | None = 
     """Un rapport, un PDF privé et un lien de livraison pour la commande."""
     demande = _demande_depuis_commande(infos)
     # Une commande payée retrouve ses réponses Claude après un échec PDF/S3
-    # ou une relance du worker. Les trois tentatives IA restent séparées.
+    # ou une reprise du worker, sans relance payante automatique.
     cle = hashlib.sha256(commande_id.encode()).hexdigest() if commande_id else uuid4().hex
     racine = Path(current_app.instance_path) / "generations_rs" / cle
 
@@ -92,26 +91,18 @@ def generer_revolution_solaire_pdf_s3(infos: dict, *, commande_id: str | None = 
             )
         return journaliser
 
-    # Les relances reprennent les parties sauvegardées du moteur validé,
-    # sans recommencer les parties déjà complètes.
-    rapport = retenter(
-        lambda numero: generer_rapport_revolution_solaire(
-            **demande, stockage_dir=racine / "moteur_valide",
-        ),
-        signaler=signaler("rapport"),
+    stockage_moteur = racine / "moteur_six_blocs"
+    rapport = generer_rapport_revolution_solaire(
+        **demande, stockage_dir=stockage_moteur, identifiant_execution=cle,
     )
-    html_pdf = habiller_rapport_pdf(
-        rapport.html, personne=demande["personne"], lieu_rs=demande["lieu_rs"],
-        annee=demande["annee"],
-    )
+    # Le parcours produit déjà le PDF habillé, avec titres et disclaimer.
+    source_pdf = stockage_moteur / rapport.identifiant_generation / "rapport.pdf"
+    if not source_pdf.is_file() or not source_pdf.stat().st_size:
+        raise RuntimeError("Le PDF du rapport RS n'est pas disponible.")
 
     def creer_pdf(_numero):
         pdf_path = private_pdf_path()
-        if not html_to_pdf(
-            html_pdf, pdf_path,
-            page_header=f"Révolution solaire {demande['annee']} - Les Fous d'Astro",
-        ):
-            raise RuntimeError("Le PDF n'a pas pu être créé.")
+        shutil.copy2(source_pdf, pdf_path)
         return pdf_path
 
     pdf_path = retenter(creer_pdf, signaler=signaler("PDF"))

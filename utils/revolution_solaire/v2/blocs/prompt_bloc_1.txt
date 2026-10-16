@@ -1,0 +1,93 @@
+BLOC 1 — POSTURE ET CAP DE L'ANNÉE
+
+Écris directement cette première partie du rapport dans la voix demandée.
+Ce texte sera conservé puis assemblé aux blocs suivants sans réécriture globale.
+Ne rédige ni le reste du thème, ni les transits, ni la conclusion.
+Vise environ 900 à 1 300 mots pour le texte de tout le bloc, hors mémoire.
+Cette fourchette est un repère, pas une raison d'allonger une explication déjà complète.
+
+Les sections correspondent aux clés de repartition_des_faits : ascendant, maitres_ascendant, profection.
+Développe dans cet ordre :
+1. ascendant : l'Ascendant RS, comment on entre dans l'année, la posture et les expériences privilégiées.
+2. maitres_ascendant : son ou ses maîtres, leurs maisons, leur état, leurs appuis et tensions ; où cette posture se joue.
+   Leur état inclut dignité, rétrogradation et interception, uniquement lorsqu'elles figurent dans les faits calculés.
+   Pour le Soleil, applique la règle commune : dignité natale mentionnée une seule fois, sans particularité annuelle.
+   Si leurs signes sont interceptés, développe ensemble l'axe intercepté et ses maisons dans cette section.
+3. profection : maison annuelle, signe, maître traditionnel de l'année, sa situation natale ; ce que cela priorise.
+   Pour le maître de l'année, indique en une proposition sa maison RS et relie-la à la maison annuelle.
+   Pour un maître autre que le Soleil, indique sa dignité RS lorsqu'elle est fournie, sans la déduire de mémoire.
+   Si c'est le Soleil, réserve son portrait solaire complet au bloc suivant.
+   Distingue maison annuelle profectée et maisons où se projette l'Ascendant profecté.
+
+REPÈRES FACTUELS
+faits_calcules.REPERES_CALCULES distingue cinq repères : Soleil RS, Soleil natal,
+maison annuelle profectée, projection RS et projection natale de l'Ascendant profecté.
+Ses phrases_factuelles fixent chaque position : conserve leur association entre sujet, cadre et maison.
+Si tu cites une maison, emploie les chiffres arabes, jamais les chiffres romains.
+soleil_natal_dignite et soleil_rs_dignite servent à vérifier la dignité solaire commune, pas à la commenter deux fois.
+maitre_annee relève de la profection ; maitres_maison_du_soleil_rs relève de la cuspide RS.
+Le maître de l'année n'est pas automatiquement le maître de la maison RS où il se trouve.
+Ces repères ne demandent pas de nouveau portrait : leur utilisation suit le rôle et le périmètre de la section.
+
+OÙ EXPLIQUER CHAQUE FAIT
+Chaque fait est développé uniquement dans la section où il est listé dans repartition_des_faits.
+Un fait qui concerne plusieurs sections reste développé là où il est listé ; une autre section le rappelle en une proposition.
+Cette répartition indique un lieu de développement, pas une obligation de commenter chaque fait fourni.
+Dans chaque section, regroupe les faits qui parlent du même sujet et approfondis les sujets les plus importants.
+Les faits secondaires sont regroupés dans un rappel en une phrase ou laissés de côté, sans catalogue de contacts.
+Les faits de references_de_contexte servent à comprendre ou vérifier les faits principaux. Ne leur consacre pas de passage à part.
+Une position, cuspide ou maîtrise ajoutée seulement comme contexte reste disponible pour un développement dans un autre bloc.
+Les positions RS du Soleil, de la Lune et des maîtres du MC sont réservées aux blocs suivants, même s'ils sont maîtres de l'Ascendant ou de l'année.
+Ici, rappelle leur signe et leur maison en une proposition si cela situe leur rôle de maître ; leur lecture propre reste à développer ensuite.
+Chaque paragraphe doit introduire un mécanisme ou un fait absent des paragraphes précédents.
+Une même planète peut avoir plusieurs rôles : ici, développe uniquement son rôle de maître de l'Ascendant ou de l'année.
+Son rôle solaire, lunaire ou lié au MC pourra être étudié dans le bloc approprié sous un angle distinct.
+Si le maître de l'Ascendant est aussi le Soleil, la Lune ou le maître du MC, explique les aspects attribués à maitres_ascendant
+sous son rôle de maître de l'Ascendant : comment ils servent ou entravent la posture annuelle.
+S'il est également maître de l'année, la profection ajoute la priorité annuelle sans refaire son portrait ni ses aspects déjà développés.
+Les faits contenus dans deja_traites restent des références vérifiables ; leurs mécanismes ne sont pas à reprendre.
+
+LIENS AVEC LE NATAL
+Parle du natal seulement s'il aide à mieux comprendre le sujet. Tu n'es pas obligé de commencer chaque section par la RS.
+Au bon moment, explique en une ou deux phrases ce qu'ajoutent la maison natale où tombe le point RS et son contact avec un point natal.
+Les contacts utilisés appartiennent au point_rs étudié. Ne transforme pas le bloc en catalogue de contacts ou portrait natal.
+Le Soleil, la Lune et le MC ne reçoivent pas leur lecture complète ici, sauf leur rôle nécessaire de maître.
+Une Lune intervenant dans un aspect n'est pas encore une analyse du monde émotionnel annuel.
+
+PÉRIMÈTRE
+Chiron est exclu de cette lecture ; aucune synthèse ni développement sur Chiron.
+Les aspects aux Nœuds sont exclus du bloc ; ne construis pas de synthèse nodale à partir de contacts absents.
+Conserve les cadres et la nature des contacts ; aucun regroupement interprétatif ne crée une nouvelle activation.
+
+ASPECTS ET INTERPRÉTATION
+Les aspects sont nommés ET expliqués lorsqu'ils éclairent le mécanisme.
+Utilise les fiches de la BDD dans la section où le fait est placé, sans recopier leurs phrases ni répéter leurs exemples.
+Intègre trois à quatre situations concrètes dans le bloc : au moins une dans chacune des sections ascendant, maitres_ascendant et profection.
+Chaque situation montre un échange, une décision, une action ou une conséquence observable, reliée au mécanisme principal de sa section.
+Formule-les au conditionnel, sans inventer de date. Chaque situation illustre un ressort différent.
+Aucun contexte personnel avant la conclusion. Respecte le genre fourni, sans point médian.
+
+SORTIE
+Retourne un objet JSON avec deux parties :
+- texte : les paragraphes destinés à la personne, en Markdown, avec des titres lisibles.
+- memoire : mecanismes et faits_cites uniquement.
+  mecanismes contient sujet, role et resume par mécanisme réellement expliqué dans le texte, pas un inventaire des données.
+  Le champ resume explique en une phrase simple ce qui se joue pour la personne, sans image ni formule mystérieuse.
+  Résume le mécanisme annuel réellement développé, pas une définition générale de personnalité issue du natal.
+  Il ne mentionne aucune maison, aucun numéro, aucune position planétaire : ces faits sont transmis séparément et ne doivent jamais être réécrits.
+  sujet et role ne contiennent pas non plus de maison numérotée.
+  role distingue la fonction étudiée, par exemple « maître de l'Ascendant » ou « maître de l'année ».
+  faits_cites contient reference et extrait : une clé exacte d'aspect ou contact explicitement nommé,
+  accompagnée d'une courte citation exacte du texte dans un même paragraphe. N'en recopie jamais la liste de répartition.
+  Chaque extrait porte sur un seul aspect ou contact, pas sur un paragraphe entier qui en énumère plusieurs.
+  L'extrait doit nommer les deux points, le type d'aspect et leurs cadres RS/natal sans les confondre.
+  Pour une maîtrise, interception ou figure, résume uniquement le mécanisme interprété, sans recopier les placements techniques.
+  Une position, maîtrise, interception ou figure n'entre pas dans faits_cites.
+  Un fait fourni mais non écrit n'est pas un fait cité. Aucune piste libre demandant de revenir sur une lecture déjà écrite.
+La mémoire est un suivi interne, pas une section du texte client. Aucun identifiant de fait ni commentaire de contrôle dans ce texte.
+
+APPUIS DE LA MÉMOIRE
+Pour chaque mécanisme, appuis liste les clés exactes des faits calculés reçus qui soutiennent ce que tu as écrit.
+Inclue les positions, maîtrises, aspects, contacts ou figures utiles à ce mécanisme ; ne recopie pas toutes les données du bloc.
+N'invente aucune clé et ne cite aucun fait absent des données reçues. Un identifiant de mémoire seul n'apporte pas un nouveau fait calculé.
+appuis reste interne. faits_cites conserve son rôle distinct : repérer les aspects ou contacts explicitement nommés dans le texte.

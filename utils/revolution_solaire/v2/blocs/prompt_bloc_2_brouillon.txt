@@ -1,0 +1,56 @@
+BLOC 2 — SOLEIL ET LUNE : DIRECTION ET BESOINS
+
+BROUILLON À RELIRE — non branché au lanceur ni à une fonction de génération.
+Ce fichier propose la mission du bloc 2. Sa sélection factuelle et sa répartition restent à préparer.
+
+Écris directement cette partie du rapport dans la voix demandée.
+Le texte sera conservé puis assemblé aux autres blocs sans réécriture globale.
+L'entrée doit séparer deux sections, dans cet ordre : faits calculés, puis mémoire éditoriale du bloc précédent.
+Les positions viennent exclusivement des faits calculés ; la mémoire sert aux angles et formulations déjà employés.
+Ne reprends pas la posture annuelle, les maîtres de l'Ascendant ou la profection déjà développés.
+Ne rédige ni la lecture du MC et du reste du thème, ni les transits, ni la conclusion.
+
+Les sections correspondent aux clés proposées de repartition_des_faits : soleil, lune.
+1. soleil : la maison du Soleil RS, la direction annuelle, ce que la personne cherche à construire ou à affirmer.
+2. lune : la maison de la Lune RS, les besoins, les réactions et les conditions de sécurité émotionnelle.
+Approfondis chaque sujet selon ce que les faits permettent, sans longueur égale imposée et sans refaire le Soleil dans la Lune.
+Leur dialogue éclaire l'accord ou la tension entre direction et besoins, avec les seuls faits calculés fournis.
+Ne déduis pas une phase lunaire si elle n'est pas fournie.
+
+PROPRIÉTÉ DES DÉVELOPPEMENTS
+Chaque fait nouveau est développé uniquement dans la section où il est listé dans repartition_des_faits.
+Un fait concernant les deux sections reste développé là où il est listé ; l'autre section le rappelle en une proposition.
+Cette répartition indique un lieu de développement, pas une obligation de commenter chaque fait.
+Les faits de deja_traites restent des références vérifiables : leurs mécanismes ne sont pas à expliquer une deuxième fois.
+La mémoire du bloc précédent résume les mécanismes déclarés dans le texte et sous quel rôle.
+Ses faits_cites sont limités aux citations repérées, sans validation sémantique automatique.
+Les faits non repérés restent disponibles ; un fait disponible ne justifie pas de refaire un mécanisme déjà expliqué.
+Une même planète peut avoir plusieurs rôles : un Soleil déjà étudié comme maître de l'année peut recevoir ici
+sa lecture solaire annuelle. Apporte ce nouvel angle sans refaire les aspects et mécanismes déjà développés.
+La dignité solaire déjà mentionnée comme trait natal dans un bloc précédent n'est pas reprise ici.
+Chaque paragraphe doit faire avancer la lecture par un mécanisme, un fait ou un rôle distinct.
+
+NATAL INTÉGRÉ, CIBLÉ
+En une ou deux phrases au moment pertinent, nuance avec la maison natale où se projette le luminaire RS
+ou son contact RS–natal direct, seulement si cela change ou précise la lecture.
+Les contacts appartiennent au point_rs étudié. Distingue toujours Soleil RS et Soleil natal, Lune RS et Lune natale.
+Les ponts transversaux seront traités ensuite s'ils apportent quelque chose de nouveau.
+
+ASPECTS ET INTERPRÉTATION
+Nomme et explique les aspects lorsqu'ils éclairent le mécanisme.
+Utilise les fiches de la BDD sans reproduire leurs formulations communes ni leurs exemples similaires.
+Intègre deux à quatre situations concrètes dans le bloc, réparties entre ses grands mécanismes : un échange, une décision, une action ou une conséquence observable.
+Prévois au moins une situation dans chacune des sections soleil et lune.
+Formule-les au conditionnel, sans inventer de date. Chaque situation illustre un ressort différent.
+Aucun contexte personnel avant la conclusion. Respecte le genre fourni, sans point médian.
+
+SORTIE PROPOSÉE
+Retourne un objet JSON contenant texte (Markdown client) et memoire (suivi interne).
+La mémoire contient mecanismes (sujet, role, resume) et faits_cites (reference, extrait exact du texte).
+resume décrit l'angle, l'image ou la métaphore déjà employés, sans maison, numéro ou position planétaire.
+Il résume le mécanisme annuel développé, pas un portrait général de personnalité natale.
+sujet et role ne contiennent pas de maison numérotée.
+Le champ role distingue notamment « Soleil RS : direction annuelle » et « Lune RS : besoins émotionnels ».
+Ne liste que les aspects et contacts explicitement écrits avec leurs deux points et cadres RS/natal.
+Ne recopie pas la répartition et ne propose pas de pistes demandant de refaire un mécanisme déjà écrit.
+Aucun identifiant de fait ni commentaire de contrôle dans le texte client.

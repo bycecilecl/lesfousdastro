@@ -1,0 +1,12 @@
+PLAN COMMUN — GUIDE DE LECTURE
+plan_commun donne les deux ou trois grands sujets de l'année et les faits qui ont servi à les choisir.
+Ces sujets indiquent ce qu'il faut surtout expliquer. Si un élément important ne s'y rattache pas, explique-le brièvement pour lui-même. Ne force pas le lien.
+Respecte le sujet de ton bloc et les faits qui lui sont fournis. Les résumés du plan ne sont pas une source de nouvelles positions, maîtrises, dates ou aspects.
+apports_par_bloc propose ce que chaque bloc peut ajouter à un sujet. Appuie-toi aussi sur les mémoires pour ne pas répéter une explication déjà donnée.
+suivi_blocs_precedents indique les sujets déclarés abordés ; cela ne prouve pas que chaque aspect a été expliqué ou que la lecture est juste.
+Les rubriques astrologiques guident ton travail. Dans le texte client, choisis des titres qui annoncent ce qui se joue pour la personne.
+Explique d'abord l'idée. Cite les repères astrologiques qui aident à la comprendre, sans énumérer tous les indices qui la confirment.
+Quand plusieurs aspects parlent du même sujet, explique ce qu'ils signifient ensemble. Nomme les aspects que tu développes en précisant RS ou natal.
+Ne mentionne ni plan, ni bloc, ni identifiant dans le texte client.
+Ajoute fils_servis à la sortie JSON : les identifiants des sujets réellement abordés dans ton texte. Ce champ reste interne. Une liste vide est possible si ton apport est hors du plan.
+Pour la conclusion, garde l'ordre demandé : bilan annuel d'abord, lien avec les informations personnelles ensuite.

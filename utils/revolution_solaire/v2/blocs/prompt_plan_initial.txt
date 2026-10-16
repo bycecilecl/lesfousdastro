@@ -1,0 +1,27 @@
+PRÉPARER LES GRANDS SUJETS DE L'ANNÉE
+À partir des seuls faits calculés fournis, propose deux ou trois grands sujets qui donneront une direction commune au rapport.
+Aucune information personnelle n'est fournie. Ne devine ni la situation, ni les questions, ni le passé de la personne.
+Le classement compte des familles de faits. Il aide à regarder le thème ; il ne mesure pas l'importance astrologique et ne t'oblige pas à retenir les premières planètes.
+Les groupes évitent de compter deux fois un même lien. Plusieurs références peuvent décrire un seul indice. Une planète focale et sa figure ne sont pas deux preuves indépendantes.
+Regarde aussi l'Ascendant et ses maîtres, le Soleil, la Lune, le MC, la profection et les maisons : ces faits restent importants même si leur score est faible.
+Les maisons RS, les maisons natales et la maison annuelle profectée sont distinctes. Le même numéro ne prouve pas une superposition. Une occupation n'est pas une maîtrise.
+Le Soleil RS garde le signe et la dignité du Soleil natal ; sa dignité n'est pas une nouveauté annuelle.
+Les transits indiquent quand certains sujets peuvent être sollicités ; ils ne remplacent pas la lecture de la RS. Les contacts RS–natal sont fixes.
+N'ajoute aucun aspect, placement, maîtrise, date ou lien non fourni. Les faits sont la seule source technique.
+Chaque sujet doit relier plusieurs indices utiles, sans réunir des faits seulement parce qu'ils contiennent le même nom de planète.
+Formule chaque idee avec des mots courants. Dans explication, dis en deux ou trois phrases ce qui se joue, ce qui aide et ce qui peut coincer lorsque les faits le montrent. Aucun catalogue de planètes, image mystérieuse ou anecdote.
+Le but est de donner une direction, pas d'écrire le rapport. Aucun degré, orbe ni date dans ces formulations.
+
+Les cinq blocs suivent cet ordre :
+1 : Ascendant RS, ses maîtres, profection et leurs liens natals utiles.
+2 : Soleil et Lune RS, leurs besoins et leurs liens natals utiles.
+3 : MC RS, ses maîtres et les autres éléments importants encore à développer.
+4 : grandes périodes de l'année, à partir des transits.
+5 : conclusion générale, puis lien avec les informations personnelles qui seront fournies à ce dernier bloc seulement.
+Dans apports_par_bloc, propose un angle court pour les blocs qui peuvent vraiment approfondir ce sujet. Chaque angle doit apporter quelque chose de différent. Ne force pas tous les blocs à expliquer chaque sujet.
+
+SORTIE JSON
+fils contient deux ou trois objets avec idee, explication, appuis et apports_par_bloc.
+appuis liste les clés exactes des faits reçus qui soutiennent le sujet. Une clé seule ne suffit pas : vérifie son contenu dans faits_calcules.
+apports_par_bloc contient des objets avec bloc (1 à 5) et apport (une phrase simple).
+Les identifiants des sujets seront ajoutés par le moteur. Aucun autre texte demandé.

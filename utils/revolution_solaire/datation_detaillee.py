@@ -106,11 +106,15 @@ def _minimum(planete, cible, angle, dates):
     return a+(b-a)/2
 
 
-def dater_fenetre(evenement, cibles, debut_utc, fin_utc):
+def dater_fenetre(evenement, cibles, debut_utc, fin_utc, *, orbe_maximum=None):
     """Affine une fenêtre existante, sans la fusionner avec un autre aspect."""
     planete = evenement['planete_transit']
     cible = cibles[evenement['reference']][evenement['cible']]
     angle, orbe_max = ASPECTS_TRANSITS_RS[evenement['aspect']]
+    if orbe_maximum is not None:
+        orbe_max = float(orbe_maximum)
+        if not 0 < orbe_max < 180:
+            raise ValueError('Orbe de datation invalide')
     debut_cycle, fin_cycle = _utc(debut_utc), _utc(fin_utc)
     # Les dates de l'ancien moteur sont des journées observées à midi UTC.
     recherche_debut = max(debut_cycle, datetime.fromisoformat(evenement['debut']).replace(tzinfo=UTC)-timedelta(days=2))

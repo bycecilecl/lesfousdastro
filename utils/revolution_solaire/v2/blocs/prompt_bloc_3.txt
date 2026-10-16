@@ -1,0 +1,70 @@
+BLOC 3 — MC, MAÎTRES DE LA CUSPIDE 10 RS ET COMPLÉMENTS DU THÈME
+
+Écris directement cette partie du rapport dans la voix demandée, avec des titres lisibles.
+Le texte sera conservé et assemblé aux autres blocs sans réécriture globale.
+Vise environ 700 à 1 200 mots pour tout le bloc selon la matière nouvelle, sans remplissage.
+Aucune comparaison avec une autre année : les blocs précédents étudient la même RS.
+Ne rédige ni les transits ni la conclusion. Aucun contexte personnel avant la conclusion.
+
+Les sections correspondent aux clés de repartition_des_faits : mc, maitres_mc, complements.
+1. mc : le MC RS, ce qui prend une forme visible, la direction professionnelle ou sociale et les responsabilités.
+2. maitres_mc : cette clé désigne les maîtres de la cuspide 10 RS, leur maison, leur état et les aspects qui expliquent comment cette direction se réalise.
+3. complements : les autres planètes, maisons et configurations encore utiles à la lecture. Regroupe-les par mécanisme, sans catalogue planète par planète.
+priorites_complementaires indique les sujets retenus pour ce thème et les faits qui les soutiennent. Explique ces sujets ; leur ordre dans la liste n'a pas de sens astrologique.
+Chaque fait n'a pas besoin de son paragraphe. Développe surtout les sujets importants et ce qu'ils peuvent changer concrètement.
+
+FAITS ET CONTEXTE
+Les faits calculés viennent avant les résumés des blocs précédents. Seuls les faits calculés font référence pour les informations astrologiques.
+REPERES_CALCULES distingue le MC RS, la cuspide 10 RS, ses maîtres et leurs projections natales. Respecte leurs associations.
+Les maîtres fournis gouvernent le signe de la cuspide 10 RS ; si le signe du MC diffère, ne les présente pas comme maîtres du signe du MC.
+Une projection de planète ne décrit pas la projection de toute sa maison RS ; une cuspide ne représente pas toute l'étendue de la maison.
+Les positions natales aident à comprendre les contacts avec la RS. Ne fais pas une lecture complète du thème natal.
+Deux maisons portant le même numéro dans la RS et le natal ne désignent pas automatiquement le même lieu du thème. Compare uniquement leurs projections calculées, en précisant toujours le cadre.
+Un aspect interne RS et un contact RS–natal restent deux liens différents : nomme les deux points et leurs cadres.
+Nomme et explique les aspects lorsqu'ils éclairent un mécanisme. Aucun degré ni orbe dans le texte client.
+Les orbes servent à pondérer les faits techniques ; ne commente pas leur précision dans le texte client avec « serré », « exact », « quasi exact », « large » ou « degré pour degré ».
+Développe les liens au MC et au FC comme un même axe, en conservant le bon angle pour chaque aspect. Un aspect d'une planète au FC ne devient jamais un aspect du MC au FC.
+Associe signes et maisons uniquement d'après les cuspides calculées. Distingue maître de cuspide RS et maître de profection.
+Aucune lecture dérivée de maison à maison (« la 2 de la 10 ») : utilise les relations explicitement fournies dans les faits calculés.
+Une figure fournie est un mécanisme d'ensemble : ne réexplique pas successivement tous les aspects qui la composent.
+Ne transforme pas une conjonction simple en nouvelle figure complexe. Ne déduis aucune dominante ou nouvelle configuration.
+
+CE QUI RESTE À EXPLIQUER
+Chaque fait nouveau est développé dans sa section de repartition_des_faits ; ailleurs, un rappel en une proposition suffit.
+Les faits de references_de_contexte servent à comprendre ou vérifier les autres faits. Ne leur consacre pas de passage à part.
+Les faits de deja_traites restent vérifiables, sans recommencer leur interprétation.
+Les memoires_editoriales indiquent les sujets, rôles et mécanismes déjà développés, jamais de nouveaux faits.
+Ne refais pas l'Ascendant, la profection, la direction solaire ou les besoins lunaires.
+Une planète peut porter plusieurs rôles : si un maître de la cuspide 10 RS est déjà connu, développe seulement ce que ce rôle ajoute.
+Les positions des maîtres de l'Ascendant servent ici de contexte ; leurs nouveaux aspects ou une figure peuvent apporter un angle complémentaire.
+Ne refais pas les mécanismes listés dans les mémoires précédentes sans un apport distinct fondé sur les nouveaux faits.
+Si une interception a déjà été expliquée, rappelle-la brièvement. Relie-la au MC ou à une autre figure seulement si ce lien apporte une explication nouvelle et précise.
+Le Soleil a déjà sa lecture : aucune nouvelle mention de sa dignité dans ce bloc.
+Explique chaque mécanisme une seule fois. Ne reformule pas le même ressort dans les paragraphes suivants.
+
+VOIX ET SITUATIONS
+Conserve la voix légère, profonde, drôle, sarcastique, pète-sec et percutante demandée dans le style commun.
+Intègre deux à quatre situations concrètes : au moins une pour le cap du MC et une pour un mécanisme complémentaire.
+Les situations montrent un échange, une décision, une action ou une conséquence observable, au conditionnel, sans date inventée.
+Varie leurs ouvertures ; ne les commence pas systématiquement par « Tu pourrais ».
+Respecte le genre fourni, sans point médian. Ne cite aucun auteur ni source documentaire dans le texte client.
+Adresse-toi à la personne en tu ; évite le « on » générique.
+Ne prête aucun passé à la personne : pas de « depuis toujours », « vieux », « vieille », « ancien » pour lui attribuer une histoire. Décris l'année en cours.
+Si les positions de Rahu et Ketu apportent une nuance utile, une seule phrase sur leurs signes et maisons calculés suffit. Leurs aspects restent exclus ; aucune lecture évolutive générale.
+
+SORTIE
+Retourne un objet JSON avec texte (Markdown client) et memoire (suivi interne).
+memoire contient mecanismes (sujet, role, resume) et faits_cites (reference, extrait exact).
+Le champ resume explique en une phrase simple ce qui se joue pour la personne, sans image ni formule mystérieuse.
+Résume uniquement les nouveaux mécanismes réellement expliqués ; ne recopie pas la mémoire des blocs précédents.
+sujet, role et resume ne contiennent ni maison numérotée ni position planétaire ; les faits calculés restent transmis séparément.
+role distingue notamment « MC RS : direction visible », « maître de la cuspide 10 RS » et le rôle propre des autres planètes.
+faits_cites contient uniquement les aspects et contacts explicitement nommés, avec un court extrait exact portant sur un seul lien.
+Ne liste ni positions, ni cuspides, ni maîtrises, ni figures dans faits_cites. Ne recopie pas les listes de répartition.
+Aucun identifiant de fait ni commentaire de contrôle dans le texte client.
+
+APPUIS DE LA MÉMOIRE
+Pour chaque mécanisme, appuis liste les clés exactes des faits calculés reçus qui soutiennent ce que tu as écrit.
+Inclue les positions, maîtrises, aspects, contacts ou figures utiles à ce mécanisme ; ne recopie pas toutes les données du bloc.
+N'invente aucune clé et ne cite aucun fait absent des données reçues. Un identifiant de mémoire seul n'apporte pas un nouveau fait calculé.
+appuis reste interne. faits_cites conserve son rôle distinct : repérer les aspects ou contacts explicitement nommés dans le texte.

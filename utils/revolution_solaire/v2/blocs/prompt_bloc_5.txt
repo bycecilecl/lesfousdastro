@@ -1,0 +1,46 @@
+BLOC 5 — BILAN DE L’ANNÉE, PUIS LIEN AVEC LA SITUATION PERSONNELLE
+
+Rédige une vraie conclusion d’environ une page : 400 à 550 mots au total, dans la voix demandée.
+Deux parties dans cet ordre, produites dans le même appel : le bilan de l'année, puis le lien avec la situation personnelle.
+Les paragraphes se lisent d’un seul tenant, sans titre ni identifiant technique. Le moteur les assemble sans réécriture.
+
+1. BILAN ANNUEL — TOUJOURS PRÉSENT
+Résume d’abord ce que cette année met en jeu, indépendamment de toute information personnelle renseignée.
+Développe les deux ou trois plus grands enjeux du rapport et ce qui les relie : direction générale, tensions, appuis, possibilités et rythme de l’année.
+Chaque enjeu retenu doit avoir son propre texte développé. Une liste de sujets déclarés ne remplace pas leur rédaction.
+Mets les sujets les plus importants en premier. Ne résume pas le rapport bloc par bloc, planète par planète ou transit par transit.
+Tiens compte de la profection et de son maître pour choisir ces sujets. Quand plusieurs éléments parlent du même sujet, explique ce qu’ils renforcent ensemble.
+Les mémoires indiquent ce qui a été interprété ; les repères calculés vérifient les références astrologiques utiles.
+Quand un mécanisme comporte appuis, ces clés désignent ses repères calculés : conserve leur cadre et leur nature.
+Une mémoire sans appuis reste une interprétation antérieure, jamais une source de nouveaux faits techniques.
+Garde quelques repères compréhensibles pour expliquer le bilan, sans refaire les démonstrations des autres parties.
+Le contexte personnel ne doit ni remplacer ce bilan ni décider à lui seul quels enjeux astrologiques sont importants.
+Avec un contexte exploitable, consacre environ 300 à 400 mots à ce bilan ; sans contexte, développe le bilan sur 400 à 550 mots.
+
+2. LIEN AVEC LA SITUATION PERSONNELLE — SI ELLE EST RENSEIGNÉE
+Après le bilan annuel, relie-le aux contraintes, projets, besoins et questions renseignés au départ, en environ 100 à 150 mots.
+Cette partie ajoute une application concrète ; elle ne répète pas le bilan et ne se limite pas à reformuler le formulaire.
+Réponds aux préoccupations formulées à partir des possibilités et limites de la lecture annuelle.
+Une information personnelle peut concerner plusieurs sujets du bilan : explique leurs liens. Ne fais pas un paragraphe par réponse au formulaire.
+Montre ce que la personne pourrait choisir ou organiser, ce qui peut l'aider et ce qui peut lui compliquer les choses.
+Aucune réponse binaire assurée, promesse de succès ou date d’événement inventée.
+Un soutien astrologique ne suffit pas à assurer qu’un projet rapportera de l’argent ou qu’un accord aboutira.
+Ne transforme pas les contraintes racontées en causes astrologiques certaines. Le contexte personnalise la lecture ; il ne valide pas une prédiction.
+Sans contexte exploitable, cette partie est vide et le bilan annuel reste complet. Ne commente pas l’absence d’informations.
+Une réponse « RAS » n’oblige pas à développer ce domaine.
+
+SUR L’ENSEMBLE DE LA CONCLUSION
+Les moments de l’année donnent le rythme général : ne refais pas le calendrier et n’ajoute aucune période ni date précise.
+Tous les transits retenus pour chaque période sont fournis, sans limite de deux. Tiens compte de ce qui aide et de ce qui complique les choses. Regroupe-les par sujet dans le bilan, sans faire une liste de transits.
+Ne dis pas qu’un transit s’achève simplement parce que l’année étudiée arrive à sa fin.
+Ne reprends pas les images des mémoires mot pour mot. Ne mets pas en scène une nouvelle anecdote détaillée ; utilise les situations renseignées dans la seconde partie.
+Pas de formule finale automatique ni de morale. Termine sur le choix ou l’enjeu décisif, avec la même voix que le reste.
+
+SORTIE
+Retourne un objet JSON avec synthese_annuelle, mise_en_perspective_personnelle et informations_personnelles_utilisees.
+synthese_annuelle contient deux ou trois objets, chacun avec enjeu (intitulé interne bref) et texte (paragraphes client qui développent réellement cet enjeu).
+Les textes de synthese_annuelle forment ensemble le bilan annuel ; ils se complètent sans redite.
+mise_en_perspective_personnelle contient uniquement les paragraphes client de la seconde partie, ou une chaîne vide sans contexte exploitable.
+informations_personnelles_utilisees liste les clés du contexte effectivement mobilisées dans cette seconde partie.
+Le moteur assemble d’abord les textes du bilan, puis la mise en perspective personnelle. Aucun texte global supplémentaire n’est demandé.
+Les intitulés internes et le suivi ne sont pas affichés au client.

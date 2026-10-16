@@ -1,0 +1,73 @@
+BLOC 4 — LES PÉRIODES SIGNIFICATIVES DE L’ANNÉE
+
+Rédige un texte distinct par période, dans la voix demandée. Les textes seront conservés et assemblés sans réécriture globale.
+Vise cinq périodes pour un cycle riche, jusqu’à cinq au maximum. S’il manque de la matière, moins de périodes sont préférables à du remplissage.
+Environ 900 à 1 300 mots pour l’ensemble selon la matière ; ce n’est pas un plancher obligatoire.
+Ne refais pas le portrait RS ou natal et ne rédige pas la conclusion. Aucun contexte personnel ici.
+
+PÉRIODES ET AMBIANCES
+Regroupe les moments significatifs dans l’ordre chronologique. Chaque période a un titre d’ambiance, une plage de lecture et un texte propre.
+Explique ce qui compte pendant cette période et ce qui pourrait se passer, sans enchaîner les définitions d’aspects.
+Les transits vers la RS et vers le natal peuvent parler du même sujet. Précise toujours si le point touché est RS ou natal.
+Explique les deux lorsqu’ils apportent quelque chose d’utile. N’ajoute pas de transit natal ou RS juste pour équilibrer la période.
+Les dates de la période ne doivent pas forcément couvrir toute la durée de chaque transit. Un transit long peut agir pendant plusieurs périodes et se manifester de différentes façons.
+Les reprises éloignées d’une même famille appartiennent aux moments où elles se produisent, pas toutes au premier chapitre qui nomme le transit.
+Les périodes peuvent se chevaucher si les enjeux le justifient ; ne découpe pas arbitrairement l’année en trimestres.
+Les déclencheurs Mars précisent une dynamique lente retenue, sans devenir des chapitres autonomes.
+
+NATAL, RS ET PROFECTION
+roles_cible est construit dans le cadre de la cible : une maison occupée ou gouvernée au natal reste natale, un rôle RS reste RS.
+maison_occupee est le placement de la cible. maisons_gouvernees contient exclusivement ses maîtrises calculées. Ne transforme jamais « occupe la XI » en « gouverne la XI ».
+roles_annuels est distinct de ces maîtrises : le maître de la profection ne se déduit pas de la maison occupée par la Lune ou une autre cible.
+Pour une cible natale, les maisons gouvernées et occupées indiquent les domaines concernés ; utilise les rôles utiles à la lecture sans les réciter tous.
+Le maître de l’année garde ce rôle de profection quel que soit le cadre de sa position. Il ne prend pas automatiquement les maîtrises de l’autre thème.
+Une planète transite un point natal : ne prétends pas qu’elle traverse une maison natale, cette donnée n’est pas fournie.
+rappel_sujets_et_roles indique les sujets des lectures conservées, sans texte ni résumé à reprendre.
+liens_rs_associes contient les aspects entre la position RS de la planète qui transite et le point RS touché. Garde le type de chaque aspect, même s'il diffère de celui du transit.
+liens_nataux_associes contient des liens natals calculés ou des contacts directs RS–natal de la même planète RS vers la cible natale.
+ponts_rs_natal_cible contient les contacts calculés entre le point natal touché et des points RS. Explique ce qu'ils ajoutent, en précisant les points concernés et RS ou natal.
+Un transit natal significatif peut apporter une nuance distincte ; ne force pas une identité de sens avec la RS.
+Distingue planète mobile, position RS et position natale. Les contacts RS–natal sont fixes, les transits sont datés.
+Le Soleil RS, lorsqu’il est signalé comme alias, partage la position du Soleil natal : une seule activation, pas deux événements.
+Les axes regroupés conservent les deux contacts, sans double développement du même mécanisme.
+
+DATES AFFICHÉES PAR LE MOTEUR
+reperes_calendrier.jours associe chaque identifiant J à un jour calculé. Choisis repere_debut et repere_fin parmi ces identifiants ; ne renvoie aucune date libre.
+Choisis une plage cohérente avec les fenêtres et les passages que tu expliques. Un transit n’a pas à occuper chaque jour de cette plage.
+reperes_calendrier.passages_exacts contient exclusivement des passages exacts archivés. Sélectionne au maximum deux ou trois identifiants utiles par période dans reperes_exacts.
+Le moteur affiche les plages dans les titres et les passages repères sous chaque texte.
+Dans texte, n’écris aucune date précise ni datation approximative (« fin novembre », « mi-avril », « un mois et demi »). Appuie l’analyse sur les repères affichés, sans les paraphraser.
+Une phase directe ou rétrograde n’est pas une prédiction : précise seulement ce qu’elle peut changer dans la façon dont l’enjeu se manifeste.
+continuite_ouverture peut identifier un aspect_interne_rs ou un contact_rs_natal qui se prolonge : ne le présente pas comme un nouveau facteur indépendant.
+Sans correspondance fournie, n’invente pas d’aspect RS à partir de la seule coupure à l’ouverture du cycle.
+usage rappel_bref signifie arrière-plan : une proposition suffit, sans créer ou étendre une période pour cette seule fenêtre.
+La fin d’une fenêtre coupée par le cycle n’annonce pas nécessairement la fin du transit dans le ciel.
+nature_bornes_fenetre précise cette distinction pour chaque transit : fin = borne_du_cycle signifie seulement fin de l’année étudiée. N’écris pas que le transit « termine », « finit » ou « s’achève » pour cette raison ; décris son activité dans la dernière période et laisse sa suite ouverte.
+fin = sortie_d_orbe_calculee désigne la sortie de cette fenêtre, pas l’absence certaine de toute reprise ultérieure.
+Les dates sont des jours UTC. Ne raconte pas le calcul, le filtre ou le contrôle au client.
+Aucun degré, orbe ni dignité dans le texte. Ne qualifie pas la précision d’un aspect.
+
+VOIX ET CONSÉQUENCES
+Explique l’ambiance de la période, les transits importants et ce qu’ils pourraient changer. Montre les choix possibles lorsque cela aide à comprendre la situation.
+Nomme et explique les aspects en précisant les cibles RS ou natales, sans catalogue technique.
+Trois scènes concrètes au conditionnel au maximum sur l’ensemble. Ne répète pas le même ressort dans plusieurs scènes.
+La lecture peut être franche et mordante ; pas de phrase ironique obligatoire ni de chute imposée.
+Aucun renvoi à un autre bloc, à une source ou au travail de rédaction. Aucun passé inventé ni événement annoncé comme certain.
+
+SORTIE
+Retourne un objet JSON avec periodes et memoire ; aucun texte global séparé des périodes.
+Chaque période contient titre, repere_debut, repere_fin, transits, reperes_exacts et texte.
+Les identifiants de jours viennent de reperes_calendrier.jours, les identifiants EXACT de reperes_calendrier.passages_exacts.
+transits contient uniquement les références TRANSIT reçues que cette période utilise ; un rappel bref peut accompagner la période sans en déterminer les bornes.
+Les passages exacts sélectionnés doivent appartenir à la plage et à l’un des transits de la période.
+texte contient les paragraphes client, sans titre, identifiants ni dates : le moteur ajoute le titre daté et les passages repères.
+memoire contient mecanismes (sujet, role, resume) et faits_cites (reference, extrait exact).
+Le champ resume explique en une phrase simple ce qui se joue pour la personne, sans image ni formule mystérieuse.
+Les résumés expliquent ce que ces périodes ajoutent à la lecture de l'année, sans positions planétaires ni maisons numérotées.
+faits_cites référence uniquement les transits réellement nommés, avec un court extrait littéral de texte.
+
+APPUIS DE LA MÉMOIRE
+Pour chaque mécanisme, appuis liste les clés exactes des faits calculés reçus qui soutiennent ce que tu as écrit.
+Inclue les positions, maîtrises, aspects, contacts ou figures utiles à ce mécanisme ; ne recopie pas toutes les données du bloc.
+N'invente aucune clé et ne cite aucun fait absent des données reçues. Un identifiant de mémoire seul n'apporte pas un nouveau fait calculé.
+appuis reste interne. faits_cites conserve son rôle distinct : repérer les transits explicitement nommés dans le texte.
