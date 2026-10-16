@@ -16,7 +16,7 @@
     .actions { text-align: center; margin: 30px 0; padding: 20px; background: #f0f8ff; border-radius: 8px; }
     .btn { display: inline-block; padding: 12px 24px; background: #1f628e; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; }
     .btn:hover, .btn:focus { background: #144a6b; color: #fff; }
-    .content-wrapper { border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+    .content-wrapper { background: #fff; }
     .rapport-frame { display: block; width: 100%; min-height: 1800px; border: 0; background: #fff; }
     .warning { color: #865e21; background: #fff8dc; padding: 12px 15px; border-radius: 8px; }
     .footer-link { text-align: center; margin-top: 30px; }
@@ -58,7 +58,23 @@
       if (!documentRapport.getElementById('rs-brand-colors')) {
         const style = documentRapport.createElement('style');
         style.id = 'rs-brand-colors';
-        style.textContent = ':root{--plum:#1f628e;--rose:#3498db;--paper:#fff;--mist:#f0f8ff;--line:#d7e7f0}h3{color:#144a6b!important}body{padding-top:26px}';
+        style.textContent = `
+          :root { --plum:#1f628e; --rose:#3498db; --paper:#fff; --mist:#f0f8ff; --line:#d7e7f0; }
+          html, body { background:#fff; }
+          body { padding-top:26px; }
+          h3 { color:#144a6b!important; }
+          .disclaimer {
+            margin:0 0 2.5rem;
+            padding:1rem 1.1rem;
+            border:1px solid #dee2e6;
+            border-radius:8px;
+            background:#f8f9fa;
+            color:#4d4d4d;
+            font:.85rem/1.6 Arial,Helvetica,sans-serif;
+          }
+          .disclaimer p { margin:0 0 .75rem; }
+          .disclaimer p:last-child { margin-bottom:0; }
+        `;
         documentRapport.head.appendChild(style);
       }
       const hauteur = Math.max(documentRapport.documentElement.scrollHeight, documentRapport.body?.scrollHeight || 0);
