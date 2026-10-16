@@ -29,7 +29,8 @@
 .rs-weekend-pack .rs-weekend-price-note { color: #197c7e; font-weight: 700; }
 .rs-weekend-select { width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; border: 0; border-radius: 11px; padding: 14px 10px; background: linear-gradient(120deg, #e79b22, #d47a16); color: #fff; font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; }
 .rs-weekend-pack .rs-weekend-select { background: linear-gradient(120deg, #208b8e, #197176); }
-.rs-weekend-select:focus-visible { outline: 3px solid #1f628e; outline-offset: 4px; }
+.rs-weekend-select::after { content: ''; position: absolute; inset: 0; border-radius: 22px; }
+.rs-weekend-card:has(.rs-weekend-select:focus-visible) { outline: 3px solid #1f628e; outline-offset: 4px; }
 .rs-weekend-card.selected { border-color: #197c7e; box-shadow: 0 0 0 3px #197c7e22; }
 .rs-weekend-validity { margin: 17px 0 0; text-align: center; font-size: 11px; color: #829099; }
 @media (max-width: 650px) {
