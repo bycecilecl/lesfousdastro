@@ -57,7 +57,7 @@ def exporter_pdf(rapport_html, destination, *, personne, lieu_rs, annee):
     destination.parent.mkdir(parents=True, exist_ok=True)
     (destination.parent / "rapport_pdf.html").write_text(html_pdf, encoding="utf-8")
     temporaire = destination.with_name(destination.stem + ".en_cours.pdf")
-    if not convertir(html_pdf, str(temporaire)) or not temporaire.exists() or not temporaire.stat().st_size:
+    if not convertir(html_pdf, str(temporaire), page_header="Révolution Solaire - Les Fous d'Astro") or not temporaire.exists() or not temporaire.stat().st_size:
         temporaire.unlink(missing_ok=True)
         raise RuntimeError("Le texte est conservé, mais le PDF n'a pas pu être créé. Une reprise identique réutilisera les réponses archivées.")
     temporaire.replace(destination)
