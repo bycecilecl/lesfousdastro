@@ -1,3 +1,4 @@
+from utils.report_presentation import report_text_to_html
 from services.generation_access import paid_analysis
 # routes/profil_amoureux_module.py
 # Module complet pour l'Analyse Amoureuse (4 modules + PDF + email)
@@ -7,6 +8,7 @@ import os
 import base64
 from datetime import datetime
 import inspect
+import re
 import logging
 from threading import Thread
 
@@ -93,14 +95,8 @@ def calcul_theme_safe(**kwargs):
 
 
 def _texte_en_html_paragraphes(texte: str) -> str:
-    """Transforme un texte brut en <p>…</p> propres pour le HTML/PDF."""
-    if not texte:
-        return ""
-    blocs = [b.strip() for b in texte.split("\n\n") if b.strip()]
-    out = []
-    for b in blocs:
-        out.append(f"<p>{b.replace(chr(10), ' ')}</p>")
-    return "\n".join(out)
+    """Présente les paragraphes et titres du rapport, sans modifier le texte source."""
+    return report_text_to_html(texte)
 
 
 def generer_html_final_amour_pdf(
@@ -171,6 +167,15 @@ def generer_html_final_amour_pdf(
             page-break-after: avoid;
         }}
         h3 {{ color: #34495e; margin-top: 30px; }}
+        .section-content h3, .section-content h4,
+        .section-content h5, .section-content h6 {{
+            color: #34495e;
+            line-height: 1.35;
+            margin: 24px 0 12px;
+            page-break-after: avoid;
+        }}
+        .section-content h3 {{ font-size: 1.25em; }}
+        .section-content h4 {{ font-size: 1.1em; }}
         main p {{ margin-bottom: 15px; text-align: justify; }}
         .section {{ margin-bottom: 40px; page-break-inside: avoid; }}
         .disclaimer {{
@@ -363,7 +368,7 @@ def generer_profil_amoureux_pdf_s3(infos, envoyer_email=False):
         logo_base64=logo_base64,
     )
 
-    html_to_pdf(html_pdf, pdf_path)
+    html_to_pdf(html_pdf, pdf_path, page_header="Profil Amoureux - Les Fous d'Astro")
 
     pdf_final_url = upload_client_pdf(
         pdf_path, key_prefix="profil_amoureux", download_filename=f"{nom_fichier}.pdf"
@@ -639,7 +644,7 @@ def profil_amoureux_complet():
             logo_base64=logo_base64,
         )
 
-        html_to_pdf(html_pdf, pdf_path)
+        html_to_pdf(html_pdf, pdf_path, page_header="Profil Amoureux - Les Fous d'Astro")
         print(f"✅ PDF généré : {pdf_path}")
 
         # No public fallback: preserve the private file if S3 fails.

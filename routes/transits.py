@@ -179,7 +179,7 @@ def transits_complet():
     )
     chemin_pdf = private_pdf_path()
 
-    if not html_to_pdf(html_pdf, chemin_pdf):
+    if not html_to_pdf(html_pdf, chemin_pdf, page_header="Point Transits - Les Fous d'Astro"):
         abort(500, description="Impossible de créer le PDF du Point Transits.")
 
     try:

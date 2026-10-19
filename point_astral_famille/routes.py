@@ -1,3 +1,4 @@
+from utils.report_presentation import report_text_to_html
 from services.generation_access import paid_analysis
 # routes/point_astral_blocs.py - VERSION HARMONISÉE
 from flask import Blueprint, render_template, session, send_from_directory, abort, request, url_for,current_app
@@ -379,7 +380,7 @@ def generer_point_astral_famille_pdf_s3(infos, envoyer_email=False):
         logo_base64=logo_base64,
     )
 
-    html_to_pdf(html_pdf, pdf_path)
+    html_to_pdf(html_pdf, pdf_path, page_header="Point Astral Famille - Les Fous d'Astro")
 
     current_app.logger.info(f"✅ PDF Point Astral généré: {pdf_path}")
 
@@ -854,7 +855,7 @@ def point_astral_famille_complet():
             #carte_astrale_data_uri=carte_astrale_data_uri,
         )
 
-        html_to_pdf(html_pdf, pdf_path)
+        html_to_pdf(html_pdf, pdf_path, page_header="Point Astral Famille - Les Fous d'Astro")
         print(f"✅ PDF généré: {pdf_path}")
 
         # No public fallback: preserve the private file if S3 fails.
@@ -1002,14 +1003,8 @@ def transformer_en_sections_fallback(texte_brut: str) -> str:
         contenu_lignes = lignes[1:] if len(lignes) > 1 else lignes
         contenu = '\n'.join(contenu_lignes).strip()
         
-        # Convertir en paragraphes HTML
-        paragraphes = contenu.split('\n\n')
-        contenu_html = ""
-        for para in paragraphes:
-            para_clean = para.strip().replace('\n', ' ')
-            if para_clean:
-                contenu_html += f"<p>{para_clean}</p>\n"
-        
+        contenu_html = report_text_to_html(contenu)
+
         # Déterminer la classe CSS
         classe = "conclusion" if i == len(blocs) else "section"
         

@@ -48,32 +48,13 @@ def md_light_to_html(text: str) -> str:
             flush_para()
             continue
 
-        # Titres de premier niveau : ne pas laisser le marqueur Markdown
-        # dans le texte envoyé au moteur PDF.
-        if line.startswith('# '):
+        titre = re.fullmatch(r"(#{1,6})\s+(.+?)(?:\s+#+)?", line)
+        if titre:
             flush_ul()
             flush_para()
-            titre = line[2:].strip()
-            titre = _inline_markdown(titre)
-            html.append(f'<h1 class="section-title">{titre}</h1>')
-            continue
-
-        # Titres ##
-        if line.startswith('## '):
-            flush_ul()
-            flush_para()
-            titre = line[3:].strip()
-            html.append(f'<h2 class="section-title">{titre}</h2>')
-            continue
-
-        # [NOUVEAU] Titres ### -> h3
-        if line.startswith('### '):
-            flush_ul()
-            flush_para()
-            titre = line[4:].strip()
-            # NB : on a déjà supprimé les cas "Introduction"/"Conclusion" plus haut
-            if titre:  # par sûreté
-                html.append(f'<h3 class="section-subtitle">{titre}</h3>')
+            niveau = len(titre.group(1))
+            classe = "section-title" if niveau <= 2 else "section-subtitle"
+            html.append(f'<h{niveau} class="{classe}">{_inline_markdown(titre.group(2))}</h{niveau}>')
             continue
 
         # Puces -

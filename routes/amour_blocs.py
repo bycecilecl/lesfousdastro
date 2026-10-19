@@ -1,3 +1,4 @@
+from utils.report_presentation import report_text_to_html
 from utils.client_pdf_storage import private_pdf_path, upload_client_pdf
 from services.generation_access import paid_analysis
 # routes/amour_blocs.py
@@ -45,14 +46,8 @@ def calcul_theme_safe(**kwargs):
 
 
 def _texte_en_html_paragraphes(texte: str) -> str:
-    """Transforme un texte brut en <p>…</p> propres pour le HTML/PDF."""
-    if not texte:
-        return ""
-    blocs = [b.strip() for b in texte.split("\n\n") if b.strip()]
-    out = []
-    for b in blocs:
-        out.append(f"<p>{b.replace('\n', ' ')}</p>")
-    return "\n".join(out)
+    """Présente les paragraphes et titres du rapport, sans modifier le texte source."""
+    return report_text_to_html(texte)
 
 
 def generer_html_final_amour_pdf_only(
@@ -326,7 +321,7 @@ def amour_complet():
             logo_base64=logo_base64,
         )
 
-        html_to_pdf(html_pdf, pdf_path)
+        html_to_pdf(html_pdf, pdf_path, page_header="Profil Amoureux - Les Fous d'Astro")
         print(f"✅ PDF Amour généré : {pdf_path}")
 
         # No public fallback: preserve the private file if S3 fails.

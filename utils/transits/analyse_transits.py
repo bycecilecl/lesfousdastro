@@ -1,3 +1,4 @@
+from utils.report_presentation import report_text_to_html
 # utils/transits/analyse_transits.py
 
 from .modeles import ResultatTransits
@@ -68,20 +69,7 @@ def texte_en_paragraphes_html(texte: str) -> str:
         return ""
 
     texte = securiser_precision_temporelle(texte)
-    blocs = [b.strip() for b in texte.split("\n\n") if b.strip()]
-
-    elements = []
-    for bloc in blocs:
-        lignes = bloc.splitlines()
-        if lignes[0].startswith("## "):
-            elements.append(f"<h3>{lignes[0][3:].strip()}</h3>")
-            contenu = " ".join(ligne.strip() for ligne in lignes[1:] if ligne.strip())
-            if contenu:
-                elements.append(f"<p>{contenu}</p>")
-        else:
-            elements.append(f"<p>{bloc.replace(chr(10), ' ')}</p>")
-
-    return "\n".join(elements)
+    return report_text_to_html(texte)
 
 def generer_dates_periode(
     date_reference: datetime,

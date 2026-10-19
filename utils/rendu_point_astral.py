@@ -1,47 +1,24 @@
+from utils.report_presentation import report_text_to_html
 # utils/rendu_point_astral.py - FIX FINAL
 
 import re
 
 def transformer_en_sections(texte_brut: str) -> str:
-    print("Début transformer_en_sections (fix final)")
-    
-    # Nouveau pattern pour vos titres actuels
-    pattern = r'##\s*([^\n]+)'
-    
-    try:
-        # Diviser par les sections ##
-        sections = re.split(pattern, texte_brut)
-        
-        # Supprimer la première partie vide
-        if sections and not sections[0].strip():
-            sections = sections[1:]
-        
-        sections_html = []
-        
-        # Traiter par paires (titre, contenu)
-        for i in range(0, len(sections), 2):
-            if i + 1 < len(sections):
-                titre = sections[i].strip()
-                contenu = sections[i + 1].strip()
-                
-                if len(contenu) > 50:
-                    contenu_html = nettoyer_contenu_html(contenu)
-                    classe = determiner_classe_section(titre)
-                    
-                    section_html = f'''
-                        <section class="{classe}">
-                            <h2>{titre}</h2>
-                            <div class="section-content">
-                                {contenu_html}
-                            </div>
-                        </section>'''
-                    sections_html.append(section_html)
-        
-        return '\n'.join(sections_html)
-        
-    except Exception as e:
-        print(f"Erreur: {e}")
-        return fallback_simple(texte_brut)
+    """Sépare les modules sans confondre ## et les sous-titres ###."""
+    parties = re.split(r"(?m)^##(?!#)[ \t]+([^\n]+)\n?", texte_brut)
+    sections = []
+    if parties[0].strip():
+        sections.append('<div class="introduction">' + report_text_to_html(parties[0]) + '</div>')
+    for i in range(1, len(parties), 2):
+        titre = parties[i].strip()
+        contenu = parties[i + 1]
+        classe = determiner_classe_section(titre)
+        sections.append(
+            f'<section class="{classe}"><h2>{titre}</h2>'
+            + '<div class="section-content">' + report_text_to_html(contenu)
+            + '</div></section>'
+        )
+    return "\n".join(sections)
 
 
 def fallback_simple(texte_brut: str) -> str:
@@ -110,25 +87,4 @@ def determiner_classe_section(titre: str) -> str:
 
 
 def nettoyer_contenu_html(contenu: str) -> str:
-    """
-    Nettoie et formate le contenu en HTML propre
-    """
-    if not contenu:
-        return "<p>Contenu en cours...</p>"
-    
-    # Supprimer les séparateurs de l'orchestration
-    contenu = re.sub(r'\n\s*---\s*\n', '\n\n', contenu)
-    
-    # Diviser en paragraphes
-    paragraphes = re.split(r'\n\s*\n', contenu.strip())
-    contenu_html = ""
-    
-    for para in paragraphes:
-        para_clean = para.strip().replace('\n', ' ')
-        # Supprimer les numéros en début de paragraphe
-        para_clean = re.sub(r'^\d+\.\s*', '', para_clean)
-        
-        if para_clean and len(para_clean) > 20:
-            contenu_html += f"<p>{para_clean}</p>\n"
-    
-    return contenu_html if contenu_html else f"<p>{contenu}</p>"
+    return report_text_to_html(contenu)

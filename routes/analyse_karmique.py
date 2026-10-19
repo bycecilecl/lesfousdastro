@@ -1,3 +1,4 @@
+from utils.report_presentation import report_text_to_html
 from services.generation_access import paid_analysis
 from flask import (
     Blueprint,
@@ -133,25 +134,16 @@ def generer_analyse_karmique_html(infos: dict) -> tuple:
         intro_toc = CHAPTER_INTROS.get(bid, "")
 
         if contenu:
-            paragraphes = []
-            for para in contenu.split("\n\n"):
-                para = para.strip()
-                if para:
-                    paragraphes.append(para.replace("\n", " "))
-
-            intro_html = ""
-            if (
-                paragraphes
-                and len(paragraphes[0]) < 200
-                and paragraphes[0].endswith(".")
-                and len(paragraphes) > 1
-            ):
-                intro_html = f'<div class="chapter-intro">{paragraphes[0]}</div>'
-                paragraphes = paragraphes[1:]
-
-            contenu_html = intro_html + "\n".join(
-                f"<p>{para}</p>" for para in paragraphes if para
-            )
+            premiere_partie, separateur, suite = contenu.partition("\n\n")
+            if (separateur and len(premiere_partie) < 200
+                    and premiere_partie.endswith(".")
+                    and not premiere_partie.lstrip().startswith("#")):
+                contenu_html = (
+                    '<div class="chapter-intro">' + premiere_partie.replace("\n", " ") + '</div>'
+                    + report_text_to_html(suite)
+                )
+            else:
+                contenu_html = report_text_to_html(contenu)
         else:
             contenu_html = "<p>Contenu en cours de génération.</p>"
 
@@ -553,7 +545,7 @@ def generer_analyse_karmique_pdf_s3(infos, envoyer_email=False):
         logo_base64=logo_base64,
     )
 
-    ok_pdf = html_to_pdf(html_pdf, pdf_path)
+    ok_pdf = html_to_pdf(html_pdf, pdf_path, page_header="Profil Karmique - Les Fous d'Astro")
 
     if not ok_pdf:
         raise RuntimeError("Échec génération PDF analyse karmique")
@@ -632,7 +624,7 @@ def analyse_karmique_complete():
         )
 
         # 6) Génération PDF
-        ok_pdf = html_to_pdf(html_pdf, pdf_path)
+        ok_pdf = html_to_pdf(html_pdf, pdf_path, page_header="Profil Karmique - Les Fous d'Astro")
 
         # No public fallback: preserve the private file if S3 fails.
         pdf_final_url = upload_client_pdf(
