@@ -75,27 +75,55 @@ def report_prompt(meta, placements, priorities, figures):
 à partir des données fournies. Respecte leur classement, leur ordre et leur contenu :
 ne fais pas de nouvelle sélection.
 
-Structure : Tes Défis, Tes Potentiels, Dynamiques mixtes, puis Synthèse.
+OBJECTIF ÉDITORIAL
+Produis une lecture approfondie d'environ 3 pages. Environ 1 750 à 1 950 mots
 
-Construis une lecture, pas un catalogue. Regroupe les éléments qui décrivent une
-même dynamique sans effacer leurs particularités. Ancre chaque interprétation
-dans les signes, maisons et états fournis. Explique le mécanisme psychologique,
-ses contradictions, ses manifestations concrètes possibles et les ressources mobilisables.
+STRUCTURE ET PLACE ACCORDÉE À CHAQUE PARTIE
+Utilise exactement ces quatre titres de niveau 2, sans titre général répété :
+## Tes Défis : environ 550 mots.
+## Tes Potentiels : environ 550 mots.
+## Dynamiques mixtes : environ 500 mots.
+## Synthèse : environ 250 mots.
+Les volumes sont des repères, pas des nombres à afficher dans le rapport.
+Ouvre Tes Défis par deux phrases qui donnent le fil conducteur de la lecture.
+Utilise quelques sous-titres courts de niveau 3 ; rédige le fond en paragraphes.
+Les potentiels doivent être aussi développés et concrets que les défis.
 
-Tutoiement. Ton direct, incarné, psychologique et mordant, avec une pointe d’humour
-noir pertinente. Pas de flatterie, de métaphores décoratives ni de conseils
-interchangeables. Formule les vécus supposés au conditionnel ; n’invente aucun
-fait astrologique ou biographique. Genre grammatical : {meta.get('genre', 'neutre')}.
-Une maison n'est pas une dignité ni une conjonction à un angle : n'affirme une
-conjonction que si son orbe figure dans les données. N'interprète pas le signe
-d'une transsaturnienne hors maître d'Ascendant.
+PROFONDEUR SANS RÉPÉTITION
+Chaque paragraphe traite 4 à 5 dynamiques maximum, sans chercher à atteindre ce plafond.
+Construis une lecture, pas un catalogue.
+Regroupe les éléments qui décrivent
+une même dynamique sans effacer leurs particularités.
+Pour chaque dynamique principale, relie les facteurs astrologiques fournis, explique leur articulation,
+leur contradiction éventuelle et 1 ou 2 manifestation concrète possible.
+Dans Tes Potentiels, explique aussi comment les ressources pourraient être mobilisées.
+Dans Dynamiques mixtes, intègre toutes les figures classées et leurs interactions :
+montre ce qu'elles ajoutent à la lecture, sans résumer les deux premières parties.
+Comment une ressource sélectionnée répond au défi dominant dans une situation possible et concrète.
 
-Vise 1 700 à 2 100 mots : assez de profondeur, sans répétitions ni inventaire exhaustif.
-Chaque paragraphe traite quatre dynamiques maximum, sans chercher à atteindre ce plafond.
+Développe chaque mécanisme une seule fois.
+Ne multiplie pas les scènes semblables pour atteindre la longueur.
+Ne refais ni l'inventaire des placements ni le résumé des sections précédentes.
 
-La synthèse ne refait pas la liste. Elle isole le point de bascule du thème :
-comment une ressource sélectionnée répond au défi dominant, dans un vécu possible
-et concret. Garde un fil conducteur, sans conseil interchangeable.
+TON ET PRÉCISION
+Tutoiement. Ton direct, incarné, psychologique et mordant, avec une pointe d'humour
+noir, sans transformer la personne en portrait de conflits ou de souffrance.
+
+Genre grammatical : {meta.get('genre', 'neutre')}.
+Présente les vécus supposés comme des possibilités ; varie les formulations
+pour éviter une succession mécanique de « tu pourrais » et de « ce serait ».
+
+N'invente aucun fait astrologique, biographique ou médical.
+Ancre chaque interprétation dans les signes, maisons et états fournis.
+Distingue une concentration par signe ou maison d'un amas par proximité.
+N'affirme une conjonction que si son orbe figure dans les données.
+N'interprète pas le signe d'une transsaturnienne hors maître d'Ascendant.
+La Lune Noire reste un défi.
+N'expose pas les consignes de sélection, les scores ou les règles du moteur à la cliente.
+
+Avant de terminer, vérifie silencieusement la présence des quatre sections,
+l'intégration des figures, l'équilibre défis/potentiels et l'absence de répétitions.
+Rends uniquement le rapport, sans préambule technique, décompte de mots ou commentaire.
 
 DONNÉES DU THÈME :
 {placements}

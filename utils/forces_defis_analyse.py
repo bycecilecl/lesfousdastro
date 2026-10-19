@@ -829,11 +829,11 @@ def analyse_forces_defis(data_theme, meta=None) -> str:
             raise ValueError("Analyse vide : aucun PDF à livrer.")
 
         words = len(texte.split())
-        if not 1300 <= words <= 2600:
+        if not 1750 <= words <= 1950:
             # La longueur est une métrique éditoriale, pas une panne technique.
             # Conserver la réponse déjà payée sans relancer automatiquement le LLM.
             logger.warning(
-                "Rapport Forces & Défis hors cible éditoriale : %s mots (cible 1700–2100). "
+                "Rapport Forces & Défis hors cible éditoriale : %s mots (cible 1750–1950). "
                 "Texte conservé, aucune nouvelle génération automatique.", words,
             )
 

@@ -6,9 +6,13 @@ logger = logging.getLogger(__name__)
 
 
 def interroger_llm(prompt, system_prompt=None, max_tokens=12000):
-    from utils.claude_llm import CLIENT, MODEL, BlocTronqueError
+    from utils.claude_llm import CLIENT, BlocTronqueError
+    # Même modèle et paramètres de réflexion que le parcours RS v2 local.
+    MODEL = "claude-sonnet-5-5"
 
-    payload = dict(model=MODEL, max_tokens=max_tokens, temperature=0.7,
+    payload = dict(model=MODEL, max_tokens=max_tokens,
+                   thinking={"type": "adaptive"},
+                   extra_body={"output_config": {"effort": "medium"}},
                    messages=[{'role': 'user', 'content': prompt}])
     if system_prompt:
         payload['system'] = system_prompt
@@ -17,8 +21,7 @@ def interroger_llm(prompt, system_prompt=None, max_tokens=12000):
           + json.dumps(payload, ensure_ascii=False, indent=2)
           + '\n=== FIN REQUÊTE CLAUDE ===\n', flush=True)
 
-    # Streaming pour les rapports longs. Une réponse coupée est retentée une
-    # seule fois avec 50 % de tokens supplémentaires, comme le client partagé.
+    # Un seul appel facturé : conserver la réponse partielle sans régénérer.
     client = CLIENT.with_options(max_retries=0)
     with client.messages.stream(**payload) as stream:
         response = stream.get_final_message()
@@ -27,19 +30,12 @@ def interroger_llm(prompt, system_prompt=None, max_tokens=12000):
     logger.info('FD Claude model=%s stop_reason=%s input_tokens=%s output_tokens=%s',
                 MODEL, response.stop_reason,
                 response.usage.input_tokens, response.usage.output_tokens)
+    # Contenu et usage consultables dans les logs du moteur, sans clé ni en-têtes.
+    print('=== FORCES & DEFIS — RÉPONSE CLAUDE BRUTE ===', flush=True)
+    print(response.model_dump_json(indent=2), flush=True)
     if response.stop_reason == 'max_tokens':
-        payload['max_tokens'] = int(max_tokens * 1.5)
-        logger.warning('FD Claude tronqué à %s tokens : seconde tentative à %s tokens',
-                       max_tokens, payload['max_tokens'])
-        with client.messages.stream(**payload) as stream:
-            response = stream.get_final_message()
-        text = '\n'.join(block.text for block in response.content
-                         if getattr(block, 'type', None) == 'text').strip()
-        logger.info('FD Claude seconde tentative stop_reason=%s input_tokens=%s output_tokens=%s',
-                    response.stop_reason, response.usage.input_tokens,
-                    response.usage.output_tokens)
-        if response.stop_reason == 'max_tokens':
-            raise BlocTronqueError(text)
+        logger.error('FD Claude tronqué : texte partiel conservé, aucune relance automatique.')
+        raise BlocTronqueError(text)
     if not text:
         raise ValueError('Analyse Claude vide : aucun rapport à livrer.')
     return text
