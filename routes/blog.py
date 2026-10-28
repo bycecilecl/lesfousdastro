@@ -213,11 +213,7 @@ def article_from_bludit(page: dict) -> dict | None:
         "category": category,
         "cat": cat,
         "tag": category or "Article",
-        "image": bludit_media_url(str(page.get("coverImage") or "")) or {
-            # This published Bludit article has its cover stored with the site.
-            "autosave-9e7a96beaeb520899b62f4c7c0388499":
-                "/static/blog/images/couverture-frida-kahlo-1200x630.webp",
-        }.get(slug, ""),
+        "image": bludit_media_url(str(page.get("coverImage") or "")),
         "image_alt": title,
         "content": content,
     }
