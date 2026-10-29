@@ -39,7 +39,7 @@ body {
     padding: 56px 24px 48px;
     text-align: center;
     position: relative; z-index: 1;
-    margin: 0 -20px;
+    margin: 0;
 }
 .article-header .badge-d-wrap { margin-bottom: 22px; }
 .article-header .badge-d { font-size: clamp(1.4rem, 3.5vw, 2rem); }
@@ -75,12 +75,12 @@ body {
 .article-header__title {
     font-size: clamp(1.6rem, 4vw, 2.4rem);
     font-weight: 700; letter-spacing: -0.03em; line-height: 1.2;
-    color: #fff; max-width: 720px; margin: 0 auto 16px;
+    color: #fff; max-width: 1100px; margin: 0 auto 16px;
 }
 .article-header__desc {
     font-size: 1rem; line-height: 1.65;
     color: rgba(255,255,255,0.7);
-    max-width: 600px; margin: 0 auto 24px;
+    max-width: 900px; margin: 0 auto 24px;
 }
 .article-header__meta {
     font-size: 0.8rem; color: rgba(255,255,255,0.45);
@@ -90,12 +90,12 @@ body {
 
 /* ── Contenu ── */
 .article-wrap {
-    max-width: 740px; margin: 0 auto;
-    padding: 56px 24px 80px;
+    width: 100%; max-width: 1200px; margin: 0 auto;
+    padding: 56px 32px 80px;
     position: relative; z-index: 1;
 }
 
-.article-body { font-size: 1.05rem; line-height: 1.8; color: var(--text); }
+.article-body { font-size: 1.05rem; line-height: 1.8; color: var(--text); overflow-wrap: anywhere; }
 
 .article-body h1,
 .article-body h2 {
@@ -135,7 +135,7 @@ body {
 }
 
 .article-body img {
-    max-width: 100%; border-radius: var(--radius);
+    max-width: 100%; height: auto; border-radius: var(--radius);
     margin: 1.5rem 0;
 }
 
@@ -261,7 +261,7 @@ body {
 }
 
 @media (max-width: 768px) {
-    .article-header { padding: 40px 20px 36px; margin: 0 -15px; }
+    .article-header { padding: 40px 20px 36px; }
     .article-wrap { padding: 36px 20px 60px; }
 }
 {% endblock %}
