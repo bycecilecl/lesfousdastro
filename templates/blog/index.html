@@ -351,9 +351,10 @@ body {
             {% for article in articles %}
             <a href="{{ url_for('blog.blog_article', slug=article.slug) }}" class="card-link" data-search="{{ (article.title ~ ' ' ~ article.tag ~ ' ' ~ article.category ~ ' ' ~ article.excerpt) | lower }}">
                 <article class="card" data-cats="{{ article.cats | join(' ') }}">
-                    {% if article.image %}
+                    {% set thumbnail = article.thumbnail_image | default(article.image, true) %}
+                    {% if thumbnail %}
                     <div class="card__cover">
-                        <img src="{{ article.image }}" alt="{{ article.image_alt or article.title }}" width="1200" height="630" loading="lazy">
+                        <img src="{{ thumbnail }}" alt="{{ article.image_alt or article.title }}" width="1200" height="630" loading="lazy">
                     </div>
                     {% else %}
                     <div class="card__doodle" aria-hidden="true" data-doodle-slot>

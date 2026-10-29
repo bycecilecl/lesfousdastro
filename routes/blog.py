@@ -201,6 +201,14 @@ def article_from_bludit(page: dict) -> dict | None:
     description = str(page.get("description") or "")
     date = str(page.get("dateRaw") or page.get("date") or "")[:10]
     content = bludit_content(page)
+    cover = bludit_media_url(str(page.get("coverImage") or ""))
+    # A cover is optional in Bludit. Use an uploaded content image for the card
+    # without repeating it above the article body or depending on its slug.
+    thumbnail = cover or next(
+        (source for source in bd_image_sources(content)
+         if source.startswith(("/blog/media/", "/static/blog/", "https://", "http://"))),
+        "",
+    )
 
     return {
         "title": title,
@@ -213,7 +221,8 @@ def article_from_bludit(page: dict) -> dict | None:
         "category": category,
         "cat": cat,
         "tag": category or "Article",
-        "image": bludit_media_url(str(page.get("coverImage") or "")),
+        "image": cover,
+        "thumbnail_image": thumbnail,
         "image_alt": title,
         "content": content,
     }
