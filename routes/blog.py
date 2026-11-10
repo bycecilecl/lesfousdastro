@@ -502,6 +502,8 @@ def bd_comment_moderate(token):
 
 
 LEGACY_ARTICLE_SLUGS = {
+    "accident-de-florence-arthaud-en-astrologie-uranienne": "florence-arthaud-astrologie-uranienne-traditionnelle",
+    "le-vimshottari-dasha": "vimshottari-dasha-astrologie-vedique-periodes-planetaires",
     "etude-de-revolution-solaire-de-2020-2021": "revolution-solaire-2020-2021-etude-cas",
     "introduction-a-lastrologie-uranienne": "astrologie-uranienne-introduction",
     "la-lune-la-mere-en-astrologie": "la-lune-la-mere-en-astrologie",
@@ -509,6 +511,8 @@ LEGACY_ARTICLE_SLUGS = {
 }
 
 
+@blog_bp.route("/accident-de-florence-arthaud-en-astrologie-uranienne/", strict_slashes=False)
+@blog_bp.route("/le-vimshottari-dasha/", strict_slashes=False)
 @blog_bp.route("/etude-de-revolution-solaire-de-2020-2021/", strict_slashes=False)
 @blog_bp.route("/introduction-a-lastrologie-uranienne/", strict_slashes=False)
 @blog_bp.route("/la-lune-la-mere-en-astrologie/", strict_slashes=False)
@@ -516,6 +520,14 @@ LEGACY_ARTICLE_SLUGS = {
 def legacy_article_redirect():
     slug = LEGACY_ARTICLE_SLUGS[request.path.strip("/")]
     return redirect(url_for("blog.blog_article", slug=slug), code=301)
+
+
+@blog_bp.route("/blog/venus-en-astrologie-amour-beaute-desir", strict_slashes=False)
+def legacy_venus_redirect():
+    return redirect(
+        url_for("blog.blog_article", slug="venus-astrologie-amour-desir-beaute-argent"),
+        code=301,
+    )
 
 
 @blog_bp.route("/blog", strict_slashes=False)

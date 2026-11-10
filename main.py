@@ -437,6 +437,21 @@ def analyses():
 app.register_blueprint(main_bp)
 #app.register_blueprint(main_bp, name='main')
 
+@app.get("/index.html")
+@app.get("/home", strict_slashes=False)
+def ancienne_adresse_accueil():
+    """Préserver les anciens liens vers l'accueil après les migrations."""
+    return redirect(url_for("main.index"), code=301)
+
+
+@app.get("/static/Exemple_Flash_Astral_Cecile.pdf")
+@app.get("/static/Exemple_Forces_Defis.pdf")
+def ancienne_adresse_exemple_pdf():
+    # Ces deux exemples publics ont été déplacés dans static/pdfs.
+    filename = request.path.rsplit("/", 1)[-1]
+    return redirect(url_for("static", filename=f"pdfs/{filename}"), code=301)
+
+
 @app.get("/dl/<path:key>")
 def dl_presign(key):
     try:
