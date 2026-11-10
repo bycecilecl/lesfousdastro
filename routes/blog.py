@@ -511,6 +511,7 @@ def bd_comment_moderate(token):
 
 
 LEGACY_ARTICLE_SLUGS = {
+    "limpact-des-cycles-des-noeuds-lunaires": "limpact-des-cycles-des-noeuds-lunaires",
     "accident-de-florence-arthaud-en-astrologie-uranienne": "florence-arthaud-astrologie-uranienne-traditionnelle",
     "le-vimshottari-dasha": "vimshottari-dasha-astrologie-vedique-periodes-planetaires",
     "etude-de-revolution-solaire-de-2020-2021": "revolution-solaire-2020-2021-etude-cas",
@@ -522,6 +523,7 @@ LEGACY_ARTICLE_SLUGS = {
 
 @blog_bp.route("/accident-de-florence-arthaud-en-astrologie-uranienne/", strict_slashes=False)
 @blog_bp.route("/le-vimshottari-dasha/", strict_slashes=False)
+@blog_bp.route("/limpact-des-cycles-des-noeuds-lunaires/", strict_slashes=False)
 @blog_bp.route("/etude-de-revolution-solaire-de-2020-2021/", strict_slashes=False)
 @blog_bp.route("/introduction-a-lastrologie-uranienne/", strict_slashes=False)
 @blog_bp.route("/la-lune-la-mere-en-astrologie/", strict_slashes=False)
