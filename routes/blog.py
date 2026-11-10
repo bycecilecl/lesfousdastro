@@ -109,7 +109,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 ARTICLES_DIR = BASE_DIR / "data" / "articles"
 
 ARTICLE_REDIRECTS = {
-    "chirurgies-sante-astrologie-theme-natal": "autosave-03ee2824d25549aa5f2fcf3c57cc6649",
+    "autosave-03ee2824d25549aa5f2fcf3c57cc6649": "chirurgies-sante-astrologie-theme-natal",
 }
 
 
@@ -200,6 +200,9 @@ def article_from_bludit(page: dict) -> dict | None:
     slug = page.get("slug")
     if not isinstance(slug, str) or not slug or "/" in slug or ".." in slug:
         return None
+    # Keep the established public address while reading the rewritten page
+    # from Bludit. Its upload URLs remain unchanged.
+    slug = ARTICLE_REDIRECTS.get(slug, slug)
     category_key = str(page.get("category") or "").strip()
     category = BLUDIT_CATEGORIES.get(category_key, category_key)
     cat = CATEGORIES_MAP.get(category.lower())
