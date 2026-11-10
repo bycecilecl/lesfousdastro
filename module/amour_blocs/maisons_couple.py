@@ -1,3 +1,4 @@
+from module.amour_blocs.normalisation_maisons import normaliser_maisons_theme
 # module/amour_blocs/maisons_couple.py
 
 import unicodedata
@@ -8,7 +9,7 @@ from module.amour_bdd import (
     get_from_maitre_en_maison,
     df_to_snippets,
 )
-from utils.openai_utils import interroger_llm
+from module.amour_blocs.llm_local import interroger_llm
 
 # ─────────────────────────────────────────
 # 1. Maîtres par signe (tropical) – avec double maître
@@ -56,6 +57,7 @@ def _normalize_signe(signe: str | None) -> str | None:
 #     return None
 
 def _get_signe_maison(theme: dict, numero: int) -> str | None:
+    theme = normaliser_maisons_theme(theme)
     maisons = theme.get("maisons") or {}
     key = f"Maison {numero}"
     data = maisons.get(key) or {}
@@ -687,5 +689,4 @@ Parle en "tu".
         texte = texte.strip() + "\n\n" + nuance_texte.strip()
 
     return texte
-
 

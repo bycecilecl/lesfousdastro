@@ -1,3 +1,5 @@
+from module.amour_blocs.normalisation_maisons import normaliser_maisons_theme
+from module.amour_blocs.aspects_facilitants import est_facilitant, orbe_facilitant, ressource_factuelle
 # module/amour_blocs/maniere_aimer.py
 # MODULE 1 : Ma manière d'aimer avec FILTRAGE INTELLIGENT des aspects
 
@@ -5,9 +7,11 @@ import logging
 from module.amour_bdd import (
     get_from_placements,
     get_from_aspects,
+    get_from_aspects_maitre,
     get_from_maisons_amour,
     get_from_maitre_en_maison,
     get_from_etat_planete,
+    get_from_noeuds,
     df_to_snippets,
 )
 
@@ -16,9 +20,9 @@ from module.amour_blocs.maisons_couple import (
     _get_signe_maison,
     _normalize_signe,
 )
-from utils.openai_utils import interroger_llm
+from module.amour_blocs.llm_local import interroger_llm
 from module.amour_blocs.dignites import get_dignite_planete
-from module.amour_blocs.utils_theme import exporter_theme_complet
+from module.amour_blocs.utils_theme import exporter_theme_complet, filtrer_point_illumination_amour
 from module.amour_blocs.context_amour import generer_contexte_amour
 
 # Configuration du logger
@@ -26,6 +30,22 @@ logger = logging.getLogger(__name__)
 
 
     
+
+def _identite_maitre(numero, nom, infos):
+    """Faits propres à chaque maître, même si le commentaire de maison est partagé."""
+    details = [nom]
+    signe = infos.get("signe")
+    if signe:
+        details.append(f"en {signe}")
+        dignite = get_dignite_planete(nom, signe)
+        if dignite:
+            details.append(f"dignité : {dignite}")
+    if infos.get("retrograde") or infos.get("rétrograde"):
+        details.append("rétrograde")
+    if infos.get("etat"):
+        details.append(str(infos["etat"]))
+    return f"=== MAÎTRE DE {numero} ({' ; '.join(details)}) EN MAISON {infos.get('maison')} ==="
+
 
 def _normalize_house_value(maison):
     """
@@ -45,6 +65,7 @@ def _get_planetes_en_maison(theme: dict, numero: int) -> list[str]:
     """
     Retourne la liste des planètes présentes dans la maison `numero`.
     """
+    theme = normaliser_maisons_theme(theme)
     planetes = theme.get("planetes", {}) or theme.get("planètes", {}) or {}
     resultat = []
     for nom, donnees in planetes.items():
@@ -66,6 +87,11 @@ def _get_aspects_reels_du_theme(theme: dict) -> list[tuple[str, str, str, float]
         p2 = asp.get("planete2")
         type_asp = asp.get("aspect")
         orbe = asp.get("orbe", 0)
+        if est_facilitant(type_asp):
+            orbe = orbe_facilitant(asp.get("orbe"))
+            if orbe is None:
+                continue
+            type_asp = str(type_asp).strip().title()
         
         if p1 and p2 and type_asp:
             aspects_reels.append((p1, p2, type_asp, orbe))
@@ -110,7 +136,7 @@ def _filtrer_aspects_intelligents(
         autre = p2 if p1 == planete_cible else p1
         
         # Catégorisation
-        if orbe <= orbe_serre:
+        if est_facilitant(type_asp) or orbe <= orbe_serre:
             categorie = "serré"
         elif autre in trans_saturniennes:
             categorie = "trans"
@@ -177,6 +203,8 @@ def _get_aspects_majeurs_planete_filtres(
     snippets_aspects = []
     
     for (autre_planete, type_asp, orbe) in aspects_filtres:
+        if est_facilitant(type_asp):
+            snippets_aspects.append(ressource_factuelle(nom_planete, type_asp, autre_planete, orbe))
         # Chercher dans la BDD
         df = get_from_aspects(
             planete_1=nom_planete,
@@ -232,7 +260,7 @@ def _filtrer_aspects_maitre5_intelligents(
         autre = p2 if p1 == nom_maitre else p1
         
         # Catégorisation
-        if orbe <= orbe_serre:
+        if est_facilitant(type_asp) or orbe <= orbe_serre:
             categorie = "serré"
         elif autre in trans_saturniennes:
             categorie = "trans"
@@ -292,6 +320,7 @@ def generer_snippets_maniere_aimer(theme: dict, polarite: str = "Homme") -> str:
     SANS LLM, SANS style rédactionnel.
     Utilisé pour guider le Module 3 (Couple).
     """
+    theme = normaliser_maisons_theme(theme)
 
     planetes = theme.get("planetes", {}) or theme.get("planètes", {}) or {}
     snippets_parts = []
@@ -439,6 +468,7 @@ def generer_snippets_maniere_aimer(theme: dict, polarite: str = "Homme") -> str:
     # Maître(s) de 5 (FILTRÉ)
     signe_norm = _normalize_signe(signe_5) if isinstance(signe_5, str) else None
     maitres_5 = MAITRES_PAR_SIGNE.get(signe_norm, [])
+    valeurs_deja_vues = set()
 
     for nom_maitre in maitres_5:
         infos = planetes.get(nom_maitre, {})
@@ -449,31 +479,28 @@ def generer_snippets_maniere_aimer(theme: dict, polarite: str = "Homme") -> str:
             continue
 
         brut = str(maison_maitre).strip()
-        df_maitre_5 = get_from_maitre_en_maison("maitre_maison_5", "Maison", brut, "Style", polarite)
-        if not df_maitre_5.empty:
-            snippets_m5.append(df_to_snippets(df_maitre_5))
-
-        if signe_maitre:
-            dignite = get_dignite_planete(nom_maitre, signe_maitre)
-            if dignite in ["Chute", "Exil"]:
-                snippets_m5.append(
-                    f"(Maître de 5 {nom_maitre} en {signe_maitre}, dignité {dignite})"
-                )
+        snippets_m5.append(_identite_maitre(5, nom_maitre, infos))
+        if brut not in valeurs_deja_vues:
+            df_maitre_5 = get_from_maitre_en_maison("maitre_maison_5", "Maison", brut, "Style", polarite)
+            if not df_maitre_5.empty:
+                snippets_m5.append(df_to_snippets(df_maitre_5))
+                valeurs_deja_vues.add(brut)
 
         # Aspects du maître de 5 (FILTRÉ)
         aspects_filtres = _filtrer_aspects_maitre5_intelligents(theme, nom_maitre)
         
         for (autre, type_asp, orbe) in aspects_filtres:
-            if type_asp == "Conjonction":
-                val = "Conjonction"
-            elif type_asp in ("Carre", "Opposition"):
-                val = "Carré / Opposition"
-            else:
-                val = "Trigone / Sextile"
-
-            df_asp = get_from_aspects("maitre_maison_5", autre, val, "Style", polarite)
+            if est_facilitant(type_asp):
+                snippets_m5.append(ressource_factuelle(nom_maitre, type_asp, autre, orbe))
+                continue
+            df_asp = get_from_aspects_maitre(
+                "maitre_maison_5", autre, type_asp, "Style", polarite,
+            )
             if not df_asp.empty:
-                snippets_m5.append(df_to_snippets(df_asp))
+                snippets_m5.append(
+                    f"=== ASPECT DU MAÎTRE DE 5 ({nom_maitre.upper()} {type_asp.upper()} {autre.upper()}) ===\n"
+                    + df_to_snippets(df_asp)
+                )
 
     if snippets_m5:
         details = []
@@ -494,7 +521,7 @@ def generer_snippets_maniere_aimer(theme: dict, polarite: str = "Homme") -> str:
     signe_nn = noeud.get("signe")
 
     if signe_nn:
-        df_nn = get_from_placements("Noeud Nord", "Signe", signe_nn, "Evolution", polarite)
+        df_nn = get_from_noeuds("Signe", signe_nn, "Evolution", polarite)
         if not df_nn.empty:
             snippets_parts.append("=== NŒUD NORD ===\n" + df_to_snippets(df_nn))
 
@@ -512,6 +539,7 @@ def generer_bloc_maniere_aimer(theme: dict, call_llm: bool = True, polarite: str
       - Lune : signe + maison + aspects majeurs FILTRÉS
       - Maison 5 : signe + planètes + maître(s) FILTRÉS
     """
+    theme = normaliser_maisons_theme(filtrer_point_illumination_amour(theme))
     logger.info(f"--- DÉBUT GÉNÉRATION MODULE 1: MANIÈRE D'AIMER ({polarite}) ---")
     
     planetes = theme.get("planetes", {}) or theme.get("planètes", {}) or {}
@@ -728,25 +756,24 @@ def generer_bloc_maniere_aimer(theme: dict, call_llm: bool = True, polarite: str
         infos_maitre = planetes.get(nom_maitre, {}) or {}
         maison_maitre = infos_maitre.get("maison")
         signe_maitre = infos_maitre.get("signe")
-        retrograde = infos_maitre.get("retrograde", False)
+        retrograde = infos_maitre.get("retrograde") or infos_maitre.get("rétrograde") or False
 
         if maison_maitre is None:
             continue
 
         brut = str(maison_maitre).strip()
-        if brut in valeurs_deja_vues:
-            continue
-        valeurs_deja_vues.add(brut)
-
-        df_maitre_5 = get_from_maitre_en_maison(
-            maitre_maison="maitre_maison_5",
-            type_donnee="Maison",
-            valeur=brut,
-            bloc="Style",
-            polarite=polarite,
-        )
-        if not df_maitre_5.empty:
-            snippets_m5.append(df_to_snippets(df_maitre_5))
+        snippets_m5.append(_identite_maitre(5, nom_maitre, infos_maitre))
+        if brut not in valeurs_deja_vues:
+            df_maitre_5 = get_from_maitre_en_maison(
+                maitre_maison="maitre_maison_5",
+                type_donnee="Maison",
+                valeur=brut,
+                bloc="Style",
+                polarite=polarite,
+            )
+            if not df_maitre_5.empty:
+                snippets_m5.append(df_to_snippets(df_maitre_5))
+                valeurs_deja_vues.add(brut)
 
         # ⚠️ ANALYSE CRITIQUE DE L'ÉTAT DU MAÎTRE
         if signe_maitre:
@@ -766,18 +793,13 @@ def generer_bloc_maniere_aimer(theme: dict, call_llm: bool = True, polarite: str
                 texte_affaiblissement = " ET ".join(details_affaiblissement)
                 
                 avertissement_critique = f"""
-⚠️ ATTENTION CRITIQUE : Le maître de ta Maison 5 ({nom_maitre}) est {texte_affaiblissement}.
+ÉTAT DU MAÎTRE À NUANCER : Le maître de ta Maison 5 ({nom_maitre}) est {texte_affaiblissement}.
 
-Cela INVERSE COMPLÈTEMENT l'énergie classique de ta Maison 5 en {signe_5}.
-
-Au lieu d'un style amoureux {signe_5.lower()} (spontané, créatif, joueur), tu as plutôt :
-- Une DIFFICULTÉ À TE LÂCHER en amour
-- Le sentiment de DEVOIR MÉRITER l'affection
-- Une RETENUE dans l'expression de tes sentiments
-- Une PEUR du rejet ou du ridicule
-- Besoin de SÉCURITÉ avant de montrer ton cœur
-
-→ NE PAS interpréter comme un style spontané et léger. C'est l'inverse : hésitation, retenue, autocensure.
+La Maison 5 en {signe_5} conserve sa symbolique. Cet état du maître en module l'expression, sans inversion automatique.
+Relie cette nuance à la nature du maître, à son signe, à sa maison et aux aspects fournis, sans effacer les ressources du thème.
+Si le maître est en chute ou en exil, explicite la difficulté symbolique propre à cette planète dans ce signe : ne te contente pas de dire qu'elle nuance le fonctionnement. Décris ce qui peut se contrarier, demander un ajustement ou constituer un point de blocage, et comment cela peut se manifester concrètement dans le domaine relationnel de ce chapitre.
+Nomme cette difficulté clairement, sans la transformer en incapacité, en événement vécu certain ou en inversion du signe de la maison. Les aspects facilitants peuvent offrir des ressources pour la gérer, mais ne l'effacent pas.
+S'il est rétrograde, distingue cette rétrogradation de sa dignité : une possible intériorisation n'est pas une incapacité.
 """
                 snippets_m5.append(avertissement_critique)
 
@@ -785,19 +807,11 @@ Au lieu d'un style amoureux {signe_5.lower()} (spontané, créatif, joueur), tu 
         aspects_filtres = _filtrer_aspects_maitre5_intelligents(theme, nom_maitre)
         
         for (autre, type_asp, orbe) in aspects_filtres:
-            if type_asp == "Conjonction":
-                valeur_csv = "Conjonction"
-            elif type_asp in ("Carre", "Opposition"):
-                valeur_csv = "Carré / Opposition"
-            else:
-                valeur_csv = "Trigone / Sextile"
-
-            df_m5_aspect = get_from_aspects(
-                planete_1="maitre_maison_5",
-                planete_2=autre,
-                valeur=valeur_csv,
-                bloc="Style",
-                polarite=polarite,
+            if est_facilitant(type_asp):
+                snippets_m5.append(ressource_factuelle(nom_maitre, type_asp, autre, orbe))
+                continue
+            df_m5_aspect = get_from_aspects_maitre(
+                "maitre_maison_5", autre, type_asp, "Style", polarite,
             )
 
             if not df_m5_aspect.empty:
@@ -818,8 +832,7 @@ Au lieu d'un style amoureux {signe_5.lower()} (spontané, créatif, joueur), tu 
     snippets_nn = []
 
     if signe_nn:
-        df_nn = get_from_placements(
-            planete="Noeud Nord",
+        df_nn = get_from_noeuds(
             type_donnee="Signe",
             valeur=signe_nn,
             bloc="Evolution",
@@ -860,21 +873,27 @@ Au lieu d'un style amoureux {signe_5.lower()} (spontané, créatif, joueur), tu 
     consigne_genre = "Adresse-toi au masculin." if polarite == "Homme" else "Adresse-toi au féminin."
 
     prompt = f"""
+ASPECTS FACILITANTS : RESSOURCES, PAS ANNULATION
+Seuls les sextiles et trigones à 3° d'orbe maximum sont retenus comme facilitants.
+Explique les difficultés clairement et directement, puis les ressources pertinentes : aucun aspect facilitant n'annule une tension.
+Une ressource peut aider à gérer une difficulté ; sa présence ne prouve pas qu'elle est utilisée ni que la difficulté est résolue.
+Ne compense pas les tensions par un comptage des aspects. Même nombreux, les facilitants ne rendent pas les tensions restantes négligeables.
+Évalue la pertinence pour ce chapitre, les planètes impliquées et la précision des aspects ; n'invente pas une souffrance dominante si l'ensemble est plus fluide.
+Ne classe pas automatiquement les conjonctions parmi les ressources.
+
 On travaille ici le MODULE 1 : "Ma manière d'aimer".
 {consigne_genre}
 
-⚠️ RÈGLE CRITIQUE : RESPECTER L'ÉTAT DES MAÎTRES DE MAISON
+LECTURE NUANCÉE DES MAÎTRES DE MAISON
 
-Si tu vois dans les données un avertissement du type "ATTENTION CRITIQUE : Le maître de ta Maison X est affaibli",
-tu DOIS IMPÉRATIVEMENT suivre cette directive et INVERSER l'interprétation classique du signe.
-
-EXEMPLE CONCRET :
-- Maison 5 en Sagittaire (classique = style amoureux spontané, léger, joueur, aventureux)
-- MAIS maître Jupiter en Capricorne chute + rétrograde
-- → Tu DOIS écrire : difficulté à te lâcher, retenue dans l'expression des sentiments, besoin de sécurité avant de montrer ton cœur
-- → Tu NE DOIS PAS écrire : style spontané, léger, joueur, aventureux
-
-C'est une RÈGLE ABSOLUE. Un maître affaibli inverse complètement l'énergie de la maison.
+Conserve la symbolique de la maison et de son signe. L'état du maître en module l'expression, sans inversion automatique.
+Articule la nature du maître, son signe, sa maison, sa dignité et les aspects effectivement fournis : tensions comme soutiens.
+Si le maître est en chute ou en exil, explicite la difficulté symbolique propre à cette planète dans ce signe : ne te contente pas de dire qu'elle nuance le fonctionnement. Décris ce qui peut se contrarier, demander un ajustement ou constituer un point de blocage, et comment cela peut se manifester concrètement dans le domaine relationnel de ce chapitre.
+Nomme cette difficulté clairement, sans la transformer en incapacité, en événement vécu certain ou en inversion du signe de la maison. Les aspects facilitants peuvent offrir des ressources pour la gérer, mais ne l'effacent pas.
+Une rétrogradation ne constitue pas à elle seule une faiblesse : évoque une possible intériorisation ou réélaboration, sans en faire un blocage certain.
+Ne déduis pas de ce seul indicateur une peur du rejet, un sentiment d'indignité, des partenaires toxiques ou une sexualité inhibée.
+Présente les manifestations possibles avec nuance et rattache chacune aux données disponibles. N'invente aucun facteur manquant.
+Si un extrait impose une inversion automatique ou un résultat négatif certain, reformule-le selon ces principes.
 
 Voici un CONTEXTE GLOBAL du thème de la personne, centré sur sa dynamique émotionnelle et relationnelle :
 

@@ -1,7 +1,11 @@
 # module/amour_blocs/context_amour.py
 
 from __future__ import annotations
+from module.amour_blocs.normalisation_maisons import normaliser_maisons_theme
 from typing import Dict, Any, List
+
+from module.amour_blocs.dignites import get_dignite_planete
+from module.amour_blocs.maisons_couple import _get_maitres_pour_signe
 
 # On considère les planètes perso + Pluton pour les amas
 PERSONNELLES = ("Soleil", "Lune", "Vénus", "Mars", "Pluton")
@@ -30,69 +34,6 @@ def _fmt_planete(planetes: dict, nom: str) -> str | None:
     if maison is not None:
         texte += f" maison {maison}"
     return texte
-
-
-# ─────────────────────────────────────────────────────────────
-# Évaluation de l'état du maître (fort / affaibli / neutre)
-# ─────────────────────────────────────────────────────────────
-
-def _evaluer_etat_maitre(planete_data: dict, nom_planete: str) -> str:
-    """
-    Retourne 'fort', 'affaibli', ou 'neutre' selon :
-    - Dignité (domicile/exaltation = fort, chute/exil = affaibli)
-    - Rétrogradation
-    - Maison (angulaire = fort, cadente = affaibli)
-    """
-    # Dignités essentielles (domicile simplifié)
-    dignites_fortes = {
-        "Soleil": ["Lion"],
-        "Lune": ["Cancer"],
-        "Mercure": ["Gémeaux", "Vierge"],
-        "Vénus": ["Taureau", "Balance"],
-        "Mars": ["Bélier", "Scorpion"],
-        "Jupiter": ["Sagittaire", "Poissons"],
-        "Saturne": ["Capricorne", "Verseau"],
-    }
-
-    # Chutes et exils (version simplifiée)
-    chutes_exils = {
-        "Soleil": ["Verseau", "Balance"],
-        "Lune": ["Capricorne", "Scorpion"],
-        "Mars": ["Cancer", "Balance", "Taureau"],
-        "Vénus": ["Scorpion", "Bélier", "Vierge"],
-        "Jupiter": ["Gémeaux", "Capricorne", "Vierge"],
-        "Saturne": ["Cancer", "Bélier", "Lion"],
-        "Mercure": ["Sagittaire", "Poissons"],
-    }
-
-    signe = planete_data.get("signe", "")
-    maison = planete_data.get("maison")
-    retro = planete_data.get("retrograde") or planete_data.get("rétrograde") or False
-
-    points = 0
-
-    # Dignité
-    if signe in dignites_fortes.get(nom_planete, []):
-        points += 2
-    elif signe in chutes_exils.get(nom_planete, []):
-        points -= 2
-
-    # Rétrogradation
-    if retro:
-        points -= 1
-
-    # Maison (angulaire = fort, cadente = faible)
-    if maison in (1, 4, 7, 10):  # Angulaires
-        points += 1
-    elif maison in (3, 6, 9, 12):  # Cadentes
-        points -= 1
-
-    if points >= 2:
-        return "fort"
-    elif points <= -2:
-        return "affaibli"
-    else:
-        return "neutre"
 
 
 # ─────────────────────────────────────────────────────────────
@@ -148,6 +89,8 @@ def _analyser_maisons_relationnelles(planetes: dict, theme: dict) -> list[str]:
     """
     Regarde les maisons 5-7-8 : planètes présentes + état du maître
     """
+    theme = normaliser_maisons_theme({**theme, "planetes": planetes})
+    planetes = theme["planetes"]
     maisons_data = (
         theme.get("maisons")
         or theme.get("maisons_tropicales")
@@ -165,9 +108,9 @@ def _analyser_maisons_relationnelles(planetes: dict, theme: dict) -> list[str]:
     phrases: List[str] = []
 
     for m in sorted(maisons_relationnelles):
-        maison_info = maisons_data.get(m, {}) or {}
+        maison_info = maisons_data.get(f"Maison {m}", {}) or {}
         signe = maison_info.get("signe") or maison_info.get("cuspide_signe")
-        maitre = maison_info.get("maitre")
+        maitres = _get_maitres_pour_signe(signe)
 
         # Planètes présentes
         if m in occupees:
@@ -180,13 +123,11 @@ def _analyser_maisons_relationnelles(planetes: dict, theme: dict) -> list[str]:
                 desc = "l'intimité, la fusion, la sexualité, les transformations"
             phrases.append(f"**Maison {m} occupée** ({noms}) : {desc} au cœur de la vie.")
 
-        # État du maître (important si affaibli, ou fort sur maison vide)
-        if maitre and signe:
+        # Dignité, rétrogradation et maison restent des facteurs distincts.
+        for maitre in maitres:
             maitre_data = _safe_planete(planetes, maitre)
             if not maitre_data:
                 continue
-
-            etat = _evaluer_etat_maitre(maitre_data, maitre)
 
             maitre_signe = maitre_data.get("signe", "")
             maitre_maison = maitre_data.get("maison")
@@ -198,30 +139,42 @@ def _analyser_maisons_relationnelles(planetes: dict, theme: dict) -> list[str]:
             if maitre_maison:
                 detail += f" M{maitre_maison}"
 
-            if etat == "affaibli":
-                if m == 5:
-                    desc_faible = "créativité amoureuse bridée, difficulté à s'autoriser le plaisir"
-                elif m == 7:
-                    desc_faible = "difficulté à structurer le couple, patterns relationnels complexes"
-                else:  # 8
-                    desc_faible = "blocages dans l'intimité, peur de la fusion, sexualité inhibée"
-
-                phrases.append(
-                    f"**Maison {m}** (maître {detail} affaibli) : {desc_faible}."
+            dignite = get_dignite_planete(maitre, maitre_signe) if maitre_signe else None
+            consignes = []
+            if dignite:
+                detail += f" ; dignité : {dignite}"
+            if dignite in ("Chute", "Exil"):
+                consignes.append(
+                    "Difficulté à traiter explicitement : explique la difficulté propre à cette "
+                    "planète dans ce signe à partir des définitions fournies dans les extraits BDD. "
+                    "Décris concrètement ce qui coince et dans quelles situations cela se manifeste "
+                    "dans le domaine de la maison gouvernée. Ne réduis pas cette difficulté à une "
+                    "simple nuance et ne l'efface pas par une formule rassurante. Les aspects "
+                    "facilitants, même nombreux, ne l'annulent pas. N'en déduis pas automatiquement "
+                    "une incapacité, un échec ou un événement vécu ; conserve la symbolique du signe "
+                    "de la maison sans inversion automatique. Si une définition manque, ne lui "
+                    "substitue pas un blocage générique."
                 )
-
-            elif etat == "fort" and m not in occupees:
-                # Maison vide mais maître fort = énergie disponible
-                if m == 5:
-                    desc_fort = "créativité amoureuse forte malgré maison vide"
-                elif m == 7:
-                    desc_fort = "capacité relationnelle forte, couple structuré"
-                else:  # 8
-                    desc_fort = "intensité et profondeur disponibles dans l'intimité"
-
-                phrases.append(
-                    f"**Maison {m}** (maître {detail} fort) : {desc_fort}."
+            elif dignite in ("Domicile", "Exaltation"):
+                consignes.append(
+                    "Ressource à examiner, sans présumer qu'elle est utilisée ni qu'elle garantit "
+                    "la réussite relationnelle ; elle n'annule pas les difficultés présentes."
                 )
+            if maitre_retro:
+                consignes.append(
+                    "Rétrogradation à distinguer de la dignité : intériorisation ou réélaboration "
+                    "possible. Précise les difficultés concrètes étayées par les définitions et "
+                    "aspects fournis, sans déduire un blocage ou une incapacité de ce seul facteur."
+                )
+            if maitre_maison:
+                consignes.append(
+                    "La maison occupée précise le terrain d'expression ; elle ne suffit pas à "
+                    "conclure à une inhibition ou à une réussite."
+                )
+            phrases.append(
+                f"**Maison {m} en {signe}** (maître {detail}) : "
+                + (" ".join(consignes) or "à relier aux placements et aspects fournis.")
+            )
 
     return phrases
 
@@ -321,6 +274,7 @@ def generer_contexte_amour(theme: dict) -> str:
     - centré sur : planètes perso, maisons relationnelles, aspects, rétrogradations, Chiron, Pluton, Maison 5
     - générique : pas de cas par cas manuel
     """
+    theme = normaliser_maisons_theme(theme)
     planetes = _get_planetes(theme)
     bouts: list[str] = []
 
@@ -410,7 +364,9 @@ def generer_contexte_amour(theme: dict) -> str:
 
     if venus_retro:
         bouts.append(
-            "**Vénus RÉTROGRADE** : difficulté à recevoir l'amour, doute sur sa valeur affective, besoin de réapprendre à aimer."
+            "**Vénus RÉTROGRADE** : intériorisation ou réélaboration possible de la manière d'aimer. "
+            "Décris sans les minimiser les difficultés étayées par les définitions et aspects fournis. "
+            "La rétrogradation seule n'établit ni difficulté à recevoir l'amour ni doute sur sa valeur affective."
         )
 
     # === 5. MARS - patterns + rétro ===
@@ -429,7 +385,9 @@ def generer_contexte_amour(theme: dict) -> str:
 
     if mars_retro:
         bouts.append(
-            "**Mars RÉTROGRADE** : désir inhibé, difficulté à initier, colère refoulée, sexualité complexe."
+            "**Mars RÉTROGRADE** : intériorisation ou réélaboration possible du désir et de l'action. "
+            "Décris sans les minimiser les difficultés étayées par les définitions et aspects fournis. "
+            "La rétrogradation seule n'établit ni désir inhibé ni colère refoulée ni incapacité sexuelle."
         )
 
     # === 6. SATURNE - blocages / leçons ===
@@ -483,17 +441,19 @@ def generer_contexte_amour(theme: dict) -> str:
         or theme.get("maisons_tropicales")
         or {}
     )
-    m5 = maisons.get(5, {}) or {}
+    m5 = maisons.get("Maison 5", {}) or {}
     m5_signe = m5.get("signe") or m5.get("cuspide_signe")
-    m5_maitre = m5.get("maitre")
+    m5_maitres = _get_maitres_pour_signe(m5_signe)
 
     if m5_signe:
         texte_m5 = f"**Maison 5 en {m5_signe}**"
-        if m5_maitre:
-            maitre_data = _safe_planete(planetes, m5_maitre)
-            maitre_maison = maitre_data.get("maison")
+        details_maitres = []
+        for maitre in m5_maitres:
+            maitre_maison = _safe_planete(planetes, maitre).get("maison")
             if maitre_maison:
-                texte_m5 += f" (maître en M{maitre_maison})"
+                details_maitres.append(f"{maitre} en M{maitre_maison}")
+        if details_maitres:
+            texte_m5 += " (maîtres : " + ", ".join(details_maitres) + ")"
         texte_m5 += " : créativité amoureuse, style de séduction, jeu amoureux."
         bouts.append(texte_m5)
 
@@ -502,7 +462,8 @@ def generer_contexte_amour(theme: dict) -> str:
     bouts.extend(_detect_amas_maisons(planetes))
 
     # === 11. MAISONS 5–7–8 + état des maîtres ===
-    bouts.extend(_analyser_maisons_relationnelles(planetes, theme))
+    contexte_maisons = _analyser_maisons_relationnelles(planetes, theme)
+    bouts.extend(contexte_maisons)
 
     # === 12. ASPECTS MAJEURS AMOUR ===
     bouts.extend(_analyser_aspects_majeurs(theme))
@@ -517,6 +478,8 @@ def generer_contexte_amour(theme: dict) -> str:
     lignes = [b for b in bouts if b and b.strip()]
     MAX_LIGNES = 22
     lignes = lignes[:MAX_LIGNES]
+    # Ne pas tronquer les données propres au second maître.
+    lignes.extend(ligne for ligne in contexte_maisons if ligne not in lignes)
 
     texte = "\n".join(lignes).strip()
     return (

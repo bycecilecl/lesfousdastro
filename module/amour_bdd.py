@@ -1,6 +1,7 @@
 # module/amour_bdd.py
 
 import os
+import re
 import unicodedata
 from functools import lru_cache
 
@@ -66,7 +67,19 @@ def _filtrer(df: pd.DataFrame, **criteres) -> pd.DataFrame:
     Filtre générique : bloc="...", planete_1="Vénus", type_donnee="Signe",
     valeur="Balance", polarite="Femme", etc.
     Utilise _normalize_value pour éviter les bugs d'espaces / accents.
+    Refuse tout critère actif dont la colonne est absente, même sans lignes.
     """
+    colonnes_manquantes = sorted({
+        _normalize_col_name(nom)
+        for nom, valeur in criteres.items()
+        if valeur is not None and _normalize_col_name(nom) not in df.columns
+    })
+    if colonnes_manquantes:
+        raise ValueError(
+            "Recherche BDD amour refusée : colonne(s) de filtre absente(s) : "
+            + ", ".join(colonnes_manquantes)
+            + ". Colonnes disponibles : " + ", ".join(map(str, df.columns))
+        )
     if df.empty:
         return df
 
@@ -76,8 +89,6 @@ def _filtrer(df: pd.DataFrame, **criteres) -> pd.DataFrame:
         if val is None:
             continue
         col = _normalize_col_name(col_logique)
-        if col not in df.columns:
-            continue
 
         # 🌟 Cas particulier pour POLARITÉ : accepter "Femme, Homme"
         if col == "polarite":
@@ -108,8 +119,14 @@ def get_from_placements(
     """
     Lit placements.csv et filtre selon les paramètres.
     Gère automatiquement la colonne planète : PLANÈTE ou PLANÈTE_1.
+    Pour les maisons, accepte 5, "5", "Maison_5" et "Maison 5".
     """
     df = _load_table("placements")
+
+    if _normalize_value(type_donnee) == "maison" and valeur is not None:
+        match = re.fullmatch(r"(?:maison[_\s]+)?(0?[1-9]|1[0-2])", _normalize_value(valeur))
+        if match:
+            valeur = str(int(match.group(1)))
 
     criteres = {
         "bloc": bloc,
@@ -123,6 +140,9 @@ def get_from_placements(
         if "planete_1" in cols:
             criteres["planete_1"] = planete
         elif "planete" in cols:
+            criteres["planete"] = planete
+        else:
+            # Conserver le critère pour que _filtrer signale le schéma invalide.
             criteres["planete"] = planete
 
     return _filtrer(df, **criteres)
@@ -143,16 +163,30 @@ def get_from_aspects(planete_1=None, planete_2=None, valeur=None, bloc=None, pol
     )
 
 
+def get_from_aspects_maitre(maitre, autre, aspect, bloc, polarite):
+    """Aspect exact du maître, dans les deux orientations, sans autre type en repli."""
+    valeur = {
+        "conjonction": "Conjonction",
+        "carre": "Carré",
+        "opposition": "Opposition",
+    }.get(_normalize_value(aspect), aspect)
+    df = get_from_aspects(maitre, autre, valeur, bloc, polarite)
+    if df.empty:
+        df = get_from_aspects(autre, maitre, valeur, bloc, polarite)
+    return df
+
+
 def get_from_etat_planete(planete_1=None, valeur=None, bloc=None, polarite=None):
     """
     Lit etat_planete.csv et filtre selon les paramètres.
+    Le paramètre historique planete_1 correspond à la colonne PLANÈTE du CSV.
     """
     df = _load_table("etat_planete")
     return _filtrer(
         df,
         bloc=bloc,
         polarite=polarite,
-        planete_1=planete_1,
+        planete=planete_1,
         valeur=valeur,
     )
 
@@ -251,24 +285,19 @@ def get_from_maitre_en_maison(maitre_maison=None, type_donnee=None, valeur=None,
 
 
 def get_from_noeuds(type_donnee: str, valeur: str, bloc: str, polarite: str):
-    """
-    Récupère une ligne du CSV noeuds_lunaires_amour.csv
-    selon le signe du Nœud Nord.
-    """
-
-    chemin = os.path.join("data", "noeuds_lunaires_amour.csv")
-
-    if not os.path.exists(chemin):
-        print("[NOEUDS] ⚠️ Fichier noeuds_lunaires_amour.csv non trouvé :", chemin)
-        return pd.DataFrame()
-
-    df = pd.read_csv(chemin)
-
-    df_filtre = df[
-        (df["Bloc"] == bloc)
-        & (df["Polarite"] == polarite)
-        & (df["Type_donnee"] == type_donnee)
-        & (df["Valeur"].str.lower() == valeur.lower())
-    ]
-
-    return df_filtre
+    """Nœud Nord en signe : source unique placements.csv, sans omission silencieuse."""
+    # Compatibilité avec l'ancien appel du module Couple.
+    if _normalize_value(type_donnee) == "noeud_nord":
+        type_donnee = "Signe"
+    df = get_from_placements(
+        planete="Noeud Nord", type_donnee=type_donnee, valeur=valeur,
+        bloc=bloc, polarite=polarite,
+    )
+    if (df.empty or "interpretation" not in df.columns
+            or df["interpretation"].fillna("").astype(str).str.strip().eq("").any()):
+        raise ValueError(
+            "Interprétation obligatoire du Nœud Nord absente ou vide dans "
+            f"data/amour/placements.csv : type={type_donnee!r}, "
+            f"valeur={valeur!r}, bloc={bloc!r}, polarite={polarite!r}."
+        )
+    return df

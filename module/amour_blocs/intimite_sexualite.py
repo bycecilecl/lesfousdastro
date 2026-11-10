@@ -1,3 +1,5 @@
+from module.amour_blocs.normalisation_maisons import normaliser_maisons_theme
+from module.amour_blocs.aspects_facilitants import est_facilitant, orbe_facilitant, ressource_factuelle
 # module/amour_blocs/intimite_sexualite.py
 # MODULE 4 : Intimité & Sexualité avec FILTRAGE INTELLIGENT des aspects
 
@@ -15,8 +17,8 @@ from module.amour_blocs.maisons_couple import (
     _normalize_signe,
 )
 from module.amour_blocs.dignites import get_dignite_planete
-from utils.openai_utils import interroger_llm
-from module.amour_blocs.utils_theme import exporter_theme_complet
+from module.amour_blocs.llm_local import interroger_llm
+from module.amour_blocs.utils_theme import exporter_theme_complet, filtrer_point_illumination_amour
 from module.amour_blocs.context_amour import generer_contexte_amour
 
 # Maisons vraiment "intimes" pour la sexualité
@@ -27,6 +29,7 @@ def _get_maison_planete(theme: dict, planete: str) -> int | None:
     """
     Récupère le numéro de la maison d'une planète (int) à partir de theme['planetes'].
     """
+    theme = normaliser_maisons_theme(theme)
     planetes = theme.get("planetes", {}) or theme.get("planètes", {}) or {}
     data = planetes.get(planete, {}) or {}
     m = data.get("maison")
@@ -51,6 +54,11 @@ def _get_aspects_reels_du_theme(theme: dict) -> list:
         p2 = asp.get("planete2")
         type_asp = asp.get("aspect")
         orbe = asp.get("orbe", 0)
+        if est_facilitant(type_asp):
+            orbe = orbe_facilitant(asp.get("orbe"))
+            if orbe is None:
+                continue
+            type_asp = str(type_asp).strip().title()
         
         if p1 and p2 and type_asp:
             aspects_reels.append((p1, p2, type_asp, orbe))
@@ -76,7 +84,7 @@ def _filtrer_aspects_durs_intelligents(
     Retourne : liste de (autre_planete, type_aspect, orbe)
     """
     aspects_reels = _get_aspects_reels_du_theme(theme)
-    aspects_durs = ["Conjonction", "Carre", "Carré", "Opposition"]
+    aspects_durs = ["Conjonction", "Carre", "Carré", "Opposition", "Sextile", "Trigone"]
     
     trans_saturniennes = {"Pluton", "Neptune", "Chiron", "Lune Noire", "Lilith"}
     lentes = {"Saturne", "Uranus", "Jupiter"}
@@ -96,7 +104,7 @@ def _filtrer_aspects_durs_intelligents(
         autre = p2 if p1 == planete_cible else p1
         
         # Catégorisation
-        if orbe <= orbe_serre:
+        if est_facilitant(type_asp) or orbe <= orbe_serre:
             categorie = "serré"
         elif autre in trans_saturniennes:
             categorie = "trans"
@@ -193,6 +201,9 @@ def _get_aspects_durs_planete_filtres(
                     )
                     continue
         
+        if est_facilitant(type_asp):
+            snippets.append(ressource_factuelle(planete_cible, type_asp, autre_planete, orbe))
+
         # Chercher l'interprétation dans le CSV
         df = get_from_aspects(
             planete_1=planete_cible,
@@ -226,6 +237,7 @@ def _get_planetes_en_maison(theme: dict, numero: int) -> list[str]:
     """
     Retourne la liste des planètes présentes dans la maison `numero`.
     """
+    theme = normaliser_maisons_theme(theme)
     planetes = theme.get("planetes", {}) or theme.get("planètes", {}) or {}
     resultat = []
     for nom, donnees in planetes.items():
@@ -240,6 +252,7 @@ def generer_bloc_intimite_sexualite(theme: dict, call_llm: bool = True, polarite
 
     Focus : aspects DURS filtrés intelligemment pour éviter surcharge
     """
+    theme = normaliser_maisons_theme(filtrer_point_illumination_amour(theme))
     planetes = theme.get("planetes", {}) or theme.get("planètes", {}) or {}
     snippets_parts = []
 
@@ -289,6 +302,17 @@ def generer_bloc_intimite_sexualite(theme: dict, call_llm: bool = True, polarite
             )
             if not df_mars_etat.empty:
                 snippets_mars.append(df_to_snippets(df_mars_etat))
+
+    # La rétrogradation est indépendante de la dignité et du signe connu.
+    if mars_data.get("retrograde") or mars_data.get("rétrograde"):
+        df_mars_retro = get_from_etat_planete(
+            planete_1="Mars",
+            valeur="Rétrograde",
+            bloc="Intime",
+            polarite=polarite,
+        )
+        if not df_mars_retro.empty:
+            snippets_mars.append(df_to_snippets(df_mars_retro))
 
     # Aspects durs à Mars (FILTRÉS)
     aspects_mars = _get_aspects_durs_planete_filtres(theme, "Mars", polarite, bloc="Intime")
@@ -386,18 +410,13 @@ def generer_bloc_intimite_sexualite(theme: dict, call_llm: bool = True, polarite
                     texte_affaiblissement = " ET ".join(details_affaiblissement)
                     
                     avertissement_critique = f"""
-⚠️ ATTENTION CRITIQUE : Le maître de ta Maison 8 ({nom_maitre}) est {texte_affaiblissement}.
+ÉTAT DU MAÎTRE À NUANCER : Le maître de ta Maison 8 ({nom_maitre}) est {texte_affaiblissement}.
 
-Cela INVERSE COMPLÈTEMENT l'énergie classique de ta Maison 8 en {signe_8}.
-
-Au lieu d'une intimité {signe_8.lower()} (directe, passionnée, intense), tu as plutôt :
-- Une sexualité INHIBÉE, freinée, timide
-- Du MAL À PASSER À L'ACTE malgré le désir
-- Des BLOCAGES ÉMOTIONNELS dans la fusion
-- Une CRAINTE de l'abandon ou de la vulnérabilité
-- Besoin de SÉCURITÉ AFFECTIVE avant l'intimité physique
-
-→ NE PAS interpréter comme une sexualité fougueuse. C'est l'inverse : hésitation, retenue, peur.
+La Maison 8 en {signe_8} conserve sa symbolique. Cet état du maître en module l'expression, sans inversion automatique.
+Relie cette nuance à la nature du maître, à son signe, à sa maison et aux aspects fournis, sans effacer les ressources du thème.
+Si le maître est en chute ou en exil, explicite la difficulté symbolique propre à cette planète dans ce signe : ne te contente pas de dire qu'elle nuance le fonctionnement. Décris ce qui peut se contrarier, demander un ajustement ou constituer un point de blocage, et comment cela peut se manifester concrètement dans le domaine relationnel de ce chapitre.
+Nomme cette difficulté clairement, sans la transformer en incapacité, en événement vécu certain ou en inversion du signe de la maison. Les aspects facilitants peuvent offrir des ressources pour la gérer, mais ne l'effacent pas.
+S'il est rétrograde, distingue cette rétrogradation de sa dignité : une possible intériorisation n'est pas une incapacité.
 """
                     bloc_txt.append(avertissement_critique)
 
@@ -562,21 +581,27 @@ Au lieu d'une intimité {signe_8.lower()} (directe, passionnée, intense), tu as
     consigne_genre = "Adresse-toi au masculin." if polarite == "Homme" else "Adresse-toi au féminin."
 
     prompt = f"""
+ASPECTS FACILITANTS : RESSOURCES, PAS ANNULATION
+Seuls les sextiles et trigones à 3° d'orbe maximum sont retenus comme facilitants.
+Explique les difficultés clairement et directement, puis les ressources pertinentes : aucun aspect facilitant n'annule une tension.
+Une ressource peut aider à gérer une difficulté ; sa présence ne prouve pas qu'elle est utilisée ni que la difficulté est résolue.
+Ne compense pas les tensions par un comptage des aspects. Même nombreux, les facilitants ne rendent pas les tensions restantes négligeables.
+Évalue la pertinence pour ce chapitre, les planètes impliquées et la précision des aspects ; n'invente pas une souffrance dominante si l'ensemble est plus fluide.
+Ne classe pas automatiquement les conjonctions parmi les ressources.
+
 On travaille ici le MODULE 4 : "Intimité & Sexualité".
 {consigne_genre}
 
-⚠️ RÈGLE CRITIQUE : RESPECTER L'ÉTAT DES MAÎTRES DE MAISON
+LECTURE NUANCÉE DES MAÎTRES DE MAISON
 
-Si tu vois dans les données un avertissement du type "ATTENTION CRITIQUE : Le maître de ta Maison X est affaibli",
-tu DOIS IMPÉRATIVEMENT suivre cette directive et INVERSER l'interprétation classique du signe.
-
-EXEMPLE CONCRET :
-- Maison 8 en Bélier (classique = sexualité directe, fougueuse, intense)
-- MAIS maître Mars en Cancer chute + rétrograde
-- → Tu DOIS écrire : sexualité INHIBÉE, timide, besoin de sécurité, peur de l'abandon
-- → Tu NE DOIS PAS écrire : sexualité fougueuse, directe, intense
-
-C'est une RÈGLE ABSOLUE. Un maître affaibli inverse complètement l'énergie de la maison.
+Conserve la symbolique de la maison et de son signe. L'état du maître en module l'expression, sans inversion automatique.
+Articule la nature du maître, son signe, sa maison, sa dignité et les aspects effectivement fournis : tensions comme soutiens.
+Si le maître est en chute ou en exil, explicite la difficulté symbolique propre à cette planète dans ce signe : ne te contente pas de dire qu'elle nuance le fonctionnement. Décris ce qui peut se contrarier, demander un ajustement ou constituer un point de blocage, et comment cela peut se manifester concrètement dans le domaine relationnel de ce chapitre.
+Nomme cette difficulté clairement, sans la transformer en incapacité, en événement vécu certain ou en inversion du signe de la maison. Les aspects facilitants peuvent offrir des ressources pour la gérer, mais ne l'effacent pas.
+Une rétrogradation ne constitue pas à elle seule une faiblesse : évoque une possible intériorisation ou réélaboration, sans en faire un blocage certain.
+Ne déduis pas de ce seul indicateur une peur du rejet, un sentiment d'indignité, des partenaires toxiques ou une sexualité inhibée.
+Présente les manifestations possibles avec nuance et rattache chacune aux données disponibles. N'invente aucun facteur manquant.
+Si un extrait impose une inversion automatique ou un résultat négatif certain, reformule-le selon ces principes.
 
 Voici un CONTEXTE GLOBAL du thème de la personne, centré sur sa dynamique émotionnelle et relationnelle :
 

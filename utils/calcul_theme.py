@@ -2,69 +2,54 @@ from geopy.geocoders import Nominatim
 from datetime import datetime
 import pytz
 import os
+import math
 import swisseph as swe
 from timezonefinder import TimezoneFinder
 from utils.formatage import formater_positions_planetes
 from utils.utils_points_forts import extraire_points_forts
 from utils.astro_utils import valider_donnees_avant_analyse, corriger_donnees_maisons
-from utils.calculs_astrologiques import get_maison_planete, detecter_aspects, get_nakshatra_name, degre_vers_signe, get_maitre_ascendant, maisons_vediques_fixes, maison_vedique_planete_simple
-
+from utils.calculs_astrologiques import (
+    get_maison_planete,
+    detecter_interceptions,
+    detecter_aspects,
+    get_nakshatra_name,
+    degre_vers_signe,
+    get_maitre_ascendant,
+    get_maitres_ascendant,
+    get_maitre_ascendant_vedique,
+    maisons_vediques_fixes,
+    maison_vedique_planete_simple,
+)
 # Initialiser TimezoneFinder une seule fois
 tf = TimezoneFinder()
 
-# ────────────────────────────────────────────────
-# FONCTION : get_timezone_for_coordinates_and_date(lat, lon, dt_naive)
-# Objectif :
-#   Retourner l’identifiant de fuseau horaire IANA le plus pertinent pour
-#   des coordonnées géographiques et une date donnée, en gérant quelques
-#   exceptions historiques (ex : Maroc avant 2008 → UTC).
-#
-# Entrées :
-#   - lat (float) : latitude en degrés décimaux
-#   - lon (float) : longitude en degrés décimaux
-#   - dt_naive (datetime) : date/heure SANS tzinfo (naive) de l’événement
-#
-# Sortie :
-#   - str : identifiant de fuseau (ex. "Europe/Paris") ou "UTC" en fallback
-#
-# Détails d’implémentation :
-#   - Utilise timezonefinder (tf.timezone_at) pour déterminer le tzid moderne.
-#   - Cas spécial : si tzid == "Africa/Casablanca" et année < 2008, renvoie "UTC"
-#     (avant 2008 : pas d’heure d’été, UTC+0 stable).
-#   - En cas d’erreur ou d’indétermination, renvoie "UTC" par défaut.
-#
-# Pré-requis :
-#   - Avoir un objet `tf = TimezoneFinder()` initialisé au niveau module.
-# ────────────────────────────────────────────────
+class ThemeInputError(ValueError):
+    """Données à corriger avant de générer une interprétation."""
+
 
 def get_timezone_for_coordinates_and_date(lat, lon, dt_naive):
-    """
-    Obtient le fuseau horaire historiquement correct pour des coordonnées et une date donnée.
-    Gère les cas spéciaux comme le Maroc avant 2008.
-    """
+    """Zone IANA géographique ; la base historique fournit ensuite l'offset."""
     try:
-        # Obtenir le fuseau moderne
         tzid = tf.timezone_at(lat=lat, lng=lon)
-        
-        if not tzid:
-            return 'UTC'
-            
-        # Cas spéciaux historiques
-        year = dt_naive.year
-        
-        # Maroc : avant 2008, pas d'heure d'été, toujours UTC+0
-        if tzid == 'Africa/Casablanca' and year < 2008:
-            print(f"📅 Maroc avant 2008 détecté -> UTC+0 fixe")
-            return 'UTC'
-        
-        # Autres cas spéciaux peuvent être ajoutés ici...
-        
-        return tzid
-        
-    except Exception as e:
-        print(f"❌ Erreur détection fuseau: {e}")
-        return 'UTC'
-    
+    except Exception as exc:
+        raise ThemeInputError("Impossible de déterminer le fuseau du lieu de naissance.") from exc
+    if not tzid:
+        raise ThemeInputError("Fuseau introuvable : précise le fuseau du lieu de naissance.")
+    return tzid
+
+
+def _local_to_utc(naive, tzid):
+    try:
+        tz_local = pytz.timezone(tzid)
+        dt_local = tz_local.localize(naive, is_dst=None)
+    except pytz.AmbiguousTimeError as exc:
+        raise ThemeInputError("Cette heure existe deux fois lors du changement d'heure. Précise l'instant de naissance avant de générer le rapport.") from exc
+    except pytz.NonExistentTimeError as exc:
+        raise ThemeInputError("Cette heure locale n'existe pas lors du changement d'heure. Vérifie l'heure de naissance.") from exc
+    except pytz.UnknownTimeZoneError as exc:
+        raise ThemeInputError("Le fuseau de naissance est invalide.") from exc
+    return dt_local, dt_local.astimezone(pytz.UTC)
+
 # ────────────────────────────────────────────────
 # FONCTION : calcul_theme(date_naissance, heure_naissance, lieu_naissance, ...)
 # Objectif :
@@ -99,7 +84,7 @@ def get_timezone_for_coordinates_and_date(lat, lon, dt_naive):
 #
 # Utilisation :
 #   Cette fonction est le cœur du calcul du thème natal, utilisée
-#   dans les routes Flask pour alimenter les analyses (gratuite, Point Astral, etc.).
+#   dans les routes Flask pour alimenter les analyses (gratuite, Flash Astral, etc.).
 # ────────────────────────────────────────────────
 
 
@@ -112,54 +97,26 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     print(f"   Calcul_Theme_Paramètres reçus: lat={lat}, lon={lon}, tzid={tzid}")
     print(f"DEBUT calcul_theme: nom = '{nom}'")
     
-    # --- ÉTAPE 1: Obtenir les coordonnées ---
-    # if lat is None or lon is None:
-    #     print(f"🌍 Géocodage de '{lieu_naissance}'...")
-    #     geolocator = Nominatim(user_agent="astro-app")
-    #     try:
-    #         location = geolocator.geocode(lieu_naissance, timeout=10)
-    #         if location:
-    #             lat, lon = location.latitude, location.longitude
-    #             print(f"✅ Géocodage réussi: {lat:.6f}, {lon:.6f}")
-    #         else:
-    #             print(f"⚠️ Géocodage échoué, utilisation de Paris par défaut")
-    #             lat, lon = 48.8566, 2.3522
-    #     except Exception as e:
-    #         print(f"❌ Erreur géocodage: {e}")
-    #         lat, lon = 48.8566, 2.3522
 
-    def _to_float_or_none(x):
-        if x is None:
-            return None
-        x = str(x).strip().replace(",", ".")
+    has_lat, has_lon = lat not in (None, ""), lon not in (None, "")
+    if has_lat != has_lon:
+        raise ThemeInputError("Latitude et longitude doivent être renseignées ensemble.")
+    if has_lat:
         try:
-            return float(x)
-        except Exception:
-            return None
-
-    lat_f = _to_float_or_none(lat)
-    lon_f = _to_float_or_none(lon)
-
-    if lat_f is not None and lon_f is not None:
-        # ✅ on a des coordonnées précises → pas de géocodage
-        lat, lon = lat_f, lon_f
-        print(f"🎯 Calcul_Theme_Coordonnées fournies: {lat}, {lon}")
+            lat, lon = float(str(lat).replace(",", ".")), float(str(lon).replace(",", "."))
+        except (TypeError, ValueError) as exc:
+            raise ThemeInputError("Les coordonnées de naissance sont invalides.") from exc
     else:
-        # 🌍 fallback géocodage (Nominatim) avec User-Agent obligatoire en prod
-        print(f"🌍 Calcul_Theme_Géocodage de '{lieu_naissance}'...")
         ua = os.getenv("GEOCODER_UA", "lesfousdastro/1.0 contact:admin@example.com")
-        geolocator = Nominatim(user_agent=ua)
         try:
-            location = geolocator.geocode(lieu_naissance, timeout=10, language="fr")
-            if location:
-                lat, lon = float(location.latitude), float(location.longitude)
-                print(f"✅ Calcul_Theme_Géocodage réussi: {lat:.6f}, {lon:.6f}")
-            else:
-                print("⚠️ Calcul_Theme_Géocodage échoué, utilisation de Paris par défaut")
-                lat, lon = 48.8566, 2.3522
-        except Exception as e:
-            print(f"❌ Calcul_Theme_Erreur géocodage: {e} → Paris par défaut")
-            lat, lon = 48.8566, 2.3522
+            location = Nominatim(user_agent=ua).geocode(lieu_naissance, timeout=10, language="fr")
+        except Exception as exc:
+            raise ThemeInputError("La recherche du lieu a échoué. Réessaie ou fournis ses coordonnées.") from exc
+        if location is None:
+            raise ThemeInputError("Lieu de naissance introuvable. Sélectionne un lieu ou fournis ses coordonnées.")
+        lat, lon = float(location.latitude), float(location.longitude)
+    if not (math.isfinite(lat) and math.isfinite(lon) and -90 <= lat <= 90 and -180 <= lon <= 180):
+        raise ThemeInputError("Les coordonnées de naissance sont hors limites.")
 
     # --- ÉTAPE 2: Parser la date de naissance ---
     try:
@@ -168,57 +125,22 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         try:
             naive = datetime.strptime(date_naissance, '%d %B %Y %H:%M')
         except ValueError as e:
-            print(f"❌ Calcul_Theme_Format de date non reconnu: {e}")
-            raise
+            raise ThemeInputError("Le format de la date ou de l'heure de naissance est invalide.") from e
 
     print(f"📅 Calcul_Theme_Date parsée: {naive}")
 
     # --- ÉTAPE 3: Obtenir le fuseau horaire correct ---
-    dt_local = None  # ✅ évite UnboundLocalError lors du print final
     if dt_naissance_utc is not None:
-    # Cas 1: UTC déjà fourni (priorité absolue)
-        dt_utc = dt_naissance_utc
-        print(f"✅ Calcul_Theme_UTC pré-calculé utilisé: {dt_utc}")
-
-        # ✅ définir aussi l'heure locale pour le log final
+        if not isinstance(dt_naissance_utc, datetime) or dt_naissance_utc.tzinfo is None or dt_naissance_utc.utcoffset() is None:
+            raise ThemeInputError("L'instant de naissance fourni doit comporter un fuseau horaire.")
+        dt_utc = dt_naissance_utc.astimezone(pytz.UTC)
         try:
-            tzid = tzid or "UTC"
-            if tzid == "UTC":
-                dt_local = dt_utc
-            else:
-                tz_local = pytz.timezone(tzid)
-                # 🔥 correction ici :
-                dt_local = dt_utc.astimezone(tz_local)
-        except Exception as e:
-            print(f"⚠️ Calcul_Theme_Impossible de reconstruire l'heure locale depuis l'UTC ({e}), on garde UTC")
-            dt_local = dt_utc
+            dt_local = dt_utc.astimezone(pytz.timezone(tzid or "UTC"))
+        except pytz.UnknownTimeZoneError as exc:
+            raise ThemeInputError("Le fuseau de naissance est invalide.") from exc
     else:
-        # Cas 2: Déterminer le fuseau et convertir
-        if tzid is None:
-            tzid = get_timezone_for_coordinates_and_date(lat, lon, naive)
-            print(f"🕐 Calcul_Theme_Fuseau détecté: {tzid}")
-        
-        # Conversion avec le bon fuseau
-        if tzid == 'UTC':
-            dt_local = naive.replace(tzinfo=pytz.UTC)
-            dt_utc = dt_local
-        else:
-            try:
-                tz_local = pytz.timezone(tzid)
-                dt_local = tz_local.localize(naive, is_dst=None)
-                dt_utc = dt_local.astimezone(pytz.UTC)
-            except pytz.AmbiguousTimeError:
-                tz_local = pytz.timezone(tzid)
-                dt_local = tz_local.localize(naive, is_dst=False)
-                dt_utc = dt_local.astimezone(pytz.UTC)
-            except pytz.NonExistentTimeError:
-                tz_local = pytz.timezone(tzid)
-                dt_local = tz_local.localize(naive, is_dst=True)
-                dt_utc = dt_local.astimezone(pytz.UTC)
-            except Exception as e:
-                print(f"❌ Erreur conversion fuseau '{tzid}': {e}")
-                dt_local = naive.replace(tzinfo=pytz.UTC)
-                dt_utc = dt_local
+        tzid = tzid or get_timezone_for_coordinates_and_date(lat, lon, naive)
+        dt_local, dt_utc = _local_to_utc(naive, tzid)
     print(f"🔧 Calcul_Theme_TEMPS FINAL:")
     print(f"   Calcul_Theme_Heure locale: {dt_local.strftime('%Y-%m-%d %H:%M %Z%z') if hasattr(dt_local, 'strftime') else 'N/A'}")
     print(f"   Calcul_Theme_Heure UTC: {dt_utc.strftime('%Y-%m-%d %H:%M %Z%z')}")
@@ -228,7 +150,15 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
 
     # --- ÉTAPE 4: Calculs astrologiques ---
     swe.set_ephe_path(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ephe'))
-    jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day, dt_utc.hour + dt_utc.minute / 60.0)
+    jd = swe.julday(
+        dt_utc.year,
+        dt_utc.month,
+        dt_utc.day,
+        dt_utc.hour
+        + dt_utc.minute / 60.0
+        + dt_utc.second / 3600.0
+        + dt_utc.microsecond / 3_600_000_000.0,
+    )
     
     print(f"🌟 Calcul_Theme_Jour Julien calculé: {jd}")
     
@@ -238,10 +168,13 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     print(f"🌙 Calcul_Theme_Ayanamsa (Lahiri): {ayanamsa:.4f}°")
 
     # Calcul des maisons avec Placidus
-    cusps, ascmc = swe.houses(jd, lat, lon, b'P')
+    try:
+        cusps, ascmc = swe.houses(jd, lat, lon, b'P')
+    except swe.Error as exc:
+        raise ThemeInputError("Les maisons Placidus ne peuvent pas être calculées pour ce lieu et cette date, notamment aux latitudes polaires. Aucun système de maisons alternatif n'a été appliqué.") from exc
     #cusps_sid = [(cusp - ayanamsa) % 360 for cusp in cusps]
 
-    asc_deg = round(ascmc[0], 2)
+    asc_deg = float(ascmc[0]) % 360.0
     signe_asc, deg_asc = degre_vers_signe(asc_deg)
 
     asc_deg_sid = (asc_deg - ayanamsa) % 360
@@ -263,11 +196,12 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         "FC": (mc_deg + 180.0) % 360.0,
     }
     
+    
     maisons_tropicales = {}
     signes_detectes = []
 
     for i in range(12):
-        deg = round(cusps[i], 2)
+        deg = float(cusps[i]) % 360.0
         signe, deg_signe = degre_vers_signe(deg)
         maisons_tropicales[f'Maison {i+1}'] = {
             'degre': deg,
@@ -276,38 +210,8 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         }
         signes_detectes.append(signe)
 
-    # Détection des signes interceptés
-    tous_les_signes = [
-        "Bélier", "Taureau", "Gémeaux", "Cancer", "Lion", "Vierge",
-        "Balance", "Scorpion", "Sagittaire", "Capricorne", "Verseau", "Poissons"
-    ]
-
-    signes_interceptes = [s for s in tous_les_signes if signes_detectes.count(s) == 0]
-    axes_interceptes = []
-
-    for i in range(0, len(signes_interceptes), 2):
-        if i + 1 < len(signes_interceptes):
-            axes_interceptes.append((signes_interceptes[i], signes_interceptes[i + 1]))
-
-    maisons_interceptées = {}
-    for i in range(12):
-        cusp1 = cusps[i]
-        cusp2 = cusps[(i + 1) % 12]
-        if cusp2 < cusp1:
-            cusp2 += 360
-
-        for signe in signes_interceptes:
-            debut_signe = tous_les_signes.index(signe) * 30
-            fin_signe = debut_signe + 30
-            if (debut_signe > cusp1 and fin_signe < cusp2):
-                maison_label = f"Maison {i+1}"
-                maisons_interceptées[signe] = maison_label
-
-    interceptions = {
-        "signes_interceptes": signes_interceptes,
-        "axes_interceptes": axes_interceptes,
-        "maisons_interceptées": maisons_interceptées
-    }
+    # Travailler sur les cuspides non arrondies et leurs intervalles circulaires.
+    interceptions = detecter_interceptions(cusps)
 
     maisons_vediques = maisons_vediques_fixes(signe_asc_sid)
 
@@ -328,7 +232,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     }
     resultats_vediques = {
         'Ascendant': {
-            'degre': round(asc_deg_sid, 2),
+            'degre': asc_deg_sid,
             'signe': signe_asc_sid,
             'degre_dans_signe': deg_asc_sid,
             'nakshatra': nakshatra_asc_sid
@@ -339,12 +243,11 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
        
        # --- 1) Récupérer aussi la vitesse pour détecter le rétrograde
         pos, _ = swe.calc_ut(jd, code)            # pos = [longitude, latitude, distance, vitesse_longitude]
-        deg_trop = round(pos[0], 2)                # remplace: swe.calc_ut(jd, code)[0][0]
+        deg_trop = float(pos[0]) % 360.0  # précision conservée pour signe/maison/aspects
         speed = pos[3]
 
-        # --- 2) Déterminer si la planète est rétrograde (que pour ces 5-là)
-        planetes_retro_ok = ["Mercure", "Vénus", "Mars", "Jupiter", "Saturne"]
-        is_retro = (nomp in planetes_retro_ok) and (speed < 0)
+        # Le mouvement vient de la vitesse éphéméride, y compris les lentes.
+        is_retro = speed < 0
        
         signe_trop, deg_signe_trop = degre_vers_signe(deg_trop)
         maison_trop = get_maison_planete(deg_trop, cusps)
@@ -365,15 +268,15 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
 
         resultats_tropical[nomp] = {
             'degre': deg_trop,
+            'longitude': deg_trop,
             'signe': signe_trop,
             'degre_dans_signe': deg_signe_trop,
             'maison': maison_trop,
             'retrograde': is_retro,
-            'longitude': deg_trop,
         }
 
         resultats_vediques[nomp] = {
-            'degre': round(deg_sid, 2),
+            'degre': deg_sid,
             'signe': signe_ved,
             'degre_dans_signe': deg_signe_ved,
             'nakshatra': nakshatra,
@@ -383,7 +286,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         }
 
         positions_tropicales[nomp] = deg_trop
-        positions_vediques[nomp] = round(deg_sid, 2)
+        positions_vediques[nomp] = deg_sid
 
 
     # --- AJOUT : Part de Fortune (tropicale) ---
@@ -407,28 +310,26 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     maison_pof = get_maison_planete(pof_deg, cusps)
 
     resultats_tropical["Part de Fortune"] = {
-        "degre": round(pof_deg, 2),
+        "degre": pof_deg,
         "signe": signe_pof,
-        "degre_dans_signe": round(deg_pof, 2),
+        "degre_dans_signe": deg_pof,
         "maison": maison_pof,
         "diurne": is_day
     }
 
-    #positions_tropicales["Part de Fortune"] = round(pof_deg, 2)
-
-    # --- AJOUT : Point d'Illumination (opposé à la Part de Fortune) ---
+    # --- AJOUT : Point d’Illumination (opposé à la Part de Fortune) ---
     illum_deg = (pof_deg + 180.0) % 360.0
     signe_illum, deg_illum = degre_vers_signe(illum_deg)
     maison_illum = get_maison_planete(illum_deg, cusps)
 
-    resultats_tropical["Point d'Illumination"] = {
-        "degre": round(illum_deg, 2),
+    resultats_tropical["Point d’Illumination"] = {
+        "degre": illum_deg,
         "signe": signe_illum,
-        "degre_dans_signe": round(deg_illum, 2),
+        "degre_dans_signe": deg_illum,
         "maison": maison_illum
     }
 
-    positions_tropicales["Point d'Illumination"] = round(illum_deg, 2)
+    positions_tropicales["Point d’Illumination"] = illum_deg
 
     
     # Ajout de Ketu
@@ -437,7 +338,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     signe_ketu_trop, deg_ketu_trop = degre_vers_signe(ketu_deg_trop)
     maison_ketu_trop = get_maison_planete(ketu_deg_trop, cusps)
     resultats_tropical['Ketu'] = {
-        'degre': round(ketu_deg_trop, 2),
+        'degre': ketu_deg_trop,
         'signe': signe_ketu_trop,
         'degre_dans_signe': deg_ketu_trop,
         'maison': maison_ketu_trop
@@ -449,16 +350,16 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     signe_ketu_ved, deg_ketu_ved = degre_vers_signe(ketu_deg_ved)
     maison_ketu_ved = maison_vedique_planete_simple(signe_ketu_ved, signe_asc_sid)
     resultats_vediques['Ketu'] = {
-        'degre': round(ketu_deg_ved, 2),
+        'degre': ketu_deg_ved,
         'signe': signe_ketu_ved,
         'degre_dans_signe': deg_ketu_ved,
         'nakshatra': get_nakshatra_name(ketu_deg_ved),
         'maison': maison_ketu_ved
     }
-    positions_vediques['Ketu'] = round(ketu_deg_ved, 2)
+    positions_vediques['Ketu'] = ketu_deg_ved
 
     # Ajout de la Lune Noire moyenne
-    deg_lilith = round(swe.calc_ut(jd, 12)[0][0], 2)
+    deg_lilith = float(swe.calc_ut(jd, 12)[0][0]) % 360.0
     signe_lilith, deg_signe_lilith = degre_vers_signe(deg_lilith)
     maison_lilith = get_maison_planete(deg_lilith, cusps)
 
@@ -471,7 +372,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     positions_tropicales['Lune Noire'] = deg_lilith
 
     # Ajout de Chiron
-    deg_chiron = round(swe.calc_ut(jd, 15)[0][0], 2)
+    deg_chiron = float(swe.calc_ut(jd, 15)[0][0]) % 360.0
     signe_chiron, deg_signe_chiron = degre_vers_signe(deg_chiron)
     maison_chiron = get_maison_planete(deg_chiron, cusps)
 
@@ -493,7 +394,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     delta_forward = _delta_circulaire(uranus_deg, saturne_deg)
     delta_backward = _delta_circulaire(saturne_deg, uranus_deg)
 
-    # On prend l'arc le plus court entre Uranus et Saturne
+    # On prend l’arc le plus court entre Uranus et Saturne
     if delta_forward <= delta_backward:
         arc_court = delta_forward
         porte_invisible_deg = (uranus_deg + arc_court / 2.0) % 360.0
@@ -501,7 +402,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         arc_court = delta_backward
         porte_invisible_deg = (saturne_deg + arc_court / 2.0) % 360.0
 
-    # La porte visible est à l'opposé exact
+    # La porte visible est à l’opposé exact
     porte_visible_deg = (porte_invisible_deg + 180.0) % 360.0
 
     porte_invisible_maison = get_maison_planete(porte_invisible_deg, cusps)
@@ -513,48 +414,53 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     axe_portes = {
         "depart": "Uranus",
         "arrivee": "Saturne",
-        "uranus_deg": round(uranus_deg, 2),
-        "saturne_deg": round(saturne_deg, 2),
-        "arc_uranus_saturne_court": round(arc_court, 2),
+        "uranus_deg": uranus_deg,
+        "saturne_deg": saturne_deg,
+        "arc_uranus_saturne_court": arc_court,
 
-        "porte_invisible_deg": round(porte_invisible_deg, 2),
+        "porte_invisible_deg": porte_invisible_deg,
         "porte_invisible_signe": porte_invisible_signe,
-        "porte_invisible_deg_signe": round(porte_invisible_deg_signe, 2),
+        "porte_invisible_deg_signe": porte_invisible_deg_signe,
         "porte_invisible_maison": porte_invisible_maison,
 
-        "porte_visible_deg": round(porte_visible_deg, 2),
+        "porte_visible_deg": porte_visible_deg,
         "porte_visible_signe": porte_visible_signe,
-        "porte_visible_deg_signe": round(porte_visible_deg_signe, 2),
+        "porte_visible_deg_signe": porte_visible_deg_signe,
         "porte_visible_maison": porte_visible_maison,
     }
 
     print("DEBUG AXE DES PORTES :", axe_portes)
 
-
     positions_tropicales_avec_angles = dict(positions_tropicales)
     positions_tropicales_avec_angles.update({
-        "MC": round(mc_deg, 2),
-        "Descendant": round((asc_deg + 180.0) % 360.0, 2),
-        "FC": round((mc_deg + 180.0) % 360.0, 2),
+        "MC": mc_deg,
+        "Descendant": (asc_deg + 180.0) % 360.0,
+        "FC": (mc_deg + 180.0) % 360.0,
     })
-    aspects = detecter_aspects(positions_tropicales)
+
     aspects_avec_angles = detecter_aspects(positions_tropicales_avec_angles)
 
-    nom_maitre_trop = get_maitre_ascendant(signe_asc)
+    aspects = detecter_aspects(positions_tropicales)
+    
+
+    nom_maitre_trop, nom_second_maitre = get_maitres_ascendant(signe_asc)
+
     maitre_ascendant = None
     if nom_maitre_trop and nom_maitre_trop in resultats_tropical:
         infos = resultats_tropical[nom_maitre_trop]
-        deg = infos['degre']
+        deg = infos["degre"]
         maison = get_maison_planete(deg, cusps)
+
         maitre_ascendant = {
-            'nom': nom_maitre_trop,
-            'degre': deg,
-            'signe': infos['signe'],
-            'degre_dans_signe': infos['degre_dans_signe'],
-            'maison': maison
+            "nom": nom_maitre_trop,
+            "second_nom": nom_second_maitre,
+            "degre": deg,
+            "signe": infos["signe"],
+            "degre_dans_signe": infos["degre_dans_signe"],
+            "maison": maison,
         }
 
-    nom_maitre_ved = get_maitre_ascendant(signe_asc_sid)
+    nom_maitre_ved = get_maitre_ascendant_vedique(signe_asc_sid)
     maitre_asc_vedique = None
     if nom_maitre_ved and nom_maitre_ved in resultats_vediques:
         infos = resultats_vediques[nom_maitre_ved]
@@ -570,46 +476,6 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
             'maison': maison
         }
 
-
-    # --- AJOUT : maisons dirigées par chaque planète (pour interceptions / karma / lectures avancées) --- 20/03/26
-    SIGN_RULERS = {
-        "Bélier": ["Mars"],
-        "Taureau": ["Vénus"],
-        "Gémeaux": ["Mercure"],
-        "Cancer": ["Lune"],
-        "Lion": ["Soleil"],
-        "Vierge": ["Mercure"],
-        "Balance": ["Vénus"],
-        "Scorpion": ["Mars", "Pluton"],
-        "Sagittaire": ["Jupiter"],
-        "Capricorne": ["Saturne"],
-        "Verseau": ["Saturne", "Uranus"],
-        "Poissons": ["Jupiter", "Neptune"],
-    }
-
-    house_rulers_map = {}
-
-    for maison_label, infos_maison in (maisons_tropicales or {}).items():
-        signe_cuspide = infos_maison.get("signe")
-        if not signe_cuspide:
-            continue
-
-        rulers = SIGN_RULERS.get(signe_cuspide, [])
-        if not rulers:
-            continue
-
-        try:
-            maison_num = int(str(maison_label).replace("Maison", "").strip())
-        except Exception:
-            continue
-
-        for ruler in rulers:
-            house_rulers_map.setdefault(ruler, []).append(maison_num)
-
-    for ruler in house_rulers_map:
-        house_rulers_map[ruler] = sorted(set(house_rulers_map[ruler]))
-
-    print("🏠 Calcul_Theme_house_rulers_map :", house_rulers_map)
 
     points_forts = extraire_points_forts({
         'planetes': resultats_tropical,
@@ -651,6 +517,48 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
     except Exception as e:
         print("⚠️ SanityCheck angles:", e)
 
+    # --- AJOUT : maisons dirigées par chaque planète (pour interceptions / karma / lectures avancées) --- 20/03/26
+    SIGN_RULERS = {
+        "Bélier": ["Mars"],
+        "Taureau": ["Vénus"],
+        "Gémeaux": ["Mercure"],
+        "Cancer": ["Lune"],
+        "Lion": ["Soleil"],
+        "Vierge": ["Mercure"],
+        "Balance": ["Vénus"],
+        "Scorpion": ["Mars", "Pluton"],
+        "Sagittaire": ["Jupiter"],
+        "Capricorne": ["Saturne"],
+        "Verseau": ["Saturne", "Uranus"],
+        "Poissons": ["Jupiter", "Neptune"],
+    }
+
+    house_rulers_map = {}
+
+    for maison_label, infos_maison in (maisons_tropicales or {}).items():
+        signe_cuspide = infos_maison.get("signe")
+        if not signe_cuspide:
+            continue
+
+        rulers = SIGN_RULERS.get(signe_cuspide, [])
+        if not rulers:
+            continue
+
+        # extraire le numéro de maison depuis "Maison 1"
+        try:
+            maison_num = int(str(maison_label).replace("Maison", "").strip())
+        except Exception:
+            continue
+
+        for ruler in rulers:
+            house_rulers_map.setdefault(ruler, []).append(maison_num)
+
+    # petit tri propre
+    for ruler in house_rulers_map:
+        house_rulers_map[ruler] = sorted(set(house_rulers_map[ruler]))
+
+    print("🏠 Calcul_Theme_house_rulers_map :", house_rulers_map)
+
     print(f"FIN calcul_theme: nom = '{nom}'")
 
     return {
@@ -660,6 +568,7 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         'maisons': maisons_tropicales,
         'maisons_vediques': maisons_vediques,
         'aspects': aspects,
+        'aspects_avec_angles': aspects_avec_angles,
         'maitre_ascendant': maitre_ascendant,
         'ascendant': ascendant,
         'ascendant_sidereal': resultats_vediques['Ascendant'],
@@ -671,7 +580,6 @@ def calcul_theme(nom, date_naissance, heure_naissance, lieu_naissance,
         'planetes_deg': planetes_deg,
         'axe_des_portes': axe_portes,
         'part_de_fortune': resultats_tropical.get("Part de Fortune"),
-        'point_illumination': resultats_tropical.get("Point d'Illumination"),
-        'aspects_avec_angles': aspects_avec_angles,
+        'point_illumination': resultats_tropical.get("Point d’Illumination"),
         'house_rulers_map': house_rulers_map,    
     }

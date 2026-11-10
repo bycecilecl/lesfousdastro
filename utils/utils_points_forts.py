@@ -126,16 +126,33 @@ def detecter_amas(data, seuil=3, par="signe", strict=False):
         return "standard"
 
     for groupe, liste in groupes_count.items():
-        if len(liste) >= seuil:
-            typ = categoriser(liste)
-            if typ == "générationnel":
-                points.append(f"Amas générationnel en {groupe} ({', '.join(liste)}) - effet collectif")
-            elif typ == "personnel":
-                points.append(f"🌟 Amas personnel en {groupe} ({', '.join(liste)})")
-            elif typ == "mixte":
-                points.append(f"Amas mixte en {groupe} ({', '.join(liste)})")
-            else:
-                points.append(f"Amas planétaire en {groupe} ({', '.join(liste)})")
+        liste_valides = [p for p in liste if p in classiques]
+        nb_personnelles = len([p for p in liste_valides if p in pers])
+
+        if len(liste_valides) < seuil:
+            continue
+
+        if nb_personnelles < 2:
+            continue
+
+        typ = categoriser(liste_valides)
+
+        if typ == "générationnel":
+            points.append(
+                f"Amas générationnel en {groupe} ({', '.join(liste_valides)}) - effet collectif"
+            )
+        elif typ == "personnel":
+            points.append(
+                f"🌟 Amas personnel en {groupe} ({', '.join(liste_valides)})"
+            )
+        elif typ == "mixte":
+            points.append(
+                f"Amas mixte en {groupe} ({', '.join(liste_valides)})"
+            )
+        else:
+            points.append(
+                f"Amas planétaire en {groupe} ({', '.join(liste_valides)})"
+            )
     return points
 
 def evaluer_dignite(planete, signe):
@@ -386,8 +403,8 @@ def extraire_points_forts(data):
     points += detecter_conjonction_angles({k:v['degre'] for k,v in planetes.items() if 'degre' in v}, angles_degres)
 
     # Amas (toutes planètes, sinon passe strict=True pour “classiques”)
-    points += detecter_amas(data, seuil=3, par="signe", strict=False)
-    points += detecter_amas(data, seuil=3, par="maison", strict=False)
+    points += detecter_amas(data, seuil=3, par="signe", strict=True)
+    points += detecter_amas(data, seuil=3, par="maison", strict=True)
 
     # Maître d’Ascendant
     points.append(qualite_maitre_asc(data))

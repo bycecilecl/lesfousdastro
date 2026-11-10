@@ -1,3 +1,5 @@
+from module.amour_blocs.normalisation_maisons import normaliser_maisons_theme
+from module.amour_blocs.aspects_facilitants import est_facilitant, orbe_facilitant, ressource_factuelle
 # module/amour_blocs/partenaire_ideal.py
 # VERSION OPTIMISÉE AVEC FILTRAGE INTELLIGENT DES ASPECTS
 
@@ -7,7 +9,7 @@ from module.amour_bdd import (
     get_from_aspects,
     df_to_snippets,
 )
-from module.amour_blocs.utils_theme import exporter_theme_complet
+from module.amour_blocs.utils_theme import exporter_theme_complet, filtrer_point_illumination_amour
 from module.amour_blocs.context_amour import generer_contexte_amour
 
 # Configuration du logger
@@ -63,6 +65,11 @@ def _get_aspects_reels_du_theme(theme: dict) -> list:
         p2 = asp.get("planete2")
         type_asp = asp.get("aspect")
         orbe = asp.get("orbe", 0)
+        if est_facilitant(type_asp):
+            orbe = orbe_facilitant(asp.get("orbe"))
+            if orbe is None:
+                continue
+            type_asp = str(type_asp).strip().title()
         print(f"{p1} {type_asp} {p2} (orbe: {orbe}°)")
 
         
@@ -168,7 +175,7 @@ def _filtrer_aspects_partenaires_intelligent(
             logger.info(f"[PARTENAIRE] 📊 Aspect DÉTECTÉ : {ref} {type_asp} {autre} (orbe {orbe:.1f}°)")
             
             # Catégoriser l'aspect
-            if orbe <= orbe_serre:
+            if est_facilitant(type_asp) or orbe <= orbe_serre:
                 categorie = "serré"
             elif autre in trans_saturniennes:
                 categorie = "trans"
@@ -263,6 +270,8 @@ def _snippets_aspects_planetes_partenaires(theme: dict, polarite: str) -> str:
         section_aspects = []
 
         for (ref, autre_planete, type_asp, orbe) in lst:
+            if est_facilitant(type_asp):
+                section_aspects.append(ressource_factuelle(ref, type_asp, autre_planete, orbe))
             key = tuple(sorted([ref, autre_planete])) + (type_asp,)
             if key in aspects_traites:
                 continue
@@ -307,6 +316,7 @@ def generer_bloc_partenaire_ideal(theme: dict, call_llm: bool = True, polarite: 
     MODULE 2 : PARTENAIRE IDÉAL
     Génération avec filtrage intelligent des aspects pour éviter la surcharge.
     """
+    theme = normaliser_maisons_theme(filtrer_point_illumination_amour(theme))
     if polarite not in ("Femme", "Homme"):
         logger.warning(f"[PARTENAIRE] Polarité '{polarite}' inconnue, défaut sur Femme")
         polarite = "Femme"
@@ -348,6 +358,14 @@ def generer_bloc_partenaire_ideal(theme: dict, call_llm: bool = True, polarite: 
     consigne_genre = "Adresse-toi au masculin." if polarite == "Homme" else "Adresse-toi au féminin."
 
     prompt = f"""
+ASPECTS FACILITANTS : RESSOURCES, PAS ANNULATION
+Seuls les sextiles et trigones à 3° d'orbe maximum sont retenus comme facilitants.
+Explique les difficultés clairement et directement, puis les ressources pertinentes : aucun aspect facilitant n'annule une tension.
+Une ressource peut aider à gérer une difficulté ; sa présence ne prouve pas qu'elle est utilisée ni que la difficulté est résolue.
+Ne compense pas les tensions par un comptage des aspects. Même nombreux, les facilitants ne rendent pas les tensions restantes négligeables.
+Évalue la pertinence pour ce chapitre, les planètes impliquées et la précision des aspects ; n'invente pas une souffrance dominante si l'ensemble est plus fluide.
+Ne classe pas automatiquement les conjonctions parmi les ressources.
+
 Tu es une astrologue experte en psychologie des relations. On travaille le MODULE 2 : "Quel type de partenaire t'attire".
 {consigne_genre}
 
@@ -391,7 +409,7 @@ NE PARLE PAS de :
     print(prompt)
     print("\n===== FIN PROMPT =====\n")
 
-    from utils.openai_utils import interroger_llm
+    from module.amour_blocs.llm_local import interroger_llm
     logger.info("[PARTENAIRE] Appel LLM en cours...")
     texte = interroger_llm(prompt)
     logger.info("[PARTENAIRE] Réponse LLM reçue.")
