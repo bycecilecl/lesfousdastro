@@ -108,6 +108,10 @@ def bd_image_content(content: str, slug: str) -> tuple[str, list[str]]:
 BASE_DIR = Path(__file__).resolve().parent.parent
 ARTICLES_DIR = BASE_DIR / "data" / "articles"
 
+ARTICLE_REDIRECTS = {
+    "chirurgies-sante-astrologie-theme-natal": "autosave-03ee2824d25549aa5f2fcf3c57cc6649",
+}
+
 
 def lire_article_md(path: Path) -> dict:
     raw = path.read_text(encoding="utf-8").strip()
@@ -182,6 +186,11 @@ def charger_articles() -> list[dict]:
         article = article_from_bludit(page)
         if article:
             by_slug[article["slug"]] = article
+
+    # Keep only the replacement in listings and the sitemap once published.
+    for old_slug, new_slug in ARTICLE_REDIRECTS.items():
+        if new_slug in by_slug:
+            by_slug.pop(old_slug, None)
 
     return sorted(by_slug.values(), key=lambda a: a.get("date", ""), reverse=True)
 
@@ -549,6 +558,9 @@ def blog_index():
 
 @blog_bp.route("/blog/<slug>", strict_slashes=False)
 def blog_article(slug):
+
+    if slug in ARTICLE_REDIRECTS:
+        return redirect(url_for("blog.blog_article", slug=ARTICLE_REDIRECTS[slug]), code=301)
 
     articles = charger_articles()
 
