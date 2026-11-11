@@ -260,6 +260,34 @@ body {
     font-weight: 700;
 }
 
+
+.article-comments {
+    margin-top: 3rem; padding: clamp(20px, 3vw, 32px);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+.article-comments h2 { color: var(--blue-dark); font-size: 1.4rem; margin-bottom: 12px; }
+.article-comments__intro { color: var(--text-muted); font-size: 0.92rem; line-height: 1.65; margin-bottom: 18px; }
+.article-comments__list { list-style: none; padding: 0; margin: 20px 0; }
+.article-comments__list li { padding: 18px 0; border-bottom: 1px solid var(--border); }
+.article-comments__list p { margin-top: 8px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
+.article-comments__notice { padding: 14px 18px; margin: 18px 0; border-radius: 8px; background: var(--teal-light); color: #17334c; line-height: 1.6; }
+.article-comment-form { display: grid; gap: 10px; margin-top: 24px; }
+.article-comment-form label { font-weight: 600; color: var(--blue-dark); }
+.article-comment-form input, .article-comment-form textarea {
+    width: 100%; min-width: 0; padding: 12px 14px; border: 1px solid #a9cbd5;
+    border-radius: 8px; font: inherit; color: var(--text); background: white;
+}
+.article-comment-form input { max-width: 480px; }
+.article-comment-form textarea { min-height: 150px; resize: vertical; line-height: 1.6; }
+.article-comment-form input:focus, .article-comment-form textarea:focus { outline: 3px solid var(--teal-light); outline-offset: 2px; }
+.article-comment-form button {
+    justify-self: start; border: 0; padding: 13px 22px; border-radius: 24px;
+    background: var(--blue-dark); color: white; font: inherit; font-weight: 600; cursor: pointer;
+}
+.article-comment-form button:hover { background: #174c70; }
+.article-comment-form__honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
 @media (max-width: 768px) {
     .article-header { padding: 40px 20px 36px; }
     .article-wrap { padding: 36px 20px 60px; }
@@ -341,14 +369,48 @@ body {
         <a href="{{ url_for('pages_bp.analyses') }}">Obtenir mon Point Astral →</a>
     </div>
 
+    <section class="article-comments" id="commentaires" aria-labelledby="article-comments-heading">
+        <h2 id="article-comments-heading">Commentaires{% if article_comments %} ({{ article_comments | length }}){% endif %}</h2>
+        <p class="article-comments__intro">Une question, un ressenti ou une expérience à partager ? La discussion est ouverte.</p>
+        {% if article_comments %}
+        <ul class="article-comments__list">
+            {% for comment in article_comments %}
+            <li><strong>{{ comment.author }}</strong><p>{{ comment.body }}</p></li>
+            {% endfor %}
+        </ul>
+        {% elif article_comments_enabled %}
+        <p class="article-comments__intro">Aucun commentaire pour le moment. À toi d’ouvrir la conversation !</p>
+        {% endif %}
+        {% set notice = request.args.get('commentaire') %}
+        {% if notice == 'en-attente' %}<p class="article-comments__notice" role="status">Merci ! Ton commentaire est bien enregistré. Il apparaîtra ici après validation.</p>{% endif %}
+        {% if notice == 'invalide' %}<p class="article-comments__notice" role="alert">Indique un pseudo de 2 à 60 caractères et un commentaire de 10 à 2 000 caractères.</p>{% endif %}
+        {% if notice == 'patiente' %}<p class="article-comments__notice" role="alert">Patiente deux minutes avant d’envoyer un autre commentaire. La limite est de dix messages par jour.</p>{% endif %}
+        {% if notice == 'expire' %}<p class="article-comments__notice" role="alert">Le formulaire a expiré. Tu peux réessayer avec le formulaire ci-dessous.</p>{% endif %}
+        {% if notice == 'indisponible' %}<p class="article-comments__notice" role="alert">Ton commentaire n’a pas pu être enregistré. Merci de réessayer un peu plus tard.</p>{% endif %}
+        {% if article_comments_enabled %}
+        <form class="article-comment-form" method="post" action="{{ url_for('blog.blog_comment_submit', slug=article.slug) }}">
+            <input type="hidden" name="csrf" value="{{ session.blog_comment_csrf }}">
+            <div class="article-comment-form__honeypot" aria-hidden="true"><label for="article-website">Site web</label><input id="article-website" name="website" tabindex="-1" autocomplete="off"></div>
+            <label for="article-author">Ton pseudo</label>
+            <input id="article-author" name="author" minlength="2" maxlength="60" required autocomplete="nickname">
+            <label for="article-comment-body">Ton commentaire</label>
+            <textarea id="article-comment-body" name="body" minlength="10" maxlength="2000" required></textarea>
+            <p class="article-comments__intro">Ton pseudo et ton commentaire seront publics après validation. Aucune adresse e-mail n’est demandée. <a href="{{ url_for('legal_bp.politique_confidentialite') }}">Confidentialité</a></p>
+            <button type="submit">Envoyer mon commentaire</button>
+        </form>
+        {% elif blog_preview %}<p class="article-comments__intro">Les commentaires seront disponibles sur le site principal.</p>
+        {% else %}<p class="article-comments__intro">Les commentaires ne sont pas disponibles pour le moment.</p>{% endif %}
+    </section>
+
     {% if autres_articles %}
     <section class="related-posts">
         <h2>À lire aussi</h2>
         <div class="related-grid">
             {% for a in autres_articles %}
             <a class="related-card" href="{{ url_for('blog.blog_article', slug=a.slug) }}">
-                {% if a.image %}
-                <img src="{{ a.image }}" alt="{{ a.image_alt }}">
+                {% set related_image = a.thumbnail_image | default(a.image, true) %}
+                {% if related_image %}
+                <img src="{{ related_image }}" alt="{{ a.image_alt or a.title }}" width="1200" height="630" loading="lazy" decoding="async">
                 {% endif %}
                 <span>{{ a.tag }}</span>
                 <h3>{{ a.title }}</h3>
