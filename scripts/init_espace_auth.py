@@ -1,7 +1,7 @@
-"""Crée les tables de l'espace personnel sans modifier les tables existantes.
+"""Crée les tables et ajoute les champs de connexion sans remplacer les données.
 
 La commande de démarrage Railway exécute ce script avant Gunicorn. Les
-redémarrages suivants ne modifient pas les tables déjà présentes.
+redémarrages suivants conservent le schéma déjà préparé et les comptes existants.
 """
 
 import os
@@ -17,10 +17,12 @@ from models.espace_personnel import (  # noqa: E402
     AbonnementEspace, AnalysePersonnelle, CommandeAnalyseEspace,
     CycleLunaire, CycleSolaire, DroitAnalyseAchetee, EmailCycleAbonnement,
     EnjeuPeriode, EntreeJournal, FichierAnalyse, LienConnexionEspace,
+    LienMotDePasseEspace, LimiteAccesEspace,
     MecanismeExploration, ObservationMecanisme, ProfilAstral,
     SectionAnalyse, SuggestionMecanisme, UtilisateurEspace,
 )
 from models.bd_comments import BdComment  # noqa: E402
+from utils.schema_auth_espace import ajouter_colonnes_auth  # noqa: E402
 
 
 def main():
@@ -37,6 +39,8 @@ def main():
                 tables=[
                     UtilisateurEspace.__table__,
                     LienConnexionEspace.__table__,
+                    LienMotDePasseEspace.__table__,
+                    LimiteAccesEspace.__table__,
                     ProfilAstral.__table__,
                     AbonnementEspace.__table__,
                     CycleLunaire.__table__,
@@ -56,6 +60,8 @@ def main():
                 ],
                 checkfirst=True,
             )
+            ajoutees = ajouter_colonnes_auth(connexion)
+            print("Champs de connexion ajoutés : " + (", ".join(ajoutees) or "déjà présents"))
     finally:
         moteur.dispose()
     print("Tables de l'espace personnel vérifiées.")

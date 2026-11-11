@@ -28,13 +28,11 @@ from utils.acces_abonnement import acces_abonnement
 from utils.calcul_theme import calcul_theme
 from utils.acces_espace import (
     activer_accompagnement_beta,
-    consommer_lien_connexion,
-    creer_lien_connexion,
     email_invite,
-    lien_recent,
-    trouver_ou_creer_utilisateur,
 )
 from utils.email_sender import envoyer_email_avec_analyse
+from utils.auth_espace import jeton_csrf_espace, utilisateur_connecte
+from routes.auth_espace import enregistrer_routes_auth, ROUTES_PUBLIQUES_AUTH, ROUTES_AUTH
 
 
 espace_personnel_bp = Blueprint("espace_personnel", __name__, url_prefix="/mon-espace")
@@ -44,6 +42,9 @@ DUREE_SESSION_ESPACE = timedelta(days=14)
 @espace_personnel_bp.record_once
 def configurer_session_espace(etat):
     etat.app.permanent_session_lifetime = DUREE_SESSION_ESPACE
+    etat.app.config["ESPACE_VERIFIER_FORMULAIRE_PUBLIC"] = verifier_turnstile
+    etat.app.config["ESPACE_AUTORISER_INSCRIPTION"] = email_invite
+    etat.app.config["ESPACE_APRES_CONNEXION"] = activer_accompagnement_beta
 
 RESSENTIS_MECANISME = {
     "me_parle": "Ça me parle clairement",
@@ -105,9 +106,7 @@ def _verifier_rapport_fda(contenu, type_analyse):
 
 
 def _compte_connecte():
-    utilisateur_id = session.get("utilisateur_espace_id")
-    utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
-    return utilisateur if utilisateur is not None and utilisateur.actif == 1 else None
+    return utilisateur_connecte()
 
 
 def _jeton_formulaire_portail():
@@ -127,6 +126,11 @@ def _verifier_formulaire_portail():
 @espace_personnel_bp.before_request
 def verifier_session_espace():
     if not session.get("utilisateur_espace_id"):
+        return None
+    if utilisateur_connecte() is None:
+        session.clear()
+        if request.endpoint not in ROUTES_PUBLIQUES_AUTH:
+            return redirect(url_for("espace_personnel.connexion", suivant=request.full_path))
         return None
     debut = session.get("espace_connecte_le")
     if debut:
@@ -258,85 +262,23 @@ def verifier_turnstile():
     }
 
 
-@espace_personnel_bp.route("/connexion", methods=["GET", "POST"])
-def connexion():
-    if request.method == "GET":
-        if _compte_connecte() is not None:
-            return redirect(url_for("espace_personnel.accueil"))
-        return render_template("espace_personnel/connexion.html")
-    if not verifier_turnstile():
-        return render_template(
-            "espace_personnel/connexion.html",
-            erreur="La vérification de sécurité a échoué. Réessaie.",
-        ), 400
-
-    email = (request.form.get("email") or "").strip().lower()
-    prenom = (request.form.get("prenom") or "").strip()
-    if not email or "@" not in email or len(email) > 255:
-        return render_template(
-            "espace_personnel/connexion.html",
-            erreur="Renseigne une adresse e-mail valide.",
-        ), 400
-
-    if email_invite(email):
-        try:
-            utilisateur = trouver_ou_creer_utilisateur(email, prenom)
-            if utilisateur.actif != 1:
-                db.session.rollback()
-                return render_template("espace_personnel/connexion.html", confirmation=True)
-            if lien_recent(utilisateur.id):
-                db.session.rollback()
-                return render_template(
-                    "espace_personnel/connexion.html",
-                    erreur="Un lien vient d'être demandé. Attends une minute avant de réessayer.",
-                ), 429
-            lien = creer_lien_connexion(utilisateur)
-            contenu = (
-                f"Bonjour {utilisateur.prenom},\n\n"
-                "Voici ton lien de connexion à ton espace astral :\n\n"
-                f"{lien}\n\n"
-                "Il est valable 20 minutes et ne peut être utilisé qu'une fois.\n\n"
-                "Une fois connecté(e), tu retrouveras les rubriques accessibles "
-                "à ton compte dans ton espace astral.\n\n"
-                "Les Fous d'Astro"
-            )
-            if not envoyer_email_avec_analyse(
-                destinataire=utilisateur.email,
-                sujet="Ton lien de connexion — Les Fous d'Astro",
-                contenu_txt=contenu,
-            ):
-                current_app.logger.error("Échec de l'envoi du lien de connexion à l'espace")
-                return render_template(
-                    "espace_personnel/connexion.html",
-                    erreur="Le lien n'a pas pu être envoyé. Réessaie plus tard.",
-                ), 503
-        except Exception:
-            db.session.rollback()
-            current_app.logger.exception("Échec de la connexion à l'espace personnel")
-            return render_template(
-                "espace_personnel/connexion.html",
-                erreur="La connexion est momentanément indisponible. Réessaie plus tard.",
-            ), 503
-
-    return render_template("espace_personnel/connexion.html", confirmation=True)
+@espace_personnel_bp.app_context_processor
+def contexte_auth_espace():
+    return {"csrf_espace": jeton_csrf_espace, "auth_turnstile_actif": True}
 
 
-@espace_personnel_bp.route("/connexion/<jeton>")
-def valider_connexion(jeton):
-    utilisateur = consommer_lien_connexion(jeton)
-    if utilisateur is None:
-        flash("Ce lien est invalide ou a expiré. Demande-en un nouveau.", "error")
-        return redirect(url_for("espace_personnel.connexion"))
-    try:
-        activer_accompagnement_beta(utilisateur)
-    except Exception:
-        db.session.rollback()
-        current_app.logger.exception("Activation de l'accompagnement bêta impossible")
-    session.clear()
-    session["utilisateur_espace_id"] = utilisateur.id
-    session["espace_connecte_le"] = datetime.now(timezone.utc).isoformat()
-    session.permanent = True
-    return redirect(url_for("espace_personnel.accueil"))
+@espace_personnel_bp.after_request
+def proteger_pages_auth_espace(reponse):
+    if request.endpoint in ROUTES_AUTH:
+        reponse.headers["Cache-Control"] = "no-store, private"
+        reponse.headers["Referrer-Policy"] = "no-referrer"
+        reponse.headers["X-Robots-Tag"] = "noindex, nofollow"
+        reponse.headers["X-Frame-Options"] = "DENY"
+        reponse.headers["Content-Security-Policy"] = "frame-ancestors 'none'; form-action 'self'; base-uri 'self'"
+    return reponse
+
+
+enregistrer_routes_auth(espace_personnel_bp, inclure_deconnexion=False)
 
 
 @espace_personnel_bp.route("/")

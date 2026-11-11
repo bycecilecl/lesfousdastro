@@ -122,7 +122,8 @@ def envoyer_email_avec_analyse(destinataire: str,
                                sujet: str,
                                contenu_txt: str | None = None,
                                contenu_html: str | None = None,
-                               pdf_path: str | None = None) -> bool:
+                               pdf_path: str | None = None,
+                               smtp_timeout: float | None = None) -> bool:
     
     # ---- NOUVEAU : route vers Brevo en PROD ----
     if os.getenv("EMAIL_PROVIDER", "smtp").lower() == "brevo":
@@ -145,6 +146,7 @@ def envoyer_email_avec_analyse(destinataire: str,
         return False
 
     try:
+        options_smtp = {"timeout": smtp_timeout} if smtp_timeout is not None else {}
         yag = yagmail.SMTP(
         user=email_exp,
         password=mdp_app,
@@ -153,6 +155,7 @@ def envoyer_email_avec_analyse(destinataire: str,
         smtp_ssl=SMTP_USE_SSL,
         smtp_starttls=SMTP_USE_STARTTLS,
         oauth2_file=None,              # ⬅️ coupe l’utilisation du fichier OAuth ~/.yagmail
+        **options_smtp,
     )
         logger.info("SMTP → host=%s port=%s ssl=%s starttls=%s user=%s",
                     SMTP_HOST, SMTP_PORT, SMTP_USE_SSL, SMTP_USE_STARTTLS, email_exp)

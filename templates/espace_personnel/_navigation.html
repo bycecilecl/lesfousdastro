@@ -17,5 +17,6 @@
   <a href="{{ url_for('espace_personnel.cycles_lunaires') }}">Mes cycles lunaires</a>
   <a href="{{ url_for('espace_personnel.mes_analyses') }}">Mes analyses</a>
   <a href="{{ url_for('espace_personnel.emails_cycle') }}">Mes mails de cycle</a>
+  <a href="{{ url_for('espace_personnel.modifier_mot_de_passe') }}">Mon mot de passe</a>
   <form method="post" action="{{ url_for('espace_personnel.deconnexion') }}"><input type="hidden" name="espace_csrf" value="{{ session.get('espace_formulaire_csrf', '') }}"><button type="submit">Déconnexion</button></form>
 </nav>

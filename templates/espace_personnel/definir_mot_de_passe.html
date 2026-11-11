@@ -1,0 +1,25 @@
+{% extends "espace_personnel/auth_base.html" %}
+{% block title %}{{ 'Modifier' if modification else 'Choisir' }} mon mot de passe | Les Fous d’Astro{% endblock %}
+{% block auth_content %}
+    <h1 id="auth-title">{{ 'Modifie' if modification else 'Choisis' }} ton mot de passe</h1>
+    <p class="auth-intro">Une phrase que tu retiens facilement peut faire un excellent mot de passe. Prévois au moins {{ minimum }} caractères.</p>
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+        <label class="auth-field" for="email">Adresse e-mail<input id="email" name="email" type="email" value="{{ email }}" autocomplete="username" readonly></label>
+        {% if modification %}
+            <label class="auth-field" for="mot_de_passe_actuel">Mot de passe actuel<input id="mot_de_passe_actuel" name="mot_de_passe_actuel" type="password" maxlength="{{ maximum }}" autocomplete="current-password" required></label>
+        {% endif %}
+        <label class="auth-field" for="mot_de_passe">Nouveau mot de passe
+            <span class="auth-password">
+                <input id="mot_de_passe" name="mot_de_passe" type="password" minlength="{{ minimum }}" maxlength="{{ maximum }}" autocomplete="new-password" aria-describedby="password-help" required>
+                <button class="auth-reveal" type="button" data-password-target="mot_de_passe" aria-controls="mot_de_passe" aria-pressed="false">Afficher</button>
+            </span>
+        </label>
+        <p class="auth-help" id="password-help">Les espaces et les accents sont acceptés. Évite un mot de passe déjà utilisé sur un autre site.</p>
+        <label class="auth-field" for="confirmation">Confirme ton nouveau mot de passe<input id="confirmation" name="confirmation" type="password" minlength="{{ minimum }}" maxlength="{{ maximum }}" autocomplete="new-password" required></label>
+        <button class="auth-submit" type="submit">Enregistrer mon mot de passe</button>
+    </form>
+    <div class="auth-links">
+        {% if modification %}<a href="{{ url_for('espace_personnel.accueil') }}">Retour à mon espace</a>{% else %}<a href="{{ url_for('espace_personnel.mot_de_passe_oublie') }}">Demander un nouveau lien</a>{% endif %}
+    </div>
+{% endblock %}

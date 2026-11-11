@@ -21,6 +21,9 @@ class UtilisateurEspace(db.Model):
     prenom = Column(String(100), nullable=False)
     email = Column(String(255), nullable=True, unique=True)
     actif = Column(Integer, nullable=False, default=1)
+    mot_de_passe_hash = Column(String(512), nullable=True)
+    version_auth = Column(Integer, nullable=False, default=0, server_default="0")
+    mot_de_passe_modifie_le = Column(DateTime(timezone=True), nullable=True)
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
 
 
@@ -33,6 +36,30 @@ class LienConnexionEspace(db.Model):
     expire_le = Column(DateTime(timezone=True), nullable=False, index=True)
     utilise_le = Column(DateTime(timezone=True), nullable=True)
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class LienMotDePasseEspace(db.Model):
+    """Définition/récupération du mot de passe ; jamais de jeton en clair en base."""
+
+    __tablename__ = "liens_mot_de_passe_espace"
+
+    id = Column(Integer, primary_key=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    empreinte_jeton = Column(String(64), nullable=False, unique=True, index=True)
+    version_auth = Column(Integer, nullable=False)
+    expire_le = Column(DateTime(timezone=True), nullable=False, index=True)
+    utilise_le = Column(DateTime(timezone=True), nullable=True)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class LimiteAccesEspace(db.Model):
+    """Compteurs partagés entre les processus, sans adresse IP/e-mail en clair."""
+
+    __tablename__ = "limites_acces_espace"
+
+    cle = Column(String(64), primary_key=True)
+    debut_fenetre = Column(DateTime(timezone=True), nullable=False, index=True)
+    nombre = Column(Integer, nullable=False)
 
 
 class ProfilAstral(db.Model):

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>{% block title %}Mon espace | Les Fous d’Astro{% endblock %}</title>
+    <link rel="icon" type="image/webp" href="{{ url_for('static', filename='images/logo_les_fous_dastro_favicon64.webp') }}">
+    <style>
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; color:#233b4a; background:linear-gradient(135deg,#1f628e,#00a8a8); font:16px/1.55 'Segoe UI',sans-serif; }
+        .auth-brand { display:block; padding:22px 24px; color:white; font-size:1.25rem; font-weight:750; text-decoration:none; }
+        .auth-shell { display:flex; justify-content:center; padding:22px 20px 55px; }
+        .auth-card { width:min(520px,100%); padding:clamp(25px,6vw,42px); background:white; border-radius:24px; box-shadow:0 20px 50px #003b5830; }
+        h1 { margin:0 0 12px; color:#1f628e; font-size:1.9rem; line-height:1.2; }
+        p { margin:0 0 20px; } .auth-intro,.auth-help { color:#536571; }
+        .auth-field { display:grid; gap:7px; margin:19px 0; font-weight:650; }
+        .auth-field input { width:100%; min-width:0; padding:12px 13px; border:1px solid #a7c6ce; border-radius:10px; font:inherit; color:#233b4a; }
+        input:focus-visible,a:focus-visible,button:focus-visible { outline:3px solid #00a8a85c; outline-offset:3px; }
+        .auth-check { display:flex; align-items:center; gap:9px; margin:18px 0; cursor:pointer; }
+        .auth-check input { width:18px; height:18px; accent-color:#1f628e; }
+        .auth-submit { width:100%; padding:13px 18px; border:0; border-radius:999px; color:white; background:linear-gradient(45deg,#008c8c,#1f628e); font:700 1rem 'Segoe UI',sans-serif; cursor:pointer; }
+        .auth-links { display:grid; gap:11px; margin-top:22px; text-align:center; }
+        a { color:#165a85; text-underline-offset:3px; } .auth-separator { margin:25px 0 20px; border:0; border-top:1px solid #dde8ec; }
+        .auth-flash { margin:15px 0; padding:12px 14px; border-radius:10px; background:#e8f7f4; color:#165e52; }
+        .auth-flash.error { color:#8b2424; background:#fff0f0; }
+        .auth-help { margin-top:8px; font-size:.9rem; } .auth-help a { font-weight:600; }
+        .auth-preview { padding:15px; margin-top:20px; background:#fff7de; border-radius:10px; overflow-wrap:anywhere; }
+        .auth-preview p { margin-bottom:8px; }
+        .auth-password { display:flex; align-items:center; gap:8px; }
+        .auth-password input { flex:1; }
+        .auth-reveal { padding:9px 7px; border:0; color:#165a85; background:#edf6f7; border-radius:7px; font:600 .8rem 'Segoe UI',sans-serif; cursor:pointer; }
+        .auth-footer { margin:0 auto 25px; padding:0 20px; color:white; text-align:center; font-size:.85rem; }
+        .auth-footer a { color:white; }
+    </style>
+</head>
+<body>
+    <a class="auth-brand" href="/">Les Fous d’Astro</a>
+    <main class="auth-shell">
+        <section class="auth-card" aria-labelledby="auth-title">
+            {% with messages=get_flashed_messages(with_categories=true) %}
+                {% for categorie,message in messages %}<p class="auth-flash {{ categorie }}" role="{{ 'alert' if categorie == 'error' else 'status' }}">{{ message }}</p>{% endfor %}
+            {% endwith %}
+            {% block auth_content %}{% endblock %}
+        </section>
+    </main>
+    <p class="auth-footer"><a href="/">Retour au site</a></p>
+    <script>
+        document.querySelectorAll('[data-password-target]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const input = document.getElementById(button.dataset.passwordTarget);
+                const visible = input.type === 'password';
+                input.type = visible ? 'text' : 'password';
+                button.textContent = visible ? 'Masquer' : 'Afficher';
+                button.setAttribute('aria-pressed', String(visible));
+            });
+        });
+    </script>
+    {% block auth_scripts %}{% endblock %}
+</body>
+</html>

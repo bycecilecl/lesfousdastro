@@ -1,0 +1,23 @@
+{% extends "espace_personnel/auth_base.html" %}
+{% block title %}{{ 'Créer mon compte' if inscription else 'Définir mon mot de passe' }} | Les Fous d’Astro{% endblock %}
+{% block auth_content %}
+    <h1 id="auth-title">{{ 'Crée ton espace' if inscription else 'Retrouve ton accès' }}</h1>
+    {% if inscription %}
+        <p class="auth-intro">Indique ton e-mail. Tu recevras un lien pour confirmer ton adresse et choisir ton mot de passe.</p>
+    {% else %}
+        <p class="auth-intro">Première connexion avec un mot de passe, ou mot de passe oublié ? Utilise l’adresse e-mail de ton compte : tu recevras un lien pour en choisir un.</p>
+    {% endif %}
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+        {% if inscription %}<label class="auth-field" for="prenom">Prénom<input id="prenom" name="prenom" value="{{ prenom }}" maxlength="100" autocomplete="given-name" required></label>{% endif %}
+        <label class="auth-field" for="email">Adresse e-mail<input id="email" name="email" type="email" value="{{ email }}" maxlength="255" autocomplete="email" required></label>
+        {% if auth_turnstile_actif %}<div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>{% endif %}
+        <button class="auth-submit" type="submit">{{ 'Créer mon compte' if inscription else 'Recevoir le lien' }}</button>
+    </form>
+    <p class="auth-help">Ce lien sert à choisir ton mot de passe. Ensuite, tu pourras te connecter directement.</p>
+    {% if lien_test %}
+        <div class="auth-preview"><p><strong>Aperçu local — aucun e-mail envoyé.</strong></p><a href="{{ lien_test }}">Choisir mon mot de passe</a></div>
+    {% endif %}
+    <div class="auth-links"><a href="{{ url_for('espace_personnel.connexion') }}">Retour à la connexion</a></div>
+{% endblock %}
+{% block auth_scripts %}{% if auth_turnstile_actif %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}{% endblock %}
