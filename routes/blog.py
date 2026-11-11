@@ -18,6 +18,7 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 import markdown
 import yaml
 from services.bludit_blog import published_pages
+from services.article_comments import comments_context
 
 blog_bp = Blueprint("blog", __name__)
 
@@ -582,11 +583,32 @@ def blog_article(slug):
                 _external=True
             )
 
-            return render_template(
+            comment_context = comments_context(slug)
+            response = make_response(render_template(
                 "blog/article.html",
                 article=article,
                 autres_articles=autres_articles,
                 canonical_url=canonical_url,
-            )
+                **comment_context,
+            ))
+            response.headers["Cache-Control"] = "private, no-store"
+            return response
 
     abort(404)
+
+
+@blog_bp.route("/blog/<slug>/commenter", methods=["POST"])
+def blog_comment_submit(slug):
+    from services.article_comments import comments_enabled, submit_comment
+    if not comments_enabled():
+        abort(404)
+    article = next((item for item in charger_articles() if item["slug"] == slug), None)
+    if article is None:
+        abort(404)
+    return submit_comment(slug, article)
+
+
+@blog_bp.route("/blog/commentaire/moderer/<token>", methods=["GET", "POST"])
+def blog_comment_moderate(token):
+    from services.article_comments import moderate_comment
+    return moderate_comment(token)

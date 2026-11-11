@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>Modérer un commentaire du blog</title></head>
+<body style="margin:0;background:#f4fbfd;font-family:system-ui,sans-serif;color:#17334c">
+<main style="max-width:720px;margin:40px auto;padding:24px">
+  <h1>Modérer un commentaire</h1>
+  <p>Article : <a href="{{ url_for('blog.blog_article', slug=article_slug) }}">{{ article_slug }}</a></p>
+  <section style="padding:22px;border:1px solid #bedde4;border-radius:14px;background:white">
+    <strong>{{ comment.author }}</strong>
+    <p style="white-space:pre-wrap;overflow-wrap:anywhere">{{ comment.body }}</p>
+  </section>
+  <p>Statut : <strong>{{ {'pending':'En attente','approved':'Publié','rejected':'Refusé'}.get(comment.status, comment.status) }}</strong></p>
+  {% if comment.status == 'pending' %}
+  <form method="post" style="display:flex;gap:12px;flex-wrap:wrap">
+    <input type="hidden" name="csrf" value="{{ session.blog_moderation_csrf }}">
+    <button type="submit" name="decision" value="approved" style="padding:12px 20px;cursor:pointer">Publier</button>
+    <button type="submit" name="decision" value="rejected" style="padding:12px 20px;cursor:pointer">Refuser</button>
+  </form>
+  {% endif %}
+</main></body></html>
