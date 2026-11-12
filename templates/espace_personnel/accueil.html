@@ -337,6 +337,7 @@ body {
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='avatars.css') }}">
 <div class="stars" id="stars"></div>
 <div class="container">
     {% include 'espace_personnel/_navigation.html' %}
@@ -350,7 +351,7 @@ body {
 
     <div class="form-container profile-card">
         <h3 class="section-title">✨ Mon profil astral</h3>
-        <div class="profile-avatar">☾</div>
+        <a href="{{ url_for('espace_personnel.profil') }}#mon-avatar" aria-label="Changer mon avatar">{% include 'espace_personnel/partials/avatar.html' %}</a>
         {% if profil %}
             <h4 class="profile-name">{{ profil.prenom }}</h4>
             <p class="espace-muted">
@@ -412,12 +413,12 @@ body {
                 <p class="espace-muted">analyse{% if analyses|length != 1 %}s{% endif %} dans ta bibliothèque</p>
                 <a class="espace-profile-link" href="{{ url_for('espace_personnel.mes_analyses') }}">Voir toute la collection</a>
             </div>
-            <div class="form-container espace-stat dashboard-card">
+            {% if outils_mails_admin %}<div class="form-container espace-stat dashboard-card">
                 <span class="dashboard-card-icon">✉️</span>
                 <h3 class="section-title">Mes emails de cycle</h3>
                 <p class="espace-muted">Prépare et relis tes emails avant le moindre envoi.</p>
                 <a class="espace-profile-link" href="{{ url_for('espace_personnel.emails_cycle') }}">Voir mes brouillons</a>
-            </div>
+            </div>{% endif %}
 
     </div>
     <section class="home-revolutions"><h2>Mes révolutions solaire et lunaire</h2><div class="dashboard-grid">

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}Mes analyses de lunaisons{% endblock %} | Les Fous d’Astro</title>
+    <style>
+        * { box-sizing:border-box; }
+        body { margin:0; background:#eef4f7; color:#193445; font:17px/1.65 system-ui,sans-serif; }
+        main { max-width:1050px; margin:0 auto; padding:30px 22px 60px; }
+        a { color:#145c79; text-underline-offset:3px; }
+        nav { display:flex; gap:22px; flex-wrap:wrap; margin-bottom:28px; }
+        h1 { line-height:1.2; font-size:clamp(1.7rem,4vw,2.5rem); margin:12px 0; }
+        h2 { font-size:1.25rem; margin:0 0 10px; }
+        p { margin:10px 0; }
+        .eyebrow { font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; font-weight:700; color:#526775; }
+        .muted { color:#526775; font-size:.95rem; }
+        .panel { padding:25px; background:white; border:1px solid #d5e1e7; border-radius:16px; margin:22px 0; }
+        .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:20px; }
+        .cards .panel { margin:0; }
+        .status { display:inline-block; border-radius:20px; padding:3px 12px; background:#edf0f3; font-size:.85rem; font-weight:650; }
+        .validated { background:#dff1e7; color:#215e3f; }
+        .pending { background:#fff1cd; color:#785700; }
+        .notice { padding:15px 18px; background:#e2f1f7; border-left:4px solid #317994; border-radius:6px; margin:18px 0; }
+        .error { background:#fff0ed; border-color:#b54432; color:#872e21; }
+        .success { background:#e6f3ea; border-color:#357852; }
+        label { display:block; font-weight:650; margin:20px 0 8px; }
+        input,textarea { width:100%; padding:12px 14px; border:1px solid #a8bbc6; border-radius:8px; font:inherit; color:inherit; background:white; }
+        textarea { resize:vertical; line-height:1.7; min-height:460px; }
+        input[type=month] { width:auto; max-width:100%; }
+        input:focus,textarea:focus,button:focus-visible,a:focus-visible { outline:3px solid #e6ad3d; outline-offset:3px; }
+        .actions,.month-form { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:22px 0 4px; }
+        .month-form label { margin:0; }
+        button,.button { display:inline-block; border:1px solid #216e89; border-radius:8px; padding:11px 17px; font:600 1rem system-ui,sans-serif; text-decoration:none; cursor:pointer; color:white; background:#216e89; }
+        .secondary { color:#215b72; background:white; }
+        .withdraw { color:#853d30; border-color:#c9aaa4; background:white; }
+        button:disabled { opacity:.5; cursor:not-allowed; }
+        .reading { white-space:pre-wrap; overflow-wrap:anywhere; }
+        summary { cursor:pointer; font-weight:650; }
+        @media(max-width:600px) { main { padding:22px 14px 40px; } .panel { padding:18px; } .actions button { width:100%; } }
+    </style>
+</head>
+<body>
+<main>
+    <nav aria-label="Administration des lunaisons">
+        <a href="{{ url_for('espace_personnel.accueil') }}">← Mon espace astral</a>
+        <a href="{{ url_for('admin_lunaisons.index') }}">Mes analyses de lunaisons</a>
+    </nav>
+    <div class="eyebrow">Cécile · Administration locale</div>
+    {% for categorie, message in get_flashed_messages(with_categories=true) %}
+        <div class="notice {{ categorie }}" role="status">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>

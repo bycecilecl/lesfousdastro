@@ -6,6 +6,8 @@ try:
     from routes.espace_personnel import espace_personnel_bp
 
     app.register_blueprint(espace_personnel_bp)
+    from routes.admin_lunaisons import admin_lunaisons_bp
+    app.register_blueprint(admin_lunaisons_bp)
 except Exception:
     app.logger.exception("Espace personnel indisponible ; application principale conservée")
 

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Énergies du moment | Les Fous d'Astro{% endblock %}
+
+{% macro afficher_groupe(groupe, ouvert=false) %}
+    <details class="transit-card" {% if ouvert %}open{% endif %}>
+        <summary>
+            <span class="planet-symbol">{{ {'Soleil':'☉','Lune':'☾','Mercure':'☿','Vénus':'♀','Mars':'♂','Jupiter':'♃','Saturne':'♄','Uranus':'♅','Neptune':'♆','Pluton':'♇'}.get(groupe.get('planete'), '✦') }}</span>
+            <span>{{ groupe.get('planete') }}</span>
+            <small>{{ groupe.get('aspects')|length }} activation{% if groupe.get('aspects')|length != 1 %}s{% endif %}</small>
+        </summary>
+        <div class="transit-content">
+            {% if groupe.get('dynamique') %}<p class="transit-reading">{{ groupe.get('planete') }} {{ groupe.get('dynamique') }}.</p>{% endif %}
+            {% if groupe.get('maison_transitee') %}<p><strong>Lieu du transit :</strong> maison {{ groupe.get('maison_transitee') }} — {{ groupe.get('theme_maison_transitee') }}.</p>{% endif %}
+            {% if groupe.get('maison_natale_planete') %}<p><strong>Position natale :</strong> {{ groupe.get('planete') }} en maison {{ groupe.get('maison_natale_planete') }} — {{ groupe.get('theme_maison_natale_planete') }}.</p>{% endif %}
+            {% if groupe.get('maisons_dirigees_planete') %}
+                <p><strong>Maisons dirigées :</strong> {% for domaine in groupe.get('maisons_dirigees_planete') %}maison {{ domaine.get('maison') }} — {{ domaine.get('theme') }}{% if not loop.last %} · {% endif %}{% endfor %}.</p>
+            {% endif %}
+            {% if groupe.get('question') %}<p class="transit-question">À observer : {{ groupe.get('question') }}</p>{% endif %}
+            <div class="aspect-list">
+                {% for transit in groupe.get('aspects', []) %}
+                    <article class="aspect-item">
+                        <strong>{{ groupe.get('planete') }} {{ transit.get('aspect') }} {{ transit.get('planete_natale') }}</strong>
+                        <span>Orbe {{ '%.2f'|format(transit.get('orbe', 0)) }}° · Intensité {{ transit.get('importance', 0) }}</span>
+                        {% if transit.get('maison_cible') %}
+                            <p>{{ transit.get('planete_natale') }} natal{% if transit.get('planete_natale') not in ['Ascendant', 'Descendant', 'Milieu du Ciel', 'Fond du Ciel'] %} en maison {{ transit.get('maison_cible') }} — {{ transit.get('theme_maison_cible') }}{% endif %}.{% if transit.get('maisons_dirigees_cible') %} Dirige : {% for domaine in transit.get('maisons_dirigees_cible') %}maison {{ domaine.get('maison') }} — {{ domaine.get('theme') }}{% if not loop.last %} · {% endif %}{% endfor %}.{% endif %}</p>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        </div>
+    </details>
+{% endmacro %}
+
+{% block extra_css %}
+body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; }
+.energy-shell { width: min(900px, calc(100% - 32px)); margin: 48px auto 72px; }
+.energy-back { display: inline-block; margin-bottom: 18px; color: white; font-weight: 700; text-decoration: none; }
+.energy-page { padding: clamp(26px, 5vw, 52px); border-radius: 26px; background: rgba(255,255,255,.96); box-shadow: 0 24px 60px rgba(0,0,0,.18); color: #33434c; }
+.energy-header { text-align: center; margin-bottom: 34px; }
+.energy-kicker { color: #00a8a8; font-size: .82rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.energy-title { margin: 8px 0; color: #1f628e; font: 700 clamp(2rem, 6vw, 3.3rem) Georgia, serif; }
+.energy-summary { color: #5d7079; line-height: 1.6; }
+.energy-count { display: inline-block; margin-top: 15px; padding: 8px 15px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-weight: 800; }
+.energy-section { margin-top: 30px; }
+.energy-section h2 { margin-bottom: 12px; color: #596970; font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; }
+.transit-list { display: grid; gap: 13px; }
+.transit-card { border: 1px solid rgba(31,98,142,.14); border-radius: 15px; background: #f5fbfb; overflow: hidden; }
+.transit-card summary { display: flex; align-items: center; gap: 10px; padding: 15px 18px; color: #1f628e; font-weight: 800; cursor: pointer; }
+.transit-card summary small { margin-left: auto; color: #687b84; font-weight: 600; }
+.planet-symbol { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #00a8a8, #1f628e); color: white; font-size: 1.2rem; }
+.transit-content { padding: 0 18px 18px 62px; color: #52636b; line-height: 1.55; }
+.transit-content > p { margin-bottom: 9px; }
+.transit-reading { font-size: 1.02rem; }
+.transit-question { padding: 11px 13px; border-radius: 10px; background: white; color: #17636c; font-weight: 700; }
+.aspect-list { margin-top: 14px; border-top: 1px solid rgba(31,98,142,.12); }
+.aspect-item { padding: 12px 0; border-bottom: 1px solid rgba(31,98,142,.1); }
+.aspect-item > strong { display: block; color: #33434c; }
+.aspect-item > span { display: block; margin-top: 3px; color: #718087; font-size: .86rem; }
+.aspect-item p { margin-top: 5px; color: #69777d; font-size: .86rem; }
+.energy-empty { padding: 42px 15px; text-align: center; color: #69777d; }
+.energy-empty a { color: #1f628e; font-weight: 800; }
+@media (max-width: 600px) { .transit-content { padding-left: 18px; } .transit-card summary small { display: none; } }
+{% endblock %}
+
+{% block content %}
+<main class="energy-shell">
+    <a class="energy-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
+    <article class="energy-page">
+        <header class="energy-header">
+            <p class="energy-kicker">Le ciel maintenant</p>
+            <h1 class="energy-title">Énergies du moment</h1>
+            {% if photo_transits %}
+                <p class="energy-summary">Une photographie de ce qui active ton ciel natal à la date et à l’heure actuelles.</p>
+                <span class="energy-count">{{ nombre_transits }} transit{% if nombre_transits != 1 %}s{% endif %} important{% if nombre_transits != 1 %}s{% endif %}</span>
+            {% endif %}
+        </header>
+
+        {% if not profil or not profil.theme_natal %}
+            <div class="energy-empty">Ton thème natal doit d’abord être calculé. <a href="{{ url_for('espace_personnel.profil') }}">Compléter mon profil astral</a></div>
+        {% elif nombre_transits == 0 %}
+            <div class="energy-empty">Aucun transit ne dépasse actuellement le seuil d’importance retenu.</div>
+        {% else %}
+            <section class="energy-section">
+                <h2>Climat de fond</h2>
+                <div class="transit-list">
+                    {% for groupe in transits_visibles.get('climat_fond', []) %}{{ afficher_groupe(groupe, loop.first) }}{% else %}<p class="energy-empty">Aucun climat lent important actuellement.</p>{% endfor %}
+                </div>
+            </section>
+            <section class="energy-section">
+                <h2>Déclencheurs rapides</h2>
+                <div class="transit-list">
+                    {% for groupe in transits_visibles.get('declencheurs', []) %}{{ afficher_groupe(groupe, groupe.get('planete') == 'Lune') }}{% else %}<p class="energy-empty">Aucun déclencheur rapide important actuellement.</p>{% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </article>
+</main>
+{% endblock %}

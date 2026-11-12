@@ -1,0 +1,21 @@
+<script>
+(() => {
+    const type = document.getElementById('type_entree');
+    const debut = document.getElementById('date_observation');
+    const fin = document.getElementById('date_fin_periode');
+    const enCours = document.getElementById('toujours_en_cours');
+    function actualiserPeriode() {
+        const periode = type.value === 'periode';
+        document.querySelectorAll('[data-periode]').forEach(champ => { champ.hidden = !periode; });
+        document.getElementById('label-date-observation').textContent = periode ? 'Date de début' : 'Date de l’observation';
+        enCours.disabled = !periode;
+        fin.disabled = !periode || enCours.checked;
+        fin.required = periode && !enCours.checked;
+        fin.min = debut.value;
+    }
+    type.addEventListener('change', actualiserPeriode);
+    enCours.addEventListener('change', actualiserPeriode);
+    debut.addEventListener('change', actualiserPeriode);
+    actualiserPeriode();
+})();
+</script>

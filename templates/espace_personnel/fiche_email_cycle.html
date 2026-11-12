@@ -1,53 +1,44 @@
 {% extends "base.html" %}
 {% block title %}Brouillon de cycle | Les Fous d'Astro{% endblock %}
 {% block extra_css %}
-  body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 52%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, sans-serif; }
-  .mail-shell { width: min(960px, calc(100% - 32px)); margin: 0 auto 72px; }
-  .mail-retour { display: inline-block; margin: 0 0 20px; color: white; font-weight: 700; text-decoration: none; }
-  .mail-carte { padding: clamp(24px, 4vw, 42px); border-radius: 24px; background: rgba(255,255,255,.97); box-shadow: 0 18px 42px #092d4a25; color: #263645; }
-  .mail-carte h1 { margin: 0 0 14px; color: #1f628e; font-size: clamp(1.65rem, 4vw, 2.5rem); line-height: 1.2; overflow-wrap: anywhere; }
-  .mail-carte p { line-height: 1.55; }
-  .mail-meta { margin-bottom: 26px; color: #607580; }
-  .mail-statut { display: inline-block; padding: 5px 11px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-size: .85rem; font-weight: 700; }
-  .mail-corps { padding-top: 6px; color: #334650; font-size: 1rem; line-height: 1.7; overflow-wrap: anywhere; }
-  .mail-corps h2 { margin: 30px 0 12px; color: #1f628e; font-size: 1.35rem; line-height: 1.3; }
-  .mail-corps p { margin: 0 0 18px; line-height: 1.7; }
-  .mail-corps strong { color: #214f69; }
-  .mail-message { padding: .8rem 1rem; border-radius: 10px; background: #e7f8f7; }
-  .mail-message.error { color: #9b3030; background: #fff0f0; }
-  .mail-action { margin-top: 26px; padding-top: 22px; border-top: 1px solid #d9e9eb; }
-  .mail-action p { margin-bottom: 14px; color: #607580; }
-  .mail-bouton { padding: .8rem 1.2rem; border: 0; border-radius: 26px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: #fff; font: 700 .95rem 'Segoe UI', Tahoma, sans-serif; cursor: pointer; }
+body{min-height:100vh;background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Segoe UI',sans-serif}.shell{width:min(900px,calc(100% - 32px));margin:48px auto 72px}.back{display:inline-block;color:#fff;font-weight:700;text-decoration:none;margin-bottom:18px}.page{background:#fffdf9;padding:clamp(24px,5vw,48px);border-radius:25px;box-shadow:0 20px 45px rgba(0,0,0,.12);color:#332b35}.kicker{color:#00a8a8;text-transform:uppercase;font-size:.8rem;font-weight:800;letter-spacing:.12em}.title{color:#1f628e;font-size:clamp(2rem,5vw,3rem);margin:8px 0}.meta{color:#66727c;line-height:1.6}.box{margin:27px 0;padding:21px;border:1px solid #dfebed;border-radius:17px;background:#f7fcfc}.button{display:inline-block;border:0;border-radius:999px;padding:12px 18px;background:linear-gradient(45deg,#00a8a8,#1f628e);color:white;font:700 1rem 'Segoe UI',sans-serif;cursor:pointer}.warn{margin-top:12px;color:#6b5b45;font-size:.92rem}.report{margin-top:32px;padding-top:20px;border-top:1px solid #e3d9df}.report h2{color:#5d315d}.report iframe{width:100%;height:900px;border:1px solid #e3d9df;border-radius:12px;background:#fff}.facts{font-size:.9rem;line-height:1.55;color:#53606a}.status{display:inline-block;padding:5px 10px;background:#eef7f6;border-radius:999px;color:#16756f;font-weight:800;font-size:.82rem}
 {% endblock %}
 {% block content %}
-{% include 'espace_personnel/_navigation.html' %}
-<main class="mail-shell">
-  <a class="mail-retour" href="{{ url_for('espace_personnel.emails_cycle') }}">← Retour à mes mails de cycle</a>
-  <article class="mail-carte">
-    <h1>{{ email.objet or 'Mail en préparation' }}</h1>
-    {% set libelles_statut = {'prepare': 'Données prêtes', 'brouillon': 'Brouillon', 'archive': 'Archive', 'envoye': 'Envoyé', 'envoi_en_cours': 'Envoi en cours', 'envoi_incertain': 'Envoi à vérifier'} %}
-    <p class="mail-meta"><span class="mail-statut">{{ libelles_statut.get(email.statut, email.statut|replace('_', ' ')|capitalize) }}</span>{% if email.date_envoi %} · Envoyé le {{ email.date_envoi.strftime('%d/%m/%Y à %H:%M') }}{% endif %}</p>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for categorie, message in messages %}<p class="mail-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
-    {% endwith %}
-    {% if contenu_apercu %}<div class="mail-corps">{{ contenu_apercu }}</div>{% endif %}
-    {% if email.statut in ['generation_en_cours', 'generation_echec'] %}
-      <p>La génération a été lancée, mais aucun brouillon complet n’est disponible. Aucun nouvel appel à Claude ne partira automatiquement ; contacte-nous pour vérifier ce cycle.</p>
-    {% endif %}
-    {% if peut_generer %}
-      <form class="mail-action" method="post" action="{{ url_for('espace_personnel.generer_brouillon_email_cycle', email_id=email.id) }}">
-        <input type="hidden" name="espace_csrf" value="{{ session.get('espace_formulaire_csrf', '') }}">
-        <p>Le contrat factuel est prêt. Ce clic lance un seul appel à Claude ; le texte restera un brouillon à relire.</p>
-        <button class="mail-bouton" type="submit">Générer le brouillon</button>
-      </form>
-    {% endif %}
-    {% if droits.cycle_lunaire and email.statut == 'brouillon' and email.objet and email.contenu_texte %}
-      <form class="mail-action" method="post" action="{{ url_for('espace_personnel.envoyer_brouillon_cycle', email_id=email.id) }}">
-        <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
-        <p>Destinataire : {{ utilisateur.email }}. L’envoi est définitif ; vérifie le texte avant de continuer.</p>
-        <button class="mail-bouton" type="submit">Envoyer ce mail à mon adresse</button>
-      </form>
-    {% endif %}
-  </article>
-</main>
-{% endblock %}
+<main class="shell"><a class="back" href="{{ url_for('espace_personnel.emails_cycle') }}">← Mes emails de cycle</a>
+<section class="page"><p class="kicker">Brouillon non envoyé</p><h1 class="title">{{ email.objet or 'Boussole du cycle' }}</h1><span class="status">{{ email.statut }}</span>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="warn" role="status">{{ message }}</p>{% endfor %}{% endwith %}
+{% set contrat = preparation.get('contrat', {}) %}
+{% set periode = contrat.get('periode_mail', {}) %}
+{% if periode %}<p class="meta">Période du {{ periode.debut_local[:10] }} à {{ periode.debut_local[11:16] }} au {{ periode.fin_exclue_locale[:10] }} à {{ periode.fin_exclue_locale[11:16] }} (fin exclue), heure de ta ville de cycles.</p>
+<div class="box"><h2>Les lunaisons de cette période</h2>
+{% for lunaison in contrat.get('lunaisons_dans_la_periode', []) %}
+<p class="facts"><strong>{{ 'Nouvelle Lune' if lunaison.type == 'nouvelle_lune' else 'Pleine Lune' }}</strong> · {{ lunaison.instant_local[:10] }} à {{ lunaison.instant_local[11:16] }} · {{ lunaison.position.signe }} {{ lunaison.position.degre }}°{% if lunaison.eclipse %} · Éclipse {{ lunaison.eclipse.nature }} (globale){% endif %}</p>
+{% if lunaison.get('lecture_personnalisee') %}<details class="facts"><summary>Maisons, contacts et maître de cette lunaison</summary>
+{% for nom, luminaire in lunaison.luminaires.items() %}
+<p><strong>{{ nom }}</strong> · maison natale {{ luminaire.maison_natale or 'non disponible' }}{% if luminaire.maison_rs %} · maison RS {{ luminaire.maison_rs }}{% endif %}</p>
+<ul>{% for aspect in luminaire.aspects_natal %}<li>{{ aspect.aspect }} à {{ aspect.point_natal }} natal · orbe {{ aspect.orbe }}°</li>{% endfor %}</ul>
+{% endfor %}
+{% for role in ['maitre_pole_lunaire', 'maitre_pole_solaire'] %}
+{% set maitrise = lunaison.lecture_personnalisee.get(role) %}
+{% if maitrise %}{% set maitre = maitrise.maitre_principal %}
+<p><strong>Maître du signe {{ maitrise.signe }} : {{ maitre.planete }}</strong> · {{ maitre.au_moment_de_la_lunaison.position.signe }}{% if maitre.au_moment_de_la_lunaison.retrograde %} · rétrograde{% endif %}{% if maitre.au_moment_de_la_lunaison.maison_natale %} · maison natale {{ maitre.au_moment_de_la_lunaison.maison_natale }}{% endif %}{% if maitre.apex_t_carres %} · apex d’un T-carré calculé{% endif %}</p>
+{% endif %}{% endfor %}
+</details>{% endif %}
+{% else %}<p class="facts">Aucune Nouvelle ou Pleine Lune dans cette fenêtre. Le mail ne rajoutera pas de rendez-vous hors période.</p>{% endfor %}
+</div>
+{% for cadre in contrat.get('cadres_rs_rl', []) %}
+<div class="box"><h2>Le cadre annuel et lunaire</h2><p class="facts">Valable du {{ cadre.valable_du_utc[:10] }} au {{ cadre.valable_au_exclu_utc[:10] }} (bornes UTC).</p>
+{% set annuel = cadre.get('enjeux_annuels', {}) %}
+{% if annuel.get('enjeux') %}<p class="facts">Enjeux retenus de l’année {{ annuel.annee }} :</p><ul>{% for enjeu in annuel.enjeux %}<li><strong>{{ enjeu.titre }}</strong> : {{ enjeu.contenu }}</li>{% endfor %}</ul><a href="{{ url_for('espace_personnel.explorer_analyse', analyse_id=annuel.analyse_id) }}#enjeux-annuels">Revoir les enjeux du PDF</a>{% else %}<p class="facts">Aucun enjeu issu d’un PDF n’est retenu pour ce cadre. Tu peux en choisir dans <a href="{{ url_for('espace_personnel.revolutions_solaires') }}">Mes révolutions solaires</a>.</p>{% endif %}
+</div>{% endfor %}
+{% set journal = preparation.get('contexte_client', {}).get('journal_recent', {}) %}
+<p class="facts">{{ journal.get('nombre_entrees_retenues', 0) }} observation(s) ou période(s) du journal retenue(s). Les périodes toujours en cours peuvent être prises en compte même si elles ont commencé depuis longtemps.</p>
+{% elif cycle %}<p class="meta">Cycle lunaire du {{ cycle.debut_cycle_utc.strftime('%d.%m.%Y') }} · {{ cycle.ville }}</p>{% endif %}
+<p><a href="{{ url_for('espace_personnel.lire_prompt_mail_cycle', email_id=email.id) }}" target="_blank" rel="noopener">Lire le prompt complet de ce brouillon ↗</a></p>
+{% if not email.contenu_texte and not email.contenu_html %}<div class="box">{% if peut_generer %}<h2>Les données sont prêtes</h2><p class="facts">Tu peux demander une seule génération Claude. Le journal et les enjeux retenus seront actualisés avant l’appel.</p>
+<form class="generer-mail" method="post" action="{{ url_for('espace_personnel.generer_brouillon_email_cycle', email_id=email.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="button" type="submit">Générer ce brouillon avec Claude</button></form>
+<p class="warn">Cette action utilise l’IA. Le résultat sera conservé pour ta relecture, sans envoi.</p>{% else %}<p>Ce brouillon utilise une ancienne préparation ou ne correspond pas à ta formule actuelle. Retourne dans « Mes emails de cycle » et prépare de nouveau les données du mois avant toute génération.</p>{% endif %}</div>
+{% else %}<div class="report"><h2>Le brouillon à relire</h2><iframe title="Brouillon d’email" srcdoc="{{ email.contenu_html|e }}"></iframe></div>{% endif %}
+{% if journaux_mail %}<details class="box"><summary>Consulter les journaux de génération</summary>{% for journal in journaux_mail %}<p>{{ journal.id }} (UTC)</p><ul>{% for nom in journal.fichiers %}<li><a href="{{ url_for('espace_personnel.lire_journal_mail_cycle', email_id=email.id, execution=journal.id, nom=nom) }}" target="_blank" rel="noopener">{{ nom }}</a></li>{% endfor %}</ul>{% endfor %}</details>{% endif %}
+</section></main>{% endblock %}
+{% block scripts %}<script>document.querySelectorAll('.generer-mail').forEach(form => form.addEventListener('submit', () => { const bouton = form.querySelector('button'); bouton.disabled = true; bouton.textContent = 'Génération en cours…'; }));</script>{% endblock %}

@@ -153,6 +153,15 @@ RÈGLES FACTUELLES
 - Ne dis qu'un facteur de RS est « réactivé » si un contact RL→RS ou une
   superposition RL dans une maison RS est explicitement fourni.
 - La RS donne le fond annuel ; la RL et les transits donnent le relief du mail.
+- ``enjeux_annuels_du_rapport`` contient uniquement les enjeux du dernier PDF
+  annuel retenus par la personne pour ses mails. Ce sont des interprétations
+  annuelles de référence, jamais des faits vécus ou de nouveaux calculs.
+- Croise un ou deux de ces enjeux avec les facteurs RL et transits réellement
+  pertinents de ce cycle. Ne les répète pas tous, ne force pas un lien absent
+  et ne prétends pas qu'un enjeu est activé sans contact calculé fourni.
+  Ils servent de fil rouge annuel ; le mail reste centré sur le mois.
+- Si aucun enjeu annuel n'est retenu, n'en invente pas et n'en récupère pas
+  depuis une autre année ou une ancienne version du rapport.
 - Une configuration du ciel qui répète un duo et un aspect natal est une
   résonance de climat. Ne l'appelle « activation renforcée » que si son niveau
   est ``renforcee`` et que des ``activations_directes`` sont fournies. Une
@@ -160,6 +169,16 @@ RÈGLES FACTUELLES
 - Les lunaisons à venir sont des rendez-vous collectifs : ne les interprète que
   lorsqu'une maison ou un aspect natal/RS est explicitement fourni, et indique
   leur date locale sans inventer de fenêtre supplémentaire.
+- Personnalise réellement la lunaison : interprète d'abord sa maison natale,
+  puis ses contacts calculés aux planètes et angles nataux. Examine le rôle
+  natal des points touchés, leurs aspects et leurs maisons gouvernées.
+  Une maison peut soutenir une lecture de domaine même sans contact exact.
+- Étudie le maître de la lunaison dans lecture_personnalisee : sa condition
+  dans le ciel de cette lunaison, sa rétrogradation, ses aspects et figures,
+  puis son rôle dans le natal. Ne le confonds pas avec un maître de RS ou de RL.
+  Une position d'apex ne peut être mentionnée que si la figure est calculée.
+- Ne transforme pas le symbole d'un signe en domaine de maison : utilise les
+  maisons et les maîtrises natales réellement fournies.
 - Une lunaison récente peut être évoquée seulement si elle éclaire le cycle qui
   commence ; elle ne doit pas prendre toute la place dans l'email.
 - Si une lunaison porte une ``eclipse`` dans les données, tu peux la nommer
@@ -257,6 +276,10 @@ def preparer_prompt_email_cycle_abonne(
         resonances_ciel_natal=resonances_ciel_natal,
     )
     contexte_client = construire_contexte_client_cycle(profil, instant_cycle)
+    from utils.lecture_lunaison import natal_pour_mail
+    contexte_astrologique["theme_natal"] = natal_pour_mail(theme_natal)
+    from utils.enjeux_annuels import contexte_enjeux_annuels
+    contexte_astrologique["enjeux_annuels_du_rapport"] = contexte_enjeux_annuels(profil, instant_cycle)
     prompt = construire_prompt_email_cycle(
         profil.prenom,
         contexte_astrologique,
@@ -270,33 +293,18 @@ def convertir_email_texte_en_html(texte: str) -> str:
     lignes = [ligne.strip() for ligne in texte.splitlines() if ligne.strip()]
     blocs = []
     for ligne in lignes:
-        if re.match(r"^OBJET\s*:", ligne, re.IGNORECASE):
+        if ligne.startswith("OBJET :"):
             continue
-        if ligne in {"Le mouvement du mois", "Ce qui vient appuyer là où ça compte", "À garder en tête"}:
-            blocs.append(f"<h2>{escape(ligne)}</h2>")
+        titre = ligne.strip("*# ").strip()
+        if titre.replace("’", "'") in {"Le mouvement du mois", "Ce qui vient appuyer là où ça compte", "À garder en tête",
+                     "Le mouvement de la quinzaine", "Ce que ta Révolution Lunaire met en jeu",
+                     "Les rendez-vous lunaires", "Ton point d'appui"}:
+            blocs.append(f"<h2>{escape(titre)}</h2>")
         else:
-            blocs.append(f"<p>{escape(ligne)}</p>")
+            contenu = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escape(ligne))
+            contenu = re.sub(r"(?<!\*)\*([^*\n]+)\*(?!\*)", r"<em>\1</em>", contenu)
+            contenu = re.sub(r"(?<![\w_])_([^_\n]+)_(?![\w_])", r"<em>\1</em>", contenu)
+            blocs.append(f"<p>{contenu}</p>")
     return """<!doctype html><html lang=\"fr\"><head><meta charset=\"utf-8\">
 <style>body{max-width:680px;margin:32px auto;padding:0 22px;background:#fffdf9;color:#292330;font:17px/1.65 Georgia,serif}h1,h2{font-family:Arial,sans-serif;color:#5d315d;line-height:1.2}h2{margin-top:2rem;font-size:1.25rem}</style>
 </head><body>""" + "\n".join(blocs) + "</body></html>"
-
-
-def generer_texte_email_cycle(prompt: str) -> str:
-    """Un seul appel Claude pour un brouillon ; aucune relance sur troncature."""
-    from utils.claude_llm import CLIENT, MODEL
-
-    reponse = CLIENT.with_options(max_retries=0).messages.create(
-        model=MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7,
-        max_tokens=4500,
-        stop_sequences=["<FIN_MAIL>"],
-    )
-    if reponse.stop_reason not in {"end_turn", "stop_sequence"}:
-        raise RuntimeError("Claude n'a pas terminé le brouillon ; aucun second appel n'a été lancé.")
-    texte = "".join(
-        bloc.text for bloc in reponse.content if getattr(bloc, "type", None) == "text"
-    ).replace("<FIN_MAIL>", "").strip()
-    if not texte:
-        raise RuntimeError("Claude a renvoyé un brouillon vide.")
-    return texte

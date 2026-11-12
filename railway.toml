@@ -1,6 +1,6 @@
 [deploy]
-preDeployCommand = ["python scripts/init_espace_auth.py"]
-startCommand = '/bin/sh -c "python scripts/init_espace_auth.py || echo Espace-personnel-tables-indisponibles >&2; exec gunicorn espace_wsgi:app --workers 4 --threads 2 --timeout 300"'
+preDeployCommand = ["python scripts/migrate_espace_prod.py --apply"]
+startCommand = '/bin/sh -c "python scripts/migrate_espace_prod.py --check && python scripts/init_espace_auth.py && exec gunicorn espace_wsgi:app --workers 4 --threads 2 --timeout 300"'
 
 # The isolated blog test has no production database, payments or account code.
 [environments.blog-test.build]

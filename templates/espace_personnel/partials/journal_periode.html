@@ -1,0 +1,20 @@
+{% set periode = request.form.get('type_entree') == 'periode' if request.method == 'POST' else (entree.est_periode if entree is defined else false) %}
+{% set en_cours = request.form.get('toujours_en_cours') == 'oui' if request.method == 'POST' else (not entree.date_fin_periode if entree is defined else true) %}
+{% set champ = 'fiche-field' if entree is defined else 'journal-field' %}
+<div class="{{ champ }} {{ champ }}--wide">
+    <label for="type_entree">Cette observation concerne</label>
+    <select id="type_entree" name="type_entree">
+        <option value="journee" {% if not periode %}selected{% endif %}>Une journée</option>
+        <option value="periode" {% if periode %}selected{% endif %}>Une période</option>
+    </select>
+</div>
+<div class="{{ champ }}">
+    <label for="date_observation" id="label-date-observation">{{ 'Date de début' if periode else 'Date de l’observation' }}</label>
+    <input id="date_observation" name="date_observation" type="date" value="{{ request.form.get('date_observation', '') if request.method == 'POST' else (entree.date_observation.strftime('%Y-%m-%d') if entree is defined else date_du_jour) }}" required>
+</div>
+<div class="{{ champ }}" data-periode {% if not periode %}hidden{% endif %}>
+    <label for="date_fin_periode">Date de fin</label>
+    <input id="date_fin_periode" name="date_fin_periode" type="date" value="{{ request.form.get('date_fin_periode', '') if request.method == 'POST' else (entree.date_fin_periode.isoformat() if entree is defined and entree.date_fin_periode else '') }}" {% if not periode or en_cours %}disabled{% else %}required{% endif %}>
+    <label for="toujours_en_cours" style="display:flex;align-items:center;gap:8px"><input style="width:auto" id="toujours_en_cours" name="toujours_en_cours" type="checkbox" value="oui" {% if en_cours %}checked{% endif %} {% if not periode %}disabled{% endif %}> Toujours en cours</label>
+</div>
+<style>[data-periode][hidden] { display: none; }</style>

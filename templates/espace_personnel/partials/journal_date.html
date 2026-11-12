@@ -1,0 +1,9 @@
+{%- if entree.est_periode -%}
+    {%- if entree.date_fin_periode -%}
+        Du {{ entree.date_observation.strftime('%d.%m.%Y') }} au {{ entree.date_fin_periode.strftime('%d.%m.%Y') }}
+    {%- else -%}
+        Depuis le {{ entree.date_observation.strftime('%d.%m.%Y') }} · Toujours en cours
+    {%- endif -%}
+{%- else -%}
+    {{ entree.date_observation.strftime('%d.%m.%Y') }}
+{%- endif -%}

@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 import json
-from dataclasses import asdict
 
 from extensions import db
 from utils.acces_abonnement import acces_abonnement
-from models.espace_personnel import AbonnementEspace, CycleLunaire, CycleSolaire, EmailCycleAbonnement, ProfilAstral
-from utils.cycles_abonnement import creer_cycle_solaire_pour_instant
+from models.espace_personnel import AbonnementEspace, CycleLunaire, EmailCycleAbonnement, ProfilAstral
+from utils.cycles_abonnement import creer_cycle_solaire_pour_instant, rattacher_cycle_lunaire_a_sa_rs
 from utils.email_cycle_abonnement import preparer_prompt_email_cycle_abonne
 from utils.revolution_lunaire import calculer_theme_revolution_lunaire, prochaine_revolution_lunaire, priorites_interpretation
 
@@ -84,7 +83,7 @@ def _lieu_cycles(profil: ProfilAstral) -> dict:
 
 
 def _prochaine_rl(profil: ProfilAstral, apres: datetime) -> tuple[dict, dict, dict]:
-    """Calcule la RL et récupère une RS archivée de ce compte, sans la générer."""
+    """Calcule la RL et récupère la RS persistée qui la couvre."""
     natal = _theme_natal(profil)
     lieu = _lieu_cycles(profil)
     longitude_lune = natal["planetes"]["Lune"]["longitude"]
@@ -93,16 +92,7 @@ def _prochaine_rl(profil: ProfilAstral, apres: datetime) -> tuple[dict, dict, di
         theme_natal=natal, tzid=lieu["tzid"],
     )
     instant_rl = datetime.fromisoformat(preliminaire["instant_utc"])
-    instant_comparable = instant_rl.astimezone(timezone.utc).replace(tzinfo=None)
-    cycle_solaire = next((
-        cycle for cycle in CycleSolaire.query.filter_by(profil_id=profil.id)
-        .order_by(CycleSolaire.debut_cycle_utc.desc()).all()
-        if cycle.debut_cycle_utc.replace(tzinfo=None) <= instant_comparable
-        < cycle.fin_cycle_utc.replace(tzinfo=None)
-    ), None)
-    if cycle_solaire is None:
-        # Un relevé purement technique suffit ici ; aucun rapport ni appel IA.
-        cycle_solaire = creer_cycle_solaire_pour_instant(profil, instant_rl)
+    cycle_solaire = creer_cycle_solaire_pour_instant(profil, instant_rl)
     try:
         contenu_rs = json.loads(cycle_solaire.theme_technique)
         donnees_rs = contenu_rs["donnees"]
@@ -170,12 +160,11 @@ def preparer_brouillon_boussole(
         db.session.add(cycle_lunaire)
         db.session.flush()
         if rs is not None:
-            cycle_lunaire.cycle_solaire_id = rs["cycle"].id
-    elif rs is not None and cycle_lunaire.cycle_solaire_id is None:
-        cycle_lunaire.cycle_solaire_id = rs["cycle"].id
+            rattacher_cycle_lunaire_a_sa_rs(cycle_lunaire)
 
     if rs is not None:
-        photo_transits = _photo_transits_cycle(natal, debut_rl)
+        from routes.espace_personnel import _calculer_photo_transits
+        photo_transits = _calculer_photo_transits(natal, debut_rl)
         prompt, contrat, contexte_client = preparer_prompt_email_cycle_abonne(
             profil, rs["donnees"], rl, photo_transits, rs["theme"],
         )
@@ -214,24 +203,3 @@ def preparer_brouillon_boussole(
         "contexte_client": contexte_client,
         "prompt": prompt,
     }
-
-
-def _photo_transits_cycle(natal: dict, instant_utc: datetime) -> dict:
-    """Photographie exacte des transits au début du cycle, sans appel externe."""
-    from utils.transits.calcul_transits import calculer_positions_transits
-    from utils.transits.detecteurs import detecter_aspects
-    from utils.transits.maisons import extraire_cuspides
-
-    instant = instant_utc.astimezone(timezone.utc).replace(tzinfo=None)
-    positions = calculer_positions_transits(instant)["positions"]
-    maitre = natal.get("maitre_ascendant")
-    if isinstance(maitre, dict):
-        maitre = maitre.get("nom")
-    aspects = detecter_aspects(
-        positions, natal.get("planetes") or {}, extraire_cuspides(natal),
-        natal.get("house_rulers_map") or {}, maitre_ascendant=maitre,
-        angles_deg=natal.get("angles_deg") or {},
-    )
-    aspects.sort(key=lambda transit: (-transit.importance, transit.orbe))
-    return {"date_calcul": instant_utc.isoformat(), "positions": positions,
-            "transits": [asdict(transit) for transit in aspects]}

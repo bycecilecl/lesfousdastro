@@ -7,7 +7,7 @@ from sqlalchemy import func
 
 from extensions import db
 from models.espace_personnel import UtilisateurEspace
-from utils.acces_espace import normaliser_email, trouver_ou_creer_utilisateur
+from utils.acces_espace import email_invite, normaliser_email, trouver_ou_creer_utilisateur
 from utils.auth_espace import (
     DUREE_RECUPERATION_MINUTES, MIN_MOT_DE_PASSE, MAX_MOT_DE_PASSE,
     creer_lien_mot_de_passe, enregistrer_mot_de_passe, labo_local,
@@ -15,7 +15,7 @@ from utils.auth_espace import (
     utilisateur_connecte, valider_nouveau_mot_de_passe, verifier_csrf_espace,
     verifier_mot_de_passe,
 )
-from utils.email_sender import envoyer_email_avec_analyse
+from utils.email_espace import envoyer_email_avec_analyse
 
 
 ROUTES_PUBLIQUES_AUTH = {
@@ -150,6 +150,8 @@ def _email_valide(email):
 
 
 def inscription():
+    if request.method == 'POST' and not email_invite(normaliser_email(request.form.get('email', ''))):
+        abort(403, 'Les inscriptions ne sont pas ouvertes pour cette adresse.')
     return _demander_mot_de_passe(inscription=True)
 
 

@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, CheckConstraint, Column, Date, DateTime, Float, Integer, LargeBinary, String, Text, Time, UniqueConstraint
+from sqlalchemy import Index, text, Boolean, CheckConstraint, Column, Date, DateTime, Float, Integer, LargeBinary, String, Text, Time, UniqueConstraint
 
 from extensions import db
 
@@ -21,10 +21,16 @@ class UtilisateurEspace(db.Model):
     prenom = Column(String(100), nullable=False)
     email = Column(String(255), nullable=True, unique=True)
     actif = Column(Integer, nullable=False, default=1)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
     mot_de_passe_hash = Column(String(512), nullable=True)
     version_auth = Column(Integer, nullable=False, default=0, server_default="0")
     mot_de_passe_modifie_le = Column(DateTime(timezone=True), nullable=True)
-    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    autoriser_journal_mails = Column(Boolean, nullable=False, default=False, server_default="0")
+    journal_mails_choix_le = Column(DateTime(timezone=True), nullable=True)
+    avatar_personnage = Column(String(20), nullable=True)
+    est_administratrice = Column(Boolean, nullable=False, default=False, server_default=text("false"))
+    __table_args__ = (CheckConstraint("actif IN (0, 1)", name="ck_utilisateurs_espace_actif"), Index("uq_espace_administratrice_unique", "est_administratrice", unique=True, sqlite_where=text("est_administratrice = TRUE"), postgresql_where=text("est_administratrice = TRUE")))
 
 
 class LienConnexionEspace(db.Model):
@@ -36,30 +42,6 @@ class LienConnexionEspace(db.Model):
     expire_le = Column(DateTime(timezone=True), nullable=False, index=True)
     utilise_le = Column(DateTime(timezone=True), nullable=True)
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
-
-
-class LienMotDePasseEspace(db.Model):
-    """Définition/récupération du mot de passe ; jamais de jeton en clair en base."""
-
-    __tablename__ = "liens_mot_de_passe_espace"
-
-    id = Column(Integer, primary_key=True)
-    utilisateur_id = Column(Integer, nullable=False, index=True)
-    empreinte_jeton = Column(String(64), nullable=False, unique=True, index=True)
-    version_auth = Column(Integer, nullable=False)
-    expire_le = Column(DateTime(timezone=True), nullable=False, index=True)
-    utilise_le = Column(DateTime(timezone=True), nullable=True)
-    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
-
-
-class LimiteAccesEspace(db.Model):
-    """Compteurs partagés entre les processus, sans adresse IP/e-mail en clair."""
-
-    __tablename__ = "limites_acces_espace"
-
-    cle = Column(String(64), primary_key=True)
-    debut_fenetre = Column(DateTime(timezone=True), nullable=False, index=True)
-    nombre = Column(Integer, nullable=False)
 
 
 class ProfilAstral(db.Model):
@@ -161,6 +143,11 @@ class EmailCycleAbonnement(db.Model):
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
     date_modification = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
 
+    cle_creneau = Column(String(10), nullable=True)
+    date_prevue = Column(DateTime(timezone=True), nullable=True)
+    fin_periode = Column(DateTime(timezone=True), nullable=True)
+    __table_args__ = (UniqueConstraint("profil_id", "cycle_lunaire_id", "type_email", name="uq_email_cycle_profil_cycle_type"), UniqueConstraint("profil_id", "cle_creneau", name="uq_email_profil_creneau"))
+
 
 class CycleSolaire(db.Model):
     """Révolution solaire active, utilisée comme cadre annuel des cycles."""
@@ -221,6 +208,8 @@ class AnalysePersonnelle(db.Model):
         onupdate=utcnow,
         nullable=False,
     )
+
+    cycle_solaire_id = Column(Integer, nullable=True, index=True)
 
 
 
@@ -441,6 +430,9 @@ class EntreeJournal(db.Model):
         nullable=False,
     )
 
+    est_periode = Column(Boolean, nullable=False, default=False, server_default="0")
+    date_fin_periode = Column(Date, nullable=True)
+
 
 class FichierAnalyse(db.Model):
     """PDF privé conservé en base pour ne pas dépendre du disque Railway."""
@@ -453,4 +445,75 @@ class FichierAnalyse(db.Model):
     type_mime = Column(String(100), nullable=False, default="application/pdf")
     contenu = Column(LargeBinary, nullable=False)
     empreinte_sha256 = Column(String(64), nullable=False)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class LienMotDePasseEspace(db.Model):
+    """Définition/récupération du mot de passe ; jamais de jeton en clair en base."""
+
+    __tablename__ = "liens_mot_de_passe_espace"
+
+    id = Column(Integer, primary_key=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    empreinte_jeton = Column(String(64), nullable=False, unique=True, index=True)
+    version_auth = Column(Integer, nullable=False)
+    expire_le = Column(DateTime(timezone=True), nullable=False, index=True)
+    utilise_le = Column(DateTime(timezone=True), nullable=True)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class LimiteAccesEspace(db.Model):
+    """Compteurs partagés entre les processus, sans adresse IP/e-mail en clair."""
+
+    __tablename__ = "limites_acces_espace"
+
+    cle = Column(String(64), primary_key=True)
+    debut_fenetre = Column(DateTime(timezone=True), nullable=False, index=True)
+    nombre = Column(Integer, nullable=False)
+
+
+class AnalyseLunaison(db.Model):
+    """Lecture collective de Cécile, avec brouillon et publication distincts."""
+
+    __tablename__ = "analyses_lunaisons"
+    __table_args__ = (
+        UniqueConstraint("type_lunaison", "date_utc", name="uq_analyse_lunaison"),
+        CheckConstraint("type_lunaison IN ('nouvelle_lune', 'pleine_lune')",
+                        name="ck_analyse_lunaison_type"),
+    )
+
+    id = Column(Integer, primary_key=True)
+    type_lunaison = Column(String(20), nullable=False)
+    date_utc = Column(String(10), nullable=False)
+    instant_utc = Column(DateTime(timezone=True), nullable=False)
+    titre = Column(String(200), nullable=False, default="")
+    texte = Column(Text, nullable=False, default="")
+    titre_valide = Column(String(200), nullable=True)
+    texte_valide = Column(Text, nullable=True)
+    validee_le = Column(DateTime(timezone=True), nullable=True)
+    revision_validee = Column(Integer, nullable=False, default=0, server_default="0")
+    revision = Column(Integer, nullable=False, default=0, server_default="0")
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    date_modification = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class EnjeuAnnuel(db.Model):
+    """Enjeu temporaire issu d'une version PDF de RS, retenu ou non pour les mails."""
+
+    __tablename__ = "enjeux_annuels"
+    __table_args__ = (UniqueConstraint("analyse_id", "ordre", name="uq_enjeu_annuel_analyse_ordre"),)
+
+    id = Column(Integer, primary_key=True)
+    analyse_id = Column(Integer, nullable=False, index=True)
+    section_id = Column(Integer, nullable=False)
+    ordre = Column(Integer, nullable=False)
+    titre = Column(String(200), nullable=False)
+    contenu = Column(Text, nullable=False)
+    manifestations_possibles = Column(Text, nullable=True)
+    extrait_source = Column(Text, nullable=False)
+    references_astrologiques = Column(Text, nullable=True)
+    retenu_email = Column(Boolean, nullable=False, default=False, server_default="0")
+    source_validation = Column(String(30), nullable=False, default="extrait_verifie", server_default="extrait_verifie")
+    execution_source = Column(String(40), nullable=True)
+    numero_source = Column(Integer, nullable=True)
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)

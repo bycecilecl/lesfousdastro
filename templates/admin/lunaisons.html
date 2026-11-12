@@ -1,0 +1,37 @@
+{% extends "admin/lunaisons_base.html" %}
+{% block content %}
+<h1>Mes analyses de lunaisons</h1>
+<p>Ta lecture de chaque Nouvelle Lune et Pleine Lune, comme base des mails personnalisés de tes abonnés.</p>
+<p class="muted">Seule la version que tu valides est reprise dans les prochains mails concernés. Enregistrer ou valider ici ne génère aucun mail et ne déclenche aucun envoi.</p>
+<form method="get" class="month-form">
+    <label for="mois">Choisir un mois</label>
+    <input type="month" id="mois" name="mois" value="{{ mois }}" min="1900-01" max="2200-12" required>
+    <button type="submit" class="secondary">Afficher les lunaisons</button>
+</form>
+<p class="muted">Dates et heures affichées pour Paris.</p>
+{% if erreur_schema %}
+<div class="notice error" role="alert">{{ erreur_schema }}</div>
+{% else %}
+<div class="cards">
+{% for fiche in calendrier %}
+    {% set analyse = fiche.analyse %}
+    <article class="panel">
+        <h2>{{ fiche.libelle }}</h2>
+        <p>{{ fiche.date_locale.strftime('%d/%m/%Y à %H h %M') }}</p>
+        {% if analyse and analyse.validee_le %}
+            <span class="status validated">Validée pour les mails · version {{ analyse.revision_validee }}</span>
+            {% if analyse.texte != analyse.texte_valide or analyse.titre != analyse.titre_valide %}
+                <p class="muted">Des modifications du brouillon attendent ta validation.</p>
+            {% endif %}
+        {% elif analyse %}
+            <span class="status pending">Brouillon · non repris dans les mails</span>
+        {% else %}
+            <span class="status">À rédiger</span>
+        {% endif %}
+        {% if analyse and analyse.titre %}<p><strong>{{ analyse.titre }}</strong></p>{% endif %}
+        <p><a class="button secondary" href="{{ url_for('admin_lunaisons.editer', nature=fiche.type, date_utc=fiche.date_utc) }}">{{ 'Ouvrir mon analyse' if analyse else 'Rédiger mon analyse' }}</a></p>
+    </article>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}

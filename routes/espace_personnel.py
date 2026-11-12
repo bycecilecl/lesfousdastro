@@ -1,3 +1,106 @@
+LECTURES_PLANETAIRES = {
+    "Soleil": {
+        "dynamique": "met en lumière ce qui demande à être affirmé consciemment",
+        "question": "Qu’est-ce que j’ai besoin d’assumer ou de rendre visible aujourd’hui ?",
+    },
+    "Lune": {
+        "dynamique": "fait remonter les besoins, les réactions et la météo émotionnelle",
+        "question": "Quel besoin émotionnel cherche réellement à être entendu ?",
+    },
+    "Mercure": {
+        "dynamique": "active la pensée, les échanges et la manière de nommer les choses",
+        "question": "Qu’est-ce qui mérite d’être compris, dit ou reformulé plus clairement ?",
+    },
+    "Vénus": {
+        "dynamique": "interroge les liens, les valeurs, le plaisir et ce qui compte vraiment",
+        "question": "Est-ce que mon choix respecte ce que j’aime et ce que je considère précieux ?",
+    },
+    "Mars": {
+        "dynamique": "mobilise l’action, le désir, la colère et la capacité à trancher",
+        "question": "Où mon énergie veut-elle agir, et comment l’utiliser sans la subir ?",
+    },
+    "Jupiter": {
+        "dynamique": "amplifie, ouvre et pousse à élargir le champ des possibles",
+        "question": "Où puis-je grandir sans confondre expansion et excès ?",
+    },
+    "Saturne": {
+        "dynamique": "structure, limite et oblige à regarder la réalité en face",
+        "question": "Où ai-je besoin de poser une limite ou de prendre ma responsabilité ?",
+    },
+    "Uranus": {
+        "dynamique": "réveille et libère ce qui était devenu trop figé",
+        "question": "Quelle ancienne manière de fonctionner ne me laisse plus respirer ?",
+    },
+    "Neptune": {
+        "dynamique": "sensibilise, inspire et dissout les repères devenus trop rigides",
+        "question": "Où dois-je distinguer l’intuition véritable de la projection ou du flou ?",
+    },
+    "Pluton": {
+        "dynamique": "intensifie et révèle ce qui opère en profondeur",
+        "question": "Qu’est-ce que cette situation révèle de mon rapport au contrôle et à la transformation ?",
+    },
+}
+PLANETES_TRANSIT_JOURNAL = (
+    "Soleil",
+    "Lune",
+    "Mercure",
+    "Vénus",
+    "Mars",
+    "Jupiter",
+    "Saturne",
+    "Uranus",
+    "Neptune",
+    "Pluton",
+)
+IMPORTANCE_TRANSIT_DU_MOMENT = 20
+FICHIERS_LOG_RS = ("requete.json", "reponse_brute.txt", "usage.json", "mecanismes.json", "enjeux.json", "controles.json", "reprise_locale.json")
+TAILLE_MAX_RAPPORT = 15 * 1024 * 1024
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+from dataclasses import asdict
+import json
+import os
+import re
+import swisseph as swe
+import unicodedata
+import uuid
+from urllib.parse import urlsplit
+from threading import Thread
+import pdfplumber
+from flask import Blueprint, Response, abort, current_app, flash, redirect, render_template, request, send_from_directory, session, url_for
+from extensions import db
+from models.espace_personnel import AbonnementEspace, AnalysePersonnelle, CycleLunaire, CycleSolaire, DroitAnalyseAchetee, EmailCycleAbonnement, EnjeuAnnuel, EnjeuPeriode, EntreeJournal, MecanismeExploration, ObservationMecanisme, ProfilAstral, SectionAnalyse, SuggestionMecanisme, UtilisateurEspace
+from utils.auth_espace import labo_local as mode_labo
+from utils.auth_espace import administratrice_connectee, jeton_csrf_espace, ouvrir_session_espace, utilisateur_connecte, verifier_csrf_espace
+from routes.auth_espace import enregistrer_routes_auth, ROUTES_PUBLIQUES_AUTH, ROUTES_AUTH
+from utils.calcul_theme import calcul_theme
+from utils.configurations_astrologiques import analyser_configurations_majeures
+from utils.extraction_mecanismes_ia import generer_suggestions_avec_claude
+from utils.exploration_rs import extraire_pages_rs, generer_enjeux_rs, lire_reponse_enjeux_rs, propositions_rs_a_verifier, verrou_extraction_rs
+from utils.enjeux_annuels import actualiser_enjeux_email
+from utils.extraction_enjeux_transits_ia import generer_enjeux_transits_avec_claude
+from utils.extraction_enjeux_forces_defis_ia import generer_enjeux_forces_defis_avec_claude
+from utils.interpretation_cycle_lunaire import generer_interpretation_avec_claude
+from utils.analyse_sections import extraire_sections_analyse_karmique, extraire_sections_forces_defis, extraire_sections_point_astral, extraire_sections_profil_amoureux, extraire_sections_transits
+from utils.revolution_lunaire import calculer_theme_revolution_lunaire, priorites_interpretation, prochaine_revolution_lunaire
+from utils.cycles_abonnement import rattacher_cycle_lunaire_a_sa_rs
+from utils.brouillon_email_cycle import TYPE_EMAIL_BOUSSOLE, preparer_brouillon_boussole, droits_email, generation_autorisee
+from utils.mails_quinzaine import VERSION_CONTRAT, preparer_mails_mois, actualiser_mail_quinzaine
+from utils.generation_mail_abonne import generer_mail_enregistre, journaux_mail, dossier_journaux_mail, FICHIERS_MAIL
+from utils.email_cycle_abonnement import convertir_email_texte_en_html
+from utils.acces_abonnement import acces_abonnement
+from utils.avatars_espace import AVATARS_ESPACE
+from utils.llm_client import ask_llm
+from utils.email_sender import envoyer_email_avec_analyse
+from utils.transits.calcul_transits import PLANETES_SWISSEPH, longitude_to_signe
+from utils.transits.detecteurs import detecter_aspects
+from utils.transits.maisons import extraire_cuspides
+from utils.transits.synthese_brady import THEMES_MAISONS
+from flask import g
+from pathlib import Path
+import tempfile
+from utils.claude_espace import BlocTronqueError
+from utils.email_espace import envoyer_email_avec_analyse
 """Première tranche de l'espace personnel : compte et connexion par e-mail."""
 
 import os
@@ -28,11 +131,14 @@ from utils.acces_abonnement import acces_abonnement
 from utils.calcul_theme import calcul_theme
 from utils.acces_espace import (
     activer_accompagnement_beta,
+    consommer_lien_connexion,
+    creer_lien_connexion,
     email_invite,
+    lien_recent,
+    trouver_ou_creer_utilisateur,
 )
 from utils.email_sender import envoyer_email_avec_analyse
-from utils.auth_espace import jeton_csrf_espace, utilisateur_connecte
-from routes.auth_espace import enregistrer_routes_auth, ROUTES_PUBLIQUES_AUTH, ROUTES_AUTH
+from utils.stockage_espace import racine_privee_espace
 
 
 espace_personnel_bp = Blueprint("espace_personnel", __name__, url_prefix="/mon-espace")
@@ -81,6 +187,7 @@ TITRES_PDF_PAR_ANALYSE = {
     "forces_defis": ("potentiels defis", "potentiel defis", "forces defis"),
     "analyse_karmique": ("analyse karmique",),
     "transits": ("point transits", "flash transits", "transits"),
+    "revolution_solaire": ("revolution solaire",),
 }
 
 
@@ -118,34 +225,15 @@ def _jeton_formulaire_portail():
 
 
 def _verifier_formulaire_portail():
+    if request.form.get('csrf_token'):
+        verifier_csrf_espace()
+        return True
     return hmac.compare_digest(
         request.form.get("espace_csrf", ""), _jeton_formulaire_portail()
     )
 
 
-@espace_personnel_bp.before_request
-def verifier_session_espace():
-    if not session.get("utilisateur_espace_id"):
-        return None
-    if utilisateur_connecte() is None:
-        session.clear()
-        if request.endpoint not in ROUTES_PUBLIQUES_AUTH:
-            return redirect(url_for("espace_personnel.connexion", suivant=request.full_path))
-        return None
-    debut = session.get("espace_connecte_le")
-    if debut:
-        try:
-            instant = datetime.fromisoformat(debut)
-            expire = instant.tzinfo is None or datetime.now(timezone.utc) - instant >= DUREE_SESSION_ESPACE
-        except (TypeError, ValueError):
-            expire = True
-        if expire:
-            session.clear()
-            if request.endpoint != "espace_personnel.connexion":
-                return redirect(url_for("espace_personnel.connexion"))
-            return None
-    _jeton_formulaire_portail()
-    return None
+
 
 
 def _photo_transits_journal(theme, jour):
@@ -262,23 +350,10 @@ def verifier_turnstile():
     }
 
 
-@espace_personnel_bp.app_context_processor
-def contexte_auth_espace():
-    return {"csrf_espace": jeton_csrf_espace, "auth_turnstile_actif": True}
 
 
-@espace_personnel_bp.after_request
-def proteger_pages_auth_espace(reponse):
-    if request.endpoint in ROUTES_AUTH:
-        reponse.headers["Cache-Control"] = "no-store, private"
-        reponse.headers["Referrer-Policy"] = "no-referrer"
-        reponse.headers["X-Robots-Tag"] = "noindex, nofollow"
-        reponse.headers["X-Frame-Options"] = "DENY"
-        reponse.headers["Content-Security-Policy"] = "frame-ancestors 'none'; form-action 'self'; base-uri 'self'"
-    return reponse
 
 
-enregistrer_routes_auth(espace_personnel_bp, inclure_deconnexion=False)
 
 
 @espace_personnel_bp.route("/")
@@ -419,152 +494,190 @@ def ciel_collectif():
 
 @espace_personnel_bp.route("/accompagnement")
 def accompagnement():
-    """Affiche les repères déjà enregistrés, sans appel IA."""
-    utilisateur = _compte_connecte()
-    if utilisateur is None:
-        return redirect(url_for("espace_personnel.connexion"))
-    profil = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
-    abonnement = AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first()
-    droits = acces_abonnement(abonnement)
-    maintenant = datetime.now(timezone.utc).replace(tzinfo=None)
-    cycle_solaire = cycle_lunaire = prochain_cycle_lunaire = dernier_email = None
+    """Réunit les repères déjà calculés sans déclencher de génération IA."""
+    utilisateur = _utilisateur_espace_courant()
+    abonnement = AbonnementEspace.query.filter_by(
+        utilisateur_id=utilisateur.id
+    ).first()
+    droits_abonnement = acces_abonnement(abonnement)
+    profil_astral = _profil_astral_courant()
+    maintenant = datetime.now(timezone.utc)
+
+    cycle_solaire = None
+    cycle_lunaire = None
+    prochain_cycle_lunaire = None
     interpretation_cycle = {}
-    if profil:
+    dernier_email = None
+
+    if profil_astral:
         cycle_solaire = (
-            CycleSolaire.query.filter_by(profil_id=profil.id)
-            .filter(CycleSolaire.debut_cycle_utc <= maintenant, CycleSolaire.fin_cycle_utc > maintenant)
-            .order_by(CycleSolaire.debut_cycle_utc.desc()).first()
+            CycleSolaire.query
+            .filter(
+                CycleSolaire.profil_id == profil_astral.id,
+                CycleSolaire.debut_cycle_utc <= maintenant,
+                CycleSolaire.fin_cycle_utc > maintenant,
+            )
+            .order_by(CycleSolaire.debut_cycle_utc.desc())
+            .first()
         )
         cycle_lunaire = (
-            CycleLunaire.query.filter_by(profil_id=profil.id)
-            .filter(CycleLunaire.debut_cycle_utc <= maintenant, CycleLunaire.fin_cycle_utc > maintenant)
-            .order_by(CycleLunaire.debut_cycle_utc.desc()).first()
+            CycleLunaire.query
+            .filter(
+                CycleLunaire.profil_id == profil_astral.id,
+                CycleLunaire.debut_cycle_utc <= maintenant,
+                CycleLunaire.fin_cycle_utc > maintenant,
+            )
+            .order_by(CycleLunaire.debut_cycle_utc.desc())
+            .first()
         )
         prochain_cycle_lunaire = (
-            CycleLunaire.query.filter_by(profil_id=profil.id)
-            .filter(CycleLunaire.debut_cycle_utc > maintenant)
-            .order_by(CycleLunaire.debut_cycle_utc.asc()).first()
-        )
-        dernier_email = (
-            EmailCycleAbonnement.query.filter_by(profil_id=profil.id)
-            .order_by(EmailCycleAbonnement.date_creation.desc()).first()
+            CycleLunaire.query
+            .filter(
+                CycleLunaire.profil_id == profil_astral.id,
+                CycleLunaire.debut_cycle_utc > maintenant,
+            )
+            .order_by(CycleLunaire.debut_cycle_utc.asc())
+            .first()
         )
         if cycle_lunaire and cycle_lunaire.interpretation:
             try:
                 interpretation_cycle = json.loads(cycle_lunaire.interpretation)
             except (TypeError, ValueError):
-                pass
+                interpretation_cycle = {}
+        dernier_email = (
+            EmailCycleAbonnement.query
+            .filter_by(profil_id=profil_astral.id)
+            .order_by(EmailCycleAbonnement.date_creation.desc())
+            .first()
+        )
+
+    # Ne transmettre au tableau de bord que le suivi inclus dans la formule.
+    # Les archives restent accessibles par leurs routes propriétaires.
+    if not droits_abonnement["revolution_solaire"]:
+        cycle_solaire = None
+    if not droits_abonnement["cycle_lunaire"]:
+        cycle_lunaire = None
+        prochain_cycle_lunaire = None
+        interpretation_cycle = {}
     if not isinstance(interpretation_cycle, dict):
         interpretation_cycle = {}
-    if not droits["revolution_solaire"]:
-        cycle_solaire = None
-    if not droits["cycle_lunaire"]:
-        cycle_lunaire = prochain_cycle_lunaire = None
-        interpretation_cycle = {}
 
-    enjeux_fond, enjeux_moment = [], []
+    enjeux_fond = []
+    enjeux_moment = []
     enjeux_rows = (
         db.session.query(EnjeuPeriode, AnalysePersonnelle)
         .join(AnalysePersonnelle, AnalysePersonnelle.id == EnjeuPeriode.analyse_id)
-        .filter(AnalysePersonnelle.utilisateur_id == utilisateur.id, AnalysePersonnelle.statut != "remplacee")
-        .order_by(AnalysePersonnelle.date_creation.desc(), EnjeuPeriode.ordre.asc()).all()
+        .filter(AnalysePersonnelle.utilisateur_id == utilisateur.id)
+        .order_by(AnalysePersonnelle.date_creation.desc(), EnjeuPeriode.ordre.asc())
+        .all()
     )
     for enjeu, analyse in enjeux_rows:
-        (enjeux_fond if analyse.type_analyse == "forces_defis" else enjeux_moment).append(
-            {"objet": enjeu, "analyse": analyse}
-        )
+        donnees = {"objet": enjeu, "analyse": analyse}
+        if analyse.type_analyse == "forces_defis":
+            enjeux_fond.append(donnees)
+        else:
+            enjeux_moment.append(donnees)
+
     dernieres_entrees = (
-        EntreeJournal.query.filter_by(utilisateur_id=utilisateur.id)
-        .order_by(EntreeJournal.date_observation.desc()).limit(3).all()
+        EntreeJournal.query
+        .filter_by(utilisateur_id=utilisateur.id)
+        .order_by(EntreeJournal.date_observation.desc())
+        .limit(3)
+        .all()
     )
+
     return render_template(
         "espace_personnel/accompagnement.html",
-        utilisateur_espace=utilisateur, profil=profil,
-        cycle_solaire=cycle_solaire, cycle_lunaire=cycle_lunaire,
+        utilisateur_espace=utilisateur,
+        profil=profil_astral,
+        cycle_solaire=cycle_solaire,
+        cycle_lunaire=cycle_lunaire,
         prochain_cycle_lunaire=prochain_cycle_lunaire,
         interpretation_cycle=interpretation_cycle,
-        enjeux_fond=enjeux_fond, enjeux_moment=enjeux_moment,
-        dernieres_entrees=dernieres_entrees, dernier_email=dernier_email,
-        droits_abonnement=droits,
+        enjeux_fond=enjeux_fond,
+        enjeux_moment=enjeux_moment,
+        dernieres_entrees=dernieres_entrees,
+        dernier_email=dernier_email,
+        droits_abonnement=droits_abonnement,
     )
 
 
 @espace_personnel_bp.route("/laboratoire")
 def laboratoire():
-    utilisateur = _compte_connecte()
-    if utilisateur is None:
-        return redirect(url_for("espace_personnel.connexion"))
+    utilisateur = _utilisateur_espace_courant()
+    mecanismes_tous = (
+        MecanismeExploration.query
+        .join(AnalysePersonnelle, AnalysePersonnelle.id == MecanismeExploration.analyse_id)
+        .filter(AnalysePersonnelle.utilisateur_id == utilisateur.id)
+        .order_by(MecanismeExploration.date_modification.desc())
+        .all()
+    )
     analyses = AnalysePersonnelle.query.filter_by(utilisateur_id=utilisateur.id).all()
     analyses_par_id = {analyse.id: analyse for analyse in analyses}
-    ids_analyses_actives = {analyse.id for analyse in analyses if analyse.statut != "remplacee"}
-    mecanismes_tous = (
-        MecanismeExploration.query.filter(MecanismeExploration.analyse_id.in_(analyses_par_id))
-        .order_by(MecanismeExploration.date_modification.desc()).all()
-        if analyses_par_id else []
-    )
-    ids = [mecanisme.id for mecanisme in mecanismes_tous]
+    suivis_par_mecanisme = {}
     observations = (
-        ObservationMecanisme.query.filter(ObservationMecanisme.mecanisme_id.in_(ids))
-        .order_by(ObservationMecanisme.date_observation.desc()).all()
-        if ids else []
+        ObservationMecanisme.query
+        .join(MecanismeExploration, MecanismeExploration.id == ObservationMecanisme.mecanisme_id)
+        .join(AnalysePersonnelle, AnalysePersonnelle.id == MecanismeExploration.analyse_id)
+        .filter(AnalysePersonnelle.utilisateur_id == utilisateur.id)
+        .order_by(ObservationMecanisme.date_observation.desc())
+        .all()
     )
-    suivis = {}
     for observation in observations:
-        suivi = suivis.setdefault(
+        suivi = suivis_par_mecanisme.setdefault(
             observation.mecanisme_id,
             {"nombre": 0, "derniere_date": observation.date_observation},
         )
         suivi["nombre"] += 1
+    statuts_termines = {"apaise", "probablement_depasse", "non_pertinent"}
     analyse_selectionnee = request.args.get("analyse", type=int)
     statut_selectionne = request.args.get("statut", "").strip()
-    if statut_selectionne not in STATUTS_MECANISME:
-        statut_selectionne = ""
     actifs_seulement = request.args.get("actifs") == "1"
     jamais_observes = request.args.get("jamais_observes") == "1"
-    termines = {"apaise", "probablement_depasse", "non_pertinent"}
+    if statut_selectionne not in STATUTS_MECANISME:
+        statut_selectionne = ""
+
     mecanismes = [
-        mecanisme for mecanisme in mecanismes_tous
-        if (mecanisme.analyse_id in ids_analyses_actives if not analyse_selectionnee else mecanisme.analyse_id == analyse_selectionnee)
+        mecanisme
+        for mecanisme in mecanismes_tous
+        if (not analyse_selectionnee or mecanisme.analyse_id == analyse_selectionnee)
         and (not statut_selectionne or mecanisme.statut == statut_selectionne)
-        and (not actifs_seulement or mecanisme.statut not in termines)
-        and (not jamais_observes or mecanisme.id not in suivis)
+        and (not actifs_seulement or mecanisme.statut not in statuts_termines)
+        and (not jamais_observes or mecanisme.id not in suivis_par_mecanisme)
     ]
-    suggestions_a_examiner = (
-        SuggestionMecanisme.query
-        .filter(
-            SuggestionMecanisme.analyse_id.in_(analyses_par_id),
-            SuggestionMecanisme.statut == "proposee",
-        )
-        .order_by(SuggestionMecanisme.priorite.asc())
-        .all()
-        if analyses_par_id else []
-    )
-    if analyse_selectionnee:
-        suggestions_a_examiner = [
-            suggestion for suggestion in suggestions_a_examiner
-            if suggestion.analyse_id == analyse_selectionnee
-        ]
-    else:
-        suggestions_a_examiner = [suggestion for suggestion in suggestions_a_examiner if suggestion.analyse_id in ids_analyses_actives]
-    mecanismes_actifs = [m for m in mecanismes_tous if m.analyse_id in ids_analyses_actives]
     statistiques = {
-        "en_cours": sum(m.statut not in termines for m in mecanismes_actifs),
-        "en_transformation": sum(m.statut == "en_transformation" for m in mecanismes_actifs),
-        "depasses": sum(m.statut == "probablement_depasse" for m in mecanismes_actifs),
+        "en_cours": sum(
+            mecanisme.statut not in statuts_termines
+            for mecanisme in mecanismes_tous
+        ),
+        "en_transformation": sum(
+            mecanisme.statut == "en_transformation"
+            for mecanisme in mecanismes_tous
+        ),
+        "depasses": sum(
+            mecanisme.statut == "probablement_depasse"
+            for mecanisme in mecanismes_tous
+        ),
     }
     return render_template(
         "espace_personnel/laboratoire.html",
-        mecanismes=mecanismes, analyses_par_id=analyses_par_id,
-        suivis_par_mecanisme=suivis,
-        ressentis=RESSENTIS_MECANISME, statuts=STATUTS_MECANISME,
-        statistiques=statistiques, analyses=analyses,
+        mecanismes=mecanismes,
+        analyses_par_id=analyses_par_id,
+        suivis_par_mecanisme=suivis_par_mecanisme,
+        ressentis=RESSENTIS_MECANISME,
+        statuts=STATUTS_MECANISME,
+        statistiques=statistiques,
+        analyses=analyses,
         analyse_selectionnee=analyse_selectionnee,
         statut_selectionne=statut_selectionne,
         actifs_seulement=actifs_seulement,
         jamais_observes=jamais_observes,
-        filtres_actifs=bool(analyse_selectionnee or statut_selectionne or actifs_seulement or jamais_observes),
-        suggestions_a_examiner=suggestions_a_examiner,
-        espace_csrf=_jeton_formulaire_portail(),
+        filtres_actifs=bool(
+            analyse_selectionnee
+            or statut_selectionne
+            or actifs_seulement
+            or jamais_observes
+        ),
     )
 
 
@@ -955,119 +1068,157 @@ def ciel_natal():
 
 @espace_personnel_bp.route("/journal", methods=["GET", "POST"])
 def journal():
-    from utils.journal_contact import DOMAINES, contact_du_jour
-
-    utilisateur_id = session.get("utilisateur_espace_id")
-    utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
-    if utilisateur is None or utilisateur.actif != 1:
-        return redirect(url_for("espace_personnel.connexion"))
-    profil_astral = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
-    jeton = session.get("espace_profil_csrf")
-    if not jeton:
-        jeton = secrets.token_urlsafe(32)
-        session["espace_profil_csrf"] = jeton
-    date_prefill = request.form.get("date_observation") if request.method == "POST" else request.args.get("date")
-    if not date_prefill:
-        date_prefill = date.today().isoformat()
-    try:
-        date_observation = date.fromisoformat(date_prefill)
-        if not 1900 <= date_observation.year <= 2100:
-            raise ValueError
-    except (TypeError, ValueError):
-        abort(400)
-
+    utilisateur = _utilisateur_espace_courant()
+    profil_astral = _profil_astral_courant()
+    date_prefill = datetime.now().date().isoformat()
+    date_demandee = request.form.get("date_observation") if request.method == "POST" else request.args.get("date")
+    if date_demandee:
+        try:
+            date_prefill = datetime.strptime(date_demandee, "%Y-%m-%d").date().isoformat()
+        except (ValueError, TypeError):
+            if request.method == "GET": abort(400)
+    from utils.journal_contact import contact_du_jour, DOMAINES
     source = request.form if request.method == "POST" else request.args
     contact_source = None
     if source.get("contact_planete"):
         try:
-            if profil_astral is None or not profil_astral.theme_natal:
-                raise ValueError
-            contact_source = contact_du_jour(
-                json.loads(profil_astral.theme_natal), date_prefill,
-                profil_astral.fuseau_cycles or profil_astral.fuseau_horaire,
-                source.get("contact_planete"), source.get("contact_point"),
-                source.get("contact_aspect"),
-            )
-        except (TypeError, ValueError, KeyError):
+            if not profil_astral or not profil_astral.theme_natal: raise ValueError()
+            contact_source = contact_du_jour(json.loads(profil_astral.theme_natal), date_prefill,
+                profil_astral.fuseau_cycles or profil_astral.fuseau_horaire or "Europe/Paris",
+                source.get("contact_planete"), source.get("contact_point"), source.get("contact_aspect"))
+        except (ValueError, TypeError, KeyError):
             abort(400, description="Ce contact n’est pas actif pour ton thème à cette date.")
     cycle_source = None
-    cycle_brut = source.get("cycle_lunaire_id") if request.method == "POST" else source.get("cycle_id")
-    if cycle_brut:
-        try:
-            cycle_id = int(cycle_brut)
-        except (TypeError, ValueError):
-            abort(400)
-        if profil_astral:
-            cycle_source = CycleLunaire.query.filter_by(id=cycle_id, profil_id=profil_astral.id).first_or_404()
     enjeu_source = None
-    enjeu_brut = source.get("enjeu_periode_id") if request.method == "POST" else source.get("enjeu_id")
-    if enjeu_brut:
+    enjeu_id_brut = (
+        request.form.get("enjeu_periode_id", "").strip()
+        if request.method == "POST"
+        else request.args.get("enjeu_id", "").strip()
+    )
+    if enjeu_id_brut:
         try:
-            enjeu_id = int(enjeu_brut)
+            enjeu_id = int(enjeu_id_brut)
         except (TypeError, ValueError):
-            abort(400)
-        enjeu_source = (
-            EnjeuPeriode.query
-            .join(AnalysePersonnelle, AnalysePersonnelle.id == EnjeuPeriode.analyse_id)
-            .filter(EnjeuPeriode.id == enjeu_id, AnalysePersonnelle.utilisateur_id == utilisateur.id)
-            .first_or_404()
-        )
-    if request.method == "POST":
-        if not hmac.compare_digest(request.form.get("profil_csrf", ""), jeton):
-            abort(400)
-        energie_texte = request.form.get("niveau_energie", "").strip()
+            enjeu_id = None
+        if enjeu_id is not None:
+            enjeu_source = (
+                EnjeuPeriode.query
+                .join(AnalysePersonnelle, AnalysePersonnelle.id == EnjeuPeriode.analyse_id)
+                .filter(
+                    EnjeuPeriode.id == enjeu_id,
+                    AnalysePersonnelle.utilisateur_id == utilisateur.id,
+                )
+                .first()
+            )
+    cycle_id_brut = (
+        request.form.get("cycle_lunaire_id", "").strip()
+        if request.method == "POST"
+        else request.args.get("cycle_id", "").strip()
+    )
+    if cycle_id_brut:
         try:
-            energie = int(energie_texte) if energie_texte else None
-            if energie is not None and not 1 <= energie <= 10:
+            cycle_id = int(cycle_id_brut)
+        except (TypeError, ValueError):
+            cycle_id = None
+        if cycle_id is not None and profil_astral:
+            cycle_source = CycleLunaire.query.filter_by(
+                id=cycle_id,
+                profil_id=profil_astral.id,
+            ).first()
+
+    if request.method == "POST":
+        date_observation_str = request.form.get("date_observation", "").strip()
+        niveau_energie_str = request.form.get("niveau_energie", "").strip()
+
+        try:
+            date_observation = datetime.strptime(
+                date_observation_str,
+                "%Y-%m-%d",
+            )
+            niveau_energie = (
+                int(niveau_energie_str)
+                if niveau_energie_str
+                else None
+            )
+            if niveau_energie is not None and not 1 <= niveau_energie <= 10:
                 raise ValueError
         except (TypeError, ValueError):
-            flash("Vérifie le niveau d’énergie indiqué.", "error")
+            flash("Vérifie la date et, si tu l’as indiqué, le niveau d’énergie.", "error")
         else:
-            champs = ("situation", "emotions", "reaction_automatique", "choix_conscient", "notes_libres")
-            valeurs = {champ: request.form.get(champ, "").strip() or None for champ in champs}
-            if any(valeur and len(valeur) > 10000 for valeur in valeurs.values()):
-                flash("Un texte dépasse 10 000 caractères.", "error")
-            elif not any(valeurs.values()) and energie is None:
-                flash("Écris quelques mots ou indique ton niveau d’énergie avant d’enregistrer.", "error")
-            else:
-                photo = None
-                if profil_astral and profil_astral.theme_natal:
-                    try:
-                        photo = _photo_transits_journal(
-                            json.loads(profil_astral.theme_natal), date_observation,
-                        )
-                    except Exception:
-                        current_app.logger.exception("Photographie des transits indisponible pour le journal")
-                if contact_source:
-                    photo = photo or {}
-                    photo["contact_journal"] = {
-                        **contact_source,
-                        "domaine": request.form.get("domaine") if request.form.get("domaine") in DOMAINES else None,
-                    }
-                entree = EntreeJournal(
-                    utilisateur_id=utilisateur.id,
-                    cycle_lunaire_id=cycle_source.id if cycle_source else None,
-                    enjeu_periode_id=enjeu_source.id if enjeu_source else None,
-                    date_observation=datetime.combine(date_observation, time.min),
-                    niveau_energie=energie,
-                    transits_actifs=json.dumps(photo, ensure_ascii=False, default=str) if photo else None,
-                    **valeurs,
+            try:
+                est_periode, date_fin_periode = _dates_periode_journal(request.form, date_observation)
+            except ValueError as erreur:
+                flash(str(erreur), "error")
+                return render_template(
+                    "espace_personnel/journal.html",
+                    entrees=EntreeJournal.query.filter_by(utilisateur_id=utilisateur.id)
+                    .order_by(EntreeJournal.date_observation.desc()).all(),
+                    date_du_jour=date_prefill, contact_source=contact_source,
+                    domaines_contact=DOMAINES, cycle_source=cycle_source,
+                    enjeu_source=enjeu_source,
+                    interpretation_cycle=json.loads(cycle_source.interpretation)
+                    if cycle_source and cycle_source.interpretation else None,
                 )
+            photo_transits = None
+            if profil_astral and profil_astral.theme_natal:
                 try:
-                    db.session.add(entree)
-                    db.session.commit()
+                    theme_natal = json.loads(profil_astral.theme_natal)
+                    photo_transits = json.dumps(
+                        _calculer_photo_transits(theme_natal, date_observation),
+                        ensure_ascii=False,
+                        default=str,
+                    )
                 except Exception:
-                    db.session.rollback()
-                    current_app.logger.exception("Observation du journal impossible à enregistrer")
-                    flash("Ton observation n’a pas pu être enregistrée.", "error")
-                else:
-                    return redirect(url_for("espace_personnel.fiche", entree_id=entree.id))
+                    photo_transits = None
+
+            if contact_source:
+                photo = json.loads(photo_transits) if photo_transits else {}
+                photo["contact_journal"] = {**contact_source,
+                    "domaine": request.form.get("domaine") if request.form.get("domaine") in DOMAINES else None,
+                    "rien_particulier": request.form.get("rien_particulier") == "oui"}
+                photo_transits = json.dumps(photo, ensure_ascii=False)
+
+            entree = EntreeJournal(
+                utilisateur_id=utilisateur.id,
+                cycle_lunaire_id=cycle_source.id if cycle_source else None,
+                enjeu_periode_id=enjeu_source.id if enjeu_source else None,
+                date_observation=date_observation,
+                est_periode=est_periode,
+                date_fin_periode=date_fin_periode,
+                niveau_energie=niveau_energie,
+                emotions=request.form.get("emotions", "").strip() or None,
+                situation=request.form.get("situation", "").strip() or None,
+                reaction_automatique=request.form.get(
+                    "reaction_automatique",
+                    "",
+                ).strip() or None,
+                choix_conscient=request.form.get(
+                    "choix_conscient",
+                    "",
+                ).strip() or None,
+                notes_libres=request.form.get("notes_libres", "").strip() or None,
+                transits_actifs=photo_transits,
+            )
+
+            try:
+                db.session.add(entree)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                flash("L’observation n’a pas pu être enregistrée.", "error")
+            else:
+                flash("Ton observation est enregistrée.", "success")
+                return redirect(url_for("espace_personnel.fiche", entree_id=entree.id))
+
     entrees = (
-        EntreeJournal.query.filter_by(utilisateur_id=utilisateur.id)
-        .order_by(EntreeJournal.date_observation.desc(), EntreeJournal.id.desc()).all()
+        EntreeJournal.query
+        .filter_by(utilisateur_id=utilisateur.id)
+        .order_by(EntreeJournal.date_observation.desc())
+        .all()
     )
     return render_template(
-        "espace_personnel/journal.html", entrees=entrees,
+        "espace_personnel/journal.html",
+        entrees=entrees,
         date_du_jour=date_prefill,
         contact_source=contact_source,
         domaines_contact=DOMAINES,
@@ -1075,7 +1226,8 @@ def journal():
         enjeu_source=enjeu_source,
         interpretation_cycle=(
             json.loads(cycle_source.interpretation)
-            if cycle_source and cycle_source.interpretation else None
+            if cycle_source and cycle_source.interpretation
+            else None
         ),
     )
 
@@ -1141,10 +1293,18 @@ def calendrier():
         message = "Les calculs astrologiques sont indisponibles pour ce mois. Ton journal reste accessible."
     entrees = EntreeJournal.query.filter_by(utilisateur_id=utilisateur.id).all()
     notes = [
-        {"date": entree.date_observation.date().isoformat(),
+        {"date": max(entree.date_observation.date(), debut.date()).isoformat(),
+         "debut_periode": entree.date_observation.date().isoformat(),
+         "fin_periode": entree.date_fin_periode.isoformat() if entree.date_fin_periode else None,
+         "est_periode": bool(entree.est_periode),
          "texte": entree.situation or entree.notes_libres or entree.emotions or "Observation enregistrée",
          "url": url_for("espace_personnel.fiche", entree_id=entree.id)}
-        for entree in entrees if debut.date() <= entree.date_observation.date() < fin.date()
+        for entree in entrees if (
+            entree.date_observation.date() < fin.date()
+            and (entree.date_observation.date() >= debut.date() or (
+                entree.est_periode and (entree.date_fin_periode is None or entree.date_fin_periode >= debut.date())
+            ))
+        )
     ]
     donnees.update({
         "jours": jours, "decalage": debut.weekday(), "fuseau": tzid,
@@ -1187,11 +1347,15 @@ def calendrier():
 
 @espace_personnel_bp.route("/revolutions-solaires")
 def revolutions_solaires():
-    utilisateur_id = session.get("utilisateur_espace_id")
-    utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
-    if utilisateur is None or utilisateur.actif != 1:
-        return redirect(url_for("espace_personnel.connexion"))
-    profil_astral = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
+    """Bibliothèque annuelle autonome des révolutions solaires du profil."""
+    from utils.revolution_solaire.themes_prioritaires import detecter_themes_prioritaires_rs
+    utilisateur = _utilisateur_espace_courant()
+    profil_astral = _profil_astral_courant()
+    rapports_par_cycle = {}
+    for rapport in AnalysePersonnelle.query.filter_by(
+        utilisateur_id=utilisateur.id, type_analyse="revolution_solaire",
+    ).order_by(AnalysePersonnelle.date_creation.desc(), AnalysePersonnelle.id.desc()).all():
+        rapports_par_cycle.setdefault(rapport.cycle_solaire_id, []).append(rapport)
     debut_filtre = request.args.get("debut", type=int)
     fin_filtre = request.args.get("fin", type=int)
     if (debut_filtre is None) != (fin_filtre is None) or (
@@ -1200,20 +1364,27 @@ def revolutions_solaires():
         abort(400)
     cycles = []
     if profil_astral:
-        enregistres = CycleSolaire.query.filter_by(profil_id=profil_astral.id).order_by(CycleSolaire.debut_cycle_utc.desc()).all()
-        for cycle in enregistres:
+        cycles_enregistres = (
+            CycleSolaire.query
+            .filter_by(profil_id=profil_astral.id)
+            .order_by(CycleSolaire.debut_cycle_utc.desc())
+            .all()
+        )
+        for cycle in cycles_enregistres:
             if debut_filtre is not None and not debut_filtre <= cycle.annee <= fin_filtre:
                 continue
             try:
                 theme = json.loads(cycle.theme_technique)
                 retour_local = datetime.fromisoformat(theme["retour_local"])
-                donnees = theme.get("donnees") or {}
-                themes = donnees.get("themes_prioritaires") or []
+                donnees = theme.get("donnees", {})
+                themes = donnees.get("themes_prioritaires") or detecter_themes_prioritaires_rs(donnees)
                 activations = []
                 for groupe in theme.get("activations_datees") or []:
                     contacts = groupe.get("contacts") or []
                     climat = contacts[0] if contacts else {}
-                    cible = {"Rahu": "Nœud Nord", "Ketu": "Nœud Sud"}.get(climat.get("cible"), climat.get("cible", ""))
+                    cible = {"Rahu": "Nœud Nord", "Ketu": "Nœud Sud"}.get(
+                        climat.get("cible"), climat.get("cible", "")
+                    )
                     activations.append({
                         "debut": datetime.fromisoformat(groupe["du"]).strftime("%d.%m.%Y"),
                         "fin": datetime.fromisoformat(groupe["au"]).strftime("%d.%m.%Y"),
@@ -1221,15 +1392,25 @@ def revolutions_solaires():
                         "climat": f"{climat.get('transit', '')} {climat.get('aspect', '')} {cible}".strip(),
                     })
             except (KeyError, TypeError, ValueError):
-                retour_local, donnees, themes, activations = None, {}, [], []
+                retour_local = None
+                donnees = {}
+                themes = []
+                activations = []
             cycles.append({
-                "themes": themes[:4], "activations": activations, "cycle": cycle,
-                "retour_local": retour_local, "ascendant": donnees.get("ascendant_rs"),
+                "themes": themes[:4],
+                "activations": activations,
+                "cycle": cycle,
+                "rapports": rapports_par_cycle.get(cycle.id, []),
+                "retour_local": retour_local,
+                "ascendant": donnees.get("ascendant_rs"),
                 "nombre_rl": CycleLunaire.query.filter_by(cycle_solaire_id=cycle.id).count(),
             })
     return render_template(
-        "espace_personnel/revolutions_solaires.html", profil=profil_astral,
-        cycles=cycles, debut_filtre=debut_filtre, fin_filtre=fin_filtre,
+        "espace_personnel/revolutions_solaires.html",
+        profil=profil_astral,
+        cycles=cycles,
+        debut_filtre=debut_filtre,
+        fin_filtre=fin_filtre,
     )
 
 
@@ -1534,116 +1715,76 @@ def mes_analyses():
     )
 
 
-@espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/suggestions/generer", methods=["POST"])
+@espace_personnel_bp.route(
+    "/mes-analyses/<int:analyse_id>/suggestions/generer",
+    methods=["POST"],
+)
 def generer_suggestions_mecanismes(analyse_id):
-    """Un clic explicite et un seul appel IA pour proposer des pistes vérifiables."""
-    from utils.analyse_sections import (
-        extraire_sections_analyse_karmique, extraire_sections_forces_defis,
-        extraire_sections_point_astral, extraire_sections_profil_amoureux,
-        extraire_sections_transits,
-    )
-    from utils.extraction_mecanismes_ia import generer_suggestions_avec_claude
-
-    utilisateur = _compte_connecte()
-    if utilisateur is None:
-        return redirect(url_for("espace_personnel.connexion"))
-    if not _verifier_formulaire_portail():
-        abort(400)
-    droits = acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first())
-    if not droits["journal_contextualise"]:
-        abort(403)
-    analyse = AnalysePersonnelle.query.filter_by(id=analyse_id, utilisateur_id=utilisateur.id).first_or_404()
-    extracteurs = {
-        "racines_familiales": extraire_sections_point_astral,
-        "profil_amoureux": extraire_sections_profil_amoureux,
-        "forces_defis": extraire_sections_forces_defis,
-        "analyse_karmique": extraire_sections_analyse_karmique,
-        "transits": extraire_sections_transits,
-    }
-    if analyse.type_analyse not in extracteurs:
-        abort(404)
+    analyse = _analyse_courante_ou_404(analyse_id)
+    if analyse.type_analyse == "revolution_solaire":
+        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
     if SuggestionMecanisme.query.filter_by(analyse_id=analyse.id).first():
-        flash("Les pistes de cette analyse ont déjà été extraites.", "error")
-        return redirect(url_for("espace_personnel.mes_analyses"))
+        flash("Des suggestions existent déjà pour cette analyse.", "error")
+        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
 
-    maintenant = datetime.now(timezone.utc)
-    reclamation = db.session.execute(
-        update(AnalysePersonnelle)
-        .where(
-            AnalysePersonnelle.id == analyse.id,
-            AnalysePersonnelle.utilisateur_id == utilisateur.id,
-            (AnalysePersonnelle.statut == "terminee")
-            | ((AnalysePersonnelle.statut == "extraction_en_cours")
-               & (AnalysePersonnelle.date_modification < maintenant - timedelta(minutes=20))),
-        )
-        .values(statut="extraction_en_cours", date_modification=maintenant)
+    sections = (
+        SectionAnalyse.query
+        .filter_by(analyse_id=analyse.id)
+        .order_by(SectionAnalyse.ordre.asc())
+        .all()
     )
-    if reclamation.rowcount != 1:
-        db.session.rollback()
-        flash("Une extraction est déjà en cours pour cette analyse.", "error")
-        return redirect(url_for("espace_personnel.mes_analyses"))
-    db.session.commit()
+    if not sections:
+        flash("Prépare d’abord ce rapport depuis sa page d’exploration, puis demande l’extraction.", "error")
+        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
+
+    sections_dict = [
+        {
+            "cle_section": section.cle_section,
+            "titre": section.titre,
+            "contenu": section.contenu,
+        }
+        for section in sections
+    ]
+    sections_par_cle = {section.cle_section: section for section in sections}
 
     try:
-        sections = SectionAnalyse.query.filter_by(analyse_id=analyse.id).order_by(SectionAnalyse.ordre).all()
-        nouvelles_sections = []
-        if not sections:
-            fichier = FichierAnalyse.query.filter_by(analyse_id=analyse.id).first()
-            if fichier is None:
-                raise ValueError("Le PDF de cette analyse est introuvable.")
-            nouvelles_sections = extracteurs[analyse.type_analyse](fichier.contenu)
-            if not nouvelles_sections:
-                raise ValueError("Aucune section reconnue dans ce PDF.")
-            sections_source = nouvelles_sections
-        else:
-            sections_source = [
-                {"cle_section": item.cle_section, "titre": item.titre, "contenu": item.contenu}
-                for item in sections
-            ]
-        if sum(len(item["contenu"]) for item in sections_source) > 100_000:
-            raise ValueError("Ce rapport est trop long pour une extraction fiable.")
         suggestions, usage = generer_suggestions_avec_claude(
-            sections_source, type_analyse=analyse.type_analyse,
+            sections_dict,
+            type_analyse=analyse.type_analyse,
         )
-        if SuggestionMecanisme.query.filter_by(analyse_id=analyse.id).first():
-            raise ValueError("Les pistes de cette analyse existent déjà.")
-        for section in nouvelles_sections:
-            db.session.add(SectionAnalyse(
-                analyse_id=analyse.id,
-                cle_section=section["cle_section"], titre=section["titre"],
-                contenu=section["contenu"], ordre=section["ordre"], source_format="pdf_importe",
-            ))
-        db.session.flush()
-        sections_par_cle = {
-            section.cle_section: section for section in
-            SectionAnalyse.query.filter_by(analyse_id=analyse.id).all()
-        }
         for suggestion in suggestions:
             section_source = sections_par_cle.get(suggestion.cle_section)
             db.session.add(SuggestionMecanisme(
                 analyse_id=analyse.id,
                 section_id=section_source.id if section_source else None,
-                titre=suggestion.titre, hypothese=suggestion.hypothese,
-                manifestations_possibles=json.dumps(suggestion.manifestations_possibles, ensure_ascii=False),
+                titre=suggestion.titre,
+                hypothese=suggestion.hypothese,
+                manifestations_possibles=json.dumps(
+                    suggestion.manifestations_possibles,
+                    ensure_ascii=False,
+                ),
                 extrait_source=suggestion.extrait_source,
-                references_astrologiques=json.dumps(suggestion.references_astrologiques, ensure_ascii=False),
-                priorite=suggestion.priorite, statut="proposee",
+                references_astrologiques=json.dumps(
+                    suggestion.references_astrologiques,
+                    ensure_ascii=False,
+                ),
+                priorite=suggestion.priorite,
+                statut="proposee",
             ))
-        analyse.statut = "terminee"
         db.session.commit()
-    except Exception as erreur:
+    except Exception:
         db.session.rollback()
-        current_app.logger.exception("Extraction des mécanismes impossible pour l’analyse %s", analyse_id)
-        db.session.execute(
-            update(AnalysePersonnelle)
-            .where(AnalysePersonnelle.id == analyse_id, AnalysePersonnelle.statut == "extraction_en_cours")
-            .values(statut="terminee")
-        )
-        db.session.commit()
-        flash(str(erreur) if isinstance(erreur, ValueError) else "L’extraction n’a pas abouti ; aucune piste n’a été enregistrée.", "error")
+        current_app.logger.exception("Échec de génération des suggestions de mécanismes")
+        flash("Les suggestions n’ont pas pu être générées ou validées.", "error")
     else:
-        flash(f"{len(suggestions)} pistes à examiner dans ton labo · {usage['tokens_total']} tokens utilisés.", "success")
-    return redirect(url_for("espace_personnel.laboratoire") + "#suggestions-ia")
+        flash(
+            f"{len(suggestions)} pistes proposées · {usage['tokens_total']} tokens utilisés.",
+            "success",
+        )
+    return redirect(
+        url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id)
+        + "#suggestions-ia"
+    )
 
 
 @espace_personnel_bp.route("/mes-analyses/importer", methods=["POST"])
@@ -1828,39 +1969,57 @@ def lire_analyse(analyse_id):
 
 @espace_personnel_bp.route("/journal/<int:entree_id>")
 def fiche(entree_id):
-    utilisateur_id = session.get("utilisateur_espace_id")
-    utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
-    if utilisateur is None or utilisateur.actif != 1:
-        return redirect(url_for("espace_personnel.connexion"))
-    entree = EntreeJournal.query.filter_by(id=entree_id, utilisateur_id=utilisateur.id).first_or_404()
-    photo = None
+    utilisateur = _utilisateur_espace_courant()
+    entree = _entree_courante_ou_404(entree_id)
+    photo_transits = None
     if entree.transits_actifs:
         try:
-            photo = json.loads(entree.transits_actifs)
+            photo_transits = json.loads(entree.transits_actifs)
         except (TypeError, ValueError):
-            pass
-    liaisons = ObservationMecanisme.query.filter_by(entree_journal_id=entree.id).all()
-    analyses = AnalysePersonnelle.query.filter_by(utilisateur_id=utilisateur.id).all()
-    analyse_ids = [analyse.id for analyse in analyses]
-    mecanismes = (
-        MecanismeExploration.query.filter(MecanismeExploration.analyse_id.in_(analyse_ids)).all()
-        if analyse_ids else []
+            photo_transits = None
+    liaisons = (
+        ObservationMecanisme.query
+        .filter_by(entree_journal_id=entree.id)
+        .order_by(ObservationMecanisme.date_creation.asc())
+        .all()
     )
-    mecanismes_par_id = {mecanisme.id: mecanisme for mecanisme in mecanismes}
-    deja_relies = {liaison.mecanisme_id for liaison in liaisons}
-    profil_astral = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
+    mecanismes_par_id = {
+        mecanisme.id: mecanisme
+        for mecanisme in (
+            MecanismeExploration.query
+            .join(AnalysePersonnelle, AnalysePersonnelle.id == MecanismeExploration.analyse_id)
+            .filter(AnalysePersonnelle.utilisateur_id == utilisateur.id)
+            .all()
+        )
+    }
+    ids_deja_relies = {liaison.mecanisme_id for liaison in liaisons}
+    liaisons_labo = [
+        {
+            "observation": liaison,
+            "mecanisme": mecanismes_par_id.get(liaison.mecanisme_id),
+        }
+        for liaison in liaisons
+    ]
+    mecanismes_disponibles = [
+        mecanisme
+        for mecanisme in mecanismes_par_id.values()
+        if mecanisme.id not in ids_deja_relies
+    ]
     cycle_source = (
-        CycleLunaire.query.filter_by(id=entree.cycle_lunaire_id, profil_id=profil_astral.id).first()
-        if entree.cycle_lunaire_id and profil_astral else None
+        CycleLunaire.query.join(ProfilAstral, ProfilAstral.id == CycleLunaire.profil_id)
+        .filter(CycleLunaire.id == entree.cycle_lunaire_id, ProfilAstral.utilisateur_id == utilisateur.id)
+        .first()
+        if entree.cycle_lunaire_id
+        else None
     )
-    if not session.get("espace_profil_csrf"):
-        session["espace_profil_csrf"] = secrets.token_urlsafe(32)
     return render_template(
-        "espace_personnel/fiche.html", entree=entree,
-        photo_transits=photo, transits_visibles=_transits_visibles_journal(photo),
-        liaisons_labo=[{"observation": liaison, "mecanisme": mecanismes_par_id.get(liaison.mecanisme_id)} for liaison in liaisons],
-        mecanismes_disponibles=[m for m in mecanismes if m.id not in deja_relies],
-        cycle_source=cycle_source, espace_csrf=_jeton_formulaire_portail(),
+        "espace_personnel/fiche.html",
+        entree=entree,
+        photo_transits=photo_transits,
+        transits_visibles=_selectionner_transits_visibles(photo_transits),
+        liaisons_labo=liaisons_labo,
+        mecanismes_disponibles=mecanismes_disponibles,
+        cycle_source=cycle_source,
     )
 
 
@@ -1899,45 +2058,64 @@ def relier_entree_mecanisme(entree_id):
 
 @espace_personnel_bp.route("/journal/<int:entree_id>/modifier", methods=["GET", "POST"])
 def modifier(entree_id):
-    utilisateur_id = session.get("utilisateur_espace_id")
-    utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
-    if utilisateur is None or utilisateur.actif != 1:
-        return redirect(url_for("espace_personnel.connexion"))
-    entree = EntreeJournal.query.filter_by(id=entree_id, utilisateur_id=utilisateur.id).first_or_404()
-    jeton = session.get("espace_profil_csrf")
-    if not jeton:
-        jeton = secrets.token_urlsafe(32)
-        session["espace_profil_csrf"] = jeton
-    if request.method == "POST":
-        if not hmac.compare_digest(request.form.get("profil_csrf", ""), jeton):
-            abort(400)
-        try:
-            jour = date.fromisoformat(request.form.get("date_observation", ""))
-            energie_texte = request.form.get("niveau_energie", "").strip()
-            energie = int(energie_texte) if energie_texte else None
-            if not 1900 <= jour.year <= 2100 or (energie is not None and not 1 <= energie <= 10):
-                raise ValueError
-        except (TypeError, ValueError):
-            flash("Vérifie la date et le niveau d’énergie.", "error")
-        else:
-            champs = ("situation", "emotions", "reaction_automatique", "choix_conscient", "notes_libres")
-            valeurs = {champ: request.form.get(champ, "").strip() or None for champ in champs}
-            if any(valeur and len(valeur) > 10000 for valeur in valeurs.values()):
-                flash("Un texte dépasse 10 000 caractères.", "error")
-            else:
-                entree.date_observation = datetime.combine(jour, time.min)
-                entree.niveau_energie = energie
-                for champ, valeur in valeurs.items():
-                    setattr(entree, champ, valeur)
-                try:
-                    db.session.commit()
-                except Exception:
-                    db.session.rollback()
-                    current_app.logger.exception("Observation du journal impossible à modifier")
-                    flash("La modification n’a pas pu être enregistrée.", "error")
-                else:
-                    return redirect(url_for("espace_personnel.fiche", entree_id=entree.id))
-    return render_template("espace_personnel/modifier.html", entree=entree)
+    entree = _entree_courante_ou_404(entree_id)
+
+    if request.method == "GET":
+        return render_template(
+            "espace_personnel/modifier.html",
+            entree=entree,
+        )
+
+    date_observation_str = request.form.get("date_observation", "").strip()
+    niveau_energie_str = request.form.get("niveau_energie", "").strip()
+
+    try:
+        date_observation = datetime.strptime(
+            date_observation_str,
+            "%Y-%m-%d",
+        )
+        niveau_energie = (
+            int(niveau_energie_str)
+            if niveau_energie_str
+            else None
+        )
+        if niveau_energie is not None and not 1 <= niveau_energie <= 10:
+            raise ValueError
+    except (TypeError, ValueError):
+        flash("Vérifie la date et, si tu l’as indiqué, le niveau d’énergie.", "error")
+        return redirect(url_for("espace_personnel.fiche", entree_id=entree.id))
+
+    try:
+        est_periode, date_fin_periode = _dates_periode_journal(request.form, date_observation)
+    except ValueError as erreur:
+        flash(str(erreur), "error")
+        return render_template("espace_personnel/modifier.html", entree=entree)
+
+    entree.date_observation = date_observation
+    entree.est_periode = est_periode
+    entree.date_fin_periode = date_fin_periode
+    entree.niveau_energie = niveau_energie
+    entree.emotions = request.form.get("emotions", "").strip() or None
+    entree.situation = request.form.get("situation", "").strip() or None
+    entree.reaction_automatique = request.form.get(
+        "reaction_automatique",
+        "",
+    ).strip() or None
+    entree.choix_conscient = request.form.get(
+        "choix_conscient",
+        "",
+    ).strip() or None
+    entree.notes_libres = request.form.get("notes_libres", "").strip() or None
+
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        flash("Les modifications n’ont pas pu être enregistrées.", "error")
+    else:
+        flash("Ton observation a été mise à jour.", "success")
+
+    return redirect(url_for("espace_personnel.fiche", entree_id=entree.id))
 
 
 @espace_personnel_bp.route("/journal/<int:entree_id>/supprimer", methods=["POST"])
@@ -2126,59 +2304,42 @@ def importer_profil_labo():
 
 @espace_personnel_bp.route("/emails-cycle")
 def emails_cycle():
-    utilisateur_id = session.get("utilisateur_espace_id")
-    utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
-    if utilisateur is None or utilisateur.actif != 1:
-        return redirect(url_for("espace_personnel.connexion"))
-    profil_astral = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
-    droits = acces_abonnement(
-        AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first()
-    )
-    emails = (
-        EmailCycleAbonnement.query.filter_by(profil_id=profil_astral.id)
-        .order_by(EmailCycleAbonnement.date_creation.desc()).all()
-        if profil_astral else []
-    )
-    if not session.get("espace_profil_csrf"):
-        session["espace_profil_csrf"] = secrets.token_urlsafe(32)
-    _jeton_formulaire_portail()
+    profil = _profil_astral_courant()
+    emails = []
+    if profil:
+        emails = (
+            EmailCycleAbonnement.query
+            .filter_by(profil_id=profil.id)
+            .order_by(EmailCycleAbonnement.date_modification.desc())
+            .all()
+        )
     return render_template(
-        "espace_personnel/emails_cycle.html", utilisateur=utilisateur,
-        profil=profil_astral, droits=droits, emails=emails,
-        peut_importer=bool(profil_astral and import_profil_autorise(utilisateur)),
+        "espace_personnel/emails_cycle.html", profil=profil, emails=emails,
+        droits=droits_email(profil) if profil else {"cycle_lunaire": False},
+        mois_courant=datetime.now(ZoneInfo(profil.fuseau_cycles or "Europe/Paris") if profil else ZoneInfo("Europe/Paris")).strftime("%Y-%m"),
     )
 
 
 @espace_personnel_bp.route("/emails-cycle/preparer", methods=["POST"])
 def preparer_email_cycle():
-    """Prépare le contrat factuel du prochain mail sans appel à Claude."""
-    from utils.brouillon_email_cycle import preparer_brouillon_boussole
-
-    utilisateur = _compte_connecte()
-    if utilisateur is None:
-        return redirect(url_for("espace_personnel.connexion"))
-    if not _verifier_formulaire_portail():
-        abort(400)
-    profil = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
+    profil = _profil_astral_courant()
     if profil is None:
         abort(404)
-    droits = acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first())
-    if not droits["cycle_lunaire"]:
-        abort(403)
     try:
+        if droits_email(profil).get("emails_par_mois") == 2:
+            mois = request.form.get("mois") or datetime.now(ZoneInfo(profil.fuseau_cycles or "Europe/Paris")).strftime("%Y-%m")
+            preparer_mails_mois(profil, mois)
+            db.session.commit()
+            flash(f"Les deux créneaux du {mois} sont prêts : le 1er et le 15 à 9 h, heure de ta ville de cycles. Aucun appel IA ni envoi.", "success")
+            return redirect(url_for("espace_personnel.emails_cycle"))
         email, _ = preparer_brouillon_boussole(profil)
         db.session.commit()
-    except (KeyError, TypeError, ValueError, RuntimeError) as exc:
+        flash("Le contrat factuel du prochain email est prêt. Aucun appel Claude n’a été fait.", "success")
+        return redirect(url_for("espace_personnel.fiche_email_cycle", email_id=email.id))
+    except (TypeError, ValueError, RuntimeError) as exc:
         db.session.rollback()
         flash(str(exc), "error")
-        return redirect(url_for("espace_personnel.emails_cycle"))
-    except Exception:
-        db.session.rollback()
-        current_app.logger.exception("Préparation du mail de cycle impossible")
-        flash("Le prochain mail n’a pas pu être préparé.", "error")
-        return redirect(url_for("espace_personnel.emails_cycle"))
-    flash("Le contrat factuel du prochain mail est prêt. Aucun appel à Claude n’a été fait.", "success")
-    return redirect(url_for("espace_personnel.fiche_email_cycle", email_id=email.id))
+    return redirect(url_for("espace_personnel.emails_cycle"))
 
 
 @espace_personnel_bp.route("/emails-cycle/importer", methods=["POST"])
@@ -2296,99 +2457,41 @@ def importer_brouillon_cycle():
 
 @espace_personnel_bp.route("/emails-cycle/<int:email_id>")
 def fiche_email_cycle(email_id):
-    from utils.rendu_brouillon_cycle import rendu_brouillon_cycle
-
-    utilisateur_id = session.get("utilisateur_espace_id")
-    utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
-    if utilisateur is None or utilisateur.actif != 1:
-        return redirect(url_for("espace_personnel.connexion"))
-    profil_astral = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
-    if profil_astral is None:
-        abort(404)
-    email = EmailCycleAbonnement.query.filter_by(id=email_id, profil_id=profil_astral.id).first_or_404()
-    droits = acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first())
-    if not session.get("espace_profil_csrf"):
-        session["espace_profil_csrf"] = secrets.token_urlsafe(32)
-    _jeton_formulaire_portail()
-    try:
-        preparation = json.loads(email.declencheur_factuel or "{}")
-    except (TypeError, ValueError):
-        preparation = {}
-    from utils.brouillon_email_cycle import generation_autorisee
-    peut_generer = (
-        email.statut == "prepare" and not email.contenu_texte
-        and bool(preparation.get("prompt"))
-        and generation_autorisee(droits, preparation)
-    )
+    email = _email_cycle_courant_ou_404(email_id)
+    preparation = _charger_preparation_email(email)
+    cycle = db.session.get(CycleLunaire, email.cycle_lunaire_id) if email.cycle_lunaire_id else None
+    if cycle and not (email.contenu_texte or email.contenu_html):
+        if preparation.get("version_contrat") == VERSION_CONTRAT:
+            preparation = actualiser_mail_quinzaine(_profil_astral_courant(), preparation)
+        elif not str(preparation.get("version_contrat", "")).startswith("quinzaine_"):
+            preparation = actualiser_enjeux_email(_profil_astral_courant(), preparation, cycle.debut_cycle_utc.replace(tzinfo=timezone.utc))
     return render_template(
-        "espace_personnel/fiche_email_cycle.html", utilisateur=utilisateur,
-        email=email, droits=droits, peut_generer=peut_generer,
-        contenu_apercu=rendu_brouillon_cycle(email.contenu_texte),
+        "espace_personnel/fiche_email_cycle.html",
+        email=email,
+        cycle=cycle,
+        preparation=preparation,
+        peut_generer=(generation_autorisee(droits_email(_profil_astral_courant()), preparation)
+                      and (droits_email(_profil_astral_courant()).get("emails_par_mois") != 2
+                           or preparation.get("version_contrat") == VERSION_CONTRAT)),
+        journaux_mail=journaux_mail(email.id),
     )
 
 
 @espace_personnel_bp.route("/emails-cycle/<int:email_id>/generer", methods=["POST"])
 def generer_brouillon_email_cycle(email_id):
-    """Un clic explicite, un seul appel Claude, brouillon enregistré sans envoi."""
-    from utils.brouillon_email_cycle import generation_autorisee
-    from utils.email_cycle_abonnement import convertir_email_texte_en_html, generer_texte_email_cycle
-
-    utilisateur = _compte_connecte()
-    if utilisateur is None:
-        return redirect(url_for("espace_personnel.connexion"))
-    if not _verifier_formulaire_portail():
-        abort(400)
-    profil = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
-    if profil is None:
-        abort(404)
-    email = EmailCycleAbonnement.query.filter_by(id=email_id, profil_id=profil.id).first_or_404()
-    droits = acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first())
-    if not droits["cycle_lunaire"]:
-        abort(403)
+    """Produit un brouillon Claude, sans envoi et sans validation automatique."""
+    email = _email_cycle_courant_ou_404(email_id)
     try:
-        preparation = json.loads(email.declencheur_factuel or "{}")
-    except (TypeError, ValueError):
-        preparation = {}
-    prompt = preparation.get("prompt")
-    if not generation_autorisee(droits, preparation) or not isinstance(prompt, str) or not prompt.strip():
-        abort(403)
-    if email.statut != "prepare" or email.contenu_texte:
-        flash("Ce mail a déjà été généré ou tenté. Aucun nouvel appel à Claude n’a été lancé.", "error")
-        return redirect(url_for("espace_personnel.fiche_email_cycle", email_id=email.id))
-
-    reclamation = db.session.execute(
-        update(EmailCycleAbonnement)
-        .where(EmailCycleAbonnement.id == email.id, EmailCycleAbonnement.statut == "prepare")
-        .values(statut="generation_en_cours")
-    )
-    if reclamation.rowcount != 1:
+        generer_mail_enregistre(email, _profil_astral_courant())
+    except ValueError as erreur:
         db.session.rollback()
-        flash("Une génération est déjà en cours pour ce mail.", "error")
-        return redirect(url_for("espace_personnel.fiche_email_cycle", email_id=email.id))
-    db.session.commit()
-    try:
-        texte = generer_texte_email_cycle(prompt)
-        objet = next((
-            correspondance.group(1).strip()[:250]
-            for ligne in texte.splitlines()
-            if (correspondance := re.match(r"^OBJET\s*:\s*(.+)$", ligne.strip(), re.IGNORECASE))
-        ), "")
-        if not objet:
-            raise ValueError("Le brouillon n’a pas d’objet valide.")
-        email.objet = objet
-        email.contenu_texte = texte
-        email.contenu_html = convertir_email_texte_en_html(texte)
-        email.statut = "brouillon"
-        email.date_generation = datetime.now(timezone.utc)
-        db.session.commit()
-        flash("Le brouillon est prêt à être relu. Aucun mail n’a été envoyé.", "success")
+        flash(str(erreur), "error")
     except Exception:
         db.session.rollback()
-        email = EmailCycleAbonnement.query.filter_by(id=email_id, profil_id=profil.id).first()
-        email.statut = "generation_echec"
-        db.session.commit()
-        current_app.logger.exception("Génération du mail de cycle impossible")
-        flash("Le brouillon n’a pas abouti. Aucun nouvel appel à Claude ne sera lancé automatiquement.", "error")
+        current_app.logger.exception("Échec de conservation du brouillon email de cycle")
+        flash("Le brouillon n’a pas pu être conservé. Consulte les journaux avant toute autre tentative.", "error")
+    else:
+        flash("Brouillon conservé : à relire, aucun envoi déclenché.", "success")
     return redirect(url_for("espace_personnel.fiche_email_cycle", email_id=email.id))
 
 
@@ -2445,9 +2548,1011 @@ def envoyer_brouillon_cycle(email_id):
     return redirect(url_for("espace_personnel.fiche_email_cycle", email_id=email_id))
 
 
-@espace_personnel_bp.route("/deconnexion", methods=["POST"])
-def deconnexion():
-    if not _verifier_formulaire_portail():
+
+
+
+def _acces_dev_sur_machine_locale():
+    """Le sélecteur de comptes DEV ne doit jamais être accessible sur Railway."""
+    return (
+        request.remote_addr in {"127.0.0.1", "::1"}
+        and urlsplit(request.host_url).hostname in {"localhost", "127.0.0.1", "::1"}
+        and not any(os.getenv(cle) for cle in (
+            "RAILWAY_ENVIRONMENT_ID", "RAILWAY_PUBLIC_DOMAIN", "RAILWAY_PROJECT_ID",
+            "RAILWAY_SERVICE_ID", "RAILWAY_ENVIRONMENT_NAME",
+        ))
+    )
+
+
+def _route_outils_mails():
+    chemin = request.path
+    return chemin == "/mon-espace/emails-cycle" or chemin.startswith("/mon-espace/emails-cycle/")
+
+
+@espace_personnel_bp.before_request
+def exiger_connexion_espace():
+    """Protège toutes les pages privées sans recourir au sélecteur DEV."""
+    if _route_outils_mails():
+        if not administratrice_connectee():
+            abort(404)
+        if request.method == "POST":
+            verifier_csrf_espace()
+    if '/extractions-rs/' in request.path and not administratrice_connectee():
+        abort(404)
+    if request.endpoint in ROUTES_PUBLIQUES_AUTH:
+        return None
+    utilisateur = utilisateur_connecte()
+    if utilisateur is None:
+        session.pop("utilisateur_espace_id", None)
+        return redirect(url_for("espace_personnel.connexion", suivant=request.full_path))
+    _jeton_formulaire_portail()
+    if not session.get('espace_profil_csrf'):
+        session['espace_profil_csrf'] = secrets.token_urlsafe(32)
+    if request.method == 'POST' and request.endpoint not in ROUTES_AUTH and not _route_outils_mails():
+        if request.form.get('csrf_token'):
+            verifier_csrf_espace()
+        elif request.form.get('espace_csrf'):
+            if not _verifier_formulaire_portail():
+                abort(400)
+        elif request.form.get('profil_csrf'):
+            if not hmac.compare_digest(request.form.get('profil_csrf', ''), session.get('espace_profil_csrf', '')):
+                abort(400)
+        else:
+            abort(400, 'Recharge la page avant de réessayer.')
+    return None
+
+
+@espace_personnel_bp.app_context_processor
+def contexte_auth_espace():
+    return {"csrf_espace": jeton_csrf_espace, "avatars_espace": AVATARS_ESPACE,
+            "auth_turnstile_actif": True, "outils_mails_admin": administratrice_connectee(), "utilisateur_espace": utilisateur_connecte()}
+
+
+@espace_personnel_bp.after_request
+def proteger_pages_auth_espace(reponse):
+    reponse.headers["Cache-Control"] = "no-store, private"
+    reponse.headers["X-Robots-Tag"] = "noindex, nofollow"
+    if _route_outils_mails():
+        reponse.headers["Cache-Control"] = "no-store, private"
+        reponse.headers["X-Robots-Tag"] = "noindex, nofollow"
+    if request.endpoint in ROUTES_AUTH:
+        reponse.headers["Cache-Control"] = "no-store, private"
+        reponse.headers["Referrer-Policy"] = "no-referrer"
+        reponse.headers["X-Robots-Tag"] = "noindex, nofollow"
+        reponse.headers["X-Frame-Options"] = "DENY"
+        reponse.headers["Content-Security-Policy"] = "frame-ancestors 'none'; form-action 'self'; base-uri 'self'"
+    return reponse
+
+
+def _utilisateur_espace_courant():
+    utilisateur = utilisateur_connecte()
+    if utilisateur is None:
+        abort(403)
+    return utilisateur
+
+
+def _profil_astral_courant():
+    return ProfilAstral.query.filter_by(
+        utilisateur_id=_utilisateur_espace_courant().id
+    ).first()
+
+
+def _analyse_courante_ou_404(analyse_id):
+    return AnalysePersonnelle.query.filter_by(
+        id=analyse_id,
+        utilisateur_id=_utilisateur_espace_courant().id,
+    ).first_or_404()
+
+
+def _mecanisme_courant_ou_404(mecanisme_id):
+    return (
+        MecanismeExploration.query
+        .join(AnalysePersonnelle, AnalysePersonnelle.id == MecanismeExploration.analyse_id)
+        .filter(
+            MecanismeExploration.id == mecanisme_id,
+            AnalysePersonnelle.utilisateur_id == _utilisateur_espace_courant().id,
+        )
+        .first_or_404()
+    )
+
+
+def _suggestion_courante_ou_404(suggestion_id):
+    return (
+        SuggestionMecanisme.query
+        .join(AnalysePersonnelle, AnalysePersonnelle.id == SuggestionMecanisme.analyse_id)
+        .filter(
+            SuggestionMecanisme.id == suggestion_id,
+            AnalysePersonnelle.utilisateur_id == _utilisateur_espace_courant().id,
+        )
+        .first_or_404()
+    )
+
+
+def _entree_courante_ou_404(entree_id):
+    return EntreeJournal.query.filter_by(
+        id=entree_id,
+        utilisateur_id=_utilisateur_espace_courant().id,
+    ).first_or_404()
+
+
+def _observation_courante_ou_404(observation_id):
+    return (
+        ObservationMecanisme.query
+        .join(MecanismeExploration, MecanismeExploration.id == ObservationMecanisme.mecanisme_id)
+        .join(AnalysePersonnelle, AnalysePersonnelle.id == MecanismeExploration.analyse_id)
+        .filter(
+            ObservationMecanisme.id == observation_id,
+            AnalysePersonnelle.utilisateur_id == _utilisateur_espace_courant().id,
+        )
+        .first_or_404()
+    )
+
+
+def _dossier_rapports_importes():
+    dossier = os.path.join(racine_privee_espace(), "analyses_uploads")
+    os.makedirs(dossier, exist_ok=True)
+    return dossier
+
+
+def _normaliser_texte_pdf(texte):
+    texte = unicodedata.normalize("NFKD", texte or "")
+    texte = "".join(caractere for caractere in texte if not unicodedata.combining(caractere))
+    texte = texte.casefold().replace("’", " ").replace("'", " ")
+    texte = re.sub(r"[^a-z0-9]+", " ", texte)
+    return " ".join(texte.split())
+
+
+def _verifier_pdf_fous_astro(chemin, type_analyse):
+    """Vérifie la signature et le titre du rapport avant son archivage privé."""
+    with pdfplumber.open(chemin) as document:
+        texte = " ".join((page.extract_text() or "") for page in document.pages[:3])
+    texte = _normaliser_texte_pdf(texte)
+    titres_attendus = TITRES_PDF_PAR_ANALYSE.get(type_analyse, ())
+    if "les fous d astro" not in texte or not any(titre in texte for titre in titres_attendus):
+        raise ValueError("Ce PDF ne correspond pas à l’analyse Les Fous d’Astro choisie.")
+
+
+def _calculer_positions_journal(date_calcul):
+    jour_julien = swe.julday(
+        date_calcul.year,
+        date_calcul.month,
+        date_calcul.day,
+        date_calcul.hour
+        + date_calcul.minute / 60
+        + date_calcul.second / 3600,
+    )
+    positions = {}
+    for nom_planete in PLANETES_TRANSIT_JOURNAL:
+        coordonnees = swe.calc_ut(
+            jour_julien,
+            PLANETES_SWISSEPH[nom_planete],
+        )[0]
+        longitude = coordonnees[0] % 360
+        positions[nom_planete] = {
+            **longitude_to_signe(longitude),
+            "retrograde": coordonnees[3] < 0,
+            "vitesse": round(coordonnees[3], 6),
+        }
+    return {
+        "date_transit": date_calcul.isoformat(),
+        "positions": positions,
+    }
+
+
+def _calculer_photo_transits(theme, date_observation):
+    """Photographie astrologique brute, sans LLM ni génération de rapport."""
+    maintenant = datetime.now()
+    date_calcul = (
+        maintenant
+        if date_observation.date() == maintenant.date()
+        else date_observation.replace(hour=12, minute=0, second=0)
+    )
+    donnees_positions = _calculer_positions_journal(date_calcul)
+    maitre_data = theme.get("maitre_ascendant")
+    maitre_ascendant = (
+        maitre_data.get("nom")
+        if isinstance(maitre_data, dict)
+        else maitre_data
+    )
+    aspects = detecter_aspects(
+        donnees_positions["positions"],
+        theme.get("planetes", {}),
+        extraire_cuspides(theme),
+        theme.get("house_rulers_map", {}),
+        maitre_ascendant=maitre_ascendant,
+        angles_deg=theme.get("angles_deg", {}),
+    )
+    transits_retenus = sorted(
+        aspects,
+        key=lambda transit: (-transit.importance, transit.orbe),
+    )
+    return {
+        "date_calcul": donnees_positions["date_transit"],
+        "positions": donnees_positions["positions"],
+        "transits": [asdict(transit) for transit in transits_retenus],
+    }
+
+
+def _selectionner_transits_visibles(photo_transits):
+    transits = photo_transits.get("transits", []) if photo_transits else []
+    planetes_lentes = {"Jupiter", "Saturne", "Uranus", "Neptune", "Pluton"}
+
+    groupes = {}
+    for transit in transits:
+        planete = transit.get("planete_transit", "Transit")
+        groupes.setdefault(planete, []).append(transit)
+
+    groupes_tries = []
+    for planete, aspects in groupes.items():
+        aspects_tries_bruts = sorted(
+            aspects,
+            key=lambda transit: (-transit.get("importance", 0), transit.get("orbe", 999)),
+        )
+        aspects_tries = []
+        for transit in aspects_tries_bruts:
+            contexte = transit.get("contexte") or {}
+            aspect_enrichi = dict(transit)
+            maison_cible = contexte.get("maison_natale_planete")
+            maisons_dirigees_cible = contexte.get("maisons_gouvernees_natale") or []
+            aspect_enrichi["maison_cible"] = maison_cible
+            aspect_enrichi["theme_maison_cible"] = THEMES_MAISONS.get(maison_cible)
+            aspect_enrichi["maisons_dirigees_cible"] = [
+                {
+                    "maison": maison,
+                    "theme": THEMES_MAISONS.get(maison, "domaine à explorer"),
+                }
+                for maison in maisons_dirigees_cible
+                if isinstance(maison, int)
+            ]
+            aspects_tries.append(aspect_enrichi)
+
+        contexte_planete = (aspects_tries[0].get("contexte") or {}) if aspects_tries else {}
+        maison_transitee = contexte_planete.get("maison_transit")
+        maison_natale_planete = contexte_planete.get("maison_natale_transit")
+        maisons_dirigees_planete = contexte_planete.get("maisons_gouvernees_transit") or []
+
+        lecture = LECTURES_PLANETAIRES.get(planete, {})
+        groupes_tries.append({
+            "planete": planete,
+            "aspects": aspects_tries,
+            "intensite_max": max(
+                (transit.get("importance", 0) for transit in aspects_tries),
+                default=0,
+            ),
+            "orbe_min": min(
+                (transit.get("orbe", 999) for transit in aspects_tries),
+                default=999,
+            ),
+            "dynamique": lecture.get("dynamique"),
+            "question": lecture.get("question"),
+            "maison_transitee": maison_transitee,
+            "theme_maison_transitee": THEMES_MAISONS.get(maison_transitee),
+            "maison_natale_planete": maison_natale_planete,
+            "theme_maison_natale_planete": THEMES_MAISONS.get(maison_natale_planete),
+            "maisons_dirigees_planete": [
+                {
+                    "maison": maison,
+                    "theme": THEMES_MAISONS.get(maison, "domaine à explorer"),
+                }
+                for maison in maisons_dirigees_planete
+                if isinstance(maison, int)
+            ],
+        })
+
+    groupes_tries.sort(
+        key=lambda groupe: (-groupe["intensite_max"], groupe["orbe_min"]),
+    )
+
+    return {
+        "climat_fond": [
+            groupe
+            for groupe in groupes_tries
+            if groupe["planete"] in planetes_lentes
+        ],
+        "declencheurs": [
+            groupe
+            for groupe in groupes_tries
+            if groupe["planete"] not in planetes_lentes
+        ],
+        "total_brut": len(transits),
+    }
+
+
+def _energies_du_moment(profil_astral):
+    if not profil_astral or not profil_astral.theme_natal:
+        return None, {"climat_fond": [], "declencheurs": [], "total_brut": 0}
+
+    try:
+        theme_natal = json.loads(profil_astral.theme_natal)
+        photo_complete = _calculer_photo_transits(theme_natal, datetime.now())
+    except Exception:
+        return None, {"climat_fond": [], "declencheurs": [], "total_brut": 0}
+
+    photo_importante = dict(photo_complete)
+    photo_importante["transits"] = [
+        transit
+        for transit in photo_complete.get("transits", [])
+        if transit.get("importance", 0) >= IMPORTANCE_TRANSIT_DU_MOMENT
+    ]
+    return photo_importante, _selectionner_transits_visibles(photo_importante)
+
+
+@espace_personnel_bp.route("/profil/avatar", methods=["POST"])
+def modifier_avatar():
+    """Change uniquement le personnage du membre connecté."""
+    verifier_csrf_espace()
+    utilisateur = _utilisateur_espace_courant()
+    personnage = request.form.get("avatar_personnage")
+    if personnage is None or (personnage and personnage not in AVATARS_ESPACE):
+        abort(400, "Choisis un personnage proposé ou Sans avatar.")
+    utilisateur.avatar_personnage = personnage or None
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        flash("Ton avatar n’a pas pu être enregistré. Réessaie après avoir rechargé la page.", "error")
+    else:
+        flash("Ton avatar est enregistré.", "success")
+    return redirect(url_for("espace_personnel.profil") + "#mon-avatar")
+
+
+@espace_personnel_bp.route("/profil/journal-mails", methods=["POST"])
+def modifier_autorisation_journal_mails():
+    """Enregistre seulement le choix du membre connecté, sans recalcul ni IA."""
+    verifier_csrf_espace()
+    utilisateur = _utilisateur_espace_courant()
+    valeur = request.form.get("autoriser_journal_mails")
+    if valeur not in {"oui", "non"}:
+        abort(400, "Choisis si tu autorises ou non l'utilisation de ton journal dans les mails.")
+    utilisateur.autoriser_journal_mails = valeur == "oui"
+    utilisateur.journal_mails_choix_le = datetime.now(timezone.utc)
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        flash("Ton choix n'a pas pu être enregistré. Réessaie après avoir rechargé la page.", "error")
+    else:
+        flash("Ton choix est enregistré pour les prochaines générations de mails.", "success")
+    return redirect(url_for("espace_personnel.profil") + "#journal-mails")
+
+
+@espace_personnel_bp.route("/energies-du-moment")
+def energies_du_moment():
+    profil_astral = _profil_astral_courant()
+    photo_transits, transits_visibles = _energies_du_moment(profil_astral)
+    return render_template(
+        "espace_personnel/energies_du_moment.html",
+        profil=profil_astral,
+        photo_transits=photo_transits,
+        transits_visibles=transits_visibles,
+        nombre_transits=transits_visibles.get("total_brut", 0),
+    )
+
+
+def _email_cycle_courant_ou_404(email_id):
+    profil = _profil_astral_courant()
+    if profil is None:
+        abort(404)
+    return EmailCycleAbonnement.query.filter_by(
+        id=email_id,
+        profil_id=profil.id,
+    ).first_or_404()
+
+
+def _charger_preparation_email(email):
+    try:
+        donnees = json.loads(email.declencheur_factuel or "{}")
+    except (TypeError, json.JSONDecodeError):
+        donnees = {}
+    return donnees if isinstance(donnees, dict) else {}
+
+
+@espace_personnel_bp.route("/emails-cycle/<int:email_id>/prompt")
+def lire_prompt_mail_cycle(email_id):
+    email = _email_cycle_courant_ou_404(email_id)
+    preparation = _charger_preparation_email(email)
+    if not (email.contenu_texte or email.contenu_html) and preparation.get("version_contrat") == VERSION_CONTRAT:
+        preparation = actualiser_mail_quinzaine(_profil_astral_courant(), preparation)
+    return Response(preparation.get("prompt", "Prompt absent"), mimetype="text/plain", headers={"Cache-Control": "private, no-store"})
+
+
+@espace_personnel_bp.route("/emails-cycle/<int:email_id>/journaux/<execution>/<nom>")
+def lire_journal_mail_cycle(email_id, execution, nom):
+    email = _email_cycle_courant_ou_404(email_id)
+    if nom not in FICHIERS_MAIL or not re.fullmatch(r"\d{8}T\d{6}-[a-f0-9]{12}", execution):
+        abort(404)
+    return send_from_directory(str(dossier_journaux_mail() / str(email.id) / execution), nom,
+                               mimetype="text/plain", as_attachment=False)
+
+
+def _dates_periode_journal(formulaire, date_debut):
+    """Une période sans fin correspond explicitement à « toujours en cours »."""
+    type_entree = formulaire.get("type_entree", "journee")
+    if type_entree not in {"journee", "periode"}:
+        raise ValueError("Choisis une journée ou une période.")
+    if type_entree == "journee":
+        return False, None
+    if formulaire.get("toujours_en_cours") == "oui":
+        return True, None
+    try:
+        date_fin = datetime.strptime(formulaire.get("date_fin_periode", ""), "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        raise ValueError("Renseigne la date de fin ou coche « Toujours en cours ».")
+    if date_fin < date_debut.date():
+        raise ValueError("La date de fin doit être égale ou postérieure à la date de début.")
+    return True, date_fin
+
+
+@espace_personnel_bp.route(
+    "/mes-analyses/<int:analyse_id>/preparer",
+    methods=["POST"],
+)
+def preparer_analyse(analyse_id):
+    analyse = _analyse_courante_ou_404(analyse_id)
+    extracteurs = {
+        "forces_defis": extraire_sections_forces_defis,
+        "analyse_karmique": extraire_sections_analyse_karmique,
+        "racines_familiales": extraire_sections_point_astral,
+        "profil_amoureux": extraire_sections_profil_amoureux,
+        "transits": extraire_sections_transits,
+    }
+    extracteur = extracteurs.get(analyse.type_analyse)
+    if extracteur is None:
+        flash("La préparation automatique n’est pas encore disponible pour ce type de rapport.", "error")
+        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
+    if not analyse.chemin_resultat:
+        flash("Le PDF de ce rapport est introuvable.", "error")
+        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
+    if SectionAnalyse.query.filter_by(analyse_id=analyse.id).first():
+        flash("Ce rapport est déjà préparé pour l’exploration.", "error")
+        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
+
+    chemin_pdf = _pdf_pour_extraction(analyse)
+
+    try:
+        sections = extracteur(chemin_pdf)
+        if not sections:
+            raise ValueError("Aucune section reconnue dans ce rapport.")
+        maintenant = datetime.now(timezone.utc)
+        for section in sections:
+            db.session.add(SectionAnalyse(
+                analyse_id=analyse.id,
+                cle_section=section["cle_section"],
+                titre=section["titre"],
+                contenu=section["contenu"],
+                ordre=section["ordre"],
+                source_format="pdf_importe",
+                date_creation=maintenant,
+                date_modification=maintenant,
+            ))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Échec de préparation du rapport %s", analyse.id)
+        flash("Le rapport n’a pas pu être préparé automatiquement.", "error")
+    else:
+        flash(f"Rapport préparé : {len(sections)} sections prêtes à explorer.", "success")
+    return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
+
+
+@espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/explorer", methods=["GET", "POST"])
+def explorer_analyse(analyse_id):
+    analyse = _analyse_courante_ou_404(analyse_id)
+
+    if request.method == "POST":
+        titre = request.form.get("titre", "").strip()
+        hypothese = request.form.get("hypothese", "").strip()
+        ressenti = request.form.get("ressenti", "a_observer").strip()
+        statut = request.form.get("statut", "a_explorer").strip()
+
+        if not titre or not hypothese:
+            flash("Le titre et l’hypothèse sont obligatoires.", "error")
+        elif ressenti not in RESSENTIS_MECANISME or statut not in STATUTS_MECANISME:
+            flash("Le ressenti ou le statut sélectionné n’est pas valide.", "error")
+        else:
+            mecanisme = MecanismeExploration(
+                analyse_id=analyse.id,
+                titre=titre,
+                extrait_source=request.form.get("extrait_source", "").strip() or None,
+                hypothese=hypothese,
+                effets_possibles=request.form.get("effets_possibles", "").strip() or None,
+                ressenti=ressenti,
+                statut=statut,
+                piste_experimentation=request.form.get(
+                    "piste_experimentation",
+                    "",
+                ).strip() or None,
+            )
+            try:
+                db.session.add(mecanisme)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                flash("Le mécanisme n’a pas pu être enregistré.", "error")
+            else:
+                flash("Le mécanisme a été ajouté à ton exploration.", "success")
+                return redirect(
+                    url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id)
+                    + "#mes-mecanismes"
+                )
+
+    mecanismes = (
+        MecanismeExploration.query
+        .filter_by(analyse_id=analyse.id)
+        .order_by(MecanismeExploration.date_creation.desc())
+        .all()
+    )
+    sections_analyse = (
+        SectionAnalyse.query
+        .filter_by(analyse_id=analyse.id)
+        .order_by(SectionAnalyse.ordre.asc())
+        .all()
+    )
+    suggestions_enregistrees = (
+        SuggestionMecanisme.query
+        .filter_by(analyse_id=analyse.id)
+        .order_by(SuggestionMecanisme.priorite.asc())
+        .all()
+    )
+    suggestions = []
+    for suggestion in suggestions_enregistrees:
+        try:
+            manifestations = json.loads(suggestion.manifestations_possibles or "[]")
+        except (TypeError, ValueError):
+            manifestations = []
+        try:
+            references = json.loads(suggestion.references_astrologiques or "[]")
+        except (TypeError, ValueError):
+            references = []
+        suggestions.append({
+            "objet": suggestion,
+            "manifestations": manifestations,
+            "references": references,
+        })
+    enjeux_periode = []
+    for enjeu in (
+        EnjeuPeriode.query
+        .filter_by(analyse_id=analyse.id)
+        .order_by(EnjeuPeriode.ordre.asc())
+        .all()
+    ):
+        try:
+            references = json.loads(enjeu.references_astrologiques or "[]")
+        except (TypeError, ValueError):
+            references = []
+        enjeux_periode.append({"objet": enjeu, "references": references})
+    enjeux_rs = (
+        EnjeuAnnuel.query.filter_by(analyse_id=analyse.id).order_by(EnjeuAnnuel.ordre).all()
+        if analyse.type_analyse == "revolution_solaire" else []
+    )
+    return render_template(
+        "espace_personnel/explorer_analyse.html",
+        analyse=analyse,
+        mecanismes=mecanismes,
+        sections_analyse=sections_analyse,
+        sections_par_id={section.id: section for section in sections_analyse},
+        suggestions=suggestions,
+        enjeux_periode=enjeux_periode,
+        titre_enjeux=(
+            "Enjeux de fond de ton thème"
+            if analyse.type_analyse == "forces_defis"
+            else "Grands enjeux de la période"
+        ),
+        suggestion_reportee=request.args.get("reportee", type=int),
+        ressentis=RESSENTIS_MECANISME,
+        statuts=STATUTS_MECANISME,
+        enjeux_annuels=[{
+            "objet": enjeu,
+            "manifestations": json.loads(enjeu.manifestations_possibles or "[]"),
+            "references": json.loads(enjeu.references_astrologiques or "[]"),
+        } for enjeu in enjeux_rs],
+        propositions_rs_a_verifier=(
+            propositions_rs_a_verifier(_dossier_extractions_rs(), analyse.id, enjeux_rs)
+            if analyse.type_analyse == "revolution_solaire" and administratrice_connectee() else []
+        ),
+        journaux_rs=(
+            _journaux_extraction_rs(analyse.id)
+            if analyse.type_analyse == "revolution_solaire" and administratrice_connectee() else []
+        ),
+    )
+
+
+@espace_personnel_bp.route(
+    "/mes-analyses/<int:analyse_id>/enjeux/generer",
+    methods=["POST"],
+)
+def generer_enjeux_periode(analyse_id):
+    analyse = _analyse_courante_ou_404(analyse_id)
+    if analyse.type_analyse not in {"transits", "forces_defis"}:
+        abort(404)
+    if EnjeuPeriode.query.filter_by(analyse_id=analyse.id).first():
+        flash("Les grands enjeux de cette période ont déjà été générés.", "error")
+        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
+
+    sections = (
+        SectionAnalyse.query
+        .filter_by(analyse_id=analyse.id)
+        .order_by(SectionAnalyse.ordre.asc())
+        .all()
+    )
+    if not sections:
+        if not analyse.chemin_resultat:
+            flash("Le PDF de cette période est introuvable.", "error")
+            return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
+        chemin_pdf = _pdf_pour_extraction(analyse)
+        extracteur = (
+            extraire_sections_forces_defis
+            if analyse.type_analyse == "forces_defis"
+            else extraire_sections_transits
+        )
+        sections_extraites = extracteur(chemin_pdf)
+        sections_dict = [
+            {
+                "cle_section": section["cle_section"],
+                "titre": section["titre"],
+                "contenu": section["contenu"],
+            }
+            for section in sections_extraites
+        ]
+    else:
+        sections_extraites = None
+        sections_dict = [
+            {
+                "cle_section": section.cle_section,
+                "titre": section.titre,
+                "contenu": section.contenu,
+            }
+            for section in sections
+        ]
+
+    try:
+        generer_enjeux = (
+            generer_enjeux_forces_defis_avec_claude
+            if analyse.type_analyse == "forces_defis"
+            else generer_enjeux_transits_avec_claude
+        )
+        enjeux, usage = generer_enjeux(sections_dict)
+        maintenant = datetime.now(timezone.utc)
+        if sections_extraites is not None:
+            for section in sections_extraites:
+                db.session.add(SectionAnalyse(
+                    analyse_id=analyse.id,
+                    cle_section=section["cle_section"],
+                    titre=section["titre"],
+                    contenu=section["contenu"],
+                    ordre=section["ordre"],
+                    source_format="pdf_importe",
+                    date_creation=maintenant,
+                    date_modification=maintenant,
+                ))
+        for ordre, enjeu in enumerate(enjeux, 1):
+            db.session.add(EnjeuPeriode(
+                analyse_id=analyse.id,
+                contenu=enjeu.contenu,
+                references_astrologiques=json.dumps(
+                    enjeu.references_astrologiques,
+                    ensure_ascii=False,
+                ),
+                ordre=ordre,
+                date_creation=maintenant,
+            ))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Échec de génération des enjeux pour %s", analyse.type_analyse)
+        flash("Les enjeux n'ont pas pu être générés ou validés.", "error")
+    else:
+        flash(
+            f"{len(enjeux)} enjeux générés · {usage['tokens_total']} tokens utilisés.",
+            "success",
+        )
+    return redirect(
+        url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id)
+        + "#enjeux-periode"
+    )
+
+
+def _dossier_extractions_rs():
+    return os.path.join(racine_privee_espace(), "extractions_rs")
+
+
+def _journaux_extraction_rs(analyse_id):
+    from pathlib import Path
+    dossier = Path(_dossier_extractions_rs()) / str(analyse_id)
+    if not dossier.is_dir():
+        return []
+    return [
+        {"id": execution.name, "fichiers": [nom for nom in FICHIERS_LOG_RS if (execution / nom).is_file()]}
+        for execution in sorted(dossier.iterdir(), reverse=True)
+        if execution.is_dir() and re.fullmatch(r"\d{8}T\d{6}-[a-f0-9]{12}", execution.name)
+    ]
+
+
+@espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/extractions-rs/<execution>/<nom>")
+def lire_journal_extraction_rs(analyse_id, execution, nom):
+    analyse = _analyse_courante_ou_404(analyse_id)
+    if (analyse.type_analyse != "revolution_solaire" or nom not in FICHIERS_LOG_RS
+            or not re.fullmatch(r"\d{8}T\d{6}-[a-f0-9]{12}", execution)):
+        abort(404)
+    return send_from_directory(
+        os.path.join(_dossier_extractions_rs(), str(analyse.id), execution), nom,
+        mimetype="text/plain", as_attachment=False,
+    )
+
+
+@espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/enjeux-annuels/generer", methods=["POST"])
+def generer_enjeux_annuels(analyse_id):
+    analyse = _analyse_courante_ou_404(analyse_id)
+    if analyse.type_analyse != "revolution_solaire":
+        abort(404)
+    return _generer_enjeux_revolution_solaire(analyse)
+
+
+def _enregistrer_enjeux_rs(analyse_id, sections, propositions):
+    sources = {section.cle_section: section.id for section in sections}
+    for ordre, proposition in enumerate(propositions, 1):
+        db.session.add(EnjeuAnnuel(
+            analyse_id=analyse_id, section_id=sources[proposition.cle_section],
+            titre=proposition.titre, contenu=proposition.hypothese,
+            manifestations_possibles=json.dumps(proposition.manifestations_possibles, ensure_ascii=False),
+            extrait_source=proposition.extrait_source,
+            references_astrologiques=json.dumps(proposition.references_astrologiques, ensure_ascii=False),
+            ordre=ordre, retenu_email=False,
+        ))
+
+
+@espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/extractions-rs/<execution>/reprendre", methods=["POST"])
+def reprendre_extraction_rs(analyse_id, execution):
+    """Contrôle la réponse déjà payée, uniquement au clic, sans appel fournisseur."""
+    from pathlib import Path
+    analyse = _analyse_courante_ou_404(analyse_id)
+    if analyse.type_analyse != "revolution_solaire" or not re.fullmatch(r"\d{8}T\d{6}-[a-f0-9]{12}", execution):
+        abort(404)
+    dossier = Path(_dossier_extractions_rs()) / str(analyse.id) / execution
+    if not (dossier / "reponse_brute.txt").is_file() or not (dossier / "usage.json").is_file():
+        abort(404)
+    destination = url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id) + "#enjeux-annuels"
+    try:
+        with verrou_extraction_rs(_dossier_extractions_rs(), analyse.id):
+            if EnjeuAnnuel.query.filter_by(analyse_id=analyse.id).first():
+                flash("Des enjeux sont déjà enregistrés pour ce PDF. Aucun appel IA.", "success")
+                return redirect(destination)
+            usage = json.loads((dossier / "usage.json").read_text(encoding="utf-8"))
+            if usage.get("stop_reason") != "end_turn":
+                raise ValueError("Cette réponse est incomplète et ne peut pas être reprise.")
+            sections = SectionAnalyse.query.filter_by(analyse_id=analyse.id).order_by(SectionAnalyse.ordre).all()
+            propositions, _, rejets = lire_reponse_enjeux_rs(
+                (dossier / "reponse_brute.txt").read_text(encoding="utf-8"),
+                [{"cle_section": s.cle_section, "titre": s.titre, "contenu": s.contenu} for s in sections],
+                reprise_partielle=True,
+            )
+            _enregistrer_enjeux_rs(analyse.id, sections, propositions)
+            db.session.commit()
+            diagnostic = {
+                "statut": "repris_partiellement" if rejets else "repris",
+                "nombre": len(propositions), "enjeux_ecartes": rejets, "appel_ia": False,
+            }
+    except ValueError as erreur:
+        db.session.rollback()
+        diagnostic = {"statut": "echec_reprise", "detail": str(erreur), "appel_ia": False}
+        flash(f"Reprise locale refusée : {erreur} Aucun appel IA n’a été fait.", "error")
+    except Exception:
+        db.session.rollback()
+        diagnostic = {"statut": "echec_enregistrement", "appel_ia": False}
+        current_app.logger.exception("Échec de reprise locale de l’extraction %s", execution)
+        flash("La reprise n’a pas pu être enregistrée. Aucun appel IA n’a été fait.", "error")
+    else:
+        flash(f"{len(propositions)} enjeux récupérés depuis la réponse conservée, sans nouvel appel IA. Ils restent à relire et à sélectionner pour tes mails.", "success")
+        for rejet in rejets:
+            flash(f"Proposition conservée dans « Source à vérifier » : {rejet['titre']} — {rejet['motif']}", "error")
+    texte = json.dumps(diagnostic, ensure_ascii=False, indent=2)
+    (dossier / "reprise_locale.json").write_text(texte, encoding="utf-8")
+    print(f"[EXPLORATION RS {analyse.id}] Reprise locale : {texte}", flush=True)
+    return redirect(destination)
+
+
+@espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/enjeux-annuels/retenir", methods=["POST"])
+def retenir_enjeux_annuels(analyse_id):
+    analyse = _analyse_courante_ou_404(analyse_id)
+    if analyse.type_analyse != "revolution_solaire":
+        abort(404)
+    selection = set(request.form.getlist("enjeux_retenus"))
+    enjeux = EnjeuAnnuel.query.filter_by(analyse_id=analyse.id).all()
+    if not selection <= {str(enjeu.id) for enjeu in enjeux}:
         abort(400)
-    session.clear()
-    return redirect(url_for("espace_personnel.connexion"))
+    for enjeu in enjeux:
+        enjeu.retenu_email = str(enjeu.id) in selection
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        flash("Ta sélection n’a pas pu être enregistrée.", "error")
+    else:
+        flash("Ta sélection d’enjeux pour les prochains mails est enregistrée. Aucun mail n’a été généré ni envoyé.", "success")
+    return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id) + "#enjeux-annuels")
+
+
+@espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/enjeux-annuels/valider-source", methods=["POST"])
+def valider_source_enjeu_annuel(analyse_id):
+    """Validation humaine explicite d'une proposition jusque-là exclue des mails."""
+    analyse = _analyse_courante_ou_404(analyse_id)
+    if analyse.type_analyse != "revolution_solaire":
+        abort(404)
+    execution = request.form.get("execution", "")
+    numero = request.form.get("numero", type=int)
+    if not re.fullmatch(r"\d{8}T\d{6}-[a-f0-9]{12}", execution) or numero not in range(1, 6):
+        abort(400)
+    destination = url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id) + "#enjeux-annuels"
+    if request.form.get("confirmation_source") != "oui":
+        flash("Confirme d’abord avoir relu le PDF et vérifié que cet enjeu y est soutenu.", "error")
+        return redirect(destination)
+    try:
+        with verrou_extraction_rs(_dossier_extractions_rs(), analyse.id):
+            enjeux = EnjeuAnnuel.query.filter_by(analyse_id=analyse.id).all()
+            if any(e.execution_source == execution and e.numero_source == numero for e in enjeux):
+                flash("Cet enjeu a déjà été validé manuellement. Aucun doublon ajouté.", "success")
+                return redirect(destination)
+            candidats = propositions_rs_a_verifier(_dossier_extractions_rs(), analyse.id, enjeux)
+            candidat = next((c for c in candidats if c["execution"] == execution and c["numero"] == numero), None)
+            if candidat is None:
+                flash("Cette proposition n’est plus en attente de vérification.", "error")
+                return redirect(destination)
+            section = SectionAnalyse.query.filter_by(analyse_id=analyse.id, cle_section=candidat["cle_section"].strip("[]")).first()
+            if section is None:
+                raise ValueError("La page indiquée n’existe pas dans ce PDF.")
+            db.session.add(EnjeuAnnuel(
+                analyse_id=analyse.id, section_id=section.id,
+                ordre=max((e.ordre for e in enjeux), default=0) + 1,
+                titre=candidat["titre"], contenu=candidat["contenu"],
+                manifestations_possibles=json.dumps(candidat["manifestations_possibles"], ensure_ascii=False),
+                references_astrologiques=json.dumps(candidat["references_astrologiques"], ensure_ascii=False),
+                extrait_source=candidat["extrait_source"], retenu_email=True,
+                source_validation="validation_manuelle", execution_source=execution, numero_source=numero,
+            ))
+            db.session.commit()
+    except ValueError as erreur:
+        db.session.rollback()
+        flash(str(erreur), "error")
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Échec de validation manuelle d’un enjeu annuel %s", analyse.id)
+        flash("Ta validation n’a pas pu être enregistrée.", "error")
+    else:
+        flash("Enjeu validé par toi et retenu pour tes prochains mails. Aucun appel IA ni envoi.", "success")
+    return redirect(destination)
+
+
+def _generer_enjeux_revolution_solaire(analyse):
+    destination = url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id) + "#enjeux-annuels"
+    profil = _profil_astral_courant()
+    if profil is None:
+        abort(404)
+    cycle = CycleSolaire.query.filter_by(id=analyse.cycle_solaire_id, profil_id=profil.id).first_or_404()
+    try:
+        with verrou_extraction_rs(_dossier_extractions_rs(), analyse.id):
+            if EnjeuAnnuel.query.filter_by(analyse_id=analyse.id).first():
+                flash("Les enjeux ont déjà été extraits de cette version du PDF.", "error")
+                return redirect(destination)
+            sections = SectionAnalyse.query.filter_by(analyse_id=analyse.id).order_by(SectionAnalyse.ordre).all()
+            if not sections:
+                raise ValueError("Le texte de ce PDF n’est pas disponible pour l’extraction.")
+            suggestions, usage, execution, a_verifier = generer_enjeux_rs(
+                [{"cle_section": s.cle_section, "titre": s.titre, "contenu": s.contenu} for s in sections],
+                _dossier_extractions_rs(), analyse.id, cycle.annee,
+            )
+            _enregistrer_enjeux_rs(analyse.id, sections, suggestions)
+            db.session.commit()
+    except ValueError as erreur:
+        db.session.rollback()
+        flash(str(erreur), "error")
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Échec d’enregistrement des enjeux annuels de l’analyse %s", analyse.id)
+        flash("Les enjeux n’ont pas pu être enregistrés. Consulte les journaux conservés ; aucune relance automatique.", "error")
+    else:
+        flash(f"{len(suggestions)} enjeux avec extrait vérifié et {len(a_verifier)} propositions avec source à vérifier pour {cycle.annee} · {usage['tokens_total']} tokens utilisés. Aucun enjeu n’est ajouté aux mails sans ton choix.", "success")
+    return redirect(destination)
+
+
+@espace_personnel_bp.route("/suggestions/<int:suggestion_id>/reporter", methods=["POST"])
+def reporter_suggestion(suggestion_id):
+    suggestion = _suggestion_courante_ou_404(suggestion_id)
+    if suggestion.statut != "proposee":
+        flash("Cette piste a déjà été traitée.", "error")
+        destination = url_for(
+            "espace_personnel.explorer_analyse",
+            analyse_id=suggestion.analyse_id,
+        )
+    else:
+        destination = url_for(
+            "espace_personnel.explorer_analyse",
+            analyse_id=suggestion.analyse_id,
+            reportee=suggestion.id,
+        )
+    return redirect(destination + f"#suggestion-{suggestion.id}")
+
+
+@espace_personnel_bp.route("/revolutions-solaires/<int:cycle_id>/importer", methods=["POST"])
+def importer_revolution_solaire(cycle_id):
+    """Archive une nouvelle version PDF sans modifier le calcul ni le rapport annuel existant."""
+    utilisateur = _utilisateur_espace_courant()
+    profil = _profil_astral_courant()
+    if profil is None:
+        abort(404)
+    cycle = CycleSolaire.query.filter_by(id=cycle_id, profil_id=profil.id).first_or_404()
+    fichier = request.files.get("rapport")
+    destination = url_for("espace_personnel.revolutions_solaires") + f"#annee-{cycle.annee}"
+    if not fichier or not fichier.filename:
+        flash("Sélectionne le PDF de ton analyse annuelle.", "error")
+        return redirect(destination)
+    # Contrôle sur le fichier lui-même, indépendamment de Content-Length.
+    contenu = fichier.stream.read(TAILLE_MAX_RAPPORT + 1)
+    if len(contenu) > TAILLE_MAX_RAPPORT or not contenu.startswith(b"%PDF-"):
+        flash("Choisis un PDF valide de 15 Mo maximum.", "error")
+        return redirect(destination)
+    nom = f"{uuid.uuid4().hex}.pdf"
+    chemin = os.path.join(_dossier_rapports_importes(), nom)
+    try:
+        with open(chemin, "wb") as sortie:
+            sortie.write(contenu)
+        _verifier_pdf_fous_astro(chemin, "revolution_solaire")
+        # Préparation locale : aucun appel IA pendant l'import.
+        sections = extraire_pages_rs(chemin)
+        analyse = AnalysePersonnelle(
+            utilisateur_id=utilisateur.id, cycle_solaire_id=cycle.id,
+            type_analyse="revolution_solaire", titre=f"Révolution solaire {cycle.annee}",
+            statut="terminee", chemin_resultat=nom,
+            date_generation=None,
+        )
+        db.session.add(analyse)
+        db.session.flush()
+        db.session.add(FichierAnalyse(analyse_id=analyse.id, nom_fichier=nom, contenu=contenu))
+        db.session.flush()
+        for section in sections:
+            db.session.add(SectionAnalyse(analyse_id=analyse.id, source_format="pdf_importe", **section))
+        db.session.commit()
+        try:
+            os.remove(chemin)
+        except OSError:
+            current_app.logger.warning("Nettoyage du PDF temporaire à effectuer après import %s", analyse.id)
+    except ValueError as erreur:
+        db.session.rollback()
+        if os.path.isfile(chemin):
+            os.remove(chemin)
+        flash(str(erreur), "error")
+    except Exception:
+        db.session.rollback()
+        if os.path.isfile(chemin):
+            os.remove(chemin)
+        current_app.logger.exception("Échec d’import du PDF annuel du cycle %s", cycle.id)
+        flash("Le PDF n’a pas pu être importé. Les versions précédentes sont conservées.", "error")
+    else:
+        flash("Ton PDF annuel est ajouté. Tu peux maintenant en faire ressortir les grands enjeux de l’année.", "success")
+        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
+    return redirect(destination)
+
+
+enregistrer_routes_auth(espace_personnel_bp)
+
+
+def _pdf_pour_extraction(analyse):
+    """Copie éphémère d'un PDF privé en base ; aucun chemin client utilisé."""
+    fichier = FichierAnalyse.query.filter_by(analyse_id=analyse.id).first_or_404()
+    with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as sortie:
+        sortie.write(fichier.contenu)
+        chemin = sortie.name
+    g.setdefault('pdfs_extraction_temporaires', []).append(chemin)
+    return chemin
+
+
+@espace_personnel_bp.teardown_request
+def nettoyer_pdf_extraction(erreur):
+    for chemin in g.pop('pdfs_extraction_temporaires', []):
+        try:
+            os.remove(chemin)
+        except FileNotFoundError:
+            pass
+
+
+espace_personnel_bp.add_url_rule('/<int:entree_id>', view_func=fiche, methods=['GET'])
+espace_personnel_bp.add_url_rule('/<int:entree_id>/modifier', view_func=modifier, methods=['GET', 'POST'])
+espace_personnel_bp.add_url_rule('/<int:entree_id>/supprimer', view_func=supprimer, methods=['POST'])

@@ -10,7 +10,7 @@ import secrets
 from urllib.parse import urlsplit
 
 from flask import abort, current_app, request, session, url_for
-from sqlalchemy import case
+from sqlalchemy import case, select
 from sqlalchemy.dialects.postgresql import insert as insert_postgresql
 from sqlalchemy.dialects.sqlite import insert as insert_sqlite
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -144,6 +144,17 @@ def ouvrir_session_espace(utilisateur, *, permanent=True):
     session["version_auth_espace"] = utilisateur.version_auth
     session["espace_connecte_le"] = utcnow().isoformat()
     session.permanent = permanent
+
+
+def administratrice_connectee():
+    """Droit relu en base, jamais déduit de l'adresse, du mode DEV ou du navigateur."""
+    utilisateur = utilisateur_connecte()
+    if utilisateur is None:
+        return False
+    return db.session.execute(select(UtilisateurEspace.est_administratrice).where(
+        UtilisateurEspace.id == utilisateur.id,
+        UtilisateurEspace.actif == 1,
+    )).scalar_one_or_none() is True
 
 
 def _url_publique(endpoint, **valeurs):

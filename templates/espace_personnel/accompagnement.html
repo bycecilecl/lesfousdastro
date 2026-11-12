@@ -53,7 +53,6 @@ body {
 {% endblock %}
 
 {% block content %}
-{% include 'espace_personnel/_navigation.html' %}
 <main class="coach-shell">
     <a class="coach-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
 
@@ -72,7 +71,7 @@ body {
                 <h2>{% if profil %}Où tu en es, {{ profil.prenom }}{% else %}Ton fil rouge{% endif %}</h2>
                 {% if not droits_abonnement.cycle_lunaire %}
                     <p class="coach-text">Ton espace reste à toi : retrouve tes analyses, explore leurs enjeux et note ce qui évolue dans ton journal.</p>
-                    <a class="coach-button" href="{{ url_for('espace_personnel.mes_analyses') }}">Voir mes analyses</a>
+                    <a class="coach-button" href="{{ url_for('pages_bp.abonnements') }}">Découvrir les accompagnements</a>
                 {% elif interpretation_cycle.get('fil_rouge') or interpretation_cycle.get('tonalite') %}
                     <p class="coach-text">{{ interpretation_cycle.get('fil_rouge') or interpretation_cycle.get('tonalite') }}</p>
                     {% if cycle_lunaire %}<p class="coach-meta">Cycle lunaire commencé le {{ cycle_lunaire.debut_cycle_utc.strftime('%d.%m.%Y') }} · {{ cycle_lunaire.ville }}</p>{% endif %}
@@ -143,7 +142,23 @@ body {
             <section class="coach-card">
                 <p class="coach-label">Le cadre</p>
                 <h2>Mes repères</h2>
-                <p class="coach-meta">{% if droits_abonnement.code == 'boussole_lunaire' %}Un email par cycle lunaire, à partir de la RL et du natal. Ton journal reste personnel et ne nourrit pas cette formule.{% elif droits_abonnement.actif %}Deux emails par mois : RS, RL, transits et contexte de vie. Le suivi peut tenir compte de ton journal.{% else %}Profil, journal, rapports et archives restent consultables.{% endif %}</p>
+                <p class="coach-meta">{% if droits_abonnement.code == 'boussole_lunaire' %}Un email par cycle lunaire, à partir de la RL et du natal. Ton journal ne nourrit pas cette formule.{% elif droits_abonnement.actif %}Deux emails par mois : RS, RL, transits et contexte de vie.{% else %}Profil, journal, rapports et archives restent consultables.{% endif %}</p>
+                <div class="status-item">
+                    <h3>Mon journal dans les mails</h3>
+                    {% if droits_abonnement.journal_contextualise %}
+                        {% if utilisateur_espace.autoriser_journal_mails %}
+                        <p class="status-value">Utilisation autorisée</p>
+                        <p class="coach-meta">Des extraits de tes notes peuvent être transmis à l’IA pour personnaliser tes prochains mails. Tu peux retirer cette autorisation à tout moment.</p>
+                        {% else %}
+                        <p class="status-value">Utilisation désactivée</p>
+                        <p class="coach-meta">Tes notes ne sont pas utilisées pour les prochaines générations de mails. Tu peux continuer à écrire dans ton journal.</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="status-value">Non utilisé dans ta formule actuelle</p>
+                        <p class="coach-meta">Ton journal reste accessible. Ton choix d’autorisation est conservé dans ton profil pour une formule qui utilise les notes.</p>
+                    {% endif %}
+                    <a class="issue-link" href="{{ url_for('espace_personnel.profil') }}#journal-mails">Gérer mon autorisation →</a>
+                </div>
                 <a class="issue-link" href="{{ url_for('espace_personnel.mes_analyses') }}">Mes rapports →</a>
                 <a class="issue-link" href="{{ url_for('espace_personnel.revolutions_solaires') }}">Mes RS enregistrées →</a>
                 <div class="status-list">
@@ -162,11 +177,13 @@ body {
                         {% else %}<p class="coach-meta">Aucun cycle enregistré.</p>{% endif %}
                     </div>
                     {% endif %}
+                    {% if outils_mails_admin %}
                     <div class="status-item">
-                        <h3>Dernier email enregistré</h3>
+                        <h3>Dernier brouillon — administration</h3>
                         {% if dernier_email %}<p class="status-value">{{ dernier_email.objet or 'Boussole du cycle' }}</p><p class="coach-meta">Statut : {{ dernier_email.statut }}</p><a class="issue-link" href="{{ url_for('espace_personnel.fiche_email_cycle', email_id=dernier_email.id) }}">Voir cet email →</a>
                         {% else %}<p class="coach-meta">Aucun email de cycle enregistré.</p>{% endif %}
                     </div>
+                    {% endif %}
                 </div>
                 <a class="coach-button coach-button--light" href="{{ url_for('espace_personnel.profil') }}#situation-actuelle">Actualiser mes domaines de vie</a>
             </section>
@@ -178,7 +195,7 @@ body {
                     <div class="trace-list">
                         {% for entree in dernieres_entrees %}
                         <a class="trace" href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">
-                            <span class="trace-date">{{ entree.date_observation.strftime('%d.%m.%Y') }}</span>
+                            <span class="trace-date">{% include "espace_personnel/partials/journal_date.html" %}</span>
                             <p>{{ (entree.situation or entree.emotions or 'Observation enregistrée.')|truncate(135) }}</p>
                         </a>
                         {% endfor %}

@@ -1,6 +1,5 @@
 """Extraction locale des sections présentes dans les rapports PDF historiques."""
 
-from io import BytesIO
 from pathlib import Path
 import re
 
@@ -94,16 +93,11 @@ def _est_ligne_technique(ligne):
     )
 
 
-def _extraire_sections_par_titres(source_pdf, titres_sections):
-    """Découpe un PDF stocké en base ou sur disque à partir de ses titres."""
-    if isinstance(source_pdf, bytes):
-        if not source_pdf.startswith(b"%PDF-") or len(source_pdf) > 15 * 1024 * 1024:
-            raise ValueError("Le rapport PDF est invalide ou dépasse 15 Mo.")
-        source = BytesIO(source_pdf)
-    else:
-        source = Path(source_pdf)
-        if not source.is_file():
-            raise FileNotFoundError(f"Rapport introuvable : {source}")
+def _extraire_sections_par_titres(chemin_pdf, titres_sections):
+    """Découpe un PDF à partir d'une liste ordonnée de titres exacts."""
+    chemin_pdf = Path(chemin_pdf)
+    if not chemin_pdf.is_file():
+        raise FileNotFoundError(f"Rapport introuvable : {chemin_pdf}")
 
     titres_par_texte = {
         titre.casefold(): (cle, titre)
@@ -112,7 +106,7 @@ def _extraire_sections_par_titres(source_pdf, titres_sections):
     sections = []
     section_courante = None
 
-    with pdfplumber.open(source) as document:
+    with pdfplumber.open(chemin_pdf) as document:
         for numero_page, page in enumerate(document.pages, 1):
             texte_page = page.extract_text(x_tolerance=2, y_tolerance=3) or ""
             for ligne in texte_page.splitlines():

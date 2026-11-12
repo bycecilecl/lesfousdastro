@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 import swisseph as swe
 
-from utils.transits.calcul_transits import longitude_to_signe
+from utils.transits.calcul_transits import longitude_to_signe, PLANETES_SWISSEPH
 from utils.transits.maisons import trouver_maison
 
 
@@ -162,12 +162,46 @@ def _aspects(longitude: float, theme: dict | None, cle_point: str) -> list[dict]
     return sorted(resultat, key=lambda item: item["orbe"])
 
 
+def _ciel_et_contacts(instant, theme_natal, theme_rs, theme_rl):
+    """Réutilisable à l'instant enregistré, sans chercher une nouvelle lunaison."""
+    swe.set_ephe_path(str(EPHEMERIS_PATH))
+    cuspides = {"natale": _cuspides(theme_natal), "rs": _cuspides(theme_rs), "rl": _cuspides(theme_rl)}
+    positions, fiches = {}, {}
+    jd = _jour_julien(instant)
+    for nom, identifiant in PLANETES_SWISSEPH.items():
+        coordonnees = swe.calc_ut(jd, identifiant)[0]
+        longitude = coordonnees[0] % 360
+        positions[nom] = {**longitude_to_signe(longitude),
+                          "retrograde": coordonnees[3] < 0, "vitesse": round(coordonnees[3], 6)}
+        fiches[nom] = {
+            "position": longitude_to_signe(longitude),
+            **{"maison_" + cadre: trouver_maison(longitude, valeurs) if valeurs else None
+               for cadre, valeurs in cuspides.items()},
+            "aspects_natal": _aspects(longitude, theme_natal, "point_natal"),
+            "aspects_rs": _aspects(longitude, theme_rs, "point_rs"),
+            "aspects_rl": _aspects(longitude, theme_rl, "point_rl"),
+            "retrograde": coordonnees[3] < 0, "vitesse": round(coordonnees[3], 6),
+        }
+    return positions, fiches
+
+
+def completer_contacts_lunaison(lunaison, *, theme_natal, theme_rs=None, theme_rl=None):
+    """Complète une préparation ancienne ; conserve sa date et ses luminaires."""
+    from utils.lecture_lunaison import dossier_lecture_lunaison
+    instant = datetime.fromisoformat(lunaison["instant_utc"])
+    positions, fiches = _ciel_et_contacts(instant, theme_natal, theme_rs, theme_rl)
+    lunaison["lecture_personnalisee"] = dossier_lecture_lunaison(
+        lunaison["luminaires"], positions, fiches, theme_natal,
+    )
+
+
 def calculer_lunaison(
     type_lunaison: str,
     *,
     apres: datetime,
     theme_natal: dict | None = None,
     theme_rs: dict | None = None,
+    theme_rl: dict | None = None,
     tzid: str = "UTC",
 ) -> dict:
     """Calcule une lunaison et ses résonances, sans l'interpréter."""
@@ -180,11 +214,29 @@ def calculer_lunaison(
     longitude = soleil if type_lunaison == "nouvelle_lune" else lune
     cuspides_natales = _cuspides(theme_natal)
     cuspides_rs = _cuspides(theme_rs)
+    cuspides_rl = _cuspides(theme_rl)
+    luminaires = {}
+    def fiche_position(valeur):
+        return {
+            "position": longitude_to_signe(valeur),
+            "maison_natale": trouver_maison(valeur, cuspides_natales) if cuspides_natales else None,
+            "maison_rs": trouver_maison(valeur, cuspides_rs) if cuspides_rs else None,
+            "maison_rl": trouver_maison(valeur, cuspides_rl) if cuspides_rl else None,
+            "aspects_natal": _aspects(valeur, theme_natal, "point_natal"),
+            "aspects_rs": _aspects(valeur, theme_rs, "point_rs"),
+            "aspects_rl": _aspects(valeur, theme_rl, "point_rl"),
+        }
+    for nom, valeur in (("Soleil", soleil), ("Lune", lune)):
+        luminaires[nom] = fiche_position(valeur)
+    positions_ciel, fiches_ciel = _ciel_et_contacts(instant, theme_natal, theme_rs, theme_rl)
+    from utils.lecture_lunaison import dossier_lecture_lunaison
     return {
         "type": type_lunaison,
         "instant_utc": instant.isoformat(),
         "instant_local": instant.astimezone(fuseau).isoformat(),
         "position": longitude_to_signe(longitude),
+        "luminaires": luminaires,
+        "lecture_personnalisee": dossier_lecture_lunaison(luminaires, positions_ciel, fiches_ciel, theme_natal),
         "maison_natale": trouver_maison(longitude, cuspides_natales) if cuspides_natales else None,
         "maison_rs": trouver_maison(longitude, cuspides_rs) if cuspides_rs else None,
         "aspects_natal": _aspects(longitude, theme_natal, "point_natal"),

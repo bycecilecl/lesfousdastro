@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% block title %}Explorer {{ analyse.titre }} | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%); font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+.explore-shell { width: min(1000px, calc(100% - 32px)); margin: 48px auto 72px; }
+.explore-back { display: inline-block; margin-bottom: 18px; color: white; font-weight: 700; text-decoration: none; }
+.explore-card { margin-bottom: 22px; padding: clamp(24px, 4vw, 38px); border-radius: 25px; background: rgba(255,255,255,.96); box-shadow: 0 20px 40px rgba(0,0,0,.12); }
+.explore-card h1, .explore-card h2 { color: #1f628e; text-align: center; }
+.explore-intro { margin: 8px auto 26px; color: #667; line-height: 1.6; text-align: center; }
+.explore-form { display: grid; grid-template-columns: 1fr 1fr; gap: 17px; }
+.explore-field { display: grid; gap: 7px; }
+.explore-wide { grid-column: 1 / -1; }
+.explore-field label { color: #1f628e; font-size: .88rem; font-weight: 700; }
+.explore-field input, .explore-field select, .explore-field textarea { width: 100%; padding: 11px 13px; border: 1px solid rgba(31,98,142,.22); border-radius: 10px; background: white; font: inherit; }
+.explore-field textarea { min-height: 95px; resize: vertical; }
+.explore-submit { grid-column: 1 / -1; justify-self: start; border: 0; border-radius: 999px; padding: 12px 20px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 700; cursor: pointer; }
+.explore-report { display: inline-block; margin: 0 auto 24px; padding: 11px 18px; border-radius: 999px; background: white; border: 1px solid #00a8a8; color: #1f628e; font-weight: 700; text-decoration: none; }
+.explore-report-wrap { text-align: center; }
+.prepared-report { margin: 0 0 26px; padding: 18px; border: 1px solid rgba(0,168,168,.2); border-radius: 16px; background: #eefafa; }
+.prepared-report h2 { margin-bottom: 5px; font-size: 1.08rem; }
+.prepared-report-summary { color: #17636c; text-align: center; font-weight: 700; }
+.prepared-sections { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-top: 13px; list-style: none; padding: 0; }
+.prepared-sections li { padding: 6px 10px; border-radius: 999px; background: white; color: #52636b; font-size: .8rem; }
+.prepared-note { margin-top: 13px; color: #687980; font-size: .82rem; line-height: 1.5; text-align: center; }
+.ai-generate { margin-top: 15px; text-align: center; }
+.ai-generate button { border: 0; border-radius: 999px; padding: 12px 19px; background: linear-gradient(45deg, #7c4fb8, #1f628e); color: white; font-weight: 800; cursor: pointer; }
+.ai-warning { margin-top: 8px; color: #7a6e82; font-size: .76rem; }
+.suggestions-grid { display: grid; gap: 16px; }
+.suggestion-card { padding: 20px; border: 1px solid rgba(124,79,184,.2); border-radius: 17px; background: #fcfaff; }
+.suggestion-card--accepted { opacity: .72; border-color: rgba(0,168,168,.3); background: #f0fbfa; }
+.suggestion-card--rejected { opacity: .58; background: #f5f5f5; }
+.suggestion-priority { color: #7c4fb8; font-size: .76rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.suggestion-card h3 { margin: 5px 0 10px; color: #1f628e; font: 700 1.3rem Georgia, serif; }
+.suggestion-hypothesis { color: #4f6068; line-height: 1.6; }
+.suggestion-source { margin-top: 14px; padding: 12px 14px; border-left: 3px solid #00a8a8; background: white; color: #65747a; font: italic .9rem/1.55 Georgia, serif; }
+.suggestion-manifestations { margin: 14px 0 0 20px; color: #5d6d74; line-height: 1.55; }
+.suggestion-references { margin-top: 11px; color: #7b6987; font-size: .82rem; }
+.suggestion-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 17px; }
+.suggestion-actions button { border: 0; border-radius: 999px; padding: 9px 14px; font-weight: 800; cursor: pointer; }
+.suggestion-accept { background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; }
+.suggestion-reject { background: #f1e9e9; color: #8a4b4b; }
+.suggestion-later { display: inline-flex; align-items: center; padding: 9px 4px; color: #6d7880; font-size: .82rem; }
+.enjeux-grid { display: grid; gap: 16px; margin-top: 18px; }
+.enjeu-card { padding: 22px 24px; border: 1px solid rgba(0,168,168,.22); border-radius: 18px; background: linear-gradient(135deg, #fbffff, #f1fbfa); box-shadow: 0 8px 18px rgba(31,98,142,.06); }
+.enjeu-card h3 { margin: 0 0 11px; color: #1f628e; font: 700 1.28rem Georgia, serif; }
+.enjeu-card p { margin: 0; color: #405861; font-size: 1.04rem; line-height: 1.65; }
+.enjeu-references { margin-top: 13px !important; color: #7b6987 !important; font-size: .83rem !important; }
+.enjeu-action { display: inline-block; margin-top: 17px; padding: 10px 16px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 800; text-decoration: none; }
+.suggestion-state { display: inline-block; margin-top: 15px; padding: 7px 11px; border-radius: 999px; background: white; color: #567078; font-size: .8rem; font-weight: 800; }
+.suggestion-postponed { margin-top: 12px; color: #6c5680; font-size: .82rem; font-weight: 800; }
+.manual-heading { margin: 34px 0 18px; padding-top: 28px; border-top: 1px solid rgba(31,98,142,.13); text-align: center; }
+.manual-heading h2 { margin-bottom: 7px; font-size: 1.25rem; }
+.manual-heading p { color: #667; line-height: 1.55; }
+.lab-guide { margin-top: 22px; padding: 18px; border-radius: 15px; background: #eefafa; text-align: center; }
+.lab-guide h3 { color: #1f628e; }
+.lab-guide p { margin: 7px auto 13px; max-width: 650px; color: #60727a; line-height: 1.55; }
+.lab-guide a { display: inline-block; padding: 10px 16px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 800; text-decoration: none; }
+.mecanismes-grid { display: grid; gap: 14px; }
+.mecanisme { display: block; padding: 18px; border: 1px solid rgba(31,98,142,.13); border-radius: 16px; background: #f8fcfc; color: inherit; text-decoration: none; }
+.mecanisme h3 { margin-bottom: 7px; color: #1f628e; }
+.mecanisme-meta { color: #667; font-size: .88rem; }
+.explore-flash { margin-bottom: 18px; padding: 12px 15px; border-radius: 12px; background: #e7f8f7; color: #17636c; text-align: center; }
+.explore-flash.error { background: #fff0f0; color: #9b3030; }
+@media (max-width: 650px) { .explore-form { grid-template-columns: 1fr; } .explore-wide, .explore-submit { grid-column: 1; } }
+{% endblock %}
+{% block content %}
+<main class="explore-shell">
+    {% if analyse.type_analyse == 'revolution_solaire' %}
+    <a class="explore-back" href="{{ url_for('espace_personnel.revolutions_solaires') }}">← Retour à Mes révolutions solaires</a>
+    {% else %}
+    <a class="explore-back" href="{{ url_for('espace_personnel.mes_analyses') }}">← Retour à Mes analyses</a>
+    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="explore-flash {{ categorie }}">{{ message }}</p>{% endfor %}{% endwith %}
+    <section class="explore-card">
+        <h1>Explorer {{ analyse.titre }}</h1>
+        <p class="explore-intro">Ajoute une hypothèse tirée du rapport. Elle reste une piste à observer, jamais une vérité imposée.</p>
+        {% if analyse.chemin_resultat %}<div class="explore-report-wrap"><a class="explore-report" href="{{ url_for('espace_personnel.lire_analyse', analyse_id=analyse.id) }}" target="_blank" rel="noopener">Afficher le rapport à côté ↗</a></div>{% endif %}
+        {% if analyse.type_analyse == 'revolution_solaire' %}
+            <aside class="prepared-report" id="enjeux-annuels">
+                <h2>Les grands enjeux de mon année</h2>
+                <p class="prepared-note">PDF ajouté le {{ analyse.date_creation.strftime('%d.%m.%Y à %H:%M') }} UTC. Les pistes proposées concernent cette année et cette version du rapport.</p>
+                <p class="prepared-note">Fais ressortir 3 à 5 dynamiques centrales, leurs manifestations possibles et les extraits du PDF qui les soutiennent. Retiens ensuite les enjeux qui serviront de fil rouge à tes mails de cycle.</p>
+                {% if not enjeux_annuels and not propositions_rs_a_verifier and sections_analyse %}
+                    <form class="ai-generate solar-extraction" method="post" action="{{ url_for('espace_personnel.generer_enjeux_annuels', analyse_id=analyse.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                        <button type="submit">Faire ressortir les grands enjeux de l’année</button>
+                        <p class="ai-warning">Cette action utilise l’IA. Une seule extraction est lancée au clic, sans relance automatique.</p>
+                    </form>
+                {% elif not sections_analyse %}
+                    <p class="prepared-note">Le texte de ce PDF n’est pas disponible. Ajoute une version avec du texte sélectionnable depuis la fiche de l’année.</p>
+                {% endif %}
+                {% if enjeux_annuels %}
+                    <form method="post" action="{{ url_for('espace_personnel.retenir_enjeux_annuels', analyse_id=analyse.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                        <div class="suggestions-grid">
+                        {% for donnees in enjeux_annuels %}
+                            {% set enjeu = donnees.objet %}
+                            <article class="suggestion-card">
+                                <span class="suggestion-priority">Enjeu {{ loop.index }}</span>
+                                <p class="prepared-note">{{ 'Validé par toi · citation non vérifiée automatiquement' if enjeu.source_validation == 'validation_manuelle' else 'Extrait retrouvé dans le PDF' }}</p>
+                                <h3>{{ enjeu.titre }}</h3>
+                                <p class="suggestion-hypothesis">{{ enjeu.contenu }}</p>
+                                {% if donnees.manifestations %}<ul class="suggestion-manifestations">{% for manifestation in donnees.manifestations %}<li>{{ manifestation }}</li>{% endfor %}</ul>{% endif %}
+                                {% if enjeu.source_validation == 'validation_manuelle' %}<p class="prepared-note">Citation initialement proposée par l’IA, conservée sans modification :</p>{% endif %}
+                                <blockquote class="suggestion-source">{{ enjeu.extrait_source }}</blockquote>
+                                {% if donnees.references %}<p class="suggestion-references">{{ donnees.references|join(' · ') }}</p>{% endif %}
+                                {% if sections_par_id.get(enjeu.section_id) %}<p><a href="{{ url_for('espace_personnel.lire_analyse', analyse_id=analyse.id) }}#page={{ sections_par_id[enjeu.section_id].ordre }}" target="_blank" rel="noopener">Source : {{ sections_par_id[enjeu.section_id].titre }} ↗</a></p>{% endif %}
+                                <label style="display:flex;gap:9px;align-items:center"><input style="width:auto" type="checkbox" name="enjeux_retenus" value="{{ enjeu.id }}" {% if enjeu.retenu_email %}checked{% endif %}> Retenir cet enjeu pour mes mails</label>
+                            </article>
+                        {% endfor %}
+                        </div>
+                        <div class="suggestion-actions"><button class="suggestion-accept" type="submit">Enregistrer les enjeux retenus pour mes mails</button></div>
+                        <p class="prepared-note">Les prochains mails croiseront ces enjeux avec le cycle lunaire et les transits pertinents. Ils ne les répéteront pas systématiquement. Les mails déjà générés restent conservés.</p>
+                    </form>
+                {% endif %}
+                {% if propositions_rs_a_verifier %}
+                    <section id="sources-a-verifier" style="margin-top:28px">
+                        <h3>Source à vérifier · {{ propositions_rs_a_verifier|length }} proposition{% if propositions_rs_a_verifier|length != 1 %}s{% endif %}</h3>
+                        <p class="prepared-note">Ces propositions sont conservées, mais leur citation n’a pas été confirmée. Elles sont exclues de tes mails tant que tu ne les as pas vérifiées et validées.</p>
+                        <div class="suggestions-grid">
+                        {% for proposition in propositions_rs_a_verifier %}
+                            <article class="suggestion-card" style="border-color:#b7791f">
+                                <span class="suggestion-priority">Source à vérifier</span>
+                                <h3>{{ proposition.titre }}</h3>
+                                <p class="suggestion-hypothesis">{{ proposition.contenu }}</p>
+                                {% if proposition.manifestations_possibles %}<ul class="suggestion-manifestations">{% for manifestation in proposition.manifestations_possibles %}<li>{{ manifestation }}</li>{% endfor %}</ul>{% endif %}
+                                <p class="prepared-note">Texte présenté comme citation par l’IA — non confirmé :</p>
+                                <blockquote class="suggestion-source">{{ proposition.extrait_source }}</blockquote>
+                                <p class="prepared-note">{{ proposition.motif }}</p>
+                                <p><a href="{{ url_for('espace_personnel.lire_analyse', analyse_id=analyse.id) }}{% if proposition.page_indiquee %}#page={{ proposition.page_indiquee }}{% endif %}" target="_blank" rel="noopener">Ouvrir le PDF{% if proposition.page_indiquee %} à la page {{ proposition.page_indiquee }} indiquée par l’IA{% endif %} ↗</a></p>
+                                <p class="prepared-note">La page indiquée peut être erronée. Vérifie dans le rapport si l’enjeu lui-même est soutenu.</p>
+                                <form method="post" action="{{ url_for('espace_personnel.valider_source_enjeu_annuel', analyse_id=analyse.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                                    <input type="hidden" name="execution" value="{{ proposition.execution }}">
+                                    <input type="hidden" name="numero" value="{{ proposition.numero }}">
+                                    <label style="display:flex;gap:9px;align-items:flex-start"><input style="width:auto" type="checkbox" name="confirmation_source" value="oui" required> J’ai relu le PDF et je confirme que cet enjeu y est soutenu.</label>
+                                    <div class="suggestion-actions"><button class="suggestion-accept" type="submit">Valider cet enjeu et le retenir pour mes mails</button></div>
+                                </form>
+                            </article>
+                        {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
+                {% if outils_mails_admin and journaux_rs %}
+                    <details>
+                        <summary>Consulter les journaux d’extraction</summary>
+                        {% for journal in journaux_rs %}
+                            <p>{{ journal.id }} (UTC)</p>
+                            <ul>{% for nom in journal.fichiers %}<li><a href="{{ url_for('espace_personnel.lire_journal_extraction_rs', analyse_id=analyse.id, execution=journal.id, nom=nom) }}" target="_blank" rel="noopener">{{ nom }}</a></li>{% endfor %}</ul>
+                            {% if not enjeux_annuels and 'reponse_brute.txt' in journal.fichiers and 'usage.json' in journal.fichiers %}
+                                <form class="ai-generate" method="post" action="{{ url_for('espace_personnel.reprendre_extraction_rs', analyse_id=analyse.id, execution=journal.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                                    <button type="submit">Reprendre cette réponse sans nouvel appel IA</button>
+                                    <p class="prepared-note">Relit la réponse conservée et récupère uniquement les enjeux dont les extraits sont vérifiables. Les enjeux refusés sont signalés séparément. Le prompt modifié s’appliquera aux prochaines extractions.</p>
+                                </form>
+                            {% endif %}
+                        {% endfor %}
+                    </details>
+                {% endif %}
+            </aside>
+        {% elif sections_analyse and analyse.type_analyse in ['transits', 'forces_defis'] %}
+            <aside class="prepared-report" id="enjeux-periode">
+                <h2>{{ titre_enjeux }}</h2>
+                {% if enjeux_periode %}
+                    <div class="enjeux-grid">
+                        {% for enjeu_data in enjeux_periode %}
+                            <article class="enjeu-card">
+                                <h3>Enjeu {{ loop.index }}</h3>
+                                <p>{{ enjeu_data.objet.contenu }}</p>
+                                {% if enjeu_data.references %}<p class="enjeu-references">{{ enjeu_data.references|join(' · ') }}</p>{% endif %}
+                                <a class="enjeu-action" href="{{ url_for('espace_personnel.journal', enjeu_id=enjeu_data.objet.id) }}">Entrer dans mon journal →</a>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="prepared-note">Une synthèse courte fera ressortir les dynamiques centrales du rapport, sans le régénérer.</p>
+                    <form class="ai-generate" method="post" action="{{ url_for('espace_personnel.generer_enjeux_periode', analyse_id=analyse.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                        <button type="submit">Faire ressortir les enjeux avec l’IA</button>
+                        <p class="ai-warning">Ce bouton déclenche un appel Claude facturé à ta clé API.</p>
+                    </form>
+                {% endif %}
+            </aside>
+        {% elif sections_analyse %}
+            <aside class="prepared-report">
+                <h2>Rapport préparé pour l’exploration</h2>
+                <p class="prepared-report-summary">{{ sections_analyse|length }} section{% if sections_analyse|length != 1 %}s{% endif %} disponible{% if sections_analyse|length != 1 %}s{% endif %}</p>
+                <ul class="prepared-sections">
+                    {% for section in sections_analyse %}<li>{{ section.titre }}</li>{% endfor %}
+                </ul>
+                <p class="prepared-note">Tu peux relever tes mécanismes manuellement ou tester l’assistance IA en DEV.</p>
+                {% if not suggestions %}
+                    <form class="ai-generate" method="post" action="{{ url_for('espace_personnel.generer_suggestions_mecanismes', analyse_id=analyse.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                        <button type="submit">Faire ressortir les mécanismes avec l’IA</button>
+                        <p class="ai-warning">En DEV, ce bouton déclenche un appel Claude facturé à ta clé API.</p>
+                    </form>
+                {% endif %}
+            </aside>
+        {% elif analyse.type_analyse in ['transits', 'forces_defis'] %}
+            <aside class="prepared-report" id="enjeux-periode">
+                <h2>{{ titre_enjeux }}</h2>
+                <p class="prepared-note">L’IA va lire le rapport et faire ressortir seulement 4 ou 5 dynamiques fortes, sans le réécrire.</p>
+                <form class="ai-generate" method="post" action="{{ url_for('espace_personnel.generer_enjeux_periode', analyse_id=analyse.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                    <button type="submit">Faire ressortir les enjeux avec l’IA</button>
+                    <p class="ai-warning">Ce bouton déclenche un appel Claude facturé à ta clé API.</p>
+                </form>
+            </aside>
+        {% elif analyse.type_analyse in ['racines_familiales', 'profil_amoureux', 'analyse_karmique'] %}
+            <aside class="prepared-report">
+                <h2>Préparer ce rapport pour l’exploration</h2>
+                <p class="prepared-note">Le rapport doit être découpé en sections avant que l’IA puisse en faire ressortir des mécanismes. Cette étape reste locale et ne déclenche aucun appel Claude.</p>
+                <form class="ai-generate" method="post" action="{{ url_for('espace_personnel.preparer_analyse', analyse_id=analyse.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                    <button type="submit">Préparer l’extraction des mécanismes</button>
+                </form>
+            </aside>
+        {% endif %}
+
+        {% if suggestions and analyse.type_analyse != 'revolution_solaire' %}
+            <section class="prepared-report" id="suggestions-ia">
+                <h2>{{ 'Grands mécanismes proposés pour cette année' if analyse.type_analyse == 'revolution_solaire' else 'Pistes proposées par l’IA' }}</h2>
+                <p class="prepared-report-summary">À toi de décider ce qui mérite réellement d’entrer dans ton Labo.</p>
+                <div class="suggestions-grid">
+                    {% for suggestion_data in suggestions %}
+                        {% set suggestion = suggestion_data.objet %}
+                        <article class="suggestion-card suggestion-card--{{ suggestion.statut }}" id="suggestion-{{ suggestion.id }}">
+                            <span class="suggestion-priority">Piste {{ suggestion.priorite }}</span>
+                            <h3>{{ suggestion.titre }}</h3>
+                            <p class="suggestion-hypothesis">{{ suggestion.hypothese }}</p>
+                            {% if suggestion_data.manifestations %}
+                                <ul class="suggestion-manifestations">{% for manifestation in suggestion_data.manifestations %}<li>{{ manifestation }}</li>{% endfor %}</ul>
+                            {% endif %}
+                            <blockquote class="suggestion-source">{{ suggestion.extrait_source }}</blockquote>
+                            {% if analyse.type_analyse == 'revolution_solaire' and sections_par_id.get(suggestion.section_id) %}<p class="suggestion-references"><a href="{{ url_for('espace_personnel.lire_analyse', analyse_id=analyse.id) }}#page={{ sections_par_id[suggestion.section_id].ordre }}" target="_blank" rel="noopener">Source : {{ sections_par_id[suggestion.section_id].titre }} ↗</a></p>{% endif %}
+                            {% if suggestion_data.references %}<p class="suggestion-references">{{ suggestion_data.references|join(' · ') }}</p>{% endif %}
+                            {% if suggestion.statut == 'proposee' %}
+                                <div class="suggestion-actions">
+                                    <form method="post" action="{{ url_for('espace_personnel.accepter_suggestion', suggestion_id=suggestion.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="suggestion-accept" type="submit">Ajouter à mon Labo</button></form>
+                                    <form method="post" action="{{ url_for('espace_personnel.rejeter_suggestion', suggestion_id=suggestion.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="suggestion-reject" type="submit">Ça ne me correspond pas</button></form>
+                                    <form method="post" action="{{ url_for('espace_personnel.reporter_suggestion', suggestion_id=suggestion.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="suggestion-later" type="submit">Garder pour plus tard</button></form>
+                                </div>
+                                {% if suggestion_reportee == suggestion.id %}<p class="suggestion-postponed">Cette piste reste disponible pour une prochaine visite.</p>{% endif %}
+                            {% elif suggestion.statut == 'acceptee' %}
+                                <span class="suggestion-state">Ajoutée au Labo</span>
+                            {% else %}
+                                <span class="suggestion-state">Piste écartée</span>
+                            {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+        {% if analyse.type_analyse not in ['transits', 'revolution_solaire'] %}
+        <div class="manual-heading" id="ajout-manuel">
+            <h2>Ajouter manuellement un mécanisme que j’ai identifié</h2>
+            <p>Utilise ce formulaire si une piste importante ressort de ta lecture ou de ton propre vécu.</p>
+        </div>
+        <form method="post" class="explore-form">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+            <div class="explore-field explore-wide"><label for="titre">Titre du mécanisme</label><input id="titre" name="titre" placeholder="Ex. Éviter le conflit pour préserver l’équilibre" required></div>
+            <div class="explore-field explore-wide"><label for="extrait_source">Extrait du rapport</label><textarea id="extrait_source" name="extrait_source"></textarea></div>
+            <div class="explore-field explore-wide"><label for="hypothese">Hypothèse à explorer</label><textarea id="hypothese" name="hypothese" required></textarea></div>
+            <div class="explore-field explore-wide"><label for="effets_possibles">Effets possibles dans ma vie</label><textarea id="effets_possibles" name="effets_possibles"></textarea></div>
+            <div class="explore-field"><label for="ressenti">Mon ressenti actuel</label><select id="ressenti" name="ressenti">{% for valeur, libelle in ressentis.items() %}<option value="{{ valeur }}">{{ libelle }}</option>{% endfor %}</select></div>
+            <div class="explore-field"><label for="statut">Statut</label><select id="statut" name="statut">{% for valeur, libelle in statuts.items() %}<option value="{{ valeur }}">{{ libelle }}</option>{% endfor %}</select></div>
+            <div class="explore-field explore-wide"><label for="piste_experimentation">Une autre manière de réagir à tester</label><textarea id="piste_experimentation" name="piste_experimentation"></textarea></div>
+            <button class="explore-submit" type="submit">Ajouter ce mécanisme</button>
+        </form>
+        {% endif %}
+    </section>
+    {% if analyse.type_analyse not in ['transits', 'revolution_solaire'] %}
+    <section class="explore-card" id="mes-mecanismes">
+        <h2>Mes mécanismes à explorer</h2>
+        <p class="explore-intro">{{ mecanismes|length }} piste{% if mecanismes|length != 1 %}s{% endif %} issue{% if mecanismes|length != 1 %}s{% endif %} de cette analyse.</p>
+        <div class="mecanismes-grid">{% for mecanisme in mecanismes %}<a class="mecanisme" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}"><h3>{{ mecanisme.titre }}</h3><span class="mecanisme-meta">{{ ressentis.get(mecanisme.ressenti) }} · {{ statuts.get(mecanisme.statut) }}</span></a>{% else %}<p class="explore-intro">Aucun mécanisme ajouté pour le moment.</p>{% endfor %}</div>
+        <aside class="lab-guide">
+            <h3>Et ensuite ?</h3>
+            <p>Retrouve tes mécanismes dans le Labo de conscience pour compléter leur fiche, noter ce que tu observes et suivre leur évolution.</p>
+            <a href="{{ url_for('espace_personnel.laboratoire') }}">Ouvrir mon Labo</a>
+        </aside>
+    </section>
+    {% endif %}
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.solar-extraction').forEach(form => {
+    form.addEventListener('submit', () => {
+        const bouton = form.querySelector('button');
+        bouton.disabled = true;
+        bouton.textContent = 'Extraction des enjeux en cours…';
+    });
+});
+</script>
+{% endblock %}

@@ -29,12 +29,19 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
 .solar-details ul { margin:9px 0 2px; padding-left:20px; line-height:1.6; }
 .solar-details a { color:#1f628e; }
 .solar-muted { color:#66727c; font-size:.86rem; }
+.solar-import { display:grid; gap:10px; margin-top:14px; }
+.solar-import label { font-weight:700; color:#31566a; }
+.solar-import input { width:100%; box-sizing:border-box; padding:10px; border:1px solid #b6d0d8; border-radius:8px; }
+.solar-import button, a.solar-action { display:inline-block; width:fit-content; padding:11px 17px; border:0; border-radius:999px; color:white; background:#1f628e; font:inherit; font-weight:700; cursor:pointer; text-decoration:none; }
+.solar-action { margin-top:10px; }
+.solar-flash { padding:13px 16px; background:#e7f8f7; color:#17636c; border-radius:12px; }
+.solar-flash.error { background:#fff0f0; color:#9b3030; }
+.solar-version { padding:12px 0; border-bottom:1px solid #e2e9eb; }
 
 @media (max-width: 650px) { .solar-card { grid-template-columns: 1fr; text-align: center; } .solar-icon { margin: 0 auto; } }
 {% endblock %}
 
 {% block content %}
-{% include 'espace_personnel/_navigation.html' %}
 <main class="solar-shell">
     <a class="solar-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
     <section class="solar-page">
@@ -44,6 +51,9 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
             <h1 class="solar-title">Mes révolutions solaires</h1>
             <p class="solar-intro">Ta révolution solaire pose le décor de l’année. Les cycles lunaires et les emails du cycle viennent ensuite montrer quand ce décor se réveille dans la vraie vie.</p>
         </header>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for categorie, message in messages %}<p class="solar-flash {{ categorie }}">{{ message }}</p>{% endfor %}
+        {% endwith %}
         <form class="solar-filter" method="get" action="{{ url_for('espace_personnel.revolutions_solaires') }}">
             <label>De <input type="number" name="debut" min="1900" max="2100" value="{{ debut_filtre or '' }}" required></label>
             <label>à <input type="number" name="fin" min="1900" max="2100" value="{{ fin_filtre or '' }}" required></label>
@@ -55,7 +65,7 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
             <div class="solar-list">
             {% for element in cycles %}
                 {% set cycle = element.cycle %}
-                <article class="solar-card">
+                <article class="solar-card" id="annee-{{ cycle.annee }}">
                     <div class="solar-icon">☀</div>
                     <div>
                         <p class="solar-date">Révolution solaire {{ cycle.annee }}</p>
@@ -73,11 +83,41 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
                                 <ul>{% for periode in element.activations %}<li>{{ periode.debut }} – {{ periode.fin }}{% if periode.climat %} · {{ periode.climat }}{% endif %} · <a href="{{ url_for('espace_personnel.calendrier', mois=periode.mois) }}">Voir le mois</a></li>{% endfor %}</ul>
                             </details>
                         {% endif %}
-                        {% if cycle.rapport_html %}
+                        {% if element.rapports %}
+                            {% set rapport = element.rapports[0] %}
+                            <p class="solar-report">Mon analyse annuelle · version PDF {{ element.rapports|length }}</p>
+                            <p class="solar-meta">Ajoutée le {{ rapport.date_creation.strftime('%d.%m.%Y à %H:%M') }} · UTC</p>
+                            <a class="solar-state" href="{{ url_for('espace_personnel.lire_analyse', analyse_id=rapport.id) }}" target="_blank" rel="noopener">Lire mon PDF ↗</a>
+                            <a class="solar-action" href="{{ url_for('espace_personnel.explorer_analyse', analyse_id=rapport.id) }}">Explorer les grands enjeux de l’année →</a>
+                            <p class="solar-muted">Chaque version conserve ses enjeux. Seuls ceux retenus dans le dernier PDF de l’année alimentent tes prochains mails.</p>
+                        {% elif cycle.rapport_html %}
                             <p class="solar-report">Le rapport annuel est disponible dans cette fiche.</p>
                             <a class="solar-state" href="{{ url_for('espace_personnel.lire_rapport_revolution_solaire', cycle_id=cycle.id) }}" target="_blank" rel="noopener">Lire le rapport annuel ↗</a>
                         {% else %}
                             <span class="solar-state">Cadre technique enregistré</span>
+                        {% endif %}
+                        <details class="solar-details">
+                            <summary>{{ 'Ajouter une nouvelle version PDF' if element.rapports or cycle.rapport_html else 'Ajouter mon analyse en PDF' }}</summary>
+                            <form class="solar-import" method="post" action="{{ url_for('espace_personnel.importer_revolution_solaire', cycle_id=cycle.id) }}" enctype="multipart/form-data">
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                                <label for="rapport-rs-{{ cycle.id }}">Mon analyse de Révolution Solaire {{ cycle.annee }} — PDF, 15 Mo maximum</label>
+                                <input id="rapport-rs-{{ cycle.id }}" name="rapport" type="file" accept="application/pdf,.pdf" required>
+                                <p class="solar-muted">Choisis le rapport de cette année. Le nouveau PDF et son texte seront enregistrés sans appel IA. Les anciennes versions et leurs enjeux seront conservés.</p>
+                                <button type="submit">Ajouter ce PDF pour {{ cycle.annee }}</button>
+                            </form>
+                        </details>
+                        {% if (element.rapports|length > 1) or (element.rapports and cycle.rapport_html) %}
+                            <details class="solar-details">
+                                <summary>Mes versions précédentes</summary>
+                                {% for ancien in element.rapports[1:] %}
+                                    <div class="solar-version">
+                                        <p class="solar-meta">PDF · version {{ element.rapports|length - loop.index }} · ajouté le {{ ancien.date_creation.strftime('%d.%m.%Y à %H:%M') }} UTC</p>
+                                        <a href="{{ url_for('espace_personnel.lire_analyse', analyse_id=ancien.id) }}" target="_blank" rel="noopener">Lire ce PDF ↗</a> ·
+                                        <a href="{{ url_for('espace_personnel.explorer_analyse', analyse_id=ancien.id) }}">Retrouver ses enjeux</a>
+                                    </div>
+                                {% endfor %}
+                                {% if cycle.rapport_html %}<p class="solar-version"><a href="{{ url_for('espace_personnel.lire_rapport_revolution_solaire', cycle_id=cycle.id) }}" target="_blank" rel="noopener">Lire le rapport initial ↗</a></p>{% endif %}
+                            </details>
                         {% endif %}
                     </div>
                 </article>
@@ -88,4 +128,16 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
         {% endif %}
     </section>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.solar-import').forEach(form => {
+    form.addEventListener('submit', () => {
+        const bouton = form.querySelector('button');
+        bouton.disabled = true;
+        bouton.textContent = 'Import du PDF en cours…';
+    });
+});
+</script>
 {% endblock %}

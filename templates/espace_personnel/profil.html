@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Mon profil astral | Les Fous d'Astro{% endblock %}
 {% block extra_css %}
+.journal-choix { grid-column:1 / -1; border:1px solid #c7dce5; border-radius:12px; padding:16px; }
+.journal-choix legend { color:#1f628e; font-weight:700; padding:0 6px; }
+.journal-choix label { display:flex; align-items:flex-start; gap:10px; margin:10px 0; line-height:1.5; color:#263645; }
+.journal-choix input { margin-top:5px; accent-color:#1f628e; }
+.profil-help { grid-column:1 / -1; color:#60747c; line-height:1.5; }
+.profil-intro { color:#60747c; line-height:1.6; margin:14px 0; }
+
   body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 52%, #c0f0f7 100%); font-family: 'Segoe UI', Tahoma, sans-serif; }
   .profil-shell { width: min(960px, calc(100% - 32px)); margin: 0 auto 72px; }
   .profil-retour { display: inline-block; margin: 0 0 20px; color: #fff; font-weight: 700; text-decoration: none; }
@@ -31,6 +38,7 @@
   @media (max-width: 600px) { .profil-form { grid-template-columns: 1fr; } }
 {% endblock %}
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='avatars.css') }}">
 {% set valeur_prenom = saisie.get('prenom') if saisie is not none else (profil.prenom if profil else utilisateur.prenom) %}
 {% set valeur_date = saisie.get('date_naissance') if saisie is not none else (profil.date_naissance.isoformat() if profil else '') %}
 {% set valeur_heure = saisie.get('heure_naissance') if saisie is not none else (profil.heure_naissance.strftime('%H:%M') if profil else '') %}
@@ -104,6 +112,44 @@
     </details>
   </section>
   {% endif %}
+    <section class="profil-carte" id="mon-avatar">
+        <h1>Mon avatar</h1>
+        <p class="profil-intro">Choisis le personnage des Fous d’Astro qui te plaît. Tu peux en changer à tout moment.</p>
+        <form method="post" action="{{ url_for('espace_personnel.modifier_avatar') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+            <fieldset class="avatar-options">
+                <legend>Ton personnage</legend>
+                <label class="avatar-option">
+                    <span class="personnage-avatar avatar-none" aria-hidden="true">☾</span>
+                    <span>Sans avatar</span>
+                    <input type="radio" name="avatar_personnage" value="" {% if utilisateur_espace.avatar_personnage not in avatars_espace %}checked{% endif %}>
+                </label>
+                {% for code, personnage in avatars_espace.items() %}
+                <label class="avatar-option">
+                    <span class="personnage-avatar" aria-hidden="true" style="background-image:url('{{ url_for('static', filename=personnage.fichier) }}');background-size:{{ personnage.taille }};background-position:{{ personnage.position }}"></span>
+                    <span>{{ personnage.nom }}</span>
+                    <input type="radio" name="avatar_personnage" value="{{ code }}" {% if utilisateur_espace.avatar_personnage == code %}checked{% endif %}>
+                </label>
+                {% endfor %}
+            </fieldset>
+            <button class="profil-submit" type="submit">Enregistrer mon avatar</button>
+        </form>
+    </section>
+    <section class="profil-carte" id="journal-mails">
+        <h1>Mon journal dans les mails</h1>
+        <p class="profil-intro">Tu choisis si tes notes peuvent servir à personnaliser tes mails astrologiques. Ce choix est désactivé par défaut et tu peux le changer à tout moment.</p>
+        <form method="post" action="{{ url_for('espace_personnel.modifier_autorisation_journal_mails') }}" class="profil-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+            <fieldset class="journal-choix" aria-describedby="journal-mails-aide">
+                <legend>Autoriser l'utilisation de mes notes</legend>
+                <label><input type="radio" name="autoriser_journal_mails" value="non" {% if not utilisateur_espace.autoriser_journal_mails %}checked{% endif %} required> Non, je ne souhaite pas utiliser mon journal dans les mails.</label>
+                <label><input type="radio" name="autoriser_journal_mails" value="oui" {% if utilisateur_espace.autoriser_journal_mails %}checked{% endif %} required> Oui, j'autorise l'utilisation de mon journal pour personnaliser les mails de ma formule.</label>
+            </fieldset>
+            <p class="profil-help" id="journal-mails-aide">Si tu autorises cette utilisation, des extraits de tes notes sont transmis à l'IA qui rédige tes mails. Ton journal reste utilisable si tu refuses. Les informations de « Ma situation actuelle » restent utilisées séparément pour personnaliser les mails.</p>
+            <p class="profil-help">Ton choix s'applique aux prochaines générations, y compris aux nouveaux essais. Les mails et journaux de génération déjà enregistrés restent inchangés.</p>
+            <button class="profil-submit" type="submit">Enregistrer mon choix</button>
+        </form>
+    </section>
 </main>
 {% endblock %}
 {% block scripts %}

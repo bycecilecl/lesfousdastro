@@ -1,0 +1,6 @@
+{% set personnage = avatars_espace.get(utilisateur_espace.avatar_personnage) %}
+{% if personnage %}
+<span class="personnage-avatar" role="img" aria-label="Avatar : {{ personnage.nom }}" style="background-image:url('{{ url_for('static', filename=personnage.fichier) }}');background-size:{{ personnage.taille }};background-position:{{ personnage.position }}"></span>
+{% else %}
+<span class="personnage-avatar avatar-none" role="img" aria-label="Sans avatar">☾</span>
+{% endif %}
