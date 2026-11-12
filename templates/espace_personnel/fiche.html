@@ -51,6 +51,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 @media (max-width: 620px) { .lab-link-form { grid-template-columns: 1fr; } .lab-link-wide, .lab-link-submit { grid-column: 1; } .lab-linked-item { align-items: flex-start; flex-direction: column; } }
 {% endblock %}
 {% block content %}
+{% include "espace_personnel/_navigation.html" %}
 <main class="journal-shell">
     <a class="journal-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour au journal</a>
     {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="journal-flash {{ categorie }}">{{ message }}</p>{% endfor %}{% endwith %}

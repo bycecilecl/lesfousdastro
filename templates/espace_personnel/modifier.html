@@ -23,6 +23,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 @media (max-width: 650px) { .fiche-card { padding: 24px; } .fiche-form { grid-template-columns: 1fr; } .fiche-field--wide, .fiche-actions { grid-column: 1; } }
 {% endblock %}
 {% block content %}
+{% include "espace_personnel/_navigation.html" %}
 <main class="fiche-shell">
     <a class="fiche-back" href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">← Annuler et revenir à l’entrée</a>
     <section class="fiche-card">

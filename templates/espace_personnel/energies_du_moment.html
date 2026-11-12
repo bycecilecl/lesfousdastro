@@ -63,6 +63,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 {% endblock %}
 
 {% block content %}
+{% include "espace_personnel/_navigation.html" %}
 <main class="energy-shell">
     <a class="energy-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
     <article class="energy-page">

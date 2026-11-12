@@ -42,6 +42,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 {% endblock %}
 
 {% block content %}
+{% include "espace_personnel/_navigation.html" %}
 <main class="journal-shell">
     <a class="journal-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
     <a class="journal-back" style="margin-left:18px" href="{{ url_for('espace_personnel.calendrier', mois=date_du_jour[:7]) }}">Mon calendrier</a>

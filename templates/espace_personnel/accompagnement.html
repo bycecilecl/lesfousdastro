@@ -53,6 +53,7 @@ body {
 {% endblock %}
 
 {% block content %}
+{% include "espace_personnel/_navigation.html" %}
 <main class="coach-shell">
     <a class="coach-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
 

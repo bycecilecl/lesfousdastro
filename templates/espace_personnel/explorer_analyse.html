@@ -64,6 +64,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 @media (max-width: 650px) { .explore-form { grid-template-columns: 1fr; } .explore-wide, .explore-submit { grid-column: 1; } }
 {% endblock %}
 {% block content %}
+{% include "espace_personnel/_navigation.html" %}
 <main class="explore-shell">
     {% if analyse.type_analyse == 'revolution_solaire' %}
     <a class="explore-back" href="{{ url_for('espace_personnel.revolutions_solaires') }}">← Retour à Mes révolutions solaires</a>

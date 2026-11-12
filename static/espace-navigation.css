@@ -1,0 +1,23 @@
+body:has(.espace-navigation) > main { margin-left:252px; min-width:0; }
+.espace-navigation { position:fixed; top:86px; bottom:18px; left:18px; width:230px; z-index:90; border:1px solid #ffffffb3; border-radius:22px; background:#fffffff5; box-shadow:0 15px 45px #103b4b26; color:#234656; overflow-y:auto; scrollbar-width:thin; box-sizing:border-box; }
+.espace-navigation > summary { display:none; }
+.espace-navigation-panel { display:flex; flex-direction:column; gap:4px; padding:20px 12px 14px; text-align:left; }
+.espace-navigation .espace-navigation-brand { display:flex; align-items:center; gap:9px; margin:0 0 17px; padding:0 7px; background:none; border:0; box-shadow:none; color:#1f628e; font:700 1rem/1.4 'Segoe UI',Tahoma,sans-serif; text-decoration:none; }
+.espace-navigation-brand > span { color:#009b9b; font-size:1.65rem; }
+.espace-navigation .espace-navigation-label { margin:0 10px 8px; color:#70868c; font:700 .67rem/1.5 'Segoe UI',Tahoma,sans-serif; letter-spacing:.13em; text-transform:uppercase; }
+.espace-navigation .espace-navigation-link { display:flex; align-items:center; justify-content:space-between; width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid transparent; border-radius:11px; background:none; color:#355767; font:600 .86rem/1.4 'Segoe UI',Tahoma,sans-serif; text-decoration:none; text-align:left; white-space:normal; cursor:pointer; box-shadow:none; transition:background .15s,color .15s; }
+.espace-navigation .espace-navigation-link:hover { background:#edf7f7; color:#146071; }
+.espace-navigation .espace-navigation-link.is-current { background:#e1f3f1; border-color:#b8dfd9; color:#126b72; font-weight:750; }
+.espace-navigation a:focus-visible,.espace-navigation button:focus-visible,.espace-navigation summary:focus-visible { outline:3px solid #009b9b; outline-offset:2px; }
+.espace-navigation-group { margin-top:13px; padding-top:15px; border-top:1px solid #dce8e9; }
+.espace-navigation form { margin:0; }
+.espace-navigation .espace-navigation-logout { color:#925750; }
+body:has(.espace-navigation) .espace-compte-actions { display:none; }
+@media (max-width:1099px) {
+  body:has(.espace-navigation) > main { margin-left:0; }
+  .espace-navigation { position:relative; top:auto; bottom:auto; left:auto; width:min(100%,1000px); margin:18px auto 22px; border-radius:16px; overflow:visible; z-index:20; }
+  .espace-navigation > summary { display:flex; align-items:center; justify-content:space-between; padding:15px 19px; list-style:none; color:#1f628e; font:700 1rem/1.4 'Segoe UI',Tahoma,sans-serif; cursor:pointer; }
+  .espace-navigation > summary::-webkit-details-marker { display:none; }
+  .espace-navigation-panel { padding-top:0; }
+  .espace-navigation-brand { display:none !important; }
+}
