@@ -5,10 +5,14 @@
     <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
     <div class="meca-field"><label>Date</label><input name="date_observation" type="date" value="{{ observation.date_observation.strftime('%Y-%m-%d') if observation else date_du_jour }}" required></div>
     <div class="meca-field meca-wide"><label>Situation vécue</label><textarea name="situation" required>{{ observation.situation if observation else '' }}</textarea></div>
-    <div class="meca-field meca-wide"><label>Ma réaction automatique</label><textarea name="reaction_automatique">{{ observation.reaction_automatique or '' if observation else '' }}</textarea></div>
+    <div class="meca-field meca-wide"><label>Quelles ont été mes réactions ?</label><textarea name="reaction_automatique">{{ observation.reaction_automatique or '' if observation else '' }}</textarea></div>
     <div class="meca-field meca-wide"><label>Ce qui montre que le mécanisme était à l’œuvre</label><textarea name="indice_pour">{{ observation.indice_pour or '' if observation else '' }}</textarea></div>
-    <div class="meca-field meca-wide"><label>Ce qui pourrait nuancer cette lecture — facultatif</label><textarea name="element_contraire">{{ observation.element_contraire or '' if observation else '' }}</textarea></div>
-    <div class="meca-field meca-wide"><label>Une autre réaction que j’ai testée</label><textarea name="reaction_testee">{{ observation.reaction_testee or '' if observation else '' }}</textarea></div>
+    {% if observation and (observation.element_contraire or observation.reaction_testee) %}
+    <details class="meca-wide"><summary>Mes notes précédentes</summary>
+        <div class="meca-field"><label>Complément déjà noté</label><textarea name="element_contraire">{{ observation.element_contraire or '' }}</textarea></div>
+        <div class="meca-field"><label>Ce que j’ai déjà essayé</label><textarea name="reaction_testee">{{ observation.reaction_testee or '' }}</textarea></div>
+    </details>
+    {% endif %}
     <div class="meca-field meca-wide"><label>Ce qui s’est passé ensuite</label><textarea name="resultat_obtenu">{{ observation.resultat_obtenu or '' if observation else '' }}</textarea></div>
     <div class="meca-field meca-wide"><label>Notes libres</label><textarea name="notes_libres">{{ observation.notes_libres or '' if observation else '' }}</textarea></div>
     <div class="observation-form-actions meca-wide"><button class="meca-button" type="submit">Enregistrer</button><a class="meca-button meca-button--secondary" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}#journal-mecanisme">Annuler</a></div>
@@ -51,7 +55,8 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 .journal-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .journal-heading h2 { color: #1f628e; font: 700 1.45rem Georgia, serif; }
 .journal-heading p { margin-top: 5px; color: #69787e; }
-.observation-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 22px; padding: 20px; border-radius: 16px; background: #f2fbfa; }
+.observation-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 22px; padding: 20px; border-radius: 16px; background: #f2fbfa; }
+.observation-decode { display:inline-block; margin:18px 12px 0 0; padding:11px 16px; border-radius:24px; background:#1f628e; color:white; font-weight:700; text-decoration:none; }
 .observation-form-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .observations-list { display: grid; gap: 16px; margin-top: 24px; }
 .observation-entry { padding: 20px; border: 1px solid #eee5d7; border-radius: 14px; background: rgba(255,255,255,.7); }
@@ -100,7 +105,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                     <div class="evolution-fact"><strong>Statut actuel</strong>{{ statuts.get(mecanisme.statut, mecanisme.statut) }}</div>
                 </div>
                 <div class="evolution-reactions">
-                    <h3>Réactions alternatives déjà testées</h3>
+                    <h3>Ce que j’ai déjà essayé</h3>
                     {% if synthese_evolution.reactions_testees %}
                         <ul>{% for reaction in synthese_evolution.reactions_testees %}<li>{{ reaction }}</li>{% endfor %}</ul>
                     {% else %}
@@ -139,10 +144,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                             <section class="observation-section"><h3>Situation vécue</h3><p>{{ observation.situation }}</p></section>
                             {% if observation.reaction_automatique %}<section class="observation-section"><h3>Réaction automatique</h3><p>{{ observation.reaction_automatique }}</p></section>{% endif %}
                             {% if observation.indice_pour %}<section class="observation-section"><h3>Ce qui montre que le mécanisme était à l’œuvre</h3><p>{{ observation.indice_pour }}</p></section>{% endif %}
-                            {% if observation.element_contraire %}<section class="observation-section"><h3>Ce qui pourrait nuancer cette lecture</h3><p>{{ observation.element_contraire }}</p></section>{% endif %}
-                            {% if observation.reaction_testee %}<section class="observation-section"><h3>Autre réaction testée</h3><p>{{ observation.reaction_testee }}</p></section>{% endif %}
+                            {% if observation.element_contraire %}<details class="observation-section"><summary>Complément déjà noté</summary><p>{{ observation.element_contraire }}</p></details>{% endif %}
+                            {% if observation.reaction_testee %}<section class="observation-section"><h3>Ce que j’ai déjà essayé</h3><p>{{ observation.reaction_testee }}</p></section>{% endif %}
                             {% if observation.resultat_obtenu %}<section class="observation-section"><h3>Ce qui s’est passé ensuite</h3><p>{{ observation.resultat_obtenu }}</p></section>{% endif %}
                             {% if observation.notes_libres %}<section class="observation-section"><h3>Notes</h3><p>{{ observation.notes_libres }}</p></section>{% endif %}
+                            <a class="observation-decode" href="{{ url_for('espace_personnel.decoder_mecanisme', observation_id=observation.id) }}">Décoder ce mécanisme / reprendre mes réponses →</a>
                             <a class="observation-edit" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id, modifier_observation=observation.id) }}#observation-{{ observation.id }}">Modifier cette observation</a>
                         {% endif %}
                     </article>

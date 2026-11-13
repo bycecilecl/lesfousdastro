@@ -37,7 +37,7 @@ COLONNES = {
 }
 NOUVELLES_TABLES = (
     "liens_mot_de_passe_espace", "limites_acces_espace",
-    "analyses_lunaisons", "enjeux_annuels",
+    "analyses_lunaisons", "enjeux_annuels", "decodages_observations_mecanisme",
 )
 INDEX = {
     "uq_espace_administratrice_unique": (
@@ -52,7 +52,7 @@ INDEX = {
 def etat(connexion):
     inspection = inspect(connexion)
     tables = set(inspection.get_table_names())
-    requises = set(COLONNES) | {"profil_astral", "fichiers_analyses_espace"}
+    requises = set(COLONNES) | {"profil_astral", "fichiers_analyses_espace", "observations_mecanisme"}
     if not requises.issubset(tables):
         raise ValueError("La base ne possède pas toutes les tables historiques attendues. Aucune initialisation vide ni modification de données.")
     ajouts = []
@@ -109,10 +109,10 @@ def main():
                 connexion.execute(text(f'ALTER TABLE "{table}" ADD COLUMN "{nom}" {definition}'))
             # Imports de modèles seuls : aucun import de main, de routes ou d'IA.
             from models.espace_personnel import (
-                AnalyseLunaison, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
+                AnalyseLunaison, DecodageObservationMecanisme, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
             )
             modeles = {m.__tablename__: m.__table__ for m in (
-                AnalyseLunaison, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
+                AnalyseLunaison, DecodageObservationMecanisme, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
             )}
             for table in tables:
                 modeles[table].create(bind=connexion, checkfirst=True)

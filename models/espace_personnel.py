@@ -517,3 +517,17 @@ class EnjeuAnnuel(db.Model):
     execution_source = Column(String(40), nullable=True)
     numero_source = Column(Integer, nullable=True)
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class DecodageObservationMecanisme(db.Model):
+    """Réponses personnelles aux six étapes, rattachées à un épisode daté."""
+
+    __tablename__ = "decodages_observations_mecanisme"
+    __table_args__ = (UniqueConstraint("observation_id", name="uq_decodage_observation"),)
+
+    id = Column(Integer, primary_key=True)
+    observation_id = Column(Integer, nullable=False)
+    reponses = Column(Text, nullable=False, default="{}", server_default="{}")
+    revision = Column(Integer, nullable=False, default=1, server_default="1")
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    date_modification = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)

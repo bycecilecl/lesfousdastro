@@ -46,7 +46,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 .lab-linked-item { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 11px 13px; border-radius: 11px; background: white; }
 .lab-linked-item strong { color: #1f628e; }
 .lab-linked-item a { color: #00a8a8; font-size: .82rem; font-weight: 800; text-decoration: none; }
-.lab-link-form { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin-top: 18px; padding-top: 17px; border-top: 1px solid rgba(31,98,142,.12); }
+.lab-link-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 18px; padding-top: 17px; border-top: 1px solid rgba(31,98,142,.12); }
+.lab-linked-actions { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+.lab-linked-item { flex-wrap:wrap; }
+.lab-linked-item .lab-decode { display:inline-block; padding:11px 15px; border-radius:24px; background:#1f628e; color:white; }
+.lab-link-form textarea { min-height:120px; }
 .lab-link-field { display: grid; gap: 6px; }
 .lab-link-wide { grid-column: 1 / -1; }
 .lab-link-field label { color: #1f628e; font-size: .84rem; font-weight: 800; }
@@ -73,15 +77,20 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
         {% endif %}
         {% include "espace_personnel/partials/journal_texte.html" %}
         <details class="lab-links journal-explore" id="liaisons-labo">
-            <summary>Explorer cette situation dans mon Labo{% if liaisons_labo %} · {{ liaisons_labo|length }} lien{% if liaisons_labo|length != 1 %}s{% endif %}{% endif %}</summary>
-            <p class="lab-links-intro">Associe ce que tu as vécu à un mécanisme que tu souhaites observer dans le temps.</p>
+            <summary>Aller plus loin{% if liaisons_labo %} · {{ liaisons_labo|length }} mécanisme{% if liaisons_labo|length != 1 %}s{% endif %} relié{% if liaisons_labo|length != 1 %}s{% endif %}{% endif %}</summary>
+            <p class="lab-links-intro">Relie cette situation à un mécanisme que tu reconnais. Tu pourras t’arrêter là ou choisir de le décoder plus en profondeur.</p>
 
             {% if liaisons_labo %}
                 <div class="lab-linked-list">
                     {% for liaison in liaisons_labo %}
                         <div class="lab-linked-item">
                             <strong>{{ liaison.mecanisme.titre|majuscule_initiale if liaison.mecanisme else 'Mécanisme supprimé' }}</strong>
-                            {% if liaison.mecanisme %}<a href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=liaison.mecanisme.id) }}#observation-{{ liaison.observation.id }}">Voir dans le Labo →</a>{% endif %}
+                            {% if liaison.mecanisme %}
+                            <div class="lab-linked-actions">
+                                <a class="lab-decode" href="{{ url_for('espace_personnel.decoder_mecanisme', observation_id=liaison.observation.id) }}">Décoder ce mécanisme →</a>
+                                <a href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=liaison.mecanisme.id) }}#observation-{{ liaison.observation.id }}">Voir dans le Labo</a>
+                            </div>
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>
@@ -92,9 +101,6 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
                     <div class="lab-link-field lab-link-wide"><label for="mecanisme_id">Mécanisme concerné</label><select id="mecanisme_id" name="mecanisme_id" required><option value="">Choisir dans mon Labo</option>{% for mecanisme in mecanismes_disponibles %}<option value="{{ mecanisme.id }}">{{ mecanisme.titre|majuscule_initiale }}</option>{% endfor %}</select></div>
                     <div class="lab-link-field"><label for="indice_pour">Ce qui montre que le mécanisme était à l’œuvre</label><textarea id="indice_pour" name="indice_pour"></textarea></div>
-                    <div class="lab-link-field"><label for="element_contraire">Ce qui pourrait nuancer cette lecture — facultatif</label><textarea id="element_contraire" name="element_contraire"></textarea></div>
-                    <div class="lab-link-field"><label for="reaction_testee">Autre réaction testée</label><textarea id="reaction_testee" name="reaction_testee"></textarea></div>
-                    <div class="lab-link-field"><label for="resultat_obtenu">Ce qui s’est passé ensuite</label><textarea id="resultat_obtenu" name="resultat_obtenu"></textarea></div>
                     <button class="lab-link-submit" type="submit">Relier au mécanisme</button>
                 </form>
             {% elif not liaisons_labo %}

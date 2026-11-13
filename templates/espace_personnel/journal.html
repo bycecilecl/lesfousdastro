@@ -38,6 +38,15 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 .journal-supplement h2 { margin-bottom: 8px; color: #1f628e; font: 700 1.05rem Georgia, serif; }
 .journal-entry-actions { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 22px; }
 .journal-entry-actions a { color: #1f628e; font-weight: 700; }
+.journal-mechanism { margin-top:20px; padding-top:16px; border-top:1px solid #d9e7e4; }
+.journal-mechanism summary { color:#1f628e; font-weight:800; cursor:pointer; line-height:1.6; }
+.journal-mechanism form { display:grid; gap:16px; margin-top:18px; }
+.journal-mechanism-actions { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+.journal-mechanism-button { display:inline-block; width:fit-content; padding:12px 18px; border:0; border-radius:24px; background:#1f628e; color:white; font:700 .95rem 'Segoe UI',sans-serif; cursor:pointer; text-decoration:none; }
+.journal-mechanism-button.secondary { border:1px solid #1f628e; background:white; color:#1f628e; }
+.journal-mechanism-help { line-height:1.6; color:#60747c; }
+.journal-linked { margin-top:18px; display:grid; gap:12px; }
+.journal-linked a { color:#1f628e; font-weight:700; }
 .journal-entry-tag { display: inline-block; margin-top: 8px; padding: 4px 8px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-size: .72rem; font-weight: 800; }
 .journal-empty { padding: 44px 18px; text-align: center; color: #7a898f; }
 .journal-moon { display: block; margin-bottom: 9px; font-size: 2.5rem; }
@@ -91,16 +100,29 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             {% if enjeu_source %}<input type="hidden" name="enjeu_periode_id" value="{{ enjeu_source.id }}">{% endif %}
             {% include "espace_personnel/partials/journal_periode.html" %}
             <div class="journal-field journal-field--wide journal-field--story"><label for="situation">Qu’est-ce que tu as envie de raconter ?</label><textarea id="situation" name="situation" placeholder="Écris librement : un moment sympa, ce que tu traverses, une pensée, un souvenir…">{% if request.method == 'POST' %}{{ request.form.get('situation', '') }}{% elif enjeu_source %}Ce qui me parle dans cet enjeu : {% endif %}</textarea></div>
-            <details class="journal-deeper">
-                <summary>J’ai envie d’aller plus loin — facultatif</summary>
+            <button type="submit" name="action" value="enregistrer" class="journal-submit">Enregistrer dans mon journal</button>
+            <details class="journal-deeper" {% if request.method == 'POST' and request.form.get('mecanisme_id') %}open{% endif %}>
+                <summary>Aller plus loin : relier ou décoder un mécanisme</summary>
                 <div class="journal-deeper-fields">
+                    {% if mecanismes_journal %}
+                    <p class="journal-mechanism-help">Choisis le mécanisme que tu reconnais dans cette situation. Tu peux simplement le relier à ta note, ou enregistrer et ouvrir directement les six étapes du décodage.</p>
+                    <div class="journal-field"><label for="mecanisme-journal">Mécanisme concerné — facultatif</label><select id="mecanisme-journal" name="mecanisme_id"><option value="">Choisir dans mon Labo</option>{% for mecanisme in mecanismes_journal %}<option value="{{ mecanisme.id }}" {% if request.form.get('mecanisme_id') == mecanisme.id|string %}selected{% endif %}>{{ mecanisme.titre|majuscule_initiale }}</option>{% endfor %}</select></div>
+                    <div class="journal-field"><label for="indice-journal">Ce qui montre que le mécanisme était à l’œuvre</label><textarea id="indice-journal" name="indice_pour">{{ request.form.get('indice_pour', '') }}</textarea></div>
+                    <button class="journal-mechanism-button" type="submit" name="action" value="decoder">Enregistrer et décoder ce mécanisme →</button>
+                    {% else %}
+                    <p class="journal-mechanism-help">Tu pourras relier cette situation et ouvrir les six étapes de décodage une fois un mécanisme ajouté dans <a href="{{ url_for('espace_personnel.laboratoire') }}">ton Labo</a>.</p>
+                    {% endif %}
+                    <details>
+                    <summary>Ajouter mes ressentis et mes premières observations — facultatif</summary>
+                    <div class="journal-deeper-fields">
                     <div class="journal-field"><label for="niveau_energie">Niveau d’énergie — facultatif</label><select id="niveau_energie" name="niveau_energie"><option value="">Je ne souhaite pas le noter</option>{% for niveau in range(1, 11) %}<option value="{{ niveau }}" {% if request.form.get('niveau_energie') == niveau|string %}selected{% endif %}>{{ niveau }}</option>{% endfor %}</select></div>
                     <div class="journal-field"><label for="emotions">Ce que je ressens</label><input id="emotions" name="emotions" type="text" maxlength="500" placeholder="Les émotions présentes…" value="{{ request.form.get('emotions', '') }}"></div>
                     <div class="journal-field"><label for="reaction_automatique">Ma réaction automatique</label><textarea id="reaction_automatique" name="reaction_automatique">{{ request.form.get('reaction_automatique', '') }}</textarea></div>
                     <div class="journal-field"><label for="choix_conscient">Le choix conscient que je peux faire</label><textarea id="choix_conscient" name="choix_conscient">{{ request.form.get('choix_conscient', '') }}</textarea></div>
+                    </div>
+                    </details>
                 </div>
             </details>
-            <button type="submit" class="journal-submit">Enregistrer dans mon journal</button>
         </form>
 
         <h2 class="entries-title">Les pages de mon journal</h2>
@@ -111,6 +133,30 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                         <div class="journal-entry-date">{% include "espace_personnel/partials/journal_date.html" %}{% if entree.niveau_energie is not none %} · Énergie {{ entree.niveau_energie }}/10{% endif %}</div>
                         {% include "espace_personnel/partials/journal_texte.html" %}
                         {% if entree.cycle_lunaire_id %}<span class="journal-entry-tag">Reliée à un cycle lunaire</span>{% endif %}
+                        {% set episodes = liaisons_journal.get(entree.id, []) %}
+                        {% set ids_relies = episodes|map(attribute='mecanisme_id')|list %}
+                        {% if episodes %}
+                        <div class="journal-linked">
+                            {% for episode in episodes %}
+                            <a href="{{ url_for('espace_personnel.decoder_mecanisme', observation_id=episode.id) }}">Décoder / reprendre : {{ mecanismes_journal_par_id[episode.mecanisme_id].titre|majuscule_initiale }} →</a>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if mecanismes_journal|length > ids_relies|length %}
+                        <details class="journal-mechanism">
+                            <summary>Aller plus loin : étudier un mécanisme depuis cette note</summary>
+                            <form method="post" action="{{ url_for('espace_personnel.relier_entree_mecanisme', entree_id=entree.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                                <input type="hidden" name="retour" value="journal">
+                                <div class="journal-field"><label for="mecanisme-{{ entree.id }}">Mécanisme concerné</label><select id="mecanisme-{{ entree.id }}" name="mecanisme_id" required><option value="">Choisir dans mon Labo</option>{% for mecanisme in mecanismes_journal %}{% if mecanisme.id not in ids_relies %}<option value="{{ mecanisme.id }}">{{ mecanisme.titre|majuscule_initiale }}</option>{% endif %}{% endfor %}</select></div>
+                                <div class="journal-field"><label for="indice-{{ entree.id }}">Ce qui montre que le mécanisme était à l’œuvre</label><textarea id="indice-{{ entree.id }}" name="indice_pour"></textarea></div>
+                                <div class="journal-mechanism-actions">
+                                    <button class="journal-mechanism-button secondary" type="submit" name="action" value="relier">Relier seulement</button>
+                                    <button class="journal-mechanism-button" type="submit" name="action" value="decoder">Relier et décoder ce mécanisme →</button>
+                                </div>
+                            </form>
+                        </details>
+                        {% endif %}
                         <div class="journal-entry-actions">
                             <a href="{{ url_for('espace_personnel.modifier', entree_id=entree.id) }}">Modifier cette page</a>
                             <a href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">Relire et approfondir →</a>

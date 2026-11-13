@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Décoder ce mécanisme | Les Fous d’Astro{% endblock %}
+{% block extra_css %}
+body { background: linear-gradient(135deg, #1f628e, #00a8a8 55%, #c0f0f7); min-height:100vh; font-family:'Segoe UI', sans-serif; }
+.decode-shell { width:min(940px, calc(100% - 32px)); margin:40px auto 72px; }
+.decode-back { display:inline-block; color:white; font-weight:700; margin-bottom:18px; }
+.decode-page { background:#fffdf7; border-radius:24px; padding:clamp(24px,5vw,46px); color:#33434c; box-shadow:0 20px 45px #12384b25; }
+.decode-page h1 { color:#1f628e; margin:8px 0 12px; font:700 clamp(1.8rem,5vw,2.8rem) Georgia,serif; }
+.decode-kicker { color:#147d82; font-weight:800; }
+.decode-intro { line-height:1.65; }
+.decode-context { margin:24px 0; padding:18px 22px; border-left:4px solid #00a8a8; background:#eefafa; border-radius:12px; }
+.decode-context p { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.6; }
+.decode-context a, .decode-history a { color:#1f628e; font-weight:700; }
+.decode-step { margin-top:14px; border:1px solid #d1e4e4; border-radius:16px; background:white; overflow:hidden; }
+.decode-step > summary { cursor:pointer; padding:19px; color:#1f628e; font-weight:800; line-height:1.45; }
+.decode-step[open] > summary { background:#f0faf9; }
+.decode-step-content { padding:6px 20px 22px; }
+.decode-step-help { color:#5e7078; line-height:1.6; }
+.decode-question { margin-top:24px; }
+.decode-question label { display:block; margin-bottom:9px; font-weight:700; color:#1f628e; line-height:1.5; }
+.decode-question textarea { width:100%; min-height:115px; box-sizing:border-box; border:1px solid #bfd6da; border-radius:12px; padding:13px; color:#33434c; font:1rem/1.65 Georgia,serif; resize:vertical; }
+.decode-question textarea:focus { outline:3px solid #00a8a826; border-color:#00a8a8; }
+.decode-question textarea::placeholder { color:#6b7680; opacity:1; font-style:italic; }
+.decode-hint { margin-top:10px; }
+.decode-hint summary { width:fit-content; color:#1f628e; font-size:.9rem; cursor:pointer; }
+.decode-hint p { margin:9px 0 0; padding:12px 14px; border-left:3px solid #00a8a8; background:#f0faf9; color:#52666f; line-height:1.65; border-radius:0 9px 9px 0; }
+.decode-unsure { margin:7px 0 0; padding:5px 0; border:0; background:none; color:#1f628e; font:inherit; text-decoration:underline; cursor:pointer; }
+.decode-unsure:disabled { opacity:.5; cursor:default; }
+.decode-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:26px; }
+.decode-button { border:0; padding:12px 18px; border-radius:24px; font:700 .95rem 'Segoe UI',sans-serif; color:white; background:linear-gradient(45deg,#00a8a8,#1f628e); cursor:pointer; }
+.decode-button.secondary { border:1px solid #1f628e; background:white; color:#1f628e; }
+.decode-next { margin-top:18px; }
+.decode-flash { padding:14px 17px; margin:18px 0; background:#e5f7f0; border-radius:12px; color:#17636c; line-height:1.5; }
+.decode-flash.error { color:#943939; background:#fff0f0; }
+.decode-history { margin-top:34px; border-top:1px solid #eee5d7; padding-top:22px; }
+.decode-history summary { color:#1f628e; font-weight:800; cursor:pointer; }
+.decode-history li { margin:12px 0; line-height:1.6; }
+.decode-small { color:#61747d; font-size:.9rem; line-height:1.6; }
+@media (max-width:650px) { .decode-question textarea { min-height:210px; } }
+{% endblock %}
+{% block content %}
+{% include "espace_personnel/_navigation.html" %}
+<main class="decode-shell">
+    {% if entree %}
+    <a class="decode-back" href="{{ url_for('espace_personnel.journal') }}#entree-{{ entree.id }}">← Revenir à mon journal</a>
+    {% else %}
+    <a class="decode-back" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}#observation-{{ observation.id }}">← Revenir à cette observation</a>
+    {% endif %}
+    <article class="decode-page">
+        <p class="decode-kicker">Décoder ce mécanisme</p>
+        <h1>{{ mecanisme.titre|majuscule_initiale }}</h1>
+        <p class="decode-intro">Six étapes pour approfondir cette situation. Tu peux répondre à une seule question, laisser les autres vides ou écrire « Je ne sais pas encore ». Enregistre tes réponses pour les retrouver plus tard.</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for categorie, message in messages %}<p class="decode-flash {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+        {% endwith %}
+        {% if erreur %}
+        <div class="decode-flash error" role="alert">{{ erreur }} <a href="{{ url_for('espace_personnel.decoder_mecanisme', observation_id=observation.id) }}">Recharger la page</a></div>
+        {% endif %}
+        <aside class="decode-context">
+            <strong>Cette situation · {{ observation.date_observation.strftime('%d.%m.%Y') }}</strong>
+            <p>{{ observation.situation }}</p>
+            {% if observation.indice_pour %}<strong>Ce qui m’a fait reconnaître ce mécanisme</strong><p>{{ observation.indice_pour }}</p>{% endif %}
+        </aside>
+        <p class="decode-small">{% if decodage %}Dernier enregistrement : {{ decodage.date_modification.strftime('%d.%m.%Y') }}.{% else %}Tes réponses seront conservées avec cet épisode quand tu les enregistreras.{% endif %} Ce parcours ne déclenche aucun appel IA.</p>
+        <form method="post" id="form-decodage">
+            <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+            <input type="hidden" name="revision" value="{{ revision if revision is not none else 0 }}">
+            <input type="hidden" name="etape" id="etape-active" value="{{ etape_ouverte }}">
+            {% for etape in etapes %}
+            <details class="decode-step" data-etape="{{ loop.index }}" {% if loop.index == etape_ouverte %}open{% endif %}>
+                <summary>{{ loop.index }}. {{ etape.titre }}</summary>
+                <div class="decode-step-content">
+                    {% if etape.aide %}<p class="decode-step-help">{{ etape.aide }}</p>{% endif %}
+                    {% for cle, question in etape.questions %}
+                    {% set aide = aides.get(cle, {}) %}
+                    <div class="decode-question">
+                        <label for="decode-{{ cle }}">{{ question }}</label>
+                        <textarea id="decode-{{ cle }}" name="{{ cle }}" maxlength="6000" placeholder="{{ aide.get('amorce', '') }}">{{ reponses.get(cle, '') }}</textarea>
+                        <button class="decode-unsure" type="button" data-incertain="decode-{{ cle }}" {% if reponses.get(cle, '')|trim %}disabled{% endif %}>Je ne sais pas encore</button>
+                        {% if aide.get('piste') %}
+                        <details class="decode-hint">
+                            <summary>Un coup de pouce ?</summary>
+                            <p>{{ aide.piste }}</p>
+                        </details>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% if not loop.last %}<button class="decode-button secondary decode-next" type="button" data-suivante="{{ loop.index + 1 }}" hidden>Passer à l’étape suivante →</button>{% endif %}
+                </div>
+            </details>
+            {% endfor %}
+            <div class="decode-actions">
+                <button class="decode-button" type="submit" name="action" value="enregistrer">Enregistrer mes réponses</button>
+                <button class="decode-button secondary" type="submit" name="action" value="plus_tard">Enregistrer et reprendre plus tard</button>
+            </div>
+        </form>
+        <details class="decode-history">
+            <summary>Les situations reliées à ce mécanisme · {{ historique|length }}</summary>
+            <p class="decode-small">Retrouve ce que tu as noté à chaque épisode, ce qui revient et ce qui change.</p>
+            <ul>
+            {% for episode in historique %}
+                <li>{% if episode.id == observation.id %}<strong>{{ episode.date_observation.strftime('%d.%m.%Y') }} · Situation ouverte</strong>{% else %}<a href="{{ url_for('espace_personnel.decoder_mecanisme', observation_id=episode.id) }}">{{ episode.date_observation.strftime('%d.%m.%Y') }} · Revoir cet épisode</a>{% endif %}<br>{{ episode.situation|truncate(160) }}</li>
+            {% endfor %}
+            </ul>
+            <a href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}#journal-mecanisme">Voir l’historique dans mon Labo →</a>
+        </details>
+    </article>
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+(() => {
+    const form = document.getElementById('form-decodage');
+    const etapes = Array.from(form.querySelectorAll('[data-etape]'));
+    const active = document.getElementById('etape-active');
+    let modifie = {{ 'true' if erreur else 'false' }};
+    form.addEventListener('input', () => { modifie = true; });
+    form.addEventListener('submit', () => { modifie = false; });
+    window.addEventListener('beforeunload', evenement => {
+        if (modifie) { evenement.preventDefault(); evenement.returnValue = ''; }
+    });
+    etapes.forEach(etape => etape.addEventListener('toggle', () => {
+        if (!etape.open) return;
+        active.value = etape.dataset.etape;
+        etapes.forEach(autre => { if (autre !== etape) autre.open = false; });
+    }));
+    form.querySelectorAll('[data-incertain]').forEach(bouton => {
+        const champ = document.getElementById(bouton.dataset.incertain);
+        champ.addEventListener('input', () => { bouton.disabled = !!champ.value.trim(); });
+        bouton.addEventListener('click', () => {
+            if (champ.value.trim()) return;
+            champ.value = 'Je ne sais pas encore';
+            bouton.disabled = true;
+            modifie = true;
+            champ.focus();
+        });
+    });
+    form.querySelectorAll('[data-suivante]').forEach(bouton => {
+        bouton.hidden = false;
+        bouton.addEventListener('click', () => {
+            const suivante = etapes.find(etape => etape.dataset.etape === bouton.dataset.suivante);
+            if (suivante) { suivante.open = true; suivante.scrollIntoView({ block:'start' }); }
+        });
+    });
+})();
+</script>
+{% endblock %}
