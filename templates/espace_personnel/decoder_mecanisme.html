@@ -21,9 +21,6 @@ body { background: linear-gradient(135deg, #1f628e, #00a8a8 55%, #c0f0f7); min-h
 .decode-question textarea { width:100%; min-height:115px; box-sizing:border-box; border:1px solid #bfd6da; border-radius:12px; padding:13px; color:#33434c; font:1rem/1.65 Georgia,serif; resize:vertical; }
 .decode-question textarea:focus { outline:3px solid #00a8a826; border-color:#00a8a8; }
 .decode-question textarea::placeholder { color:#6b7680; opacity:1; font-style:italic; }
-.decode-hint { margin-top:10px; }
-.decode-hint summary { width:fit-content; color:#1f628e; font-size:.9rem; cursor:pointer; }
-.decode-hint p { margin:9px 0 0; padding:12px 14px; border-left:3px solid #00a8a8; background:#f0faf9; color:#52666f; line-height:1.65; border-radius:0 9px 9px 0; }
 .decode-unsure { margin:7px 0 0; padding:5px 0; border:0; background:none; color:#1f628e; font:inherit; text-decoration:underline; cursor:pointer; }
 .decode-unsure:disabled { opacity:.5; cursor:default; }
 .decode-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:26px; }
@@ -77,12 +74,6 @@ body { background: linear-gradient(135deg, #1f628e, #00a8a8 55%, #c0f0f7); min-h
                         <label for="decode-{{ cle }}">{{ question }}</label>
                         <textarea id="decode-{{ cle }}" name="{{ cle }}" maxlength="6000" placeholder="{{ aide.get('amorce', '') }}">{{ reponses.get(cle, '') }}</textarea>
                         <button class="decode-unsure" type="button" data-incertain="decode-{{ cle }}" {% if reponses.get(cle, '')|trim %}disabled{% endif %}>Je ne sais pas encore</button>
-                        {% if aide.get('piste') %}
-                        <details class="decode-hint">
-                            <summary>Un coup de pouce ?</summary>
-                            <p>{{ aide.piste }}</p>
-                        </details>
-                        {% endif %}
                     </div>
                     {% endfor %}
                     {% if not loop.last %}<button class="decode-button secondary decode-next" type="button" data-suivante="{{ loop.index + 1 }}" hidden>Passer à l’étape suivante →</button>{% endif %}
