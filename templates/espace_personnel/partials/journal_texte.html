@@ -1,0 +1,15 @@
+{% if entree.situation and entree.situation|trim %}
+    <p class="journal-story">{{ entree.situation }}</p>
+{% endif %}
+{% if entree.emotions and entree.emotions|trim %}
+    <section class="journal-supplement"><h2>Ce que je ressens</h2><p>{{ entree.emotions }}</p></section>
+{% endif %}
+{% if entree.reaction_automatique and entree.reaction_automatique|trim %}
+    <section class="journal-supplement"><h2>Ma réaction automatique</h2><p>{{ entree.reaction_automatique }}</p></section>
+{% endif %}
+{% if entree.choix_conscient and entree.choix_conscient|trim %}
+    <section class="journal-supplement"><h2>Mon choix conscient</h2><p>{{ entree.choix_conscient }}</p></section>
+{% endif %}
+{% if entree.notes_libres and entree.notes_libres|trim %}
+    <section class="journal-supplement"><h2>Mes notes</h2><p>{{ entree.notes_libres }}</p></section>
+{% endif %}

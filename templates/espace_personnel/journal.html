@@ -30,11 +30,14 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 .journal-flash { margin-bottom: 18px; padding: 12px 15px; border-radius: 12px; background: #e7f8f7; color: #17636c; text-align: center; }
 .journal-flash.error { background: #fff0f0; color: #9b3030; }
 .entries-title { margin-bottom: 12px; color: #596970; font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; }
-.entries-list { display: grid; gap: 12px; }
-.journal-entry { display: block; padding: 17px 19px; border: 1px solid rgba(31,98,142,.12); border-radius: 14px; background: #fbfefd; color: inherit; text-decoration: none; }
-.journal-entry:hover { border-color: #00a8a8; transform: translateY(-1px); }
+.entries-list { display: grid; gap: 24px; }
+.journal-entry { padding: clamp(20px, 4vw, 32px); border: 1px solid #eee5d7; border-radius: 14px; background: #fffdf7; color: #33434c; }
 .journal-entry-date { color: #1f628e; font-weight: 800; }
-.journal-entry-text { margin-top: 5px; color: #66777e; line-height: 1.5; }
+.journal-story, .journal-supplement p { white-space: pre-wrap; overflow-wrap: anywhere; font: 1.05rem/1.8 Georgia, serif; }
+.journal-supplement { margin-top: 24px; }
+.journal-supplement h2 { margin-bottom: 8px; color: #1f628e; font: 700 1.05rem Georgia, serif; }
+.journal-entry-actions { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 22px; }
+.journal-entry-actions a { color: #1f628e; font-weight: 700; }
 .journal-entry-tag { display: inline-block; margin-top: 8px; padding: 4px 8px; border-radius: 999px; background: #e7f8f7; color: #17636c; font-size: .72rem; font-weight: 800; }
 .journal-empty { padding: 44px 18px; text-align: center; color: #7a898f; }
 .journal-moon { display: block; margin-bottom: 9px; font-size: 2.5rem; }
@@ -48,9 +51,9 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
     <a class="journal-back" style="margin-left:18px" href="{{ url_for('espace_personnel.calendrier', mois=date_du_jour[:7]) }}">Mon calendrier</a>
     <article class="journal-page">
         <header class="journal-header">
-            <p class="journal-kicker">Observer ce qui se joue</p>
+            <p class="journal-kicker">Un endroit pour écrire</p>
             <h1 class="journal-title">Mon journal de bord</h1>
-            <p class="journal-intro">Dépose ton vécu, repère tes réactions automatiques et garde une trace du ciel qui accompagnait chaque observation.</p>
+            <p class="journal-intro">Un souvenir, une journée, une période de ta vie… Raconte ce que tu as envie de garder. Tu pourras y revenir et approfondir quand tu le souhaites.</p>
         </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -87,11 +90,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             {% if cycle_source %}<input type="hidden" name="cycle_lunaire_id" value="{{ cycle_source.id }}">{% endif %}
             {% if enjeu_source %}<input type="hidden" name="enjeu_periode_id" value="{{ enjeu_source.id }}">{% endif %}
             {% include "espace_personnel/partials/journal_periode.html" %}
-            <div class="journal-field"><label for="niveau_energie">Niveau d’énergie — facultatif</label><select id="niveau_energie" name="niveau_energie"><option value="">Je ne souhaite pas le noter</option>{% for niveau in range(1, 11) %}<option value="{{ niveau }}" {% if request.form.get('niveau_energie') == niveau|string %}selected{% endif %}>{{ niveau }}</option>{% endfor %}</select></div>
-            <div class="journal-field journal-field--wide journal-field--story"><label for="situation">{{ "Que souhaites-tu garder de cette journée ?" if contact_source else "Ce que j’ai envie de déposer" }}</label><textarea id="situation" name="situation" placeholder="Raconte librement ce qui s’est passé, ce qui t’a marquée ou ce qui fait écho pour toi…">{% if request.method == 'POST' %}{{ request.form.get('situation', '') }}{% elif enjeu_source %}Ce qui me parle dans cet enjeu : {% endif %}</textarea></div>
+            <div class="journal-field journal-field--wide journal-field--story"><label for="situation">Qu’est-ce que tu as envie de raconter ?</label><textarea id="situation" name="situation" placeholder="Écris librement : un moment sympa, ce que tu traverses, une pensée, un souvenir…">{% if request.method == 'POST' %}{{ request.form.get('situation', '') }}{% elif enjeu_source %}Ce qui me parle dans cet enjeu : {% endif %}</textarea></div>
             <details class="journal-deeper">
-                <summary>Aller plus loin dans mon observation — facultatif</summary>
+                <summary>J’ai envie d’aller plus loin — facultatif</summary>
                 <div class="journal-deeper-fields">
+                    <div class="journal-field"><label for="niveau_energie">Niveau d’énergie — facultatif</label><select id="niveau_energie" name="niveau_energie"><option value="">Je ne souhaite pas le noter</option>{% for niveau in range(1, 11) %}<option value="{{ niveau }}" {% if request.form.get('niveau_energie') == niveau|string %}selected{% endif %}>{{ niveau }}</option>{% endfor %}</select></div>
                     <div class="journal-field"><label for="emotions">Ce que je ressens</label><input id="emotions" name="emotions" type="text" maxlength="500" placeholder="Les émotions présentes…" value="{{ request.form.get('emotions', '') }}"></div>
                     <div class="journal-field"><label for="reaction_automatique">Ma réaction automatique</label><textarea id="reaction_automatique" name="reaction_automatique">{{ request.form.get('reaction_automatique', '') }}</textarea></div>
                     <div class="journal-field"><label for="choix_conscient">Le choix conscient que je peux faire</label><textarea id="choix_conscient" name="choix_conscient">{{ request.form.get('choix_conscient', '') }}</textarea></div>
@@ -100,15 +103,19 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             <button type="submit" class="journal-submit">Enregistrer dans mon journal</button>
         </form>
 
-        <h2 class="entries-title">Mes anciennes observations</h2>
+        <h2 class="entries-title">Les pages de mon journal</h2>
         {% if entrees %}
             <div class="entries-list">
                 {% for entree in entrees %}
-                    <a class="journal-entry" href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">
+                    <article class="journal-entry" id="entree-{{ entree.id }}">
                         <div class="journal-entry-date">{% include "espace_personnel/partials/journal_date.html" %}{% if entree.niveau_energie is not none %} · Énergie {{ entree.niveau_energie }}/10{% endif %}</div>
-                        {% if entree.situation %}<p class="journal-entry-text">{{ entree.situation|truncate(180) }}</p>{% elif entree.emotions %}<p class="journal-entry-text">{{ entree.emotions }}</p>{% endif %}
+                        {% include "espace_personnel/partials/journal_texte.html" %}
                         {% if entree.cycle_lunaire_id %}<span class="journal-entry-tag">Reliée à un cycle lunaire</span>{% endif %}
-                    </a>
+                        <div class="journal-entry-actions">
+                            <a href="{{ url_for('espace_personnel.modifier', entree_id=entree.id) }}">Modifier cette page</a>
+                            <a href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">Relire et approfondir →</a>
+                        </div>
+                    </article>
                 {% endfor %}
             </div>
         {% else %}

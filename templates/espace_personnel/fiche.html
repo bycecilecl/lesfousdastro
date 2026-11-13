@@ -14,6 +14,13 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 .journal-section { margin-top: 30px; }
 .journal-section h2 { margin-bottom: 10px; color: #1f628e; font: 700 1.15rem Georgia, serif; }
 .journal-section p { white-space: pre-wrap; font: 1.05rem/1.8 Georgia, serif; }
+.journal-story, .journal-supplement p { white-space: pre-wrap; overflow-wrap: anywhere; font: 1.05rem/1.8 Georgia, serif; }
+.journal-story { margin-top: 28px; }
+.journal-supplement { margin-top: 30px; }
+.journal-supplement h2 { margin-bottom: 10px; color: #1f628e; font: 700 1.15rem Georgia, serif; }
+.journal-explore > summary { color: #1f628e; font-weight: 700; cursor: pointer; }
+.journal-sky { margin-top: 30px; padding: 16px; border: 1px solid #eee5d7; border-radius: 12px; }
+.journal-sky > summary { font-family: 'Segoe UI', sans-serif; }
 .journal-empty { color: #98918a; font-style: italic; }
 .journal-actions { display: flex; justify-content: flex-end; margin-top: 42px; padding-top: 22px; border-top: 1px solid #eee5d7; }
 .journal-edit { padding: 11px 18px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 700; text-decoration: none; }
@@ -53,25 +60,20 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 {% block content %}
 {% include "espace_personnel/_navigation.html" %}
 <main class="journal-shell">
-    <a class="journal-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour au journal</a>
+    <a class="journal-back" href="{{ url_for('espace_personnel.journal') }}#entree-{{ entree.id }}">← Retour au journal</a>
     {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="journal-flash {{ categorie }}">{{ message }}</p>{% endfor %}{% endwith %}
     <article class="journal-page">
         <div class="journal-date">{% include "espace_personnel/partials/journal_date.html" %}</div>
         <h1 class="journal-title">{{ "Ma période" if entree.est_periode else "Mon observation" }}</h1>
         {% if entree.niveau_energie is not none %}<span class="journal-energy">Énergie · {{ entree.niveau_energie }}/10</span>{% endif %}
         {% if cycle_source %}<div class="cycle-source">Cette observation est reliée à ton cycle lunaire. <a href="{{ url_for('espace_personnel.fiche_cycle_lunaire', cycle_id=cycle_source.id) }}">Revoir le cycle →</a></div>{% endif %}
-        {% if entree.est_periode %}<p class="journal-empty">Le contexte astrologique conservé correspond à la date de début de cette période.</p>{% endif %}
         {% if photo_transits and photo_transits.get('contact_journal') %}
         {% set contact = photo_transits.contact_journal %}
         <section class="journal-section"><h2>Mon repère dans le calendrier</h2><p>{{ contact.libelle }}</p>{% if contact.domaine %}<p>{{ contact.domaine }}</p>{% endif %}{% if contact.rien_particulier %}<p>Rien de particulier signalé.</p>{% endif %}<a href="{{ url_for('espace_personnel.calendrier', mois=contact.date[:7]) }}">Retrouver ce mois dans le calendrier</a></section>
         {% endif %}
-        <section class="journal-section"><h2>Ce que j’ai déposé</h2><p class="{% if not entree.situation %}journal-empty{% endif %}">{{ entree.situation or 'Rien de noté.' }}</p></section>
-        <section class="journal-section"><h2>Ce que je ressens</h2><p class="{% if not entree.emotions %}journal-empty{% endif %}">{{ entree.emotions or 'Rien de noté.' }}</p></section>
-        <section class="journal-section"><h2>Ma réaction automatique</h2><p class="{% if not entree.reaction_automatique %}journal-empty{% endif %}">{{ entree.reaction_automatique or 'Rien de noté.' }}</p></section>
-        <section class="journal-section"><h2>Mon choix conscient</h2><p class="{% if not entree.choix_conscient %}journal-empty{% endif %}">{{ entree.choix_conscient or 'Rien de noté.' }}</p></section>
-        {% if entree.notes_libres %}<section class="journal-section"><h2>Mes anciennes notes libres</h2><p>{{ entree.notes_libres }}</p></section>{% endif %}
-        <section class="lab-links" id="liaisons-labo">
-            <h2>Relier cette observation à mon Labo</h2>
+        {% include "espace_personnel/partials/journal_texte.html" %}
+        <details class="lab-links journal-explore" id="liaisons-labo">
+            <summary>Explorer cette situation dans mon Labo{% if liaisons_labo %} · {{ liaisons_labo|length }} lien{% if liaisons_labo|length != 1 %}s{% endif %}{% endif %}</summary>
             <p class="lab-links-intro">Associe ce que tu as vécu à un mécanisme que tu souhaites observer dans le temps.</p>
 
             {% if liaisons_labo %}
@@ -100,10 +102,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             {% else %}
                 <p class="lab-link-empty">Cette observation est déjà reliée à tous les mécanismes présents dans ton Labo.</p>
             {% endif %}
-        </section>
+        </details>
         {% if photo_transits %}
-            <section class="journal-section">
-                <h2>Le ciel autour de cette observation</h2>
+            <details class="journal-sky journal-explore">
+                <summary>Le ciel autour de cette observation</summary>
+                {% if entree.est_periode %}<p class="journal-empty">Le contexte astrologique conservé correspond à la date de début de cette période.</p>{% endif %}
                 {% if photo_transits.get('transits') %}
                     <div class="transits-group">
                         <h3>Climat de fond</h3>
@@ -140,9 +143,21 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                 {% else %}
                     <p class="journal-empty">Aucun transit majeur retenu pour cette date.</p>
                 {% endif %}
-            </section>
+            </details>
         {% endif %}
         <div class="journal-actions"><a class="journal-edit" href="{{ url_for('espace_personnel.modifier', entree_id=entree.id) }}">Modifier cette entrée</a></div>
     </article>
 </main>
+{% endblock %}
+{% block scripts %}
+<script>
+(() => {
+    const labo = document.getElementById('liaisons-labo');
+    const ouvrirLabo = () => {
+        if (labo && window.location.hash === '#liaisons-labo') labo.open = true;
+    };
+    ouvrirLabo();
+    window.addEventListener('hashchange', ouvrirLabo);
+})();
+</script>
 {% endblock %}

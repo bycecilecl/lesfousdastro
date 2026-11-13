@@ -13,6 +13,10 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 .fiche-field label { color: #1f628e; font-size: .9rem; font-weight: 700; }
 .fiche-field input, .fiche-field select, .fiche-field textarea { width: 100%; padding: 12px 14px; border: 1px solid rgba(31,98,142,.22); border-radius: 12px; background: white; color: #263645; font: inherit; }
 .fiche-field textarea { min-height: 105px; resize: vertical; }
+.fiche-field--story textarea { min-height: 210px; font: 1.05rem/1.65 Georgia, serif; box-sizing: border-box; }
+.fiche-deeper { grid-column: 1 / -1; border: 1px solid rgba(31,98,142,.14); border-radius: 14px; }
+.fiche-deeper summary { padding: 14px 16px; color: #1f628e; font-weight: 800; cursor: pointer; }
+.fiche-deeper-fields { display: grid; gap: 17px; padding: 4px 16px 17px; }
 .fiche-field input:focus, .fiche-field select:focus, .fiche-field textarea:focus { outline: 3px solid rgba(0,168,168,.13); border-color: #00a8a8; }
 .fiche-actions { grid-column: 1 / -1; display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
 .fiche-button { border: 0; border-radius: 999px; padding: 13px 20px; color: white; font-weight: 700; cursor: pointer; }
@@ -33,12 +37,17 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
         <form method="post" action="{{ url_for('espace_personnel.modifier', entree_id=entree.id) }}" class="fiche-form">
 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
             {% include "espace_personnel/partials/journal_periode.html" %}
+            <div class="fiche-field fiche-field--wide fiche-field--story"><label for="situation">Qu’est-ce que tu as envie de raconter ?</label><textarea id="situation" name="situation">{{ request.form.get('situation', '') if request.method == 'POST' else (entree.situation or '') }}</textarea></div>
+            <details class="fiche-deeper">
+                <summary>J’ai envie d’aller plus loin — facultatif</summary>
+                <div class="fiche-deeper-fields">
             <div class="fiche-field"><label for="niveau_energie">Niveau d’énergie — facultatif</label><select id="niveau_energie" name="niveau_energie"><option value="">Non renseigné</option>{% for niveau in range(1, 11) %}<option value="{{ niveau }}" {% if (request.method == 'POST' and request.form.get('niveau_energie') == niveau|string) or (request.method != 'POST' and niveau == entree.niveau_energie) %}selected{% endif %}>{{ niveau }}</option>{% endfor %}</select></div>
             <div class="fiche-field fiche-field--wide"><label for="emotions">Émotions ressenties</label><input id="emotions" name="emotions" type="text" maxlength="500" value="{{ request.form.get('emotions', '') if request.method == 'POST' else (entree.emotions or '') }}"></div>
-            <div class="fiche-field fiche-field--wide"><label for="situation">Ce que j’ai envie de déposer</label><textarea id="situation" name="situation">{{ request.form.get('situation', '') if request.method == 'POST' else (entree.situation or '') }}</textarea></div>
             <div class="fiche-field fiche-field--wide"><label for="reaction_automatique">Ma réaction automatique</label><textarea id="reaction_automatique" name="reaction_automatique">{{ request.form.get('reaction_automatique', '') if request.method == 'POST' else (entree.reaction_automatique or '') }}</textarea></div>
             <div class="fiche-field fiche-field--wide"><label for="choix_conscient">Le choix conscient que je peux faire</label><textarea id="choix_conscient" name="choix_conscient">{{ request.form.get('choix_conscient', '') if request.method == 'POST' else (entree.choix_conscient or '') }}</textarea></div>
             <div class="fiche-field fiche-field--wide"><label for="notes_libres">Notes libres</label><textarea id="notes_libres" name="notes_libres">{{ request.form.get('notes_libres', '') if request.method == 'POST' else (entree.notes_libres or '') }}</textarea></div>
+                </div>
+            </details>
             <div class="fiche-actions"><button class="fiche-button fiche-button--save" type="submit">Enregistrer les modifications</button></div>
         </form>
         <form class="fiche-delete" method="post" action="{{ url_for('espace_personnel.supprimer', entree_id=entree.id) }}" onsubmit="return confirm('Supprimer définitivement cette observation ?');">
