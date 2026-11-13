@@ -1,0 +1,12 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='espace-footer.css') }}">
+<footer class="espace-footer">
+    <span class="espace-footer-brand">Les Fous d’Astro</span>
+    <nav aria-label="Aide et informations légales">
+        <span aria-hidden="true">·</span>
+        <span><a href="{{ url_for('legal_bp.aide_faq') }}">Aide</a> / <a href="{{ url_for('pages_bp.contact') }}">Contact</a></span>
+        <span aria-hidden="true">·</span>
+        <a href="{{ url_for('legal_bp.politique_confidentialite') }}">Confidentialité</a>
+        <span aria-hidden="true">·</span>
+        <a href="{{ url_for('legal_bp.mentions_legales') }}">Mentions légales</a>
+    </nav>
+</footer>
