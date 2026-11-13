@@ -37,7 +37,7 @@ body {
 .mechanism-tag--status { background: #eef2fb; color: #405981; }
 .mechanism-tracking { margin-top: 14px; color: #526b73; font-size: .82rem; font-weight: 700; }
 .mechanism-tracking--empty { color: #a0694d; }
-.mechanism-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(31,98,142,.1); }
+.mechanism-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(31,98,142,.1); }
 .mechanism-date { color: #849198; font-size: .78rem; }
 .lab-button { display: inline-block; padding: 9px 15px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 800; text-decoration: none; font-size: .84rem; }
 .lab-empty { padding: 48px 20px; border: 1px dashed rgba(31,98,142,.24); border-radius: 18px; text-align: center; color: #60727a; }
@@ -111,7 +111,8 @@ body {
                         {% endif %}
                         <footer class="mechanism-footer">
                             <span class="mechanism-date">Mis à jour le {{ mecanisme.date_modification.strftime('%d.%m.%Y') }}</span>
-                            <a class="lab-button" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}">Ouvrir</a>
+                            <a class="lab-button" href="{{ url_for('espace_personnel.decoder_depuis_labo', mecanisme_id=mecanisme.id) }}">Décoder / reprendre</a>
+                            <a class="lab-button" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}">Fiche du mécanisme</a>
                         </footer>
                     </article>
                 {% endfor %}

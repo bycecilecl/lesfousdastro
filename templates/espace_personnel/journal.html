@@ -54,6 +54,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='choix-mecanismes.css') }}">
 {% include "espace_personnel/_navigation.html" %}
 <main class="journal-shell">
     <a class="journal-back" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
@@ -101,14 +102,17 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             {% include "espace_personnel/partials/journal_periode.html" %}
             <div class="journal-field journal-field--wide journal-field--story"><label for="situation">Qu’est-ce que tu as envie de raconter ?</label><textarea id="situation" name="situation" placeholder="Écris librement : un moment sympa, ce que tu traverses, une pensée, un souvenir…">{% if request.method == 'POST' %}{{ request.form.get('situation', '') }}{% elif enjeu_source %}Ce qui me parle dans cet enjeu : {% endif %}</textarea></div>
             <button type="submit" name="action" value="enregistrer" class="journal-submit">Enregistrer dans mon journal</button>
-            <details class="journal-deeper" {% if request.method == 'POST' and request.form.get('mecanisme_id') %}open{% endif %}>
-                <summary>Aller plus loin : relier ou décoder un mécanisme</summary>
+            {% set selection_mecanismes = (request.form.getlist('mecanisme_ids') + request.form.getlist('mecanisme_id')) if request.method == 'POST' else request.args.getlist('mecanisme_id') %}
+            <details class="journal-deeper" {% if selection_mecanismes %}open{% endif %}>
+                <summary>Aller plus loin : relier ou décoder des mécanismes</summary>
                 <div class="journal-deeper-fields">
                     {% if mecanismes_journal %}
-                    <p class="journal-mechanism-help">Choisis le mécanisme que tu reconnais dans cette situation. Tu peux simplement le relier à ta note, ou enregistrer et ouvrir directement les six étapes du décodage.</p>
-                    <div class="journal-field"><label for="mecanisme-journal">Mécanisme concerné — facultatif</label><select id="mecanisme-journal" name="mecanisme_id"><option value="">Choisir dans mon Labo</option>{% for mecanisme in mecanismes_journal %}<option value="{{ mecanisme.id }}" {% if request.form.get('mecanisme_id') == mecanisme.id|string %}selected{% endif %}>{{ mecanisme.titre|majuscule_initiale }}</option>{% endfor %}</select></div>
-                    <div class="journal-field"><label for="indice-journal">Ce qui montre que le mécanisme était à l’œuvre</label><textarea id="indice-journal" name="indice_pour">{{ request.form.get('indice_pour', '') }}</textarea></div>
-                    <button class="journal-mechanism-button" type="submit" name="action" value="decoder">Enregistrer et décoder ce mécanisme →</button>
+                    <p class="journal-mechanism-help">Coche les mécanismes que tu reconnais dans cette situation. Tu peux les relier à ta note, puis choisir celui que tu souhaites décoder.</p>
+                    {% with choix_mecanismes=mecanismes_journal, prefixe_choix='journal', ids_selectionnes=selection_mecanismes, ids_exclus=[] %}
+                    {% include "espace_personnel/partials/choix_mecanismes.html" %}
+                    {% endwith %}
+                    <div class="journal-field"><label for="indice-journal">Ce qui montre que ces mécanismes étaient à l’œuvre</label><textarea id="indice-journal" name="indice_pour">{{ request.form.get('indice_pour', '') }}</textarea></div>
+                    <button class="journal-mechanism-button" type="submit" name="action" value="decoder">Enregistrer et étudier les mécanismes choisis →</button>
                     {% else %}
                     <p class="journal-mechanism-help">Tu pourras relier cette situation et ouvrir les six étapes de décodage une fois un mécanisme ajouté dans <a href="{{ url_for('espace_personnel.laboratoire') }}">ton Labo</a>.</p>
                     {% endif %}
@@ -144,15 +148,17 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                         {% endif %}
                         {% if mecanismes_journal|length > ids_relies|length %}
                         <details class="journal-mechanism">
-                            <summary>Aller plus loin : étudier un mécanisme depuis cette note</summary>
+                            <summary>Aller plus loin : relier d’autres mécanismes à cette note</summary>
                             <form method="post" action="{{ url_for('espace_personnel.relier_entree_mecanisme', entree_id=entree.id) }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
                                 <input type="hidden" name="retour" value="journal">
-                                <div class="journal-field"><label for="mecanisme-{{ entree.id }}">Mécanisme concerné</label><select id="mecanisme-{{ entree.id }}" name="mecanisme_id" required><option value="">Choisir dans mon Labo</option>{% for mecanisme in mecanismes_journal %}{% if mecanisme.id not in ids_relies %}<option value="{{ mecanisme.id }}">{{ mecanisme.titre|majuscule_initiale }}</option>{% endif %}{% endfor %}</select></div>
-                                <div class="journal-field"><label for="indice-{{ entree.id }}">Ce qui montre que le mécanisme était à l’œuvre</label><textarea id="indice-{{ entree.id }}" name="indice_pour"></textarea></div>
+                                {% with choix_mecanismes=mecanismes_journal, prefixe_choix='note-' ~ entree.id, ids_selectionnes=[], ids_exclus=ids_relies %}
+                                {% include "espace_personnel/partials/choix_mecanismes.html" %}
+                                {% endwith %}
+                                <div class="journal-field"><label for="indice-{{ entree.id }}">Ce qui montre que ces mécanismes étaient à l’œuvre</label><textarea id="indice-{{ entree.id }}" name="indice_pour"></textarea></div>
                                 <div class="journal-mechanism-actions">
                                     <button class="journal-mechanism-button secondary" type="submit" name="action" value="relier">Relier seulement</button>
-                                    <button class="journal-mechanism-button" type="submit" name="action" value="decoder">Relier et décoder ce mécanisme →</button>
+                                    <button class="journal-mechanism-button" type="submit" name="action" value="decoder">Relier et étudier les mécanismes choisis →</button>
                                 </div>
                             </form>
                         </details>

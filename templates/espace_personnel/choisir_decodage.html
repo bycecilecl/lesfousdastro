@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Choisir un décodage | Les Fous d’Astro{% endblock %}
+{% block extra_css %}
+body { background:linear-gradient(135deg,#1f628e,#00a8a8 55%,#c0f0f7); min-height:100vh; font-family:'Segoe UI',sans-serif; }
+.choisir-shell { width:min(880px,calc(100% - 32px)); margin:40px auto 72px; }
+.choisir-back { display:inline-block; margin-bottom:18px; color:white; font-weight:700; }
+.choisir-page { padding:clamp(24px,5vw,42px); background:#fffdf7; border-radius:24px; color:#33434c; }
+.choisir-page h1 { color:#1f628e; font:700 clamp(1.7rem,4vw,2.5rem) Georgia,serif; }
+.choisir-page p { line-height:1.65; overflow-wrap:anywhere; }
+.choisir-liste { display:grid; gap:18px; margin-top:24px; }
+.choisir-item { padding:20px; border:1px solid #cce2df; background:white; border-radius:14px; }
+.choisir-item h2 { color:#1f628e; font-size:1.15rem; margin:0 0 12px; }
+.choisir-action { display:inline-block; border:0; border-radius:24px; padding:12px 17px; background:#1f628e; color:white; font:700 .95rem 'Segoe UI',sans-serif; text-decoration:none; cursor:pointer; }
+.choisir-form { display:grid; gap:15px; margin-top:30px; padding-top:22px; border-top:1px solid #dce8e4; }
+.choisir-form label { color:#1f628e; font-weight:700; }
+.choisir-form select { width:100%; box-sizing:border-box; padding:12px; border:1px solid #bfd6da; border-radius:10px; background:white; font:inherit; }
+.choisir-note { padding:18px; border-left:4px solid #00a8a8; white-space:pre-wrap; background:#eefafa; }
+.choisir-flash { padding:12px 16px; background:#e5f7f0; border-radius:12px; }
+.choisir-flash.error { color:#943939; background:#fff0f0; }
+{% endblock %}
+{% block content %}
+{% include "espace_personnel/_navigation.html" %}
+<main class="choisir-shell">
+    {% if entree %}<a class="choisir-back" href="{{ url_for('espace_personnel.journal') }}#entree-{{ entree.id }}">← Revenir à mon journal</a>{% else %}<a class="choisir-back" href="{{ url_for('espace_personnel.laboratoire') }}">← Revenir à mon Labo</a>{% endif %}
+    <article class="choisir-page">
+        {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie,message in messages %}<p class="choisir-flash {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
+        {% if entree %}
+        <h1>Quel mécanisme souhaites-tu décoder ?</h1>
+        <p class="choisir-note">{{ entree.situation or entree.emotions or entree.notes_libres or 'Situation notée dans le journal.' }}</p>
+        <p>Cette situation peut faire apparaître plusieurs mécanismes. Choisis celui que tu souhaites approfondir maintenant.</p>
+        <div class="choisir-liste">
+            {% for observation, lie in liaisons %}
+            <section class="choisir-item"><h2>{{ lie.titre|majuscule_initiale }}</h2><a class="choisir-action" href="{{ url_for('espace_personnel.decoder_mecanisme', observation_id=observation.id) }}">Décoder / reprendre →</a></section>
+            {% else %}<p>Cette note n’est pas encore reliée à un mécanisme. Tu peux les choisir depuis ton journal.</p>{% endfor %}
+        </div>
+        {% else %}
+        <h1>{{ mecanisme.titre|majuscule_initiale }}</h1>
+        <p>Choisis la situation que tu souhaites décoder. Tu peux aussi relier ce mécanisme à une autre note de ton journal.</p>
+        <div class="choisir-liste">
+            {% for observation in observations %}
+            <section class="choisir-item"><h2>{{ observation.date_observation.strftime('%d.%m.%Y') }}</h2><p>{{ observation.situation|truncate(240) }}</p><a class="choisir-action" href="{{ url_for('espace_personnel.decoder_mecanisme', observation_id=observation.id) }}">Décoder / reprendre →</a></section>
+            {% else %}<p>Aucune situation n’est encore reliée à ce mécanisme.</p>{% endfor %}
+        </div>
+        {% if entrees_disponibles %}
+        <form class="choisir-form" method="post" action="{{ url_for('espace_personnel.decoder_depuis_labo', mecanisme_id=mecanisme.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+            <input type="hidden" name="mecanisme_ids" value="{{ mecanisme.id }}">
+            <input type="hidden" name="action" value="decoder">
+            <label for="entree">Relier une autre situation du journal</label>
+            <select name="entree_id" id="entree" required><option value="">Choisir une note</option>{% for note in entrees_disponibles %}<option value="{{ note.id }}">{{ note.date_observation.strftime('%d.%m.%Y') }} · {{ (note.situation or note.emotions or note.notes_libres or 'Note du journal')|truncate(100) }}</option>{% endfor %}</select>
+            <button class="choisir-action" type="submit">Relier cette situation et décoder →</button>
+        </form>
+        {% endif %}
+        <p><a href="{{ url_for('espace_personnel.journal', mecanisme_id=mecanisme.id) }}">Écrire une nouvelle situation dans mon journal →</a></p>
+        {% endif %}
+    </article>
+</main>
+{% endblock %}

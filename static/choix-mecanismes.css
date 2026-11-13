@@ -1,0 +1,6 @@
+.choix-mecanismes { min-width:0; margin:0; padding:16px; border:1px solid #bed8da; border-radius:12px; }
+.choix-mecanismes legend { padding:0 6px; color:#1f628e; font-weight:700; }
+.choix-mecanismes p { margin:0 0 12px; color:#60747c; line-height:1.5; }
+.choix-mecanismes .choix-mecanisme { display:flex; align-items:flex-start; gap:10px; padding:10px 0; color:#33434c; font-weight:600; line-height:1.5; cursor:pointer; }
+.choix-mecanismes .choix-mecanisme input { flex:0 0 auto; width:auto; margin:5px 0 0; accent-color:#1f628e; }
+.choix-mecanisme span { overflow-wrap:anywhere; }

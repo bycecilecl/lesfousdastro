@@ -1,0 +1,12 @@
+<fieldset class="choix-mecanismes">
+    <legend>Mécanismes concernés</legend>
+    <p>Tu peux en cocher plusieurs pour cette même situation.</p>
+    {% for mecanisme in choix_mecanismes %}
+    {% if mecanisme.id not in ids_exclus|default([]) %}
+    <label class="choix-mecanisme" for="{{ prefixe_choix }}-{{ mecanisme.id }}">
+        <input id="{{ prefixe_choix }}-{{ mecanisme.id }}" type="checkbox" name="mecanisme_ids" value="{{ mecanisme.id }}" {% if mecanisme.id|string in ids_selectionnes|default([]) %}checked{% endif %}>
+        <span>{{ mecanisme.titre|majuscule_initiale }}</span>
+    </label>
+    {% endif %}
+    {% endfor %}
+</fieldset>

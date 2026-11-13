@@ -1157,12 +1157,9 @@ def journal():
         else:
             try:
                 est_periode, date_fin_periode = _dates_periode_journal(request.form, date_observation)
-                mecanisme_id = request.form.get("mecanisme_id", "").strip()
-                mecanisme_choisi = next((m for m in contexte_mecanismes["mecanismes_journal"] if str(m.id) == mecanisme_id), None)
-                if mecanisme_id and mecanisme_choisi is None:
-                    raise ValueError("Choisis un mécanisme présent dans ton Labo.")
-                if request.form.get("action") == "decoder" and mecanisme_choisi is None:
-                    raise ValueError("Choisis le mécanisme à décoder dans « Aller plus loin ».")
+                mecanismes_choisis = _mecanismes_choisis_journal(request.form, utilisateur.id)
+                if request.form.get("action") == "decoder" and not mecanismes_choisis:
+                    raise ValueError("Coche au moins un mécanisme à décoder dans « Aller plus loin ».")
             except ValueError as erreur:
                 flash(str(erreur), "error")
                 return render_template(
@@ -1220,26 +1217,16 @@ def journal():
             try:
                 db.session.add(entree)
                 db.session.flush()
-                liaison = None
-                if mecanisme_choisi:
-                    liaison = ObservationMecanisme(
-                        mecanisme_id=mecanisme_choisi.id, entree_journal_id=entree.id,
-                        date_observation=entree.date_observation,
-                        situation=entree.situation or entree.emotions or entree.notes_libres or "Situation notée dans le journal.",
-                        reaction_automatique=entree.reaction_automatique,
-                        indice_pour=request.form.get("indice_pour", "").strip() or None,
-                        notes_libres=entree.notes_libres,
-                    )
-                    db.session.add(liaison)
+                liaisons = _relier_situation_aux_mecanismes(entree, mecanismes_choisis)
                 db.session.commit()
             except Exception:
                 db.session.rollback()
                 flash("L’observation n’a pas pu être enregistrée.", "error")
             else:
-                flash("Ta page est enregistrée." + (" Elle est reliée au mécanisme choisi." if liaison else ""), "success")
-                if liaison and request.form.get("action") == "decoder":
-                    return redirect(url_for("espace_personnel.decoder_mecanisme", observation_id=liaison.id))
-                if liaison:
+                flash("Ta page est enregistrée." + (" Les liens avec ton Labo sont enregistrés aussi." if liaisons else ""), "success")
+                if liaisons and request.form.get("action") == "decoder":
+                    return redirect(url_for("espace_personnel.decoder_situation", entree_id=entree.id))
+                if liaisons:
                     return redirect(url_for("espace_personnel.journal") + f"#entree-{entree.id}")
                 return redirect(url_for("espace_personnel.fiche", entree_id=entree.id))
 
@@ -2064,50 +2051,22 @@ def relier_entree_mecanisme(entree_id):
                    if request.form.get("retour") == "journal"
                    else url_for("espace_personnel.fiche", entree_id=entree.id) + "#liaisons-labo")
     try:
-        mecanisme_id = int(request.form.get("mecanisme_id", ""))
-    except (TypeError, ValueError):
-        flash("Choisis un mécanisme à relier.", "error")
-        return redirect(destination)
-
-    mecanisme = _mecanisme_du_compte(mecanisme_id, utilisateur.id)
-    liaison_existante = ObservationMecanisme.query.filter_by(
-        entree_journal_id=entree.id,
-        mecanisme_id=mecanisme.id,
-    ).first()
-    if liaison_existante:
-        flash("Cette situation est déjà reliée à ce mécanisme.", "success")
-        if request.form.get("action") == "decoder":
-            return redirect(url_for("espace_personnel.decoder_mecanisme", observation_id=liaison_existante.id))
-        return redirect(destination)
-
-    situation = (
-        entree.situation
-        or entree.emotions
-        or entree.notes_libres
-        or "Observation issue du journal de bord."
-    )
-    liaison = ObservationMecanisme(
-        mecanisme_id=mecanisme.id,
-        entree_journal_id=entree.id,
-        date_observation=entree.date_observation,
-        situation=situation,
-        reaction_automatique=entree.reaction_automatique,
-        indice_pour=request.form.get("indice_pour", "").strip() or None,
-        element_contraire=request.form.get("element_contraire", "").strip() or None,
-        reaction_testee=request.form.get("reaction_testee", "").strip() or None,
-        resultat_obtenu=request.form.get("resultat_obtenu", "").strip() or None,
-        notes_libres=entree.notes_libres,
-    )
-    try:
-        db.session.add(liaison)
+        mecanismes = _mecanismes_choisis_journal(request.form, entree.utilisateur_id)
+        if not mecanismes:
+            raise ValueError("Coche au moins un mécanisme à relier à cette situation.")
+        _relier_situation_aux_mecanismes(entree, mecanismes)
         db.session.commit()
+    except ValueError as erreur:
+        db.session.rollback()
+        flash(str(erreur), "error")
     except Exception:
         db.session.rollback()
-        flash("Cette observation n’a pas pu être reliée au mécanisme.", "error")
+        current_app.logger.exception("Impossible de relier les mécanismes à l’entrée %s", entree.id)
+        flash("Les liens n’ont pas pu être enregistrés.", "error")
     else:
-        flash(f"Situation reliée à « {majuscule_initiale(mecanisme.titre)} ».", "success")
+        flash("Cette situation est reliée aux mécanismes choisis.", "success")
         if request.form.get("action") == "decoder":
-            return redirect(url_for("espace_personnel.decoder_mecanisme", observation_id=liaison.id))
+            return redirect(url_for("espace_personnel.decoder_situation", entree_id=entree.id))
     return redirect(destination)
 
 
@@ -3671,6 +3630,7 @@ def decoder_mecanisme(observation_id):
         mecanisme=mecanisme, entree=entree, etapes=ETAPES_DECODAGE, aides=AIDES_DECODAGE,
         reponses=reponses, revision=revision, etape_ouverte=etape,
         erreur=erreur, decodage=decodage, historique=historique,
+        mecanismes_meme_situation=_liaisons_de_situation(entree.id, entree.utilisateur_id) if entree else [],
     ), statut
 
 
@@ -3692,3 +3652,91 @@ def _contexte_mecanismes_journal(utilisateur_id):
             liaisons.setdefault(observation.entree_journal_id, []).append(observation)
     return {"mecanismes_journal": mecanismes, "mecanismes_journal_par_id": par_id,
             "liaisons_journal": liaisons}
+
+
+def _mecanismes_choisis_journal(formulaire, utilisateur_id):
+    """Accepte les cases à cocher et les anciens formulaires à choix unique."""
+    valeurs = formulaire.getlist("mecanisme_ids") + formulaire.getlist("mecanisme_id")
+    try:
+        ids = list(dict.fromkeys(int(v) for v in valeurs if v.strip()))
+        if any(i <= 0 for i in ids):
+            raise ValueError
+    except (ValueError, TypeError):
+        raise ValueError("Choisis des mécanismes présents dans ton Labo.")
+    if not ids:
+        return []
+    mecanismes = (MecanismeExploration.query
+        .join(AnalysePersonnelle, AnalysePersonnelle.id == MecanismeExploration.analyse_id)
+        .filter(AnalysePersonnelle.utilisateur_id == utilisateur_id,
+                MecanismeExploration.id.in_(ids)).all())
+    par_id = {m.id: m for m in mecanismes}
+    if set(ids) != set(par_id):
+        raise ValueError("Choisis uniquement des mécanismes présents dans ton Labo.")
+    return [par_id[i] for i in ids]
+
+
+def _relier_situation_aux_mecanismes(entree, mecanismes):
+    """Crée seulement les liens manquants ; le demandeur valide la transaction."""
+    if not mecanismes:
+        return []
+    EntreeJournal.query.filter_by(id=entree.id, utilisateur_id=entree.utilisateur_id).with_for_update().one()
+    existants = {o.mecanisme_id: o for o in ObservationMecanisme.query.filter_by(entree_journal_id=entree.id).all()}
+    liaisons = []
+    for mecanisme in mecanismes:
+        liaison = existants.get(mecanisme.id)
+        if liaison is None:
+            liaison = ObservationMecanisme(
+                mecanisme_id=mecanisme.id, entree_journal_id=entree.id,
+                date_observation=entree.date_observation,
+                situation=entree.situation or entree.emotions or entree.notes_libres or "Situation notée dans le journal.",
+                reaction_automatique=entree.reaction_automatique,
+                indice_pour=request.form.get("indice_pour", "").strip() or None,
+                notes_libres=entree.notes_libres,
+            )
+            db.session.add(liaison)
+        liaisons.append(liaison)
+    db.session.flush()
+    return liaisons
+
+
+def _liaisons_de_situation(entree_id, utilisateur_id):
+    return (db.session.query(ObservationMecanisme, MecanismeExploration)
+        .join(MecanismeExploration, MecanismeExploration.id == ObservationMecanisme.mecanisme_id)
+        .join(AnalysePersonnelle, AnalysePersonnelle.id == MecanismeExploration.analyse_id)
+        .filter(ObservationMecanisme.entree_journal_id == entree_id,
+                AnalysePersonnelle.utilisateur_id == utilisateur_id)
+        .order_by(MecanismeExploration.titre.asc()).all())
+
+
+@espace_personnel_bp.route("/journal/<int:entree_id>/decoder")
+def decoder_situation(entree_id):
+    entree = _entree_courante_ou_404(entree_id)
+    liaisons = _liaisons_de_situation(entree.id, entree.utilisateur_id)
+    if len(liaisons) == 1:
+        return redirect(url_for("espace_personnel.decoder_mecanisme", observation_id=liaisons[0][0].id))
+    return render_template("espace_personnel/choisir_decodage.html", entree=entree,
+                           mecanisme=None, liaisons=liaisons, observations=[], entrees_disponibles=[])
+
+
+@espace_personnel_bp.route("/mecanismes/<int:mecanisme_id>/decoder", methods=["GET", "POST"])
+def decoder_depuis_labo(mecanisme_id):
+    mecanisme = _mecanisme_courant_ou_404(mecanisme_id)
+    if request.method == "POST":
+        verifier_csrf_espace()
+        if request.form.getlist("mecanisme_ids") != [str(mecanisme.id)]:
+            abort(400)
+        entree_id = request.form.get("entree_id", type=int)
+        if not entree_id:
+            flash("Choisis une situation dans ton journal.", "error")
+        else:
+            return relier_entree_mecanisme(entree_id)
+    observations = (ObservationMecanisme.query.filter_by(mecanisme_id=mecanisme.id)
+                    .order_by(ObservationMecanisme.date_observation.desc()).all())
+    if len(observations) == 1 and request.method == "GET":
+        return redirect(url_for("espace_personnel.decoder_mecanisme", observation_id=observations[0].id))
+    ids_relies = {o.entree_journal_id for o in observations if o.entree_journal_id}
+    entrees = (EntreeJournal.query.filter_by(utilisateur_id=_utilisateur_espace_courant().id)
+               .order_by(EntreeJournal.date_observation.desc()).all())
+    return render_template("espace_personnel/choisir_decodage.html", mecanisme=mecanisme,
+                           entree=None, liaisons=[], observations=observations,
+                           entrees_disponibles=[e for e in entrees if e.id not in ids_relies])

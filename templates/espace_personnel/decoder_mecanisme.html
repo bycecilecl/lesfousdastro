@@ -58,6 +58,15 @@ body { background: linear-gradient(135deg, #1f628e, #00a8a8 55%, #c0f0f7); min-h
             <p>{{ observation.situation }}</p>
             {% if observation.indice_pour %}<strong>Ce qui m’a fait reconnaître ce mécanisme</strong><p>{{ observation.indice_pour }}</p>{% endif %}
         </aside>
+        {% if mecanismes_meme_situation|length > 1 %}
+        <details class="decode-history">
+            <summary>Les autres mécanismes repérés dans cette situation</summary>
+            <p class="decode-small">La situation est commune. Chaque mécanisme garde ses propres réponses.</p>
+            <ul>{% for episode, autre in mecanismes_meme_situation %}
+                {% if episode.id != observation.id %}<li><a href="{{ url_for('espace_personnel.decoder_mecanisme', observation_id=episode.id) }}">{{ autre.titre|majuscule_initiale }} →</a></li>{% endif %}
+            {% endfor %}</ul>
+        </details>
+        {% endif %}
         <p class="decode-small">{% if decodage %}Dernier enregistrement : {{ decodage.date_modification.strftime('%d.%m.%Y') }}.{% else %}Tes réponses seront conservées avec cet épisode quand tu les enregistreras.{% endif %} Ce parcours ne déclenche aucun appel IA.</p>
         <form method="post" id="form-decodage">
             <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">

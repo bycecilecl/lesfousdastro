@@ -62,6 +62,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 @media (max-width: 620px) { .lab-link-form { grid-template-columns: 1fr; } .lab-link-wide, .lab-link-submit { grid-column: 1; } .lab-linked-item { align-items: flex-start; flex-direction: column; } }
 {% endblock %}
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='choix-mecanismes.css') }}">
 {% include "espace_personnel/_navigation.html" %}
 <main class="journal-shell">
     <a class="journal-back" href="{{ url_for('espace_personnel.journal') }}#entree-{{ entree.id }}">← Retour au journal</a>
@@ -78,7 +79,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
         {% include "espace_personnel/partials/journal_texte.html" %}
         <details class="lab-links journal-explore" id="liaisons-labo">
             <summary>Aller plus loin{% if liaisons_labo %} · {{ liaisons_labo|length }} mécanisme{% if liaisons_labo|length != 1 %}s{% endif %} relié{% if liaisons_labo|length != 1 %}s{% endif %}{% endif %}</summary>
-            <p class="lab-links-intro">Relie cette situation à un mécanisme que tu reconnais. Tu pourras t’arrêter là ou choisir de le décoder plus en profondeur.</p>
+            <p class="lab-links-intro">Relie cette situation à un ou plusieurs mécanismes que tu reconnais. Tu pourras ensuite choisir lequel décoder.</p>
 
             {% if liaisons_labo %}
                 <div class="lab-linked-list">
@@ -99,9 +100,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             {% if mecanismes_disponibles %}
                 <form class="lab-link-form" method="post" action="{{ url_for('espace_personnel.relier_entree_mecanisme', entree_id=entree.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
-                    <div class="lab-link-field lab-link-wide"><label for="mecanisme_id">Mécanisme concerné</label><select id="mecanisme_id" name="mecanisme_id" required><option value="">Choisir dans mon Labo</option>{% for mecanisme in mecanismes_disponibles %}<option value="{{ mecanisme.id }}">{{ mecanisme.titre|majuscule_initiale }}</option>{% endfor %}</select></div>
-                    <div class="lab-link-field"><label for="indice_pour">Ce qui montre que le mécanisme était à l’œuvre</label><textarea id="indice_pour" name="indice_pour"></textarea></div>
-                    <button class="lab-link-submit" type="submit">Relier au mécanisme</button>
+                    {% with choix_mecanismes=mecanismes_disponibles, prefixe_choix='fiche-' ~ entree.id, ids_selectionnes=[], ids_exclus=[] %}
+                    {% include "espace_personnel/partials/choix_mecanismes.html" %}
+                    {% endwith %}
+                    <div class="lab-link-field"><label for="indice_pour">Ce qui montre que ces mécanismes étaient à l’œuvre</label><textarea id="indice_pour" name="indice_pour"></textarea></div>
+                    <button class="lab-link-submit" type="submit">Relier les mécanismes choisis</button>
                 </form>
             {% elif not liaisons_labo %}
                 <p class="lab-link-empty">Ajoute d’abord un mécanisme dans ton Labo pour pouvoir relier cette observation.</p>
