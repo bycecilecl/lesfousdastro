@@ -1075,6 +1075,26 @@ def ciel_natal():
     return render_template("espace_personnel/ciel_natal.html", profil=profil_astral, theme=theme)
 
 
+@espace_personnel_bp.route("/profil/exporter-journal-labo", methods=["POST"])
+def exporter_journal_labo():
+    if not administratrice_connectee():
+        abort(404)
+    verifier_csrf_espace()
+    from utils.transfert_espace import exporter_compte
+    utilisateur = _utilisateur_espace_courant()
+    origine = "local" if _acces_dev_sur_machine_locale() else "lesfousdastro.fr"
+    try:
+        contenu = exporter_compte(utilisateur, origine)
+    except ValueError as erreur:
+        flash(str(erreur), "error")
+        return redirect(url_for("espace_personnel.profil"))
+    return Response(contenu, mimetype="application/json", headers={
+        "Content-Disposition": 'attachment; filename="fda-journal-labo-' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '.json"',
+        "Cache-Control": "no-store, private", "X-Content-Type-Options": "nosniff",
+    })
+
+
+
 def _rendre_journal(utilisateur, **contexte):
     """Journal à deux colonnes : une seule entrée ouverte et l’index privé du membre."""
     donnees = {

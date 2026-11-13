@@ -1,0 +1,20 @@
+{% if outils_mails_admin %}
+<section class="profil-carte" id="copie-locale">
+    <h2>Copier mes données en local</h2>
+    <p>Journal, mécanismes, situations reliées, réponses de décodage et thème natal de ton compte uniquement. Aucun appel IA.</p>
+    <form method="post" action="{{ url_for('espace_personnel.exporter_journal_labo') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+        <button class="profil-submit" type="submit">Télécharger mes données{% if transfert_local_autorise %} locales{% endif %}</button>
+    </form>
+    {% if transfert_local_autorise %}
+    <p class="profil-help">Pour récupérer tes notes en ligne, télécharge le fichier depuis ce même bouton sur le site de production, puis sélectionne-le ici.</p>
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('espace_personnel.importer_journal_labo') }}" class="profil-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+        <div class="profil-champ large"><label for="export-journal">Fichier de production</label><input id="export-journal" type="file" name="export_journal" accept=".json,application/json" required></div>
+        <label class="profil-help"><input type="checkbox" name="confirmer_copie" value="oui" required> Copier dans mon compte local. Une sauvegarde sera faite avant l’import. Mes notes locales seront conservées ; mes données de naissance et mon thème natal seront repris de l’export.</label>
+        <p class="profil-help">L’adresse email doit être identique dans les deux comptes. Un même élément réimporté n’est pas ajouté en double. Les copies déjà importées restent conservées si la version en production a changé. Les PDF, mots de passe, abonnements et consentements ne sont pas transférés.</p>
+        <button class="profil-submit" type="submit">Importer avec sauvegarde du local</button>
+    </form>
+    {% endif %}
+</section>
+{% endif %}

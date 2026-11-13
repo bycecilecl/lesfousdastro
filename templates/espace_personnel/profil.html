@@ -150,6 +150,7 @@
             <button class="profil-submit" type="submit">Enregistrer mon choix</button>
         </form>
     </section>
+    {% with transfert_local_autorise=false %}{% include 'espace_personnel/partials/transfert_journal_labo.html' %}{% endwith %}
 </main>
 {% endblock %}
 {% block scripts %}
