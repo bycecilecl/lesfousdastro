@@ -1,0 +1,28 @@
+{% with entree=entree_ouverte %}
+<article class="journal-entry" id="entree-{{ entree.id }}">
+    <p class="journal-entry-date">{% include "espace_personnel/partials/journal_date.html" %}</p>
+    <h2 class="journal-panel-title">{{ 'Ma période' if entree.est_periode else 'Ma page du jour' }}</h2>
+    {% if entree.niveau_energie is not none %}<p class="journal-entry-tag">Énergie {{ entree.niveau_energie }}/10</p>{% endif %}
+    {% include "espace_personnel/partials/journal_texte.html" %}
+    <div class="journal-entry-actions"><a class="journal-mechanism-button secondary" href="{{ url_for('espace_personnel.journal', entree=entree.id, mode='modifier') }}#page-journal">Modifier cette entrée</a>
+        <details class="journal-delete"><summary>Supprimer</summary><p>Cette entrée sera supprimée du journal. Cette action est définitive.</p><form method="post" action="{{ url_for('espace_personnel.supprimer', entree_id=entree.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button type="submit">Confirmer la suppression</button></form></details>
+    </div>
+    {% set episodes = liaisons_journal.get(entree.id, []) %}
+    {% set ids_relies = episodes|map(attribute='mecanisme_id')|list %}
+    <details class="journal-deeper journal-mechanism" id="aller-plus-loin">
+        <summary>Aller plus loin{% if episodes %} · {{ episodes|length }} mécanisme{% if episodes|length != 1 %}s{% endif %} relié{% if episodes|length != 1 %}s{% endif %}{% endif %}</summary>
+        <div class="journal-deeper-fields">
+            {% if episodes %}<div class="journal-linked">{% for episode in episodes %}<a href="{{ url_for('espace_personnel.decoder_mecanisme', observation_id=episode.id) }}">{{ mecanismes_journal_par_id[episode.mecanisme_id].titre|majuscule_initiale }} · ouvrir mon décodage →</a>{% endfor %}</div>{% endif %}
+            {% if mecanismes_journal|length > ids_relies|length %}
+            <p class="journal-mechanism-help">Relie cette note à un ou plusieurs mécanismes que tu reconnais.</p>
+            <form method="post" action="{{ url_for('espace_personnel.relier_entree_mecanisme', entree_id=entree.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><input type="hidden" name="retour" value="journal">
+                {% with choix_mecanismes=mecanismes_journal, prefixe_choix='note-' ~ entree.id, ids_selectionnes=[], ids_exclus=ids_relies %}{% include "espace_personnel/partials/choix_mecanismes.html" %}{% endwith %}
+                <button class="journal-mechanism-button" type="submit" name="action" value="decoder">Relier et ouvrir le décodage →</button>
+            </form>
+            {% elif not episodes %}<p>Tu peux ajouter tes mécanismes dans <a href="{{ url_for('espace_personnel.laboratoire') }}">Mes mécanismes</a>, puis les relier ici.</p>{% endif %}
+            <a class="journal-context-link" href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">Voir les repères astrologiques conservés avec cette entrée →</a>
+        </div>
+    </details>
+</article>
+{% endwith %}

@@ -1,6 +1,6 @@
 {% set periode = request.form.get('type_entree') == 'periode' if request.method == 'POST' else (entree.est_periode if entree is defined else false) %}
 {% set en_cours = request.form.get('toujours_en_cours') == 'oui' if request.method == 'POST' else (not entree.date_fin_periode if entree is defined else true) %}
-{% set champ = 'fiche-field' if entree is defined else 'journal-field' %}
+{% set champ = journal_classe_champ|default('fiche-field' if entree is defined else 'journal-field') %}
 <div class="{{ champ }} {{ champ }}--wide">
     <label for="type_entree">Cette observation concerne</label>
     <select id="type_entree" name="type_entree">

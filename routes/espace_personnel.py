@@ -1075,11 +1075,34 @@ def ciel_natal():
     return render_template("espace_personnel/ciel_natal.html", profil=profil_astral, theme=theme)
 
 
+def _rendre_journal(utilisateur, **contexte):
+    """Journal à deux colonnes : une seule entrée ouverte et l’index privé du membre."""
+    donnees = {
+        "entree_ouverte": None, "mode_modification": False,
+        "date_du_jour": datetime.now().date().isoformat(),
+        "contact_source": None, "cycle_source": None, "enjeu_source": None,
+        "interpretation_cycle": None, "domaines_contact": [],
+        "entrees": EntreeJournal.query.filter_by(utilisateur_id=utilisateur.id)
+            .order_by(EntreeJournal.date_observation.desc(), EntreeJournal.id.desc()).all(),
+        **_contexte_mecanismes_journal(utilisateur.id),
+    }
+    donnees.update(contexte)
+    return render_template("espace_personnel/journal.html", **donnees)
+
+
+
 @espace_personnel_bp.route("/journal", methods=["GET", "POST"])
 def journal():
     utilisateur = _utilisateur_espace_courant()
     profil_astral = _profil_astral_courant()
-    contexte_mecanismes = _contexte_mecanismes_journal(utilisateur.id)
+    entree_ouverte = None
+    mode_modification = False
+    if request.method == "GET" and "entree" in request.args:
+        entree_id = request.args.get("entree", type=int)
+        if not entree_id or entree_id < 1:
+            abort(400)
+        entree_ouverte = _entree_courante_ou_404(entree_id)
+        mode_modification = request.args.get("mode") == "modifier"
     date_prefill = datetime.now().date().isoformat()
     date_demandee = request.form.get("date_observation") if request.method == "POST" else request.args.get("date")
     if date_demandee:
@@ -1162,11 +1185,8 @@ def journal():
                     raise ValueError("Coche au moins un mécanisme à décoder dans « Aller plus loin ».")
             except ValueError as erreur:
                 flash(str(erreur), "error")
-                return render_template(
-                    "espace_personnel/journal.html",
-                    **contexte_mecanismes,
-                    entrees=EntreeJournal.query.filter_by(utilisateur_id=utilisateur.id)
-                    .order_by(EntreeJournal.date_observation.desc()).all(),
+                return _rendre_journal(
+                    utilisateur,
                     date_du_jour=date_prefill, contact_source=contact_source,
                     domaines_contact=DOMAINES, cycle_source=cycle_source,
                     enjeu_source=enjeu_source,
@@ -1226,20 +1246,11 @@ def journal():
                 flash("Ta page est enregistrée." + (" Les liens avec ton Labo sont enregistrés aussi." if liaisons else ""), "success")
                 if liaisons and request.form.get("action") == "decoder":
                     return redirect(url_for("espace_personnel.decoder_situation", entree_id=entree.id))
-                if liaisons:
-                    return redirect(url_for("espace_personnel.journal") + f"#entree-{entree.id}")
-                return redirect(url_for("espace_personnel.fiche", entree_id=entree.id))
+                return redirect(url_for("espace_personnel.journal", entree=entree.id) + "#page-journal")
 
-    entrees = (
-        EntreeJournal.query
-        .filter_by(utilisateur_id=utilisateur.id)
-        .order_by(EntreeJournal.date_observation.desc())
-        .all()
-    )
-    return render_template(
-        "espace_personnel/journal.html",
-        **contexte_mecanismes,
-        entrees=entrees,
+    return _rendre_journal(
+        utilisateur,
+        entree_ouverte=entree_ouverte, mode_modification=mode_modification,
         date_du_jour=date_prefill,
         contact_source=contact_source,
         domaines_contact=DOMAINES,
@@ -2047,7 +2058,7 @@ def relier_entree_mecanisme(entree_id):
     entree = EntreeJournal.query.filter_by(id=entree_id, utilisateur_id=utilisateur.id).first_or_404()
     if not _verifier_formulaire_portail():
         abort(400)
-    destination = (url_for("espace_personnel.journal") + f"#entree-{entree.id}"
+    destination = (url_for("espace_personnel.journal", entree=entree.id) + "#aller-plus-loin"
                    if request.form.get("retour") == "journal"
                    else url_for("espace_personnel.fiche", entree_id=entree.id) + "#liaisons-labo")
     try:
@@ -2073,6 +2084,7 @@ def relier_entree_mecanisme(entree_id):
 @espace_personnel_bp.route("/journal/<int:entree_id>/modifier", methods=["GET", "POST"])
 def modifier(entree_id):
     entree = _entree_courante_ou_404(entree_id)
+    retour_journal = request.form.get("retour") == "journal"
 
     if request.method == "GET":
         return render_template(
@@ -2097,19 +2109,26 @@ def modifier(entree_id):
             raise ValueError
     except (TypeError, ValueError):
         flash("Vérifie la date et, si tu l’as indiqué, le niveau d’énergie.", "error")
+        if retour_journal:
+            return _rendre_journal(_utilisateur_espace_courant(), entree_ouverte=entree, mode_modification=True)
         return redirect(url_for("espace_personnel.fiche", entree_id=entree.id))
 
     try:
         est_periode, date_fin_periode = _dates_periode_journal(request.form, date_observation)
     except ValueError as erreur:
         flash(str(erreur), "error")
+        if retour_journal:
+            return _rendre_journal(_utilisateur_espace_courant(), entree_ouverte=entree, mode_modification=True)
         return render_template("espace_personnel/modifier.html", entree=entree)
 
     entree.date_observation = date_observation
     entree.est_periode = est_periode
     entree.date_fin_periode = date_fin_periode
-    entree.niveau_energie = niveau_energie
-    entree.emotions = request.form.get("emotions", "").strip() or None
+    # Les champs retirés du journal ne doivent pas effacer les anciennes informations.
+    if "niveau_energie" in request.form:
+        entree.niveau_energie = niveau_energie
+    if "emotions" in request.form:
+        entree.emotions = request.form.get("emotions", "").strip() or None
     entree.situation = request.form.get("situation", "").strip() or None
     if "reaction_automatique" in request.form:
         entree.reaction_automatique = request.form.get(
@@ -2129,9 +2148,13 @@ def modifier(entree_id):
     except Exception:
         db.session.rollback()
         flash("Les modifications n’ont pas pu être enregistrées.", "error")
+        if retour_journal:
+            return _rendre_journal(_utilisateur_espace_courant(), entree_ouverte=entree, mode_modification=True)
     else:
         flash("Ton observation a été mise à jour.", "success")
 
+    if retour_journal:
+        return redirect(url_for("espace_personnel.journal", entree=entree.id) + "#page-journal")
     return redirect(url_for("espace_personnel.fiche", entree_id=entree.id))
 
 
