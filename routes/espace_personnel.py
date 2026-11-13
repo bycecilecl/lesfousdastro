@@ -3611,6 +3611,10 @@ def decoder_mecanisme(observation_id):
     }
     revision = decodage.revision if decodage else 0
     etape = max(1, min(6, request.values.get("etape", 1, type=int) or 1))
+    action_decodage = request.form.get("action", "") if request.method == "POST" else ""
+    action_etape = re.fullmatch(r"(etape|continuer)_([1-6])", action_decodage)
+    if action_etape:
+        etape = int(action_etape.group(2))
     erreur, statut = None, 200
     if request.method == "POST":
         verifier_csrf_espace()
@@ -3656,7 +3660,10 @@ def decoder_mecanisme(observation_id):
                     return redirect(url_for("espace_personnel.journal") + f"#entree-{entree.id}")
                 return redirect(url_for("espace_personnel.fiche_mecanisme", mecanisme_id=mecanisme.id)
                                 + f"#observation-{observation.id}")
-            return redirect(url_for("espace_personnel.decoder_mecanisme", observation_id=observation.id, etape=etape))
+            if action_etape and action_etape.group(1) == "continuer":
+                etape = min(6, etape + 1)
+            return redirect(url_for("espace_personnel.decoder_mecanisme", observation_id=observation.id,
+                                    etape=etape, enregistre=1) + f"#etape-{etape}")
     historique = (ObservationMecanisme.query.filter_by(mecanisme_id=mecanisme.id)
                   .order_by(ObservationMecanisme.date_observation.desc()).all())
     return render_template(

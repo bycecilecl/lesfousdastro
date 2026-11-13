@@ -46,7 +46,7 @@ body { background: linear-gradient(135deg, #1f628e, #00a8a8 55%, #c0f0f7); min-h
     <article class="decode-page">
         <p class="decode-kicker">Décoder ce mécanisme</p>
         <h1>{{ mecanisme.titre|majuscule_initiale }}</h1>
-        <p class="decode-intro">Six étapes pour approfondir cette situation. Tu peux répondre à une seule question, laisser les autres vides ou écrire « Je ne sais pas encore ». Enregistre tes réponses pour les retrouver plus tard.</p>
+        <p class="decode-intro">Six étapes pour approfondir cette situation. Tu peux répondre à une seule question, laisser les autres vides ou écrire « Je ne sais pas encore ». À chaque étape, tu peux enregistrer ce que tu as écrit et reprendre plus tard.</p>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for categorie, message in messages %}<p class="decode-flash {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
         {% endwith %}
@@ -64,9 +64,10 @@ body { background: linear-gradient(135deg, #1f628e, #00a8a8 55%, #c0f0f7); min-h
             <input type="hidden" name="revision" value="{{ revision if revision is not none else 0 }}">
             <input type="hidden" name="etape" id="etape-active" value="{{ etape_ouverte }}">
             {% for etape in etapes %}
-            <details class="decode-step" data-etape="{{ loop.index }}" {% if loop.index == etape_ouverte %}open{% endif %}>
+            <details class="decode-step" id="etape-{{ loop.index }}" data-etape="{{ loop.index }}" {% if loop.index == etape_ouverte %}open{% endif %}>
                 <summary>{{ loop.index }}. {{ etape.titre }}</summary>
                 <div class="decode-step-content">
+                    {% if loop.index == etape_ouverte and request.args.get('enregistre') == '1' and decodage %}<p class="decode-flash" role="status">✓ Tes réponses sont enregistrées.</p>{% endif %}
                     {% if etape.aide %}<p class="decode-step-help">{{ etape.aide }}</p>{% endif %}
                     {% for cle, question in etape.questions %}
                     {% set aide = aides.get(cle, {}) %}
@@ -76,7 +77,10 @@ body { background: linear-gradient(135deg, #1f628e, #00a8a8 55%, #c0f0f7); min-h
                         <button class="decode-unsure" type="button" data-incertain="decode-{{ cle }}" {% if reponses.get(cle, '')|trim %}disabled{% endif %}>Je ne sais pas encore</button>
                     </div>
                     {% endfor %}
-                    {% if not loop.last %}<button class="decode-button secondary decode-next" type="button" data-suivante="{{ loop.index + 1 }}" hidden>Passer à l’étape suivante →</button>{% endif %}
+                    <div class="decode-actions">
+                        <button class="decode-button" type="submit" name="action" value="etape_{{ loop.index }}">Enregistrer cette étape</button>
+                        {% if not loop.last %}<button class="decode-button secondary" type="submit" name="action" value="continuer_{{ loop.index }}">Enregistrer et passer à l’étape suivante →</button>{% endif %}
+                    </div>
                 </div>
             </details>
             {% endfor %}
@@ -124,13 +128,6 @@ body { background: linear-gradient(135deg, #1f628e, #00a8a8 55%, #c0f0f7); min-h
             bouton.disabled = true;
             modifie = true;
             champ.focus();
-        });
-    });
-    form.querySelectorAll('[data-suivante]').forEach(bouton => {
-        bouton.hidden = false;
-        bouton.addEventListener('click', () => {
-            const suivante = etapes.find(etape => etape.dataset.etape === bouton.dataset.suivante);
-            if (suivante) { suivante.open = true; suivante.scrollIntoView({ block:'start' }); }
         });
     });
 })();

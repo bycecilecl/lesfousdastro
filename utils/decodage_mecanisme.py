@@ -29,11 +29,10 @@ ETAPES_DECODAGE = (
     {
         "titre": "Débusquer la croyance",
         "questions": (
-            ("sens", "Qu’est-ce que ça veut dire pour moi ?"),
+            ("sens", "Qu’est-ce que je me dis sur moi ou sur les autres à cause de cette situation ?"),
             ("pire", "Si c’était vrai, quel serait le pire ?"),
             ("besoin_manquant", "Quel besoin n’est pas comblé à ce moment-là ?"),
         ),
-        "aide": "Sécurité, attention, reconnaissance, preuve d’amour… ou autre chose qui compte pour toi.",
     },
     {
         "titre": "Remonter à la source",
@@ -55,7 +54,7 @@ ETAPES_DECODAGE = (
     {
         "titre": "Transformer",
         "questions": (
-            ("autre_explication", "Quelle autre explication, plus douce et tout aussi plausible, pourrais-je me donner ?"),
+            ("autre_explication", "Qu’est-ce qui pourrait expliquer cette situation, à part ma première idée ?"),
             ("besoin_reponse", "De quoi ai-je besoin et comment puis-je y répondre ? Si cela implique quelqu’un, comment le demander ?"),
             ("prochain_geste", "Quel tout petit geste différent puis-je tester la prochaine fois ?"),
         ),
@@ -88,13 +87,13 @@ AIDES_DECODAGE = {
         "amorce": "Juste après ma réaction, il s’est passé… Puis…",
     },
     "sens": {
-        "amorce": "Si cette situation signifie bien ce que je crois, alors ça voudrait dire que je suis… ou que je ne peux pas…",
+        "amorce": "Par exemple : « Si je fais une erreur, je suis nulle » ou « S’il ne répond pas, je ne compte pas ». Dans ma situation, je me dis…",
     },
     "pire": {
         "amorce": "Ce que je redoute le plus dans cette idée, c’est…",
     },
     "besoin_manquant": {
-        "amorce": "J’aurais eu besoin d’entendre, de recevoir ou de pouvoir faire…",
+        "amorce": "J’aurais eu besoin de… Sécurité, attention, reconnaissance, preuve d’amour, liberté… ou autre chose qui compte pour moi.",
     },
     "souvenirs": {
         "amorce": "Cette sensation m’est-elle familière ? Dans quelles situations l’ai-je déjà ressentie ?",
@@ -115,7 +114,7 @@ AIDES_DECODAGE = {
         "amorce": "Ce que je cherchais, c’était… Ce que j’ai obtenu, c’est…",
     },
     "autre_explication": {
-        "amorce": "Une autre façon de comprendre cette situation pourrait être…",
+        "amorce": "Par exemple : un message sans réponse peut aussi vouloir dire que la personne est occupée. Dans ma situation, une autre possibilité serait…",
     },
     "besoin_reponse": {
         "amorce": "Ce dont j’ai besoin, c’est… Pour y répondre, je pourrais…",
