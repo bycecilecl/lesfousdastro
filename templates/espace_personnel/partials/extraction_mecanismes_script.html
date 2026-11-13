@@ -1,0 +1,27 @@
+<script>
+(() => {
+    const formulaires = document.querySelectorAll('form[data-extraction-mecanismes]');
+    formulaires.forEach(form => {
+        const bouton = form.querySelector('button[type="submit"]');
+        if (!bouton) return;
+        const libelle = bouton.textContent;
+        form.addEventListener('submit', evenement => {
+            if (form.dataset.extractionEnCours === 'oui') {
+                evenement.preventDefault();
+                return;
+            }
+            form.dataset.extractionEnCours = 'oui';
+            form.setAttribute('aria-busy', 'true');
+            bouton.disabled = true;
+            bouton.textContent = 'Lecture de ton rapport en cours…';
+        });
+        window.addEventListener('pageshow', evenement => {
+            if (!evenement.persisted) return;
+            delete form.dataset.extractionEnCours;
+            form.removeAttribute('aria-busy');
+            bouton.disabled = false;
+            bouton.textContent = libelle;
+        });
+    });
+})();
+</script>

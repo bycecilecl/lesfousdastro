@@ -27,8 +27,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 .ai-warning { margin-top: 8px; color: #7a6e82; font-size: .76rem; }
 .suggestions-grid { display: grid; gap: 16px; }
 .suggestion-card { padding: 20px; border: 1px solid rgba(124,79,184,.2); border-radius: 17px; background: #fcfaff; }
-.suggestion-card--accepted { opacity: .72; border-color: rgba(0,168,168,.3); background: #f0fbfa; }
-.suggestion-card--rejected { opacity: .58; background: #f5f5f5; }
+.suggestion-card--acceptee { border-color: rgba(0,168,168,.3); background: #f0fbfa; }
+.suggestion-card--rejetee { opacity: .58; background: #f5f5f5; }
+.suggestion-added { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.suggestion-added p { margin: 0; color: #17636c; font-weight: 700; }
+.suggestion-labo-link { display: inline-block; padding: 9px 14px; border: 1px solid #1f628e; border-radius: 999px; color: #1f628e; font-weight: 700; text-decoration: none; }
 .suggestion-priority { color: #7c4fb8; font-size: .76rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .suggestion-card h3 { margin: 5px 0 10px; color: #1f628e; font: 700 1.3rem Georgia, serif; }
 .suggestion-hypothesis { color: #4f6068; line-height: 1.6; }
@@ -182,20 +185,18 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                     </form>
                 {% endif %}
             </aside>
-        {% elif sections_analyse %}
+        {% elif sections_analyse or analyse.type_analyse in ['racines_familiales', 'profil_amoureux', 'analyse_karmique'] %}
             <aside class="prepared-report">
-                <h2>Rapport préparé pour l’exploration</h2>
-                <p class="prepared-report-summary">{{ sections_analyse|length }} section{% if sections_analyse|length != 1 %}s{% endif %} disponible{% if sections_analyse|length != 1 %}s{% endif %}</p>
-                <ul class="prepared-sections">
-                    {% for section in sections_analyse %}<li>{{ section.titre }}</li>{% endfor %}
-                </ul>
-                <p class="prepared-note">Tu peux relever tes mécanismes manuellement ou tester l’assistance IA en DEV.</p>
+                <h2>Faire ressortir les mécanismes de ce rapport</h2>
+                <p class="prepared-note">Retrouve les grandes pistes de ton analyse, puis choisis celles que tu souhaites explorer dans ton Labo.</p>
                 {% if not suggestions %}
-                    <form class="ai-generate" method="post" action="{{ url_for('espace_personnel.generer_suggestions_mecanismes', analyse_id=analyse.id) }}">
-<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                    <form class="ai-generate" data-extraction-mecanismes method="post" action="{{ url_for('espace_personnel.generer_suggestions_mecanismes', analyse_id=analyse.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
                         <button type="submit">Faire ressortir les mécanismes avec l’IA</button>
-                        <p class="ai-warning">En DEV, ce bouton déclenche un appel Claude facturé à ta clé API.</p>
+                        <p class="ai-warning">Cette action utilise l’IA et démarre seulement quand tu cliques.</p>
                     </form>
+                {% else %}
+                    <p class="prepared-note">Les pistes proposées sont disponibles ci-dessous.</p>
                 {% endif %}
             </aside>
         {% elif analyse.type_analyse in ['transits', 'forces_defis'] %}
@@ -206,15 +207,6 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
                     <button type="submit">Faire ressortir les enjeux avec l’IA</button>
                     <p class="ai-warning">Ce bouton déclenche un appel Claude facturé à ta clé API.</p>
-                </form>
-            </aside>
-        {% elif analyse.type_analyse in ['racines_familiales', 'profil_amoureux', 'analyse_karmique'] %}
-            <aside class="prepared-report">
-                <h2>Préparer ce rapport pour l’exploration</h2>
-                <p class="prepared-note">Le rapport doit être découpé en sections avant que l’IA puisse en faire ressortir des mécanismes. Cette étape reste locale et ne déclenche aucun appel Claude.</p>
-                <form class="ai-generate" method="post" action="{{ url_for('espace_personnel.preparer_analyse', analyse_id=analyse.id) }}">
-<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
-                    <button type="submit">Préparer l’extraction des mécanismes</button>
                 </form>
             </aside>
         {% endif %}
@@ -228,7 +220,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                         {% set suggestion = suggestion_data.objet %}
                         <article class="suggestion-card suggestion-card--{{ suggestion.statut }}" id="suggestion-{{ suggestion.id }}">
                             <span class="suggestion-priority">Piste {{ suggestion.priorite }}</span>
-                            <h3>{{ suggestion.titre }}</h3>
+                            <h3>{{ suggestion.titre|majuscule_initiale }}</h3>
                             <p class="suggestion-hypothesis">{{ suggestion.hypothese }}</p>
                             {% if suggestion_data.manifestations %}
                                 <ul class="suggestion-manifestations">{% for manifestation in suggestion_data.manifestations %}<li>{{ manifestation }}</li>{% endfor %}</ul>
@@ -239,7 +231,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                             {% if suggestion.statut == 'proposee' %}
                                 <div class="suggestion-actions">
                                     <form method="post" action="{{ url_for('espace_personnel.accepter_suggestion', suggestion_id=suggestion.id) }}">
-<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="suggestion-accept" type="submit">Ajouter à mon Labo</button></form>
+<input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="suggestion-accept" type="submit">Ajouter au Labo</button></form>
                                     <form method="post" action="{{ url_for('espace_personnel.rejeter_suggestion', suggestion_id=suggestion.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="suggestion-reject" type="submit">Ça ne me correspond pas</button></form>
                                     <form method="post" action="{{ url_for('espace_personnel.reporter_suggestion', suggestion_id=suggestion.id) }}">
@@ -247,7 +239,10 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                                 </div>
                                 {% if suggestion_reportee == suggestion.id %}<p class="suggestion-postponed">Cette piste reste disponible pour une prochaine visite.</p>{% endif %}
                             {% elif suggestion.statut == 'acceptee' %}
-                                <span class="suggestion-state">Ajoutée au Labo</span>
+                                <div class="suggestion-added">
+                                    <p role="status">✓ Mécanisme ajouté à ton Labo.</p>
+                                    <a class="suggestion-labo-link" href="{{ url_for('espace_personnel.laboratoire') }}">Aller au Labo →</a>
+                                </div>
                             {% else %}
                                 <span class="suggestion-state">Piste écartée</span>
                             {% endif %}
@@ -278,7 +273,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
     <section class="explore-card" id="mes-mecanismes">
         <h2>Mes mécanismes à explorer</h2>
         <p class="explore-intro">{{ mecanismes|length }} piste{% if mecanismes|length != 1 %}s{% endif %} issue{% if mecanismes|length != 1 %}s{% endif %} de cette analyse.</p>
-        <div class="mecanismes-grid">{% for mecanisme in mecanismes %}<a class="mecanisme" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}"><h3>{{ mecanisme.titre }}</h3><span class="mecanisme-meta">{{ ressentis.get(mecanisme.ressenti) }} · {{ statuts.get(mecanisme.statut) }}</span></a>{% else %}<p class="explore-intro">Aucun mécanisme ajouté pour le moment.</p>{% endfor %}</div>
+        <div class="mecanismes-grid">{% for mecanisme in mecanismes %}<a class="mecanisme" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}"><h3>{{ mecanisme.titre|majuscule_initiale }}</h3><span class="mecanisme-meta">{{ ressentis.get(mecanisme.ressenti) }} · {{ statuts.get(mecanisme.statut) }}</span></a>{% else %}<p class="explore-intro">Aucun mécanisme ajouté pour le moment.</p>{% endfor %}</div>
         <aside class="lab-guide">
             <h3>Et ensuite ?</h3>
             <p>Retrouve tes mécanismes dans le Labo de conscience pour compléter leur fiche, noter ce que tu observes et suivre leur évolution.</p>
@@ -290,6 +285,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 {% endblock %}
 
 {% block scripts %}
+{% include "espace_personnel/partials/extraction_mecanismes_script.html" %}
 <script>
 document.querySelectorAll('.solar-extraction').forEach(form => {
     form.addEventListener('submit', () => {

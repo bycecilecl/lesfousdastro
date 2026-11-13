@@ -98,7 +98,7 @@ body {
                     <article class="mechanism-card">
                         <p class="mechanism-source">{{ analyse.titre if analyse else 'Analyse personnelle' }}</p>
                         {% if analyse and analyse.type_analyse == 'revolution_solaire' %}<p class="mechanism-source">Piste annuelle · PDF ajouté le {{ analyse.date_creation.strftime('%d.%m.%Y à %H:%M') }} UTC</p>{% endif %}
-                        <h2>{{ mecanisme.titre }}</h2>
+                        <h2>{{ mecanisme.titre|majuscule_initiale }}</h2>
                         <p class="mechanism-excerpt">{{ mecanisme.hypothese }}</p>
                         <div class="mechanism-tags">
                             <span class="mechanism-tag">{{ ressentis.get(mecanisme.ressenti, mecanisme.ressenti) }}</span>

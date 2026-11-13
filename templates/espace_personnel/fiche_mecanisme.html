@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ mecanisme.titre }} | Les Fous d'Astro{% endblock %}
+{% block title %}{{ mecanisme.titre|majuscule_initiale }} | Les Fous d'Astro{% endblock %}
 {% macro formulaire_observation(action, observation=None) %}
 <form method="post" action="{{ action }}" class="observation-form">
     <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
@@ -76,7 +76,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             <p class="meca-source">Issu de {{ analyse.titre }}</p>
             <form method="post" class="meca-form">
                 <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
-                <div class="meca-field meca-wide"><label for="titre">Titre</label><input id="titre" name="titre" value="{{ mecanisme.titre }}" required></div>
+                <div class="meca-field meca-wide"><label for="titre">Titre</label><input id="titre" name="titre" value="{{ mecanisme.titre|majuscule_initiale }}" required></div>
                 <div class="meca-field meca-wide"><label for="extrait_source">Extrait source</label><textarea id="extrait_source" name="extrait_source">{{ mecanisme.extrait_source or '' }}</textarea></div>
                 <div class="meca-field meca-wide"><label for="hypothese">Hypothèse</label><textarea id="hypothese" name="hypothese" required>{{ mecanisme.hypothese }}</textarea></div>
                 <div class="meca-field meca-wide"><label for="effets_possibles">Effets possibles</label><textarea id="effets_possibles" name="effets_possibles">{{ mecanisme.effets_possibles or '' }}</textarea></div>
@@ -89,7 +89,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                 <div class="meca-actions meca-wide"><button class="meca-button" type="submit">Enregistrer</button><a class="meca-button meca-button--secondary" href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=mecanisme.id) }}">Annuler</a></div>
             </form>
         {% else %}
-            <h1>{{ mecanisme.titre }}</h1>
+            <h1>{{ mecanisme.titre|majuscule_initiale }}</h1>
             <p class="meca-source">Issu de {{ analyse.titre }}</p>
             <div class="meca-badges"><span class="meca-badge">{{ ressentis.get(mecanisme.ressenti) }}</span><span class="meca-badge">{{ statuts.get(mecanisme.statut) }}</span></div>
             <section class="evolution-box">

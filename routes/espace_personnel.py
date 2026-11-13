@@ -76,6 +76,9 @@ from routes.auth_espace import enregistrer_routes_auth, ROUTES_PUBLIQUES_AUTH, R
 from utils.calcul_theme import calcul_theme
 from utils.configurations_astrologiques import analyser_configurations_majeures
 from utils.extraction_mecanismes_ia import generer_suggestions_avec_claude
+from utils.preparation_mecanismes import (
+    ExtractionMecanismesEnCours, preparer_sections_mecanismes, verrou_mecanismes,
+)
 from utils.exploration_rs import extraire_pages_rs, generer_enjeux_rs, lire_reponse_enjeux_rs, propositions_rs_a_verifier, verrou_extraction_rs
 from utils.enjeux_annuels import actualiser_enjeux_email
 from utils.extraction_enjeux_transits_ia import generer_enjeux_transits_avec_claude
@@ -715,7 +718,7 @@ def accepter_suggestion(suggestion_id):
         if reclamation.rowcount == 1:
             db.session.add(MecanismeExploration(
                 analyse_id=suggestion.analyse_id,
-                titre=suggestion.titre,
+                titre=majuscule_initiale(suggestion.titre),
                 extrait_source=suggestion.extrait_source,
                 hypothese=suggestion.hypothese,
                 effets_possibles="\n".join(f"• {item}" for item in manifestations) or None,
@@ -727,7 +730,10 @@ def accepter_suggestion(suggestion_id):
         else:
             db.session.rollback()
             flash("Cette piste a déjà été traitée.", "error")
-    return redirect(url_for("espace_personnel.laboratoire") + "#mes-mecanismes")
+    return redirect(
+        url_for("espace_personnel.explorer_analyse", analyse_id=suggestion.analyse_id)
+        + f"#suggestion-{suggestion.id}"
+    )
 
 
 @espace_personnel_bp.route("/suggestions/<int:suggestion_id>/rejeter", methods=["POST"])
@@ -777,7 +783,7 @@ def fiche_mecanisme(mecanisme_id):
     if request.method == "POST":
         if not _verifier_formulaire_portail():
             abort(400)
-        titre = request.form.get("titre", "").strip()
+        titre = majuscule_initiale(request.form.get("titre", ""))
         hypothese = request.form.get("hypothese", "").strip()
         ressenti = request.form.get("ressenti", "").strip()
         statut = request.form.get("statut", "").strip()
@@ -1721,70 +1727,65 @@ def mes_analyses():
 )
 def generer_suggestions_mecanismes(analyse_id):
     analyse = _analyse_courante_ou_404(analyse_id)
+    destination = url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id)
     if analyse.type_analyse == "revolution_solaire":
-        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
-    if SuggestionMecanisme.query.filter_by(analyse_id=analyse.id).first():
-        flash("Des suggestions existent déjà pour cette analyse.", "error")
-        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
-
-    sections = (
-        SectionAnalyse.query
-        .filter_by(analyse_id=analyse.id)
-        .order_by(SectionAnalyse.ordre.asc())
-        .all()
-    )
-    if not sections:
-        flash("Prépare d’abord ce rapport depuis sa page d’exploration, puis demande l’extraction.", "error")
-        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
-
-    sections_dict = [
-        {
-            "cle_section": section.cle_section,
-            "titre": section.titre,
-            "contenu": section.contenu,
-        }
-        for section in sections
-    ]
-    sections_par_cle = {section.cle_section: section for section in sections}
-
+        return redirect(destination)
+    phase = "preparation"
     try:
-        suggestions, usage = generer_suggestions_avec_claude(
-            sections_dict,
-            type_analyse=analyse.type_analyse,
-        )
-        for suggestion in suggestions:
-            section_source = sections_par_cle.get(suggestion.cle_section)
-            db.session.add(SuggestionMecanisme(
-                analyse_id=analyse.id,
-                section_id=section_source.id if section_source else None,
-                titre=suggestion.titre,
-                hypothese=suggestion.hypothese,
-                manifestations_possibles=json.dumps(
-                    suggestion.manifestations_possibles,
-                    ensure_ascii=False,
-                ),
-                extrait_source=suggestion.extrait_source,
-                references_astrologiques=json.dumps(
-                    suggestion.references_astrologiques,
-                    ensure_ascii=False,
-                ),
-                priorite=suggestion.priorite,
-                statut="proposee",
-            ))
-        db.session.commit()
+        with verrou_mecanismes(analyse.id):
+            if SuggestionMecanisme.query.filter_by(analyse_id=analyse.id).first():
+                flash("Les pistes de ce rapport sont déjà disponibles.", "success")
+                return redirect(destination + "#suggestions-ia")
+            sections = preparer_sections_mecanismes(
+                analyse, lambda: _pdf_pour_extraction(analyse),
+            )
+            sections_dict = [
+                {
+                    "cle_section": section.cle_section,
+                    "titre": section.titre,
+                    "contenu": section.contenu,
+                }
+                for section in sections
+            ]
+            sections_par_cle = {section.cle_section: section for section in sections}
+            phase = "ia"
+            print(f"[Mécanismes] Rapport {analyse.id} : demande explicite, un seul appel IA.", flush=True)
+            suggestions, usage = generer_suggestions_avec_claude(
+                sections_dict,
+                type_analyse=analyse.type_analyse,
+            )
+            for suggestion in suggestions:
+                section_source = sections_par_cle.get(suggestion.cle_section)
+                db.session.add(SuggestionMecanisme(
+                    analyse_id=analyse.id,
+                    section_id=section_source.id if section_source else None,
+                    titre=suggestion.titre,
+                    hypothese=suggestion.hypothese,
+                    manifestations_possibles=json.dumps(
+                        suggestion.manifestations_possibles,
+                        ensure_ascii=False,
+                    ),
+                    extrait_source=suggestion.extrait_source,
+                    references_astrologiques=json.dumps(
+                        suggestion.references_astrologiques,
+                        ensure_ascii=False,
+                    ),
+                    priorite=suggestion.priorite,
+                    statut="proposee",
+                ))
+            db.session.commit()
+    except ExtractionMecanismesEnCours as erreur:
+        flash(str(erreur), "error")
     except Exception:
         db.session.rollback()
-        current_app.logger.exception("Échec de génération des suggestions de mécanismes")
-        flash("Les suggestions n’ont pas pu être générées ou validées.", "error")
+        current_app.logger.exception("Échec d’extraction des mécanismes du rapport %s (étape %s)", analyse.id, phase)
+        if phase == "preparation":
+            flash("Le PDF n’a pas pu être lu. Utilise un PDF avec du texte sélectionnable. Aucun appel IA n’a été lancé.", "error")
+        else:
+            flash("Les mécanismes n’ont pas pu être extraits ou enregistrés. Aucune relance automatique.", "error")
     else:
-        flash(
-            f"{len(suggestions)} pistes proposées · {usage['tokens_total']} tokens utilisés.",
-            "success",
-        )
-    return redirect(
-        url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id)
-        + "#suggestions-ia"
-    )
+        flash(f"{len(suggestions)} pistes proposées · {usage['tokens_total']} tokens utilisés.", "success")
+    return redirect(destination + "#suggestions-ia")
 
 
 @espace_personnel_bp.route("/mes-analyses/importer", methods=["POST"])
@@ -2988,50 +2989,19 @@ def _dates_periode_journal(formulaire, date_debut):
 )
 def preparer_analyse(analyse_id):
     analyse = _analyse_courante_ou_404(analyse_id)
-    extracteurs = {
-        "forces_defis": extraire_sections_forces_defis,
-        "analyse_karmique": extraire_sections_analyse_karmique,
-        "racines_familiales": extraire_sections_point_astral,
-        "profil_amoureux": extraire_sections_profil_amoureux,
-        "transits": extraire_sections_transits,
-    }
-    extracteur = extracteurs.get(analyse.type_analyse)
-    if extracteur is None:
-        flash("La préparation automatique n’est pas encore disponible pour ce type de rapport.", "error")
-        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
-    if not analyse.chemin_resultat:
-        flash("Le PDF de ce rapport est introuvable.", "error")
-        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
-    if SectionAnalyse.query.filter_by(analyse_id=analyse.id).first():
-        flash("Ce rapport est déjà préparé pour l’exploration.", "error")
-        return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
-
-    chemin_pdf = _pdf_pour_extraction(analyse)
-
+    destination = url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id)
     try:
-        sections = extracteur(chemin_pdf)
-        if not sections:
-            raise ValueError("Aucune section reconnue dans ce rapport.")
-        maintenant = datetime.now(timezone.utc)
-        for section in sections:
-            db.session.add(SectionAnalyse(
-                analyse_id=analyse.id,
-                cle_section=section["cle_section"],
-                titre=section["titre"],
-                contenu=section["contenu"],
-                ordre=section["ordre"],
-                source_format="pdf_importe",
-                date_creation=maintenant,
-                date_modification=maintenant,
-            ))
-        db.session.commit()
+        with verrou_mecanismes(analyse.id):
+            preparer_sections_mecanismes(analyse, lambda: _pdf_pour_extraction(analyse))
+    except ExtractionMecanismesEnCours as erreur:
+        flash(str(erreur), "error")
     except Exception:
         db.session.rollback()
-        current_app.logger.exception("Échec de préparation du rapport %s", analyse.id)
-        flash("Le rapport n’a pas pu être préparé automatiquement.", "error")
+        current_app.logger.exception("Échec de lecture du rapport %s", analyse.id)
+        flash("Le PDF n’a pas pu être lu. Utilise un PDF avec du texte sélectionnable. Aucun appel IA n’a été lancé.", "error")
     else:
-        flash(f"Rapport préparé : {len(sections)} sections prêtes à explorer.", "success")
-    return redirect(url_for("espace_personnel.explorer_analyse", analyse_id=analyse.id))
+        flash("Ton rapport est prêt. Tu peux demander les mécanismes avec l’IA.", "success")
+    return redirect(destination)
 
 
 @espace_personnel_bp.route("/mes-analyses/<int:analyse_id>/explorer", methods=["GET", "POST"])
@@ -3039,7 +3009,7 @@ def explorer_analyse(analyse_id):
     analyse = _analyse_courante_ou_404(analyse_id)
 
     if request.method == "POST":
-        titre = request.form.get("titre", "").strip()
+        titre = majuscule_initiale(request.form.get("titre", ""))
         hypothese = request.form.get("hypothese", "").strip()
         ressenti = request.form.get("ressenti", "a_observer").strip()
         statut = request.form.get("statut", "a_explorer").strip()
@@ -3556,3 +3526,10 @@ def nettoyer_pdf_extraction(erreur):
 espace_personnel_bp.add_url_rule('/<int:entree_id>', view_func=fiche, methods=['GET'])
 espace_personnel_bp.add_url_rule('/<int:entree_id>/modifier', view_func=modifier, methods=['GET', 'POST'])
 espace_personnel_bp.add_url_rule('/<int:entree_id>/supprimer', view_func=supprimer, methods=['POST'])
+
+
+@espace_personnel_bp.app_template_filter("majuscule_initiale")
+def majuscule_initiale(valeur):
+    """Met la première lettre en majuscule sans changer le reste du titre."""
+    texte = (valeur or "").strip()
+    return texte[:1].upper() + texte[1:]

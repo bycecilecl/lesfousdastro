@@ -68,9 +68,9 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                         <a class="analyse-link" href="{{ url_for('espace_personnel.laboratoire', analyse=analyse.id) }}">Ouvrir mon labo</a>
 <a class="analyse-link" href="{{ url_for('espace_personnel.explorer_analyse', analyse_id=analyse.id) }}">Explorer ce rapport</a>
                         {% if droits_abonnement.journal_contextualise and analyse.type_analyse in types_extraction_mecanismes and analyse.statut == 'terminee' and analyse.chemin_resultat and analyse.id not in analyses_deja_extraites %}
-                        <form method="post" action="{{ url_for('espace_personnel.generer_suggestions_mecanismes', analyse_id=analyse.id) }}">
+                        <form data-extraction-mecanismes method="post" action="{{ url_for('espace_personnel.generer_suggestions_mecanismes', analyse_id=analyse.id) }}">
                             <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
-                            <button class="analyse-link analyse-link--secondary" type="submit">Extraire des pistes avec l’IA</button>
+                            <button class="analyse-link analyse-link--secondary" type="submit">Faire ressortir les mécanismes avec l’IA</button>
                         </form>
                         {% endif %}
                         {% if analyse.statut == 'terminee' and analyse.type_analyse in types_importables and analyse.chemin_resultat %}
@@ -152,4 +152,8 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
         </div>
     </section>
 </main>
+{% endblock %}
+
+{% block scripts %}
+{% include "espace_personnel/partials/extraction_mecanismes_script.html" %}
 {% endblock %}

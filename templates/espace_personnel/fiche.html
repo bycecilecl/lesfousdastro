@@ -80,7 +80,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                 <div class="lab-linked-list">
                     {% for liaison in liaisons_labo %}
                         <div class="lab-linked-item">
-                            <strong>{{ liaison.mecanisme.titre if liaison.mecanisme else 'Mécanisme supprimé' }}</strong>
+                            <strong>{{ liaison.mecanisme.titre|majuscule_initiale if liaison.mecanisme else 'Mécanisme supprimé' }}</strong>
                             {% if liaison.mecanisme %}<a href="{{ url_for('espace_personnel.fiche_mecanisme', mecanisme_id=liaison.mecanisme.id) }}#observation-{{ liaison.observation.id }}">Voir dans le Labo →</a>{% endif %}
                         </div>
                     {% endfor %}
@@ -90,7 +90,7 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             {% if mecanismes_disponibles %}
                 <form class="lab-link-form" method="post" action="{{ url_for('espace_personnel.relier_entree_mecanisme', entree_id=entree.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
-                    <div class="lab-link-field lab-link-wide"><label for="mecanisme_id">Mécanisme concerné</label><select id="mecanisme_id" name="mecanisme_id" required><option value="">Choisir dans mon Labo</option>{% for mecanisme in mecanismes_disponibles %}<option value="{{ mecanisme.id }}">{{ mecanisme.titre }}</option>{% endfor %}</select></div>
+                    <div class="lab-link-field lab-link-wide"><label for="mecanisme_id">Mécanisme concerné</label><select id="mecanisme_id" name="mecanisme_id" required><option value="">Choisir dans mon Labo</option>{% for mecanisme in mecanismes_disponibles %}<option value="{{ mecanisme.id }}">{{ mecanisme.titre|majuscule_initiale }}</option>{% endfor %}</select></div>
                     <div class="lab-link-field"><label for="indice_pour">Ce qui montre que le mécanisme était à l’œuvre</label><textarea id="indice_pour" name="indice_pour"></textarea></div>
                     <div class="lab-link-field"><label for="element_contraire">Ce qui pourrait nuancer cette lecture — facultatif</label><textarea id="element_contraire" name="element_contraire"></textarea></div>
                     <div class="lab-link-field"><label for="reaction_testee">Autre réaction testée</label><textarea id="reaction_testee" name="reaction_testee"></textarea></div>
