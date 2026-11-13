@@ -2111,15 +2111,18 @@ def modifier(entree_id):
     entree.niveau_energie = niveau_energie
     entree.emotions = request.form.get("emotions", "").strip() or None
     entree.situation = request.form.get("situation", "").strip() or None
-    entree.reaction_automatique = request.form.get(
-        "reaction_automatique",
-        "",
-    ).strip() or None
-    entree.choix_conscient = request.form.get(
-        "choix_conscient",
-        "",
-    ).strip() or None
-    entree.notes_libres = request.form.get("notes_libres", "").strip() or None
+    if "reaction_automatique" in request.form:
+        entree.reaction_automatique = request.form.get(
+            "reaction_automatique",
+            "",
+        ).strip() or None
+    if "choix_conscient" in request.form:
+        entree.choix_conscient = request.form.get(
+            "choix_conscient",
+            "",
+        ).strip() or None
+    if "notes_libres" in request.form:
+        entree.notes_libres = request.form.get("notes_libres", "").strip() or None
 
     try:
         db.session.commit()
