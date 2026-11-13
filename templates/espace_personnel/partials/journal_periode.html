@@ -8,13 +8,27 @@
         <option value="periode" {% if periode %}selected{% endif %}>Une période</option>
     </select>
 </div>
-<div class="{{ champ }}">
+<div class="{{ champ }} journal-date-field">
     <label for="date_observation" id="label-date-observation">{{ 'Date de début' if periode else 'Date de l’observation' }}</label>
     <input id="date_observation" name="date_observation" type="date" value="{{ request.form.get('date_observation', '') if request.method == 'POST' else (entree.date_observation.strftime('%Y-%m-%d') if entree is defined else date_du_jour) }}" required>
 </div>
-<div class="{{ champ }}" data-periode {% if not periode %}hidden{% endif %}>
+<div class="{{ champ }} journal-date-field" data-periode {% if not periode %}hidden{% endif %}>
     <label for="date_fin_periode">Date de fin</label>
     <input id="date_fin_periode" name="date_fin_periode" type="date" value="{{ request.form.get('date_fin_periode', '') if request.method == 'POST' else (entree.date_fin_periode.isoformat() if entree is defined and entree.date_fin_periode else '') }}" {% if not periode or en_cours %}disabled{% else %}required{% endif %}>
     <label for="toujours_en_cours" style="display:flex;align-items:center;gap:8px"><input style="width:auto" id="toujours_en_cours" name="toujours_en_cours" type="checkbox" value="oui" {% if en_cours %}checked{% endif %} {% if not periode %}disabled{% endif %}> Toujours en cours</label>
 </div>
-<style>[data-periode][hidden] { display: none; }</style>
+<style>
+[data-periode][hidden] { display: none; }
+.journal-date-field {
+    display: flex;
+    flex-direction: column;
+    align-self: start;
+    gap: 7px;
+    min-width: 0;
+}
+.journal-date-field input[type="date"] {
+    box-sizing: border-box;
+    height: 3rem;
+    min-width: 0;
+}
+</style>
