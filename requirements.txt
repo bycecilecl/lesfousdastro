@@ -70,3 +70,4 @@ Flask-Migrate
 psycopg2-binary
 pdfplumber==0.11.7
 psycopg[binary]
+PyPDF2==3.0.1

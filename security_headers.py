@@ -38,6 +38,10 @@ def add_security_headers(app):
                 "max-age=31536000; includeSubDomains; preload"
             )
 
+        # Documents privés : conserver leur politique de contenu inactif.
+        if request.endpoint in {"outils_membres.fichier_carte", "outils_membres.fichier_carte_admin", "abonnement_client.contenu_mail"} and resp.headers.get("Content-Security-Policy"):
+            return resp
+
         # Content-Security-Policy (CSP)
         # Ajuste selon tes vrais besoins (CDN, scripts externes, etc.).
         # NB: commence strict, desserre si une ressource légitime est bloquée.

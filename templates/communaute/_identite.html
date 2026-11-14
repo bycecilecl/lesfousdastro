@@ -1,0 +1,3 @@
+{% macro identite(auteur, date=None) %}
+<span class="comm-identite"><span class="comm-avatar ton-{{ auteur.couleur|default(0) }}" aria-hidden="true">{% if auteur.avatar and auteur.avatar in avatars_espace %}<img src="{{ url_for('static',filename=avatars_espace[auteur.avatar].fichier) }}" alt="">{% else %}☾{% endif %}</span><span><strong>{{ auteur.pseudo }}</strong>{% if auteur.creatrice %}<span class="comm-badge">Créatrice</span>{% endif %}{% if date %}<small>{{ date.strftime('%d.%m.%Y') }}</small>{% endif %}</span></span>
+{% endmacro %}

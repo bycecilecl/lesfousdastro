@@ -1,0 +1,11 @@
+{% extends 'communaute/base.html' %}
+{% from 'communaute/_identite.html' import identite with context %}
+{% block communaute_content %}
+<div class="comm-section-heading"><div><p class="comm-kicker">LE JOURNAL DU GROUPE</p><h2>Nos partages</h2><p>Une expérience, une question, une prise de conscience…</p></div><a class="comm-button" href="{{ url_for('communaute.publier') }}">+ Publier un partage</a></div>
+<div class="comm-grid">
+{% for publication in publications %}<a class="comm-card carte-{{ loop.index0 % 4 }}" href="{{ url_for('communaute.fiche',publication_id=publication.id) }}"><span class="comm-card-top">PARTAGE <span aria-hidden="true">✦</span></span><h3>{{ publication.titre }}</h3><p class="comm-extrait">{{ publication.texte|truncate(200) }}</p><div class="comm-card-bottom">{{ identite(identites.get(publication.utilisateur_id,{'pseudo':'Membre'}), publication.date_creation) }}<span class="comm-comment-count">{{ nombres.get(publication.id,0) }} commentaire{% if nombres.get(publication.id,0) != 1 %}s{% endif %}</span></div></a>
+{% else %}<div class="comm-card comm-empty"><span class="comm-empty-star" aria-hidden="true">✦</span><h3>Le premier partage du groupe ?</h3><p>Cette page accueillera vos expériences, vos questions et vos prises de conscience. Tu peux commencer avec une chose toute simple que tu as remarquée.</p><a class="comm-button" href="{{ url_for('communaute.publier') }}">Écrire ma première publication</a></div>{% endfor %}
+</div>
+{% if page > 1 or suite %}<nav class="comm-pagination" aria-label="Pages des publications">{% if page > 1 %}<a href="{{ url_for('communaute.index',page=page-1) }}">← Plus récentes</a>{% endif %}{% if suite %}<a href="{{ url_for('communaute.index',page=page+1) }}">Plus anciennes →</a>{% endif %}</nav>{% endif %}
+<aside class="comm-coming"><span aria-hidden="true">◉</span><div><strong>Et plus tard, les lives</strong><p>On ajoutera ici ces rendez-vous quand ils seront prêts.</p></div></aside>
+{% endblock %}

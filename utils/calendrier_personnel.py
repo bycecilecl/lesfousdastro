@@ -203,7 +203,7 @@ def donnees_astrales(theme, debut, fin, *, mars_actif=False, lune_active=False, 
         for x in prochaines_lunaisons(apres=debut, tzid=str(debut.tzinfo), nombre=3):
             instant=datetime.fromisoformat(x["instant_utc"])
             if debut <= instant < fin:
-                resultat["events"].append({"date":x["instant_local"], "label":("Nouvelle Lune" if x["type"]=="nouvelle_lune" else "Pleine Lune") + " en " + x["position"]["signe"]})
+                resultat["events"].append({"date":x["instant_local"], "nature":x["type"], "label":("Nouvelle Lune" if x["type"]=="nouvelle_lune" else "Pleine Lune") + " en " + x["position"]["signe"]})
         longitude=theme.get("planetes",{}).get("Lune",{}).get("longitude")
         if longitude is not None:
             curseur=debut.astimezone(timezone.utc)
@@ -211,7 +211,7 @@ def donnees_astrales(theme, debut, fin, *, mars_actif=False, lune_active=False, 
                 instant=prochaine_revolution_lunaire(float(longitude),apres=curseur)
                 if instant >= fin:break
                 if instant >= debut:
-                    resultat["events"].append({"date":instant.astimezone(debut.tzinfo).isoformat(),"label":"Début de ta révolution lunaire"})
+                    resultat["events"].append({"date":instant.astimezone(debut.tzinfo).isoformat(),"nature":"rl","label":"Début de ta révolution lunaire"})
                 curseur=instant+timedelta(minutes=1)
     hierarchiser_contacts(resultat, debut, fin, cycles_rs)
     if mars_actif:

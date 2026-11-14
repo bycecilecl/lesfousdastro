@@ -1,12 +1,14 @@
 {% set edition = mode_modification and entree_ouverte %}
 {% set valeurs = request.form if request.method == 'POST' else {} %}
 <h2 class="journal-panel-title">{{ 'Modifier cette entrée' if edition else 'Une nouvelle page' }}</h2>
+{% if mail_source %}<aside class="cycle-context"><span class="cycle-context-label">À partir de mon mail</span><h3>{{ mail_source.objet }}</h3><p>Tu peux noter ce qui te parle, ce que tu observes ou ce que tu souhaites suivre dans les jours qui viennent.</p>{% if mail_source.disponible %}<a href="{{ url_for('abonnement_client.lire_mail', mail_id=mail_source.id) }}">Relire le mail →</a>{% endif %}</aside>{% endif %}
 {% if not edition and cycle_source %}
 <aside class="cycle-context"><span class="cycle-context-label">Depuis mon cycle lunaire</span><h3>{{ interpretation_cycle.fil_rouge if interpretation_cycle else 'Observer ce cycle dans ma vie' }}</h3>{% if interpretation_cycle and interpretation_cycle.question_journal %}<p>{{ interpretation_cycle.question_journal }}</p>{% endif %}<a href="{{ url_for('espace_personnel.fiche_cycle_lunaire', cycle_id=cycle_source.id) }}">Revoir le cycle →</a></aside>
 {% endif %}
 {% if not edition and enjeu_source %}<aside class="cycle-context"><span class="cycle-context-label">Depuis mes Transits</span><p>{{ enjeu_source.contenu }}</p></aside>{% endif %}
 <form method="post" class="journal-form" id="journal-ecriture" data-saisie-conservee="{{ 'oui' if request.method == 'POST' else 'non' }}" action="{{ url_for('espace_personnel.modifier', entree_id=entree_ouverte.id) if edition else url_for('espace_personnel.journal') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+    {% if not edition and mail_source and mail_source.disponible %}<input type="hidden" name="mail_source" value="{{ mail_source.id }}">{% endif %}
     {% if edition %}<input type="hidden" name="retour" value="journal">{% endif %}
     {% if not edition and contact_source %}
     <aside class="cycle-context journal-field--wide"><strong>{{ contact_source.libelle }}</strong><p>Ce contact est un repère pour ta note. Tu peux raconter ton vécu, même si rien de particulier ne se passe.</p></aside>

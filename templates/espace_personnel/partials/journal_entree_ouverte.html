@@ -2,6 +2,7 @@
 <article class="journal-entry" id="entree-{{ entree.id }}">
     <p class="journal-entry-date">{% include "espace_personnel/partials/journal_date.html" %}</p>
     <h2 class="journal-panel-title">{{ 'Ma période' if entree.est_periode else 'Ma page du jour' }}</h2>
+    {% if mail_source %}<aside class="cycle-context"><span class="cycle-context-label">À partir de mon mail</span><p>{{ mail_source.objet }}</p>{% if mail_source.disponible %}<a href="{{ url_for('abonnement_client.lire_mail', mail_id=mail_source.id) }}">Relire le mail →</a>{% endif %}</aside>{% endif %}
     {% if entree.niveau_energie is not none %}<p class="journal-entry-tag">Énergie {{ entree.niveau_energie }}/10</p>{% endif %}
     {% include "espace_personnel/partials/journal_texte.html" %}
     <div class="journal-entry-actions"><a class="journal-mechanism-button secondary" href="{{ url_for('espace_personnel.journal', entree=entree.id, mode='modifier') }}#page-journal">Modifier cette entrée</a>
@@ -22,6 +23,7 @@
             </form>
             {% elif not episodes %}<p>Tu peux ajouter tes mécanismes dans <a href="{{ url_for('espace_personnel.laboratoire') }}">Mes mécanismes</a>, puis les relier ici.</p>{% endif %}
             <a class="journal-context-link" href="{{ url_for('espace_personnel.fiche', entree_id=entree.id) }}">Voir les repères astrologiques conservés avec cette entrée →</a>
+            <a class="journal-context-link" href="{{ url_for('communaute.publier', entree=entree.id) }}">Préparer un partage pour le groupe →</a>
         </div>
     </details>
 </article>

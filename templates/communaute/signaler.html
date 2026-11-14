@@ -1,0 +1,16 @@
+{% extends 'communaute/base.html' %}
+{% block communaute_content %}
+<section class="comm-paper">
+  <a class="comm-back" href="{{ source }}">← Revenir à l’échange</a>
+  <h2>Signaler à Cécile</h2>
+  <p>Explique ce qui te pose problème. Seule Cécile pourra consulter ton signalement et ton identité de membre ; ils ne seront pas affichés dans le groupe.</p>
+  <details class="comm-report-source"><summary>Revoir le contenu concerné</summary><h3>{{ titre }}</h3><blockquote>{{ contenu.texte }}</blockquote></details>
+  <form method="post" class="comm-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+    <label for="signalement-motif">Pourquoi souhaites-tu le signaler ?<select id="signalement-motif" name="motif" required><option value="">Choisir une raison</option>{% for code, libelle in motifs.items() %}<option value="{{ code }}" {% if request.form.get('motif') == code %}selected{% endif %}>{{ libelle }}</option>{% endfor %}</select></label>
+    <label for="signalement-precision">Une précision — facultatif<textarea id="signalement-precision" name="precision" rows="4" maxlength="2000" placeholder="Ce que tu souhaites préciser à Cécile…">{{ request.form.get('precision', '') }}</textarea></label>
+    <p class="comm-help">Ton signalement sera enregistré dans l’espace de Cécile. Le contenu reste visible jusqu’à sa décision.</p>
+    <button class="comm-button" type="submit">Enregistrer mon signalement</button>
+  </form>
+</section>
+{% endblock %}

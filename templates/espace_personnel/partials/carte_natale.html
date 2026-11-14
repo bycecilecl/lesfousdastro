@@ -1,0 +1,16 @@
+<section class="profil-carte" id="ma-carte-natale">
+  <h2>Ma carte natale</h2>
+  {% if carte_natale %}
+    {% set fichier_carte = url_for('outils_membres.fichier_carte') %}
+    {% if carte_natale.type_mime.startswith('image/') %}
+      <a href="{{ fichier_carte }}" target="_blank" rel="noopener"><img src="{{ fichier_carte }}" alt="Ma carte natale" style="display:block;max-width:100%;max-height:560px;margin:22px auto;object-fit:contain" loading="lazy"></a>
+    {% else %}
+      <p>Ta carte natale est disponible au format PDF.</p>
+      <iframe src="{{ fichier_carte }}" title="Ma carte natale en PDF" style="width:100%;height:500px;border:1px solid #c7dce5;border-radius:12px;margin-top:16px" loading="lazy"></iframe>
+      <p class="profil-aide">Si le PDF ne s’affiche pas sur ton appareil, utilise « Ouvrir en grand ».</p>
+    {% endif %}
+    <p><a class="profil-lien" href="{{ fichier_carte }}" target="_blank" rel="noopener">Ouvrir en grand ↗</a> · <a class="profil-lien" href="{{ url_for('outils_membres.fichier_carte', telecharger=1) }}">Télécharger ma carte</a></p>
+  {% else %}
+    <p>Ta carte apparaîtra ici dès qu’elle sera ajoutée par Cécile.</p>
+  {% endif %}
+</section>

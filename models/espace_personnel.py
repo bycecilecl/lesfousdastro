@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Index, text, Boolean, CheckConstraint, Column, Date, DateTime, Float, Integer, LargeBinary, String, Text, Time, UniqueConstraint
 
+from sqlalchemy.orm import deferred
+
 from extensions import db
 
 
@@ -531,3 +533,150 @@ class DecodageObservationMecanisme(db.Model):
     revision = Column(Integer, nullable=False, default=1, server_default="1")
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
     date_modification = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
+
+
+class CarteNataleMembre(db.Model):
+    """Document privé déposé par l’administratrice ; aucune interprétation IA."""
+
+    __tablename__ = "cartes_natales_membres"
+
+    utilisateur_id = Column(Integer, primary_key=True)
+    nom_fichier = Column(String(180), nullable=False)
+    type_mime = Column(String(40), nullable=False)
+    taille_octets = Column(Integer, nullable=False)
+    contenu = deferred(Column(LargeBinary, nullable=False))
+    ajoutee_par = Column(Integer, nullable=False)
+    date_modification = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
+
+
+class RetourBetaMembre(db.Model):
+    """Remarque d’un testeur, consultable uniquement par l’administratrice."""
+
+    __tablename__ = "retours_beta_membres"
+
+    id = Column(Integer, primary_key=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    objet = Column(String(140), nullable=False)
+    texte = Column(Text, nullable=False)
+    page_concernee = Column(String(240), nullable=True)
+    nonce = Column(String(32), nullable=False, unique=True)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False, index=True)
+
+
+class InscriptionMailsBeta(db.Model):
+    """Adhésion explicite au calendrier bêta, indépendante des anciens brouillons."""
+    __tablename__ = "inscriptions_mails_beta"
+
+    utilisateur_id = Column(Integer, primary_key=True)
+    profil_id = Column(Integer, nullable=False)
+    actif = Column(Boolean, nullable=False, default=True)
+    email_destinataire = Column(String(255), nullable=False)
+    signature_profil = Column(String(64), nullable=False)
+    debut = Column(DateTime(timezone=True), nullable=False)
+    fin = Column(DateTime(timezone=True), nullable=False)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    date_planification = Column(DateTime(timezone=True), nullable=True)
+
+
+class MailEvenementAbonne(db.Model):
+    """Une seule tentative IA/envoi par abonné et événement, avec résultat durable."""
+    __tablename__ = "mails_evenements_abonnes"
+    __table_args__ = (UniqueConstraint("utilisateur_id", "nature", "cle_evenement", name="uq_mail_abonne_evenement"),)
+
+    id = Column(String(36), primary_key=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    profil_id = Column(Integer, nullable=False)
+    nature = Column(String(20), nullable=False)
+    cle_evenement = Column(String(80), nullable=False)
+    instant_evenement = Column(DateTime(timezone=True), nullable=False)
+    date_prevue = Column(DateTime(timezone=True), nullable=False, index=True)
+    expire_le = Column(DateTime(timezone=True), nullable=False)
+    signature_profil = Column(String(64), nullable=False)
+    statut = Column(String(40), nullable=False, default="planifie", index=True)
+    dossier_json = Column(Text, nullable=True)
+    prompt = Column(Text, nullable=True)
+    parametres_json = Column(Text, nullable=True)
+    reponse_brute = Column(Text, nullable=True)
+    usage_json = Column(Text, nullable=True)
+    choix_journal_json = Column(Text, nullable=True)
+    source_lunaison_json = Column(Text, nullable=True)
+    reference_transport = Column(String(255), nullable=True)
+    objet = Column(String(250), nullable=True)
+    contenu_texte = Column(Text, nullable=True)
+    contenu_html = Column(Text, nullable=True)
+    erreur = Column(Text, nullable=True)
+    date_generation = Column(DateTime(timezone=True), nullable=True)
+    date_envoi = Column(DateTime(timezone=True), nullable=True)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    date_modification = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
+
+
+class ProfilCommunaute(db.Model):
+    __tablename__ = "profils_communaute"
+    utilisateur_id = Column(Integer, primary_key=True)
+    pseudo = Column(String(32), nullable=False)
+    pseudo_cle = Column(String(64), nullable=False, unique=True)
+    avatar = Column(String(20))
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class PublicationCommunaute(db.Model):
+    __tablename__ = "publications_communaute"
+    id = Column(Integer, primary_key=True)
+    groupe = Column(String(40), nullable=False, index=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    titre = Column(String(140), nullable=False)
+    texte = Column(Text, nullable=False)
+    entree_journal_id = Column(Integer)
+    nonce = Column(String(32), nullable=False, unique=True)
+    retiree = Column(Boolean, nullable=False, default=False)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False, index=True)
+    date_modification = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
+
+
+class CommentaireCommunaute(db.Model):
+    __tablename__ = "commentaires_communaute"
+    id = Column(Integer, primary_key=True)
+    publication_id = Column(Integer, nullable=False, index=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    texte = Column(Text, nullable=False)
+    nonce = Column(String(32), nullable=False, unique=True)
+    retire = Column(Boolean, nullable=False, default=False)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class MessageSalonCommunaute(db.Model):
+    __tablename__ = "messages_salon_communaute"
+    id = Column(Integer, primary_key=True)
+    groupe = Column(String(40), nullable=False, index=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    texte = Column(Text, nullable=False)
+    nonce = Column(String(32), nullable=False, unique=True)
+    retire = Column(Boolean, nullable=False, default=False)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False, index=True)
+
+
+class SignalementCommunaute(db.Model):
+    """Signalement privé, avec copie du seul contenu déjà partagé dans le groupe."""
+    __tablename__ = "signalements_communaute"
+    __table_args__ = (
+        UniqueConstraint("signale_par", "nature", "contenu_id", "empreinte_contenu",
+                         name="uq_signalement_communaute_version"),
+        CheckConstraint("nature IN ('publication', 'commentaire', 'message')",
+                        name="ck_signalement_communaute_nature"),
+    )
+    id = Column(Integer, primary_key=True)
+    groupe = Column(String(40), nullable=False, index=True)
+    signale_par = Column(Integer, nullable=False, index=True)
+    auteur_id = Column(Integer, nullable=False)
+    nature = Column(String(20), nullable=False)
+    contenu_id = Column(Integer, nullable=False)
+    empreinte_contenu = Column(String(64), nullable=False)
+    titre_copie = Column(String(160), nullable=False)
+    texte_copie = Column(Text, nullable=False)
+    motif = Column(String(40), nullable=False)
+    precision = Column(Text, nullable=True)
+    traite = Column(Boolean, nullable=False, default=False, index=True)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False, index=True)
+    traite_le = Column(DateTime(timezone=True), nullable=True)
+    traite_par = Column(Integer, nullable=True)

@@ -7,7 +7,11 @@
   'espace_personnel.explorer_analyse': 'espace_personnel.mes_analyses',
   'espace_personnel.fiche_cycle_lunaire': 'espace_personnel.cycles_lunaires',
   'espace_personnel.apercu_cycle_lunaire': 'espace_personnel.cycles_lunaires',
-  'espace_personnel.fiche_email_cycle': 'espace_personnel.emails_cycle'
+  'espace_personnel.fiche_email_cycle': 'espace_personnel.emails_cycle',
+  'abonnement_client.lire_mail': 'abonnement_client.mes_mails',
+  'communaute.fiche': 'communaute.index',
+  'communaute.publier': 'communaute.index',
+  'communaute.modifier': 'communaute.index'
 } %}
 {% set rubrique = rubriques_detail.get(rubrique, rubrique) %}
 <details class="espace-navigation" open>
@@ -24,15 +28,34 @@
       ('espace_personnel.laboratoire', 'Mon labo'),
       ('espace_personnel.revolutions_solaires', 'Mes années'),
       ('espace_personnel.cycles_lunaires', 'Mes cycles lunaires'),
-      ('espace_personnel.mes_analyses', 'Mes analyses')
+      ('espace_personnel.mes_analyses', 'Mes analyses'),
+      ('abonnement_client.mes_mails', 'Mes mails')
     ] %}
     <a class="espace-navigation-link{% if rubrique == endpoint %} is-current{% endif %}" href="{{ url_for(endpoint) }}"{% if rubrique == endpoint %} aria-current="page"{% endif %}>{{ libelle }}</a>
     {% endfor %}
+    <div class="espace-navigation-group">
+      <p class="espace-navigation-label">Communauté</p>
+      {% for endpoint, libelle in [
+        ('communaute.index', 'Nos partages'),
+        ('communaute.salon', 'Le tchat')
+      ] %}
+      <a class="espace-navigation-link{% if rubrique == endpoint %} is-current{% endif %}" href="{{ url_for(endpoint) }}"{% if rubrique == endpoint %} aria-current="page"{% endif %}>{{ libelle }}</a>
+      {% endfor %}
+    </div>
+    {% if retours_beta_accessibles is defined and retours_beta_accessibles() %}
+    <div class="espace-navigation-group">
+      <p class="espace-navigation-label">Bêta-test</p>
+      <a class="espace-navigation-link{% if rubrique == 'outils_membres.retours_beta' %} is-current{% endif %}" href="{{ url_for('outils_membres.retours_beta') }}"{% if rubrique == 'outils_membres.retours_beta' %} aria-current="page"{% endif %}>Ton feedback</a>
+    </div>
+    {% endif %}
     {% if outils_mails_admin %}
     <div class="espace-navigation-group">
       <p class="espace-navigation-label">Administration</p>
       <a class="espace-navigation-link{% if rubrique == 'espace_personnel.emails_cycle' %} is-current{% endif %}" href="{{ url_for('espace_personnel.emails_cycle') }}"{% if rubrique == 'espace_personnel.emails_cycle' %} aria-current="page"{% endif %}>Administration des mails</a>
       <a class="espace-navigation-link" href="{{ url_for('admin_lunaisons.index') }}">Mes lectures de lunaisons</a>
+      <a class="espace-navigation-link{% if rubrique == 'outils_membres.cartes_natales' %} is-current{% endif %}" href="{{ url_for('outils_membres.cartes_natales') }}">Cartes natales des membres</a>
+      <a class="espace-navigation-link{% if rubrique == 'outils_membres.lire_retours_beta' %} is-current{% endif %}" href="{{ url_for('outils_membres.lire_retours_beta') }}">Retours bêta</a>
+      <a class="espace-navigation-link{% if rubrique in ['communaute.signalements', 'communaute.traiter_signalement'] %} is-current{% endif %}" href="{{ url_for('communaute.signalements') }}">Signalements du groupe</a>
     </div>
     {% endif %}
     <div class="espace-navigation-group">

@@ -1101,12 +1101,16 @@ def _rendre_journal(utilisateur, **contexte):
         "entree_ouverte": None, "mode_modification": False,
         "date_du_jour": datetime.now().date().isoformat(),
         "contact_source": None, "cycle_source": None, "enjeu_source": None,
+        "mail_source": None,
         "interpretation_cycle": None, "domaines_contact": [],
         "entrees": EntreeJournal.query.filter_by(utilisateur_id=utilisateur.id)
             .order_by(EntreeJournal.date_observation.desc(), EntreeJournal.id.desc()).all(),
         **_contexte_mecanismes_journal(utilisateur.id),
     }
     donnees.update(contexte)
+    if donnees.get("entree_ouverte"):
+        from utils.journal_mails import reference_entree
+        donnees["mail_source"] = reference_entree(donnees["entree_ouverte"])
     return render_template("espace_personnel/journal.html", **donnees)
 
 
@@ -1132,6 +1136,10 @@ def journal():
             if request.method == "GET": abort(400)
     from utils.journal_contact import contact_du_jour, DOMAINES
     source = request.form if request.method == "POST" else request.args
+    mail_source = None
+    if source.get("mail_source") and not entree_ouverte:
+        from utils.journal_mails import mail_envoye_du_membre, reference_mail
+        mail_source = reference_mail(mail_envoye_du_membre(source["mail_source"], utilisateur.id))
     contact_source = None
     if source.get("contact_planete"):
         try:
@@ -1210,6 +1218,7 @@ def journal():
                     date_du_jour=date_prefill, contact_source=contact_source,
                     domaines_contact=DOMAINES, cycle_source=cycle_source,
                     enjeu_source=enjeu_source,
+                    mail_source=mail_source,
                     interpretation_cycle=json.loads(cycle_source.interpretation)
                     if cycle_source and cycle_source.interpretation else None,
                 )
@@ -1230,6 +1239,11 @@ def journal():
                 photo["contact_journal"] = {**contact_source,
                     "domaine": request.form.get("domaine") if request.form.get("domaine") in DOMAINES else None,
                     "rien_particulier": request.form.get("rien_particulier") == "oui"}
+                photo_transits = json.dumps(photo, ensure_ascii=False)
+
+            if mail_source:
+                photo = json.loads(photo_transits) if photo_transits else {}
+                photo["mail_journal"] = {k: v for k, v in mail_source.items() if k != "disponible"}
                 photo_transits = json.dumps(photo, ensure_ascii=False)
 
             entree = EntreeJournal(
@@ -1273,6 +1287,7 @@ def journal():
         entree_ouverte=entree_ouverte, mode_modification=mode_modification,
         date_du_jour=date_prefill,
         contact_source=contact_source,
+        mail_source=mail_source,
         domaines_contact=DOMAINES,
         cycle_source=cycle_source,
         enjeu_source=enjeu_source,
@@ -1364,6 +1379,8 @@ def calendrier():
         "mars": bool(theme) and droits["transits_personnalises"],
         "lune": droits["cycle_lunaire"],
     })
+    from utils.calendrier_mails import relier_mails_envoyes
+    relier_mails_envoyes(donnees.get("events", []), utilisateur.id)
     try:
         from utils.ciel_collectif import ciel_collectif_mois
         ciel = ciel_collectif_mois(annee, mois, inclure_periodes=True)

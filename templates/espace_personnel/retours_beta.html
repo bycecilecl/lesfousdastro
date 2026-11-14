@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Ton feedback | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='outils-membres.css') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="membres-shell"><section class="membres-carte">
+  <h1>Ton feedback</h1>
+  <p>Un truc qui te plaît, qui manque, qui bloque ou qui te saoule ? Raconte-moi ! Tes remarques m’aideront à améliorer l’espace.</p>
+  <p><strong>Je suis la seule à pouvoir consulter tes retours.</strong> Ils ne sont pas publiés dans la communauté.</p>
+  {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="membres-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
+  {% if erreur %}<p class="membres-message error" role="alert">{{ erreur }}</p>{% endif %}
+  {% if pret %}
+    <form method="post" class="membres-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><input type="hidden" name="nonce" value="{{ nonce }}">
+      <label for="retour-objet">Objet<input id="retour-objet" name="objet" minlength="2" maxlength="140" value="{{ request.form.get('objet', '') }}" placeholder="Ex. Je ne retrouve pas une entrée du journal" required></label>
+      <label for="retour-page">La rubrique concernée — facultatif<input id="retour-page" name="page_concernee" maxlength="240" value="{{ request.form.get('page_concernee', '') }}" placeholder="Ex. Mon journal, Mes mécanismes, Mes mails…"></label>
+      <label for="retour-texte">Ta remarque<textarea id="retour-texte" name="texte" minlength="5" maxlength="10000" rows="8" placeholder="Ce que tu essayais de faire, ce qui s’est passé, ou ce que tu aimerais trouver ici…" required>{{ request.form.get('texte', '') }}</textarea></label>
+      <button class="membres-bouton" type="submit">M’envoyer ton feedback</button>
+    </form>
+  {% else %}<p>Le formulaire sera disponible prochainement.</p>{% endif %}
+</section></main>
+{% endblock %}

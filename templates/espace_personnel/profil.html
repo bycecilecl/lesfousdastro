@@ -50,11 +50,15 @@
 <main class="profil-shell">
   <a class="profil-retour" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
   <header class="profil-entete"><p class="profil-kicker">Mes repères personnels</p><h1>Mon profil astral</h1><p>Retrouve tes données de naissance, le lieu de tes cycles et les repères que tu choisis de partager.</p></header>
+  {% if carte_natale_du_membre is defined %}
+    {% set carte_natale = carte_natale_du_membre() %}
+    {% include 'espace_personnel/partials/carte_natale.html' %}
+  {% endif %}
   <section class="profil-carte">
     <h2>Mes données de naissance</h2>
     <p>Ces coordonnées servent à calculer ton thème natal.</p>
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for categorie, message in messages %}<p class="profil-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+      {% for categorie, message in messages if categorie not in ['pseudo_success', 'pseudo_error'] %}<p class="profil-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
     {% endwith %}
     {% if erreur %}<p class="profil-message error" role="alert">{{ erreur }}</p>{% endif %}
     <form method="post" class="profil-form">
@@ -112,6 +116,24 @@
     </details>
   </section>
   {% endif %}
+    {% if profil_communaute_du_membre is defined %}
+    {% set profil_groupe = profil_communaute_du_membre() %}
+    <section class="profil-carte" id="pseudo-communaute">
+        <h2>Mon pseudo pour la communauté</h2>
+        <p>Ce prénom ou pseudo apparaîtra avec tes partages, tes commentaires et tes messages dans le tchat. Tu peux le modifier ici.</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for categorie, message in messages if categorie in ['pseudo_success', 'pseudo_error'] %}<p class="profil-message {{ 'error' if categorie == 'pseudo_error' else '' }}" role="status">{{ message }}</p>{% endfor %}
+        {% endwith %}
+        <form method="post" class="profil-form" action="{{ url_for('communaute.mon_profil') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+            <input type="hidden" name="suivant" value="{{ request.args.get('communaute_suivant', '') }}">
+            <input type="hidden" name="entree" value="{{ request.args.get('communaute_entree', '') }}">
+            <div class="profil-champ large"><label for="pseudo-communaute-champ">Prénom ou pseudo</label><input id="pseudo-communaute-champ" name="pseudo" value="{{ profil_groupe.pseudo if profil_groupe else '' }}" minlength="2" maxlength="32" autocomplete="nickname" required></div>
+            <p class="profil-aide">Ton e-mail, tes données de naissance et ton journal restent privés. Ton personnage se choisit dans « Mon avatar » juste en dessous.</p>
+            <button class="profil-submit" type="submit">Enregistrer mon pseudo</button>
+        </form>
+    </section>
+    {% endif %}
     <section class="profil-carte" id="mon-avatar">
         <h1>Mon avatar</h1>
         <p class="profil-intro">Choisis le personnage des Fous d’Astro qui te plaît. Tu peux en changer à tout moment.</p>

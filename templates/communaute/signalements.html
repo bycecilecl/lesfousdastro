@@ -1,0 +1,26 @@
+{% extends 'communaute/base.html' %}
+{% block communaute_content %}
+<section class="comm-paper">
+  <h2>Signalements du groupe</h2>
+  <p>Ces signalements et leurs auteurs sont visibles uniquement par toi. Rien n’est publié dans le groupe.</p>
+  <nav class="comm-report-filtres" aria-label="État des signalements"><a href="{{ url_for('communaute.signalements') }}" {% if not archives %}aria-current="page"{% endif %}>À traiter</a><a href="{{ url_for('communaute.signalements', traites=1) }}" {% if archives %}aria-current="page"{% endif %}>Traités</a></nav>
+  {% if not signalements_prets %}<p>Les signalements sont en cours de préparation.</p>{% else %}
+    {% for signalement in signalements %}
+    <article class="comm-report">
+      <h3>{{ signalement.titre_copie }}</h3>
+      <p class="comm-help">Signalé par <strong>{{ identites.get(signalement.signale_par, {'pseudo':'Ancien membre'}).pseudo }}</strong> · {{ utc(signalement.date_creation).astimezone(paris).strftime('%d.%m.%Y à %H:%M') }}<br>Auteur du contenu : {{ identites.get(signalement.auteur_id, {'pseudo':'Ancien membre'}).pseudo }}</p>
+      <p><strong>{{ motifs.get(signalement.motif, 'Autre raison') }}</strong></p>
+      {% if signalement.precision %}<p class="comm-report-texte">{{ signalement.precision }}</p>{% endif %}
+      <details class="comm-report-source"><summary>Contenu au moment du signalement</summary><blockquote>{{ signalement.texte_copie }}</blockquote></details>
+      {% if not signalement.traite %}
+      <div class="comm-report-actions">
+        <form method="post" action="{{ url_for('communaute.traiter_signalement', id=signalement.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><input type="hidden" name="action" value="traiter"><button class="comm-button" type="submit">Marquer comme traité</button></form>
+        <form method="post" action="{{ url_for('communaute.traiter_signalement', id=signalement.id) }}" data-confirmer="Retirer ce contenu du groupe et traiter les signalements associés ?"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><input type="hidden" name="action" value="retirer"><button class="comm-text-button" type="submit">Retirer le contenu du groupe</button></form>
+      </div>
+      {% elif signalement.traite_le %}<p class="comm-help">Traité le {{ utc(signalement.traite_le).astimezone(paris).strftime('%d.%m.%Y à %H:%M') }}.</p>{% endif %}
+    </article>
+    {% else %}<p>{{ 'Aucun signalement traité pour le moment.' if archives else 'Aucun signalement à traiter.' }}</p>{% endfor %}
+    {% if page > 1 or suite %}<nav class="comm-pagination comm-report-pagination" aria-label="Pages des signalements">{% if page > 1 %}<a href="{{ url_for('communaute.signalements', page=page-1, traites=1 if archives else 0) }}">← Plus récents</a>{% endif %}{% if suite %}<a href="{{ url_for('communaute.signalements', page=page+1, traites=1 if archives else 0) }}">Plus anciens →</a>{% endif %}</nav>{% endif %}
+  {% endif %}
+</section>
+{% endblock %}

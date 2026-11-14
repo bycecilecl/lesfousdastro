@@ -1,0 +1,35 @@
+# Communauté, cartes, feedback et calendrier
+
+Report de la version validée dans le local de Cécile. Ce commit prépare le
+déploiement ; aucune donnée locale n’est importée et aucun accès n’est attribué.
+
+- Communauté privée : Nos partages, commentaires et tchat ouvert ; pseudo dans
+  Mon profil, avatar commun, charte et signalements réservés à l’administratrice.
+- Cartes : Administration → Cartes natales des membres ; image/PDF privé,
+  consultable et téléchargeable depuis le profil du propriétaire.
+- Bêta-test → Ton feedback ; consultation uniquement par l’administratrice.
+- Calendrier : repère ✉ et ouverture du mail envoyé de la RL ou lunaison.
+  L’archive Mes mails vérifie propriétaire et statut envoyé ; lien vers le journal.
+
+Le point d’entrée `espace_wsgi.py` enregistre les nouveaux blueprints. La
+migration Railway existante crée neuf tables supplémentaires, sans recopier les
+binds SQLite locaux, sans modification des notes ni attribution de droits.
+Les PDF/images sont conservés en base PostgreSQL, pas dans un fichier éphémère.
+
+L’accès à la communauté et au feedback exige une inscription bêta confirmée et
+active ainsi que la formule bêta active/non expirée ; l’administratrice y accède
+aussi. Les inscriptions peuvent participer avant le début des mails. Une adresse
+invitée ou un compte gratuit seul ne suffit pas. La table d’adhésion est créée
+vide ; ce commit ne migre pas les inscriptions locales, ne crée aucun abonnement
+et ne déploie pas le parcours de souscription/paiement, traité séparément.
+
+Les tables de rendez-vous/adhésion sont des prérequis de stockage et de lecture.
+Le module d’archives n’importe aucun moteur de mail ni de paiement. Aucun worker,
+cron, appel IA, transport de mail ou activation automatique n’est ajouté.
+Les moteurs RS et les paiements existants restent ceux de production.
+
+Contrôles : comparaison des changements, lecture syntaxique Python/Jinja/JS et
+contrôles statiques Git. Pas de test fonctionnel, génération, appel IA, envoi ou
+connexion à la base de production. Les essais locaux ont été effectués et validés
+par Cécile avant le report ; les adaptations PostgreSQL restent à vérifier après
+déploiement par Cécile.

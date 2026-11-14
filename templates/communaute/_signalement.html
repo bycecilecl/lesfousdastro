@@ -1,0 +1,3 @@
+{% macro bouton_signalement(nature, id) -%}
+  {% if signalements_prets %}<a class="comm-report-link" href="{{ url_for('communaute.signaler', nature=nature, id=id) }}">Signaler à Cécile</a>{% endif %}
+{%- endmacro %}

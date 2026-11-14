@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Communauté | Les Fous d’Astro{% endblock %}
+{% block extra_css %}
+body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Segoe UI',Tahoma,sans-serif}
+.comm-profile-access{display:inline-block;margin-top:14px;color:#e3f8f4;font-size:.85rem;text-underline-offset:4px}
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static',filename='communaute.css') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="comm-shell" data-communaute>
+<header class="comm-header"><p class="comm-kicker">ENTRE FOUS D’ASTRO</p><h1>Communauté</h1><p>Nos déclics, nos questions et les petits pas qu’on a envie de partager.</p>{% if request.endpoint != 'communaute.mon_profil' %}<a class="comm-profile-access" href="{{ url_for('espace_personnel.profil', _anchor='pseudo-communaute') }}">{{ 'Mon pseudo dans Mon profil' if mon_profil else 'Choisir mon pseudo dans Mon profil' }}</a>{% endif %}</header>
+{% include 'communaute/_charte.html' %}
+{% with messages=get_flashed_messages(with_categories=true) %}{% for categorie,message in messages %}<p class="comm-flash {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
+{% block communaute_content %}{% endblock %}
+</main>
+<script src="{{ url_for('static',filename='communaute.js') }}" defer></script>
+{% endblock %}

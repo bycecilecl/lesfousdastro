@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block title %}{{ mail.objet }} | Les Fous d’Astro{% endblock %}
+{% block extra_css %}.lecture-membre{max-width:850px;margin:35px auto;padding:24px;background:#fffdf8;border-radius:20px}.lecture-membre h1{color:#1f628e;margin:20px 0}.lecture-membre iframe{width:100%;height:1100px;border:0}.lecture-membre a{color:#1f628e}.lecture-membre .ecrire-journal{display:inline-block;padding:13px 20px;margin:8px 0 24px;border-radius:24px;background:#1f628e;color:white;text-decoration:none;line-height:1.6}.lecture-membre .notes-mail{margin-top:28px;padding-top:20px;border-top:1px solid #d8e8e6}.notes-mail h2{color:#1f628e;margin-bottom:16px}.notes-mail article{padding:15px 0;border-bottom:1px solid #e0ebe9}.notes-mail p{line-height:1.7;margin:10px 0}{% endblock %}
+{% block content %}{% include 'espace_personnel/_navigation.html' %}<main class="lecture-membre"><a href="{{ url_for('abonnement_client.mes_mails') }}">← Mes mails</a><h1>{{ mail.objet }}</h1>
+<a class="ecrire-journal" href="{{ url_for('espace_personnel.journal',mail_source=mail.id) }}#page-journal">Écrire dans mon journal à partir de ce mail</a>
+<iframe sandbox="allow-popups allow-popups-to-escape-sandbox" src="{{ url_for('abonnement_client.contenu_mail',mail_id=mail.id) }}" title="Ton mail astrologique"></iframe>
+<section class="notes-mail"><h2>Mes notes à partir de ce mail</h2>
+{% for note in notes_liees %}<article><a href="{{ url_for('espace_personnel.journal',entree=note.id) }}#page-journal">{{ note.date_observation.strftime('%d.%m.%Y') }} · ouvrir ma note</a><p>{{ (note.situation or note.notes_libres or 'Ma note')|truncate(150) }}</p></article>{% else %}<p>Tu pourras retrouver ici les notes que tu écriras à partir de cette analyse.</p>{% endfor %}
+<a class="ecrire-journal" href="{{ url_for('espace_personnel.journal',mail_source=mail.id) }}#page-journal">Écrire dans mon journal à partir de ce mail</a></section>
+</main>{% endblock %}

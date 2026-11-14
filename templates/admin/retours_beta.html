@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Retours bêta | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='outils-membres.css') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="membres-shell"><section class="membres-carte">
+  <h1>Retours bêta</h1>
+  <p>Les remarques des testeurs, visibles uniquement par toi. Les plus récentes sont en premier.</p>
+  {% if not pret %}<p>Le stockage des retours doit être préparé avant leur consultation.</p>{% else %}
+    {% for retour, prenom, email in retours %}
+      <article class="membres-retour"><h2>{{ retour.objet }}</h2>
+        <p class="membres-aide"><strong>{{ prenom or 'Ancien membre' }}</strong>{% if email %} · {{ email }}{% endif %} · {{ retour.date_creation.strftime('%d.%m.%Y') }}{% if retour.page_concernee %}<br>Rubrique : {{ retour.page_concernee }}{% endif %}</p>
+        <p class="membres-texte">{{ retour.texte }}</p>
+      </article>
+    {% else %}<p>Aucune remarque pour le moment.</p>{% endfor %}
+    {% if page > 1 or suite %}<nav class="membres-pagination" aria-label="Pages des retours">{% if page > 1 %}<a class="membres-lien" href="{{ url_for('outils_membres.lire_retours_beta', page=page-1) }}">← Plus récents</a>{% endif %}{% if suite %}<a class="membres-lien" href="{{ url_for('outils_membres.lire_retours_beta', page=page+1) }}">Plus anciens →</a>{% endif %}</nav>{% endif %}
+  {% endif %}
+</section></main>
+{% endblock %}

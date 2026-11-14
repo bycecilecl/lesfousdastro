@@ -38,6 +38,15 @@ COLONNES = {
 NOUVELLES_TABLES = (
     "liens_mot_de_passe_espace", "limites_acces_espace",
     "analyses_lunaisons", "enjeux_annuels", "decodages_observations_mecanisme",
+    'cartes_natales_membres',
+    'retours_beta_membres',
+    'inscriptions_mails_beta',
+    'mails_evenements_abonnes',
+    'profils_communaute',
+    'publications_communaute',
+    'commentaires_communaute',
+    'messages_salon_communaute',
+    'signalements_communaute',
 )
 INDEX = {
     "uq_espace_administratrice_unique": (
@@ -110,9 +119,27 @@ def main():
             # Imports de modèles seuls : aucun import de main, de routes ou d'IA.
             from models.espace_personnel import (
                 AnalyseLunaison, DecodageObservationMecanisme, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
+                CarteNataleMembre,
+                RetourBetaMembre,
+                InscriptionMailsBeta,
+                MailEvenementAbonne,
+                ProfilCommunaute,
+                PublicationCommunaute,
+                CommentaireCommunaute,
+                MessageSalonCommunaute,
+                SignalementCommunaute,
             )
             modeles = {m.__tablename__: m.__table__ for m in (
                 AnalyseLunaison, DecodageObservationMecanisme, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
+                CarteNataleMembre,
+                RetourBetaMembre,
+                InscriptionMailsBeta,
+                MailEvenementAbonne,
+                ProfilCommunaute,
+                PublicationCommunaute,
+                CommentaireCommunaute,
+                MessageSalonCommunaute,
+                SignalementCommunaute,
             )}
             for table in tables:
                 modeles[table].create(bind=connexion, checkfirst=True)

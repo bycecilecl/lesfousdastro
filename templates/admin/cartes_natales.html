@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Cartes natales des membres | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='outils-membres.css') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="membres-shell">
+  <section class="membres-carte" id="depot">
+    <h1>Cartes natales des membres</h1>
+    <p>Choisis un membre et ajoute sa carte en image ou en PDF. Il la retrouvera dans son profil. Elle reste privée.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="membres-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
+    {% if pret %}
+      <form method="post" action="{{ url_for('outils_membres.cartes_natales') }}" enctype="multipart/form-data" class="membres-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+        <label for="carte-membre">Membre<select id="carte-membre" name="membre" required><option value="">Choisir un membre</option>{% for membre in membres %}<option value="{{ membre.id }}" {% if selection == membre.id %}selected{% endif %}>{{ membre.prenom }} — {{ membre.email or 'Sans e-mail' }}</option>{% endfor %}</select></label>
+        <label for="carte-fichier">Carte natale<input type="file" id="carte-fichier" name="carte" accept="image/png,image/jpeg,image/webp,application/pdf,.png,.jpg,.jpeg,.webp,.pdf" required></label>
+        <p class="membres-aide">PNG, JPG, WebP ou PDF · 15 Mo maximum. Un nouveau dépôt remplace la carte précédente du membre sélectionné.</p>
+        <button class="membres-bouton" type="submit">Enregistrer la carte dans son profil</button>
+      </form>
+    {% else %}<p>Le stockage des cartes natales doit être préparé avant le premier dépôt.</p>{% endif %}
+  </section>
+  <section class="membres-carte">
+    <h2>Les cartes ajoutées</h2>
+    <div class="membres-table"><table><thead><tr><th>Membre</th><th>Carte natale</th><th>Action</th></tr></thead><tbody>
+    {% for membre in membres %}{% set carte = cartes.get(membre.id) %}
+      <tr><td>{{ membre.prenom }}<br><span class="membres-aide">{{ membre.email or '' }}</span></td><td>{% if carte %}<a href="{{ url_for('outils_membres.fichier_carte_admin', utilisateur_id=membre.id) }}" target="_blank" rel="noopener">Ouvrir la carte ↗</a><br><span class="membres-aide">{{ carte.nom_fichier }} · {{ carte.date_modification.strftime('%d.%m.%Y') }}</span>{% else %}Pas encore ajoutée{% endif %}</td><td><a href="{{ url_for('outils_membres.cartes_natales', membre=membre.id, _anchor='depot') }}">{{ 'Remplacer' if carte else 'Ajouter' }}</a></td></tr>
+    {% else %}<tr><td colspan="3">Aucun membre pour le moment.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</main>
+{% endblock %}
