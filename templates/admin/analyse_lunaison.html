@@ -1,0 +1,40 @@
+{% extends "admin/lunaisons_base.html" %}
+{% block title %}{{ fiche.libelle }} du {{ fiche.date_locale.strftime('%d/%m/%Y') }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('admin_lunaisons.index', mois=fiche.date_locale.strftime('%Y-%m')) }}">← Les lunaisons de ce mois</a>
+<h1>{{ fiche.libelle }} du {{ fiche.date_locale.strftime('%d/%m/%Y') }}</h1>
+<p class="muted">{{ fiche.date_locale.strftime('%H h %M') }}, heure de Paris. Cette fiche correspond à cette lunaison précise pour tous les abonnés.</p>
+{% if analyse and analyse.validee_le %}
+    <p><span class="status validated">Version {{ analyse.revision_validee }} validée pour les mails</span></p>
+    {% if analyse.texte != analyse.texte_valide or analyse.titre != analyse.titre_valide %}
+        <div class="notice">Ton brouillon contient des modifications non validées. Les mails continuent d'utiliser la version validée ci-dessous.</div>
+    {% endif %}
+{% else %}
+    <p><span class="status pending">Aucune version validée pour les mails</span></p>
+{% endif %}
+{% if erreur %}<div class="notice error" role="alert">{{ erreur }}</div>{% endif %}
+<form method="post" class="panel">
+    <input type="hidden" name="csrf_token" value="{{ csrf_lunaisons }}">
+    <input type="hidden" name="revision" value="{{ analyse.revision if analyse else 0 }}">
+    <label for="titre">Ton titre <span class="muted">(facultatif)</span></label>
+    <input type="text" id="titre" name="titre" maxlength="200" value="{{ formulaire.titre }}" placeholder="Le fil conducteur de cette lunaison">
+    <label for="texte">Ton analyse</label>
+    <p class="muted" id="aide-analyse">Écris ou colle ta lecture : les enjeux collectifs, les tensions, les ressources et les nuances que tu veux transmettre. Les maisons et contacts propres à chaque client serviront ensuite à la personnaliser.</p>
+    <textarea id="texte" name="texte" rows="24" aria-describedby="aide-analyse">{{ formulaire.texte }}</textarea>
+    <div class="actions">
+        <button type="submit" name="action" value="enregistrer" class="secondary" {% if conflit %}disabled{% endif %}>Enregistrer le brouillon</button>
+        <button type="submit" name="action" value="valider" {% if conflit %}disabled{% endif %}>Valider pour les mails</button>
+        {% if analyse and analyse.validee_le %}
+            <button type="submit" name="action" value="retirer" class="withdraw" {% if conflit %}disabled{% endif %}>Retirer la validation</button>
+        {% endif %}
+    </div>
+    <p class="muted">« Valider » enregistre ton texte et le rend disponible pour les futurs mails concernés. Les mails déjà générés restent inchangés. Aucun appel IA ni envoi depuis cette page.</p>
+</form>
+{% if analyse and analyse.validee_le %}
+<details class="panel">
+    <summary>Lire la version actuellement reprise dans les mails</summary>
+    {% if analyse.titre_valide %}<h2>{{ analyse.titre_valide }}</h2>{% endif %}
+    <div class="reading">{{ analyse.texte_valide }}</div>
+</details>
+{% endif %}
+{% endblock %}
