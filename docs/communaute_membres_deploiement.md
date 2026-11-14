@@ -6,7 +6,11 @@ déploiement ; aucune donnée locale n’est importée et aucun accès n’est a
 - Communauté privée : Nos partages, commentaires et tchat ouvert ; pseudo dans
   Mon profil, avatar commun, charte et signalements réservés à l’administratrice.
 - Cartes : Administration → Cartes natales des membres ; image/PDF privé,
-  consultable et téléchargeable depuis le profil du propriétaire.
+  consultable et téléchargeable depuis le ciel natal du propriétaire, accessible
+  depuis son profil. Aperçu de recadrage, choix de la page PDF et conversion
+  WebP sans perte, proportions conservées ; affichage en grand centré. La carte
+  déjà déposée peut être reprise sans réimport. Le dépôt et l’aperçu restent
+  réservés à l’administratrice ; seule la validation finale remplace le document.
 - Bêta-test → Ton feedback ; consultation uniquement par l’administratrice.
 - Calendrier : repère ✉ et ouverture du mail envoyé de la RL ou lunaison.
   L’archive Mes mails vérifie propriétaire et statut envoyé ; lien vers le journal.
@@ -33,3 +37,8 @@ contrôles statiques Git. Pas de test fonctionnel, génération, appel IA, envoi
 connexion à la base de production. Les essais locaux ont été effectués et validés
 par Cécile avant le report ; les adaptations PostgreSQL restent à vérifier après
 déploiement par Cécile.
+
+La note sous la carte précise un possible écart de quelques minutes d’arc avec
+les données du site, sans exemple. Le rendu PDF utilise `pypdfium2==4.30.0`.
+Cette évolution des cartes ne nécessite aucune migration de données et ne
+reconvertit pas les cartes existantes au déploiement.

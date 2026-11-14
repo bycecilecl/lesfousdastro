@@ -2,11 +2,13 @@
 from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
+import base64
+import hashlib
 import re
 import warnings
 from uuid import uuid4
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, send_file, url_for
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, send_file, url_for
 from PIL import Image, UnidentifiedImageError
 from PyPDF2 import PdfReader
 from sqlalchemy import inspect, select
@@ -107,6 +109,44 @@ def _document_valide(fichier):
     return contenu, mime, nom + extension
 
 
+def _source_carte():
+    if request.form.get("utiliser_existante") == "oui":
+        membre_id = request.form.get("membre", type=int)
+        membre = db.session.get(UtilisateurEspace, membre_id) if membre_id else None
+        carte = db.session.get(CarteNataleMembre, membre_id) if membre else None
+        if membre is None or membre.actif != 1 or carte is None:
+            raise ValueError("Choisis un membre qui possède déjà une carte à recadrer.")
+        return carte.contenu, carte.type_mime, carte.nom_fichier
+    return _document_valide(request.files.get("carte"))
+
+
+def _page_carte():
+    try:
+        page = int(request.form.get("page_pdf", "1"))
+        if not 1 <= page <= 100:
+            raise ValueError()
+        return page
+    except ValueError:
+        raise ValueError("Choisis un numéro de page valide.") from None
+
+
+@outils_membres_bp.route("/admin/cartes-natales/apercu", methods=["POST"])
+def apercu_carte():
+    """Aperçu en mémoire : aucun document ni recadrage n’est enregistré ici."""
+    if not _table_prete(CarteNataleMembre):
+        return jsonify(error="Le stockage des cartes n’est pas prêt."), 503
+    try:
+        contenu, _, _ = _source_carte()
+        from utils.images_cartes_natales import image_de_travail, webp
+        image, pages = image_de_travail(contenu, _page_carte())
+        return jsonify(image="data:image/webp;base64," + base64.b64encode(webp(image, apercu=True)).decode("ascii"),
+            pages=pages, empreinte=hashlib.sha256(contenu).hexdigest())
+    except ValueError as erreur:
+        return jsonify(error=str(erreur)), 400
+    except Exception:
+        return jsonify(error="L’aperçu n’a pas pu être préparé. La carte enregistrée est conservée."), 400
+
+
 @outils_membres_bp.route("/admin/cartes-natales", methods=["GET", "POST"])
 def cartes_natales():
     pret = _table_prete(CarteNataleMembre)
@@ -118,7 +158,17 @@ def cartes_natales():
         if membre is None or membre.actif != 1:
             abort(404)
         try:
-            contenu, mime, nom = _document_valide(request.files.get("carte"))
+            contenu, _, nom = _source_carte()
+            empreinte = request.form.get("empreinte_source", "")
+            if empreinte and empreinte != hashlib.sha256(contenu).hexdigest():
+                raise ValueError("La carte source a changé depuis l’aperçu. Recharge son aperçu avant d’enregistrer.")
+            from utils.images_cartes_natales import image_de_travail, recadrer, webp
+            image, _ = image_de_travail(contenu, _page_carte())
+            contenu = webp(recadrer(image, request.form.get("recadrage")))
+            if len(contenu) > TAILLE_MAX_CARTE:
+                raise ValueError("L’image convertie est trop lourde. Choisis un recadrage plus petit.")
+            nom = (secure_filename(Path(nom).stem)[:150] or "carte-natale") + ".webp"
+            mime = "image/webp"
             carte = db.session.get(CarteNataleMembre, membre.id)
             if carte is None:
                 carte = CarteNataleMembre(utilisateur_id=membre.id)
@@ -126,7 +176,7 @@ def cartes_natales():
             carte.contenu, carte.ajoutee_par, carte.date_modification = contenu, utilisateur_connecte().id, utcnow()
             db.session.add(carte)
             db.session.commit()
-            flash(f"La carte natale de {membre.prenom} est enregistrée dans son profil.", "success")
+            flash(f"La carte natale de {membre.prenom} est disponible dans son ciel natal.", "success")
         except ValueError as erreur:
             db.session.rollback()
             flash(str(erreur), "error")
@@ -161,6 +211,28 @@ def fichier_carte():
 @outils_membres_bp.route("/admin/cartes-natales/<int:utilisateur_id>/fichier")
 def fichier_carte_admin(utilisateur_id):
     return _servir_carte(utilisateur_id)
+
+
+def _voir_carte(utilisateur_id, administration=False):
+    if not _table_prete(CarteNataleMembre):
+        abort(404)
+    carte = db.session.get(CarteNataleMembre, utilisateur_id)
+    if carte is None:
+        abort(404)
+    fichier = url_for("outils_membres.fichier_carte_admin", utilisateur_id=utilisateur_id) if administration else url_for("outils_membres.fichier_carte")
+    retour = url_for("outils_membres.cartes_natales", membre=utilisateur_id) if administration else url_for("espace_personnel.ciel_natal", _anchor="ma-carte-natale")
+    return render_template("espace_personnel/carte_natale_grand.html", carte=carte, fichier=fichier,
+        telecharger=fichier + "?telecharger=1", retour=retour)
+
+
+@outils_membres_bp.route("/mon-espace/carte-natale")
+def voir_carte():
+    return _voir_carte(utilisateur_connecte().id)
+
+
+@outils_membres_bp.route("/admin/cartes-natales/<int:utilisateur_id>/voir")
+def voir_carte_admin(utilisateur_id):
+    return _voir_carte(utilisateur_id, administration=True)
 
 
 @outils_membres_bp.route("/mon-espace/retours-beta", methods=["GET", "POST"])

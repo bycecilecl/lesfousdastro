@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Ma carte natale | Les Fous d’Astro</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#edf4f6;color:#29434e;font:16px/1.5 system-ui,sans-serif}.carte-grand-shell{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}.carte-grand-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 24px;background:white;border-bottom:1px solid #c7dce0}.carte-grand-nav a{color:#1f628e;font-weight:700;text-underline-offset:3px}.carte-grand-nav strong{color:#1f628e}.carte-grand-scene{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}.carte-grand-scene img{display:block;width:auto;height:auto;max-width:100%;max-height:calc(100vh - 130px);max-height:calc(100dvh - 130px);object-fit:contain;background:white;box-shadow:0 10px 35px #16414f18}.carte-grand-scene iframe{display:block;width:min(1100px,100%);height:calc(100vh - 130px);border:0;background:white}@media(max-width:600px){.carte-grand-nav{padding:12px 16px;font-size:14px}.carte-grand-scene{padding:12px}}
+</style></head>
+<body><main class="carte-grand-shell"><nav class="carte-grand-nav" aria-label="Carte natale"><a href="{{ retour }}">← Revenir à mon espace</a><strong>Ma carte natale</strong><a href="{{ telecharger }}">Télécharger</a></nav>
+<div class="carte-grand-scene">{% if carte.type_mime.startswith('image/') %}<img src="{{ fichier }}" alt="Ma carte natale en grand">{% else %}<iframe src="{{ fichier }}" title="Ma carte natale en PDF"></iframe>{% endif %}</div>
+</main></body></html>

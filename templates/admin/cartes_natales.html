@@ -2,19 +2,32 @@
 {% block title %}Cartes natales des membres | Les Fous d’Astro{% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='outils-membres.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='cartes-natales.css') }}">
 {% include 'espace_personnel/_navigation.html' %}
 <main class="membres-shell">
   <section class="membres-carte" id="depot">
     <h1>Cartes natales des membres</h1>
-    <p>Choisis un membre et ajoute sa carte en image ou en PDF. Il la retrouvera dans son profil. Elle reste privée.</p>
+    <p>Choisis un membre et ajoute sa carte en image ou en PDF. Il la retrouvera dans son ciel natal, accessible depuis son profil. Elle reste privée.</p>
     {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie, message in messages %}<p class="membres-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
     {% if pret %}
-      <form method="post" action="{{ url_for('outils_membres.cartes_natales') }}" enctype="multipart/form-data" class="membres-form">
+      <form method="post" action="{{ url_for('outils_membres.cartes_natales') }}" enctype="multipart/form-data" class="membres-form" data-carte-form data-apercu-url="{{ url_for('outils_membres.apercu_carte') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+        <input type="hidden" name="utiliser_existante" value="non">
+        <input type="hidden" name="empreinte_source" value="">
+        <input type="hidden" name="recadrage" value="">
         <label for="carte-membre">Membre<select id="carte-membre" name="membre" required><option value="">Choisir un membre</option>{% for membre in membres %}<option value="{{ membre.id }}" {% if selection == membre.id %}selected{% endif %}>{{ membre.prenom }} — {{ membre.email or 'Sans e-mail' }}</option>{% endfor %}</select></label>
         <label for="carte-fichier">Carte natale<input type="file" id="carte-fichier" name="carte" accept="image/png,image/jpeg,image/webp,application/pdf,.png,.jpg,.jpeg,.webp,.pdf" required></label>
-        <p class="membres-aide">PNG, JPG, WebP ou PDF · 15 Mo maximum. Un nouveau dépôt remplace la carte précédente du membre sélectionné.</p>
-        <button class="membres-bouton" type="submit">Enregistrer la carte dans son profil</button>
+        <p class="membres-aide">PNG, JPG, WebP ou PDF · 15 Mo maximum. Choisis le cadrage ci-dessous : la carte sera enregistrée en WebP, en gardant ses proportions. Un nouvel enregistrement remplace la carte précédente du membre sélectionné.</p>
+        <p class="membres-aide" data-carte-status role="status">Choisis un fichier ou clique sur « Recadrer » pour reprendre une carte déjà déposée.</p>
+        <div class="carte-page" data-page-section hidden><label for="carte-page">Page du PDF<input id="carte-page" name="page_pdf" type="number" value="1" min="1" max="100"></label><span data-page-total></span></div>
+        <section class="carte-editeur" data-carte-editeur hidden aria-label="Recadrage de la carte natale">
+          <p><strong>Trace un rectangle sur la carte pour choisir la zone à conserver.</strong> Vérifie que les noms, symboles et degrés utiles restent dans le cadre.</p>
+          <div class="carte-ateliers"><div><h2>Choisir le cadrage</h2><canvas data-carte-canvas aria-label="Carte à recadrer. Trace une sélection avec la souris ou utilise les réglages sous l’image."></canvas></div><div><h2>Résultat du recadrage</h2><canvas data-carte-resultat aria-label="Aperçu de la carte qui sera enregistrée"></canvas></div></div>
+          <div class="carte-coordonnees">{% for cle, libelle in [('x','Depuis la gauche'),('y','Depuis le haut'),('w','Largeur conservée'),('h','Hauteur conservée')] %}<label for="carte-{{ cle }}">{{ libelle }} (%)<input id="carte-{{ cle }}" type="number" data-coordonnee="{{ cle }}" min="0" max="100" step="0.1"></label>{% endfor %}</div>
+          <button type="button" class="membres-bouton carte-secondaire" data-carte-reset>Garder toute la carte</button>
+        </section>
+        <button class="membres-bouton" type="submit" data-carte-enregistrer disabled>Enregistrer la carte en WebP</button>
+        <noscript><p>Active JavaScript pour voir et recadrer la carte avant de l’enregistrer.</p></noscript>
       </form>
     {% else %}<p>Le stockage des cartes natales doit être préparé avant le premier dépôt.</p>{% endif %}
   </section>
@@ -22,9 +35,10 @@
     <h2>Les cartes ajoutées</h2>
     <div class="membres-table"><table><thead><tr><th>Membre</th><th>Carte natale</th><th>Action</th></tr></thead><tbody>
     {% for membre in membres %}{% set carte = cartes.get(membre.id) %}
-      <tr><td>{{ membre.prenom }}<br><span class="membres-aide">{{ membre.email or '' }}</span></td><td>{% if carte %}<a href="{{ url_for('outils_membres.fichier_carte_admin', utilisateur_id=membre.id) }}" target="_blank" rel="noopener">Ouvrir la carte ↗</a><br><span class="membres-aide">{{ carte.nom_fichier }} · {{ carte.date_modification.strftime('%d.%m.%Y') }}</span>{% else %}Pas encore ajoutée{% endif %}</td><td><a href="{{ url_for('outils_membres.cartes_natales', membre=membre.id, _anchor='depot') }}">{{ 'Remplacer' if carte else 'Ajouter' }}</a></td></tr>
+      <tr><td>{{ membre.prenom }}<br><span class="membres-aide">{{ membre.email or '' }}</span></td><td>{% if carte %}<a href="{{ url_for('outils_membres.voir_carte_admin', utilisateur_id=membre.id) }}" target="_blank" rel="noopener">Ouvrir la carte ↗</a><br><span class="membres-aide">{{ carte.nom_fichier }} · {{ carte.date_modification.strftime('%d.%m.%Y') }}</span>{% else %}Pas encore ajoutée{% endif %}</td><td>{% if carte %}<button class="carte-reprendre" type="button" data-reprendre-carte="{{ membre.id }}">Recadrer</button><br>{% endif %}<a href="{{ url_for('outils_membres.cartes_natales', membre=membre.id, _anchor='depot') }}">{{ 'Remplacer' if carte else 'Ajouter' }}</a></td></tr>
     {% else %}<tr><td colspan="3">Aucun membre pour le moment.</td></tr>{% endfor %}
     </tbody></table></div>
   </section>
 </main>
+<script src="{{ url_for('static', filename='cartes-natales.js') }}" defer></script>
 {% endblock %}

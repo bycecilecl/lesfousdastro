@@ -50,10 +50,6 @@
 <main class="profil-shell">
   <a class="profil-retour" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
   <header class="profil-entete"><p class="profil-kicker">Mes repères personnels</p><h1>Mon profil astral</h1><p>Retrouve tes données de naissance, le lieu de tes cycles et les repères que tu choisis de partager.</p></header>
-  {% if carte_natale_du_membre is defined %}
-    {% set carte_natale = carte_natale_du_membre() %}
-    {% include 'espace_personnel/partials/carte_natale.html' %}
-  {% endif %}
   <section class="profil-carte">
     <h2>Mes données de naissance</h2>
     <p>Ces coordonnées servent à calculer ton thème natal.</p>
@@ -73,7 +69,7 @@
       <p class="profil-aide" id="lieu-statut">Choisis une ville dans la liste : ses coordonnées et son fuseau seront ajoutés automatiquement.</p>
       <button class="profil-submit" type="submit">{{ 'Mettre à jour mon profil' if profil else 'Créer mon profil astral' }}</button>
     </form>
-    {% if profil %}<a class="profil-lien" href="{{ url_for('espace_personnel.ciel_natal') }}">Voir mon ciel natal calculé →</a>{% endif %}
+    <a class="profil-lien" href="{{ url_for('espace_personnel.ciel_natal') }}">Voir mon ciel natal et ma carte →</a>
   </section>
   {% if profil %}
   <section class="profil-carte" id="ville-cycles">

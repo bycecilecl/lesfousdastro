@@ -17,14 +17,16 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
 .ciel-button { display: inline-block; margin-top: 18px; padding: 11px 18px; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: white; font-weight: 700; text-decoration: none; }
 {% endblock %}
 {% block content %}
+{% set carte_natale = carte_natale_du_membre() if carte_natale_du_membre is defined else none %}
 <main class="ciel-shell">
     {% include 'espace_personnel/_navigation.html' %}
     {% if not theme %}
-        <section class="ciel-card ciel-empty"><h1 class="ciel-title">Mon ciel natal</h1><p>Enregistre ton profil pour calculer et afficher tes placements.</p><a class="ciel-button" href="{{ url_for('espace_personnel.profil') }}">Compléter mon profil</a></section>
+        <section class="ciel-card ciel-empty"><h1 class="ciel-title">Mon ciel natal</h1>{% if carte_natale %}{% include 'espace_personnel/partials/carte_natale.html' %}{% endif %}<p>Enregistre ton profil pour calculer et afficher tes placements.</p><a class="ciel-button" href="{{ url_for('espace_personnel.profil') }}">Compléter mon profil</a></section>
     {% else %}
         <section class="ciel-card">
             <h1 class="ciel-title">Le ciel natal de {{ profil.prenom }}</h1>
             <p class="ciel-intro">{{ profil.date_naissance.strftime('%d.%m.%Y') }} · {{ profil.heure_naissance.strftime('%H:%M') }} · {{ profil.ville_naissance }}</p>
+            {% include 'espace_personnel/partials/carte_natale.html' %}
             <div class="ciel-grid">
                 {% for nom, placement in theme.get('planetes', {}).items() %}
                     <article class="placement">
