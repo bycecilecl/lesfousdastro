@@ -48,7 +48,7 @@ def _interroger_openai(prompt, system_prompt):
 #   - Gère les erreurs d’appel API et affiche un aperçu du prompt et de la réponse.
 # ────────────────────────────────────────────────
 
-def interroger_llm(prompt, system_prompt=None, provider=None):
+def interroger_llm(prompt, system_prompt=None, provider=None, claude_model=None):
     print(f"🤖 APPEL LLM - Prompt: {len(prompt)} caractères")
     print(f"🔍 Début prompt: {prompt[:200]}...")
 
@@ -68,6 +68,7 @@ def interroger_llm(prompt, system_prompt=None, provider=None):
                     system=system_prompt,
                     max_tokens=8000,
                     temperature=0.7,
+                    model=claude_model,
                 )
             except Exception as claude_error:
                 print(

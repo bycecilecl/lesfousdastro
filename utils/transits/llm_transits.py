@@ -27,7 +27,7 @@ def _ask_transits_llm(**kwargs) -> str:
         from utils.claude_llm import ask_claude
 
         logger.info("Point Transits : génération avec Claude")
-        return ask_claude(**kwargs)
+        return ask_claude(model="claude-sonnet-5-5", **kwargs)
 
     if provider == "openai":
         from utils.llm_client import ask_llm as ask_openai

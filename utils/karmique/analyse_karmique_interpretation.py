@@ -105,7 +105,8 @@ def interpret_all(
         def call_llm(prompt: str, system_prompt: str | None = None) -> str:
             return interroger_llm(
                 prompt,
-                system_prompt=system_prompt or SYSTEM_KARMIQUE
+                system_prompt=system_prompt or SYSTEM_KARMIQUE,
+                claude_model="claude-sonnet-5-5",
             )
 
     for b in blocks:
