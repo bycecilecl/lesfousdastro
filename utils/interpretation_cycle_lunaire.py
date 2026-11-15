@@ -251,11 +251,13 @@ def valider_interpretation(reponse: str | dict) -> dict:
 
 
 def generer_interpretation_avec_claude(prenom: str, lieu: str, theme: dict) -> tuple[dict, dict]:
-    from utils.claude_llm import CLIENT, MODEL
+    from utils.claude_llm import CLIENT
+    from utils.claude_espace import creer_message_claude
 
     messages = construire_messages_interpretation(prenom, lieu, theme)
-    reponse = CLIENT.with_options(max_retries=0).messages.create(
-        model=MODEL,
+    reponse = creer_message_claude(
+        client=CLIENT,
+        model="claude-sonnet-5-5",
         system=messages[0]["content"],
         messages=[{"role": "user", "content": messages[1]["content"]}],
         temperature=0.35,
