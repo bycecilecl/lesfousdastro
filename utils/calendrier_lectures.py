@@ -8,7 +8,9 @@ MOUVEMENTS={"Soleil":"Un éclairage sur", "Lune":"Une sensibilité passagère au
 CIBLES={"Soleil":"ton identité, ta vitalité et tes priorités", "Lune":"ta sécurité émotionnelle et tes besoins", "Mercure":"ta manière de penser et de communiquer", "Vénus":"tes attachements, tes valeurs et tes désirs", "Mars":"ta manière d’agir et de t’affirmer", "Jupiter":"tes convictions et tes perspectives", "Saturne":"tes limites, tes engagements et tes repères", "Uranus":"ton autonomie et ton rapport au changement", "Neptune":"tes idéaux et tes aspirations", "Pluton":"ton rapport au contrôle et aux transformations", "Ascendant":"ta manière de te présenter et de prendre ta place", "Descendant":"ta manière de vivre tes relations", "MC":"ta direction professionnelle", "FC":"tes fondations personnelles", "Nœud Nord":"tes orientations et tes apprentissages", "Nœud Sud":"tes habitudes et tes repères familiers"}
 ASPECTS={"carré":"Une tension peut demander des ajustements.","opposition":"Un équilibre est à trouver entre des besoins contradictoires.","conjonction":"Ces questions peuvent prendre davantage de place.","trigone":"Un appui possible, à mobiliser consciemment.","sextile":"Une ouverture possible, qui demande un petit pas de ta part."}
 def normaliser(s):
-    return ''.join(c for c in unicodedata.normalize('NFD',s.strip().lower()) if unicodedata.category(c)!='Mn')
+    texte = ''.join(c for c in unicodedata.normalize('NFD',s.strip().lower()) if unicodedata.category(c)!='Mn')
+    texte = ' '.join(texte.replace('_', ' ').split())
+    return {'mc': 'milieu du ciel', 'fc': 'fond du ciel'}.get(texte, texte)
 def enrichir_lectures(resultat,theme):
     base={}
     path=Path(__file__).resolve().parents[1]/'data/transits/transits_aspects.csv'
@@ -47,4 +49,4 @@ def enrichir_lectures(resultat,theme):
                     nuance = ' '.join(re.split(r'(?<=[.!?])\s+',lecture_asc)[:2])
                     personnalisation = (point+' gouverne ton Ascendant natal. En complément, par analogie avec '+planet+' '+aspect+' Ascendant : '+nuance)
 
-            c['lecture_courte']={'texte':text,'personnalisation':personnalisation,'domaines':[DOMAINES[n] for n in dict.fromkeys(houses)],'faits':list(dict.fromkeys(facts)),'source':source}
+            c['lecture_courte']={'texte':text,'texte_complet':raw or '', 'personnalisation':personnalisation,'domaines':[DOMAINES[n] for n in dict.fromkeys(houses)],'faits':list(dict.fromkeys(facts)),'source':source}

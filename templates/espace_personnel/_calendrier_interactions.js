@@ -87,7 +87,9 @@ function eventMail(e){
 }
 function shortReading(p){
  const r=p.lecture_courte;if(!r)return '';
- return `<div class="cal-reading"><p>${escapeCal(r.texte)}</p>${r.personnalisation?`<p>${escapeCal(r.personnalisation)}</p>`:''}${r.domaines.length?`<p><strong>Domaines concernés</strong>${r.domaines.map(escapeCal).join(' · ')}</p>`:''}${r.faits.length?`<details><summary>Maisons et maîtrises natales</summary><ul>${r.faits.map(f=>`<li>${escapeCal(f)}</li>`).join('')}</ul></details>`:''}</div>`;
+ const complete=r.texte_complet&&r.texte_complet!==r.texte?`<details class="cal-full-reading"><summary>Lire la signification complète</summary><div>${escapeCal(r.texte_complet)}</div></details>`:'';
+ const statut=r.source==='reperes_generaux'?'<p class="muted">Repère général : cette combinaison n’a pas encore de fiche détaillée.</p>':'';
+ return `<div class="cal-reading">${statut}<p>${escapeCal(r.texte)}</p>${complete}${r.personnalisation?`<p>${escapeCal(r.personnalisation)}</p>`:''}${r.domaines.length?`<p><strong>Domaines concernés</strong>${r.domaines.map(escapeCal).join(' · ')}</p>`:''}${r.faits.length?`<details><summary>Maisons et maîtrises natales</summary><ul>${r.faits.map(f=>`<li>${escapeCal(f)}</li>`).join('')}</ul></details>`:''}</div>`;
 }
 function contactDetails(g,expanded=false,dayOnly=false){
  if(g.jupiterBundle){
@@ -98,7 +100,7 @@ function contactDetails(g,expanded=false,dayOnly=false){
  const levels={prioritaire:'Climat de fond actif',declencheur:'Déclencheur personnel',climat:'Climat ponctuel'};
  const rank={prioritaire:0,declencheur:1,climat:2};const level=g.contacts.map(p=>p.niveau||'climat').sort((a,b)=>rank[a]-rank[b])[0];
  let h=`<section class="cal-contact"><details class="cal-contact-details" ${expanded?'open':''}><summary>${escapeCal(g.label)}</summary>${g.planete==='Lune'?'<p class="muted">Contact de quelques heures, affiché sur le jour concerné. Seuls les horaires ci-dessous correspondent à l’orbe de 1°.</p>':''}<p class="muted">${el('view')?.value==='rs'?'Écho à la révolution solaire':el('view')?.value==='lunar'?'Exploration lunaire':el('view')?.value==='fast'?'Contact rapide':levels[level]}</p>${g.maitre?'<p class="cal-ruler-badge">Contact au maître de ton Ascendant natal</p>':''}`;
- h+=shortReading(g.contacts[0]);
+ h+=g.contacts.map(p=>(g.contacts.length>1?`<h4 class="cal-reading-title">${escapeCal(p.planete)} ${escapeCal(p.aspect)} ${escapeCal(p.point)} natal</h4>`:'')+shortReading(p)).join('');
  const reasons=viewReasons(g);h+='<ul>'+reasons.map(r=>`<li>${escapeCal(r)}</li>`).join('')+'</ul>';
  h+='<div class="event">'+movementDetails(g.contacts[0])+g.contacts.map(p=>`<strong>${escapeCal(p.planete)} ${escapeCal(p.aspect)} ${escapeCal(p.point)} natal</strong>`).join('');
  const windows=[...new Set(g.contacts.map(p=>`${fmt(p.start)} → ${fmt(p.end)}`))];const broad=[...new Set(g.contacts.map(p=>`${fmt(p.start_3)} → ${fmt(p.end_3)}`))];
