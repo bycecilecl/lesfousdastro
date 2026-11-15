@@ -242,7 +242,8 @@ def generer_bloc_3(contexte: Dict[str, Any], max_tokens: int = 1800) -> str:
     print(prompt)
 
     try:
-        resultat = ask_llm(prompt, max_tokens=max_tokens, temperature=0.4)
+        resultat = ask_llm(prompt, max_tokens=max_tokens, temperature=0.4,
+                           claude_model="claude-sonnet-5-5")
         resultat = _sanitize(resultat)
         if len(resultat) < 80:
             raise ValueError("Réponse LLM trop courte")

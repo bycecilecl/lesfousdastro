@@ -12,6 +12,7 @@ def ask_llm(
     """Client Claude réservé au Point Astral Famille."""
     return ask_claude(
         prompt=prompt,
+        model="claude-sonnet-5-5",
         system=system,
         max_tokens=max_tokens,
         temperature=temperature,

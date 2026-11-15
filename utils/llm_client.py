@@ -53,6 +53,7 @@ def ask_llm(
     temperature: float = 0.7,
     retries: int = 3,
     min_backoff: float = 1.5,
+    claude_model: str | None = None,
 ) -> str:
     """
     Appel Claude par défaut, avec OpenAI conservé comme moteur de repli.
@@ -70,6 +71,7 @@ def ask_llm(
                 system=system,
                 max_tokens=max_tokens,
                 temperature=temperature,
+                model=claude_model,
             )
         except Exception as claude_error:
             print(

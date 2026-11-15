@@ -521,6 +521,7 @@ def generer_bloc_2(contexte: Dict[str, Any], max_tokens: int = 1800) -> str:
 
     resultat = ask_llm(
         prompt,
+        claude_model="claude-sonnet-5-5",
         max_tokens=max_tokens,
         temperature=0.9,
     )

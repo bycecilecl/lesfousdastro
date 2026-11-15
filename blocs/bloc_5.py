@@ -209,6 +209,7 @@ def generer_bloc_5(contexte: dict, max_tokens: int = 1800) -> str:
 
     return ask_llm(
         prompt,
+        claude_model="claude-sonnet-5-5",
         max_tokens=max_tokens,
         temperature=0.9,
     )

@@ -445,6 +445,7 @@ Format de sortie attendu :
 
     resultat = ask_llm(
         prompt,
+        claude_model="claude-sonnet-5-5",
         #system=system,                # ← utilise le system dynamique
         max_tokens=max_tokens,
         temperature=0.7,
