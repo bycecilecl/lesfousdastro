@@ -1385,6 +1385,13 @@ def calendrier():
     from utils.calendrier_mails import relier_mails_envoyes
     relier_mails_envoyes(donnees.get("events", []), utilisateur.id)
     try:
+        from utils.conjonctions_lunaires import conjonctions_lunaires_du_mois
+        donnees["conjonctions_lunaires"] = conjonctions_lunaires_du_mois(debut, fin, theme)
+    except Exception:
+        current_app.logger.exception("Calcul des conjonctions lunaires indisponible pour le calendrier")
+        donnees["conjonctions_lunaires"] = []
+        donnees["conjonctions_lunaires_indisponibles"] = True
+    try:
         from utils.ciel_collectif import ciel_collectif_mois
         ciel = ciel_collectif_mois(annee, mois, inclure_periodes=True)
         donnees["ciel_collectif"] = {
