@@ -1364,9 +1364,12 @@ def calendrier():
          "debut_periode": entree.date_observation.date().isoformat(),
          "fin_periode": entree.date_fin_periode.isoformat() if entree.date_fin_periode else None,
          "est_periode": bool(entree.est_periode),
-         "texte": entree.situation or entree.notes_libres or entree.emotions or "Observation enregistrée",
+         "texte": entree.situation or entree.notes_libres or entree.emotions or entree.reaction_automatique or entree.choix_conscient or "Niveau d’énergie renseigné",
          "url": url_for("espace_personnel.fiche", entree_id=entree.id)}
-        for entree in entrees if (
+        for entree in entrees if (entree.niveau_energie is not None or any(
+            (texte or "").strip() for texte in (entree.situation, entree.notes_libres, entree.emotions,
+                                               entree.reaction_automatique, entree.choix_conscient)
+        )) and (
             entree.date_observation.date() < fin.date()
             and (entree.date_observation.date() >= debut.date() or (
                 entree.est_periode and (entree.date_fin_periode is None or entree.date_fin_periode >= debut.date())

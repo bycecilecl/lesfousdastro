@@ -44,6 +44,29 @@ def _bisect(a,b,f):
         else:b=mid
     return a+(b-a)/2
 
+
+def signes_lunaires_du_mois(debut, fin):
+    """Signe à minuit local et horaire d'une éventuelle entrée dans le signe suivant."""
+    signes = ("Bélier", "Taureau", "Gémeaux", "Cancer", "Lion", "Vierge",
+              "Balance", "Scorpion", "Sagittaire", "Capricorne", "Verseau", "Poissons")
+    swe.set_ephe_path(str(EPHEMERIS_PATH))
+    resultat = {}
+    jour = debut
+    while jour < fin:
+        lendemain = jour + timedelta(days=1)
+        a = jour.astimezone(timezone.utc)
+        b = lendemain.astimezone(timezone.utc)
+        signe = int(_longitude(a, "Lune") % 360 // 30)
+        signe_fin = int(_longitude(b - timedelta(microseconds=1), "Lune") % 360 // 30)
+        fiche = {"signe": signes[signe]}
+        if signe_fin != signe:
+            seuil = ((signe + 1) * 30) % 360
+            instant = _bisect(a, b, lambda t: (_longitude(t, "Lune") - seuil + 180) % 360 - 180)
+            fiche["entree"] = {"signe": signes[signe_fin], "date": instant.astimezone(debut.tzinfo).isoformat()}
+        resultat[jour.date().isoformat()] = fiche
+        jour = lendemain
+    return resultat
+
 @lru_cache(maxsize=256)
 def _periodes_planete(points_json, debut, fin, planete="Mars", orbe=3):
     points=json.loads(points_json)
@@ -172,6 +195,8 @@ def hierarchiser_contacts(resultat, debut, fin, cycles_rs=()):
 
 def donnees_astrales(theme, debut, fin, *, mars_actif=False, lune_active=False, cycles_rs=()):
     resultat={"periods": [], "periods_1": [], "events": []}
+    if mars_actif or lune_active:
+        resultat["signes_lunaires"] = signes_lunaires_du_mois(debut, fin)
     maitres = maitres_ascendant(theme)
     resultat["maitres_ascendant"] = sorted(maitres)
     resultat["planetes_disponibles"] = list(PLANETES) if mars_actif else []

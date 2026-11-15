@@ -26,7 +26,8 @@
                     {% if groupe.mois != mois %}<h2 class="journal-index-month">{{ mois_fr[entree.date_observation.month - 1]|capitalize }} {{ entree.date_observation.year }}</h2>{% set groupe.mois = mois %}{% endif %}
                     <a class="journal-index-entry{% if entree_ouverte and entree_ouverte.id == entree.id %} is-current{% endif %}" href="{{ url_for('espace_personnel.journal', entree=entree.id) }}#page-journal" data-entree-id="{{ entree.id }}" {% if entree_ouverte and entree_ouverte.id == entree.id %}aria-current="page"{% endif %}>
                         <span class="journal-index-date">{% include "espace_personnel/partials/journal_date.html" %}</span>
-                        <span class="journal-index-excerpt">{{ (entree.situation or entree.emotions or entree.notes_libres or 'Une page de mon journal')|truncate(110) }}</span>
+                        {% set extrait = entree.situation or entree.emotions or entree.notes_libres or entree.reaction_automatique or entree.choix_conscient %}
+                        {% if extrait %}<span class="journal-index-excerpt">{{ extrait|truncate(110) }}</span>{% endif %}
                     </a>
                 {% else %}<p class="journal-empty">Tes entrées apparaîtront ici une fois enregistrées.</p>{% endfor %}
             </nav>
