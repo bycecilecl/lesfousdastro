@@ -87,9 +87,9 @@ function eventMail(e){
 }
 function shortReading(p){
  const r=p.lecture_courte;if(!r)return '';
- const complete=r.texte_complet&&r.texte_complet!==r.texte?`<details class="cal-full-reading"><summary>Lire la signification complète</summary><div>${escapeCal(r.texte_complet)}</div></details>`:'';
  const statut=r.source==='reperes_generaux'?'<p class="muted">Repère général : cette combinaison n’a pas encore de fiche détaillée.</p>':'';
- return `<div class="cal-reading">${statut}<p>${escapeCal(r.texte)}</p>${complete}${r.personnalisation?`<p>${escapeCal(r.personnalisation)}</p>`:''}${r.domaines.length?`<p><strong>Domaines concernés</strong>${r.domaines.map(escapeCal).join(' · ')}</p>`:''}${r.faits.length?`<details><summary>Maisons et maîtrises natales</summary><ul>${r.faits.map(f=>`<li>${escapeCal(f)}</li>`).join('')}</ul></details>`:''}</div>`;
+ const complete=`<details class="cal-full-reading"><summary>Lire la signification</summary>${statut}<div>${escapeCal(r.texte_complet||r.texte)}</div>${r.personnalisation?`<p>${escapeCal(r.personnalisation)}</p>`:''}</details>`;
+ return `<div class="cal-reading">${complete}${r.domaines.length?`<p><strong>Domaines concernés</strong>${r.domaines.map(escapeCal).join(' · ')}</p>`:''}${r.faits.length?`<details><summary>Maisons et maîtrises natales</summary><ul>${r.faits.map(f=>`<li>${escapeCal(f)}</li>`).join('')}</ul></details>`:''}</div>`;
 }
 function contactDetails(g,expanded=false,dayOnly=false){
  if(g.jupiterBundle){
