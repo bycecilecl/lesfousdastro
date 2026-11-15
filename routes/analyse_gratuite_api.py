@@ -106,6 +106,7 @@ def _generer_texte_analyse_gratuite(prompt):
         try:
             return ask_claude(
                 prompt=prompt,
+                model="claude-sonnet-5-5",
                 system=SYSTEM_ANALYSE_GRATUITE,
                 max_tokens=350,
                 temperature=0.6,
