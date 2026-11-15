@@ -436,7 +436,7 @@ body {
                         <p class="espace-muted" style="text-align:left">Ton interprétation personnalisée est disponible.</p>
                         <p class="lunar-dashboard-meta">{% if date_cycle_locale %}Cycle du {{ date_cycle_locale.strftime('%d.%m.%Y à %H:%M') }} · {% endif %}{{ cycle_lunaire.ville }}</p>
                     {% elif profil and profil.ville_cycles %}
-                        <p class="espace-muted" style="text-align:left">Découvre la tonalité et le fil rouge de ton prochain cycle.</p>
+                        <p class="espace-muted" style="text-align:left">Retrouve le cycle lunaire qui t’accompagne en ce moment.</p>
                         <p class="lunar-dashboard-meta">Ville utilisée : {{ profil.ville_cycles }}</p>
                     {% else %}
                         <p class="espace-muted" style="text-align:left">Renseigne la ville utilisée pour calculer tes cycles lunaires.</p>

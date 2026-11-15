@@ -36,7 +36,7 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
             <p class="cycles-intro">Retrouve les tonalités qui ont accompagné chaque période et observe ce qui s’est réellement manifesté dans ta vie.</p>
         </header>
         {% if droits.cycle_lunaire %}
-            <p class="cycles-next"><a class="cycle-button" href="{{ url_for('espace_personnel.apercu_cycle_lunaire') }}">Voir mon prochain cycle lunaire</a></p>
+            <p class="cycles-next"><a class="cycle-button" href="{{ url_for('espace_personnel.apercu_cycle_lunaire') }}">Voir mon cycle lunaire en cours</a></p>
         {% endif %}
         {% if cycles %}
             <div class="cycles-list">

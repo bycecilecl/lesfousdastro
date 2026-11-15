@@ -1566,7 +1566,7 @@ def _preparer_theme_cycle_lunaire(theme):
 def apercu_cycle_lunaire():
     """Aperçu gratuit à calculer ; Claude intervient seulement sur POST autorisé."""
     from utils.revolution_lunaire import (
-        calculer_theme_revolution_lunaire, prochaine_revolution_lunaire,
+        calculer_theme_revolution_lunaire, revolution_lunaire_active,
     )
 
     utilisateur = _compte_connecte()
@@ -1603,11 +1603,12 @@ def apercu_cycle_lunaire():
             longitude_lune = lune.get("longitude", lune.get("degre"))
             if longitude_lune is None:
                 raise ValueError("La longitude de la Lune natale est absente.")
+            debut_cycle, fin_cycle = revolution_lunaire_active(longitude_lune)
             theme = calculer_theme_revolution_lunaire(
                 longitude_lune,
                 latitude=profil.latitude_cycles,
                 longitude=profil.longitude_cycles,
-                apres=datetime.now(timezone.utc),
+                apres=debut_cycle - timedelta(minutes=1),
                 theme_natal=natal,
                 tzid=profil.fuseau_cycles,
             )
@@ -1654,12 +1655,9 @@ def apercu_cycle_lunaire():
                     erreur_generation = "Une génération a déjà été tentée pour ce cycle. Aucun nouvel appel à Claude n’a été lancé."
                 else:
                     if cycle is None:
-                        prochain = prochaine_revolution_lunaire(
-                            longitude_lune, apres=instant + timedelta(days=1),
-                        )
                         cycle = CycleLunaire(
                             profil_id=profil.id, cle_cycle=cle_cycle,
-                            debut_cycle_utc=instant, fin_cycle_utc=prochain,
+                            debut_cycle_utc=instant, fin_cycle_utc=fin_cycle,
                             ville=profil.ville_cycles, fuseau_horaire=profil.fuseau_cycles,
                             latitude=profil.latitude_cycles, longitude=profil.longitude_cycles,
                             theme_technique=json.dumps(theme, ensure_ascii=False, default=str),
@@ -1709,6 +1707,7 @@ def apercu_cycle_lunaire():
         interpretation=interpretation, usage_ia=usage_ia,
         cycle_enregistre=cycle, entrees_cycle=entrees_cycle,
         cycles_navigation=cycles_navigation, lieu_revolution=lieu_revolution,
+        est_apercu_actif=True,
         peut_generer=peut_generer, espace_csrf=_jeton_formulaire_portail(),
     )
 

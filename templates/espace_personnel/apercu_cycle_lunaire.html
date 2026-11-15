@@ -240,14 +240,15 @@ body {
             {% if theme %}
                 <p class="lunar-intro">Calculé pour {{ lieu_revolution }} à partir du retour exact de la Lune sur sa position natale.</p>
                 <span class="lunar-date">{{ theme.date_locale.strftime('%d.%m.%Y à %H:%M') }}</span>
-                {% if cycles_navigation|length > 1 %}
                     {% set mois_fr = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'] %}
                     <nav class="cycle-switcher" aria-label="Choisir un cycle lunaire">
+                        <a class="{% if est_apercu_actif %}is-active{% endif %}" href="{{ url_for('espace_personnel.apercu_cycle_lunaire') }}">Cycle en cours{% if est_apercu_actif %} · {{ mois_fr[theme.date_locale.month] }} {{ theme.date_locale.year }}{% endif %}</a>
                         {% for cycle_nav in cycles_navigation %}
+                            {% if not (est_apercu_actif and cycle_enregistre and cycle_nav.id == cycle_enregistre.id) %}
                             <a class="{% if cycle_enregistre and cycle_nav.id == cycle_enregistre.id %}is-active{% endif %}" href="{{ url_for('espace_personnel.fiche_cycle_lunaire', cycle_id=cycle_nav.id) }}">{{ mois_fr[cycle_nav.debut_cycle_utc.month] }} {{ cycle_nav.debut_cycle_utc.year }}</a>
+                            {% endif %}
                         {% endfor %}
                     </nav>
-                {% endif %}
             {% endif %}
         </header>
 

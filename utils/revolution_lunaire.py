@@ -186,6 +186,29 @@ def _superpositions_rl_dans_rs(positions_rl: dict, angles_rl: dict, theme_rs: di
     ]
 
 
+def revolution_lunaire_active(
+    longitude_natale: float,
+    reference: datetime | None = None,
+) -> tuple[datetime, datetime]:
+    """Retourne les bornes du cycle déjà commencé à la date de référence.
+
+    Recherche astronomique uniquement : aucune sauvegarde ni interprétation IA.
+    """
+    instant = _en_utc(reference or datetime.now(timezone.utc))
+    curseur = instant - timedelta(days=35)
+    precedent = None
+    for _ in range(4):
+        retour = prochaine_revolution_lunaire(longitude_natale, apres=curseur)
+        if retour > instant:
+            if precedent is not None:
+                return precedent, retour
+            break
+        precedent = retour
+        curseur = retour + timedelta(seconds=2)
+    raise RuntimeError("Le cycle lunaire en cours n’a pas pu être déterminé.")
+
+
+
 def prochaine_revolution_lunaire(
     longitude_natale: float,
     apres: datetime | None = None,
