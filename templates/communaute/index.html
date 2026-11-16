@@ -7,5 +7,4 @@
 {% else %}<div class="comm-card comm-empty"><span class="comm-empty-star" aria-hidden="true">✦</span><h3>Le premier partage du groupe ?</h3><p>Cette page accueillera vos expériences, vos questions et vos prises de conscience. Tu peux commencer avec une chose toute simple que tu as remarquée.</p><a class="comm-button" href="{{ url_for('communaute.publier') }}">Écrire ma première publication</a></div>{% endfor %}
 </div>
 {% if page > 1 or suite %}<nav class="comm-pagination" aria-label="Pages des publications">{% if page > 1 %}<a href="{{ url_for('communaute.index',page=page-1) }}">← Plus récentes</a>{% endif %}{% if suite %}<a href="{{ url_for('communaute.index',page=page+1) }}">Plus anciennes →</a>{% endif %}</nav>{% endif %}
-<aside class="comm-coming"><span aria-hidden="true">◉</span><div><strong>Et plus tard, les lives</strong><p>On ajoutera ici ces rendez-vous quand ils seront prêts.</p></div></aside>
 {% endblock %}
