@@ -239,8 +239,9 @@ def construire_prompt_evenement(prenom, mail, dossier):
     from utils.dossier_mail_essentiel import sans_point_illumination
     dossier = sans_point_illumination(dossier)
     titres = TITRES_RL if mail.nature == "rl" else TITRES_LUNAISON
-    special = ("Ce mail développe la RL qui vient de commencer, d’abord à partir de sa carte seule, puis du natal. "
-               "Il ne refait pas l’analyse des lunaisons, qui auront leurs propres mails."
+    special = ("Ce mail développe la RL déjà commencée, d’abord à partir de sa carte seule, puis du natal. "
+               "Il ne refait pas l’analyse des lunaisons, qui auront leurs propres mails. "
+               "Ne redécris pas chaque mois la Lune natale, son signe, sa dignité et ses aspects nataux. Développe ce qui change dans cette RL : la maison où tombe la Lune, les angles et les nouvelles relations entre les planètes du cycle et le thème natal. Explique ce que ces changements viennent mobiliser chez la personne."
                if mail.nature == "rl" else
                "Ce mail développe cette seule lunaison : pars de l’analyse collective validée de Cécile, puis explique "
                "ce qu’elle mobilise dans le natal. Développe les maisons, les maîtres et leurs contacts importants. "

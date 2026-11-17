@@ -64,25 +64,37 @@ def _profil(utilisateur):
     return profil
 
 
-def preparer(utilisateur):
+def preparer(utilisateur, nature="pleine_lune"):
     """Appelé uniquement sur le clic de préparation ; aucun client IA importé."""
-    print("[ESSAI MAIL] 1. Lecture du profil et de la version validée de la Pleine Lune.", flush=True)
+    if nature not in {"rl", "pleine_lune"}:
+        raise ValueError("Choisis la Révolution Lunaire ou la Pleine Lune du 24 novembre.")
+    print(f"[ESSAI MAIL] 1. Lecture du profil pour {nature}.", flush=True)
     profil = _profil(utilisateur)
-    analyse = analyse_validee()
-    if analyse is None or not (analyse.texte_valide or "").strip():
-        raise ValueError("Valide d’abord ton analyse de la Pleine Lune du 24 novembre 2026.")
-    instant = utc(analyse.instant_utc)
-    if instant.date().isoformat() != DATE_PLEINE_LUNE:
-        raise ValueError("La date de l’analyse validée ne correspond pas à la Pleine Lune choisie.")
+    maintenant = datetime.now(timezone.utc)
     # La fonction de dossier conserve les mêmes contrôles de profil que le moteur normal.
     fuseau = profil.fuseau_cycles or profil.fuseau_horaire or "Europe/Paris"
+    if nature == "rl":
+        from utils.mails_evenements import _donnees_profil, _rl_active
+        natal, _ = _donnees_profil(profil)
+        instant, expiration = _rl_active(natal["planetes"]["Lune"]["longitude"], maintenant)
+        # Essai du cycle actuel avec les notes à jour, sans antidater l’envoi.
+        date_prevue = maintenant
+    else:
+        analyse = analyse_validee()
+        if analyse is None or not (analyse.texte_valide or "").strip():
+            raise ValueError("Valide d’abord ton analyse de la Pleine Lune du 24 novembre 2026.")
+        instant = utc(analyse.instant_utc)
+        if instant.date().isoformat() != DATE_PLEINE_LUNE:
+            raise ValueError("La date de l’analyse validée ne correspond pas à la Pleine Lune choisie.")
+        expiration = instant
+        date_prevue = horaire_envoi(nature, instant, fuseau)
     identifiant = str(uuid4())
     mail = MailEvenementAbonne(id=identifiant, utilisateur_id=utilisateur.id, profil_id=profil.id,
-        nature="pleine_lune", cle_evenement=PREFIXE + identifiant,
-        instant_evenement=instant, date_prevue=horaire_envoi("pleine_lune", instant, fuseau),
-        expire_le=instant, signature_profil=signature_profil(profil), statut="essai_prepare")
+        nature=nature, cle_evenement=PREFIXE + identifiant,
+        instant_evenement=instant, date_prevue=date_prevue,
+        expire_le=expiration, signature_profil=signature_profil(profil), statut="essai_prepare")
     print("[ESSAI MAIL] 2. Calcul des données et lecture des notes connues au moment de la préparation.", flush=True)
-    dossier, choix, source = preparer_dossier_evenement(mail, profil, datetime.now(timezone.utc))
+    dossier, choix, source = preparer_dossier_evenement(mail, profil, maintenant)
     prompt = construire_prompt_evenement(profil.prenom, mail, dossier)
     mail.dossier_json = json.dumps(dossier, ensure_ascii=False, default=str)
     mail.choix_journal_json = json.dumps(choix)

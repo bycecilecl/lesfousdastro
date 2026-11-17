@@ -80,7 +80,7 @@ def _action(nom, id=None):
     try:
         from utils import essais_mails_evenements as moteur
         if nom == "preparer":
-            mail = moteur.preparer(utilisateur_connecte())
+            mail = moteur.preparer(utilisateur_connecte(), nature=request.form.get("nature", "pleine_lune"))
             flash("Aperçu préparé avec les données actuelles. Aucun appel IA ni envoi.", "success")
         elif nom == "generer":
             moteur.generer(mail, utilisateur_connecte())
