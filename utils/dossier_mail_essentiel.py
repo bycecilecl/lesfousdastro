@@ -17,6 +17,37 @@ def _normaliser(texte):
     return unicodedata.normalize("NFKD", str(texte)).encode("ascii", "ignore").decode().casefold()
 
 
+def _point_reserve_karmique(nom):
+    return "illumination" in _normaliser(nom)
+
+
+def sans_point_illumination(valeur):
+    """Copie les données de mail sans ce point ni les contacts/figures associés.
+
+    Les textes éditoriaux restent intacts ; la consigne du rédacteur couvre
+    les éventuelles mentions dans des archives ou dans une source rédigée.
+    """
+    if isinstance(valeur, dict):
+        return {k: sans_point_illumination(v) for k, v in valeur.items()
+                if not _point_reserve_karmique(k)}
+    if isinstance(valeur, (list, tuple)):
+        resultat = []
+        for element in valeur:
+            if isinstance(element, str) and _point_reserve_karmique(element):
+                continue
+            if isinstance(element, dict):
+                noms = [element.get(k) for k in (
+                    "planete", "nom", "de", "vers", "planete_transit", "planete_natale",
+                    "planete_focale", "point_natal", "point_rs", "point_rl")]
+                noms += element.get("planetes") or []
+                if any(_point_reserve_karmique(n) for n in noms if isinstance(n, str)):
+                    continue
+            resultat.append(sans_point_illumination(element))
+        return resultat
+    return valeur
+
+
+
 def _position(position):
     position = position or {}
     resultat = {k: position[k] for k in ("signe", "maison", "maison_natale", "maison_rs", "maison_rl")

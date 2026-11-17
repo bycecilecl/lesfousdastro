@@ -96,7 +96,10 @@ def _action(nom, id=None):
     except Exception as erreur:
         db.session.rollback()
         current_app.logger.exception("[ESSAI MAIL] Action interrompue : %s", nom)
-        flash("L’action a été interrompue. Les résultats enregistrés sont conservés ; aucun nouvel appel ni renvoi automatique.", "error")
+        if nom == "preparer":
+            flash("La préparation du mail a échoué avant tout appel IA et tout envoi. Le détail est conservé dans les journaux serveur.", "error")
+        else:
+            flash("L’action a été interrompue. Les résultats enregistrés sont conservés ; aucun nouvel appel ni renvoi automatique.", "error")
     return redirect(url_for("admin_essais_mails.index", **({"essai": mail.id} if mail else {})))
 
 
