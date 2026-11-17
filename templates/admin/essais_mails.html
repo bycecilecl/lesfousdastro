@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Essai de mail · Pleine Lune du 24 novembre | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='essais-mails.css') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="essai-shell">
+  <header class="essai-entete"><p>ESSAI · TON COMPTE UNIQUEMENT</p><h1>Ton mail de Pleine Lune</h1><p>Pleine Lune du 24 novembre 2026 · Une préparation, une génération, puis un envoi à ton adresse si tu le décides.</p></header>
+  {% for categorie, message in get_flashed_messages(with_categories=true) %}<p class="essai-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+  <section class="essai-carte">
+    <h2>1. Préparer et regarder ce qui sera transmis</h2>
+    <p>Cette étape reprend ton analyse validée, ton thème natal, ta RS archivée si elle existe, la RL active à la date du mail et les notes actuellement connues de ton journal, selon ton autorisation.</p>
+    <div class="essai-reperes">
+      <p><strong>Ton analyse</strong>{% if analyse and analyse.texte_valide %}Version validée n° {{ analyse.revision_validee }}<br>{{ analyse.titre_valide }}{% else %}Aucune analyse validée disponible.<br><a href="{{ url_for('admin_lunaisons.index', mois='2026-11') }}">Ouvrir mes analyses de novembre →</a>{% endif %}</p>
+      <p><strong>Ton journal</strong>{% if choix_journal.autorise %}Utilisation autorisée. Les notes sont relues lors de chaque préparation.{% else %}Utilisation non autorisée : aucune note ne sera transmise.<br><a href="{{ url_for('espace_personnel.profil', _anchor='journal-mails') }}">Modifier mon choix →</a>{% endif %}</p>
+    </div>
+    {% if pret %}
+    <form method="post" action="{{ url_for('admin_essais_mails.preparer') }}" data-essai-action>
+      <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+      <button class="essai-bouton" type="submit" {% if not analyse or not analyse.texte_valide %}disabled{% endif %}>{{ 'Préparer un nouvel aperçu avec mes données à jour' if mail else 'Préparer l’aperçu · sans IA' }}</button>
+    </form>
+    {% else %}<p class="essai-message error">Le stockage des mails événements doit être préparé avant cet essai.</p>{% endif %}
+    <p class="essai-aide">Ce bouton ne génère aucun texte et n’envoie aucun mail. Les aperçus et brouillons précédents sont conservés.</p>
+  </section>
+  {% if mail %}
+  {% set etats = {'essai_prepare':'Aperçu préparé, aucun appel lancé','essai_generation_en_cours':'Génération engagée, ne pas relancer','essai_brouillon':'Brouillon disponible pour ta relecture','essai_generation_echouee':'Génération interrompue ou réponse refusée, sans relance','essai_envoi_en_cours':'Envoi engagé, ne pas renvoyer','essai_envoi_incertain':'Envoi non confirmé, vérification manuelle nécessaire','envoye':'Mail remis au transport et archivé'} %}
+  <section class="essai-carte" id="apercu">
+    <h2>Ton aperçu préparé</h2>
+    <p class="essai-etat">{{ etats.get(mail.statut, mail.statut) }}</p>
+    <p>Préparé le <strong>{{ mail.date_creation|date_essai_mail }}</strong>.<br>Événement : {{ dossier.evenement_local|date_essai_mail }}.<br>Date d’envoi simulée pour l’analyse : <strong>{{ dossier.envoi_local|date_essai_mail }}</strong> · fuseau du lieu de tes cycles.</p>
+    <p class="essai-aide">L’essai utilise seulement les notes connues au moment de la préparation. Il ne crée aucune note future. Un éventuel envoi d’essai partira au clic, sans attendre cette date simulée.</p>
+    {% if source %}<p>Analyse collective reprise : <strong>{{ source.titre }}</strong> · version validée n° {{ source.revision }}.</p>{% endif %}
+    {% set journal = dossier.get('journal_30_jours', {}) %}
+    <p>Notes incluses : <strong>{{ journal.get('nombre_entrees_retenues', 0) }}</strong>{% if not dossier.get('journal_autorise') %} · utilisation du journal non autorisée{% endif %}.</p>
+    <div class="essai-reperes"><p><strong>Modèle prévu</strong>{{ parametres.get('model', '—') }}</p><p><strong>Taille exacte du prompt</strong>{{ controle.caracteres }} caractères</p><p><strong>Estimation des tokens d’entrée</strong>≈ {{ controle.tokens_estimes }} tokens<br><span class="essai-aide">Estimation locale, pas un comptage exact de Claude. Aucun appel de comptage API.</span></p></div>
+    {% if not controle.conforme %}<p class="essai-message error">Le prompt dépasse le plafond de {{ controle.limite_caracteres }} caractères. La génération est bloquée ; tu peux examiner les données ci-dessous.</p>{% endif %}
+    {% if mail.erreur %}<p class="essai-message error" role="alert">{{ mail.erreur }}</p>{% endif %}
+    <details class="essai-details"><summary>Lire le prompt complet qui sera envoyé</summary><pre>{{ mail.prompt }}</pre></details>
+    <details class="essai-details"><summary>Voir les données par chapitre</summary>
+      {% set chapitres = {'natal':'Thème natal','RS':'Révolution Solaire archivée','RL_active_a_lenvoi':'Révolution Lunaire active à la date du mail','lunaison':'Pleine Lune et ton analyse validée','journal_30_jours':'Notes du journal retenues','profil_declare':'Situation déclarée dans le profil','mails_deja_envoyes':'Historique des mails réellement envoyés'} %}
+      {% for cle, titre in chapitres.items() %}<details class="essai-chapitre"><summary>{{ titre }}</summary><pre>{{ dossier.get(cle, {})|json_essai_mail }}</pre></details>{% endfor %}
+    </details>
+    <details class="essai-details"><summary>Paramètres complets de la requête</summary><pre>{{ parametres|json_essai_mail }}</pre></details>
+  </section>
+  <section class="essai-carte">
+    <h2>2. Générer un seul brouillon</h2>
+    {% if mail.statut == 'essai_prepare' %}
+    <p>Ce bouton lance <strong>un seul appel Claude</strong> avec l’aperçu ci-dessus. Il n’envoie aucun mail. Le texte, la réponse brute et les tokens réellement utilisés seront conservés.</p>
+    <form method="post" action="{{ url_for('admin_essais_mails.generer', id=mail.id) }}" data-essai-action>
+      <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+      <button class="essai-bouton" type="submit" {% if not controle.conforme %}disabled{% endif %}>Générer 1 brouillon avec Claude · 1 appel IA</button>
+    </form>
+    {% else %}<p>Une tentative a déjà été engagée pour cet aperçu. Le résultat reste ci-dessous ; aucun nouvel appel ne sera lancé en rechargeant la page.</p>{% endif %}
+    {% if mail.contenu_html %}<h3>{{ mail.objet }}</h3><iframe class="essai-lecture" sandbox src="{{ url_for('admin_essais_mails.lecture', id=mail.id) }}" title="Lecture du brouillon de Pleine Lune"></iframe>{% elif mail.contenu_texte %}<pre>{{ mail.contenu_texte }}</pre>{% endif %}
+    {% if usage %}<p>Tokens réels : <strong>{{ usage.get('input_tokens', '—') }}</strong> en entrée · <strong>{{ usage.get('output_tokens', '—') }}</strong> en sortie.</p><details class="essai-details"><summary>Usage complet retourné par Claude</summary><pre>{{ usage|json_essai_mail }}</pre></details>{% endif %}
+    {% if mail.reponse_brute %}<details class="essai-details"><summary>Réponse brute conservée</summary><pre>{{ mail.reponse_brute }}</pre></details>{% endif %}
+    {% if mail.statut == 'essai_brouillon' %}<p class="essai-aide">Les contrôles automatiques vérifient la structure, les liens et la fin de réponse. La justesse et la qualité de l’analyse restent à relire par toi.</p>{% endif %}
+  </section>
+  <section class="essai-carte">
+    <h2>3. Après relecture, envoyer à ton adresse uniquement</h2>
+    <p>Adresse de ton compte : <strong>{{ utilisateur_espace.email or 'Aucune adresse renseignée' }}</strong>. Le destinataire ne peut pas être changé depuis cet écran.</p>
+    {% if mail.statut == 'essai_brouillon' %}
+    <form method="post" action="{{ url_for('admin_essais_mails.envoyer', id=mail.id) }}" data-essai-action>
+      <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+      <label class="essai-validation"><input type="checkbox" name="validation_relecture" value="oui" required> J’ai relu et validé ce brouillon pour un envoi à mon adresse.</label>
+      <button class="essai-bouton" type="submit">Valider et envoyer ce brouillon à mon adresse</button>
+    </form>
+    <p class="essai-aide">Cet envoi reprend le brouillon enregistré sans le régénérer. Tu retrouveras aussi sa copie dans Mes mails.</p>
+    {% elif mail.statut == 'envoye' %}
+    <p>Remis au transport le {{ mail.date_envoi|date_essai_mail }}. Vérifie sa réception dans ta boîte.</p>
+    <p><a href="{{ url_for('abonnement_client.lire_mail', mail_id=mail.id) }}">Ouvrir la copie dans Mes mails →</a></p><p><a href="{{ url_for('espace_personnel.calendrier', mois='2026-11') }}">Vérifier le lien du 24 novembre dans mon calendrier →</a></p>
+    {% elif mail.statut in ['essai_envoi_en_cours','essai_envoi_incertain'] %}<p>Vérifie ta boîte et les traces. Aucun bouton de renvoi automatique n’est proposé.</p>
+    {% else %}<p>Cette action sera disponible après la génération d’un brouillon conforme et ta relecture.</p>{% endif %}
+  </section>
+  {% endif %}
+  {% if essais %}<section class="essai-carte"><h2>Retrouver mes essais précédents</h2><ul class="essai-historique">{% for ancien in essais %}<li><a href="{{ url_for('admin_essais_mails.index', essai=ancien.id) }}">{{ ancien.date_creation|date_essai_mail }} · {{ ancien.objet or 'Aperçu de la Pleine Lune du 24 novembre' }}</a></li>{% endfor %}</ul></section>{% endif %}
+</main>
+<script>
+document.querySelectorAll('[data-essai-action]').forEach(form => form.addEventListener('submit', event => {
+  const bouton = event.submitter;
+  if (bouton) { bouton.disabled = true; bouton.textContent = 'Traitement en cours…'; }
+}));
+</script>
+{% endblock %}

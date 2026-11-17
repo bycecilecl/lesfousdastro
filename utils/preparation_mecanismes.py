@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 import fcntl
 import os
+from sqlalchemy.exc import SQLAlchemyError
 
 from extensions import db
 from models.espace_personnel import SectionAnalyse
@@ -28,6 +29,10 @@ EXTRACTEURS_MECANISMES = {
 
 class ExtractionMecanismesEnCours(ValueError):
     pass
+
+
+class ErreurPreparationMecanismes(ValueError):
+    """Message de préparation affichable, avant tout appel IA."""
 
 
 @contextmanager
@@ -58,19 +63,21 @@ def preparer_sections_mecanismes(analyse, obtenir_chemin_pdf):
     """
     extracteur = EXTRACTEURS_MECANISMES.get(analyse.type_analyse)
     if extracteur is None:
-        raise ValueError("Ce type de rapport ne permet pas cette extraction.")
+        raise ErreurPreparationMecanismes("Ce type de rapport ne permet pas cette extraction.")
     sections = (SectionAnalyse.query.filter_by(analyse_id=analyse.id)
                 .order_by(SectionAnalyse.ordre.asc()).all())
     if sections:
         if not any(section.contenu and section.contenu.strip() for section in sections):
-            raise ValueError("Le texte de ce rapport n’est pas lisible.")
+            raise ErreurPreparationMecanismes("Les sections enregistrées de ce rapport ne contiennent pas de texte exploitable.")
         print(f"[Mécanismes] Rapport {analyse.id} : texte déjà disponible ({len(sections)} sections).", flush=True)
         return sections
 
     print(f"[Mécanismes] Rapport {analyse.id} : lecture du PDF, sans appel IA.", flush=True)
     extraites = extracteur(obtenir_chemin_pdf())
     if not extraites or not any(section.get("contenu", "").strip() for section in extraites):
-        raise ValueError("Aucun texte exploitable dans ce PDF. Utilise une version avec du texte sélectionnable.")
+        raise ErreurPreparationMecanismes(
+            "Le découpage du PDF n’a trouvé aucune section exploitable. Vérifie le texte et les titres du rapport."
+        )
     maintenant = datetime.now(timezone.utc)
     sections = [SectionAnalyse(
         analyse_id=analyse.id, cle_section=section["cle_section"],
@@ -78,7 +85,13 @@ def preparer_sections_mecanismes(analyse, obtenir_chemin_pdf):
         source_format="pdf_importe", date_creation=maintenant,
         date_modification=maintenant,
     ) for section in extraites]
-    db.session.add_all(sections)
-    db.session.commit()
+    try:
+        db.session.add_all(sections)
+        db.session.commit()
+    except SQLAlchemyError as erreur:
+        db.session.rollback()
+        raise ErreurPreparationMecanismes(
+            "Le texte du rapport a été lu, mais ses sections n’ont pas pu être enregistrées."
+        ) from erreur
     print(f"[Mécanismes] Rapport {analyse.id} : texte enregistré ({len(sections)} sections).", flush=True)
     return sections

@@ -14,6 +14,8 @@ try:
     app.register_blueprint(communaute_bp)
     from routes.outils_membres import outils_membres_bp
     app.register_blueprint(outils_membres_bp)
+    from routes.admin_essais_mails import admin_essais_mails_bp
+    app.register_blueprint(admin_essais_mails_bp)
 except Exception:
     app.logger.exception("Espace personnel indisponible ; application principale conservée")
 

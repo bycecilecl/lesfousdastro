@@ -78,7 +78,7 @@ from utils.calcul_theme import calcul_theme
 from utils.configurations_astrologiques import analyser_configurations_majeures
 from utils.extraction_mecanismes_ia import generer_suggestions_avec_claude
 from utils.preparation_mecanismes import (
-    ExtractionMecanismesEnCours, preparer_sections_mecanismes, verrou_mecanismes,
+    ErreurPreparationMecanismes, ExtractionMecanismesEnCours, preparer_sections_mecanismes, verrou_mecanismes,
 )
 from utils.exploration_rs import extraire_pages_rs, generer_enjeux_rs, lire_reponse_enjeux_rs, propositions_rs_a_verifier, verrou_extraction_rs
 from utils.enjeux_annuels import actualiser_enjeux_email
@@ -1569,6 +1569,99 @@ def _preparer_theme_cycle_lunaire(theme):
     return theme
 
 
+def _generer_interpretation_cycle_enregistre(cycle, prenom, theme):
+    """Appelé après réservation atomique du cycle, une fois par clic autorisé."""
+    interpretation, usage = generer_interpretation_avec_claude(
+        prenom, cycle.ville, theme, cycle_id=cycle.id,
+    )
+    cycle.interpretation = json.dumps(interpretation, ensure_ascii=False)
+    cycle.tokens_entree = usage["tokens_entree"]
+    cycle.tokens_sortie = usage["tokens_sortie"]
+    cycle.statut = "genere"
+    cycle.date_generation = datetime.now(timezone.utc)
+    db.session.commit()
+    return interpretation, usage
+
+
+def _journaux_cycle_pour_admin(cycle):
+    if not cycle or not administratrice_connectee():
+        return []
+    from utils.journal_cycles_lunaires import journaux_interpretation
+    return journaux_interpretation(cycle.id)
+
+
+@espace_personnel_bp.route("/cycles-lunaires/<int:cycle_id>/relancer", methods=["POST"])
+def relancer_cycle_lunaire(cycle_id):
+    """Relance volontaire par l’administratrice de son seul cycle en échec."""
+    if not administratrice_connectee():
+        abort(404)
+    utilisateur = _compte_connecte()
+    if utilisateur is None:
+        abort(404)
+    if not _verifier_formulaire_portail():
+        abort(400)
+    profil = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first_or_404()
+    droits = acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first())
+    if not droits["cycle_lunaire"]:
+        abort(403)
+    cycle = CycleLunaire.query.filter_by(id=cycle_id, profil_id=profil.id).first_or_404()
+    destination = url_for("espace_personnel.fiche_cycle_lunaire", cycle_id=cycle.id)
+    if cycle.interpretation or cycle.statut != "echec":
+        flash("Ce cycle n’est pas en échec. Aucun nouvel appel IA lancé.", "error")
+        return redirect(destination)
+    if request.form.get("relance_ia") != "oui":
+        abort(400)
+    try:
+        theme = json.loads(cycle.theme_technique)
+        _preparer_theme_cycle_lunaire(theme)
+    except (KeyError, TypeError, ValueError):
+        flash("Les données de ce cycle ne peuvent pas être relues. Aucun appel IA lancé.", "error")
+        return redirect(destination)
+    reclamation = db.session.execute(update(CycleLunaire).where(
+        CycleLunaire.id == cycle.id,
+        CycleLunaire.profil_id == profil.id,
+        CycleLunaire.statut == "echec",
+        or_(CycleLunaire.interpretation.is_(None), CycleLunaire.interpretation == ""),
+    ).values(statut="en_cours"))
+    if reclamation.rowcount != 1:
+        db.session.rollback()
+        flash("Cette tentative a déjà été engagée. Aucun autre appel IA lancé.", "error")
+        return redirect(destination)
+    db.session.commit()
+    try:
+        _generer_interpretation_cycle_enregistre(cycle, profil.prenom, theme)
+    except Exception as exc:
+        db.session.rollback()
+        cycle = CycleLunaire.query.filter_by(id=cycle_id, profil_id=profil.id).first_or_404()
+        cycle.statut = "echec"
+        db.session.commit()
+        current_app.logger.exception("Échec de relance manuelle du cycle lunaire %s", cycle_id)
+        from utils.interpretation_cycle_lunaire import ErreurInterpretationCycle
+        flash(str(exc) if isinstance(exc, ErreurInterpretationCycle) else
+              "L’interprétation n’a pas abouti. Les traces sont conservées ; aucune relance automatique.", "error")
+    else:
+        flash("L’interprétation est enregistrée. Aucun mail envoyé.", "success")
+    return redirect(destination)
+
+
+@espace_personnel_bp.route("/cycles-lunaires/<int:cycle_id>/traces/<execution>/<nom>")
+def trace_cycle_lunaire(cycle_id, execution, nom):
+    if not administratrice_connectee():
+        abort(404)
+    utilisateur = _compte_connecte()
+    if utilisateur is None:
+        abort(404)
+    profil = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first_or_404()
+    cycle = CycleLunaire.query.filter_by(id=cycle_id, profil_id=profil.id).first_or_404()
+    from utils.journal_cycles_lunaires import dossier_cycle, FICHIERS, FORMAT_EXECUTION
+    if nom not in FICHIERS or not re.fullmatch(FORMAT_EXECUTION, execution):
+        abort(404)
+    reponse = send_from_directory(str(dossier_cycle(cycle.id) / execution), nom, mimetype="text/plain")
+    reponse.headers["Cache-Control"] = "private, no-store"
+    return reponse
+
+
+
 @espace_personnel_bp.route("/cycles-lunaires/apercu", methods=["GET", "POST"])
 def apercu_cycle_lunaire():
     """Aperçu gratuit à calculer ; Claude intervient seulement sur POST autorisé."""
@@ -1686,24 +1779,17 @@ def apercu_cycle_lunaire():
                         return redirect(url_for("espace_personnel.apercu_cycle_lunaire"))
                     db.session.commit()
                     try:
-                        from utils.interpretation_cycle_lunaire import generer_interpretation_avec_claude
-                        interpretation, usage_ia = generer_interpretation_avec_claude(
-                            profil.prenom, lieu_revolution, theme,
-                        )
-                        cycle.interpretation = json.dumps(interpretation, ensure_ascii=False)
-                        cycle.tokens_entree = usage_ia["tokens_entree"]
-                        cycle.tokens_sortie = usage_ia["tokens_sortie"]
-                        cycle.statut = "genere"
-                        cycle.date_generation = datetime.now(timezone.utc)
-                        db.session.commit()
+                        interpretation, usage_ia = _generer_interpretation_cycle_enregistre(cycle, profil.prenom, theme)
                         return redirect(url_for("espace_personnel.fiche_cycle_lunaire", cycle_id=cycle.id))
-                    except Exception:
+                    except Exception as exc:
                         db.session.rollback()
                         cycle = CycleLunaire.query.filter_by(profil_id=profil.id, cle_cycle=cle_cycle).first()
                         cycle.statut = "echec"
                         db.session.commit()
                         current_app.logger.exception("Échec de génération du cycle lunaire")
-                        erreur_generation = "L’interprétation n’a pas abouti. Aucun nouvel appel ne sera tenté automatiquement."
+                        from utils.interpretation_cycle_lunaire import ErreurInterpretationCycle
+                        erreur_generation = (str(exc) if isinstance(exc, ErreurInterpretationCycle) else
+                            "L’interprétation n’a pas abouti. Aucun nouvel appel ne sera tenté automatiquement.")
                         peut_generer = False
         except (KeyError, TypeError, ValueError, RuntimeError) as exc:
             erreur = str(exc)
@@ -1716,6 +1802,8 @@ def apercu_cycle_lunaire():
         cycles_navigation=cycles_navigation, lieu_revolution=lieu_revolution,
         est_apercu_actif=True,
         peut_generer=peut_generer, espace_csrf=_jeton_formulaire_portail(),
+        peut_relancer=bool(administratrice_connectee() and cycle and cycle.statut == "echec" and not cycle.interpretation),
+        journaux_generation=_journaux_cycle_pour_admin(cycle),
     )
 
 
@@ -1748,6 +1836,8 @@ def fiche_cycle_lunaire(cycle_id):
         usage_ia=usage_ia, cycle_enregistre=cycle, entrees_cycle=entrees_cycle,
         cycles_navigation=cycles_navigation, lieu_revolution=cycle.ville,
         peut_generer=False, espace_csrf=_jeton_formulaire_portail(),
+        peut_relancer=bool(administratrice_connectee() and cycle.statut == "echec" and not cycle.interpretation),
+        journaux_generation=_journaux_cycle_pour_admin(cycle),
     )
 
 
@@ -1848,11 +1938,15 @@ def generer_suggestions_mecanismes(analyse_id):
             db.session.commit()
     except ExtractionMecanismesEnCours as erreur:
         flash(str(erreur), "error")
+    except ErreurPreparationMecanismes as erreur:
+        db.session.rollback()
+        current_app.logger.exception("Échec de préparation du rapport %s", analyse.id)
+        flash(f"{erreur} Aucun appel IA n’a été lancé.", "error")
     except Exception:
         db.session.rollback()
         current_app.logger.exception("Échec d’extraction des mécanismes du rapport %s (étape %s)", analyse.id, phase)
         if phase == "preparation":
-            flash("Le PDF n’a pas pu être lu. Utilise un PDF avec du texte sélectionnable. Aucun appel IA n’a été lancé.", "error")
+            flash("La préparation du rapport a échoué. Aucun appel IA n’a été lancé.", "error")
         else:
             flash("Les mécanismes n’ont pas pu être extraits ou enregistrés. Aucune relance automatique.", "error")
     else:
@@ -3080,10 +3174,14 @@ def preparer_analyse(analyse_id):
             preparer_sections_mecanismes(analyse, lambda: _pdf_pour_extraction(analyse))
     except ExtractionMecanismesEnCours as erreur:
         flash(str(erreur), "error")
+    except ErreurPreparationMecanismes as erreur:
+        db.session.rollback()
+        current_app.logger.exception("Échec de préparation du rapport %s", analyse.id)
+        flash(f"{erreur} Aucun appel IA n’a été lancé.", "error")
     except Exception:
         db.session.rollback()
-        current_app.logger.exception("Échec de lecture du rapport %s", analyse.id)
-        flash("Le PDF n’a pas pu être lu. Utilise un PDF avec du texte sélectionnable. Aucun appel IA n’a été lancé.", "error")
+        current_app.logger.exception("Échec de préparation du rapport %s", analyse.id)
+        flash("La préparation du rapport a échoué. Aucun appel IA n’a été lancé.", "error")
     else:
         flash("Ton rapport est prêt. Tu peux demander les mécanismes avec l’IA.", "success")
     return redirect(destination)

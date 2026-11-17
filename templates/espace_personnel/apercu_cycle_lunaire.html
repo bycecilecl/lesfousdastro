@@ -290,7 +290,18 @@ body {
                     <h2>Interpréter ce cycle</h2>
                     {% if peut_generer %}
                         <p>Claude utilisera les priorités techniques pour construire une lecture personnalisée de ce cycle. La génération démarre seulement quand tu cliques.</p>
-                        <form method="post"><input type="hidden" name="espace_csrf" value="{{ espace_csrf }}"><button class="generate-button" type="submit">Générer et enregistrer mon interprétation</button></form>
+                        <form method="post" data-generation-cycle><input type="hidden" name="espace_csrf" value="{{ espace_csrf }}"><button class="generate-button" type="submit">Générer et enregistrer mon interprétation</button></form>
+                    {% elif peut_relancer %}
+                        <p>La précédente tentative a échoué. Tu peux lancer une nouvelle tentative pour ce cycle ; elle utilisera l’IA et n’enverra aucun mail.</p>
+                        <form method="post" action="{{ url_for('espace_personnel.relancer_cycle_lunaire', cycle_id=cycle_enregistre.id) }}" data-generation-cycle>
+                            <input type="hidden" name="espace_csrf" value="{{ espace_csrf }}">
+                            <input type="hidden" name="relance_ia" value="oui">
+                            <button class="generate-button" type="submit">Relancer une fois l’interprétation avec l’IA</button>
+                        </form>
+                    {% elif cycle_enregistre and cycle_enregistre.statut == 'en_cours' %}
+                        <p>La génération est en cours. Aucun deuxième appel ne sera lancé en rechargeant cette page.</p>
+                    {% elif cycle_enregistre and cycle_enregistre.statut == 'echec' %}
+                        <p>L’interprétation n’a pas abouti. Contacte Cécile pour reprendre ce cycle ; aucun nouvel appel ne partira automatiquement.</p>
                     {% elif cycle_enregistre and cycle_enregistre.statut == 'technique' %}
                         <p>Le calcul de ce cycle est disponible, mais son interprétation n’a pas encore été générée.</p>
                     {% else %}
@@ -298,6 +309,18 @@ body {
                     {% endif %}
                     {% if erreur_generation %}<p class="generation-error">{{ erreur_generation }}</p>{% endif %}
                 </section>
+            {% endif %}
+
+            {% if journaux_generation %}
+                <details class="lunar-details">
+                    <summary>Journaux de génération · administration</summary>
+                    {% for journal in journaux_generation %}
+                        <p>{{ journal.id }} :
+                        {% for nom in journal.fichiers %}
+                            <a href="{{ url_for('espace_personnel.trace_cycle_lunaire', cycle_id=cycle_enregistre.id, execution=journal.id, nom=nom) }}" target="_blank" rel="noopener noreferrer">{{ nom }}</a>{% if not loop.last %} · {% endif %}
+                        {% endfor %}</p>
+                    {% endfor %}
+                </details>
             {% endif %}
 
             <details class="technical-foundations">
@@ -329,6 +352,14 @@ body {
 
 {% block scripts %}
 <script>
+    document.querySelectorAll('[data-generation-cycle]').forEach(form => {
+        form.addEventListener('submit', event => {
+            if (form.dataset.enCours === 'oui') { event.preventDefault(); return; }
+            form.dataset.enCours = 'oui';
+            const bouton = event.submitter || form.querySelector('button[type="submit"]');
+            if (bouton) { bouton.disabled = true; bouton.textContent = 'Génération en cours…'; }
+        });
+    });
     function createStars() {
         const starsContainer = document.getElementById('stars');
         if (!starsContainer) return;

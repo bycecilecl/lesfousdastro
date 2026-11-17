@@ -250,30 +250,65 @@ def valider_interpretation(reponse: str | dict) -> dict:
     return donnees
 
 
-def generer_interpretation_avec_claude(prenom: str, lieu: str, theme: dict) -> tuple[dict, dict]:
-    from utils.claude_llm import CLIENT
-    from utils.claude_espace import creer_message_claude
+class ErreurInterpretationCycle(ValueError):
+    """Cause contrôlée affichable sans exposer une erreur du fournisseur."""
+
+
+def generer_interpretation_avec_claude(
+    prenom: str, lieu: str, theme: dict, *, cycle_id: int | None = None,
+) -> tuple[dict, dict]:
+    from utils.claude_espace import CLIENT, MODEL, creer_message_claude
+    from utils.parametres_claude_espace import preparer_parametres_claude
+    from utils.journal_cycles_lunaires import nouvelle_tentative, ecrire_trace
 
     messages = construire_messages_interpretation(prenom, lieu, theme)
-    reponse = creer_message_claude(
-        client=CLIENT,
-        model="claude-sonnet-5-5",
-        system=messages[0]["content"],
-        messages=[{"role": "user", "content": messages[1]["content"]}],
-        temperature=0.35,
-        max_tokens=2200,
-    )
-    if reponse.stop_reason != "end_turn":
-        raise RuntimeError("Claude n'a pas terminé l'interprétation lunaire ; aucun second appel n'a été lancé.")
-    contenu = "".join(
-        bloc.text
-        for bloc in reponse.content
-        if getattr(bloc, "type", None) == "text"
-    ).strip()
-    interpretation = valider_interpretation(contenu)
-    usage = {
-        "tokens_entree": reponse.usage.input_tokens,
-        "tokens_sortie": reponse.usage.output_tokens,
-        "tokens_total": reponse.usage.input_tokens + reponse.usage.output_tokens,
-    }
+    parametres = preparer_parametres_claude({
+        "model": MODEL,
+        "system": messages[0]["content"],
+        "messages": [{"role": "user", "content": messages[1]["content"]}],
+        "temperature": 0.35,
+        "max_tokens": 6000,
+    })
+    dossier = nouvelle_tentative(cycle_id)
+    # Si la requête ne peut pas être conservée, aucun appel payant ne part.
+    ecrire_trace(dossier, "requete.json", parametres)
+    print(f"[RL] Une tentative, sans relance automatique. Journaux : {dossier}", flush=True)
+    try:
+        reponse = creer_message_claude(
+            client=CLIENT.with_options(max_retries=0, timeout=180.0), **parametres,
+        )
+        # Conserver même une réponse tronquée ou refusée avant tout contrôle.
+        ecrire_trace(dossier, "reponse_brute.json", reponse.model_dump(mode="json"))
+        ecrire_trace(dossier, "usage.json", reponse.usage.model_dump(mode="json"))
+        if reponse.stop_reason != "end_turn":
+            raison = ("la limite de sortie a été atteinte" if reponse.stop_reason == "max_tokens"
+                      else "la réponse n’est pas terminée")
+            raise ErreurInterpretationCycle(
+                f"L’interprétation est incomplète : {raison}. La réponse est conservée. Aucune relance automatique."
+            )
+        contenu = "".join(
+            bloc.text for bloc in reponse.content if getattr(bloc, "type", None) == "text"
+        ).strip()
+        try:
+            interpretation = valider_interpretation(contenu)
+        except ValueError as erreur:
+            raise ErreurInterpretationCycle(
+                "La réponse ne respecte pas le format attendu. Elle est conservée. Aucune relance automatique."
+            ) from erreur
+        usage = {
+            "tokens_entree": reponse.usage.input_tokens,
+            "tokens_sortie": reponse.usage.output_tokens,
+            "tokens_total": reponse.usage.input_tokens + reponse.usage.output_tokens,
+        }
+        ecrire_trace(dossier, "controles.json", {"format": "conforme", "stop_reason": reponse.stop_reason})
+    except Exception as erreur:
+        try:
+            ecrire_trace(dossier, "erreur.json", {
+                "type": type(erreur).__name__,
+                "message": str(erreur) if isinstance(erreur, ErreurInterpretationCycle) else
+                    "La tentative a échoué. Consulte le journal serveur ; aucune relance automatique.",
+            })
+        except OSError:
+            pass
+        raise
     return interpretation, usage

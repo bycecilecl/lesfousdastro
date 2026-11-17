@@ -51,6 +51,7 @@
     {% if outils_mails_admin %}
     <div class="espace-navigation-group">
       <p class="espace-navigation-label">Administration</p>
+      <a class="espace-navigation-link{% if request.blueprint == 'admin_essais_mails' %} is-current{% endif %}" href="{{ url_for('admin_essais_mails.index') }}">Essais de mails</a>
       <a class="espace-navigation-link{% if rubrique == 'espace_personnel.emails_cycle' %} is-current{% endif %}" href="{{ url_for('espace_personnel.emails_cycle') }}"{% if rubrique == 'espace_personnel.emails_cycle' %} aria-current="page"{% endif %}>Administration des mails</a>
       <a class="espace-navigation-link" href="{{ url_for('admin_lunaisons.index') }}">Mes lectures de lunaisons</a>
       <a class="espace-navigation-link{% if rubrique == 'outils_membres.cartes_natales' %} is-current{% endif %}" href="{{ url_for('outils_membres.cartes_natales') }}">Cartes natales des membres</a>

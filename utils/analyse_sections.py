@@ -94,7 +94,11 @@ def _est_ligne_technique(ligne):
 
 
 def _extraire_sections_par_titres(chemin_pdf, titres_sections):
-    """Découpe un PDF à partir d'une liste ordonnée de titres exacts."""
+    """Découpe un PDF, en réunissant les passages d'un même chapitre.
+
+    Un titre répété (par exemple en début de page) ne crée pas une seconde
+    section avec la même clé. Le texte et les pages sont conservés ensemble.
+    """
     chemin_pdf = Path(chemin_pdf)
     if not chemin_pdf.is_file():
         raise FileNotFoundError(f"Rapport introuvable : {chemin_pdf}")
@@ -104,6 +108,7 @@ def _extraire_sections_par_titres(chemin_pdf, titres_sections):
         for cle, titre in titres_sections
     }
     sections = []
+    sections_par_cle = {}
     section_courante = None
 
     with pdfplumber.open(chemin_pdf) as document:
@@ -117,14 +122,19 @@ def _extraire_sections_par_titres(chemin_pdf, titres_sections):
                 titre_reconnu = titres_par_texte.get(ligne.casefold())
                 if titre_reconnu:
                     cle, titre = titre_reconnu
-                    section_courante = {
-                        "cle_section": cle,
-                        "titre": titre,
-                        "ordre": len(sections) + 1,
-                        "pages": [numero_page],
-                        "lignes": [],
-                    }
-                    sections.append(section_courante)
+                    section_courante = sections_par_cle.get(cle)
+                    if section_courante is None:
+                        section_courante = {
+                            "cle_section": cle,
+                            "titre": titre,
+                            "ordre": len(sections) + 1,
+                            "pages": [],
+                            "lignes": [],
+                        }
+                        sections_par_cle[cle] = section_courante
+                        sections.append(section_courante)
+                    if numero_page not in section_courante["pages"]:
+                        section_courante["pages"].append(numero_page)
                     continue
 
                 # La couverture et ses avertissements ne constituent pas une section.
