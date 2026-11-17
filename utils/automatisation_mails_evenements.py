@@ -96,6 +96,18 @@ def _html(texte, nature):
             + "\n".join(blocs) + '</body></html>')
 
 
+def presentation_pour_envoi(mail):
+    """Même présentation pour un brouillon déjà prêt, sans nouvelle génération."""
+    from types import SimpleNamespace
+    from utils.mails_evenements import normaliser_presentation_mail
+    from utils.journal_mails import ajouter_lien_journal
+    texte = normaliser_presentation_mail(mail.contenu_texte, mail)
+    objet = _controler(texte, mail.nature)
+    copie = SimpleNamespace(id=mail.id, contenu_texte=texte, contenu_html=_html(texte, mail.nature))
+    html, texte = ajouter_lien_journal(copie)
+    return objet, html, texte
+
+
 def _tracer(mail, nom, valeur):
     from utils.stockage_espace import racine_privee_espace
     dossier = racine_privee_espace() / "mails_evenements" / mail.id
@@ -186,6 +198,8 @@ def traiter_evenement(mail_id):
             db.session.commit()
             if reponse.stop_reason not in {"end_turn", "stop_sequence"} or not texte:
                 raise ValueError("Réponse vide, tronquée ou interrompue.")
+            from utils.mails_evenements import normaliser_presentation_mail
+            texte = normaliser_presentation_mail(texte, mail)
             objet = _controler(texte, mail.nature)
             contenu_html = _html(texte, mail.nature)
             try:
@@ -193,7 +207,7 @@ def traiter_evenement(mail_id):
                     "reponse_complete": True, "controle_du_fond": "consigne_dans_le_meme_appel_pas_de_second_appel"})
             except OSError:
                 print("[MAILS BÊTA] Contrôle structurel conforme ; fichier indisponible.", flush=True)
-            if not _transition(mail.id, ("generation_en_cours",), "pret", objet=objet, contenu_html=contenu_html):
+            if not _transition(mail.id, ("generation_en_cours",), "pret", objet=objet, contenu_texte=texte, contenu_html=contenu_html):
                 return "etat_modifie"
         except Exception as erreur:
             db.session.rollback()
@@ -212,11 +226,11 @@ def traiter_evenement(mail_id):
         _verifier_sources(mail, json.loads(mail.choix_journal_json), json.loads(mail.source_lunaison_json))
         if not automatique_actif():
             return "desactive"
-        html_envoi, texte_envoi = ajouter_lien_journal(mail)
+        objet_envoi, html_envoi, texte_envoi = presentation_pour_envoi(mail)
     except ValueError as erreur:
         _transition(mail.id, ("pret",), "suspendu", erreur=str(erreur))
         return "suspendu"
-    if not _transition(mail.id, ("pret",), "envoi_en_cours", contenu_html=html_envoi, contenu_texte=texte_envoi):
+    if not _transition(mail.id, ("pret",), "envoi_en_cours", objet=objet_envoi, contenu_html=html_envoi, contenu_texte=texte_envoi):
         return "deja_reclame"
     try:
         db.session.refresh(mail)  # Le transport et l’archive lisent la même version avec le lien.

@@ -123,7 +123,7 @@ def verifier_actualite(mail, utilisateur):
     dossier, choix, source = preparer_dossier_evenement(mail, profil, datetime.now(timezone.utc))
     if (choix != json.loads(mail.choix_journal_json) or source != json.loads(mail.source_lunaison_json)
             or construire_prompt_evenement(profil.prenom, mail, dossier) != mail.prompt):
-        raise ValueError("Le journal, le profil, l’historique ou l’analyse validée ont changé. Prépare un nouvel aperçu ; aucun nouvel appel ni envoi n’a été lancé.")
+        raise ValueError("Les consignes, le journal, le profil, l’historique ou l’analyse validée ont changé. Prépare un nouvel aperçu ; aucun nouvel appel ni envoi n’a été lancé.")
     return profil
 
 
@@ -156,9 +156,11 @@ def generer(mail, utilisateur):
         if reponse.stop_reason not in {"end_turn", "stop_sequence"} or not texte:
             raise ValueError("Réponse vide ou interrompue. Le résultat est conservé sans relance.")
         from utils.automatisation_mails_evenements import _controler, _html
+        from utils.mails_evenements import normaliser_presentation_mail
+        texte = normaliser_presentation_mail(texte, mail)
         objet = _controler(texte, mail.nature)
         html = _html(texte, mail.nature)
-        _transition(mail, ("essai_generation_en_cours",), "essai_brouillon", objet=objet, contenu_html=html)
+        _transition(mail, ("essai_generation_en_cours",), "essai_brouillon", objet=objet, contenu_texte=texte, contenu_html=html)
         for nom, valeur in (("brouillon.txt", texte), ("brouillon.html", html),
                            ("controles.json", {"structure": "conforme", "liens": "conformes", "fond": "à relire par Cécile"})):
             try:
@@ -191,9 +193,9 @@ def envoyer_a_soi(mail, utilisateur):
     if not destinataire or "@" not in destinataire:
         raise ValueError("Ton compte doit avoir une adresse e-mail avant cet essai d’envoi.")
     from utils.transport_mails_evenements import verifier_transport, envoyer_evenement
-    from utils.journal_mails import ajouter_lien_journal
+    from utils.automatisation_mails_evenements import presentation_pour_envoi
     verifier_transport()
-    html, texte = ajouter_lien_journal(mail)
+    objet, html, texte = presentation_pour_envoi(mail)
     # En local, le lien suit le serveur local ; en production, garder l’origine
     # publique vérifiée plutôt que dépendre de l’en-tête Host de la requête.
     from flask import url_for
@@ -205,7 +207,7 @@ def envoyer_a_soi(mail, utilisateur):
         lien_local = url_for("espace_personnel.journal", mail_source=mail.id, _external=True)
         html = html.replace(escape(lien_public, quote=True), escape(lien_local, quote=True))
         texte = texte.replace(lien_public, lien_local)
-    _transition(mail, ("essai_brouillon",), "essai_envoi_en_cours", contenu_html=html, contenu_texte=texte, erreur=None)
+    _transition(mail, ("essai_brouillon",), "essai_envoi_en_cours", objet=objet, contenu_html=html, contenu_texte=texte, erreur=None)
     try:
         print("[ESSAI MAIL] 4. Une remise au transport, uniquement à l’adresse de ton compte.", flush=True)
         reference = envoyer_evenement(mail, destinataire)
