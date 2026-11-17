@@ -120,7 +120,7 @@ import uuid
 import unicodedata
 from datetime import date, datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
-from sqlalchemy import update
+from sqlalchemy import or_, update
 
 from flask import Blueprint, Response, abort, current_app, flash, redirect, render_template, request, session, url_for
 
