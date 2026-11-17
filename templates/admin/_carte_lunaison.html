@@ -1,0 +1,17 @@
+{% set analyse = fiche.analyse %}
+<article class="panel">
+    <h3>{{ fiche.libelle }}</h3>
+    <p>{{ fiche.date_locale.strftime('%d/%m/%Y à %H h %M') }}</p>
+    {% if analyse and analyse.validee_le %}
+        <span class="status validated">Validée pour les mails · version {{ analyse.revision_validee }}</span>
+        {% if analyse.texte != analyse.texte_valide or analyse.titre != analyse.titre_valide %}
+            <p class="muted">Des modifications du brouillon attendent ta validation.</p>
+        {% endif %}
+    {% elif analyse %}
+        <span class="status pending">Brouillon · non repris dans les mails</span>
+    {% else %}
+        <span class="status">À rédiger</span>
+    {% endif %}
+    {% if analyse and analyse.titre %}<p><strong>{{ analyse.titre }}</strong></p>{% endif %}
+    <p><a class="button secondary" href="{{ url_for('admin_lunaisons.editer', nature=fiche.type, date_utc=fiche.date_utc) }}">{{ 'Ouvrir mon analyse' if analyse else 'Rédiger mon analyse' }}</a></p>
+</article>

@@ -11,6 +11,8 @@ from utils.lunaisons import prochain_instant_lunaison
 
 TYPES_LUNAISONS = {"nouvelle_lune": "Nouvelle Lune", "pleine_lune": "Pleine Lune"}
 FUSEAU_EDITION = ZoneInfo("Europe/Paris")
+NOMS_MOIS = ("Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août",
+             "Septembre", "Octobre", "Novembre", "Décembre")
 MESSAGE_MIGRATION = (
     "L'espace des analyses de lunaisons doit être initialisé. "
     "Lance env/bin/python3.12 script/migrate_analyses_lunaisons.py --apply "
@@ -48,6 +50,28 @@ def lunaisons_du_mois(mois):
                 resultat.append(fiche_lunaison(nature, instant))
             curseur = instant + timedelta(seconds=2)
     return sorted(resultat, key=lambda fiche: fiche["instant"])
+
+
+def lunaisons_a_preparer(mois, duree=6):
+    """Fiches de plusieurs mois, calculées à la consultation sans créer d’analyse."""
+    try:
+        debut = datetime.strptime(mois, "%Y-%m")
+        if debut.strftime("%Y-%m") != mois or not 1900 <= debut.year <= 2200:
+            raise ValueError()
+        if duree not in {1, 3, 6, 12}:
+            raise ValueError()
+    except (ValueError, TypeError) as exc:
+        raise ValueError("Choisis un mois entre janvier 1900 et décembre 2200 et une durée de 1, 3, 6 ou 12 mois.") from exc
+    groupes = []
+    premier = debut.year * 12 + debut.month - 1
+    for decalage in range(duree):
+        annee, mois_zero = divmod(premier + decalage, 12)
+        if annee > 2200:
+            break
+        cle = f"{annee:04d}-{mois_zero+1:02d}"
+        groupes.append({"mois": cle, "libelle": f"{NOMS_MOIS[mois_zero]} {annee}",
+                        "lunaisons": lunaisons_du_mois(cle)})
+    return groupes
 
 
 def fiche_lunaison(nature, instant):

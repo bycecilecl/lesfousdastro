@@ -29,6 +29,12 @@
         input,textarea { width:100%; padding:12px 14px; border:1px solid #a8bbc6; border-radius:8px; font:inherit; color:inherit; background:white; }
         textarea { resize:vertical; line-height:1.7; min-height:460px; }
         input[type=month] { width:auto; max-width:100%; }
+        .month-form select { width:auto; padding:12px 14px; border:1px solid #a8bbc6; border-radius:8px; font:inherit; color:inherit; background:white; }
+        .month-form select:focus-visible { outline:3px solid #e6ad3d; outline-offset:3px; }
+        .lunaison-mois { margin:30px 0; }
+        .lunaison-mois>h2 { font-size:1.4rem; margin-bottom:16px; }
+        .lunaison-mois h3 { font-size:1.15rem; margin:0 0 10px; }
+        .month-navigation { justify-content:space-between; margin-top:24px; }
         input:focus,textarea:focus,button:focus-visible,a:focus-visible { outline:3px solid #e6ad3d; outline-offset:3px; }
         .actions,.month-form { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:22px 0 4px; }
         .month-form label { margin:0; }
@@ -47,7 +53,7 @@
         <a href="{{ url_for('espace_personnel.accueil') }}">← Mon espace astral</a>
         <a href="{{ url_for('admin_lunaisons.index') }}">Mes analyses de lunaisons</a>
     </nav>
-    <div class="eyebrow">Cécile · Administration locale</div>
+    <div class="eyebrow">Cécile · Administration</div>
     {% for categorie, message in get_flashed_messages(with_categories=true) %}
         <div class="notice {{ categorie }}" role="status">{{ message }}</div>
     {% endfor %}

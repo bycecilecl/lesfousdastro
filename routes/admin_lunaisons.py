@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from extensions import db
 from models.espace_personnel import AnalyseLunaison, utcnow
 from utils.analyses_lunaisons import (
-    FUSEAU_EDITION, lunaisons_du_mois, retrouver_lunaison, verifier_table_analyses,
+    FUSEAU_EDITION, lunaisons_a_preparer, retrouver_lunaison, verifier_table_analyses,
 )
 from utils.auth_espace import jeton_csrf_espace, verifier_csrf_espace
 
@@ -49,7 +49,9 @@ def proteger_reponse(reponse):
 def index():
     mois = request.args.get("mois", datetime.now(FUSEAU_EDITION).strftime("%Y-%m"))
     try:
-        calendrier = lunaisons_du_mois(mois)
+        duree = int(request.args.get("duree", "6"))
+        groupes = lunaisons_a_preparer(mois, duree)
+        calendrier = [fiche for groupe in groupes for fiche in groupe["lunaisons"]]
     except ValueError as erreur:
         abort(400, str(erreur))
     erreur_schema = None
@@ -62,7 +64,13 @@ def index():
         erreur_schema = str(erreur)
     for fiche in calendrier:
         fiche["analyse"] = analyses.get((fiche["type"], fiche["date_utc"]))
-    return render_template("admin/lunaisons.html", calendrier=calendrier, mois=mois,
+    debut = datetime.strptime(mois, "%Y-%m")
+    index_mois = debut.year * 12 + debut.month - 1
+    def mois_voisin(decalage):
+        annee, mois_zero = divmod(index_mois + decalage, 12)
+        return f"{annee:04d}-{mois_zero+1:02d}" if 1900 <= annee <= 2200 else None
+    return render_template("admin/lunaisons.html", calendrier=calendrier, groupes=groupes,
+                           mois=mois, duree=duree, precedent=mois_voisin(-1), suivant=mois_voisin(1),
                            erreur_schema=erreur_schema), (503 if erreur_schema else 200)
 
 
