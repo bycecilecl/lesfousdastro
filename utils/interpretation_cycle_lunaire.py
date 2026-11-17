@@ -165,6 +165,7 @@ Tu présentes des dynamiques possibles, jamais des certitudes ni des prédiction
 Tu ne poses aucun diagnostic psychologique ou médical.
 Tu ne mentionnes aucune configuration absente du contexte fourni.
 La conjonction Lune de révolution–Lune natale n'est jamais une interprétation : elle définit seulement le retour lunaire.
+Ne redécris pas chaque mois la Lune natale, son signe, sa dignité et ses aspects nataux. Développe ce qui change dans cette RL : la maison où tombe la Lune, les angles et les nouvelles relations entre les planètes du cycle et le thème natal. Explique ce que ces changements viennent mobiliser chez la personne.
 Réponds exclusivement avec un objet JSON valide, sans markdown ni commentaire."""
     utilisateur = f"""Interprète le prochain cycle lunaire de {prenom or 'la personne'} à partir du contexte technique filtré ci-dessous.
 
