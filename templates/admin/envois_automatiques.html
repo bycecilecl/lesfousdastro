@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Envois automatiques | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='essais-mails.css') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="essai-shell">
+  <header class="essai-entete"><p>ADMINISTRATION</p><h1>Envois automatiques</h1><p>Les comptes inscrits, leurs rendez-vous et le résultat des envois.</p></header>
+  {% for categorie, message in get_flashed_messages(with_categories=true) %}<p class="essai-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+  <section class="essai-carte">
+    <h2>Le fonctionnement</h2>
+    <p><strong>Autorisation des envois : {{ 'activée' if autorise else 'désactivée' }}.</strong> Ce réglage se fait dans la configuration du serveur. Cet écran ne déclenche aucun appel IA ni envoi.</p>
+    <p>Période bêta : du {{ debut.strftime('%d/%m/%Y') }} au {{ fin.strftime('%d/%m/%Y') }} inclus.</p>
+    {% if maintenant < utc(debut) %}<p>Avant le 1er décembre, aucun mail automatique n’est généré ou envoyé. Les dates peuvent être préparées à l’avance.</p>{% endif %}
+    <p>RL : premier 9 h après le retour lunaire. Nouvelle et Pleine Lune : la veille à 9 h, selon le fuseau du profil.</p>
+    <p>Pour les lunaisons, ton analyse doit être validée. Le journal est utilisé selon le choix de chaque membre. Une tentative échouée n’est jamais relancée automatiquement.</p>
+    <p><a href="{{ url_for('admin_essais_mails.index') }}">Tester un mail sur mon compte →</a> · <a href="{{ url_for('admin_lunaisons.index') }}">Préparer mes analyses de lunaisons →</a></p>
+  </section>
+  {% if not pret %}<p class="essai-message error">Le stockage des envois automatiques n’est pas encore disponible.</p>{% else %}
+  <section class="essai-carte"><h2>Les comptes inscrits</h2>
+    {% for inscription in inscriptions %}
+    {% set compte = utilisateurs.get(inscription.utilisateur_id) %}
+    <article class="essai-details"><h3>{{ compte.prenom if compte else 'Compte indisponible' }}</h3>
+      <p>{{ inscription.email_destinataire }} · {{ 'Envois autorisés' if inscription.actif else 'Envois suspendus' }}<br>Calendrier {{ 'préparé' if inscription.date_planification else 'à préparer par le programme' }}.</p>
+      {% if inscription.actif %}<form method="post" action="{{ url_for('admin_envois_automatiques.suspendre', utilisateur_id=inscription.utilisateur_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="essai-bouton" type="submit">Suspendre les envois de ce compte</button></form>{% endif %}
+    </article>
+    {% else %}<p>Aucun compte inscrit pour le moment. Le raccordement des inscriptions à l’offre bêta reste à terminer ; les essais manuels sont séparés.</p>{% endfor %}
+  </section>
+  <section class="essai-carte"><h2>Les envois</h2>
+    {% if etats %}<p>{% for etat, nombre in etats.items() %}{{ libelles_etats.get(etat, etat) }} : {{ nombre }}{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+    {% for mail in mails %}{% set compte = utilisateurs.get(mail.utilisateur_id) %}
+    <article class="essai-details"><h3>{{ natures.get(mail.nature, mail.nature) }} · {{ compte.prenom if compte else 'Compte indisponible' }}</h3>
+      <p>Prévu le {{ utc(mail.date_prevue).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }} (Paris).<br>État : <strong>{{ libelles_etats.get(mail.statut, mail.statut) }}</strong>{% if mail.objet %}<br>{{ mail.objet }}{% endif %}</p>
+      {% if mail.erreur %}<p class="essai-message error">{{ mail.erreur }}</p>{% endif %}
+      {% if mail.date_envoi %}<p>Remis au transport le {{ utc(mail.date_envoi).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }}.</p>{% endif %}
+    </article>{% else %}<p>Aucun rendez-vous automatique enregistré.</p>{% endfor %}
+  </section>
+  {% endif %}
+</main>
+{% endblock %}
