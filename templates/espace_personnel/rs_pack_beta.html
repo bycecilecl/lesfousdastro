@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Ma Révolution Solaire incluse | Les Fous d’Astro{% endblock %}
+{% block extra_css %}body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Segoe UI',sans-serif}.rs-pack{max-width:850px;margin:35px auto;padding:30px;background:#fffdf8;border-radius:24px;color:#29434e}.rs-pack h1,.rs-pack h2{color:#1f628e;margin:22px 0 14px}.rs-pack p{line-height:1.7;margin:14px 0}.rs-pack form{display:grid;gap:18px;margin-top:24px}.rs-pack label{display:grid;gap:8px;font-weight:700;color:#1f628e}.rs-pack input,.rs-pack textarea{padding:12px;border:1px solid #b9d4d7;border-radius:10px;font:inherit;width:100%}.rs-pack .check{display:flex;align-items:flex-start;gap:10px}.rs-pack .check input{width:auto;margin-top:4px}.rs-pack button{justify-self:start;border:0;border-radius:25px;background:#1f628e;color:white;padding:13px 22px;font:inherit;cursor:pointer}.rs-pack .message{padding:15px;background:#e7f6ef;border-radius:12px}.rs-pack .error{background:#fff0ee;color:#923b34}.rs-pack a{color:#1f628e;font-weight:700}{% endblock %}
+{% block content %}{% include 'espace_personnel/_navigation.html' %}<main class="rs-pack">
+<a href="{{ url_for('abonnement_client.mon_abonnement') }}">← Mon abonnement</a>
+<h1>Ma Révolution Solaire incluse</h1><p>Ton pack comprend un rapport de Révolution Solaire. Choisis l’année du retour et la ville où tu passes, ou as passé, ton anniversaire.</p>
+{% with messages=get_flashed_messages(with_categories=true) %}{% for categorie,message in messages %}<p class="message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
+{% if droit.statut == 'terminee' %}<p>Ton rapport est prêt. Tu le retrouveras dans Mes analyses et dans tes années.</p><a href="{{ url_for('espace_personnel.lire_analyse',analyse_id=droit.analyse_id) }}">Lire mon rapport →</a>
+{% elif droit.statut == 'en_cours' %}<p>Ton rapport est en préparation. Tu peux revenir à ton espace ; cette page ne relance pas sa génération.</p>
+{% elif droit.statut == 'a_revoir' %}<p>{{ droit.erreur }}</p>
+{% else %}
+<p>{{ profil.prenom }} · naissance le {{ profil.date_naissance.strftime('%d.%m.%Y') }} à {{ profil.heure_naissance.strftime('%H:%M') }} · {{ profil.ville_naissance }}. <a href="{{ url_for('espace_personnel.profil') }}">Revoir mon profil</a></p>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+<label for="rs-annee">Année du début de ta Révolution Solaire<input id="rs-annee" name="annee" type="number" min="1900" max="2100" value="{{ saisie.get('annee',annee) }}" required></label>
+<label for="rs-lieu">Ville de ton retour solaire<input id="rs-lieu" name="lieu" list="rs-suggestions" value="{{ saisie.get('lieu','') }}" autocomplete="off" required placeholder="Écris une ville, puis choisis une suggestion"></label><datalist id="rs-suggestions"></datalist>
+<input type="hidden" id="rs-lat" name="lat" value="{{ saisie.get('lat','') }}"><input type="hidden" id="rs-lon" name="lon" value="{{ saisie.get('lon','') }}"><input type="hidden" id="rs-tzid" name="tzid" value="{{ saisie.get('tzid','') }}">
+<label for="rs-contexte">Un repère sur ce que tu vis ou ce qui te préoccupe · facultatif<textarea id="rs-contexte" name="preoccupation" rows="5" maxlength="5000">{{ saisie.get('preoccupation','') }}</textarea></label>
+<label class="check"><input type="checkbox" name="confirmer_generation" value="oui" required>Mes informations sont correctes, je souhaite générer le rapport inclus dans mon pack.</label>
+<button type="submit">Générer ma Révolution Solaire incluse</button></form>
+<p>Un rapport est inclus. Aucun nouveau paiement. Le rapport sera conservé dans ton espace ; ton journal n’est pas transmis dans cette demande.</p>
+{% endif %}</main>{% endblock %}
+{% block scripts %}{% if droit.statut == 'a_preparer' %}<script>
+(()=>{const input=document.getElementById('rs-lieu'),liste=document.getElementById('rs-suggestions');let resultats=[],delai,revision=0;
+const choisir=()=>{const r=resultats.find(r=>r.label===input.value);if(r){document.getElementById('rs-lat').value=r.lat;document.getElementById('rs-lon').value=r.lon;document.getElementById('rs-tzid').value=r.tzid||'';}};
+input.addEventListener('input',()=>{const version=++revision;clearTimeout(delai);for(const id of ['rs-lat','rs-lon','rs-tzid'])document.getElementById(id).value='';if(input.value.trim().length<2){liste.replaceChildren();return;}delai=setTimeout(async()=>{try{const r=await fetch('/api/geocode?q='+encodeURIComponent(input.value.trim()));if(!r.ok)return;const d=await r.json();if(version!==revision)return;resultats=d.results||[];liste.replaceChildren(...resultats.map(r=>{const o=document.createElement('option');o.value=r.label;return o;}));choisir();}catch{}},250);});input.addEventListener('change',choisir);input.addEventListener('blur',choisir);
+document.querySelector('.rs-pack form').addEventListener('submit',e=>{if(!document.getElementById('rs-lat').value||!document.getElementById('rs-tzid').value){e.preventDefault();input.setCustomValidity('Choisis une ville dans les suggestions.');input.reportValidity();input.setCustomValidity('');return;}const b=e.target.querySelector('button');b.disabled=true;b.textContent='Préparation de ton rapport…';});})();
+</script>{% endif %}{% endblock %}

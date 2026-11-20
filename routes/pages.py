@@ -53,7 +53,22 @@ def analyses():
 
 @pages_bp.route("/abonnements")
 def abonnements():
-    return render_template("pages/abonnements.html", active="abonnements")
+    return offre_beta()
+
+
+@pages_bp.route("/offre-beta")
+def offre_beta():
+    from flask import make_response
+    from utils.auth_espace import utilisateur_connecte
+    from utils.invitations_beta import adresse_invitee_beta
+    from utils.souscription_espace import offre_publique
+    utilisateur = utilisateur_connecte()
+    invite = bool(utilisateur and adresse_invitee_beta(utilisateur.email))
+    reponse = make_response(render_template("pages/offre_beta.html", active="abonnements",
+        invite_beta=invite, connecte=bool(utilisateur), offre=offre_publique()))
+    reponse.headers["Cache-Control"] = "private, no-store"
+    reponse.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return reponse
 
 @pages_bp.route("/formations")
 def formations():

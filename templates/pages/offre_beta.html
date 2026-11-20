@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}L’espace abonné · Trois mois pour tester | Les Fous d'Astro{% endblock %}
+{% block meta_description %}Offre bêta des Fous d’Astro, réservée aux adresses invitées par Cécile.{% endblock %}
+
+{% block extra_css %}
+:root { --navy:#1f628e; --navy-dark:#123f5d; --teal:#00a8a8; --mist:#eafafa; --pink:#d3b1c2; --ink:#243943; }
+body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48%,#c0f0f7 100%); font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:var(--ink); }
+.subscriptions-page { position:relative; overflow:hidden; }
+.subscriptions-page::before,.subscriptions-page::after { content:""; position:absolute; border-radius:50%; filter:blur(2px); pointer-events:none; }
+.subscriptions-page::before { width:380px; height:380px; top:70px; right:-170px; background:rgba(211,177,194,.22); }
+.subscriptions-page::after { width:290px; height:290px; bottom:130px; left:-140px; background:rgba(255,255,255,.13); }
+.subscriptions-wrap { position:relative; z-index:1; width:min(1120px,calc(100% - 32px)); margin:0 auto; padding:72px 0 84px; }
+.subscriptions-hero { max-width:790px; margin:0 auto 48px; text-align:center; color:white; }
+.subscriptions-kicker { display:inline-block; margin-bottom:16px; padding:7px 14px; border:1px solid rgba(255,255,255,.35); border-radius:999px; background:rgba(255,255,255,.12); font-size:.8rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.subscriptions-hero h1 { margin:0 0 18px; font-size:clamp(2.35rem,6vw,4.5rem); line-height:1.02; }
+.subscriptions-hero p { margin:0 auto; max-width:690px; font-size:clamp(1.05rem,2vw,1.25rem); line-height:1.7; color:rgba(255,255,255,.9); }
+.plans { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; align-items:stretch; margin-top:32px; }
+.plan { position:relative; display:flex; flex-direction:column; padding:34px; border:1px solid rgba(255,255,255,.5); border-radius:28px; background:rgba(255,255,255,.96); box-shadow:0 24px 55px rgba(10,54,77,.2); }
+.plan--premium { border:2px solid #ffe3a8; transform:translateY(-8px); }
+.plan-ribbon { position:absolute; top:18px; right:18px; padding:6px 11px; border-radius:999px; background:#fff0c7; color:#765500; font-size:.72rem; font-weight:900; text-transform:uppercase; }
+.plan-label { margin:0 0 8px; color:var(--teal); font-size:.82rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+.plan h2 { margin:0 0 8px; color:var(--navy-dark); font-size:1.75rem; }
+.plan-summary { min-height:58px; color:#60727b; line-height:1.55; }
+.plan-price { margin:24px 0 5px; color:var(--navy); font-size:2.65rem; font-weight:900; }
+.plan-price span { font-size:1rem; font-weight:700; color:#65737a; }
+.plan-list { display:grid; gap:12px; margin:24px 0 30px; padding:0; list-style:none; }
+.plan-list li { position:relative; padding-left:28px; line-height:1.5; color:#40545d; }
+.plan-list li::before { content:"✓"; position:absolute; left:0; top:0; color:var(--teal); font-weight:900; }
+.plan-list li.is-not::before { content:"—"; color:#a5afb4; }
+.plan-list li.is-not { color:#7f8a8f; }
+.plan-button { margin-top:auto; padding:13px 19px; border-radius:999px; background:#dce3e6; color:#68777e; font-weight:800; text-align:center; }
+.plan-note { margin:14px 0 0; color:#829096; font-size:.8rem; line-height:1.45; text-align:center; }
+.free-space,.comparison { margin-top:28px; padding:clamp(26px,4vw,42px); border-radius:28px; background:rgba(255,255,255,.95); box-shadow:0 20px 45px rgba(10,54,77,.16); }
+.free-space { display:grid; grid-template-columns:1fr auto; gap:28px; align-items:center; }
+.section-kicker { margin-bottom:8px; color:var(--teal); font-size:.78rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+.free-space h2,.comparison h2 { margin:0 0 10px; color:var(--navy-dark); }
+.free-space p,.comparison p { color:#60727b; line-height:1.65; }
+.free-link { display:inline-block; padding:12px 18px; border-radius:999px; background:linear-gradient(45deg,var(--teal),var(--navy)); color:white; font-weight:800; text-decoration:none; white-space:nowrap; }
+.comparison-table { width:100%; margin-top:22px; border-collapse:collapse; }
+.comparison-table th,.comparison-table td { padding:14px 12px; border-bottom:1px solid rgba(31,98,142,.12); text-align:center; }
+.comparison-table th:first-child,.comparison-table td:first-child { text-align:left; }
+.comparison-table th { color:var(--navy); }
+.fine-print { max-width:760px; margin:28px auto 0; color:rgba(255,255,255,.83); font-size:.86rem; line-height:1.55; text-align:center; }
+.beta-intro{margin:18px 0;color:#40545d;line-height:1.75}.beta-section{grid-template-columns:1fr}.beta-section ol{padding-left:23px;color:#40545d;line-height:1.9}.beta-section li{margin:10px 0}.beta-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:24px}.beta-attention{margin-top:20px;padding:16px;border-radius:12px;background:#fff4e6;color:#76512e;line-height:1.65}.beta-intro a{color:#1f628e;font-weight:700}.free-link:focus-visible{outline:3px solid #765500;outline-offset:4px}.free-link{white-space:normal;text-align:center}
+@media(max-width:760px){ .plans{grid-template-columns:1fr}.plan--premium{transform:none}.free-space{grid-template-columns:1fr}.comparison{overflow-x:auto}.comparison-table{min-width:620px} }
+{% endblock %}
+
+{% block content %}
+<div class="subscriptions-page"><main class="subscriptions-wrap">
+<header class="subscriptions-hero">
+<span class="subscriptions-kicker">L’espace abonné · bêta sur invitation</span>
+<h1>Viens tester l’espace abonné avec moi !</h1>
+<p>Un espace pour écrire ce que tu vis, comprendre tes mécanismes, et faire des liens avec ton thème astral.</p>
+<p class="beta-intro">Si tu lis cette page, c’est que tu as répondu à mes mails pour devenir bêta-testeur pendant 3 mois et que tu es OK pour me faire tes retours afin que cet espace devienne un espace qui t’aide, t’accompagne et surtout te donne envie d’y revenir.</p>
+</header>
+<section class="plan plan--premium" aria-labelledby="offre-lancement">
+<p class="plan-label">Du 1er décembre 2026 au 28 février 2027</p>
+<h2 id="offre-lancement">Trois mois pour explorer ton espace</h2>
+<p class="plan-price">35 € <span>au total pour les trois mois</span></p>
+<p class="plan-summary">Un paiement unique, sans renouvellement automatique. Cette première période est réservée uniquement aux bêta-testeurs.</p>
+<p class="beta-intro">Entre le boulot, les responsabilités, la famille, les enfants, la vie sociale et tout le tralala, on a parfois du mal à se poser. <em>(Enfin ça dépend qui, moi ça fait dix ans que j’ai les fesses sur ma chaise à m’étudier ahah.)</em></p>
+<p class="beta-intro">Le but de cet espace est de simplifier la connaissance de soi et les prises de conscience, grâce à l’astrologie.</p>
+<p class="beta-intro">Tu peux y déposer ce que tu vis, revenir dessus et voir ce qui se répète, ce qui change et ce que tu comprends petit à petit.</p>
+<p class="beta-intro">Tu as ton propre espace, accessible avec ton adresse e-mail et ton mot de passe. Tu y reviens quand tu veux, à ton rythme.</p>
+<p><a class="free-link" href="#comment-participer">Ça me dit, comment je participe ?</a></p>
+<h2>Ce que tu vas pouvoir utiliser</h2>
+<ul class="plan-list">
+<li><strong>Ton calendrier astrologique personnel.</strong> Tu retrouves les transits qui touchent ton thème, leur signification et les domaines concernés. En cliquant sur une date, tu peux noter ce que tu traverses à ce moment-là.</li>
+<li><strong>Ton journal de bord.</strong> Tu écris ce que tu veux : tes pensées, une situation, tes ressentis ou une semaine en famille. Tu peux noter une journée ou une période, avec un début, une fin ou « toujours en cours ». Perlimpinpin.</li>
+<li><strong>Ton labo et tes mécanismes.</strong> Tu te rends compte que tu dis oui alors que tu aimerais dire non ? Tu peux relier plusieurs situations à ce fonctionnement, puis aller plus loin : tes émotions, tes réactions, la croyance derrière, la source et ce que tu aimerais tester autrement.</li>
+<li><strong>Tes analyses et ton profil astral.</strong> Tu retrouves les rapports que tu as déjà et tu peux explorer ce qui te parle. Ton thème natal sert de socle, of course. Tu peux aussi actualiser ta situation : travail, relations, projets… Parce que ta vie bouge, n’est-ce pas.</li>
+<li><strong>La communauté</strong>, avec « Nos partages » et le tchat pour échanger sur tes expériences, tes questions et tes prises de conscience.</li>
+</ul>
+<h2>Et les mails ?</h2>
+<p class="beta-intro">Tu recevras les mails directement dans ta boîte : <strong>ta Révolution Lunaire</strong> pour ton nouveau cycle personnel, <strong>la Nouvelle Lune</strong> et <strong>la Pleine Lune</strong> pour comprendre ce qu’elles viennent mobiliser dans ton thème. Les rendez-vous suivent les cycles, donc le nombre de mails peut varier selon le mois.</p>
+<p class="beta-intro"><strong>J’étudie et rédige moi-même les analyses collectives des lunaisons.</strong> L’application, avec l’aide de l’IA, les croise ensuite avec ton thème natal pour construire ta lecture personnelle. Pour la RL, la lecture est générée à partir de sa carte et de ton thème natal. Ta Révolution Solaire, lorsqu’elle est enregistrée, apporte le fil de l’année.</p>
+<p class="beta-intro">Si tu l’autorises, tes notes des trente derniers jours peuvent nourrir un passage à la fin du mail. Tu peux aussi garder ton journal pour toi : le choix t’appartient, et tu peux le modifier dans ton profil.</p>
+<p class="beta-intro">Tous les mails envoyés restent dans <strong>Mes mails</strong>. Et si quelque chose te parle, un bouton te permet d’aller écrire dans ton journal à partir de cette analyse. Tu retrouves ensuite tes notes reliées au mail.</p>
+</section>
+<section class="free-space beta-section" aria-labelledby="option-revolution-solaire">
+<div><p class="section-kicker">En option</p><h2 id="option-revolution-solaire">Tu veux aussi ta Révolution Solaire ?</h2>
+<p>Tu peux ajouter un rapport de Révolution Solaire à <strong>39 €</strong>. Le pack avec les trois mois d’espace abonné revient alors à <strong>74 € au total</strong> : 35 € pour l’espace + 39 € pour le rapport.</p>
+<p class="beta-intro">Tu choisis ensuite l’année et le lieu du retour solaire, puis tu demandes la génération de ton rapport. Tu le retrouveras dans Mes analyses et dans tes années.</p>
+<p>Cette option est facultative. Si tu as déjà ta RS, tu peux utiliser ton analyse existante dans l’espace.</p>
+</div></section>
+<section class="free-space beta-section" aria-labelledby="retours">
+<div><p class="section-kicker">Pourquoi une bêta ?</p><h2 id="retours">J’ai besoin de tes retours, pour de vrai</h2>
+<p>L’espace est encore en phase de test.</p>
+<p>Certaines choses pourront évoluer, être ajoutées et tu rencontreras peut-être des bugs.</p>
+<p>Le but, c’est de l’utiliser dans ta vraie vie pour voir ce qui fonctionne et ce qui mérite d’être revu.</p>
+<p class="beta-intro">Dis-moi ce qui t’aide, ce que tu ne comprends pas, ce qui manque ou ce qui te saoule.</p>
+<p>Est-ce que tu retrouves facilement tes notes ?<br>Est-ce que les mails te parlent ?<br>Est-ce qu’une rubrique te semble inutile ?</p>
+<p><strong>Sois cash pistache !</strong></p>
+<p>Une rubrique <strong>Ton feedback</strong> est prévue directement dans l’espace.</p>
+<p><strong>Seule moi, Cécile, peux consulter tes retours.</strong> Tu peux aussi répondre à mon mail.</p>
+<p>Utilise l’espace à ton rythme : dis-moi aussi ce que tu n’as pas eu envie d’utiliser, ça m’intéresse. Tout m’intéresse.</p>
+<p>Je veux vraiment que cet espace soit comme ton super pote à la compote.</p>
+</div></section>
+<section class="free-space beta-section" aria-labelledby="comment-participer">
+<div><p class="section-kicker">Comment ça se passe ?</p><h2 id="comment-participer">Tu découvres l’offre, puis tu commences</h2>
+<ol><li><strong>Ton compte.</strong> Tu crées ton compte et ton mot de passe, ou tu te connectes avec l’adresse e-mail à laquelle je t’ai invitée.</li>
+<li><strong>Tes informations.</strong> Tu renseignes ta date, ton heure et ton lieu de naissance, puis la ville de tes cycles.</li>
+<li><strong>Ton choix pour le journal.</strong> Tu indiques si tu autorises son utilisation dans les mails.</li>
+<li><strong>Ton inscription.</strong> Tu choisis les trois mois seuls à 35 €, ou le pack avec une Révolution Solaire à 74 €. Tu règles une seule fois le montant choisi lorsque la souscription est ouverte.</li>
+<li><strong>Ton espace.</strong> Après confirmation du paiement, ton inscription est enregistrée pour les trois mois. Tu retrouves tes prochains rendez-vous dans « Mon abonnement » et les mails déjà envoyés dans « Mes mails ».</li></ol>
+<p class="beta-intro">L’accompagnement commence le <strong>1er décembre 2026</strong> et se termine le <strong>28 février 2027</strong>. À la fin, aucun nouveau prélèvement : ton compte gratuit, ton journal et tes archives restent accessibles.</p>
+<p class="beta-intro">Cette première offre est réservée aux personnes invitées. Les formules proposées ensuite seront présentées sur cette même page, après les retours de la bêta.</p>
+{% if connecte and not invite_beta %}
+<p class="beta-attention">L’adresse de ton compte n’est pas sur la liste des invités. Si tu as répondu au sondage, réponds à mon mail pour me préciser l’adresse à ajouter. Tu pourras ensuite commencer ton inscription.</p>
+<div class="beta-actions"><a class="free-link" href="{{ url_for('espace_personnel.accueil') }}">Revenir à mon espace</a></div>
+{% else %}
+<div class="beta-actions"><a class="free-link" href="{{ url_for('abonnement_client.mon_abonnement') }}">Commencer mon inscription</a></div>
+<p class="plan-note">Utilise l’adresse e-mail de ton invitation. Cliquer sur ce bouton ne déclenche aucun paiement.</p>
+{% endif %}
+{% if not offre.paiement.ouvert %}<p class="plan-note">Le paiement n’est pas encore ouvert. Les personnes invitées peuvent déjà préparer leur compte et leurs informations.</p>{% endif %}
+</div></section>
+</main></div>
+{% endblock %}

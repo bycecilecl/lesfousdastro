@@ -15,6 +15,25 @@
     <p>Pour les lunaisons, ton analyse doit être validée. Le journal est utilisé selon le choix de chaque membre. Une tentative échouée n’est jamais relancée automatiquement.</p>
     <p><a href="{{ url_for('admin_essais_mails.index') }}">Tester un mail sur mon compte →</a> · <a href="{{ url_for('admin_lunaisons.index') }}">Préparer mes analyses de lunaisons →</a></p>
   </section>
+  <section class="essai-carte" id="invitations"><h2>Les adresses invitées à la bêta</h2>
+    <p>Ajoute les adresses qui peuvent souscrire. Cette action n’envoie aucun mail et n’accorde aucun accès payant.</p>
+    <p>Page à partager : <a href="{{ url_for('pages_bp.abonnements') }}">L’offre bêta à 35 € pour trois mois →</a></p>
+    <p>Paiement : <strong>{{ 'ouvert aux adresses invitées' if paiement_ouvert else 'fermé pour le moment' }}.</strong></p>
+    {% if invitations_pretes %}
+    <form method="post" action="{{ url_for('admin_envois_automatiques.invitations') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><input type="hidden" name="action" value="ajouter">
+      <label for="adresses-beta">Adresses e-mail, une par ligne</label><textarea id="adresses-beta" name="adresses" rows="5" maxlength="60000" required></textarea>
+      <button class="essai-bouton" type="submit">Autoriser ces adresses</button>
+    </form>
+    {% for invitation in invitations %}<article class="essai-details"><p>{{ invitation.email }} · {{ 'Autorisée' if invitation.actif else 'Retirée' }}</p>
+      {% if invitation.actif %}<form method="post" action="{{ url_for('admin_envois_automatiques.invitations') }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><input type="hidden" name="action" value="retirer"><input type="hidden" name="email" value="{{ invitation.email }}"><button class="essai-bouton" type="submit">Retirer cette adresse</button></form>{% endif %}
+    </article>{% else %}<p>Aucune adresse dans la liste pour le moment.</p>{% endfor %}
+    {% else %}<p>Le stockage des invitations n’est pas encore prêt.</p>{% endif %}
+  </section>
+  <section class="essai-carte"><h2>Les paiements des abonnements</h2>
+    {% for commande in commandes %}<article class="essai-details"><p>Compte {{ commande.utilisateur_id }} · {{ '%.2f'|format(commande.montant_centimes / 100) }} € · {{ commande.statut }}{% if commande.sandbox %} · essai sans paiement réel{% endif %}</p>{% if commande.erreur %}<p>{{ commande.erreur }}</p>{% endif %}</article>
+    {% else %}<p>Aucun paiement d’abonnement enregistré.</p>{% endfor %}
+  </section>
   {% if not pret %}<p class="essai-message error">Le stockage des envois automatiques n’est pas encore disponible.</p>{% else %}
   <section class="essai-carte"><h2>Les comptes inscrits</h2>
     {% for inscription in inscriptions %}
@@ -23,7 +42,7 @@
       <p>{{ inscription.email_destinataire }} · {{ 'Envois autorisés' if inscription.actif else 'Envois suspendus' }}<br>Calendrier {{ 'préparé' if inscription.date_planification else 'à préparer par le programme' }}.</p>
       {% if inscription.actif %}<form method="post" action="{{ url_for('admin_envois_automatiques.suspendre', utilisateur_id=inscription.utilisateur_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="essai-bouton" type="submit">Suspendre les envois de ce compte</button></form>{% endif %}
     </article>
-    {% else %}<p>Aucun compte inscrit pour le moment. Le raccordement des inscriptions à l’offre bêta reste à terminer ; les essais manuels sont séparés.</p>{% endfor %}
+    {% else %}<p>Aucun compte inscrit pour le moment. La confirmation du paiement inscrit le membre au programme ; les essais manuels restent séparés.</p>{% endfor %}
   </section>
   <section class="essai-carte"><h2>Les envois</h2>
     {% if etats %}<p>{% for etat, nombre in etats.items() %}{{ libelles_etats.get(etat, etat) }} : {{ nombre }}{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}

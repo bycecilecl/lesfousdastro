@@ -563,6 +563,54 @@ class RetourBetaMembre(db.Model):
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False, index=True)
 
 
+class InvitationOffreBeta(db.Model):
+    """Adresse autorisée à souscrire à une offre bêta ; aucun envoi d’invitation."""
+    __tablename__ = "invitations_offre_beta"
+
+    email = Column(String(255), primary_key=True)
+    offre = Column(String(40), primary_key=True)
+    actif = Column(Boolean, nullable=False, default=True)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    date_modification = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
+
+
+class CommandeAbonnementEspace(db.Model):
+    """Paiement unique de la période de lancement ; aucun prélèvement récurrent."""
+    __tablename__ = "commandes_abonnements_espace"
+    __table_args__ = (UniqueConstraint("utilisateur_id", "offre", "sandbox", name="uq_commande_offre_compte_mode"),)
+
+    id = Column(String(36), primary_key=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    offre = Column(String(40), nullable=False)
+    montant_centimes = Column(Integer, nullable=False)
+    devise = Column(String(3), nullable=False, default="EUR")
+    sandbox = Column(Boolean, nullable=False)
+    statut = Column(String(40), nullable=False)
+    fournisseur_commande_id = Column(String(64), unique=True)
+    fournisseur_paiement_id = Column(String(64), unique=True)
+    cgv_version = Column(String(40), nullable=False)
+    cgv_acceptees_le = Column(DateTime(timezone=True), nullable=False)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    date_paiement = Column(DateTime(timezone=True))
+    date_activation = Column(DateTime(timezone=True))
+    erreur = Column(Text)
+
+
+class RevolutionSolairePackBeta(db.Model):
+    """Un rapport RS acquis avec le pack, généré sur demande explicite du membre."""
+    __tablename__ = "revolutions_solaires_pack_beta"
+
+    commande_id = Column(String(36), primary_key=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    statut = Column(String(30), nullable=False, default="a_preparer")
+    preparation_json = Column(Text)
+    identifiant_generation = Column(String(120))
+    analyse_id = Column(Integer)
+    erreur = Column(Text)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    date_generation = Column(DateTime(timezone=True))
+
+
 class InscriptionMailsBeta(db.Model):
     """Adhésion explicite au calendrier bêta, indépendante des anciens brouillons."""
     __tablename__ = "inscriptions_mails_beta"

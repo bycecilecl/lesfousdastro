@@ -60,7 +60,8 @@ def url_suivante_espace(valeur):
 
 
 def connexion():
-    suivant = url_suivante_espace(request.values.get("suivant"))
+    suivant = url_suivante_espace(request.values.get("suivant") or
+        ("/mon-espace/abonnement" if session.get("reprendre_abonnement") else None))
     email, statut = "", 200
     if request.method == "GET" and utilisateur_connecte():
         return redirect(suivant)
@@ -95,10 +96,18 @@ def connexion():
 def _demander_mot_de_passe(*, inscription=False):
     """Seul le POST explicite peut déclencher l'envoi d'un e-mail."""
     lien_test, email, prenom, statut = None, "", "", 200
+    if request.args.get("suivant") == "/mon-espace/abonnement":
+        session["reprendre_abonnement"] = True
     if request.method == "POST":
         verifier_csrf_espace()
         email = normaliser_email(request.form.get("email", ""))
         prenom = request.form.get("prenom", "").strip()[:100]
+        if inscription and request.args.get("suivant") == "/mon-espace/abonnement":
+            from utils.invitations_beta import adresse_invitee_beta
+            if not adresse_invitee_beta(email):
+                flash("Cette offre bêta est réservée aux adresses invitées par Cécile. Utilise l’adresse de ton invitation.", "error")
+                return render_template("espace_personnel/demander_mot_de_passe.html",
+                    inscription=True, lien_test=None, email=email, prenom=prenom), 403
         verifier_public = current_app.config.get("ESPACE_VERIFIER_FORMULAIRE_PUBLIC")
         if verifier_public and not verifier_public():
             flash("La vérification de sécurité a échoué. Réessaie.", "error")
@@ -179,9 +188,11 @@ def _formulaire_definition(jeton, *, ancien_lien=False):
                 flash(str(erreur), "error")
                 statut = 400
             else:
+                reprendre = bool(session.get("reprendre_abonnement"))
                 session.clear()
                 flash("Ton mot de passe est enregistré. Tu peux maintenant te connecter.", "success")
-                return redirect(url_for("espace_personnel.connexion"))
+                return redirect(url_for("espace_personnel.connexion", suivant="/mon-espace/abonnement") if reprendre
+                                else url_for("espace_personnel.connexion"))
     return render_template(
         "espace_personnel/definir_mot_de_passe.html", modification=False,
         minimum=MIN_MOT_DE_PASSE, maximum=MAX_MOT_DE_PASSE, email=utilisateur.email,

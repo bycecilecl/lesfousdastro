@@ -973,6 +973,8 @@ def profil():
                 erreur="Le profil n’a pas pu être enregistré. Réessaie plus tard.",
             ), 503
         flash("Ton profil astral est enregistré.", "success")
+        if request.args.get("parcours") == "abonnement":
+            return redirect(url_for("abonnement_client.mon_abonnement"))
         return redirect(url_for("espace_personnel.profil"))
 
     return render_template(
@@ -1021,6 +1023,8 @@ def modifier_ville_cycles():
         flash("La ville des cycles n’a pas pu être enregistrée.", "error")
     else:
         flash("La ville de tes cycles est enregistrée.", "success")
+    if request.args.get("parcours") == "abonnement":
+        return redirect(url_for("abonnement_client.mon_abonnement"))
     return redirect(url_for("espace_personnel.profil") + "#ville-cycles")
 
 

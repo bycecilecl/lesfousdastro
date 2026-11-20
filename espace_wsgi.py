@@ -8,8 +8,8 @@ try:
     app.register_blueprint(espace_personnel_bp)
     from routes.admin_lunaisons import admin_lunaisons_bp
     app.register_blueprint(admin_lunaisons_bp)
-    from routes.archives_mails import archives_mails_bp
-    app.register_blueprint(archives_mails_bp)
+    from routes.abonnement_client import abonnement_client_bp
+    app.register_blueprint(abonnement_client_bp)
     from routes.communaute import communaute_bp
     app.register_blueprint(communaute_bp)
     from routes.outils_membres import outils_membres_bp

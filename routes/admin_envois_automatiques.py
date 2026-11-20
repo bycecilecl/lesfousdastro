@@ -5,10 +5,12 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from sqlalchemy import func, inspect
 
 from extensions import db
-from models.espace_personnel import InscriptionMailsBeta, MailEvenementAbonne, UtilisateurEspace
+from models.espace_personnel import CommandeAbonnementEspace, InscriptionMailsBeta, InvitationOffreBeta, MailEvenementAbonne, UtilisateurEspace
 from utils.auth_espace import administratrice_connectee, verifier_csrf_espace
 from utils.automatisation_mails_evenements import automatique_actif
 from utils.mails_evenements import DEBUT_BETA, FIN_BETA, NATURES, PARIS, utc
+from utils.invitations_beta import OFFRE_BETA, autoriser_adresses_beta, stockage_invitations_pret
+from utils.souscription_espace import configuration_paiement
 
 
 admin_envois_automatiques_bp = Blueprint("admin_envois_automatiques", __name__, url_prefix="/admin/envois-automatiques")
@@ -57,11 +59,40 @@ def index():
         ids = {i.utilisateur_id for i in inscriptions} | {m.utilisateur_id for m in mails}
         if ids:
             utilisateurs = {u.id: u for u in UtilisateurEspace.query.filter(UtilisateurEspace.id.in_(ids)).all()}
+    invitations_pretes = stockage_invitations_pret()
+    invitations = InvitationOffreBeta.query.filter_by(offre=OFFRE_BETA).order_by(InvitationOffreBeta.email).all() if invitations_pretes else []
+    commandes = CommandeAbonnementEspace.query.order_by(CommandeAbonnementEspace.date_creation.desc()).limit(100).all() if inspect(db.session.get_bind(mapper=CommandeAbonnementEspace)).has_table("commandes_abonnements_espace") else []
     return render_template("admin/envois_automatiques.html", pret=pret,
+        invitations_pretes=invitations_pretes, invitations=invitations, commandes=commandes,
+        paiement_ouvert=configuration_paiement()["ouvert"],
         inscriptions=inscriptions, mails=mails, etats=etats, utilisateurs=utilisateurs,
         autorise=automatique_actif(), debut=DEBUT_BETA.astimezone(PARIS),
         fin=(FIN_BETA - timedelta(days=1)).astimezone(PARIS), maintenant=datetime.now(timezone.utc),
         natures=NATURES, utc=utc, paris=PARIS, libelles_etats=LIBELLES_ETATS)
+
+
+@admin_envois_automatiques_bp.route("/invitations", methods=["POST"])
+def invitations():
+    if not stockage_invitations_pret():
+        abort(503)
+    try:
+        if request.form.get("action") == "retirer":
+            invitation = db.session.get(InvitationOffreBeta, (request.form.get("email", "").strip().lower(), OFFRE_BETA))
+            if invitation is None:
+                abort(404)
+            invitation.actif = False
+            message = "Adresse retirée. Un abonnement déjà payé est conservé."
+        elif request.form.get("action") == "ajouter":
+            total = autoriser_adresses_beta(request.form.get("adresses", ""))
+            message = f"{total} adresse(s) autorisée(s). Aucun compte créé ni message envoyé."
+        else:
+            abort(400)
+        db.session.commit()
+        flash(message, "success")
+    except ValueError as erreur:
+        db.session.rollback()
+        flash(str(erreur), "error")
+    return redirect(url_for("admin_envois_automatiques.index") + "#invitations")
 
 
 @admin_envois_automatiques_bp.route("/comptes/<int:utilisateur_id>/suspendre", methods=["POST"])

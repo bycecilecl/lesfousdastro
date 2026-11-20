@@ -9,6 +9,7 @@
   'espace_personnel.apercu_cycle_lunaire': 'espace_personnel.cycles_lunaires',
   'espace_personnel.fiche_email_cycle': 'espace_personnel.emails_cycle',
   'abonnement_client.lire_mail': 'abonnement_client.mes_mails',
+  'abonnement_client.revolution_solaire_pack': 'abonnement_client.mon_abonnement',
   'communaute.fiche': 'communaute.index',
   'communaute.publier': 'communaute.index',
   'communaute.modifier': 'communaute.index'
@@ -62,6 +63,7 @@
     {% endif %}
     <div class="espace-navigation-group">
       <p class="espace-navigation-label">Mon compte</p>
+      <a class="espace-navigation-link{% if rubrique == 'abonnement_client.mon_abonnement' %} is-current{% endif %}" href="{{ url_for('abonnement_client.mon_abonnement') }}">Mon abonnement</a>
       <a class="espace-navigation-link{% if rubrique == 'espace_personnel.modifier_mot_de_passe' %} is-current{% endif %}" href="{{ url_for('espace_personnel.modifier_mot_de_passe') }}">Mon mot de passe</a>
       <form method="post" action="{{ url_for('espace_personnel.deconnexion') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">

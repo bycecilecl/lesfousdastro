@@ -22,6 +22,6 @@
     <div class="auth-links"><a href="{{ url_for('espace_personnel.mot_de_passe_oublie') }}">Mot de passe oublié ?</a></div>
     <hr class="auth-separator">
     <p class="auth-help">Tu avais déjà un compte avec un lien de connexion ? <a href="{{ url_for('espace_personnel.mot_de_passe_oublie') }}">Définis ton mot de passe</a> avec la même adresse e-mail pour retrouver tes données.</p>
-    <div class="auth-links"><a href="{{ url_for('espace_personnel.inscription') }}">Créer mon compte</a></div>
+    <div class="auth-links"><a href="{{ url_for('espace_personnel.inscription', suivant=suivant) }}">Créer mon compte</a></div>
 {% endblock %}
 {% block auth_scripts %}{% if auth_turnstile_actif %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}{% endblock %}

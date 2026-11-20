@@ -146,6 +146,10 @@ def before_request_handler():
     # → WooCommerce, Gift API, etc.
     if path.startswith("/api/"):
         return None
+
+    # Notification signée par PayPal, vérifiée par la route ; aucun accès membre.
+    if path == "/mon-espace/abonnement/paypal/webhook" and request.method == "POST":
+        return None
     
     # → fichiers statiques, favicon, robots, sitemap
     if path.startswith("/static/") or path in ("/favicon.ico", "/robots.txt", "/sitemap.xml"):

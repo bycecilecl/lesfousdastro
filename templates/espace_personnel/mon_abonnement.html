@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Mon abonnement | Les Fous d’Astro{% endblock %}
+{% block extra_css %}
+body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Segoe UI',sans-serif}.installation{max-width:950px;margin:36px auto 60px;padding:0 20px;color:#263d47}.installation header{color:white;margin-bottom:24px}.installation h1{font-size:2.4rem;margin:12px 0}.installation h2{color:#1f628e;margin-bottom:12px}.installation p{line-height:1.7;margin:10px 0}.installation section{background:#fffdf8;border-radius:22px;padding:28px;margin:20px 0}.installation .etapes{padding-left:24px}.installation li{padding:15px 0;border-bottom:1px solid #dce8e6;line-height:1.7}.installation a{color:#1f628e;font-weight:700}.installation .bouton{display:inline-block;background:#1f628e;color:white;border:0;border-radius:30px;padding:12px 20px;text-decoration:none;font:inherit;cursor:pointer}.installation .valide{color:#177262;font-weight:700}.installation .message{padding:15px;border-radius:12px;background:#e5f5ee}.installation .error{background:#fff0ee;color:#8c3434}.installation fieldset{border:0;margin:16px 0;display:grid;gap:12px}.installation label{line-height:1.6}.installation input{margin-right:8px}.installation .prix{font-size:2rem;font-weight:800;color:#1f628e}.installation small{display:block;line-height:1.6;color:#586f77}.installation #paypal-boutons{max-width:400px;margin-top:20px}
+{% endblock %}
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main class="installation">
+<header><p>MON ESPACE ASTRAL</p><h1>Mon abonnement</h1><p>Ton profil, tes choix et tes rendez-vous : tout est ici.</p></header>
+{% with messages=get_flashed_messages(with_categories=true) %}{% for categorie,message in messages %}<p class="message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
+{% if commande and commande.statut == 'active' %}<section><h2>Ton inscription est confirmée</h2><p>Ton paiement unique de {{ choix_commande.prix }} € est enregistré{% if commande.sandbox %} <strong>en mode d’essai, sans paiement réel</strong>{% endif %}. Ton accompagnement couvre le <strong>1er décembre 2026 au 28 février 2027</strong>.</p><p>Aucun renouvellement automatique. Tu gardes ensuite ton espace gratuit et tes archives.</p><a class="bouton" href="{{ url_for('espace_personnel.accueil') }}">Entrer dans mon espace</a></section>
+{% elif inscription and inscription.actif %}<section><h2>Ton inscription est enregistrée</h2><p>Cécile a activé ton inscription pour cette période. Aucun nouveau paiement n’est nécessaire depuis cette page.</p></section>{% endif %}
+{% if rs_pack and commande and commande.statut == 'active' %}<section><h2>Ma Révolution Solaire incluse</h2>
+{% if rs_pack.statut == 'terminee' %}<p>Ton rapport est prêt et conservé dans Mes analyses.</p><a class="bouton" href="{{ url_for('espace_personnel.lire_analyse', analyse_id=rs_pack.analyse_id) }}">Lire ma Révolution Solaire</a>
+{% else %}<p>Ton pack comprend un rapport de Révolution Solaire. Choisis l’année et le lieu du retour solaire ; la génération démarre lorsque tu la demandes.</p><a class="bouton" href="{{ url_for('abonnement_client.revolution_solaire_pack') }}">{{ 'Préparer ma Révolution Solaire' if rs_pack.statut == 'a_preparer' else 'Voir où en est mon rapport' }}</a>{% endif %}</section>{% endif %}
+<section><h2>Préparer mes mails</h2>
+<ol class="etapes">
+<li><strong>Mon compte</strong> <span class="valide">✓ Créé</span><p>{{ utilisateur_espace.email }}</p></li>
+<li><strong>Mon thème natal</strong> {% if natal %}<span class="valide">✓ Enregistré</span><p>{{ profil.ville_naissance }} · <a href="{{ url_for('espace_personnel.profil', parcours='abonnement') }}">Revoir mes informations</a></p>{% else %}<p>Ta date, ton heure et ton lieu de naissance servent de base aux mails personnalisés.</p><a class="bouton" href="{{ url_for('espace_personnel.profil', parcours='abonnement') }}">Renseigner ma naissance</a>{% endif %}</li>
+<li><strong>Le lieu de mes cycles</strong> {% if ville %}<span class="valide">✓ Enregistré</span><p>{{ profil.ville_cycles }} · {{ profil.fuseau_cycles }} · <a href="{{ url_for('espace_personnel.profil', parcours='abonnement') }}#ville-cycles">Modifier</a></p>{% elif natal %}<p>Indique la ville où tu vis pour calculer tes cycles et les horaires de tes mails.</p><a class="bouton" href="{{ url_for('espace_personnel.profil', parcours='abonnement') }}#ville-cycles">Choisir ma ville</a>{% else %}<p>À compléter après tes données de naissance.</p>{% endif %}</li>
+<li><strong>Mon journal dans les mails</strong> {% if choix_journal %}<span class="valide">✓ Choix enregistré</span>{% endif %}
+<p>Tu peux écrire dans ton journal et choisir librement si tes notes nourrissent le rapprochement en fin de mail.</p>
+<form method="post" action="{{ url_for('abonnement_client.choix_journal') }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+<fieldset><legend>Autoriser l’utilisation de mes notes pour les mails personnalisés ?</legend>
+<label><input type="radio" name="autoriser_journal_mails" value="oui" required {% if choix_journal and utilisateur_espace.autoriser_journal_mails %}checked{% endif %}>Oui, j’autorise la transmission des extraits utiles à l’IA qui rédige mes mails.</label>
+<label><input type="radio" name="autoriser_journal_mails" value="non" required {% if choix_journal and not utilisateur_espace.autoriser_journal_mails %}checked{% endif %}>Non, je garde mes notes en dehors des mails.</label></fieldset>
+<button class="bouton" type="submit">Enregistrer mon choix</button></form><small>Les informations de « Ma situation actuelle » restent utilisées séparément. Tu peux changer ce choix à tout moment.</small></li>
+</ol></section>
+{% if commande and not (inscription and inscription.actif) %}<section><h2>Mon paiement</h2>
+<p>{{ commande.erreur or 'Une commande est enregistrée pour ton compte.' }}</p>
+<form method="post" action="{{ url_for('abonnement_client.verifier_paiement') }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="bouton" type="submit">Vérifier mon paiement · sans nouveau débit</button></form></section>{% endif %}
+{% if not invite_beta and not (inscription and inscription.actif) %}<section><h2>Offre bêta sur invitation</h2><p>Cette offre est réservée aux adresses invitées par Cécile. Si tu as répondu au sondage, demande-lui d’ajouter l’adresse de ton compte à la liste.</p><p>Tu peux continuer à utiliser ton espace gratuit.</p></section>{% endif %}
+{% if invite_beta and not (inscription and inscription.actif) %}<section id="souscription"><h2>Accompagnement astral · offre bêta sur invitation</h2>
+<p class="prix">35 € au total pour les trois mois</p>
+<p><strong>Du 1er décembre 2026 au 28 février 2027.</strong> Un seul paiement. Aucun renouvellement automatique.</p>
+<p>Ton calendrier personnel, ton journal, tes mécanismes, tes analyses et des rendez-vous par mail : une Révolution Lunaire, une Nouvelle Lune et une Pleine Lune. Les dates suivent les cycles ; leur nombre peut varier selon le mois.</p>
+<p>Cécile rédige les analyses collectives des lunaisons. L’application, avec l’aide de l’IA, les personnalise avec ton natal, la RL active et les enjeux utiles de ta RS lorsqu’elle est enregistrée. Le journal intervient à la fin, si tu l’autorises.</p>
+<fieldset><legend>En option · ajouter un rapport de Révolution Solaire</legend>
+<label><input id="option-rs" type="checkbox" {% if choix_commande and choix_commande.avec_rs %}checked{% endif %} {% if commande %}disabled{% endif %}>Je souhaite ajouter ma Révolution Solaire pour <strong>39 € supplémentaires</strong>.</label>
+<p>Avec cette option, le pack revient à <strong>74 € au total</strong> pour les trois mois et le rapport. Tu choisiras ensuite l’année et le lieu du retour solaire. Si tu possèdes déjà ta RS, tu peux utiliser ton analyse existante.</p></fieldset>
+
+{% if termine %}<p>Cette période d’accompagnement est terminée.</p>
+{% elif not (natal and ville and choix_journal) %}<p><strong>Complète les étapes ci-dessus pour passer à la souscription.</strong></p>
+{% elif not stockage_pret or not offre.paiement.ouvert %}<p>La souscription n’est pas encore ouverte. Tes informations sont enregistrées pour la suite.</p>
+{% elif not commande or commande.statut == 'prete' %}
+{% if offre.paiement.sandbox %}<p class="message"><strong>Essai local du parcours : paiement fictif PayPal Sandbox.</strong></p>{% endif %}
+<label><input id="conditions" type="checkbox">J’accepte les <a href="{{ url_for('legal_bp.conditions_utilisation') }}" target="_blank" rel="noopener">conditions d’utilisation</a> et le paiement unique de <span id="prix-paiement">{{ choix_commande.prix if choix_commande else '35' }}</span> € pour l’offre choisie.</label>
+<div id="paypal-boutons"></div><p id="paiement-message" role="status" aria-live="polite"></p>
+{% endif %}</section>{% endif %}
+<section><h2>Mes prochains rendez-vous</h2>
+{% if prochains %}<ul>{% for mail in prochains %}<li><strong>{{ natures[mail.nature] }}</strong> · mail prévu le {{ utc(mail.date_prevue).astimezone(fuseau).strftime('%d.%m.%Y à %H:%M') }}</li>{% endfor %}</ul><small>Heures de {{ profil.ville_cycles }}. Le mail arrive après sa préparation.</small>
+{% elif inscription and inscription.actif %}<p>Tes dates apparaîtront ici une fois le calendrier préparé. Les premiers envois commenceront à l’ouverture de l’accompagnement.</p>{% else %}<p>Après confirmation de ton inscription, retrouve ici les dates de tes mails.</p>{% endif %}
+<p>RL : premier 9 h après le retour lunaire. Nouvelle/Pleine Lune : veille à 9 h, selon le fuseau du lieu de tes cycles.</p>
+<a href="{{ url_for('abonnement_client.mes_mails') }}">Retrouver mes mails reçus →</a></section>
+</main>{% endblock %}
+{% block scripts %}
+{% if invite_beta and stockage_pret and offre.paiement.ouvert and natal and ville and choix_journal and not termine and not (inscription and inscription.actif) and (not commande or commande.statut == 'prete') %}
+<script src="https://www.paypal.com/sdk/js?client-id={{ offre.paiement.client_id|urlencode }}&amp;currency=EUR&amp;intent=capture&amp;components=buttons"></script>
+<script>
+(() => {
+const message=document.getElementById('paiement-message'), conditions=document.getElementById('conditions');
+const formules={{ offre.formules|tojson }}, optionRs=document.getElementById('option-rs'), selection=()=>optionRs.checked?'espace_et_rs':'espace_seul';
+optionRs.addEventListener('change',()=>{document.getElementById('prix-paiement').textContent=formules[selection()].prix;conditions.checked=false;conditions.dispatchEvent(new Event('change'));});
+const appeler=async (url, valeurs={})=>{const corps=new URLSearchParams({...valeurs,csrf_token:{{ csrf_espace()|tojson }}});const reponse=await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:corps});let donnees;try{donnees=await reponse.json();}catch{throw new Error('La confirmation est indisponible. Vérifie ton abonnement avant de recommencer.');}if(!reponse.ok)throw new Error(donnees.error||'Le paiement n’a pas abouti.');return donnees;};
+if(!window.paypal){message.textContent='Le bouton de paiement n’a pas pu être chargé. Recharge la page.';return;}
+paypal.Buttons({onInit(data,actions){actions.disable();conditions.addEventListener('change',()=>conditions.checked?actions.enable():actions.disable());},
+createOrder:async()=>{message.textContent='Préparation du paiement…';const r=await appeler({{ url_for('abonnement_client.creer')|tojson }},{conditions:conditions.checked?'oui':'non',formule:selection()});return r.id;},
+onApprove:async data=>{message.textContent='Confirmation de ton paiement…';const r=await appeler({{ url_for('abonnement_client.capturer')|tojson }},{orderID:data.orderID});window.location.assign(r.redirect);},
+onCancel(){message.textContent='Paiement interrompu. Ton compte et tes informations sont conservés.';},
+onError(erreur){message.textContent=erreur.message||'Vérifie ton paiement depuis Mon abonnement avant de recommencer.';}
+}).render('#paypal-boutons');
+})();
+</script>{% endif %}{% endblock %}

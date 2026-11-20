@@ -27,7 +27,11 @@ def email_invite(email):
         "ESPACE_INVITE_EMAILS", "cecilecl@gmail.com,cecilecl.cyp@gmail.com"
     )
     invites = {normaliser_email(adresse) for adresse in adresses.split(",")}
-    return normaliser_email(email) in invites
+    if normaliser_email(email) in invites:
+        return True
+    # Autorise seulement la création du compte : aucun abonnement offert.
+    from utils.invitations_beta import adresse_invitee_beta
+    return adresse_invitee_beta(email)
 
 
 def activer_accompagnement_beta(utilisateur):
