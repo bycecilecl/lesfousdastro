@@ -187,9 +187,14 @@ def source_editoriale(mail):
         return None
     if abs((utc(ligne.instant_utc) - utc(mail.instant_evenement)).total_seconds()) > 120:
         raise ValueError("L’analyse validée ne correspond pas à l’instant de cette lunaison.")
-    return {"id": ligne.id, "revision": ligne.revision_validee,
+    source = {"id": ligne.id, "revision": ligne.revision_validee,
             "validee_le": utc(ligne.validee_le).isoformat(), "titre": ligne.titre_valide,
             "texte": ligne.texte_valide}
+    from utils.cartes_lunaisons import reference_carte
+    carte = reference_carte(mail.nature, utc(mail.instant_evenement).date().isoformat())
+    if carte:
+        source["carte"] = carte
+    return source
 
 
 def preparer_dossier_evenement(mail, profil, maintenant):

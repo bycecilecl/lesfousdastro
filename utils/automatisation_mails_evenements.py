@@ -77,7 +77,7 @@ def _controler(texte, nature):
     return objet
 
 
-def _html(texte, nature):
+def _html(texte, nature, *, mail=None):
     titres = TITRES_RL if nature == "rl" else TITRES_LUNAISON
     normalises = {t.replace("’", "'").casefold() for t in titres}
     blocs = []
@@ -92,8 +92,12 @@ def _html(texte, nature):
         contenu = re.sub(r"(?<![\w_])_([^_\n]+)_(?![\w_])", r"<em>\1</em>", contenu)
         balise = "h2" if titre.replace("’", "'").casefold() in normalises else "p"
         blocs.append(f"<{balise}>{contenu}</{balise}>")
-    return ('<!doctype html><html lang="fr"><meta charset="utf-8"><body style="max-width:680px;margin:24px auto;padding:20px;color:#33434c;font:17px/1.75 Georgia,serif">'
+    html = ('<!doctype html><html lang="fr"><meta charset="utf-8"><body style="max-width:680px;margin:24px auto;padding:20px;color:#33434c;font:17px/1.75 Georgia,serif">'
             + "\n".join(blocs) + '</body></html>')
+    if mail is not None:
+        from utils.cartes_lunaisons import ajouter_carte_au_mail
+        html, _ = ajouter_carte_au_mail(mail, html, texte, pour_envoi=False)
+    return html
 
 
 def presentation_pour_envoi(mail):
@@ -103,7 +107,9 @@ def presentation_pour_envoi(mail):
     from utils.journal_mails import ajouter_lien_journal
     texte = normaliser_presentation_mail(mail.contenu_texte, mail)
     objet = _controler(texte, mail.nature)
-    copie = SimpleNamespace(id=mail.id, contenu_texte=texte, contenu_html=_html(texte, mail.nature))
+    from utils.cartes_lunaisons import ajouter_carte_au_mail
+    html, texte = ajouter_carte_au_mail(mail, _html(texte, mail.nature), texte)
+    copie = SimpleNamespace(id=mail.id, contenu_texte=texte, contenu_html=html)
     html, texte = ajouter_lien_journal(copie)
     return objet, html, texte
 
@@ -201,7 +207,7 @@ def traiter_evenement(mail_id):
             from utils.mails_evenements import normaliser_presentation_mail
             texte = normaliser_presentation_mail(texte, mail)
             objet = _controler(texte, mail.nature)
-            contenu_html = _html(texte, mail.nature)
+            contenu_html = _html(texte, mail.nature, mail=mail)
             try:
                 _tracer(mail, "controles.json", {"structure": "conforme", "liens": "conformes",
                     "reponse_complete": True, "controle_du_fond": "consigne_dans_le_meme_appel_pas_de_second_appel"})

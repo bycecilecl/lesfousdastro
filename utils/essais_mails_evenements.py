@@ -159,7 +159,7 @@ def generer(mail, utilisateur):
         from utils.mails_evenements import normaliser_presentation_mail
         texte = normaliser_presentation_mail(texte, mail)
         objet = _controler(texte, mail.nature)
-        html = _html(texte, mail.nature)
+        html = _html(texte, mail.nature, mail=mail)
         _transition(mail, ("essai_generation_en_cours",), "essai_brouillon", objet=objet, contenu_texte=texte, contenu_html=html)
         for nom, valeur in (("brouillon.txt", texte), ("brouillon.html", html),
                            ("controles.json", {"structure": "conforme", "liens": "conformes", "fond": "à relire par Cécile"})):

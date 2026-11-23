@@ -122,5 +122,5 @@ def envoyer(id):
 def lecture(id):
     mail = _essai(id)
     reponse = Response(mail.contenu_html or "", mimetype="text/html")
-    reponse.headers["Content-Security-Policy"] = "sandbox; default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'self'"
+    reponse.headers["Content-Security-Policy"] = "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src 'self' https://lesfousdastro.fr; frame-ancestors 'self'"
     return reponse

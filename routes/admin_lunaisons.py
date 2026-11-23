@@ -13,6 +13,7 @@ from utils.analyses_lunaisons import (
     FUSEAU_EDITION, lunaisons_a_preparer, retrouver_lunaison, verifier_table_analyses,
 )
 from utils.auth_espace import jeton_csrf_espace, verifier_csrf_espace
+from utils.cartes_lunaisons import cartes_de_la_fiche, enregistrer_carte, preparer_import, stockage_pret
 
 
 admin_lunaisons_bp = Blueprint("admin_lunaisons", __name__, url_prefix="/admin/lunaisons")
@@ -107,6 +108,10 @@ def editer(nature, date_utc):
                 raise ValueError("Le titre doit tenir en 200 caractères.")
             if action == "valider" and not formulaire["texte"]:
                 raise ValueError("Ajoute ton analyse avant de la valider pour les mails.")
+            nouvel_import = preparer_import(request.files.get("carte_lunaison"))
+            retirer_carte = request.form.get("retirer_carte") == "oui"
+            if nouvel_import and retirer_carte:
+                raise ValueError("Choisis une nouvelle carte ou le retrait de la carte actuelle, pas les deux.")
             maintenant = utcnow()
             valeurs = {**formulaire, "revision": revision + 1, "date_modification": maintenant}
             if action == "valider":
@@ -121,6 +126,8 @@ def editer(nature, date_utc):
                 nombre = AnalyseLunaison.query.filter_by(id=analyse.id, revision=revision).update(valeurs, synchronize_session=False)
                 if nombre != 1:
                     raise RuntimeError("La fiche a changé pendant l'enregistrement. Ton texte est conservé ci-dessous : copie-le avant de recharger.")
+            db.session.flush()
+            enregistrer_carte(nature, date_utc, action, nouvel_import=nouvel_import, retirer=retirer_carte)
             db.session.commit()
         except (ValueError, RuntimeError, IntegrityError) as exc:
             db.session.rollback()
@@ -128,12 +135,14 @@ def editer(nature, date_utc):
             code = 409 if isinstance(exc, (RuntimeError, IntegrityError)) else 400
         else:
             messages = {
-                "enregistrer": "Brouillon enregistré. La version validée reste celle utilisée dans les mails, s'il y en a une.",
-                "valider": "Analyse validée pour les prochains mails concernés. Aucun mail généré ou envoyé.",
-                "retirer": "Validation retirée. Ton texte reste enregistré en brouillon. Aucun mail existant modifié.",
+                "enregistrer": "Brouillon et éventuelle carte enregistrés. La version validée reste celle des mails et de l’espace.",
+                "valider": "Analyse et éventuelle carte validées pour les prochains mails et l’espace. Aucun mail généré ou envoyé.",
+                "retirer": "Validation retirée. Ton texte et ta carte restent en brouillon. Les mails déjà envoyés sont conservés.",
             }
             flash(messages[action], "success")
             return redirect(url_for("admin_lunaisons.editer", nature=nature, date_utc=date_utc))
+    carte_brouillon, carte_validee = cartes_de_la_fiche(nature, date_utc)
     return render_template("admin/analyse_lunaison.html", fiche=fiche, analyse=analyse,
+                           cartes_pretes=stockage_pret(), carte_brouillon=carte_brouillon, carte_validee=carte_validee,
                            formulaire=formulaire, erreur=erreur, conflit=(code == 409),
                            csrf_lunaisons=jeton_csrf_espace()), code

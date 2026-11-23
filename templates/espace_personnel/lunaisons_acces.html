@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Les lunaisons de ton espace abonné | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static',filename='lunaisons-espace.css',v='20261123-cartes-centrees') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="lunaisons-shell"><section class="lunaison-lecture">
+  <h1>Les lunaisons de ton espace abonné</h1>
+  <p>Les cartes et les lectures collectives des Nouvelles et Pleines Lunes sont accessibles avec un abonnement actif.</p>
+  <a class="lunaison-bouton" href="{{ url_for('abonnement_client.mon_abonnement') }}">Retrouver mon abonnement</a>
+</section></main>
+{% endblock %}

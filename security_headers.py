@@ -39,7 +39,7 @@ def add_security_headers(app):
             )
 
         # Documents privés : conserver leur politique de contenu inactif.
-        if request.endpoint in {"outils_membres.fichier_carte", "outils_membres.fichier_carte_admin", "abonnement_client.contenu_mail"} and resp.headers.get("Content-Security-Policy"):
+        if request.endpoint in {"outils_membres.fichier_carte", "outils_membres.fichier_carte_admin", "abonnement_client.contenu_mail", "admin_essais_mails.lecture", "lunaisons.fichier"} and resp.headers.get("Content-Security-Policy"):
             return resp
 
         # Content-Security-Policy (CSP)
