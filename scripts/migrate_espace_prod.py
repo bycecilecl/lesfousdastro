@@ -38,6 +38,7 @@ COLONNES = {
 NOUVELLES_TABLES = (
     "liens_mot_de_passe_espace", "limites_acces_espace",
     "analyses_lunaisons", "enjeux_annuels", "decodages_observations_mecanisme",
+    "cartes_lunaisons",
     'cartes_natales_membres',
     'retours_beta_membres',
     'inscriptions_mails_beta',
@@ -122,6 +123,7 @@ def main():
             # Imports de modèles seuls : aucun import de main, de routes ou d'IA.
             from models.espace_personnel import (
                 AnalyseLunaison, DecodageObservationMecanisme, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
+                CarteLunaison,
                 CarteNataleMembre,
                 RetourBetaMembre,
                 InscriptionMailsBeta,
@@ -137,6 +139,7 @@ def main():
             )
             modeles = {m.__tablename__: m.__table__ for m in (
                 AnalyseLunaison, DecodageObservationMecanisme, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
+                CarteLunaison,
                 CarteNataleMembre,
                 RetourBetaMembre,
                 InscriptionMailsBeta,

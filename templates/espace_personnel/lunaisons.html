@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Les lunaisons | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static',filename='lunaisons-espace.css',v='20261123-cartes-centrees') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="lunaisons-shell">
+  <header class="lunaisons-entete"><h1>Les lunaisons</h1><p>Les cartes et les lectures collectives de Cécile pour les Nouvelles et Pleines Lunes. Dans tes mails, tu retrouves aussi leur lecture personnalisée avec ton thème.</p></header>
+  <div class="lunaisons-grille">
+    {% for lunaison in lunaisons %}
+    <article class="lunaison-carte">
+      <p class="lunaison-date">{{ lunaison.libelle }} · {{ lunaison.date_locale.strftime('%d.%m.%Y') }}</p>
+      <h2>{{ lunaison.analyse.titre_valide or lunaison.libelle }}</h2>
+      {% if lunaison.carte %}<a class="lunaison-carte-illustration" href="{{ url_for('lunaisons.fiche',nature=lunaison.analyse.type_lunaison,date_utc=lunaison.analyse.date_utc) }}"><img src="{{ url_for('lunaisons.fichier',identifiant=lunaison.carte.id) }}" width="{{ lunaison.carte.largeur }}" height="{{ lunaison.carte.hauteur }}" alt="Carte de la {{ lunaison.libelle }} du {{ lunaison.date_locale.strftime('%d.%m.%Y') }}" loading="lazy"></a>{% endif %}
+      <p>{{ lunaison.analyse.texte_valide|truncate(230) }}</p>
+      <a class="lunaison-bouton" href="{{ url_for('lunaisons.fiche',nature=lunaison.analyse.type_lunaison,date_utc=lunaison.analyse.date_utc) }}">Découvrir cette lunaison</a>
+    </article>
+    {% else %}
+    <section class="lunaison-carte"><h2>{{ 'Les prochaines lectures arrivent' if stockage else 'Les lunaisons se préparent' }}</h2><p>Tu retrouveras ici les cartes et les lectures publiées par Cécile.</p></section>
+    {% endfor %}
+  </div>
+  {% if stockage and (page > 1 or suite) %}<nav class="lunaisons-pagination" aria-label="Autres lunaisons">
+    {% if page > 1 %}<a href="{{ url_for('lunaisons.index',page=page-1) }}">Lunaisons plus récentes</a>{% endif %}
+    {% if suite %}<a href="{{ url_for('lunaisons.index',page=page+1) }}">Lunaisons plus anciennes</a>{% endif %}
+  </nav>{% endif %}
+</main>
+{% endblock %}

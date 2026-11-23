@@ -13,7 +13,7 @@
     <p><span class="status pending">Aucune version validée pour les mails</span></p>
 {% endif %}
 {% if erreur %}<div class="notice error" role="alert">{{ erreur }}</div>{% endif %}
-<form method="post" class="panel">
+<form method="post" class="panel" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{{ csrf_lunaisons }}">
     <input type="hidden" name="revision" value="{{ analyse.revision if analyse else 0 }}">
     <label for="titre">Ton titre <span class="muted">(facultatif)</span></label>
@@ -21,19 +21,35 @@
     <label for="texte">Ton analyse</label>
     <p class="muted" id="aide-analyse">Écris ou colle ta lecture : les enjeux collectifs, les tensions, les ressources et les nuances que tu veux transmettre. Les maisons et contacts propres à chaque client serviront ensuite à la personnaliser.</p>
     <textarea id="texte" name="texte" rows="24" aria-describedby="aide-analyse">{{ formulaire.texte }}</textarea>
+    <section class="carte-lunaison-edition" aria-labelledby="titre-carte-lunaison">
+        <h2 id="titre-carte-lunaison">La carte de cette lunaison</h2>
+        {% if cartes_pretes %}
+        <p class="muted" id="aide-carte-lunaison">Ajoute ta carte en PNG, JPG, WebP ou PDF (première page), 15 Mo maximum. Après validation, elle sera visible dans les mails et dans « Les lunaisons » de l’espace astral.</p>
+        <label for="carte-lunaison">{{ 'Remplacer la carte du brouillon' if carte_brouillon else 'Ajouter une carte' }}</label>
+        <input type="file" id="carte-lunaison" name="carte_lunaison" accept="image/png,image/jpeg,image/webp,application/pdf" aria-describedby="aide-carte-lunaison">
+        {% if carte_brouillon %}
+        <figure class="carte-lunaison-apercu"><a href="{{ url_for('lunaisons.fichier',identifiant=carte_brouillon.id) }}" target="_blank" rel="noopener"><img src="{{ url_for('lunaisons.fichier',identifiant=carte_brouillon.id) }}" alt="Carte du brouillon de cette lunaison"></a><figcaption>Carte du brouillon · clique pour l’ouvrir en grand.</figcaption></figure>
+        <label class="choix-carte"><input type="checkbox" name="retirer_carte" value="oui"> Retirer la carte du brouillon</label>
+        {% endif %}
+        {% if (carte_brouillon.id if carte_brouillon else none) != (carte_validee.id if carte_validee else none) %}
+        <p class="notice">Le brouillon et la version validée n’ont pas la même carte. Clique sur « Valider » pour publier ce changement.</p>
+        {% endif %}
+        {% else %}<p class="notice">Le stockage des cartes doit être préparé avant le premier ajout. Ton texte et sa validation restent disponibles.</p>{% endif %}
+    </section>
     <div class="actions">
         <button type="submit" name="action" value="enregistrer" class="secondary" {% if conflit %}disabled{% endif %}>Enregistrer le brouillon</button>
-        <button type="submit" name="action" value="valider" {% if conflit %}disabled{% endif %}>Valider pour les mails</button>
+        <button type="submit" name="action" value="valider" {% if conflit %}disabled{% endif %}>Valider pour les mails et l’espace</button>
         {% if analyse and analyse.validee_le %}
             <button type="submit" name="action" value="retirer" class="withdraw" {% if conflit %}disabled{% endif %}>Retirer la validation</button>
         {% endif %}
     </div>
-    <p class="muted">« Valider » enregistre ton texte et le rend disponible pour les futurs mails concernés. Les mails déjà générés restent inchangés. Aucun appel IA ni envoi depuis cette page.</p>
+    <p class="muted">« Valider » publie ton texte et ta carte dans l’espace et pour les prochains mails concernés. Les mails déjà envoyés conservent leur carte. Aucun appel IA ni envoi depuis cette page. En cas d’erreur, sélectionne à nouveau le fichier avant d’enregistrer.</p>
 </form>
 {% if analyse and analyse.validee_le %}
 <details class="panel">
     <summary>Lire la version actuellement reprise dans les mails</summary>
     {% if analyse.titre_valide %}<h2>{{ analyse.titre_valide }}</h2>{% endif %}
+    {% if carte_validee %}<figure class="carte-lunaison-apercu"><a href="{{ url_for('lunaisons.fichier',identifiant=carte_validee.id) }}" target="_blank" rel="noopener"><img src="{{ url_for('lunaisons.fichier',identifiant=carte_validee.id) }}" alt="Carte validée de cette lunaison"></a><figcaption>Carte actuellement publiée.</figcaption></figure>{% endif %}
     <div class="reading">{{ analyse.texte_valide }}</div>
 </details>
 {% endif %}

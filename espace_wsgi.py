@@ -8,6 +8,8 @@ try:
     app.register_blueprint(espace_personnel_bp)
     from routes.admin_lunaisons import admin_lunaisons_bp
     app.register_blueprint(admin_lunaisons_bp)
+    from routes.lunaisons import lunaisons_bp
+    app.register_blueprint(lunaisons_bp)
     from routes.abonnement_client import abonnement_client_bp
     app.register_blueprint(abonnement_client_bp)
     from routes.communaute import communaute_bp

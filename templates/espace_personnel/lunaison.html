@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}{{ libelle }} du {{ date_locale.strftime('%d.%m.%Y') }} | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static',filename='lunaisons-espace.css',v='20261123-cartes-centrees') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="lunaisons-shell"><article class="lunaison-lecture">
+  <a class="lunaison-retour" href="{{ url_for('lunaisons.index') }}">Revenir aux lunaisons</a>
+  <p class="lunaison-date">{{ libelle }} · {{ date_locale.strftime('%d.%m.%Y à %H h %M') }} (Paris)</p>
+  <h1>{{ analyse.titre_valide or libelle }}</h1>
+  {% if carte %}<figure class="lunaison-figure">
+    <a href="{{ url_for('lunaisons.fichier',identifiant=carte.id) }}" target="_blank" rel="noopener"><img src="{{ url_for('lunaisons.fichier',identifiant=carte.id) }}" width="{{ carte.largeur }}" height="{{ carte.hauteur }}" alt="Carte de la {{ libelle }} du {{ date_locale.strftime('%d.%m.%Y') }}"></a>
+    <figcaption>La carte collective de cette lunaison · <a href="{{ url_for('lunaisons.fichier',identifiant=carte.id) }}" target="_blank" rel="noopener">Ouvrir en grand</a></figcaption>
+  </figure>{% endif %}
+  <div class="lunaison-texte">{{ analyse.texte_valide }}</div>
+  <p class="lunaison-repere">Cette lecture collective décrit le ciel de la lunaison. Tes mails personnalisés la rapprochent de ton thème natal et de tes cycles.</p>
+  <a class="lunaison-bouton" href="{{ url_for('abonnement_client.mes_mails') }}">Retrouver mes mails</a>
+</article></main>
+{% endblock %}

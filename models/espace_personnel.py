@@ -728,3 +728,30 @@ class SignalementCommunaute(db.Model):
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False, index=True)
     traite_le = Column(DateTime(timezone=True), nullable=True)
     traite_par = Column(Integer, nullable=True)
+
+
+class CarteLunaison(db.Model):
+    """Image collective immuable ; les anciennes publications restent lisibles."""
+
+    __tablename__ = "cartes_lunaisons"
+    __table_args__ = (
+        CheckConstraint("type_lunaison IN ('nouvelle_lune', 'pleine_lune')",
+                        name="ck_carte_lunaison_type"),
+        Index("uq_carte_lunaison_brouillon", "type_lunaison", "date_utc", unique=True,
+              sqlite_where=text("brouillon_actif = TRUE"),
+              postgresql_where=text("brouillon_actif = TRUE")),
+        Index("uq_carte_lunaison_validee", "type_lunaison", "date_utc", unique=True,
+              sqlite_where=text("version_validee = TRUE"),
+              postgresql_where=text("version_validee = TRUE")),
+    )
+
+    id = Column(String(64), primary_key=True)
+    type_lunaison = Column(String(20), nullable=False)
+    date_utc = Column(String(10), nullable=False)
+    contenu = deferred(Column(LargeBinary, nullable=False))
+    largeur = Column(Integer, nullable=False)
+    hauteur = Column(Integer, nullable=False)
+    brouillon_actif = Column(Boolean, nullable=False, default=True)
+    version_validee = Column(Boolean, nullable=False, default=False)
+    publiee_le = Column(DateTime(timezone=True), nullable=True)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)

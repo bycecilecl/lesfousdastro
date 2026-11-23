@@ -150,6 +150,9 @@ def before_request_handler():
     # Notification signée par PayPal, vérifiée par la route ; aucun accès membre.
     if path == "/mon-espace/abonnement/paypal/webhook" and request.method == "POST":
         return None
+    # La route sert uniquement les cartes collectives publiées, par URL opaque.
+    if request.endpoint == "lunaisons.fichier" and request.method in {"GET", "HEAD"}:
+        return None
     
     # → fichiers statiques, favicon, robots, sitemap
     if path.startswith("/static/") or path in ("/favicon.ico", "/robots.txt", "/sitemap.xml"):
