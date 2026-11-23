@@ -198,7 +198,11 @@
     <footer style="padding:28px 20px; text-align:center; background:#1f628e; color:white;">
         Aperçu privé du blog des Fous d'Astro. Aucun formulaire actif.
     </footer>
-    {% elif request.blueprint in ['espace_personnel', 'communaute', 'outils_membres', 'abonnement_client'] and utilisateur_espace %}
+    {% elif request.blueprint in [
+        'espace_personnel', 'communaute', 'outils_membres', 'abonnement_client',
+        'paiement_espace', 'admin_envois_automatiques', 'admin_essais_mails',
+        'admin_mails_evenements'
+    ] and utilisateur_espace %}
     {% include "espace_personnel/_footer.html" %}
     {% else %}
     {% include "_footer.html" %}

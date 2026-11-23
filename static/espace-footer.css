@@ -4,9 +4,11 @@ body:has(> .espace-footer) {
     min-height: 100vh;
     min-height: 100dvh;
 }
-body:has(> .espace-footer) > main { flex: 1; min-width: 0; }
+body:has(> .espace-footer) > .navbar { flex-shrink: 0; }
+body:has(> .espace-footer) > main { flex: 1 0 auto; min-width: 0; }
 .espace-footer {
     display: flex;
+    flex-shrink: 0;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
