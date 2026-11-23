@@ -459,9 +459,9 @@ def api_analyse_gratuite():
             <div style="margin: 20px 0; line-height: 1.6;">{texte_html}</div>
             
             <div class="free-analysis-offer">
-                <p>Le <strong>Point Astral Essentiel</strong> relie les grandes dynamiques
-                    de ton thème dans un PDF personnalisé de 4 à 6 pages.</p>
-                <p><strong>25 € au total.</strong> Reçu par email après le paiement et la génération.</p>
+                <p>Si tu veux aller plus en profondeur dans la connaissance de toi-même ?
+                    Le <strong>Point Astral Essentiel</strong> relie les grandes dynamiques
+                    de ton thème sur un PDF de 4 à 6 pages. <strong>25 €</strong></p>
                 <div class="free-analysis-offer-actions">
                 <a href="/static/pdfs/Exemple_Flash_Astral_Cecile.pdf" target="_blank" rel="noopener"
                 style="display:inline-block;font-size:14px;min-height:44px;padding:12px;color:#1f628e;text-decoration:underline;">
