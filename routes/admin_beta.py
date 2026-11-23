@@ -17,6 +17,7 @@ admin_beta_bp = Blueprint('admin_beta', __name__, url_prefix='/admin/beta-testeu
 STATUTS_PAIEMENT = {
     'creation_en_cours': 'Préparation du paiement', 'prete': 'Paiement à terminer',
     'creation_incertaine': 'Préparation à vérifier', 'capture_en_cours': 'Confirmation en cours',
+    'modification_en_cours': 'Changement d’option en cours', 'modification_incertaine': 'Changement d’option à reprendre',
     'capture_incertaine': 'Confirmation à vérifier', 'payee': 'Payé · profil à compléter',
     'active': 'Payé · inscription confirmée', 'rembourse': 'Remboursé', 'revoque': 'Révoqué',
 }

@@ -79,7 +79,7 @@ def _requete(config, methode, chemin, *, cle=None, donnees=None):
         entetes["PayPal-Request-Id"] = cle
     reponse = requests.request(methode, config["base"]+chemin, headers=entetes, json=donnees, timeout=20)
     reponse.raise_for_status()
-    return reponse.json()
+    return {} if reponse.status_code == 204 else reponse.json()
 
 
 def _configuration_ouverte():
@@ -87,6 +87,56 @@ def _configuration_ouverte():
     if not config["ouvert"]:
         raise ValueError("La souscription n’est pas encore ouverte.")
     return config
+
+
+def _modifier_commande(commande, selection, config):
+    """Révise une commande non réglée, en excluant toute capture simultanée."""
+    from sqlalchemy import update
+    from extensions import db
+    from models.espace_personnel import CommandeAbonnementEspace
+    identifiant = commande.fournisseur_commande_id
+    reservation = db.session.execute(update(CommandeAbonnementEspace).where(
+        CommandeAbonnementEspace.id == commande.id,
+        CommandeAbonnementEspace.fournisseur_commande_id == identifiant,
+        CommandeAbonnementEspace.statut.in_(("prete", "modification_incertaine")),
+    ).values(statut="modification_en_cours"))
+    db.session.commit()
+    if reservation.rowcount != 1:
+        raise ValueError("Le paiement est déjà en cours. Recharge la page pour vérifier son état.")
+    chemin = "/v2/checkout/orders/" + identifiant
+    try:
+        resultat = _requete(config, "GET", chemin)
+        unites = resultat.get("purchase_units") or []
+        if (resultat.get("id") != identifiant or resultat.get("status") not in {"CREATED", "APPROVED"}
+                or len(unites) != 1 or unites[0].get("reference_id") != commande.id
+                or unites[0].get("custom_id") != commande.id or unites[0].get("payments")):
+            raise ValueError("Cette commande ne peut plus être modifiée.")
+        montant = {"currency_code": "EUR", "value": f"{selection['prix_centimes'] / 100:.2f}"}
+        description = selection["libelle"] + " — décembre 2026 à février 2027"
+        cible = "/purchase_units/@reference_id=='" + commande.id + "'"
+        _requete(config, "PATCH", chemin, donnees=[
+            {"op": "replace", "path": cible + "/amount", "value": montant},
+            {"op": "replace", "path": cible + "/description", "value": description},
+        ])
+        resultat = _requete(config, "GET", chemin)
+        unites = resultat.get("purchase_units") or []
+        if (resultat.get("id") != identifiant or resultat.get("status") not in {"CREATED", "APPROVED"}
+                or len(unites) != 1 or unites[0].get("reference_id") != commande.id
+                or unites[0].get("custom_id") != commande.id or unites[0].get("payments")
+                or (unites[0].get("amount") or {}).get("currency_code") != "EUR"
+                or Decimal(str((unites[0].get("amount") or {}).get("value"))) * 100 != selection["prix_centimes"]):
+            raise ValueError("Le nouveau montant n’est pas confirmé.")
+        commande.montant_centimes = selection["prix_centimes"]
+        commande.cgv_version, commande.cgv_acceptees_le = CGV_VERSION, datetime.now(timezone.utc)
+        commande.statut, commande.erreur = "prete", None
+        db.session.commit()
+        return commande
+    except Exception:
+        db.session.rollback()
+        commande.statut = "modification_incertaine"
+        commande.erreur = "Le changement d’option reste à confirmer. Aucun nouveau débit demandé."
+        db.session.commit()
+        raise ValueError("Le changement d’option n’a pas été confirmé. Recharge la page puis réessaie. Si tu as déjà payé, utilise « Vérifier mon paiement ».") from None
 
 
 def creer_commande(utilisateur, accepter, formule="espace_seul"):
@@ -105,9 +155,9 @@ def creer_commande(utilisateur, accepter, formule="espace_seul"):
         raise ValueError("Tu es déjà inscrit à cette période. Aucun nouveau paiement nécessaire.")
     commande = CommandeAbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id, offre=OFFRE, sandbox=config["sandbox"]).first()
     if commande:
-        if commande.statut == "prete" and commande.fournisseur_commande_id:
-            if commande.montant_centimes != selection["prix_centimes"]:
-                raise ValueError("Un paiement est déjà préparé pour une autre formule. Reprends-le ou contacte Cécile pour le modifier.")
+        if commande.statut in {"prete", "modification_incertaine"} and commande.fournisseur_commande_id:
+            if commande.montant_centimes != selection["prix_centimes"] or commande.statut == "modification_incertaine":
+                return _modifier_commande(commande, selection, config)
             return commande
         raise ValueError("Une commande existe déjà : utilise « Vérifier mon paiement » dans ton abonnement avant de recommencer.")
     commande = CommandeAbonnementEspace(id=str(uuid4()), utilisateur_id=utilisateur.id,
@@ -188,7 +238,7 @@ def enregistrer_paiement(commande_id, resultat):
     return commande
 
 
-def verifier_ou_capturer(commande, *, capturer=False):
+def verifier_ou_capturer(commande, *, capturer=False, montant_attendu=None):
     from sqlalchemy import update
     from extensions import db
     from models.espace_personnel import CommandeAbonnementEspace, UtilisateurEspace
@@ -197,6 +247,8 @@ def verifier_ou_capturer(commande, *, capturer=False):
         raise ValueError("Le mode du paiement ne correspond plus à la configuration.")
     if commande.statut == "active":
         return commande
+    if capturer and (montant_attendu is None or montant_attendu != commande.montant_centimes):
+        raise ValueError("L’option a changé depuis la préparation du paiement. Recharge la page avant de payer.")
     if not commande.fournisseur_commande_id:
         raise ValueError("Cette commande nécessite une vérification par Cécile.")
     chemin = "/v2/checkout/orders/" + commande.fournisseur_commande_id
@@ -204,7 +256,9 @@ def verifier_ou_capturer(commande, *, capturer=False):
         verifier_invitation_beta(db.session.get(UtilisateurEspace, commande.utilisateur_id))
         _configuration_ouverte()
         reservation = db.session.execute(update(CommandeAbonnementEspace).where(
-            CommandeAbonnementEspace.id == commande.id, CommandeAbonnementEspace.statut == "prete"
+            CommandeAbonnementEspace.id == commande.id, CommandeAbonnementEspace.statut == "prete",
+            CommandeAbonnementEspace.fournisseur_commande_id == commande.fournisseur_commande_id,
+            CommandeAbonnementEspace.montant_centimes == montant_attendu,
         ).values(statut="capture_en_cours"))
         db.session.commit()
         if reservation.rowcount != 1:

@@ -10,7 +10,7 @@ from extensions import db
 from models.espace_personnel import AbonnementEspace, CommandeAbonnementEspace, InscriptionMailsBeta, MailEvenementAbonne, ProfilAstral, RevolutionSolairePackBeta
 from utils.auth_espace import utilisateur_connecte, verifier_csrf_espace
 from utils.mails_evenements import FIN_BETA, NATURES, utc
-from utils.souscription_espace import OFFRE, configuration_paiement, formule_commande, offre_publique
+from utils.souscription_espace import OFFRE, FORMULES_BETA, configuration_paiement, formule_commande, offre_publique
 from utils.invitations_beta import adresse_invitee_beta
 
 abonnement_client_bp = Blueprint("abonnement_client", __name__, url_prefix="/mon-espace")
@@ -99,7 +99,7 @@ def creer():
         from utils.souscription_espace import creer_commande
         commande = creer_commande(utilisateur_connecte(), request.form.get("conditions") == "oui",
                                  request.form.get("formule", "espace_seul"))
-        return jsonify(id=commande.fournisseur_commande_id)
+        return jsonify(id=commande.fournisseur_commande_id, formule=formule_commande(commande)["code"])
     except ValueError as erreur:
         db.session.rollback()
         return jsonify(error=str(erreur)), 409
@@ -117,7 +117,10 @@ def capturer():
         fournisseur_commande_id=request.form.get("orderID", ""), offre=OFFRE, sandbox=config["sandbox"]).first_or_404()
     try:
         from utils.souscription_espace import verifier_ou_capturer
-        verifier_ou_capturer(commande, capturer=True)
+        selection = FORMULES_BETA.get(request.form.get("formule"))
+        if selection is None:
+            return jsonify(error="Recharge la page pour confirmer ton option et le montant avant de payer."), 409
+        verifier_ou_capturer(commande, capturer=True, montant_attendu=selection["prix_centimes"])
         return jsonify(redirect=url_for("abonnement_client.mon_abonnement"))
     except Exception:
         db.session.rollback()
