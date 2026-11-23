@@ -1,17 +1,17 @@
 # routes/analyse_gratuite_api.py
 from flask import Blueprint, request, jsonify, render_template, current_app
-from utils.openai_utils import interroger_llm
 from utils.calcul_theme import calcul_theme
 from utils.utils_analyse import analyse_gratuite
-from utils.formatage import formater_positions_planetes, formater_aspects
+from utils.formatage import formater_positions_planetes
+from utils.analyse_gratuite_formatage import formater_aspects
 from utils.gestion_utilisateur import enregistrer_utilisateur_et_envoyer
 from utils.enregistrement_placements import enregistrer_placements_utilisateur
 from utils.google.sheets_writer import ajouter_email_au_sheet, ajouter_reponse_analyse_gratuite
-from utils.calculs_astrologiques import NAKSHATRAS
 from utils.email_sender import envoyer_email_avec_analyse
 from utils.email_quota import check_and_log_email_quota
 from utils.brevo_contacts import ajouter_contact_brevo
-from utils.llm_system_prompts import SYSTEM_ANALYSE_GRATUITE
+from utils.llm_system_prompts import SYSTEM_ANALYSE_GRATUITE as SYSTEM_BASE
+from utils.analyse_gratuite_figures import preparer_figures_analyse_gratuite
 from threading import Thread
 from html import escape
 import textwrap
@@ -68,21 +68,7 @@ def _texte_analyse_vers_html(texte):
     return "".join(f'<p style="margin:0 0 16px;">{p}</p>' for p in paragraphes)
 
 
-def _assurer_nakshatra_dans_texte(texte, nakshatra):
-    """Ajoute une phrase factuelle avant la question finale si l'IA l'a omis."""
-    if nakshatra not in NAKSHATRAS or nakshatra.casefold() in texte.casefold():
-        return texte
-    lignes = texte.split("\n")
-    non_vides = [i for i, ligne in enumerate(lignes) if ligne.strip()]
-    index = non_vides[-1] if non_vides else 0
-    if len(non_vides) > 1 and lignes[index].rstrip().endswith("?"):
-        index = non_vides[-2]
-    phrase = (
-        f"Ta Lune en nakshatra {nakshatra} apporte aussi un angle védique "
-        "à ton rapport aux émotions."
-    )
-    lignes[index] = lignes[index].rstrip() + " " + phrase
-    return "\n".join(lignes)
+
 
 
 def _generer_texte_analyse_gratuite(prompt):
@@ -95,7 +81,28 @@ def _generer_texte_analyse_gratuite(prompt):
 
     if provider == "openai":
         print("🤖 Analyse gratuite générée avec OpenAI")
-        return interroger_llm(prompt, provider="openai")
+        from openai import OpenAI
+
+        reponse = OpenAI(
+            api_key=os.getenv("OPENAI_API_KEY"), max_retries=0
+        ).chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": SYSTEM_BASE},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=8000,
+            temperature=0.7,
+            top_p=1.0,
+            frequency_penalty=0,
+            presence_penalty=0,
+        )
+        choix = reponse.choices[0]
+        texte = choix.message.content or ""
+        print("=== OPENAI : RÉPONSE BRUTE ET TOKENS ===", reponse.model_dump_json(indent=2))
+        if choix.finish_reason != "stop" or getattr(choix.message, "refusal", None) or not texte.strip():
+            raise RuntimeError("Réponse IA incomplète : génération gratuite interrompue.")
+        return texte
 
     if provider == "claude":
         # Import tardif : une production restée sur OpenAI ne dépend pas de
@@ -103,20 +110,15 @@ def _generer_texte_analyse_gratuite(prompt):
         from utils.claude_llm import ask_claude
 
         print("🤖 Analyse gratuite générée avec Claude")
-        try:
-            return ask_claude(
-                prompt=prompt,
-                model="claude-sonnet-5-5",
-                system=SYSTEM_ANALYSE_GRATUITE,
-                max_tokens=350,
-                temperature=0.6,
-            )
-        except Exception as claude_error:
-            print(
-                "⚠️ Claude indisponible pour le gratuit, repli vers OpenAI : "
-                f"{claude_error}"
-            )
-            return interroger_llm(prompt, provider="openai")
+        # Une seule tentative : conserver l'échec sans nouvelle génération payante.
+        return ask_claude(
+            prompt=prompt,
+            model="claude-sonnet-5-5",  # Modèle du local validé, sans changer les autres rapports.
+            system=SYSTEM_BASE,
+            max_tokens=900,
+            temperature=0.6,
+            single_attempt=True,
+        )
 
     raise ValueError(
         "FREE_ANALYSIS_LLM_PROVIDER doit valoir 'openai' ou 'claude' "
@@ -246,7 +248,10 @@ def api_analyse_gratuite():
         else:
             print("[PLACEMENTS] Rien à pousser vers Sheets (donnees_placements=None)")
 
-        # 📝 4) Résumé + formats (comme dans l'ancienne version)
+        from utils.filtrage_rapports import sans_point_illumination
+        theme = sans_point_illumination(theme)
+
+        # 📝 2) Résumé + formats
         resume_list = analyse_gratuite(
             planetes=theme['planetes'],
             aspects=theme['aspects'],
@@ -258,37 +263,36 @@ def api_analyse_gratuite():
 
         positions_str = formater_positions_planetes(theme['planetes'])
         aspects_str   = formater_aspects(theme['aspects'])
-        nakshatra = theme.get("planetes_vediques", {}).get("Lune", {}).get("nakshatra")
-        consigne_nakshatra = ""
-        if nakshatra in NAKSHATRAS:
-            consigne_nakshatra = (
-                f"Nakshatra lunaire calculé : {nakshatra}. Dans le deuxième "
-                "paragraphe, intègre une phrase qui nomme ce nakshatra et "
-                "le relie prudemment au fonctionnement émotionnel décrit. "
-                "Si sa symbolique t'est incertaine, reste factuel. "
-                "N'invente ni événement de vie ni certitude psychologique."
-            )
+        configurations, configurations_str = preparer_figures_analyse_gratuite(theme)
+        maitre_ascendant = theme.get("maitre_ascendant") or {}
+        maitre_ascendant_nom = (
+            maitre_ascendant.get("nom")
+            if isinstance(maitre_ascendant, dict) else maitre_ascendant
+        ) or "non fourni"
+        print(f"🪐 Figures et conjonctions détectées : {len(configurations)}")
+        print(configurations_str)
 
-        # 🤖 5) Prompt : un aperçu concret qui ouvre vers le Point Astral
+        # 🤖 3) Prompt : un aperçu concret qui ouvre vers le Point Astral
         prompt = dedent(
             f"""
-            Tu es l'astrologue des Fous d'Astro : directe, lucide, profonde,
-            avec un humour noir sec et une pointe de sarcasme bien placée.
+            Tu es une astrologue expérimentée, directe, lucide avec une pointe d'humour noir.
 
             OBJECTIF
-            Écris un aperçu astrologique bref qui donne une preuve de
-            personnalisation autour d'UN mécanisme central du thème. La personne
-            doit reconnaître une dynamique concrète, sans recevoir une analyse
-            complète de ses émotions, relations, travail et argent à la fois.
+            Écris une mini-analyse astrologique et fait apparaître UN ou DEUX mécanismes centraux
+            du thème, choisis selon leur importance réelle dans les données fournies.
+            L'aperçu doit permettre à la personne de se reconnaître dans une
+            situation observable, tout en lui faisant comprendre qu'il reste beaucoup plus à
+            explorer. Cette analyse doit être uniquement une mise en bouche.
 
             Tu parles directement à la personne.
             Tu utilises le tutoiement.
             Tu ne flattes pas et tu n'emploies pas de phrases creuses.
-            Tu peux ajouter une ou deux images sarcastiques, concrètes et
-            mémorables. Elles doivent éclairer une contradiction du thème,
-            jamais se moquer de la personne ni banaliser une difficulté.
-            Tu fondes l'analyse sur l'astrologie occidentale tropicale.
-            {consigne_nakshatra}
+            Tu fondes l'analyse sur l'astrologie occidentale tropicale. Tu peux
+            utiliser le Nakshatra lunaire fourni comme éclairage complémentaire. 
+
+            Termine par UNE question d'observation personnelle précise dans
+            un dernier paragraphe très court.
+            
 
             Personne analysée : {theme.get("nom", "la personne")}
             Genre déclaré obligatoire : {genre_label}
@@ -305,67 +309,40 @@ def api_analyse_gratuite():
 
             {aspects_str}
 
+            FIGURES ET CONJONCTIONS VÉRIFIÉES PAR LE MOTEUR :
 
-            CONSTRUCTION OBLIGATOIRE
-            1. Premier paragraphe : décris la dynamique centrale de l'identité
-               ou de la manière d'apparaître au monde. Choisis seulement les
-               facteurs réellement structurants et n'énumère pas les placements.
-            2. Deuxième paragraphe : expose le paradoxe, la ressource et le
-               revers possible de cette dynamique, avec UNE manifestation
-               concrète. Garde une part de mystère à explorer dans le Point
-               Astral complet.
-            3. Termine par UNE question d'observation personnelle précise,
-               seule dans un dernier paragraphe très court.
+            {configurations_str}
 
+            Maître de l'Ascendant calculé : {maitre_ascendant_nom}
+
+                
             RÈGLES :
 
             - Commence directement par une dynamique humaine, jamais par un placement.
             - Ne fais pas une liste de placements.
-            - Cite au maximum quatre termes astrologiques dans tout le texte,
-              dont le nakshatra lunaire s'il est fourni.
+            - Cite au maximum trois termes astrologiques dans tout le texte.
             - Ne répète pas plusieurs fois la même idée.
             - N'invente aucun placement ni aucun aspect.
             - Pour toute manifestation concrète, croise les facteurs disponibles
-              dans ce thème (planètes, signes, maisons, aspects, angles, maîtrises
-              et le Nakshatra lunaire). Ne transforme jamais
+              dans ce thème (planètes, signes, maisons, aspects, figures vérifiées, angles, maîtrises
+              et, s'il est pertinent, Nakshatra lunaire). Ne transforme jamais
               le symbolisme isolé d'un seul facteur en certitude biographique.
-            - Évite les compliments invérifiables comme « magnétique »,
-              « charismatique », « exceptionnel » ou « don naturel ».
-            - Tu peux employer un vocabulaire intense s'il est astrologiquement
-              justifié. Ne transforme jamais une hypothèse en diagnostic, ni un
-              symbole astrologique en fait biographique certain.
-            - Utilise « tu peux », « il est possible » ou « semble » lorsque
-              l'interprétation n'est pas certaine.
-            - Pas de conseil générique de développement personnel.
             - Pas de syntaxe Markdown.
             - Texte brut uniquement.
             - Respecte obligatoirement le genre déclaré dans tous les adjectifs
               et participes.
-            - Deux paragraphes courts, puis la question finale.
-            - Entre 110 et 130 mots. Ne dépasse jamais 130 mots.
+            - Quatre paragraphes courts, puis la question finale.
+            - Entre 220 et 260 mots. Ne produis jamais moins de 220 mots.
             """
         ).strip()
 
         print("📤 Prompt envoyé à l'IA :", prompt)
 
-        # 🤖 6) Appel à l'IA
+        # 🤖 4) Appel à l'IA
         texte = _generer_texte_analyse_gratuite(prompt)
-        texte = _assurer_nakshatra_dans_texte(texte, nakshatra)
-        print("✅ Analyse IA reçue :", texte[:100] + "...")
+        print("✅ Analyse IA reçue (texte intégral) :", texte)
+        print(f"📏 Nombre de mots reçu : {len(texte.split())} (consigne : 220–260, sans réécriture automatique)")
         texte_html = _texte_analyse_vers_html(texte)
-        nakshatra_txt = ""
-        nakshatra_html = ""
-        if nakshatra in NAKSHATRAS:
-            explication = (
-                "En astrologie védique, il situe ta Lune dans l’une des "
-                "27 divisions du zodiaque sidéral."
-            )
-            nakshatra_txt = f"Ton nakshatra lunaire : {nakshatra}. {explication}"
-            nakshatra_html = (
-                '<p class="free-analysis-nakshatra">'
-                f"<strong>Ton nakshatra lunaire : {escape(nakshatra)}.</strong> "
-                f"{explication}</p>"
-            )
 
         # 📧 7) Envoi email + Google Sheets (comme dans l'ancienne version)
         prenom = theme['nom'].split()[0]
@@ -418,8 +395,6 @@ def api_analyse_gratuite():
 
             {texte}
 
-            {nakshatra_txt}
-
             Cet aperçu met en lumière un mécanisme central, mais pas encore ses origines,
             les situations dans lesquelles il s'active ni les ressources qui permettent de mieux le vivre.
             Le Point Astral Essentiel relie ces différentes dimensions dans une analyse personnalisée de 4 à 6 pages.
@@ -439,7 +414,6 @@ def api_analyse_gratuite():
             <p>Allez, voici ce que disent tes étoiles :</p>
             <div style="margin:30px 0; padding:20px; background:#f9f6ff; border-radius:12px; line-height:1.8;">
             {texte_html}
-            {nakshatra_html}
             </div>
             <p><strong>Ton aperçu s'arrête là où l'exploration commence.</strong><br><br>
             Il met en lumière un mécanisme central, mais pas encore ses origines,
@@ -483,7 +457,6 @@ def api_analyse_gratuite():
         <div class="analysis-summary">
             <h4>🌟 Bonjour {nom_html}, voici ton profil astrologique :</h4>
             <div style="margin: 20px 0; line-height: 1.6;">{texte_html}</div>
-            {nakshatra_html}
             
             <div class="free-analysis-offer">
                 <p>Le <strong>Point Astral Essentiel</strong> relie les grandes dynamiques
@@ -549,6 +522,7 @@ def api_analyse_gratuite():
             'placements_url': f"/placements?nom={nom}&date={date_naissance}&heure={heure_naissance}&lieu={lieu_naissance}&lat={lat}&lon={lon}&tzid={tzid}",
             'positions': positions_str[:200] + "..." if len(positions_str) > 200 else positions_str,
             'aspects_count': len(theme.get('aspects', [])),
+            'configurations_majeures': configurations,
             'ascendant': theme.get('ascendant', 'Non calculé')
         }
 
