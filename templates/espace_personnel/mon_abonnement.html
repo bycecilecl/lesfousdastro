@@ -29,7 +29,7 @@ body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Seg
 {% if commande and not (inscription and inscription.actif) %}<section><h2>Mon paiement</h2>
 <p>{{ commande.erreur or 'Une commande est enregistrée pour ton compte.' }}</p>
 <form method="post" action="{{ url_for('abonnement_client.verifier_paiement') }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="bouton" type="submit">Vérifier mon paiement · sans nouveau débit</button></form></section>{% endif %}
-{% if not invite_beta and not (inscription and inscription.actif) %}<section><h2>Offre bêta sur invitation</h2><p>Cette offre est réservée aux adresses invitées par Cécile. Si tu as répondu au sondage, demande-lui d’ajouter l’adresse de ton compte à la liste.</p><p>Tu peux continuer à utiliser ton espace gratuit.</p></section>{% endif %}
+{% if not invite_beta and not (inscription and inscription.actif) %}<section><h2>Offre bêta sur invitation</h2><p>Pour souscrire, connecte-toi avec l’adresse e-mail à laquelle Cécile t’a envoyé son invitation.</p><p>Tu peux continuer à utiliser ton espace gratuit.</p></section>{% endif %}
 {% if invite_beta and not (inscription and inscription.actif) %}<section id="souscription"><h2>Accompagnement astral · offre bêta sur invitation</h2>
 <p class="prix">35 € au total pour les trois mois</p>
 <p><strong>Du 1er décembre 2026 au 28 février 2027.</strong> Un seul paiement. Aucun renouvellement automatique.</p>
