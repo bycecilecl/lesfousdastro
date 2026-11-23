@@ -20,6 +20,8 @@ try:
     app.register_blueprint(admin_essais_mails_bp)
     from routes.admin_envois_automatiques import admin_envois_automatiques_bp
     app.register_blueprint(admin_envois_automatiques_bp)
+    from routes.admin_beta import admin_beta_bp
+    app.register_blueprint(admin_beta_bp)
 except Exception:
     app.logger.exception("Espace personnel indisponible ; application principale conservée")
 

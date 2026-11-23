@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Bêta-testeurs | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static',filename='essais-mails.css',v='20261123-beta') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="essai-shell">
+  <header class="essai-entete"><p>ADMINISTRATION</p><h1>Bêta-testeurs</h1><p>Les invitations, les inscriptions et les paiements de ta bêta du {{ debut.strftime('%d/%m/%Y') }} au {{ fin.strftime('%d/%m/%Y') }}.</p></header>
+  {% for categorie,message in get_flashed_messages(with_categories=true) %}<p class="essai-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
+  <nav class="beta-admin-onglets" aria-label="Gestion des bêta-testeurs">
+    <a href="#invitations">Invitations</a><a href="#paiements">Paiements</a><a href="#inscrits">Inscrits</a>
+    <a href="{{ url_for('outils_membres.lire_retours_beta') }}">Retours bêta</a>
+  </nav>
+  <section class="essai-carte" id="invitations">
+    <h2>Les adresses invitées à la bêta</h2>
+    <p>Ajoute les adresses qui peuvent s’inscrire et payer. Tu envoies ensuite toi-même ton mail avec le lien de l’offre.</p>
+    <p>Page à partager : <a href="{{ url_for('pages_bp.abonnements') }}" target="_blank" rel="noopener">L’offre bêta à 35 € pour trois mois</a></p>
+    <p>Paiement : <strong>{{ 'ouvert aux adresses invitées' if paiement_ouvert else 'fermé pour le moment' }}.</strong></p>
+    {% if invitations_pretes %}
+    <form class="essai-invitations-form" method="post" action="{{ url_for('admin_beta.invitations') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><input type="hidden" name="action" value="ajouter">
+      <label for="adresses-beta">Adresses e-mail, une par ligne</label>
+      <textarea id="adresses-beta" name="adresses" rows="10" maxlength="60000" placeholder="Colle ici les adresses e-mail de tes bêta-testeurs, une par ligne." required></textarea>
+      <button class="essai-bouton" type="submit">Autoriser ces adresses</button>
+    </form>
+    <p class="essai-aide">Autoriser une adresse ne crée pas de compte, n’offre pas l’abonnement et n’envoie aucun mail.</p>
+    {% for invitation in invitations %}<article class="essai-details">
+      <p><strong>{{ invitation.email }}</strong> · {{ 'Autorisée' if invitation.actif else 'Retirée' }}</p>
+      {% if invitation.actif %}<form method="post" action="{{ url_for('admin_beta.invitations') }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><input type="hidden" name="action" value="retirer"><input type="hidden" name="email" value="{{ invitation.email }}"><button class="essai-bouton" type="submit">Retirer cette adresse</button></form>{% endif %}
+    </article>{% else %}<p>Aucune adresse dans la liste pour le moment.</p>{% endfor %}
+    {% else %}<p>Le stockage des invitations n’est pas encore prêt.</p>{% endif %}
+  </section>
+  <section class="essai-carte" id="paiements"><h2>Les paiements de la bêta</h2>
+    {% if paiements_prets %}
+    {% for commande in commandes %}{% set compte=utilisateurs.get(commande.utilisateur_id) %}
+    <article class="essai-details"><h3>{{ compte.prenom if compte else 'Compte indisponible' }}</h3>
+      {% if compte and compte.email %}<p>{{ compte.email }}</p>{% endif %}
+      <p><strong>{{ '%.2f'|format(commande.montant_centimes/100) }} €</strong> · {{ statuts_paiement.get(commande.statut,commande.statut) }}{% if commande.sandbox %} · essai sans paiement réel{% endif %}</p>
+      {% if commande.date_paiement %}<p>Paiement confirmé le {{ utc(commande.date_paiement).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }}.</p>{% endif %}
+      {% if commande.erreur %}<p>{{ commande.erreur }}</p>{% endif %}
+    </article>{% else %}<p>Aucun paiement de la bêta enregistré.</p>{% endfor %}
+    <p class="essai-aide">Les 100 dernières commandes de la bêta sont affichées.</p>
+    {% else %}<p>Le stockage des paiements n’est pas encore prêt.</p>{% endif %}
+  </section>
+  <section class="essai-carte" id="inscrits"><h2>Les inscrits à la bêta</h2>
+    {% if inscriptions_pretes %}
+    {% for inscription in inscriptions %}{% set compte=utilisateurs.get(inscription.utilisateur_id) %}
+    <article class="essai-details"><h3>{{ compte.prenom if compte else 'Compte indisponible' }}</h3><p>{{ inscription.email_destinataire }}</p>
+      <p>Statut : {{ 'inscription confirmée' if inscription.actif else 'inscription suspendue' }}.</p>
+    </article>{% else %}<p>Aucune inscription confirmée pour le moment. Autoriser une adresse ne l’inscrit pas automatiquement.</p>{% endfor %}
+    {% else %}<p>Le stockage des inscriptions n’est pas encore prêt.</p>{% endif %}
+    <p><a href="{{ url_for('admin_envois_automatiques.index') }}">Consulter les rendez-vous et les envois de mails</a></p>
+  </section>
+</main>
+{% endblock %}

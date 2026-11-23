@@ -7,7 +7,7 @@ avec une RS facultative à 39 € (pack à 74 €). Aucun renouvellement automat
 
 ## Parcours préparé
 
-- Cécile autorise les adresses dans `/admin/envois-automatiques#invitations`.
+- Cécile autorise les adresses dans **Bêta-testeurs**, `/admin/beta-testeurs#invitations`.
   Aucun compte, accès offert ou message n'est créé par cette action.
 - Le membre crée son compte avec l'adresse invitée, confirme son adresse par
   le parcours existant de définition du mot de passe et revient à son inscription.
