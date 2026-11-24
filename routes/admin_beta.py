@@ -1,13 +1,14 @@
 """Invitations, inscriptions et paiements de la bêta, sans envoi ni génération."""
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
-from sqlalchemy import inspect
+from sqlalchemy import and_, case, inspect, or_
 
 from extensions import db
 from models.espace_personnel import (
-    CommandeAbonnementEspace, InscriptionMailsBeta, InvitationOffreBeta, UtilisateurEspace,
+    AbonnementEspace, CommandeAbonnementEspace, InscriptionMailsBeta, InvitationOffreBeta, UtilisateurEspace,
 )
+from utils.acces_abonnement import FORMULES_ABONNEMENT, STATUTS_ACTIFS, acces_abonnement
 from utils.auth_espace import administratrice_connectee, verifier_csrf_espace
 from utils.invitations_beta import OFFRE_BETA, autoriser_adresses_beta, stockage_invitations_pret
 from utils.mails_evenements import DEBUT_BETA, FIN_BETA, PARIS, utc
@@ -40,6 +41,82 @@ def prive(reponse):
 
 def _table_prete(modele):
     return inspect(db.session.get_bind(mapper=modele)).has_table(modele.__tablename__)
+
+
+@admin_beta_bp.route('/comptes')
+def comptes():
+    """Tous les comptes et leurs droits actuels, sans charger leurs données privées."""
+    maintenant = datetime.now(timezone.utc)
+    recherche = request.args.get('q', '').strip()[:200]
+    formules = {
+        'toutes': 'Toutes les formules',
+        'gratuit': 'Espace gratuit',
+        'rl': 'Boussole lunaire · RL',
+        'complet': 'Accompagnement complet · bêta incluse',
+    }
+    filtre = request.args.get('formule', 'toutes')
+    if filtre not in formules:
+        filtre = 'toutes'
+    requete = db.session.query(
+        UtilisateurEspace.id, UtilisateurEspace.prenom, UtilisateurEspace.email,
+        UtilisateurEspace.actif, UtilisateurEspace.est_administratrice,
+        UtilisateurEspace.date_creation, AbonnementEspace,
+    ).select_from(UtilisateurEspace).outerjoin(
+        AbonnementEspace, AbonnementEspace.utilisateur_id == UtilisateurEspace.id)
+    total = requete.count()
+    if recherche:
+        terme = '%' + recherche.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
+        requete = requete.filter(or_(
+            UtilisateurEspace.prenom.ilike(terme, escape='\\'),
+            UtilisateurEspace.email.ilike(terme, escape='\\'),
+        ))
+    # Même règle de statut et de dates que acces_abonnement(), appliquée au filtre SQL.
+    formule_effective = case((and_(
+        UtilisateurEspace.actif == 1,
+        AbonnementEspace.statut.in_(tuple(STATUTS_ACTIFS)),
+        AbonnementEspace.formule.in_(tuple(FORMULES_ABONNEMENT)),
+        or_(AbonnementEspace.date_debut.is_(None), AbonnementEspace.date_debut <= maintenant),
+        or_(AbonnementEspace.date_fin.is_(None), AbonnementEspace.date_fin > maintenant),
+    ), AbonnementEspace.formule), else_='espace_gratuit')
+    codes = {
+        'gratuit': ('espace_gratuit',),
+        'rl': ('boussole_lunaire',),
+        'complet': ('accompagnement_astral', 'beta_accompagnement'),
+    }
+    if filtre in codes:
+        requete = requete.filter(formule_effective.in_(codes[filtre]))
+    nombre = requete.count() if recherche or filtre != 'toutes' else total
+    pages = max(1, (nombre + 49) // 50)
+    page = min(pages, max(1, request.args.get('page', 1, type=int)))
+    lignes = requete.order_by(UtilisateurEspace.date_creation.desc(), UtilisateurEspace.id.desc()).offset(
+        (page - 1) * 50).limit(50).all()
+    comptes_affiches = []
+    for identifiant, prenom, email, actif, admin, creation, abonnement in lignes:
+        droits = acces_abonnement(abonnement, maintenant)
+        etat = 'Gratuit'
+        if abonnement:
+            if abonnement.formule not in FORMULES_ABONNEMENT:
+                etat = 'Formule à vérifier'
+            elif abonnement.statut not in STATUTS_ACTIFS:
+                etat = 'Inactif'
+            elif abonnement.date_fin and utc(abonnement.date_fin) <= maintenant:
+                etat = 'Terminé'
+            elif abonnement.date_debut and utc(abonnement.date_debut) > maintenant:
+                etat = 'À venir'
+            elif droits['actif']:
+                etat = 'Test / accès offert' if abonnement.statut == 'test' else 'Actif'
+        comptes_affiches.append({
+            'id': identifiant, 'prenom': prenom, 'email': email, 'actif': actif == 1,
+            'administratrice': admin, 'creation': creation,
+            'formule': FORMULES_ABONNEMENT.get(abonnement.formule, {}).get('libelle', 'Formule inconnue')
+                if abonnement else 'Espace gratuit',
+            'acces': droits['libelle'] if actif == 1 else 'Aucun accès · compte désactivé',
+            'etat': etat, 'debut': abonnement.date_debut if abonnement else None,
+            'fin': abonnement.date_fin if abonnement else None,
+        })
+    return render_template('admin/comptes_abonnements.html', comptes=comptes_affiches,
+        total=total, nombre=nombre, page=page, pages=pages, recherche=recherche,
+        filtre=filtre, formules=formules, utc=utc, paris=PARIS)
 
 
 @admin_beta_bp.route('')

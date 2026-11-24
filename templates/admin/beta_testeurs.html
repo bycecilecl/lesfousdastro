@@ -7,6 +7,7 @@
   <header class="essai-entete"><p>ADMINISTRATION</p><h1>Bêta-testeurs</h1><p>Les invitations, les inscriptions et les paiements de ta bêta du {{ debut.strftime('%d/%m/%Y') }} au {{ fin.strftime('%d/%m/%Y') }}.</p></header>
   {% for categorie,message in get_flashed_messages(with_categories=true) %}<p class="essai-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
   <nav class="beta-admin-onglets" aria-label="Gestion des bêta-testeurs">
+    <a href="{{ url_for('admin_beta.comptes') }}">Tous les comptes et abonnements</a>
     <a href="#invitations">Invitations</a><a href="#paiements">Paiements</a><a href="#inscrits">Inscrits</a>
     <a href="{{ url_for('outils_membres.lire_retours_beta') }}">Retours bêta</a>
   </nav>

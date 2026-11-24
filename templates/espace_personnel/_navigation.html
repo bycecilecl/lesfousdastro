@@ -54,7 +54,8 @@
     {% if outils_mails_admin %}
     <div class="espace-navigation-group">
       <p class="espace-navigation-label">Administration</p>
-      <a class="espace-navigation-link{% if request.blueprint == 'admin_beta' %} is-current{% endif %}" href="{{ url_for('admin_beta.index') }}">Bêta-testeurs</a>
+      <a class="espace-navigation-link{% if rubrique == 'admin_beta.comptes' %} is-current{% endif %}" href="{{ url_for('admin_beta.comptes') }}"{% if rubrique == 'admin_beta.comptes' %} aria-current="page"{% endif %}>Comptes et abonnements</a>
+      <a class="espace-navigation-link{% if request.blueprint == 'admin_beta' and rubrique != 'admin_beta.comptes' %} is-current{% endif %}" href="{{ url_for('admin_beta.index') }}">Bêta-testeurs</a>
       <a class="espace-navigation-link{% if request.blueprint == 'admin_envois_automatiques' %} is-current{% endif %}" href="{{ url_for('admin_envois_automatiques.index') }}">Envois automatiques</a>
       <a class="espace-navigation-link{% if request.blueprint == 'admin_essais_mails' %} is-current{% endif %}" href="{{ url_for('admin_essais_mails.index') }}">Essais de mails</a>
       <a class="espace-navigation-link{% if rubrique == 'espace_personnel.emails_cycle' %} is-current{% endif %}" href="{{ url_for('espace_personnel.emails_cycle') }}"{% if rubrique == 'espace_personnel.emails_cycle' %} aria-current="page"{% endif %}>Administration des mails</a>

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Comptes et abonnements | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='essais-mails.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin-comptes.css', v='20261124') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="essai-shell">
+  <header class="essai-entete">
+    <p>ADMINISTRATION</p><h1>Comptes et abonnements</h1>
+    <p>{{ total }} compte{% if total != 1 %}s{% endif %} enregistré{% if total != 1 %}s{% endif %} dans l’espace, toutes formules confondues.</p>
+  </header>
+  <section class="essai-carte">
+    <h2>Tous les membres</h2>
+    <form method="get" class="comptes-filtres" action="{{ url_for('admin_beta.comptes') }}">
+      <label for="comptes-recherche">Nom ou adresse e-mail
+        <input id="comptes-recherche" type="search" name="q" value="{{ recherche }}" maxlength="200" placeholder="Rechercher un compte">
+      </label>
+      <label for="comptes-formule">Accès actuel
+        <select id="comptes-formule" name="formule">
+          {% for code, libelle in formules.items() %}<option value="{{ code }}"{% if filtre == code %} selected{% endif %}>{{ libelle }}</option>{% endfor %}
+        </select>
+      </label>
+      <button class="essai-bouton" type="submit">Afficher</button>
+      {% if recherche or filtre != 'toutes' %}<a href="{{ url_for('admin_beta.comptes') }}">Tout afficher</a>{% endif %}
+    </form>
+    <p class="essai-aide">Boussole lunaire correspond à la formule RL. L’accompagnement complet comprend aussi la bêta. Une formule à venir ou terminée ne donne pas encore, ou ne donne plus, les droits payants. Les comptes désactivés sont inclus dans le filtre gratuit et restent signalés comme sans accès.</p>
+    <p>{{ nombre }} résultat{% if nombre != 1 %}s{% endif %}{% if pages > 1 %} · page {{ page }} sur {{ pages }}{% endif %}.</p>
+    {% if comptes %}
+    <div class="comptes-table-scroll" role="region" aria-label="Comptes enregistrés et abonnements" tabindex="0">
+      <table class="comptes-table">
+        <caption class="comptes-caption">Comptes classés du plus récent au plus ancien. Dates et heures de Paris.</caption>
+        <thead><tr><th scope="col">Compte</th><th scope="col">Formule enregistrée</th><th scope="col">Accès actuel</th><th scope="col">Statut de l’abonnement</th><th scope="col">Période</th><th scope="col">Inscription</th></tr></thead>
+        <tbody>
+        {% for compte in comptes %}
+          <tr>
+            <th scope="row"><strong>{{ compte.prenom or 'Sans prénom' }}</strong><span>{{ compte.email or 'Sans adresse e-mail' }}</span>{% if compte.administratrice %}<small>Administratrice</small>{% endif %}{% if not compte.actif %}<small class="comptes-inactif">Compte désactivé</small>{% endif %}</th>
+            <td>{{ compte.formule }}</td>
+            <td>{{ compte.acces }}</td>
+            <td>{{ compte.etat }}</td>
+            <td>{% if compte.debut %}<span>Du {{ utc(compte.debut).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }}</span>{% endif %}{% if compte.fin %}<span>Au {{ utc(compte.fin).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }}</span>{% elif compte.debut %}<span>Sans date de fin</span>{% else %}—{% endif %}</td>
+            <td>{{ utc(compte.creation).astimezone(paris).strftime('%d/%m/%Y') if compte.creation else '—' }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p>Aucun compte ne correspond à cette recherche.</p>{% endif %}
+    {% if pages > 1 %}
+    <nav class="comptes-pagination" aria-label="Pages des comptes">
+      {% if page > 1 %}<a href="{{ url_for('admin_beta.comptes', page=page-1, q=recherche, formule=filtre) }}">← Précédents</a>{% endif %}
+      <span>Page {{ page }} sur {{ pages }}</span>
+      {% if page < pages %}<a href="{{ url_for('admin_beta.comptes', page=page+1, q=recherche, formule=filtre) }}">Suivants →</a>{% endif %}
+    </nav>
+    {% endif %}
+    <p class="essai-aide">50 comptes par page. Les invitations sans compte créé sont dans <a href="{{ url_for('admin_beta.index', _anchor='invitations') }}">Bêta-testeurs</a>.</p>
+  </section>
+</main>
+{% endblock %}
