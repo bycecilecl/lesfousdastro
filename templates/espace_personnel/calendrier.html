@@ -72,6 +72,13 @@ body{background:linear-gradient(135deg,#1f628e,#00a8a8);min-height:100vh}.cal{ma
 .cal-lunar-highlights h3{margin-top:0;color:#59477e}.cal-lunar-highlight+.cal-lunar-highlight{margin-top:18px;padding-top:18px;border-top:1px solid #ded4ea}
 .cal-lunar-highlight strong{color:#1f628e}.cal-lunar-time{font-weight:700;color:#59477e}.cal-lunar-house{color:#526a75;font-size:.9rem}.cal-lunar-highlight p{line-height:1.65}
 
+/* Les libellés longs restent dans leurs rubans ; le détail complet est au clic. */
+.cal .cal-band{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cal .cal-climate,.cal .cal-sky-climate{display:flex;align-items:center;gap:5px}
+.cal .cal-climate .cal-band-label,.cal .cal-sky-climate .cal-band-label{float:none;flex:1;min-width:0}
+.cal .cal-climate .cal-band-expand,.cal .cal-sky-climate .cal-band-expand{float:none;flex:0 0 auto;line-height:1}
+.cal .foot{white-space:normal;overflow-wrap:anywhere}
+
 /* Agenda lunaire : repères mensuels compacts, lecture dans la journée sélectionnée. */
 .cal.cal-lunar-agenda .cal-planet-filters,.cal.cal-lunar-agenda .cal-ruler-help,.cal.cal-lunar-agenda .periods{display:none}
 .cal.cal-lunar-agenda .cal-lunar-week{gap:6px;margin-bottom:6px;padding:0;border:0;grid-auto-rows:minmax(168px,auto)}
