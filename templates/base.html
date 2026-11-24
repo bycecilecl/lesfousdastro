@@ -153,6 +153,7 @@
         @media (max-width: 1200px) {
             .navbar__toggle { display: block; }
             .navbar__links { position: absolute; top: 100%; left: 0; right: 0; background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #2c3e50 100%); flex-direction: column; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); transform: translateY(-10px); opacity: 0; visibility: hidden; transition: all 0.3s ease; gap: 0; }
+            .navbar__links { max-height:calc(100vh - 60px); max-height:calc(100dvh - 60px); overflow-y:auto; }
             .nav-open .navbar__links { transform: translateY(0); opacity: 1; visibility: visible; }
             .navbar__links a { display: block; margin: 8px 0; padding: 15px 20px; border-radius: 12px; text-align: center; }
             .navbar__inner { padding: 0 15px; height: 60px; }
@@ -180,6 +181,7 @@
                 <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Analyses 💫</a></li>
                 <li><a href="{{ url_for('pages_bp.analyses') }}" class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
                 <li><a href="{{ url_for('pages_bp.abonnements') }}" class="{% if request.path == url_for('pages_bp.abonnements') %}active{% endif %}">Abonnements</a></li>
+                <li><a href="{{ url_for('espace_personnel.accueil') }}" class="{% if request.path.startswith('/mon-espace') %}active{% endif %}"{% if request.path.startswith('/mon-espace') %} aria-current="page"{% endif %}>Mon espace</a></li>
                 <li><a href="{{ url_for('blog.blog_index') }}" class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
                 <li><a href="{{ url_for('blog.bd_index') }}" class="{% if request.path.startswith('/bd') %}active{% endif %}">BD</a></li>
                 <li><a href="{{ url_for('site_bp.temoignages') }}" class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
