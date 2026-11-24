@@ -1,0 +1,32 @@
+{% set tutoriels_beta = [
+  ('J7-ue-r11Wc', 'Inscription et paiement'),
+  ('9xrvs7EDarY', 'Journal et calendrier'),
+  ('acdIHgShRJk', 'Labo de conscience et mécanismes'),
+  ('rV_sKUidYJE', 'Révolutions et lunaisons'),
+  ('y_KM6SaXKvM', 'Communauté et feedback')
+] %}
+<section class="beta-tutoriels" id="tutoriels-beta" aria-labelledby="titre-tutoriels-beta">
+  <header class="beta-tutoriels-entete">
+    <p class="section-kicker">Je te montre tout ça</p>
+    <h2 id="titre-tutoriels-beta">Ton espace en vidéo</h2>
+    <p>De l’inscription à tes premiers pas dans l’espace, voici les cinq tutos à suivre dans l’ordre ou à revoir quand tu en as besoin.</p>
+    <p class="beta-tab-note">L’inscription s’ouvre dans un autre onglet : tu peux garder cette page et les vidéos sous les yeux.</p>
+  </header>
+  <ol class="beta-tutoriels-liste">
+    {% for identifiant, titre in tutoriels_beta %}
+    <li class="beta-tutoriel">
+      <div class="beta-tutoriel-lecteur">
+        <iframe src="https://www.youtube-nocookie.com/embed/{{ identifiant }}?rel=0"
+          title="Tutoriel {{ loop.index }} : {{ titre }}" loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+      </div>
+      <div class="beta-tutoriel-texte">
+        <p class="beta-tutoriel-numero">Vidéo {{ loop.index }} sur {{ tutoriels_beta|length }}</p>
+        <h3>{{ titre }}</h3>
+        <a href="https://youtu.be/{{ identifiant }}" target="_blank" rel="noopener noreferrer">Ouvrir sur YouTube <span class="sr-only">(nouvel onglet)</span>↗</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+</section>

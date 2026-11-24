@@ -1,0 +1,17 @@
+.beta-tutoriels{margin-top:28px;padding:clamp(22px,4vw,42px);border-radius:28px;background:#fffffff5;box-shadow:0 20px 45px #0a364d29;scroll-margin-top:110px}
+.beta-tutoriels-entete{max-width:760px;margin-bottom:26px}
+.beta-tutoriels h2{color:#123f5d;font-size:clamp(1.6rem,4vw,2rem);margin:0 0 12px}
+.beta-tutoriels-entete>p{color:#60727b;line-height:1.7;margin:12px 0}
+.beta-tutoriels-entete>.section-kicker{color:#008b8b}
+.beta-tutoriels-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;padding:0;margin:0;list-style:none}
+.beta-tutoriel{min-width:0;overflow:hidden;border:1px solid #d5e5e8;border-radius:18px;background:white}
+.beta-tutoriel:first-child{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:center}
+.beta-tutoriel-lecteur{position:relative;width:100%;aspect-ratio:16/9;background:#123f5d}
+.beta-tutoriel iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.beta-tutoriel-texte{padding:20px}
+.beta-tutoriel-numero{margin:0 0 8px;color:#008b8b;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.beta-tutoriel h3{margin:0 0 16px;color:#123f5d;font-size:1.15rem;line-height:1.5;overflow-wrap:anywhere}
+.beta-tutoriel a{display:inline-block;padding:8px 0;color:#1f628e;font-weight:700;line-height:1.5;text-underline-offset:3px}
+.beta-tutoriel a:focus-visible{outline:3px solid #008b8b;outline-offset:4px}
+.beta-tab-note{font-size:.88rem;line-height:1.6;color:#60727b;margin-top:12px}
+@media(max-width:760px){.beta-tutoriels-liste{grid-template-columns:1fr}.beta-tutoriel:first-child{grid-column:auto;display:block}.beta-tutoriel-texte{padding:18px}.subscriptions-page .subscriptions-wrap{padding-top:44px}.subscriptions-page .plan{padding:26px 22px}.subscriptions-page .beta-actions>.free-link{width:100%;box-sizing:border-box}}
