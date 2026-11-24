@@ -4,7 +4,7 @@ from decimal import Decimal, InvalidOperation
 import os
 from uuid import uuid4
 
-from utils.mails_evenements import DEBUT_BETA, FIN_BETA, PARIS, _donnees_profil
+from utils.mails_evenements import _donnees_profil
 from utils.invitations_beta import OFFRE_BETA, verifier_invitation_beta
 
 OFFRE = OFFRE_BETA
@@ -13,7 +13,7 @@ FORMULES_BETA = {
     "espace_seul": {"prix_centimes": 3500, "prix": "35", "libelle": "Trois mois d’espace abonné", "avec_rs": False},
     "espace_et_rs": {"prix_centimes": 7400, "prix": "74", "libelle": "Trois mois d’espace abonné + une Révolution Solaire", "avec_rs": True},
 }
-CGV_VERSION = "lancement_2026_11"
+CGV_VERSION = "lancement_2026_11_trois_mois_activation"
 
 
 def formule_commande(commande):
@@ -26,7 +26,7 @@ def formule_commande(commande):
 def configuration_paiement():
     mode = os.getenv("PAYPAL_ABONNEMENTS_MODE", "sandbox").lower()
     production = bool(os.getenv("RAILWAY_ENVIRONMENT_ID")) or os.getenv("APP_ENV") == "production"
-    ouvert = os.getenv("ABONNEMENTS_OUVERTS", "0") == "1" and datetime.now(timezone.utc) < FIN_BETA
+    ouvert = os.getenv("ABONNEMENTS_OUVERTS", "0") == "1"
     if mode not in {"sandbox", "live"} or (production and mode != "live"):
         return {"ouvert": False, "sandbox": True, "client_id": "", "base": ""}
     suffixe = "SANDBOX" if mode == "sandbox" else "LIVE"
@@ -39,8 +39,8 @@ def configuration_paiement():
 
 
 def offre_publique():
-    return {"prix": "35", "formules": FORMULES_BETA, "debut": DEBUT_BETA.astimezone(PARIS),
-            "fin": FIN_BETA.astimezone(PARIS), "paiement": configuration_paiement()}
+    return {"prix": "35", "formules": FORMULES_BETA, "duree_mois": 3,
+            "demarrage": "activation", "paiement": configuration_paiement()}
 
 
 def verifier_preparation(utilisateur):
@@ -156,6 +156,8 @@ def creer_commande(utilisateur, accepter, formule="espace_seul"):
     commande = CommandeAbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id, offre=OFFRE, sandbox=config["sandbox"]).first()
     if commande:
         if commande.statut in {"prete", "modification_incertaine"} and commande.fournisseur_commande_id:
+            commande.cgv_version, commande.cgv_acceptees_le = CGV_VERSION, datetime.now(timezone.utc)
+            db.session.commit()
             if commande.montant_centimes != selection["prix_centimes"] or commande.statut == "modification_incertaine":
                 return _modifier_commande(commande, selection, config)
             return commande
@@ -227,13 +229,13 @@ def enregistrer_paiement(commande_id, resultat):
     utilisateur = db.session.get(UtilisateurEspace, commande.utilisateur_id)
     try:
         verifier_preparation(utilisateur)
-        inscrire_beta(utilisateur)
+        inscription = inscrire_beta(utilisateur)
     except ValueError:
         commande.erreur = "Paiement confirmé. Complète ton profil pour activer ton accès, sans payer à nouveau."
     else:
         abonnement = AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).one()
         abonnement.source = "paypal:" + commande.id
-        commande.statut, commande.date_activation, commande.erreur = "active", datetime.now(timezone.utc), None
+        commande.statut, commande.date_activation, commande.erreur = "active", inscription.debut, None
     db.session.commit()
     return commande
 

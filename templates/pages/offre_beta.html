@@ -57,7 +57,7 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
 </header>
 <section class="plan plan--premium" aria-labelledby="offre-lancement">
 <p class="beta-intro">Si tu lis cette page, c’est que tu as répondu à mes mails pour devenir bêta-testeur pendant 3 mois et que tu es OK pour me faire tes retours afin que cet espace devienne un espace qui t’aide, t’accompagne et surtout te donne envie d’y revenir.</p>
-<p class="plan-label">Du 1er décembre 2026 au 28 février 2027</p>
+<p class="plan-label">Trois mois à partir de l’activation de ton abonnement</p>
 <h2 id="offre-lancement">Trois mois pour explorer ton espace</h2>
 <p class="plan-price">35 € <span>au total pour les trois mois</span></p>
 <p class="plan-summary">Un paiement unique, sans renouvellement automatique. Cette première période est réservée uniquement aux bêta-testeurs.</p>
@@ -103,7 +103,7 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
 <li><strong>Ton choix pour le journal.</strong> Tu indiques si tu autorises son utilisation dans les mails.</li>
 <li><strong>Ton paiement.</strong> Dans « Mon abonnement », choisis les trois mois seuls à 35 €, ou le pack avec une Révolution Solaire à 74 €. Après les informations ci-dessus, accepte les conditions de vente puis règle une seule fois le montant choisi avec le bouton PayPal.</li>
 <li><strong>Ton espace.</strong> Après confirmation du paiement, ton inscription est enregistrée pour les trois mois. Tu retrouves tes prochains rendez-vous dans « Mon abonnement » et les mails déjà envoyés dans « Mes mails ».</li></ol>
-<p class="beta-intro">L’accompagnement commence le <strong>1er décembre 2026</strong> et se termine le <strong>28 février 2027</strong>. À la fin, aucun nouveau prélèvement : ton compte gratuit, ton journal et tes archives restent accessibles.</p>
+<p class="beta-intro">Tes <strong>trois mois commencent à l’activation de ton abonnement</strong>, après paiement confirmé et informations complétées. Tes dates exactes seront affichées dans « Mon abonnement ». À la fin, aucun nouveau prélèvement : ton compte gratuit, ton journal et tes archives restent accessibles.</p>
 <p class="beta-intro">Cette première offre est réservée aux personnes invitées. Les futurs abonnements seront présentés sur <a href="{{ url_for('pages_bp.abonnements') }}">la page des abonnements</a>, après les retours de la bêta.</p>
 <div class="beta-actions">
 <a class="free-link" href="{{ url_for('abonnement_client.mon_abonnement',_anchor='souscription') if connecte else url_for('espace_personnel.inscription',suivant='/mon-espace/abonnement') }}" target="_blank" rel="noopener">M’inscrire et accéder au paiement<span class="sr-only"> (nouvel onglet)</span></a>

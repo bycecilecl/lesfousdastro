@@ -1,5 +1,5 @@
 """Invitations, inscriptions et paiements de la bêta, sans envoi ni génération."""
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from sqlalchemy import and_, case, inspect, or_
@@ -11,7 +11,7 @@ from models.espace_personnel import (
 from utils.acces_abonnement import FORMULES_ABONNEMENT, STATUTS_ACTIFS, acces_abonnement
 from utils.auth_espace import administratrice_connectee, verifier_csrf_espace
 from utils.invitations_beta import OFFRE_BETA, autoriser_adresses_beta, stockage_invitations_pret
-from utils.mails_evenements import DEBUT_BETA, FIN_BETA, PARIS, utc
+from utils.mails_evenements import PARIS, utc
 from utils.souscription_espace import configuration_paiement
 
 admin_beta_bp = Blueprint('admin_beta', __name__, url_prefix='/admin/beta-testeurs')
@@ -138,7 +138,7 @@ def index():
         invitations_pretes=invitations_pretes, commandes=commandes, paiements_prets=paiements_prets,
         inscriptions=inscriptions, inscriptions_pretes=inscriptions_pretes, utilisateurs=utilisateurs,
         paiement_ouvert=configuration_paiement()['ouvert'], statuts_paiement=STATUTS_PAIEMENT,
-        debut=DEBUT_BETA.astimezone(PARIS), fin=(FIN_BETA - timedelta(days=1)).astimezone(PARIS), utc=utc, paris=PARIS)
+        utc=utc, paris=PARIS)
 
 
 @admin_beta_bp.route('/invitations', methods=['POST'])

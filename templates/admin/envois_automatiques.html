@@ -10,8 +10,7 @@
   <section class="essai-carte">
     <h2>Le fonctionnement</h2>
     <p><strong>Autorisation des envois : {{ 'activée' if autorise else 'désactivée' }}.</strong> Ce réglage se fait dans la configuration du serveur. Cet écran ne déclenche aucun appel IA ni envoi.</p>
-    <p>Période bêta : du {{ debut.strftime('%d/%m/%Y') }} au {{ fin.strftime('%d/%m/%Y') }} inclus.</p>
-    {% if maintenant < utc(debut) %}<p>Avant le 1er décembre, aucun mail automatique n’est généré ou envoyé. Les dates peuvent être préparées à l’avance.</p>{% endif %}
+    <p>Chaque membre reçoit ses mails pendant les trois mois de son abonnement, à partir de son activation. Les dates de début et de fin sont propres à chaque compte.</p>
     <p>RL : premier 9 h après le retour lunaire. Nouvelle et Pleine Lune : la veille à 9 h, selon le fuseau du profil.</p>
     <p>Pour les lunaisons, ton analyse doit être validée. Le journal est utilisé selon le choix de chaque membre. Une tentative échouée n’est jamais relancée automatiquement.</p>
     <p><a href="{{ url_for('admin_essais_mails.index') }}">Tester un mail sur mon compte →</a> · <a href="{{ url_for('admin_lunaisons.index') }}">Préparer mes analyses de lunaisons →</a></p>
@@ -21,7 +20,8 @@
     {% for inscription in inscriptions %}
     {% set compte = utilisateurs.get(inscription.utilisateur_id) %}
     <article class="essai-details"><h3>{{ compte.prenom if compte else 'Compte indisponible' }}</h3>
-      <p>{{ inscription.email_destinataire }} · {{ 'Envois autorisés' if inscription.actif else 'Envois suspendus' }}<br>Calendrier {{ 'préparé' if inscription.date_planification else 'à préparer par le programme' }}.</p>
+      <p>{{ inscription.email_destinataire }} · {{ 'Période terminée' if maintenant >= utc(inscription.fin) else ('Envois autorisés' if inscription.actif else 'Envois suspendus') }}<br>Calendrier {{ 'préparé' if inscription.date_planification else 'à préparer par le programme' }}.</p>
+      <p>Période : du {{ utc(inscription.debut).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }} au {{ utc(inscription.fin).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }} (Paris).</p>
       {% if inscription.actif %}<form method="post" action="{{ url_for('admin_envois_automatiques.suspendre', utilisateur_id=inscription.utilisateur_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_espace() }}"><button class="essai-bouton" type="submit">Suspendre les envois de ce compte</button></form>{% endif %}
     </article>
     {% else %}<p>Aucun destinataire inscrit pour le moment. Les invitations et paiements sont regroupés dans « Bêta-testeurs ».</p>{% endfor %}

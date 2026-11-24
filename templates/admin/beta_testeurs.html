@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static',filename='essais-mails.css',v='20261123-beta') }}">
 {% include 'espace_personnel/_navigation.html' %}
 <main class="essai-shell">
-  <header class="essai-entete"><p>ADMINISTRATION</p><h1>Bêta-testeurs</h1><p>Les invitations, les inscriptions et les paiements de ta bêta du {{ debut.strftime('%d/%m/%Y') }} au {{ fin.strftime('%d/%m/%Y') }}.</p></header>
+  <header class="essai-entete"><p>ADMINISTRATION</p><h1>Bêta-testeurs</h1><p>Les invitations, les inscriptions et les paiements de ta bêta. Chaque abonnement dure trois mois à partir de son activation initiale.</p></header>
   {% for categorie,message in get_flashed_messages(with_categories=true) %}<p class="essai-message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}
   <nav class="beta-admin-onglets" aria-label="Gestion des bêta-testeurs">
     <a href="{{ url_for('admin_beta.comptes') }}">Tous les comptes et abonnements</a>

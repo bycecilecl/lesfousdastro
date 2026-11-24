@@ -5,11 +5,10 @@ import json
 import re
 from uuid import uuid4
 from zoneinfo import ZoneInfo
+from utils.periode_abonnement import fin_trois_mois
 
 VERSION = "evenements_beta_v1"
 PARIS = ZoneInfo("Europe/Paris")
-DEBUT_BETA = datetime(2026, 12, 1, tzinfo=PARIS).astimezone(timezone.utc)
-FIN_BETA = datetime(2027, 3, 1, tzinfo=PARIS).astimezone(timezone.utc)
 NATURES = {"rl": "Révolution Lunaire", "nouvelle_lune": "Nouvelle Lune", "pleine_lune": "Pleine Lune"}
 TITRES_RL = ("Le fil de ton cycle", "Ce que cela mobilise chez toi", "Ton point d’appui")
 TITRES_LUNAISON = ("Ce que cette lunaison met en lumière", "Ce que cela mobilise chez toi", "Ton point d’appui")
@@ -98,7 +97,7 @@ def horaire_envoi(nature, instant, tzid):
 
 
 def inscrire_beta(utilisateur):
-    """Appelé seulement par le formulaire admin confirmé ; ne planifie/envoie rien."""
+    """Active trois mois une seule fois, après paiement vérifié ou décision admin."""
     from extensions import db
     from models.espace_personnel import AbonnementEspace, InscriptionMailsBeta, ProfilAstral
     if not utilisateur.actif or not utilisateur.email:
@@ -108,15 +107,18 @@ def inscrire_beta(utilisateur):
         raise ValueError("Le compte doit d’abord compléter son profil astral.")
     _donnees_profil(profil)
     maintenant = datetime.now(timezone.utc)
-    if maintenant >= FIN_BETA:
-        raise ValueError("Cette session bêta est terminée.")
     inscription = db.session.get(InscriptionMailsBeta, utilisateur.id)
-    debut = max(DEBUT_BETA, maintenant)
     if inscription is None:
+        debut, fin = maintenant, fin_trois_mois(maintenant)
         inscription = InscriptionMailsBeta(utilisateur_id=utilisateur.id, date_creation=maintenant)
         db.session.add(inscription)
+    else:
+        # Une réactivation après modification du profil ne prolonge pas l'abonnement.
+        debut, fin = utc(inscription.debut), utc(inscription.fin)
+        if fin <= maintenant:
+            raise ValueError("Les trois mois de cet abonnement sont terminés. Aucun renouvellement automatique.")
     inscription.profil_id, inscription.actif = profil.id, True
-    inscription.debut, inscription.fin = debut, FIN_BETA
+    inscription.debut, inscription.fin = debut, fin
     inscription.email_destinataire = utilisateur.email.strip().lower()
     inscription.signature_profil = signature_profil(profil)
     inscription.date_planification = None
@@ -125,7 +127,7 @@ def inscrire_beta(utilisateur):
         abonnement = AbonnementEspace(utilisateur_id=utilisateur.id)
         db.session.add(abonnement)
     abonnement.formule, abonnement.statut = "beta_accompagnement", "actif"
-    abonnement.date_debut, abonnement.date_fin = debut, FIN_BETA
+    abonnement.date_debut, abonnement.date_fin = debut, fin
     abonnement.source = "beta_decembre_2026_inscription_admin"
     return inscription
 
@@ -140,11 +142,13 @@ def planifier_inscription(inscription):
     if not profil or signature_profil(profil) != inscription.signature_profil:
         raise ValueError("Le profil a changé : réactive explicitement cette inscription après vérification.")
     natal, lieu = _donnees_profil(profil)
-    debut, fin = max(DEBUT_BETA, utc(inscription.debut)), min(FIN_BETA, utc(inscription.fin))
+    debut, fin = utc(inscription.debut), utc(inscription.fin)
+    if debut >= fin:
+        raise ValueError("La période de cet abonnement est invalide.")
     compte = 0
     for nature in NATURES:
         curseur = debut - timedelta(days=2)
-        for _ in range(12):  # Au plus quatre cycles de chaque nature dans la cohorte.
+        for _ in range(12):  # Marge de recherche pour les trois mois individuels.
             instant = (prochaine_revolution_lunaire(natal["planetes"]["Lune"]["longitude"], apres=curseur)
                        if nature == "rl" else prochain_instant_lunaison(nature, apres=curseur))
             instant = utc(instant)

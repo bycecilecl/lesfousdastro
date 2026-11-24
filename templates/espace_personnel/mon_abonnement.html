@@ -8,8 +8,8 @@ body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Seg
 <main class="installation">
 <header><p>MON ESPACE ASTRAL</p><h1>Mon abonnement</h1><p>Ton profil, tes choix et tes rendez-vous : tout est ici.</p></header>
 {% with messages=get_flashed_messages(with_categories=true) %}{% for categorie,message in messages %}<p class="message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
-{% if commande and commande.statut == 'active' %}<section><h2>Ton inscription est confirmée</h2><p>Ton paiement unique de {{ choix_commande.prix }} € est enregistré{% if commande.sandbox %} <strong>en mode d’essai, sans paiement réel</strong>{% endif %}. Ton accompagnement couvre le <strong>1er décembre 2026 au 28 février 2027</strong>.</p><p>Aucun renouvellement automatique. Tu gardes ensuite ton espace gratuit et tes archives.</p><a class="bouton" href="{{ url_for('espace_personnel.accueil') }}">Entrer dans mon espace</a></section>
-{% elif inscription and inscription.actif %}<section><h2>Ton inscription est enregistrée</h2><p>Cécile a activé ton inscription pour cette période. Aucun nouveau paiement n’est nécessaire depuis cette page.</p></section>{% endif %}
+{% if commande and commande.statut == 'active' %}<section><h2>Ton inscription est confirmée</h2><p>Ton paiement unique de {{ choix_commande.prix }} € est enregistré{% if commande.sandbox %} <strong>en mode d’essai, sans paiement réel</strong>{% endif %}.</p>{% include 'espace_personnel/partials/periode_abonnement.html' %}<p>Aucun renouvellement automatique. Tu gardes ensuite ton espace gratuit et tes archives.</p><a class="bouton" href="{{ url_for('espace_personnel.accueil') }}">Entrer dans mon espace</a></section>
+{% elif inscription and inscription.actif %}<section><h2>Ton inscription est enregistrée</h2><p>Cécile a activé ton inscription pour cette période. Aucun nouveau paiement n’est nécessaire depuis cette page.</p>{% include 'espace_personnel/partials/periode_abonnement.html' %}</section>{% endif %}
 {% if rs_pack and commande and commande.statut == 'active' %}<section><h2>Ma Révolution Solaire incluse</h2>
 {% if rs_pack.statut == 'terminee' %}<p>Ton rapport est prêt et conservé dans Mes analyses.</p><a class="bouton" href="{{ url_for('espace_personnel.lire_analyse', analyse_id=rs_pack.analyse_id) }}">Lire ma Révolution Solaire</a>
 {% else %}<p>Ton pack comprend un rapport de Révolution Solaire. Choisis l’année et le lieu du retour solaire ; la génération démarre lorsque tu la demandes.</p><a class="bouton" href="{{ url_for('abonnement_client.revolution_solaire_pack') }}">{{ 'Préparer ma Révolution Solaire' if rs_pack.statut == 'a_preparer' else 'Voir où en est mon rapport' }}</a>{% endif %}</section>{% endif %}
@@ -32,7 +32,7 @@ body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Seg
 {% if not invite_beta and not (inscription and inscription.actif) %}<section><h2>Offre bêta sur invitation</h2><p>Pour souscrire, connecte-toi avec l’adresse e-mail à laquelle Cécile t’a envoyé son invitation.</p><p>Tu peux continuer à utiliser ton espace gratuit.</p></section>{% endif %}
 {% if invite_beta and not (inscription and inscription.actif) %}<section id="souscription"><h2>Accompagnement astral · offre bêta sur invitation</h2>
 <p class="prix">35 € au total pour les trois mois</p>
-<p><strong>Du 1er décembre 2026 au 28 février 2027.</strong> Un seul paiement. Aucun renouvellement automatique.</p>
+<p><strong>Trois mois à partir de l’activation de ton abonnement, après paiement confirmé et informations complétées.</strong> Un seul paiement. Aucun renouvellement automatique.</p>
 <p>Ton calendrier personnel, ton journal, tes mécanismes, tes analyses et des rendez-vous par mail : une Révolution Lunaire, une Nouvelle Lune et une Pleine Lune. Les dates suivent les cycles ; leur nombre peut varier selon le mois.</p>
 <p>Cécile rédige les analyses collectives des lunaisons. L’application, avec l’aide de l’IA, les personnalise avec ton natal, la RL active et les enjeux utiles de ta RS lorsqu’elle est enregistrée. Le journal intervient à la fin, si tu l’autorises.</p>
 <fieldset><legend>En option · ajouter un rapport de Révolution Solaire</legend>
@@ -49,7 +49,7 @@ body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Seg
 {% endif %}</section>{% endif %}
 <section><h2>Mes prochains rendez-vous</h2>
 {% if prochains %}<ul>{% for mail in prochains %}<li><strong>{{ natures[mail.nature] }}</strong> · mail prévu le {{ utc(mail.date_prevue).astimezone(fuseau).strftime('%d.%m.%Y à %H:%M') }}</li>{% endfor %}</ul><small>Heures de {{ profil.ville_cycles }}. Le mail arrive après sa préparation.</small>
-{% elif inscription and inscription.actif %}<p>Tes dates apparaîtront ici une fois le calendrier préparé. Les premiers envois commenceront à l’ouverture de l’accompagnement.</p>{% else %}<p>Après confirmation de ton inscription, retrouve ici les dates de tes mails.</p>{% endif %}
+{% elif termine %}<p>Tes trois mois sont terminés. Les mails déjà reçus restent accessibles dans « Mes mails ».</p>{% elif inscription and inscription.actif %}<p>Tes dates apparaîtront ici une fois le calendrier préparé, pour la période active de ton abonnement.</p>{% else %}<p>Après confirmation de ton inscription, retrouve ici les dates de tes mails.</p>{% endif %}
 <p>RL : premier 9 h après le retour lunaire. Nouvelle/Pleine Lune : veille à 9 h, selon le fuseau du lieu de tes cycles.</p>
 <a href="{{ url_for('abonnement_client.mes_mails') }}">Retrouver mes mails reçus →</a></section>
 </main>{% endblock %}

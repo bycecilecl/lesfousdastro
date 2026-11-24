@@ -1,5 +1,5 @@
 """Suivi administratrice des échéances. Aucune génération ou livraison depuis cet écran."""
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from sqlalchemy import func, inspect
@@ -8,7 +8,7 @@ from extensions import db
 from models.espace_personnel import InscriptionMailsBeta, MailEvenementAbonne, UtilisateurEspace
 from utils.auth_espace import administratrice_connectee, verifier_csrf_espace
 from utils.automatisation_mails_evenements import automatique_actif
-from utils.mails_evenements import DEBUT_BETA, FIN_BETA, NATURES, PARIS, utc
+from utils.mails_evenements import NATURES, PARIS, utc
 
 
 admin_envois_automatiques_bp = Blueprint("admin_envois_automatiques", __name__, url_prefix="/admin/envois-automatiques")
@@ -59,8 +59,7 @@ def index():
             utilisateurs = {u.id: u for u in UtilisateurEspace.query.filter(UtilisateurEspace.id.in_(ids)).all()}
     return render_template("admin/envois_automatiques.html", pret=pret,
         inscriptions=inscriptions, mails=mails, etats=etats, utilisateurs=utilisateurs,
-        autorise=automatique_actif(), debut=DEBUT_BETA.astimezone(PARIS),
-        fin=(FIN_BETA - timedelta(days=1)).astimezone(PARIS), maintenant=datetime.now(timezone.utc),
+        autorise=automatique_actif(), maintenant=datetime.now(timezone.utc),
         natures=NATURES, utc=utc, paris=PARIS, libelles_etats=LIBELLES_ETATS)
 
 

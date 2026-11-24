@@ -5,7 +5,7 @@ import json
 import os
 import re
 
-from utils.mails_evenements import DEBUT_BETA, FIN_BETA, NATURES, TITRES_RL, TITRES_LUNAISON, utc
+from utils.mails_evenements import NATURES, TITRES_RL, TITRES_LUNAISON, utc
 
 EN_ATTENTE = ("planifie", "attente_analyse")
 
@@ -41,7 +41,7 @@ def verifier_destinataire(mail, maintenant):
     abonnement = db.session.execute(select(AbonnementEspace).where(AbonnementEspace.utilisateur_id == mail.utilisateur_id)).scalar_one_or_none()
     if not inscription or not inscription.actif or not utilisateur or not utilisateur.actif or not profil:
         raise ValueError("Inscription suspendue, compte ou profil indisponible.")
-    if not DEBUT_BETA <= maintenant < FIN_BETA or not utc(inscription.debut) <= maintenant < utc(inscription.fin):
+    if not utc(inscription.debut) <= maintenant < utc(inscription.fin):
         raise ValueError("En dehors de la période bêta de ce compte.")
     droits = acces_abonnement(abonnement, maintenant=maintenant)
     if not droits["actif"] or droits["code"] != "beta_accompagnement":
@@ -145,8 +145,6 @@ def traiter_evenement(mail_id):
     if not automatique_actif():
         return "desactive"
     maintenant = datetime.now(timezone.utc)
-    if not DEBUT_BETA <= maintenant < FIN_BETA:
-        return "hors_periode_beta"
     mail = db.session.get(MailEvenementAbonne, mail_id)
     if mail is None or mail.statut not in (*EN_ATTENTE, "pret"):
         return "ignore"
@@ -265,9 +263,9 @@ def passer_automatisation():
     if not automatique_actif():
         return {"statut": "desactive", **resultat}
     maintenant = datetime.now(timezone.utc)
-    if maintenant >= FIN_BETA:
-        return {"statut": "beta_terminee", **resultat}
-    for inscription in InscriptionMailsBeta.query.filter_by(actif=True, date_planification=None).all():
+    for inscription in InscriptionMailsBeta.query.filter_by(actif=True, date_planification=None).filter(
+        InscriptionMailsBeta.fin > maintenant,
+    ).all():
         try:
             nouveaux = planifier_inscription(inscription)
             db.session.commit()
@@ -275,8 +273,6 @@ def passer_automatisation():
         except Exception as erreur:
             db.session.rollback()
             print("[MAILS BÊTA] Planification non effectuée pour le compte", inscription.utilisateur_id, type(erreur).__name__, flush=True)
-    if maintenant < DEBUT_BETA:
-        return {"statut": "avant_ouverture_aucun_appel", **resultat}
     limite = max(1, min(50, int(os.getenv("MAILS_EVENEMENTS_MAX_PAR_PASSAGE", "10"))))
     from sqlalchemy import case
     priorite = case((MailEvenementAbonne.statut == "pret", 0), (MailEvenementAbonne.statut == "planifie", 1), else_=2)

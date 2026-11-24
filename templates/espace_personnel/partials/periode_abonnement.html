@@ -1,0 +1,4 @@
+{% if inscription %}
+<p>Ta période d’accompagnement : du <strong>{{ utc(inscription.debut).astimezone(fuseau).strftime('%d/%m/%Y à %H h %M') }}</strong> au <strong>{{ utc(inscription.fin).astimezone(fuseau).strftime('%d/%m/%Y à %H h %M') }}</strong>. Heures du lieu de tes cycles.</p>
+{% if termine %}<p>Cette période est terminée. Ton espace gratuit et tes archives restent accessibles.</p>{% endif %}
+{% endif %}

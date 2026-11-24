@@ -9,7 +9,7 @@ from sqlalchemy import inspect
 from extensions import db
 from models.espace_personnel import AbonnementEspace, CommandeAbonnementEspace, InscriptionMailsBeta, MailEvenementAbonne, ProfilAstral, RevolutionSolairePackBeta
 from utils.auth_espace import utilisateur_connecte, verifier_csrf_espace
-from utils.mails_evenements import FIN_BETA, NATURES, utc
+from utils.mails_evenements import NATURES, utc
 from utils.souscription_espace import OFFRE, FORMULES_BETA, configuration_paiement, formule_commande, offre_publique
 from utils.invitations_beta import adresse_invitee_beta
 
@@ -73,7 +73,7 @@ def mon_abonnement():
         choix_commande=formule_commande(commande) if commande else None, rs_pack=rs_pack,
         offre=offre_publique(), utc=utc, fuseau=_fuseau(profil),
         invite_beta=adresse_invitee_beta(utilisateur.email),
-        termine=datetime.now(timezone.utc) >= FIN_BETA)
+        termine=bool(inscription and datetime.now(timezone.utc) >= utc(inscription.fin)))
 
 
 @abonnement_client_bp.route("/abonnement/journal", methods=["POST"])
