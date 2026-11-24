@@ -82,6 +82,14 @@ def add_security_headers(app):
                 "frame-ancestors 'self'",
             ]
 
+        # Les tutoriels YouTube sont intégrés uniquement à la page bêta.
+        if request.endpoint == "pages_bp.offre_beta":
+            csp_parts = [
+                directive + " https://www.youtube-nocookie.com"
+                if directive.startswith("frame-src ") else directive
+                for directive in csp_parts
+            ]
+
         # ⚠️ Ici on écrase la CSP pour être sûr d’appliquer celle-ci
         resp.headers["Content-Security-Policy"] = "; ".join(csp_parts)
 
