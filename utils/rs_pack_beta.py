@@ -1,5 +1,6 @@
 """Branche un rapport acheté dans le pack sur le moteur RS existant, sans le modifier."""
 from datetime import datetime, timezone
+import hashlib
 import json
 import math
 import os
@@ -65,7 +66,7 @@ def generer(commande, droit, profil, preparation):
     from flask import current_app
     from sqlalchemy import select, update
     from extensions import db
-    from models.espace_personnel import AnalysePersonnelle, CommandeAbonnementEspace, RevolutionSolairePackBeta
+    from models.espace_personnel import AnalysePersonnelle, CommandeAbonnementEspace, FichierAnalyse, RevolutionSolairePackBeta
     from utils.souscription_espace import formule_commande
     from utils.stockage_espace import racine_privee_espace
     if commande.statut != "active" or not formule_commande(commande)["avec_rs"] or droit.utilisateur_id != profil.utilisateur_id:
@@ -115,6 +116,7 @@ def generer(commande, droit, profil, preparation):
             if not html_to_pdf(html, str(destination)) or not destination.is_file():
                 raise ValueError("Le texte est conservé, mais son PDF n’a pas pu être préparé.")
         os.chmod(destination, 0o600)
+        contenu_pdf = destination.read_bytes()
         # La réservation a été validée avant l’appel ; le cycle neuf est enregistré ici.
         db.session.add(cycle)
         db.session.flush()
@@ -123,6 +125,12 @@ def generer(commande, droit, profil, preparation):
             statut="terminee", chemin_resultat=destination.name, date_generation=datetime.now(timezone.utc))
         db.session.add(analyse)
         db.session.flush()
+        # La lecture en production utilise le PDF privé en base, pas le disque Railway.
+        db.session.add(FichierAnalyse(
+            analyse_id=analyse.id, nom_fichier=destination.name,
+            type_mime="application/pdf", contenu=contenu_pdf,
+            empreinte_sha256=hashlib.sha256(contenu_pdf).hexdigest(),
+        ))
         # Les anciennes versions annuelles et leurs PDF restent conservés.
         if not cycle.rapport_texte:
             cycle.rapport_texte, cycle.rapport_html = rapport.texte_markdown, rapport.html
