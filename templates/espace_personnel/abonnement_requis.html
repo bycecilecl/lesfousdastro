@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Fonction réservée aux abonnés | Les Fous d’Astro{% endblock %}
+{% block content %}
+{% include 'espace_personnel/_navigation.html' %}
+<main style="max-width:760px;margin:40px auto;padding:30px;background:#fffdf8;border-radius:24px;color:#243943">
+  <h1>Cette fonction fait partie de l’abonnement payant</h1>
+  <p>Ton compte gratuit te permet de garder ton profil, ton journal et tes analyses déjà achetées. Il ne comprend aucun appel IA ni mail d’accompagnement.</p>
+  <p>Les fonctions IA et les mails personnalisés sont réservés aux abonnés pendant la période active de leur formule.</p>
+  <p><a href="{{ url_for('abonnement_client.mon_abonnement') }}">Voir mon abonnement →</a></p>
+  <p><a href="{{ url_for('espace_personnel.journal') }}">Revenir à mon journal →</a></p>
+</main>
+{% endblock %}

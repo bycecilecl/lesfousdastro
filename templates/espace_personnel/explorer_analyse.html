@@ -85,11 +85,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                 <p class="prepared-note">PDF ajouté le {{ analyse.date_creation.strftime('%d.%m.%Y à %H:%M') }} UTC. Les pistes proposées concernent cette année et cette version du rapport.</p>
                 <p class="prepared-note">Fais ressortir 3 à 5 dynamiques centrales, leurs manifestations possibles et les extraits du PDF qui les soutiennent. Retiens ensuite les enjeux qui serviront de fil rouge à tes mails de cycle.</p>
                 {% if not enjeux_annuels and not propositions_rs_a_verifier and sections_analyse %}
-                    <form class="ai-generate solar-extraction" method="post" action="{{ url_for('espace_personnel.generer_enjeux_annuels', analyse_id=analyse.id) }}">
+                    {% if droits_compte_espace.extraction_ia %}<form class="ai-generate solar-extraction" method="post" action="{{ url_for('espace_personnel.generer_enjeux_annuels', analyse_id=analyse.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
                         <button type="submit">Faire ressortir les grands enjeux de l’année</button>
                         <p class="ai-warning">Cette action utilise l’IA. Une seule extraction est lancée au clic, sans relance automatique.</p>
-                    </form>
+                    </form>{% else %}<p class="prepared-note">L’extraction IA fait partie de l’abonnement payant. <a href="{{ url_for('abonnement_client.mon_abonnement') }}">Voir mon abonnement →</a></p>{% endif %}
                 {% elif not sections_analyse %}
                     <p class="prepared-note">Le texte de ce PDF n’est pas disponible. Ajoute une version avec du texte sélectionnable depuis la fiche de l’année.</p>
                 {% endif %}
@@ -178,11 +178,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                     </div>
                 {% else %}
                     <p class="prepared-note">Une synthèse courte fera ressortir les dynamiques centrales du rapport, sans le régénérer.</p>
-                    <form class="ai-generate" method="post" action="{{ url_for('espace_personnel.generer_enjeux_periode', analyse_id=analyse.id) }}">
+                    {% if droits_compte_espace.extraction_ia %}<form class="ai-generate" method="post" action="{{ url_for('espace_personnel.generer_enjeux_periode', analyse_id=analyse.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
                         <button type="submit">Faire ressortir les enjeux avec l’IA</button>
                         <p class="ai-warning">Ce bouton déclenche un appel Claude facturé à ta clé API.</p>
-                    </form>
+                    </form>{% else %}<p class="prepared-note">L’extraction IA fait partie de l’abonnement payant. <a href="{{ url_for('abonnement_client.mon_abonnement') }}">Voir mon abonnement →</a></p>{% endif %}
                 {% endif %}
             </aside>
         {% elif sections_analyse or analyse.type_analyse in ['racines_familiales', 'profil_amoureux', 'analyse_karmique'] %}
@@ -190,11 +190,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
                 <h2>Faire ressortir les mécanismes de ce rapport</h2>
                 <p class="prepared-note">Retrouve les grandes pistes de ton analyse, puis choisis celles que tu souhaites explorer dans ton Labo.</p>
                 {% if not suggestions %}
-                    <form class="ai-generate" data-extraction-mecanismes method="post" action="{{ url_for('espace_personnel.generer_suggestions_mecanismes', analyse_id=analyse.id) }}">
+                    {% if droits_compte_espace.extraction_ia %}<form class="ai-generate" data-extraction-mecanismes method="post" action="{{ url_for('espace_personnel.generer_suggestions_mecanismes', analyse_id=analyse.id) }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
                         <button type="submit">Faire ressortir les mécanismes avec l’IA</button>
                         <p class="ai-warning">Cette action utilise l’IA et démarre seulement quand tu cliques.</p>
-                    </form>
+                    </form>{% else %}<p class="prepared-note">L’extraction IA fait partie de l’abonnement payant. <a href="{{ url_for('abonnement_client.mon_abonnement') }}">Voir mon abonnement →</a></p>{% endif %}
                 {% else %}
                     <p class="prepared-note">Les pistes proposées sont disponibles ci-dessous.</p>
                 {% endif %}
@@ -203,11 +203,11 @@ body { background: linear-gradient(135deg, #1f628e 0%, #00a8a8 50%, #c0f0f7 100%
             <aside class="prepared-report" id="enjeux-periode">
                 <h2>{{ titre_enjeux }}</h2>
                 <p class="prepared-note">L’IA va lire le rapport et faire ressortir seulement 4 ou 5 dynamiques fortes, sans le réécrire.</p>
-                <form class="ai-generate" method="post" action="{{ url_for('espace_personnel.generer_enjeux_periode', analyse_id=analyse.id) }}">
+                {% if droits_compte_espace.extraction_ia %}<form class="ai-generate" method="post" action="{{ url_for('espace_personnel.generer_enjeux_periode', analyse_id=analyse.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
                     <button type="submit">Faire ressortir les enjeux avec l’IA</button>
                     <p class="ai-warning">Ce bouton déclenche un appel Claude facturé à ta clé API.</p>
-                </form>
+                </form>{% else %}<p class="prepared-note">L’extraction IA fait partie de l’abonnement payant. <a href="{{ url_for('abonnement_client.mon_abonnement') }}">Voir mon abonnement →</a></p>{% endif %}
             </aside>
         {% endif %}
 

@@ -129,6 +129,8 @@ def verifier_actualite(mail, utilisateur):
 
 def generer(mail, utilisateur):
     """Une seule tentative payante par aperçu, jamais d’envoi dans cette fonction."""
+    from utils.acces_abonnement import exiger_droit_compte
+    exiger_droit_compte(utilisateur.id, "appels_ia")
     if mail.statut != "essai_prepare":
         raise ValueError("Cet aperçu a déjà fait l’objet d’une tentative. Le résultat est conservé ; aucun nouvel appel automatique.")
     verifier_actualite(mail, utilisateur)
@@ -140,6 +142,7 @@ def generer(mail, utilisateur):
         print("[ESSAI MAIL] 3. Un seul appel Claude, sans relance automatique et sans envoi.", flush=True)
         _trace(mail, "requete.json", parametres)
         from utils.claude_espace import CLIENT, creer_message_claude, extraire_texte_claude
+        exiger_droit_compte(utilisateur.id, "appels_ia")
         reponse = creer_message_claude(client=CLIENT.with_options(max_retries=0, timeout=180.0), **parametres)
         brut = reponse.model_dump_json(indent=2)
         usage = reponse.usage.model_dump(mode="json")
@@ -177,6 +180,8 @@ def generer(mail, utilisateur):
 
 def envoyer_a_soi(mail, utilisateur):
     """Remise explicite d’un brouillon relu, à l’adresse du seul compte administrateur."""
+    from utils.acces_abonnement import exiger_droit_compte
+    exiger_droit_compte(utilisateur.id, "emails_accompagnement")
     if mail.utilisateur_id != utilisateur.id or not mail.cle_evenement.startswith(PREFIXE):
         raise ValueError("Ce mail n’appartient pas à ton écran d’essai.")
     db.session.refresh(mail)

@@ -97,6 +97,8 @@ def _verrou(email_id):
 
 def generer_mail_enregistre(email, profil, *, nouvel_essai=False, actualiser_journal=False):
     """L'appelant doit avoir explicitement demandé cette génération."""
+    from utils.acces_abonnement import exiger_droit_compte
+    exiger_droit_compte(profil.utilisateur_id, "emails_accompagnement")
     from utils.claude_espace import CLIENT, MODEL, creer_message_claude, ouvrir_flux_claude
     from utils.mails_quinzaine import VERSION_CONTRAT, actualiser_mail_quinzaine, preparer_essai_quinzaine, construire_prompt_quinzaine
     from utils.enjeux_annuels import actualiser_enjeux_email
@@ -193,6 +195,7 @@ def generer_mail_enregistre(email, profil, *, nouvel_essai=False, actualiser_jou
             if lire_choix_journal_mails(profil.utilisateur_id) != preparation["choix_journal_mails"]:
                 controles["raison_lisible"] = "Ton choix sur l'utilisation du journal a changé pendant la préparation. Aucun appel IA effectué. Prépare un nouveau brouillon avec ton choix actuel."
                 raise ValueError(controles["raison_lisible"])
+            exiger_droit_compte(profil.utilisateur_id, "emails_accompagnement")
             reponse = creer_message_claude(client=CLIENT.with_options(max_retries=0, timeout=180.0), **parametres)
             brut = "".join(bloc.text for bloc in reponse.content if getattr(bloc, "type", None) == "text")
             conserver("reponse_brute.txt", brut)

@@ -1587,6 +1587,9 @@ def _preparer_theme_cycle_lunaire(theme):
 
 def _generer_interpretation_cycle_enregistre(cycle, prenom, theme):
     """Appelé après réservation atomique du cycle, une fois par clic autorisé."""
+    from utils.acces_abonnement import exiger_droit_compte
+    profil = db.session.get(ProfilAstral, cycle.profil_id)
+    exiger_droit_compte(profil.utilisateur_id if profil else None, "appels_ia")
     interpretation, usage = generer_interpretation_avec_claude(
         prenom, cycle.ville, theme, cycle_id=cycle.id,
     )
@@ -1926,6 +1929,8 @@ def generer_suggestions_mecanismes(analyse_id):
                 for section in sections
             ]
             sections_par_cle = {section.cle_section: section for section in sections}
+            from utils.acces_abonnement import exiger_droit_compte
+            exiger_droit_compte(analyse.utilisateur_id, "extraction_ia")
             phase = "ia"
             print(f"[Mécanismes] Rapport {analyse.id} : demande explicite, un seul appel IA.", flush=True)
             suggestions, usage = generer_suggestions_avec_claude(
@@ -2778,6 +2783,12 @@ def exiger_connexion_espace():
     if utilisateur is None:
         session.pop("utilisateur_espace_id", None)
         return redirect(url_for("espace_personnel.connexion", suivant=request.full_path))
+    # Refuser une action IA avant la lecture du PDF ou toute préparation payante.
+    from utils.acces_abonnement import DROITS_ACTIONS_ESPACE, droits_pour_compte
+    action = (request.endpoint or "").rsplit(".", 1)[-1]
+    if request.method == "POST" and action in DROITS_ACTIONS_ESPACE:
+        if not droits_pour_compte(utilisateur.id).get(DROITS_ACTIONS_ESPACE[action], False):
+            return render_template("espace_personnel/abonnement_requis.html"), 403
     _jeton_formulaire_portail()
     if not session.get('espace_profil_csrf'):
         session['espace_profil_csrf'] = secrets.token_urlsafe(32)
@@ -2797,8 +2808,11 @@ def exiger_connexion_espace():
 
 @espace_personnel_bp.app_context_processor
 def contexte_auth_espace():
+    from utils.acces_abonnement import droits_pour_compte
+    utilisateur = utilisateur_connecte()
     return {"csrf_espace": jeton_csrf_espace, "avatars_espace": AVATARS_ESPACE,
-            "auth_turnstile_actif": True, "outils_mails_admin": administratrice_connectee(), "utilisateur_espace": utilisateur_connecte()}
+            "droits_compte_espace": droits_pour_compte(utilisateur.id if utilisateur else None),
+            "auth_turnstile_actif": True, "outils_mails_admin": administratrice_connectee(), "utilisateur_espace": utilisateur}
 
 
 @espace_personnel_bp.after_request
@@ -3377,6 +3391,8 @@ def generer_enjeux_periode(analyse_id):
             if analyse.type_analyse == "forces_defis"
             else generer_enjeux_transits_avec_claude
         )
+        from utils.acces_abonnement import exiger_droit_compte
+        exiger_droit_compte(analyse.utilisateur_id, "extraction_ia")
         enjeux, usage = generer_enjeux(sections_dict)
         maintenant = datetime.now(timezone.utc)
         if sections_extraites is not None:
@@ -3601,9 +3617,8 @@ def _generer_enjeux_revolution_solaire(analyse):
         flash("L’année de ce rapport n’est pas renseignée. Importe ton PDF en précisant son année.", "error")
         return redirect(destination)
     try:
-        droits = acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=analyse.utilisateur_id).first())
-        if not droits["actif"]:
-            raise ValueError("L’extraction IA est réservée à un abonnement payant actif. Aucun appel IA lancé.")
+        from utils.acces_abonnement import exiger_droit_compte
+        exiger_droit_compte(analyse.utilisateur_id, "extraction_ia")
         with verrou_extraction_rs(_dossier_extractions_rs(), analyse.id):
             if EnjeuAnnuel.query.filter_by(analyse_id=analyse.id).first():
                 flash("Les enjeux ont déjà été extraits de cette version du PDF.", "error")
@@ -3611,6 +3626,7 @@ def _generer_enjeux_revolution_solaire(analyse):
             sections = SectionAnalyse.query.filter_by(analyse_id=analyse.id).order_by(SectionAnalyse.ordre).all()
             if not sections:
                 raise ValueError("Le texte de ce PDF n’est pas disponible pour l’extraction.")
+            exiger_droit_compte(analyse.utilisateur_id, "extraction_ia")
             suggestions, usage, execution, a_verifier = generer_enjeux_rs(
                 [{"cle_section": s.cle_section, "titre": s.titre, "contenu": s.contenu} for s in sections],
                 _dossier_extractions_rs(), analyse.id, annee,
