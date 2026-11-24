@@ -88,6 +88,16 @@ function eventMail(e){
  if(!['rl','nouvelle_lune','pleine_lune'].includes(e.nature))return '';
  return e.mail_url?`<p><a class="action cal-mail-link" href="${escapeCal(e.mail_url)}">Ouvrir mon mail →</a></p>`:'<p class="muted">Pas encore de mail disponible pour cet événement.</p>';
 }
+function eventLecture(e){
+ return e.lecture_url?`<p><a class="action cal-lecture-link" href="${escapeCal(e.lecture_url)}">Lire l’interprétation de Cécile →</a></p>`:'';
+}
+function eventCalendarLabel(e,classe,label=e.label){
+ const titre=escapeCal(e.label)+' · '+escapeCal(fmt(e.date));
+ const texte=escapeCal(label)+(e.mail_url?' <span aria-label="Mail disponible">✉</span>':'');
+ return e.lecture_url
+  ?`<a class="${escapeCal(classe)} cal-lecture-link" href="${escapeCal(e.lecture_url)}" title="${titre}" aria-label="${escapeCal(e.label)} : lire l’interprétation de Cécile">${texte}</a>`
+  :`<span class="${escapeCal(classe)}" title="${titre}">${texte}</span>`;
+}
 function shortReading(p){
  const r=p.lecture_courte;if(!r)return '';
  const statut=r.source==='reperes_generaux'?'<p class="muted">Repère général : cette combinaison n’a pas encore de fiche détaillée.</p>':'';
@@ -166,13 +176,13 @@ function drawAgendaLunaire(){
    const evenements=evenementsLunairesDuJour(d);
    const titreNotes=notes.map(n=>periodeNote(n)||('Note du '+n.date.split('-').reverse().join('.'))).join(' · ');
    const titreJour=new Intl.DateTimeFormat('fr-FR',{timeZone:calData.fuseau,day:'numeric',month:'long'}).format(new Date(d.debut));
-   h+=`<button type="button" class="day cal-lunar-day ${d.date===aujourdHui?'today':''} ${d.date===selected.date?'selected':''}" data-date="${d.date}" aria-pressed="${d.date===selected.date}" aria-label="${escapeCal(titreJour)}${d.date===aujourdHui?', aujourd’hui':''}, ${contacts} contacts, ${notes.length} notes" ${d.date===aujourdHui?'aria-current="date"':''}><span class="num">${d.numero}${d.date===aujourdHui?'<small class="today-label" aria-hidden="true">Aujourd’hui</small>':''}</span>`;
+   h+=`<div class="day cal-lunar-day ${d.date===aujourdHui?'today':''} ${d.date===selected.date?'selected':''}" data-date="${d.date}"><button type="button" class="cal-day-select" aria-pressed="${d.date===selected.date}" aria-label="${escapeCal(titreJour)}${d.date===aujourdHui?', aujourd’hui':''}, ${contacts} contacts, ${notes.length} notes" ${d.date===aujourdHui?'aria-current="date"':''}><span class="num">${d.numero}${d.date===aujourdHui?'<small class="today-label" aria-hidden="true">Aujourd’hui</small>':''}</span></button>`;
    if(lune){
     const changement=lune.entree?.signe;
     const label=changement?`Lune en ${lune.signe}, puis ${changement}`:`Lune en ${lune.signe}`;
     h+=`<span class="cal-lunar-sign" title="${escapeCal(label)}" aria-label="${escapeCal(label)}">${glyphesSignes[lune.signe]||'☾'}${changement?' → '+(glyphesSignes[changement]||escapeCal(changement)):' '+escapeCal(lune.signe)}</span>`;
    }
-   h+='<span class="cal-lunar-day-events">'+evenements.map(e=>`<span class="cal-lunar-cycle ${escapeCal(e.nature)}" title="${escapeCal(e.label)} · ${fmt(e.date)}">${e.nature==='rl'?'Révolution lunaire':e.nature==='nouvelle_lune'?'Nouvelle Lune':'Pleine Lune'}${e.mail_url?' ✉':''}</span>`).join('');
+   h+='<span class="cal-lunar-day-events">'+evenements.map(e=>eventCalendarLabel(e,'cal-lunar-cycle '+e.nature,e.nature==='rl'?'Révolution lunaire':e.nature==='nouvelle_lune'?'Nouvelle Lune':'Pleine Lune')).join('');
    if(passages.length){
     const titre=passages.map(p=>`${p.titre} · ${heureConjonction(p.date)}`).join(' · ');
     h+=`<span class="cal-lunar-day-conjunction" title="${escapeCal(titre)}">☾ ${passages.length===1?'Lune–'+escapeCal(passages[0].planete):passages.map(p=>escapeCal(p.planete)).join(' · ')}</span>`;
@@ -180,12 +190,13 @@ function drawAgendaLunaire(){
    h+='</span><span class="cal-lunar-day-footer">';
    if(contacts)h+=`<span class="cal-lunar-contact-count">${contacts} contact${contacts>1?'s':''}</span>`;
    if(notes.length)h+=`<span class="cal-lunar-note-count" title="${escapeCal(titreNotes)}" aria-label="${notes.length} notes de journal">📖 ${notes.length}</span>`;
-   h+='</span></button>';
+   h+='</span></div>';
   }
   h+='</div>';
  }
  el('grid').innerHTML=h;
- el('grid').querySelectorAll('.day[data-date]').forEach(b=>b.onclick=()=>{
+ el('grid').querySelectorAll('.day[data-date]').forEach(b=>b.onclick=ev=>{
+  if(ev.target.closest('a'))return;
   selected=calData.jours.find(d=>d.date===b.dataset.date);
   selectedGroup=null;selectedClimate=null;selectedSkyPeriod=null;focusedSlow=null;
   drawCal();
@@ -198,7 +209,7 @@ function detailAgendaLunaire(d){
  const titre=new Intl.DateTimeFormat('fr-FR',{timeZone:calData.fuseau,weekday:'long',day:'numeric',month:'long'}).format(new Date(d.debut));
  const contacts=contactsLunairesDuJour(d);
  let h=`<h2>${escapeCal(titre)}</h2><section class="cal-lunar-detail-section"><h3>Le ciel du jour</h3>${signeLunaireDuJour(d)}`;
- h+=evenementsLunairesDuJour(d).map(e=>`<div class="event"><strong>${escapeCal(e.label)}</strong><p class="muted">${fmt(e.date)} · ${escapeCal(calData.fuseau)}</p>${eventMail(e)}</div>`).join('');
+ h+=evenementsLunairesDuJour(d).map(e=>`<div class="event"><strong>${escapeCal(e.label)}</strong><p class="muted">${fmt(e.date)} · ${escapeCal(calData.fuseau)}</p>${eventLecture(e)}${eventMail(e)}</div>`).join('');
  h+=conjonctionsLunairesDuJour(d,false);
  h+='</section><section class="cal-lunar-detail-section"><h3>Les contacts avec mon thème</h3>';
  if(contacts.length){
@@ -234,7 +245,7 @@ function detailCal(){let h;
   el('detail').innerHTML=h;el('detail').querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>{focusedSlow=+b.dataset.focus;selectedGroup=focusedSlow;selectedClimate=null;drawCal()});return;
  }
  if(selectedGroup!==null){h=conjonctionsLunairesDuJour(selected)+signeLunaireDuJour(selected)+journalDuJour(selected)+contactDetails(groups[selectedGroup],true)}else{const d=selected;h=`<h2>${escapeCal(new Intl.DateTimeFormat('fr-FR',{timeZone:calData.fuseau,day:'numeric',month:'long'}).format(new Date(d.debut)))}</h2>${conjonctionsLunairesDuJour(d)}${signeLunaireDuJour(d)}${journalDuJour(d)}`;
- for(const e of calData.events.filter(e=>eventVisible(e)&&localKey(e.date)===d.date))h+=`<div class="event"><strong>${escapeCal(e.label)}</strong>${fmt(e.date)}${stationDetails(e)}${eventMail(e)}</div>`;
+ for(const e of calData.events.filter(e=>eventVisible(e)&&localKey(e.date)===d.date))h+=`<div class="event"><strong>${escapeCal(e.label)}</strong>${fmt(e.date)}${stationDetails(e)}${eventLecture(e)}${eventMail(e)}</div>`;
  if(checked('mars')){const actifs=groups.filter(g=>enabled(g)&&overlaps(g,d));if(actifs.length)h+=`<details class="cal-transit-explore"><summary>Noter en lien avec un transit <small>· pour les connaisseurs (${actifs.length})</small></summary><div class="cal-transit-list">${actifs.map(g=>contactDetails(g,false,true)).join('')}</div></details>`;}
  }el('detail').innerHTML=h;}
 function drawCal(){
@@ -264,7 +275,7 @@ function drawCal(){
  }
  bands.sort((a,b)=>a.first-b.first||b.last-a.last);const stationPlanets=[...new Set(bands.filter(b=>b.skyStation).map(b=>b.skyStation.planete))];const retroKinds=['personal','slow'].filter(kind=>bands.some(b=>b.retroKind===kind));const skyClimateLane=bands.some(b=>b.skyClimateGroup)?stationPlanets.length+retroKinds.length:-1;const lanes=bands.some(b=>b.climate)?[6]:Array(stationPlanets.length+retroKinds.length+(skyClimateLane<0?0:1)).fill(6);
  for(const b of bands){if(b.climate){b.lane=0;continue}if(b.skyStation){b.lane=stationPlanets.indexOf(b.skyStation.planete);continue}if(b.retroGroup){b.lane=stationPlanets.length+retroKinds.indexOf(b.retroKind);continue}if(b.skyClimateGroup){b.lane=skyClimateLane;continue}let lane=lanes.findIndex(end=>end<b.first);if(lane<0)lane=lanes.length;lanes[lane]=b.last;b.lane=lane;}
- h+=`<div class="cal-week" style="--band-lanes:${Math.max(1,lanes.length)}">`;week.forEach((d,i)=>{if(!d){h+=`<div class="cal-blank" style="grid-column:${i+1};grid-row:1"></div>`;return}h+=`<button class="day ${d.date===localKey(new Date())?'today':''} ${d.date===selected.date&&selectedGroup===null?'selected':''}" style="grid-column:${i+1};grid-row:1" data-date="${d.date}" ${d.date===localKey(new Date())?'aria-current="date"':''} aria-label="${d.date}"><span class="num">${d.numero}${d.date===localKey(new Date())?'<small class="today-label">Aujourd’hui</small>':''}</span>`;h+=view==='sky'?skyEventsOn(d.date).filter(e=>!e.station).map(e=>`<span class="pill sky ${skyClass(e)}">${escapeCal(skyEventLabel(e))}</span>`).join(''):calData.events.filter(e=>eventVisible(e)&&localKey(e.date)===d.date).map(e=>`<span class="pill ${e.kind==='station'?'station':e.kind==='solar'?'solar':'moon'}">${escapeCal(e.label)}${e.mail_url?' <span aria-label="Mail disponible">✉</span>':''}</span>`).join('');if(checked('lunar-conjunctions'))h+=conjonctionsLunairesLe(d.date).map(p=>`<span class="pill lunar-highlight" title="${escapeCal(p.titre)} · ${heureConjonction(p.date)}">☾ Lune–${escapeCal(p.planete)} · ${heureConjonction(p.date)}</span>`).join('');const notesDuJour=calData.notes.filter(n=>noteConcerneDate(n,d.date));const n=notesDuJour.length;const titreNotes=notesDuJour.map(note=>periodeNote(note)||('Note du '+note.date.split('-').reverse().join('.'))).join(' · ');if(checked('journal')&&n)h+=`<span class="cal-journal-marker" title="${escapeCal(titreNotes)}" aria-label="${n} entrée${n>1?'s':''} dans le journal"><span aria-hidden="true">📖</span><small aria-hidden="true">${n}</small></span>`;h+='</button>'});
+ h+=`<div class="cal-week" style="--band-lanes:${Math.max(1,lanes.length)}">`;week.forEach((d,i)=>{if(!d){h+=`<div class="cal-blank" style="grid-column:${i+1};grid-row:1"></div>`;return}h+=`<div class="day ${d.date===localKey(new Date())?'today':''} ${d.date===selected.date&&selectedGroup===null?'selected':''}" style="grid-column:${i+1};grid-row:1" data-date="${d.date}"><button type="button" class="cal-day-select" ${d.date===localKey(new Date())?'aria-current="date"':''} aria-label="${d.date}"><span class="num">${d.numero}${d.date===localKey(new Date())?'<small class="today-label">Aujourd’hui</small>':''}</span></button>`;h+=view==='sky'?skyEventsOn(d.date).filter(e=>!e.station).map(e=>`<span class="pill sky ${skyClass(e)}">${escapeCal(skyEventLabel(e))}</span>`).join(''):calData.events.filter(e=>eventVisible(e)&&localKey(e.date)===d.date).map(e=>eventCalendarLabel(e,'pill '+(e.kind==='station'?'station':e.kind==='solar'?'solar':'moon'))).join('');if(checked('lunar-conjunctions'))h+=conjonctionsLunairesLe(d.date).map(p=>`<span class="pill lunar-highlight" title="${escapeCal(p.titre)} · ${heureConjonction(p.date)}">☾ Lune–${escapeCal(p.planete)} · ${heureConjonction(p.date)}</span>`).join('');const notesDuJour=calData.notes.filter(n=>noteConcerneDate(n,d.date));const n=notesDuJour.length;const titreNotes=notesDuJour.map(note=>periodeNote(note)||('Note du '+note.date.split('-').reverse().join('.'))).join(' · ');if(checked('journal')&&n)h+=`<span class="cal-journal-marker" title="${escapeCal(titreNotes)}" aria-label="${n} entrée${n>1?'s':''} dans le journal"><span aria-hidden="true">📖</span><small aria-hidden="true">${n}</small></span>`;h+='</div>'});
  for(const b of bands){const {g,index,first,last,lane}=b;
  if(b.skyStation){const p=b.skyStation;const position=week.findIndex(d=>d?.date===p.changement);const marker=position>=first&&position<=last?`<span class="cal-star" style="left:${(position-first+.5)/(last-first+1)*100}%" title="${escapeCal(p.planete)} devient ${escapeCal(p.direction)} le ${skyDate(p.changement)}">${p.direction==='direct'?'D':'R'}</span>`:'';h+=`<button class="cal-band cal-sky-station ${skyMoverKind(p)}" style="grid-column:${first+1} / ${last+2};grid-row:1;--band-lane:${lane}" data-date="${position>=first&&position<=last?p.changement:week[first].date}" title="${escapeCal(p.planete)} stationnaire du ${skyDate(p.debut)} au ${skyDate(p.fin)}" aria-label="${escapeCal(p.planete)} stationnaire du ${skyDate(p.debut)} au ${skyDate(p.fin)}, devient ${escapeCal(p.direction)} le ${skyDate(p.changement)}"><span class="cal-band-label">${p.debut<week[first].date?'← ':''}${escapeCal(p.planete)} stationnaire${p.fin>week[last].date?' →':''}</span>${marker}</button>`;continue;}
  if(b.retroGroup){const planets=[...new Set(b.retroGroup.map(p=>p.planete))];h+=`<div class="cal-band cal-sky-retro ${b.retroKind}" style="grid-column:${first+1} / ${last+2};grid-row:1;--band-lane:${lane}" title="${escapeCal(planets.join(', '))} rétrograde${planets.length>1?'s':''}"><span class="cal-band-label">${b.retroKind==='personal'?'Mercure · Vénus · Mars':'Jupiter à Pluton'} : ${escapeCal(planets.join(', '))} rétrograde${planets.length>1?'s':''}</span></div>`;continue;}
@@ -274,7 +285,7 @@ function drawCal(){
 const before=bounds(g)[0]<+new Date(week[first].debut),after=bounds(g)[1]>+new Date(week[last].fin);const exact=exactDays(g);let stars='';let firstStar=null;for(let i=first;i<=last;i++)if(exact.includes(week[i].date)){const pos=((i-first+.5)/(last-first+1))*100;if(firstStar===null)firstStar=pos;stars+=`<span class="cal-star" style="left:${pos}%" title="Passage exact le ${week[i].date}">★</span>`;}
  h+=`<button data-planet="${escapeCal(g.planete)}" class="cal-band ${g.maitre?'cal-ruler':''} ${g.lente?'cal-slow':''} ${before?'continues-before':''} ${after?'continues-after':''}" style="grid-column:${first+1} / ${last+2};grid-row:1;--band-lane:${lane}" data-group="${index}" data-date="${week[first].date}" title="${escapeCal(g.label)} · ${fmt(g.start)} → ${fmt(g.end)}" aria-label="${escapeCal(g.label)} du ${fmt(g.start)} au ${fmt(g.end)}${exact.length?', passage exact : '+exact.join(', '):''}"><span class="cal-band-label" style="${firstStar===null?'':`max-width:calc(${firstStar}% - 13px)`}">${before?'← ':''}${escapeCal(g.label)}${g.maitre?' · Maître d’Asc.':''}${after?' →':''}</span>${stars}</button>`}
  h+='</div>'}
- el('grid').innerHTML=h;el('grid').querySelectorAll('.day[data-date],.cal-sky-station[data-date]').forEach(b=>b.onclick=()=>{selected=calData.jours.find(d=>d.date===b.dataset.date);selectedGroup=null;selectedClimate=null;selectedSkyPeriod=null;drawCal()});el('grid').querySelectorAll('[data-sky-period]').forEach(b=>b.onclick=()=>{selected=calData.jours.find(d=>d.date===b.dataset.date);selectedSkyPeriod=+b.dataset.skyPeriod;drawCal()});el('grid').querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{selectedGroup=+b.dataset.group;selected=calData.jours.find(d=>d.date===b.dataset.date)||selected;selectedClimate=null;drawCal()});el('grid').querySelectorAll('[data-climate],[data-sky-climate]').forEach(b=>b.onclick=()=>{const panel=el('background');panel?.scrollIntoView?.({behavior:'smooth',block:'start'});panel?.focus?.({preventScroll:true})});if(el('periods'))el('periods').parentElement.hidden=view==='sky'||!checked('mars');drawPeriods();drawBackground();detailCal();}
+ el('grid').innerHTML=h;el('grid').querySelectorAll('.day[data-date],.cal-sky-station[data-date]').forEach(b=>b.onclick=ev=>{if(ev.target.closest('a'))return;selected=calData.jours.find(d=>d.date===b.dataset.date);selectedGroup=null;selectedClimate=null;selectedSkyPeriod=null;drawCal()});el('grid').querySelectorAll('[data-sky-period]').forEach(b=>b.onclick=()=>{selected=calData.jours.find(d=>d.date===b.dataset.date);selectedSkyPeriod=+b.dataset.skyPeriod;drawCal()});el('grid').querySelectorAll('[data-group]').forEach(b=>b.onclick=()=>{selectedGroup=+b.dataset.group;selected=calData.jours.find(d=>d.date===b.dataset.date)||selected;selectedClimate=null;drawCal()});el('grid').querySelectorAll('[data-climate],[data-sky-climate]').forEach(b=>b.onclick=()=>{const panel=el('background');panel?.scrollIntoView?.({behavior:'smooth',block:'start'});panel?.focus?.({preventScroll:true})});if(el('periods'))el('periods').parentElement.hidden=view==='sky'||!checked('mars');drawPeriods();drawBackground();detailCal();}
 function drawBackground(){
  const panel=el('background');if(!panel)return;
  if(el('view')?.value==='sky'){

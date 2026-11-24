@@ -1395,6 +1395,8 @@ def calendrier():
     })
     from utils.calendrier_mails import relier_mails_envoyes
     relier_mails_envoyes(donnees.get("events", []), utilisateur.id)
+    from utils.calendrier_lunaisons import relier_lectures_lunaisons
+    relier_lectures_lunaisons(donnees.get("events", []))
     try:
         from utils.conjonctions_lunaires import conjonctions_lunaires_du_mois
         donnees["conjonctions_lunaires"] = conjonctions_lunaires_du_mois(debut, fin, theme)
