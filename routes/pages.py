@@ -53,10 +53,10 @@ def analyses():
 
 @pages_bp.route("/abonnements")
 def abonnements():
-    return offre_beta()
+    return render_template("pages/abonnements.html", active="abonnements")
 
 
-@pages_bp.route("/offre-beta")
+@pages_bp.route("/abonnements-beta")
 def offre_beta():
     from flask import make_response
     from utils.auth_espace import utilisateur_connecte
@@ -69,6 +69,12 @@ def offre_beta():
     reponse.headers["Cache-Control"] = "private, no-store"
     reponse.headers["X-Robots-Tag"] = "noindex, nofollow"
     return reponse
+
+
+@pages_bp.route("/offre-beta")
+def ancienne_offre_beta():
+    from flask import url_for
+    return redirect(url_for("pages_bp.offre_beta"), code=302)
 
 @pages_bp.route("/formations")
 def formations():
