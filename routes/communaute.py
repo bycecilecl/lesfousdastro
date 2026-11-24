@@ -13,6 +13,7 @@ from extensions import db
 from models.espace_personnel import (AbonnementEspace, CommentaireCommunaute, EntreeJournal,
     InscriptionMailsBeta, MessageSalonCommunaute, ProfilCommunaute, PublicationCommunaute,
     SignalementCommunaute, UtilisateurEspace)
+from utils.acces_abonnement import demonstration_beta_active
 from utils.auth_espace import administratrice_connectee, autoriser_tentative, utilisateur_connecte, verifier_csrf_espace
 from utils.avatars_espace import AVATARS_ESPACE
 
@@ -38,8 +39,10 @@ def _utc(date):
 def _membre(utilisateur):
     if administratrice_connectee():
         return True
-    inscription = db.session.get(InscriptionMailsBeta, utilisateur.id)
     abonnement = AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first()
+    if demonstration_beta_active(abonnement):
+        return True
+    inscription = db.session.get(InscriptionMailsBeta, utilisateur.id)
     return bool(inscription and inscription.actif and datetime.now(timezone.utc) < _utc(inscription.fin)
         and abonnement and abonnement.formule == "beta_accompagnement" and abonnement.statut in {"actif", "test"}
         and (abonnement.date_fin is None or datetime.now(timezone.utc) < _utc(abonnement.date_fin)))

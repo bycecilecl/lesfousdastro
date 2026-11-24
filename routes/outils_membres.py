@@ -20,6 +20,7 @@ from models.espace_personnel import (
     AbonnementEspace, CarteNataleMembre, InscriptionMailsBeta, RetourBetaMembre,
     UtilisateurEspace, utcnow,
 )
+from utils.acces_abonnement import demonstration_beta_active
 from utils.auth_espace import administratrice_connectee, utilisateur_connecte, verifier_csrf_espace
 
 outils_membres_bp = Blueprint("outils_membres", __name__)
@@ -46,10 +47,12 @@ def retours_beta_accessibles():
         return False
     if administratrice_connectee():
         return True
+    abonnement = AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first()
+    if demonstration_beta_active(abonnement):
+        return True
     if not _table_prete(InscriptionMailsBeta):
         return False
     inscription = db.session.get(InscriptionMailsBeta, utilisateur.id)
-    abonnement = AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first()
     def utc(instant):
         return instant.replace(tzinfo=timezone.utc) if instant.tzinfo is None else instant.astimezone(timezone.utc)
     maintenant = datetime.now(timezone.utc)
