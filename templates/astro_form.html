@@ -59,14 +59,14 @@ body {
 .header {
     text-align: center;
     margin-bottom: 40px;
-    margin-top: 60px;
-    padding-top: 40px;
+    margin-top: 40px;
+    padding-top: 24px;
     color: white;
 }
 
 .logo {
-    width: 180px;
-    height: 180px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     margin: 0 auto 20px;
     border: 3px solid rgba(255,255,255,0.3);
@@ -79,7 +79,7 @@ body {
     display: inline-block;
     background: white;
     color: #1f628e;
-    font-size: 2.3rem;
+    font-size: clamp(1.55rem, 4.5vw, 2.6rem);
     font-weight: 700;
     padding: 0.45rem 1.6rem;
     border-radius: 6px;
@@ -87,12 +87,28 @@ body {
     box-shadow: 4px 4px 0px rgba(0,0,0,0.18);
 }
 
+.header-tagline {
+    font-size: clamp(1.35rem, 3vw, 1.85rem);
+    font-weight: 700;
+    line-height: 1.35;
+    max-width: 760px;
+    margin: 0 auto 1rem;
+    text-wrap: balance;
+}
+
 .header-hook {
     font-size: 1.1rem;
     color: rgba(255,255,255,0.92);
     line-height: 1.6;
-    max-width: 680px;
-    margin: 0 auto 1.5rem;
+    max-width: none;
+    margin: 0 auto 1rem;
+    text-wrap: balance;
+}
+
+.header-offer { font-size: 1rem; margin-bottom: 1.5rem; }
+
+@media (min-width: 1100px) {
+    .header-hook { white-space: nowrap; }
 }
 
 .header-btns {
@@ -107,9 +123,12 @@ body {
     background: white;
     color: #1f628e;
     border: none;
-    padding: 0.7rem 1.75rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    padding: 1rem clamp(1.25rem, 4vw, 2.5rem);
+    max-width: 100%;
+    border-radius: 50px;
+    box-shadow: 0 4px 20px rgba(212,175,55,0.4);
+    font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+    line-height: 1.35;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.2s ease;
@@ -117,10 +136,12 @@ body {
 
 .header-cta:hover { transform: translateY(-2px); }
 
-.header-links-row { display: flex; gap: 1rem; align-items: center; }
+.header-links-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; align-items: center; }
 
-.header-link { color: rgba(255,255,255,0.8); font-size: 0.9rem; text-decoration: none; }
+.header-link { color: rgba(255,255,255,0.92); font-size: 1rem; text-decoration: none; }
 .header-link:hover { color: white; }
+.header-link--espace { text-decoration: underline; text-underline-offset: 4px; }
+.header-cta:focus-visible, .header-link:focus-visible { outline: 2px solid white; outline-offset: 4px; }
 .header-sep { color: rgba(255,255,255,0.3); font-size: 0.8rem; }
 
 .planetes-deco {
@@ -784,6 +805,8 @@ input[type="time"]:focus, input[type="email"]:focus {
 
 @media (max-width: 768px) {
     .container { padding: 15px; }
+    .header { margin-top: 24px; padding-top: 16px; }
+    .logo { width: 130px; height: 130px; }
     .form-row { grid-template-columns: 1fr; }
     .options-grid, .packs-grid, .consultation-grid { grid-template-columns: minmax(0, 1fr); }
     .qui-suis-je { flex-direction: column; text-align: center; }
@@ -828,14 +851,16 @@ input[type="time"]:focus, input[type="email"]:focus {
     <div class="header">
         <img src="{{ url_for('static', filename='images/logo_les_fous_dastro.webp') }}" alt="Les Fous d'Astro" class="logo">
         <div class="badge-d-wrap">
-            <div class="badge-d">✦ Analyses Astrologiques ✦</div>
+            <h1 class="badge-d"><span aria-hidden="true">✦</span> Les Fous d’Astro <span aria-hidden="true">✦</span></h1>
         </div>
-        <p class="header-hook"><strong>Explore les grandes dynamiques de ton thème : ta personnalité, tes ressources, tes contradictions et tes chemins d’évolution.</strong></p>
-        <p class="header-hook">Des analyses personnalisées qui associent le calcul de ton thème, ma méthode de lecture astrologique et une rédaction assistée par IA.</p>
+        <p class="header-tagline">L’astrologie pour mieux se connaître</p>
+        <p class="header-hook">Explore ta personnalité, tes besoins, tes contradictions et les schémas qui se répètent dans ta vie.</p>
+        <p class="header-hook header-offer">Des analyses astrologiques personnalisées et un espace de conscience pour approfondir ta connaissance de toi, à ton rythme.</p>
         <div class="header-btns">
-            <button class="header-cta" style="font-size:1.3rem; font-weight:700; padding:18px 40px; border-radius:50px; box-shadow:0 4px 20px rgba(212,175,55,0.4);" onclick="document.getElementById('form-analyse').scrollIntoView({behavior:'smooth'})">
-                Découvrir mon analyse ↓
+            <button type="button" class="header-cta" onclick="document.getElementById('form-analyse').scrollIntoView({behavior:'smooth'})">
+                Découvrir les analyses
             </button>
+            <a href="{{ url_for('pages_bp.abonnements') }}" class="header-link header-link--espace">Découvrir l’espace de conscience</a>
             <div class="header-links-row">
                 <a href="/blog" class="header-link">Le blog</a>
                 <span class="header-sep">·</span>
