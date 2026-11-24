@@ -82,8 +82,8 @@ def add_security_headers(app):
                 "frame-ancestors 'self'",
             ]
 
-        # Les tutoriels YouTube sont intégrés uniquement à la page bêta.
-        if request.endpoint == "pages_bp.offre_beta":
+        # Autoriser les lecteurs YouTube sur les deux pages de tutoriels uniquement.
+        if request.endpoint in {"pages_bp.offre_beta", "espace_personnel.tutoriels"}:
             csp_parts = [
                 directive + " https://www.youtube-nocookie.com"
                 if directive.startswith("frame-src ") else directive

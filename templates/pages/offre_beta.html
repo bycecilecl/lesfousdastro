@@ -2,7 +2,6 @@
 
 {% block title %}L’espace abonné · Trois mois pour tester | Les Fous d'Astro{% endblock %}
 {% block meta_description %}Offre bêta des Fous d’Astro, réservée aux adresses invitées par Cécile.{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{{ url_for('static', filename='beta-tutoriels.css', v='20261124') }}">{% endblock %}
 
 {% block extra_css %}
 :root { --navy:#1f628e; --navy-dark:#123f5d; --teal:#00a8a8; --mist:#eafafa; --pink:#d3b1c2; --ink:#243943; }
@@ -49,6 +48,7 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='beta-tutoriels.css', v='20261124-tutos') }}">
 <div class="subscriptions-page"><main class="subscriptions-wrap">
 <header class="subscriptions-hero">
 <span class="subscriptions-kicker">L’espace abonné · bêta sur invitation</span>

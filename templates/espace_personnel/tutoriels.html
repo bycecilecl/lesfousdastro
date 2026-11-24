@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Tes tutos | Les Fous d’Astro{% endblock %}
+{% block extra_css %}
+body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Segoe UI',Tahoma,sans-serif}
+.tutos-espace{max-width:1100px;margin:32px auto 64px;padding:0 24px;box-sizing:border-box}
+.tutos-espace h1{margin:0 0 14px;color:#123f5d;font-size:clamp(1.9rem,4vw,2.6rem)}
+.tutos-espace .beta-tutoriels{margin-top:0}
+.tutos-espace .tutos-retour{display:inline-block;color:#1f628e;font-weight:700;margin-top:18px}
+@media(max-width:760px){.tutos-espace{padding:0 16px}}
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='beta-tutoriels.css', v='20261124-tutos') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="tutos-espace">
+  <section class="beta-tutoriels" aria-labelledby="titre-tutos">
+    <header class="beta-tutoriels-entete">
+      <p class="section-kicker">Je te montre tout ça</p>
+      <h1 id="titre-tutos">Tes tutos</h1>
+      {% if tutoriels_accessibles %}
+      <p>Ton journal, ton labo, tes cycles et nos échanges : je te montre comment utiliser ton espace. Regarde les vidéos dans l’ordre ou reviens sur celle dont tu as besoin, à ton rythme.</p>
+      {% else %}
+      <p>Les quatre tutos pour découvrir ton espace seront accessibles une fois ton abonnement activé.</p>
+      <a class="tutos-retour" href="{{ url_for('abonnement_client.mon_abonnement') }}">Continuer mon inscription →</a>
+      {% endif %}
+    </header>
+    {% if tutoriels_accessibles %}
+    {% set tutoriels_beta = [
+      ('9xrvs7EDarY', 'Journal et calendrier'),
+      ('acdIHgShRJk', 'Labo de conscience et mécanismes'),
+      ('rV_sKUidYJE', 'Révolutions et lunaisons'),
+      ('y_KM6SaXKvM', 'Communauté et feedback')
+    ] %}
+    {% include 'pages/_liste_videos_tutoriels.html' %}
+    {% endif %}
+    <a class="tutos-retour" href="{{ url_for('espace_personnel.accueil') }}">← Revenir à mon espace</a>
+  </section>
+</main>
+{% endblock %}

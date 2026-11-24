@@ -360,6 +360,13 @@ def verifier_turnstile():
 
 
 
+@espace_personnel_bp.route("/tutos")
+def tutoriels():
+    from utils.acces_abonnement import droits_pour_compte
+    accessible = droits_pour_compte(utilisateur_connecte().id)["actif"]
+    return render_template("espace_personnel/tutoriels.html", tutoriels_accessibles=accessible), 200 if accessible else 403
+
+
 @espace_personnel_bp.route("/")
 def accueil():
     utilisateur_id = session.get("utilisateur_espace_id")
