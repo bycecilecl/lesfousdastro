@@ -23,7 +23,6 @@
     <p class="espace-navigation-label">Mon exploration</p>
     {% for endpoint, libelle in [
       ('espace_personnel.accueil', 'Accueil'),
-      ('espace_personnel.tutoriels', 'Tutos'),
       ('espace_personnel.profil', 'Mon profil'),
       ('espace_personnel.journal', 'Mon journal'),
       ('espace_personnel.calendrier', 'Mon calendrier'),
@@ -74,6 +73,10 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
         <button class="espace-navigation-link espace-navigation-logout" type="submit">Déconnexion <span aria-hidden="true">↗</span></button>
       </form>
+    </div>
+    <div class="espace-navigation-group">
+      <p class="espace-navigation-label">Aide</p>
+      <a class="espace-navigation-link{% if rubrique == 'espace_personnel.tutoriels' %} is-current{% endif %}" href="{{ url_for('espace_personnel.tutoriels') }}"{% if rubrique == 'espace_personnel.tutoriels' %} aria-current="page"{% endif %}>Les tutos vidéo</a>
     </div>
   </nav>
 </details>

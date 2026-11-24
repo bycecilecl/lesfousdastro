@@ -349,11 +349,6 @@ body {
         <p class="header-hook">Un endroit pour observer ce qui se joue, relier ton vécu aux énergies du moment et transformer les automatismes en choix conscients.</p>
     </div>
 
-    <section class="form-container dashboard-card dashboard-card--coach">
-        <div><h2 class="section-title">Tes premiers pas en vidéo</h2><p class="espace-muted">Retrouve les quatre tutos pour prendre tes marques dans ton espace.</p></div>
-        <a class="espace-profile-link" href="{{ url_for('espace_personnel.tutoriels') }}">Voir les tutos</a>
-    </section>
-
     <div class="form-container profile-card">
         <h3 class="section-title">✨ Mon profil astral</h3>
         <a href="{{ url_for('espace_personnel.profil') }}#mon-avatar" aria-label="Changer mon avatar">{% include 'espace_personnel/partials/avatar.html' %}</a>
