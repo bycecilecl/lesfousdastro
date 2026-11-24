@@ -3,7 +3,7 @@
 {% block extra_css %}body { background:linear-gradient(135deg,#1f628e 0%,#00a8a8 50%,#c0f0f7 100%); font-family:'Segoe UI',Tahoma,sans-serif; min-height:100vh; }{% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='choix-mecanismes.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='journal.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='journal.css', v='20261124-mobile') }}">
 {% include "espace_personnel/_navigation.html" %}
 <div class="journal-shell" data-journal-mode="{{ 'modifier' if mode_modification else ('lecture' if entree_ouverte else 'nouveau') }}">
     <header class="journal-header">

@@ -2,7 +2,7 @@
 {% block title %}Comptes et abonnements | Les Fous d’Astro{% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='essais-mails.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='admin-comptes.css', v='20261124') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin-comptes.css', v='20261124-mobile') }}">
 {% include 'espace_personnel/_navigation.html' %}
 <main class="essai-shell">
   <header class="essai-entete">
@@ -29,16 +29,16 @@
     <div class="comptes-table-scroll" role="region" aria-label="Comptes enregistrés et abonnements" tabindex="0">
       <table class="comptes-table">
         <caption class="comptes-caption">Comptes classés du plus récent au plus ancien. Dates et heures de Paris.</caption>
-        <thead><tr><th scope="col">Compte</th><th scope="col">Formule enregistrée</th><th scope="col">Accès actuel</th><th scope="col">Statut de l’abonnement</th><th scope="col">Période</th><th scope="col">Inscription</th></tr></thead>
+        <thead><tr><th scope="col">Compte</th><th scope="col">Formule enregistrée</th><th scope="col">Accès actuel</th><th scope="col">Statut de l’abonnement</th><th scope="col">Période</th><th scope="col" class="comptes-inscription">Inscription</th></tr></thead>
         <tbody>
         {% for compte in comptes %}
           <tr>
             <th scope="row"><strong>{{ compte.prenom or 'Sans prénom' }}</strong><span>{{ compte.email or 'Sans adresse e-mail' }}</span>{% if compte.administratrice %}<small>Administratrice</small>{% endif %}{% if not compte.actif %}<small class="comptes-inactif">Compte désactivé</small>{% endif %}</th>
             <td>{{ compte.formule }}</td>
             <td>{{ compte.acces }}</td>
-            <td>{{ compte.etat }}</td>
+            <td>{{ 'Administrateur' if compte.administratrice else compte.etat }}</td>
             <td>{% if compte.debut %}<span>Du {{ utc(compte.debut).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }}</span>{% endif %}{% if compte.fin %}<span>Au {{ utc(compte.fin).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }}</span>{% elif compte.debut %}<span>Sans date de fin</span>{% else %}—{% endif %}</td>
-            <td>{{ utc(compte.creation).astimezone(paris).strftime('%d/%m/%Y') if compte.creation else '—' }}</td>
+            <td class="comptes-inscription">{{ utc(compte.creation).astimezone(paris).strftime('%d/%m/%Y') if compte.creation else '—' }}</td>
           </tr>
         {% endfor %}
         </tbody>

@@ -13,7 +13,10 @@
 .journal-field { display:grid; gap:7px; min-width:0; }
 .journal-field--wide, .journal-form-actions { grid-column:1 / -1; }
 .journal-field label { color:#1f628e; font-size:.95rem; font-weight:700; }
-.journal-field input, .journal-field select, .journal-field textarea { width:100%; min-width:0; padding:12px 14px; border:1px solid #cbdde2; border-radius:10px; background:white; color:#263645; font:inherit; }
+.journal-field input, .journal-field select, .journal-field textarea { box-sizing:border-box; width:100%; min-width:0; max-width:100%; padding:12px 14px; border:1px solid #cbdde2; border-radius:10px; background:white; color:#263645; font:inherit; }
+.journal-field input[type="date"], .journal-field input[type="time"], .journal-field input[type="datetime-local"] { display:block; -webkit-appearance:none; appearance:none; min-height:48px; line-height:1.5; }
+.journal-field input::-webkit-date-and-time-value { min-width:0; height:1.5em; text-align:left; }
+.journal-field input::-webkit-datetime-edit { min-width:0; padding:0; }
 .journal-field textarea { min-height:100px; resize:vertical; }
 .journal-field--story textarea { min-height:320px; font:1.15rem/1.9 Georgia,serif; }
 .journal-field .journal-check { display:flex; gap:10px; align-items:center; }

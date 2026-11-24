@@ -20,22 +20,25 @@
   .profil-carte > p { color: #5d7079; line-height: 1.55; }
   .profil-message { margin: 16px 0; padding: 12px 15px; border-radius: 12px; background: #e7f8f7; color: #17636c; }
   .profil-message.error { color: #9b3030; background: #fff0f0; }
-  .profil-form { display: grid; gap: 17px 20px; grid-template-columns: 1fr 1fr; margin-top: 24px; }
+  .profil-form { display: grid; gap: 17px 20px; grid-template-columns: repeat(2,minmax(0,1fr)); margin-top: 24px; }
   .profil-champ { display: grid; gap: 7px; min-width: 0; }
   .profil-champ.large, .profil-aide, .profil-submit { grid-column: 1 / -1; }
   .profil-champ label { color: #1f628e; font-size: .9rem; font-weight: 700; }
-  .profil-champ input, .profil-champ textarea { width: 100%; padding: 12px 14px; border: 1px solid #b9d4d7; border-radius: 12px; background: #fff; color: #263645; font: inherit; }
+  .profil-champ input, .profil-champ textarea { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; padding: 12px 14px; border: 1px solid #b9d4d7; border-radius: 12px; background: #fff; color: #263645; font: inherit; }
+  .profil-champ input[type="date"], .profil-champ input[type="time"] { display: block; -webkit-appearance: none; appearance: none; min-height: 48px; line-height: 1.5; }
+  .profil-champ input::-webkit-date-and-time-value { min-width: 0; height: 1.5em; text-align: left; }
+  .profil-champ input::-webkit-datetime-edit { min-width: 0; padding: 0; }
   .profil-champ textarea { min-height: 100px; resize: vertical; }
   .profil-champ input:focus, .profil-champ textarea:focus { outline: 3px solid #00a8a822; border-color: #00a8a8; }
   .profil-aide { margin: -5px 0 0; color: #607580; font-size: .86rem; line-height: 1.5; }
-  .profil-submit { justify-self: start; padding: 12px 20px; border: 0; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: #fff; font: 700 .95rem 'Segoe UI', Tahoma, sans-serif; cursor: pointer; }
+  .profil-submit { justify-self: start; max-width: 100%; white-space: normal; padding: 12px 20px; border: 0; border-radius: 999px; background: linear-gradient(45deg, #00a8a8, #1f628e); color: #fff; font: 700 .95rem 'Segoe UI', Tahoma, sans-serif; cursor: pointer; }
   .profil-submit:hover { filter: brightness(1.08); }
   .profil-lien { display: inline-block; margin-top: 18px; color: #1f628e; font-weight: 700; text-decoration: none; }
   .profil-lien:hover { text-decoration: underline; }
   .profil-import { margin-top: 24px; }
   .profil-import summary { color: #1f628e; font-weight: 700; cursor: pointer; }
   .profil-import p { margin-top: 12px; color: #5d7079; line-height: 1.55; }
-  @media (max-width: 600px) { .profil-form { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .profil-form { grid-template-columns: minmax(0,1fr); } }
 {% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='avatars.css') }}">
