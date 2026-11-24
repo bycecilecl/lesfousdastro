@@ -2308,9 +2308,7 @@ def supprimer(entree_id):
     utilisateur = db.session.get(UtilisateurEspace, utilisateur_id) if utilisateur_id else None
     if utilisateur is None or utilisateur.actif != 1:
         return redirect(url_for("espace_personnel.connexion"))
-    jeton = session.get("espace_profil_csrf", "")
-    if not jeton or not hmac.compare_digest(request.form.get("profil_csrf", ""), jeton):
-        abort(400)
+    verifier_csrf_espace()
     entree = EntreeJournal.query.filter_by(id=entree_id, utilisateur_id=utilisateur.id).first_or_404()
     try:
         db.session.delete(entree)
