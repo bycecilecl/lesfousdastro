@@ -20,7 +20,7 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
 .solar-state { display: inline-block; margin-top: 11px; padding: 5px 10px; border-radius: 999px; background: rgba(224,123,0,.12); color: #a35900; font-size: .8rem; font-weight: 800; }
 .solar-empty { padding: 42px 20px; border: 1px dashed rgba(31,98,142,.25); border-radius: 18px; text-align: center; line-height: 1.55; }
 .solar-filter { display:flex; flex-wrap:wrap; align-items:end; gap:10px; margin:0 0 25px; padding:16px; border-radius:14px; background:#f3f8f9; }
-#importer-rs + .solar-filter { margin-top:20px; }
+#importer-rs { margin-top:24px; }
 .solar-filter label { color:#31566a; font-weight:700; font-size:.9rem; }
 .solar-filter input { display:block; width:90px; margin-top:5px; padding:8px; border:1px solid #b6d0d8; border-radius:8px; font:inherit; }
 .solar-filter button { padding:10px 16px; border:0; border-radius:999px; color:white; background:#1f628e; font-weight:700; cursor:pointer; }
@@ -56,7 +56,6 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for categorie, message in messages %}<p class="solar-flash {{ categorie }}">{{ message }}</p>{% endfor %}
         {% endwith %}
-        {% include 'espace_personnel/partials/import_revolution_solaire.html' %}
         <form class="solar-filter" method="get" action="{{ url_for('espace_personnel.revolutions_solaires') }}">
             <label>De <input type="number" name="debut" min="1900" max="2100" value="{{ debut_filtre or '' }}" required></label>
             <label>à <input type="number" name="fin" min="1900" max="2100" value="{{ fin_filtre or '' }}" required></label>
@@ -64,7 +63,7 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
             {% if debut_filtre %}<a href="{{ url_for('espace_personnel.revolutions_solaires') }}">Toutes mes années</a>{% endif %}
         </form>
         {% if debut_filtre %}<p class="solar-meta">Années {{ debut_filtre }} à {{ fin_filtre }}</p>{% endif %}
-        {% if cycles %}
+        {% if cycles or rapports_sans_cycle %}
             <div class="solar-list">
             {% for element in cycles %}
                 {% set cycle = element.cycle %}
@@ -125,17 +124,30 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
                     </div>
                 </article>
             {% endfor %}
+            {% for element in rapports_sans_cycle %}
+                {% set rapport = element.rapport %}
+                <article class="solar-card" id="rapport-rs-{{ rapport.id }}">
+                    <div class="solar-icon">☀</div>
+                    <div>
+                        <p class="solar-date">{{ rapport.titre }}</p>
+                        <p class="solar-meta">Rapport PDF importé{% if element.annee %} · année {{ element.annee }}{% endif %}</p>
+                        <a class="solar-action" href="{{ url_for('espace_personnel.lire_analyse', analyse_id=rapport.id) }}" target="_blank" rel="noopener">Lire mon rapport ↗</a>
+                        <a class="solar-action" href="{{ url_for('espace_personnel.explorer_analyse', analyse_id=rapport.id) }}">Explorer les enjeux de cette RS</a>
+                    </div>
+                </article>
+            {% endfor %}
             </div>
         {% else %}
-            <div class="solar-empty">Aucune révolution solaire enregistrée pour ces années. Le lieu de chaque anniversaire doit être renseigné pour les calculer correctement.</div>
+            <div class="solar-empty">Aucune révolution solaire enregistrée pour ces années. Tu peux ajouter ton rapport PDF ci-dessous.</div>
         {% endif %}
+        {% include 'espace_personnel/partials/import_revolution_solaire.html' %}
     </section>
 </main>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.querySelectorAll('.solar-import:not([data-premier-import-rs])').forEach(form => {
+document.querySelectorAll('.solar-import').forEach(form => {
     form.addEventListener('submit', () => {
         const bouton = form.querySelector('button');
         bouton.disabled = true;
@@ -143,5 +155,4 @@ document.querySelectorAll('.solar-import:not([data-premier-import-rs])').forEach
     });
 });
 </script>
-{% include 'espace_personnel/partials/import_revolution_solaire_script.html' %}
 {% endblock %}

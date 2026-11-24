@@ -1445,6 +1445,17 @@ def revolutions_solaires():
         debut_filtre is not None and not (1900 <= debut_filtre <= fin_filtre <= 2100)
     ):
         abort(400)
+    rapports_sans_cycle = []
+    for rapport in rapports_par_cycle.get(None, []):
+        # Les nouveaux imports portent explicitement l’année dans leur titre.
+        correspondance = re.search(r"\b(19\d{2}|20\d{2}|2100)\b", rapport.titre)
+        annee_rapport = int(correspondance.group(1)) if correspondance else None
+        if debut_filtre is not None and (annee_rapport is None or not debut_filtre <= annee_rapport <= fin_filtre):
+            continue
+        rapports_sans_cycle.append({"rapport": rapport, "annee": annee_rapport})
+    annee_import = request.args.get("annee_import", datetime.now(timezone.utc).year, type=int)
+    if not 1900 <= annee_import <= 2100:
+        annee_import = datetime.now(timezone.utc).year
     cycles = []
     if profil_astral:
         cycles_enregistres = (
@@ -1491,10 +1502,10 @@ def revolutions_solaires():
     return render_template(
         "espace_personnel/revolutions_solaires.html",
         profil=profil_astral,
-        cycles=cycles,
+        cycles=cycles, rapports_sans_cycle=rapports_sans_cycle,
         debut_filtre=debut_filtre,
         fin_filtre=fin_filtre,
-        annee_import=datetime.now(timezone.utc).year,
+        annee_import=annee_import,
     )
 
 
@@ -3582,8 +3593,17 @@ def _generer_enjeux_revolution_solaire(analyse):
     profil = _profil_astral_courant()
     if profil is None:
         abort(404)
-    cycle = CycleSolaire.query.filter_by(id=analyse.cycle_solaire_id, profil_id=profil.id).first_or_404()
+    cycle = (CycleSolaire.query.filter_by(id=analyse.cycle_solaire_id, profil_id=profil.id).first_or_404()
+             if analyse.cycle_solaire_id is not None else None)
+    correspondance = re.fullmatch(r"Révolution solaire (\d{4})", analyse.titre)
+    annee = cycle.annee if cycle else int(correspondance.group(1)) if correspondance else None
+    if annee is None or not max(1900, profil.date_naissance.year) <= annee <= 2100:
+        flash("L’année de ce rapport n’est pas renseignée. Importe ton PDF en précisant son année.", "error")
+        return redirect(destination)
     try:
+        droits = acces_abonnement(AbonnementEspace.query.filter_by(utilisateur_id=analyse.utilisateur_id).first())
+        if not droits["actif"]:
+            raise ValueError("L’extraction IA est réservée à un abonnement payant actif. Aucun appel IA lancé.")
         with verrou_extraction_rs(_dossier_extractions_rs(), analyse.id):
             if EnjeuAnnuel.query.filter_by(analyse_id=analyse.id).first():
                 flash("Les enjeux ont déjà été extraits de cette version du PDF.", "error")
@@ -3593,7 +3613,7 @@ def _generer_enjeux_revolution_solaire(analyse):
                 raise ValueError("Le texte de ce PDF n’est pas disponible pour l’extraction.")
             suggestions, usage, execution, a_verifier = generer_enjeux_rs(
                 [{"cle_section": s.cle_section, "titre": s.titre, "contenu": s.contenu} for s in sections],
-                _dossier_extractions_rs(), analyse.id, cycle.annee,
+                _dossier_extractions_rs(), analyse.id, annee,
             )
             _enregistrer_enjeux_rs(analyse.id, sections, suggestions)
             db.session.commit()
@@ -3605,7 +3625,7 @@ def _generer_enjeux_revolution_solaire(analyse):
         current_app.logger.exception("Échec d’enregistrement des enjeux annuels de l’analyse %s", analyse.id)
         flash("Les enjeux n’ont pas pu être enregistrés. Consulte les journaux conservés ; aucune relance automatique.", "error")
     else:
-        flash(f"{len(suggestions)} enjeux avec extrait vérifié et {len(a_verifier)} propositions avec source à vérifier pour {cycle.annee} · {usage['tokens_total']} tokens utilisés. Aucun enjeu n’est ajouté aux mails sans ton choix.", "success")
+        flash(f"{len(suggestions)} enjeux avec extrait vérifié et {len(a_verifier)} propositions avec source à vérifier pour {annee} · {usage['tokens_total']} tokens utilisés. Aucun enjeu n’est ajouté aux mails sans ton choix.", "success")
     return redirect(destination)
 
 
@@ -3629,56 +3649,37 @@ def reporter_suggestion(suggestion_id):
 
 @espace_personnel_bp.route("/revolutions-solaires/importer", methods=["POST"])
 def importer_premiere_revolution_solaire():
-    """Rattache un PDF existant à son année, sans générer de nouveau rapport."""
+    """Archive un rapport existant sans imposer de nouveau calcul annuel."""
     verifier_csrf_espace()
-    utilisateur = _utilisateur_espace_courant()
     profil = _profil_astral_courant()
     if profil is None:
         flash("Complète ton profil de naissance avant d’ajouter ta Révolution Solaire.", "error")
         return redirect(url_for("espace_personnel.profil"))
-    destination = url_for("espace_personnel.revolutions_solaires", importer=1, _anchor="importer-rs")
-    fichier = request.files.get("rapport")
-    if not fichier or not fichier.filename:
-        flash("Sélectionne le PDF de ta Révolution Solaire.", "error")
-        return redirect(destination)
-    contenu = fichier.stream.read(TAILLE_MAX_RAPPORT + 1)
-    fichier.stream.seek(0)
-    if len(contenu) > TAILLE_MAX_RAPPORT or not contenu.startswith(b"%PDF-"):
-        flash("Choisis un PDF valide de 15 Mo maximum.", "error")
-        return redirect(destination)
     try:
-        # Les mêmes validations et calculs de repères que le pack ; aucun moteur de rapport.
-        from utils.rs_pack_beta import preparer, _cycle
-        profil = ProfilAstral.query.filter_by(
-            id=profil.id, utilisateur_id=utilisateur.id,
-        ).with_for_update().first_or_404()
-        preparation = preparer(profil, request.form)
-        cycle = _cycle(profil, preparation)
-        db.session.add(cycle)
-        db.session.flush()
-        # Ce chemin archive déjà le PDF dans le stockage propre à cet environnement.
-        # Il valide la transaction seulement après lecture et archivage réussis du PDF.
-        return importer_revolution_solaire(cycle.id)
-    except ValueError as erreur:
-        db.session.rollback()
-        flash(str(erreur), "error")
-    except Exception:
-        db.session.rollback()
-        current_app.logger.exception("Impossible de rattacher le PDF RS à son année")
-        flash("Le PDF n’a pas pu être ajouté. Aucune nouvelle année ni analyse n’a été enregistrée.", "error")
-    return redirect(destination)
+        annee = int(request.form.get("annee", ""))
+        if not max(1900, profil.date_naissance.year) <= annee <= 2100:
+            raise ValueError
+    except (TypeError, ValueError):
+        flash("Choisis l’année de début de ta Révolution Solaire.", "error")
+        return redirect(url_for("espace_personnel.revolutions_solaires", importer=1, _anchor="importer-rs"))
+    cycle = CycleSolaire.query.filter_by(profil_id=profil.id, cle_cycle=str(annee)).first()
+    return importer_revolution_solaire(cycle.id if cycle else None, annee=annee)
 
 
 @espace_personnel_bp.route("/revolutions-solaires/<int:cycle_id>/importer", methods=["POST"])
-def importer_revolution_solaire(cycle_id):
+def importer_revolution_solaire(cycle_id=None, *, annee=None):
     """Archive une nouvelle version PDF sans modifier le calcul ni le rapport annuel existant."""
     utilisateur = _utilisateur_espace_courant()
     profil = _profil_astral_courant()
     if profil is None:
         abort(404)
-    cycle = CycleSolaire.query.filter_by(id=cycle_id, profil_id=profil.id).first_or_404()
+    cycle = (CycleSolaire.query.filter_by(id=cycle_id, profil_id=profil.id).first_or_404()
+             if cycle_id is not None else None)
+    annee = cycle.annee if cycle else annee
+    if not isinstance(annee, int) or not max(1900, profil.date_naissance.year) <= annee <= 2100:
+        abort(400)
     fichier = request.files.get("rapport")
-    destination = url_for("espace_personnel.revolutions_solaires") + f"#annee-{cycle.annee}"
+    destination = url_for("espace_personnel.revolutions_solaires", importer=1, annee_import=annee, _anchor="importer-rs")
     if not fichier or not fichier.filename:
         flash("Sélectionne le PDF de ton analyse annuelle.", "error")
         return redirect(destination)
@@ -3696,14 +3697,17 @@ def importer_revolution_solaire(cycle_id):
         # Préparation locale : aucun appel IA pendant l'import.
         sections = extraire_pages_rs(chemin)
         analyse = AnalysePersonnelle(
-            utilisateur_id=utilisateur.id, cycle_solaire_id=cycle.id,
-            type_analyse="revolution_solaire", titre=f"Révolution solaire {cycle.annee}",
+            utilisateur_id=utilisateur.id, cycle_solaire_id=cycle.id if cycle else None,
+            type_analyse="revolution_solaire", titre=f"Révolution solaire {annee}",
             statut="terminee", chemin_resultat=nom,
             date_generation=None,
         )
         db.session.add(analyse)
         db.session.flush()
-        db.session.add(FichierAnalyse(analyse_id=analyse.id, nom_fichier=nom, contenu=contenu))
+        db.session.add(FichierAnalyse(
+            analyse_id=analyse.id, nom_fichier=nom, contenu=contenu,
+            empreinte_sha256=hashlib.sha256(contenu).hexdigest(),
+        ))
         db.session.flush()
         for section in sections:
             db.session.add(SectionAnalyse(analyse_id=analyse.id, source_format="pdf_importe", **section))
@@ -3721,7 +3725,7 @@ def importer_revolution_solaire(cycle_id):
         db.session.rollback()
         if os.path.isfile(chemin):
             os.remove(chemin)
-        current_app.logger.exception("Échec d’import du PDF annuel du cycle %s", cycle.id)
+        current_app.logger.exception("Échec d’import du PDF annuel pour l’année %s", annee)
         flash("Le PDF n’a pas pu être importé. Les versions précédentes sont conservées.", "error")
     else:
         flash("Ton PDF annuel est ajouté. Tu peux maintenant en faire ressortir les grands enjeux de l’année.", "success")
