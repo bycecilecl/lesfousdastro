@@ -104,7 +104,10 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
 <li><strong>Ton espace.</strong> Après confirmation du paiement, ton inscription est enregistrée pour les trois mois. Tu retrouves tes prochains rendez-vous dans « Mon abonnement » et les mails déjà envoyés dans « Mes mails ».</li></ol>
 <p class="beta-intro">L’accompagnement commence le <strong>1er décembre 2026</strong> et se termine le <strong>28 février 2027</strong>. À la fin, aucun nouveau prélèvement : ton compte gratuit, ton journal et tes archives restent accessibles.</p>
 <p class="beta-intro">Cette première offre est réservée aux personnes invitées. Les futurs abonnements seront présentés sur <a href="{{ url_for('pages_bp.abonnements') }}">la page des abonnements</a>, après les retours de la bêta.</p>
-<div class="beta-actions"><a class="free-link" href="{{ url_for('abonnement_client.mon_abonnement',_anchor='souscription') }}">M’inscrire et accéder au paiement</a></div>
+<div class="beta-actions">
+<a class="free-link" href="{{ url_for('abonnement_client.mon_abonnement',_anchor='souscription') if connecte else url_for('espace_personnel.inscription',suivant='/mon-espace/abonnement') }}">M’inscrire et accéder au paiement</a>
+{% if not connecte %}<a href="{{ url_for('espace_personnel.connexion',suivant='/mon-espace/abonnement') }}">J’ai déjà un compte : me connecter</a>{% endif %}
+</div>
 <p class="plan-note">Utilise l’adresse e-mail de ton invitation. Le paiement PayPal se fait dans « Mon abonnement », après la préparation de ton profil. Cliquer ici ne déclenche aucun débit.</p>
 {% if not offre.paiement.ouvert %}<p class="plan-note">Le paiement n’est pas encore ouvert. Les personnes invitées peuvent déjà préparer leur compte et leurs informations.</p>{% endif %}
 </div></section>
