@@ -413,6 +413,20 @@ body {
                 <p class="espace-muted">analyse{% if analyses|length != 1 %}s{% endif %} dans ta bibliothèque</p>
                 <a class="espace-profile-link" href="{{ url_for('espace_personnel.mes_analyses') }}">Voir toute la collection</a>
             </div>
+            <div class="form-container espace-stat dashboard-card">
+                <span class="dashboard-card-icon" aria-hidden="true">💬</span>
+                <h3 class="section-title">Communauté</h3>
+                <p class="espace-muted">Partage tes expériences, pose tes questions et échange avec les autres membres.</p>
+                {% if retours_beta_accessibles is defined and retours_beta_accessibles() %}
+                <div class="profile-actions">
+                    <a class="espace-profile-link" href="{{ url_for('communaute.index') }}">Nos partages</a>
+                    <a class="espace-profile-link espace-profile-link--secondary" href="{{ url_for('communaute.salon') }}">Le tchat</a>
+                </div>
+                {% else %}
+                <p class="espace-muted dashboard-card-note">Incluse pendant ton abonnement bêta actif.</p>
+                <a class="espace-profile-link" href="{{ url_for('abonnement_client.mon_abonnement') }}">Voir mon abonnement</a>
+                {% endif %}
+            </div>
             {% if outils_mails_admin %}<div class="form-container espace-stat dashboard-card">
                 <span class="dashboard-card-icon">✉️</span>
                 <h3 class="section-title">Mes emails de cycle</h3>

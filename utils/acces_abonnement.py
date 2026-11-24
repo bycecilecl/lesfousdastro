@@ -76,13 +76,6 @@ def acces_abonnement(abonnement, maintenant=None):
     return droits
 
 
-def demonstration_beta_active(abonnement, maintenant=None):
-    """Accès offert pour le tuto, indépendant de l'inscription aux mails."""
-    return bool(
-        abonnement
-        and abonnement.source == "demonstration_video"
-        and abonnement.statut == "test"
-        and abonnement.date_debut is not None
-        and abonnement.date_fin is not None
-        and acces_abonnement(abonnement, maintenant)["code"] == "beta_accompagnement"
-    )
+def acces_beta_actif(abonnement, maintenant=None):
+    """Communauté et feedback suivent l'abonnement, pas l'inscription aux mails."""
+    return acces_abonnement(abonnement, maintenant)["code"] == "beta_accompagnement"

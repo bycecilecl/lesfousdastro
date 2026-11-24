@@ -1,5 +1,4 @@
 """Cartes natales privées et retours bêta. Aucun appel IA, aucun envoi de mail."""
-from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
 import base64
@@ -17,10 +16,10 @@ from werkzeug.utils import secure_filename
 
 from extensions import db
 from models.espace_personnel import (
-    AbonnementEspace, CarteNataleMembre, InscriptionMailsBeta, RetourBetaMembre,
+    AbonnementEspace, CarteNataleMembre, RetourBetaMembre,
     UtilisateurEspace, utcnow,
 )
-from utils.acces_abonnement import demonstration_beta_active
+from utils.acces_abonnement import acces_beta_actif
 from utils.auth_espace import administratrice_connectee, utilisateur_connecte, verifier_csrf_espace
 
 outils_membres_bp = Blueprint("outils_membres", __name__)
@@ -48,18 +47,7 @@ def retours_beta_accessibles():
     if administratrice_connectee():
         return True
     abonnement = AbonnementEspace.query.filter_by(utilisateur_id=utilisateur.id).first()
-    if demonstration_beta_active(abonnement):
-        return True
-    if not _table_prete(InscriptionMailsBeta):
-        return False
-    inscription = db.session.get(InscriptionMailsBeta, utilisateur.id)
-    def utc(instant):
-        return instant.replace(tzinfo=timezone.utc) if instant.tzinfo is None else instant.astimezone(timezone.utc)
-    maintenant = datetime.now(timezone.utc)
-    return bool(inscription and inscription.actif and maintenant < utc(inscription.fin)
-        and abonnement and abonnement.formule == "beta_accompagnement"
-        and abonnement.statut in {"actif", "test"}
-        and (abonnement.date_fin is None or maintenant < utc(abonnement.date_fin)))
+    return acces_beta_actif(abonnement)
 
 
 @outils_membres_bp.before_request
