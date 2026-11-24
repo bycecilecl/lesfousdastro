@@ -70,7 +70,7 @@
       <p class="profil-aide" id="lieu-statut">Choisis une ville dans la liste : ses coordonnées et son fuseau seront ajoutés automatiquement.</p>
       <button class="profil-submit" type="submit">{{ 'Mettre à jour mon profil' if profil else 'Créer mon profil astral' }}</button>
     </form>
-    <a class="profil-lien" href="{{ url_for('espace_personnel.ciel_natal') }}">Voir mon ciel natal et ma carte →</a>
+    <a class="profil-lien" href="{{ url_for('espace_personnel.ciel_natal', parcours=request.args.get('parcours')) if request.args.get('parcours') in ['abonnement', 'abonnement-beta'] else url_for('espace_personnel.ciel_natal') }}">Voir mon ciel natal et ma carte →</a>
   </section>
   {% if profil %}
   <section class="profil-carte" id="ville-cycles">
