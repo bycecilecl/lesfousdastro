@@ -1494,6 +1494,7 @@ def revolutions_solaires():
         cycles=cycles,
         debut_filtre=debut_filtre,
         fin_filtre=fin_filtre,
+        annee_import=datetime.now(timezone.utc).year,
     )
 
 
@@ -3624,6 +3625,48 @@ def reporter_suggestion(suggestion_id):
             reportee=suggestion.id,
         )
     return redirect(destination + f"#suggestion-{suggestion.id}")
+
+
+@espace_personnel_bp.route("/revolutions-solaires/importer", methods=["POST"])
+def importer_premiere_revolution_solaire():
+    """Rattache un PDF existant à son année, sans générer de nouveau rapport."""
+    verifier_csrf_espace()
+    utilisateur = _utilisateur_espace_courant()
+    profil = _profil_astral_courant()
+    if profil is None:
+        flash("Complète ton profil de naissance avant d’ajouter ta Révolution Solaire.", "error")
+        return redirect(url_for("espace_personnel.profil"))
+    destination = url_for("espace_personnel.revolutions_solaires", importer=1, _anchor="importer-rs")
+    fichier = request.files.get("rapport")
+    if not fichier or not fichier.filename:
+        flash("Sélectionne le PDF de ta Révolution Solaire.", "error")
+        return redirect(destination)
+    contenu = fichier.stream.read(TAILLE_MAX_RAPPORT + 1)
+    fichier.stream.seek(0)
+    if len(contenu) > TAILLE_MAX_RAPPORT or not contenu.startswith(b"%PDF-"):
+        flash("Choisis un PDF valide de 15 Mo maximum.", "error")
+        return redirect(destination)
+    try:
+        # Les mêmes validations et calculs de repères que le pack ; aucun moteur de rapport.
+        from utils.rs_pack_beta import preparer, _cycle
+        profil = ProfilAstral.query.filter_by(
+            id=profil.id, utilisateur_id=utilisateur.id,
+        ).with_for_update().first_or_404()
+        preparation = preparer(profil, request.form)
+        cycle = _cycle(profil, preparation)
+        db.session.add(cycle)
+        db.session.flush()
+        # Ce chemin archive déjà le PDF dans le stockage propre à cet environnement.
+        # Il valide la transaction seulement après lecture et archivage réussis du PDF.
+        return importer_revolution_solaire(cycle.id)
+    except ValueError as erreur:
+        db.session.rollback()
+        flash(str(erreur), "error")
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Impossible de rattacher le PDF RS à son année")
+        flash("Le PDF n’a pas pu être ajouté. Aucune nouvelle année ni analyse n’a été enregistrée.", "error")
+    return redirect(destination)
 
 
 @espace_personnel_bp.route("/revolutions-solaires/<int:cycle_id>/importer", methods=["POST"])

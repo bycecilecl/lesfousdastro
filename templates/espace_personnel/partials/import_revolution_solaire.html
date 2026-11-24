@@ -1,0 +1,24 @@
+<details class="solar-details" id="importer-rs" {% if not cycles or request.args.get('importer') == '1' %}open{% endif %}>
+    <summary>Importer ma Révolution Solaire</summary>
+    <p class="solar-muted">Tu as déjà un rapport des Fous d’Astro ? Ajoute son PDF à ton espace. Choisis l’année de début et le lieu du retour solaire indiqués dans ton rapport.</p>
+    {% if profil %}
+    <form id="import-rs-form" class="solar-import" data-premier-import-rs method="post" action="{{ url_for('espace_personnel.importer_premiere_revolution_solaire') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+        <label for="import-rs-annee">Année du début de ta Révolution Solaire</label>
+        <input id="import-rs-annee" name="annee" type="number" min="{{ profil.date_naissance.year }}" max="2100" value="{{ annee_import }}" required>
+        <label for="import-rs-lieu">Ville de ton retour solaire</label>
+        <input id="import-rs-lieu" name="lieu" list="import-rs-suggestions" autocomplete="off" placeholder="Écris une ville, puis choisis une suggestion" required>
+        <datalist id="import-rs-suggestions"></datalist>
+        <input id="import-rs-lat" name="lat" type="hidden">
+        <input id="import-rs-lon" name="lon" type="hidden">
+        <input id="import-rs-tzid" name="tzid" type="hidden">
+        <label for="import-rs-pdf">Ton rapport de Révolution Solaire — PDF, 15 Mo maximum</label>
+        <input id="import-rs-pdf" name="rapport" type="file" accept="application/pdf,.pdf" required>
+        <p class="solar-muted">Vérifie que le PDF est bien le tien et correspond à cette année et à ce lieu. Les repères de l’année seront calculés pour rattacher ton PDF. L’import ne déclenche ni génération IA, ni paiement, ni envoi de mail. Les anciens rapports sont conservés.</p>
+        <button type="submit">Importer ma Révolution Solaire</button>
+    </form>
+    {% else %}
+    <p>Renseigne d’abord tes données de naissance pour rattacher ton rapport au bon thème natal.</p>
+    <a class="solar-action" href="{{ url_for('espace_personnel.profil') }}">Compléter mon profil</a>
+    {% endif %}
+</details>

@@ -20,6 +20,7 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
 .solar-state { display: inline-block; margin-top: 11px; padding: 5px 10px; border-radius: 999px; background: rgba(224,123,0,.12); color: #a35900; font-size: .8rem; font-weight: 800; }
 .solar-empty { padding: 42px 20px; border: 1px dashed rgba(31,98,142,.25); border-radius: 18px; text-align: center; line-height: 1.55; }
 .solar-filter { display:flex; flex-wrap:wrap; align-items:end; gap:10px; margin:0 0 25px; padding:16px; border-radius:14px; background:#f3f8f9; }
+#importer-rs + .solar-filter { margin-top:20px; }
 .solar-filter label { color:#31566a; font-weight:700; font-size:.9rem; }
 .solar-filter input { display:block; width:90px; margin-top:5px; padding:8px; border:1px solid #b6d0d8; border-radius:8px; font:inherit; }
 .solar-filter button { padding:10px 16px; border:0; border-radius:999px; color:white; background:#1f628e; font-weight:700; cursor:pointer; }
@@ -55,6 +56,7 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for categorie, message in messages %}<p class="solar-flash {{ categorie }}">{{ message }}</p>{% endfor %}
         {% endwith %}
+        {% include 'espace_personnel/partials/import_revolution_solaire.html' %}
         <form class="solar-filter" method="get" action="{{ url_for('espace_personnel.revolutions_solaires') }}">
             <label>De <input type="number" name="debut" min="1900" max="2100" value="{{ debut_filtre or '' }}" required></label>
             <label>à <input type="number" name="fin" min="1900" max="2100" value="{{ fin_filtre or '' }}" required></label>
@@ -133,7 +135,7 @@ body { min-height: 100vh; background: linear-gradient(135deg, #1f628e 0%, #00a8a
 
 {% block scripts %}
 <script>
-document.querySelectorAll('.solar-import').forEach(form => {
+document.querySelectorAll('.solar-import:not([data-premier-import-rs])').forEach(form => {
     form.addEventListener('submit', () => {
         const bouton = form.querySelector('button');
         bouton.disabled = true;
@@ -141,4 +143,5 @@ document.querySelectorAll('.solar-import').forEach(form => {
     });
 });
 </script>
+{% include 'espace_personnel/partials/import_revolution_solaire_script.html' %}
 {% endblock %}
