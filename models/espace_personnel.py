@@ -755,3 +755,30 @@ class CarteLunaison(db.Model):
     version_validee = Column(Boolean, nullable=False, default=False)
     publiee_le = Column(DateTime(timezone=True), nullable=True)
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+
+
+class BilanJournal30Jours(db.Model):
+    """Une période privée de suivi ; sa consultation ne régénère jamais le bilan."""
+    __tablename__ = "bilans_journal_30_jours"
+    __table_args__ = (
+        UniqueConstraint("utilisateur_id", "debut", "fin", name="uq_bilan_journal_periode"),
+        CheckConstraint("statut IN ('prepare', 'sans_notes', 'en_cours', 'genere', 'echec')", name="ck_bilan_journal_statut"),
+        CheckConstraint("fin > debut", name="ck_bilan_journal_dates"),
+    )
+    id = Column(String(36), primary_key=True)
+    utilisateur_id = Column(Integer, nullable=False, index=True)
+    debut = Column(Date, nullable=False)
+    fin = Column(Date, nullable=False)  # Borne exclusive, selon le fuseau du suivi.
+    fuseau = Column(String(100), nullable=False)
+    statut = Column(String(30), nullable=False, default="prepare")
+    dossier_json = Column(Text, nullable=False)
+    prompt = Column(Text, nullable=False)
+    parametres_json = Column(Text)
+    reponse_brute = Column(Text)
+    texte = Column(Text)
+    memoire_suivi = Column(Text)
+    precedent_id = Column(String(36))
+    usage_json = Column(Text)
+    erreur = Column(Text)
+    date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    date_generation = Column(DateTime(timezone=True))

@@ -73,6 +73,7 @@ from models.espace_personnel import DecodageObservationMecanisme
 from models.espace_personnel import AbonnementEspace, AnalysePersonnelle, CycleLunaire, CycleSolaire, DroitAnalyseAchetee, EmailCycleAbonnement, EnjeuAnnuel, EnjeuPeriode, EntreeJournal, MecanismeExploration, ObservationMecanisme, ProfilAstral, SectionAnalyse, SuggestionMecanisme, UtilisateurEspace
 from utils.auth_espace import labo_local as mode_labo
 from utils.auth_espace import administratrice_connectee, jeton_csrf_espace, ouvrir_session_espace, utilisateur_connecte, verifier_csrf_espace
+from models.espace_personnel import BilanJournal30Jours
 from routes.auth_espace import enregistrer_routes_auth, ROUTES_PUBLIQUES_AUTH, ROUTES_AUTH
 from utils.calcul_theme import calcul_theme
 from utils.configurations_astrologiques import analyser_configurations_majeures
@@ -2818,9 +2819,11 @@ def exiger_connexion_espace():
 @espace_personnel_bp.app_context_processor
 def contexte_auth_espace():
     from utils.acces_abonnement import droits_pour_compte
+    from utils.automatisation_bilans_journal import automatique_actif as bilans_actifs
     utilisateur = utilisateur_connecte()
     return {"csrf_espace": jeton_csrf_espace, "avatars_espace": AVATARS_ESPACE,
             "droits_compte_espace": droits_pour_compte(utilisateur.id if utilisateur else None),
+            "bilans_journal_auto_actifs": bilans_actifs(),
             "auth_turnstile_actif": True, "outils_mails_admin": administratrice_connectee(), "utilisateur_espace": utilisateur}
 
 
@@ -3984,3 +3987,114 @@ def decoder_depuis_labo(mecanisme_id):
     return render_template("espace_personnel/choisir_decodage.html", mecanisme=mecanisme,
                            entree=None, liaisons=[], observations=observations,
                            entrees_disponibles=[e for e in entrees if e.id not in ids_relies])
+
+
+def _periode_suivi_courante(utilisateur):
+    from utils.suivi_journal import periode_suivi
+    profil = ProfilAstral.query.filter_by(utilisateur_id=utilisateur.id).first()
+    return periode_suivi(utilisateur, (profil.fuseau_cycles if profil else None) or "Europe/Paris")
+
+
+
+@espace_personnel_bp.route("/mon-suivi")
+def mon_suivi():
+    utilisateur = _utilisateur_espace_courant()
+    historique = BilanJournal30Jours.query.filter_by(
+        utilisateur_id=utilisateur.id,
+    ).filter(BilanJournal30Jours.statut.in_(("genere", "sans_notes"))).order_by(BilanJournal30Jours.fin.desc()).paginate(
+        page=max(1, request.args.get("page", 1, type=int) or 1), per_page=12, error_out=False,
+    )
+    return render_template("espace_personnel/mon_suivi.html", historique=historique,
+                           periode=_periode_suivi_courante(utilisateur), preparation=None, bilan=None)
+
+
+
+@espace_personnel_bp.route("/mon-suivi/preparer", methods=["POST"])
+def preparer_suivi_journal():
+    utilisateur = _utilisateur_espace_courant()
+    verifier_csrf_espace()
+    from utils.suivi_journal import preparer_bilan_journal
+    periode = _periode_suivi_courante(utilisateur)
+    if not periode["due"]:
+        flash("La période de 30 jours n’est pas encore terminée.", "error")
+        return redirect(url_for("espace_personnel.mon_suivi"))
+    if periode["existant"] and periode["existant"].statut in {"en_cours", "echec"}:
+        flash("Une génération a déjà été tentée pour cette période. Aucune relance n’a été faite.", "error")
+        return redirect(url_for("espace_personnel.mon_suivi"))
+    # Aperçu en mémoire seulement : aucun résultat fictif, aucune réservation IA.
+    preparation = preparer_bilan_journal(utilisateur, periode)
+    from utils.generation_bilan_journal import empreinte_preparation, parametres_bilan_journal
+    preparation["empreinte"] = empreinte_preparation(preparation)
+    preparation["modele"] = parametres_bilan_journal(preparation)["model"]
+    session["bilan_journal_prepare"] = {"empreinte": preparation["empreinte"],
+        "debut": periode["debut"].isoformat(), "fin": periode["fin"].isoformat()}
+    return render_template("espace_personnel/mon_suivi.html", historique=None,
+                           periode=periode, preparation=preparation, bilan=None)
+
+
+
+@espace_personnel_bp.route("/mon-suivi/generer", methods=["POST"])
+def generer_suivi_journal():
+    # Le filtre serveur réserve la génération aux abonnements payants actifs.
+    utilisateur = _utilisateur_espace_courant()
+    verifier_csrf_espace()
+    from utils.suivi_journal import preparer_bilan_journal
+    from utils.generation_bilan_journal import empreinte_preparation, generer_bilan_journal
+    periode = _periode_suivi_courante(utilisateur)
+    apercu = session.get("bilan_journal_prepare") or {}
+    if (not apercu or apercu.get("debut") != periode["debut"].isoformat()
+            or apercu.get("fin") != periode["fin"].isoformat()):
+        flash("Prépare d’abord les sources de cette période. Aucun appel IA lancé.", "error")
+        return redirect(url_for("espace_personnel.mon_suivi"))
+    if periode["existant"]:
+        return redirect(url_for("espace_personnel.fiche_bilan_journal", bilan_id=periode["existant"].id))
+    preparation = preparer_bilan_journal(utilisateur, periode)
+    empreinte = empreinte_preparation(preparation)
+    if not preparation["minimum_atteint"]:
+        flash(f"Le bilan demande au moins {preparation['minimum_notes']} notes sur la période ; {preparation['nombre_notes']} disponible(s). Aucun appel IA lancé.", "error")
+        return redirect(url_for("espace_personnel.mon_suivi"))
+    if (not hmac.compare_digest(apercu.get("empreinte", ""), empreinte)
+            or not hmac.compare_digest(request.form.get("empreinte", ""), empreinte)):
+        flash("Les notes ou les paramètres ont changé. Prépare à nouveau les sources avant de générer. Aucun appel IA lancé.", "error")
+        return redirect(url_for("espace_personnel.mon_suivi"))
+    session.pop("bilan_journal_prepare", None)
+    try:
+        bilan, _ = generer_bilan_journal(utilisateur, periode, preparation)
+    except (ValueError, OSError):
+        flash("La préparation est vide, trop volumineuse ou ne peut pas être sauvegardée. Aucun appel IA lancé.", "error")
+        return redirect(url_for("espace_personnel.mon_suivi"))
+    return redirect(url_for("espace_personnel.fiche_bilan_journal", bilan_id=bilan.id))
+
+
+
+@espace_personnel_bp.route("/mon-suivi/<uuid:bilan_id>")
+def fiche_bilan_journal(bilan_id):
+    utilisateur = _utilisateur_espace_courant()
+    bilan = BilanJournal30Jours.query.filter_by(
+        id=str(bilan_id), utilisateur_id=utilisateur.id,
+    ).first_or_404()
+    from utils.generation_bilan_journal import traces_conservees
+    from utils.formatage_suivi_journal import formater_bilan
+    fichiers = sorted(traces_conservees(bilan))
+    try:
+        erreur_bilan = (json.loads(bilan.erreur or "{}") or {}).get("message")
+    except (ValueError, AttributeError):
+        erreur_bilan = None
+    return render_template("espace_personnel/mon_suivi.html", historique=None,
+                           periode=None, preparation=None, bilan=bilan,
+                           bilan_html=formater_bilan(bilan.texte or ""), fichiers_bilan=fichiers,
+                           erreur_bilan=erreur_bilan)
+
+
+
+@espace_personnel_bp.route("/mon-suivi/<uuid:bilan_id>/traces/<nom>")
+def trace_suivi_journal(bilan_id, nom):
+    utilisateur = _utilisateur_espace_courant()
+    bilan = BilanJournal30Jours.query.filter_by(id=str(bilan_id), utilisateur_id=utilisateur.id).first_or_404()
+    from utils.generation_bilan_journal import FICHIERS, traces_conservees
+    if nom not in FICHIERS:
+        abort(404)
+    contenu = traces_conservees(bilan).get(nom)
+    if contenu is None:
+        abort(404)
+    return current_app.response_class(contenu, mimetype="text/plain")

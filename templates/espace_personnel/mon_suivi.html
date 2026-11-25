@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Mon suivi | Les Fous d'Astro{% endblock %}
+{% block extra_css %}
+.suivi-shell{max-width:940px;margin:40px auto 70px;padding:0 16px;min-width:0;box-sizing:border-box;color:#263d48}
+.suivi-card{padding:clamp(22px,4vw,38px);margin-bottom:22px;border-radius:23px;background:#fff;box-shadow:0 12px 35px #164f7817}
+.suivi-card h1,.suivi-card h2,.suivi-card h3{color:#164f78;margin-bottom:14px}
+.suivi-card p{line-height:1.7;margin:12px 0}.suivi-meta{color:#71838b;font-size:.9rem}
+.suivi-action{display:inline-block;padding:12px 18px;border:0;border-radius:25px;background:#1f628e;color:#fff;font:inherit;font-weight:700;text-decoration:none;margin:12px 8px 8px 0;cursor:pointer}
+.suivi-action:disabled{opacity:.55;cursor:default}.suivi-card pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.85rem}
+.suivi-card summary{padding:16px 0;font-weight:700;color:#1f628e;cursor:pointer}.suivi-texte{white-space:pre-wrap;line-height:1.8}
+.suivi-historique{display:grid;gap:14px}.suivi-historique article{padding:18px;border:1px solid #c7dce0;border-radius:14px}
+.suivi-flash{background:#eef8f8;padding:14px;border-radius:12px}
+{% endblock %}
+{% block content %}
+{% include "espace_personnel/_navigation.html" %}
+<main class="suivi-shell">
+    <section class="suivi-card">
+        <a href="{{ url_for('espace_personnel.accompagnement') }}">← Mon accompagnement</a>
+        <h1>Mon suivi</h1>
+        <p>Un bilan tous les 30 jours pour retrouver les sujets qui reviennent, les prises de conscience et les changements réellement notés dans ton journal. Tes bilans restent dans cet historique, mois après mois.</p>
+        {% for categorie, message in get_flashed_messages(with_categories=true) %}<p class="suivi-flash" role="status">{{ message }}</p>{% endfor %}
+        {% if bilan %}
+            <h2>Mon bilan à partir du {{ bilan.debut.strftime('%d.%m.%Y') }}</h2>
+            <p class="suivi-meta">Période de 30 jours · {{ bilan.fuseau }} · enregistré le {{ bilan.date_generation.strftime('%d.%m.%Y') if bilan.date_generation else bilan.date_creation.strftime('%d.%m.%Y') }}</p>
+            {% if bilan.statut == 'genere' %}
+                <div>{{ bilan_html|safe }}</div>
+            {% elif bilan.statut == 'en_cours' %}
+                <p>Une génération est déjà en cours pour cette période. Aucun nouvel appel ne sera lancé en rechargeant cette page.</p>
+            {% elif bilan.statut == 'sans_notes' %}
+                <p>Cette période contient moins de cinq notes. Aucun bilan IA n’a été demandé ; tes notes restent dans ton journal.</p>
+            {% else %}
+                <p>{{ erreur_bilan or 'Le bilan n’a pas abouti ou sa réponse n’a pas été validée.' }} Aucun nouvel appel ne sera lancé automatiquement.</p>
+            {% endif %}
+            {% if fichiers_bilan %}
+            <details><summary>Retrouver les sources, la réponse et les contrôles</summary>
+                <ul>{% for nom in fichiers_bilan %}<li><a href="{{ url_for('espace_personnel.trace_suivi_journal', bilan_id=bilan.id, nom=nom) }}">{{ nom }}</a></li>{% endfor %}</ul>
+            </details>
+            {% endif %}
+            <a class="suivi-action" href="{{ url_for('espace_personnel.mon_suivi') }}">Voir mon historique</a>
+        {% else %}
+            {% if droits_compte_espace.bilan_journal_30j %}
+            <p class="suivi-meta">Ton abonnement comprend un bilan par période de 30 jours, avec au moins cinq notes. {% if bilans_journal_auto_actifs %}Ton bilan est préparé automatiquement à l’échéance et conservé ici.{% else %}L’automatisation n’est pas encore activée. Tu peux préparer les sources et demander ton bilan ici.{% endif %}</p>
+            {% else %}<p>Le compte gratuit ne comprend aucun appel IA ni mail d’accompagnement. Le bilan du journal tous les 30 jours fait partie de l’abonnement payant.</p><a class="suivi-action" href="{{ url_for('abonnement_client.mon_abonnement') }}">Voir mon abonnement</a>{% endif %}
+        {% endif %}
+    </section>
+    {% if periode and droits_compte_espace.bilan_journal_30j %}
+    <section class="suivi-card">
+        <h2>Ma période de suivi</h2>
+        <p>Du <strong>{{ periode.debut.strftime('%d.%m.%Y') }}</strong> au <strong>{{ periode.dernier_jour.strftime('%d.%m.%Y') }}</strong>.</p>
+        <p class="suivi-meta">Repère de bilan : {{ periode.fin.strftime('%d.%m.%Y') }} · {{ periode.fuseau }}. Seules les notes concernant ces 30 jours et une courte mémoire du bilan précédent seront reprises. Les anciennes périodes encore concernées seront identifiées comme contexte.</p>
+        <form method="post" action="{{ url_for('espace_personnel.preparer_suivi_journal') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+            <button class="suivi-action" type="submit" {% if not periode.due %}disabled{% endif %}>Préparer les sources — sans appel IA</button>
+        </form>
+        {% if not periode.due %}<p>Cette période n’est pas encore terminée.</p>{% endif %}
+        {% if preparation %}
+            <h3>Les sources prévues</h3>
+            {% if not preparation.minimum_atteint %}
+                <p><strong>{{ preparation.nombre_notes }} / {{ preparation.minimum_notes }} notes dans cette période.</strong> Il manque {{ preparation.notes_manquantes }} note{% if preparation.notes_manquantes != 1 %}s{% endif %} pour pouvoir générer un bilan. Aucun appel IA ne sera lancé avant ce minimum.</p>
+                <a href="{{ url_for('espace_personnel.journal') }}">Continuer mon journal →</a>
+            {% else %}
+                <p>{{ preparation.nombre_notes }} note{% if preparation.nombre_notes != 1 %}s{% endif %} de journal · {{ preparation.caracteres }} caractères, consignes comprises.</p>
+                {% if preparation.dossier.memoire_precedente %}<p>Une courte mémoire du bilan précédent est incluse.</p>{% else %}<p>Aucune mémoire précédente disponible : ce bilan partira des notes de la période.</p>{% endif %}
+                {% if not preparation.taille_ok %}<p>La préparation dépasse le budget prévu de 16 000 caractères. Il faudra l’alléger avant d’activer une génération.</p>{% endif %}
+            {% endif %}
+            <details><summary>Voir les notes retenues et le prompt complet</summary><pre>{{ preparation.prompt }}</pre></details>
+            <p class="suivi-meta">Cet aperçu n’est pas un bilan généré et n’est pas ajouté à l’historique.</p>
+            {% if droits_compte_espace.bilan_journal_30j and preparation.taille_ok %}
+                <p class="suivi-meta">Modèle configuré : {{ preparation.modele }}. Le bouton ci-dessous lance un appel IA payant et enregistre le bilan. Aucun mail n’est envoyé.</p>
+                <form method="post" action="{{ url_for('espace_personnel.generer_suivi_journal') }}" class="suivi-generation">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+                    <input type="hidden" name="empreinte" value="{{ preparation.empreinte }}">
+                    <button class="suivi-action" type="submit" {% if not preparation.minimum_atteint %}disabled{% endif %}>Générer mon bilan du journal avec l’IA</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </section>
+    {% endif %}
+    {% if historique is not none %}
+    <section class="suivi-card">
+        <h2>Mon historique</h2>
+        {% if historique.total %}
+        <div class="suivi-historique">
+            {% for element in historique.items %}
+            <article>
+                <h3>Bilan à partir du {{ element.debut.strftime('%d.%m.%Y') }}</h3>
+                <p>{% if element.statut == 'sans_notes' %}Moins de cinq notes : aucun bilan IA demandé pour cette période.{% else %}{{ (element.texte or '')|truncate(220) }}{% endif %}</p>
+                <a href="{{ url_for('espace_personnel.fiche_bilan_journal', bilan_id=element.id) }}">Lire ce bilan →</a>
+            </article>
+            {% endfor %}
+        </div>
+        <nav aria-label="Pages de mon suivi">
+            {% if historique.has_prev %}<a class="suivi-action" href="{{ url_for('espace_personnel.mon_suivi', page=historique.prev_num) }}">Plus récents</a>{% endif %}
+            {% if historique.has_next %}<a class="suivi-action" href="{{ url_for('espace_personnel.mon_suivi', page=historique.next_num) }}">Plus anciens</a>{% endif %}
+        </nav>
+        {% else %}<p>Aucun bilan n’a encore été généré. Tes notes restent disponibles dans ton journal.</p>{% endif %}
+        <a class="suivi-action" href="{{ url_for('espace_personnel.journal') }}">Ouvrir mon journal</a>
+    </section>
+    {% endif %}
+</main>
+<script>
+document.querySelectorAll('.suivi-generation').forEach(form => form.addEventListener('submit', () => {
+    const bouton = form.querySelector('button');
+    bouton.disabled = true;
+    bouton.textContent = 'Génération en cours…';
+}));
+</script>
+{% endblock %}

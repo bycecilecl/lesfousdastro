@@ -11,6 +11,7 @@
     <h2>Le fonctionnement</h2>
     <p><strong>Autorisation des envois : {{ 'activée' if autorise else 'désactivée' }}.</strong> Ce réglage se fait dans la configuration du serveur. Cet écran ne déclenche aucun appel IA ni envoi.</p>
     <p>Chaque membre reçoit ses mails pendant les trois mois de son abonnement, à partir de son activation. Les dates de début et de fin sont propres à chaque compte.</p>
+    <p><strong>Bilans automatiques du journal : {{ 'activés' if bilans_journal_auto_actifs else 'désactivés' }}.</strong> Un bilan privé est prévu tous les 30 jours d’abonnement actif, avec au moins cinq notes. Il reste dans <a href="{{ url_for('espace_personnel.mon_suivi') }}">Mon suivi</a> ; aucun e-mail n’est envoyé pour ce bilan.</p>
     <p>RL : premier 9 h après le retour lunaire. Nouvelle et Pleine Lune : la veille à 9 h, selon le fuseau du profil.</p>
     <p>Pour les lunaisons, ton analyse doit être validée. Le journal est utilisé selon le choix de chaque membre. Une tentative échouée n’est jamais relancée automatiquement.</p>
     <p><a href="{{ url_for('admin_essais_mails.index') }}">Tester un mail sur mon compte →</a> · <a href="{{ url_for('admin_lunaisons.index') }}">Préparer mes analyses de lunaisons →</a></p>

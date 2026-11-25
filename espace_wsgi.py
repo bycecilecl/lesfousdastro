@@ -28,5 +28,8 @@ except Exception:
 from services.mails_evenements_worker import demarrer_mails_evenements
 demarrer_mails_evenements(app)
 
+from services.bilans_journal_worker import demarrer_bilans_journal
+demarrer_bilans_journal(app)
+
 from services.revolution_solaire_worker import demarrer_relances_rs
 demarrer_relances_rs(app)
