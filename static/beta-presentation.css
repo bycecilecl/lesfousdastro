@@ -1,4 +1,14 @@
 .beta-presentation{--beta-encre:#183f53;--beta-secondaire:#526b76}
+.subscriptions-hero.beta-hero{width:100%;max-width:1060px;margin:0 auto 48px;padding:4px 0 8px;text-align:center}
+.beta-hero .subscriptions-kicker{margin-bottom:24px;font-size:.73rem;letter-spacing:.12em}
+.beta-hero .beta-hero-title{margin:0 0 26px;font-size:clamp(2.1rem,4.2vw,3.6rem);font-weight:750;line-height:1.16;letter-spacing:-.025em}
+.beta-hero-amorce{display:block;margin-bottom:16px;font-size:clamp(1.15rem,2.1vw,1.65rem);font-weight:500;line-height:1.45;letter-spacing:0;color:#e6f4f5}
+.beta-hero-ligne{display:block;text-wrap:balance}
+.beta-hero-title em{font-family:Georgia,'Times New Roman',serif;font-weight:500;color:#ffe4b2}
+.beta-hero .beta-hero-description{max-width:890px;margin:0 auto;font-size:clamp(1rem,1.45vw,1.15rem);line-height:1.7;text-wrap:pretty}
+.beta-hero-promesse,.beta-hero-complice{display:block}
+.beta-hero-complice{margin:12px auto 0;max-width:820px;color:#e1f0f2;font-size:.94em}
+.beta-hero-clin{color:#d4e8ed}
 .beta-presentation h2,.beta-presentation h3{color:var(--beta-encre);line-height:1.25}
 .beta-presentation p{line-height:1.75}
 .beta-presentation .free-link{background:linear-gradient(45deg,#087f86,#1f628e);color:white}
@@ -54,6 +64,6 @@
 .beta-presentation .beta-derniere-action{margin-top:24px;margin-bottom:0}
 .beta-presentation a:focus-visible,.beta-presentation summary:focus-visible{outline:3px solid #087f86;outline-offset:4px}
 @media(max-width:960px){.beta-benefices-grille{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:760px){.beta-offre,.beta-option-rs{grid-template-columns:minmax(0,1fr)}.beta-offre-prix{grid-row:1;border-left:0;border-bottom:1px solid #d5e7e3}.beta-offre-mails{grid-row:2}.beta-offre-mails,.beta-offre-prix{padding:26px 22px}.beta-option-rs{gap:16px}.beta-presentation .subscriptions-hero{margin-bottom:30px}.beta-presentation .subscriptions-hero h1{font-size:clamp(2.1rem,8vw,3.1rem);line-height:1.1}}
+@media(max-width:760px){.beta-offre,.beta-option-rs{grid-template-columns:minmax(0,1fr)}.beta-offre-prix{grid-row:1;border-left:0;border-bottom:1px solid #d5e7e3}.beta-offre-mails{grid-row:2}.beta-offre-mails,.beta-offre-prix{padding:26px 22px}.beta-option-rs{gap:16px}.subscriptions-hero.beta-hero{margin-bottom:32px;padding-top:0}.beta-hero .beta-hero-title{font-size:clamp(1.85rem,5.6vw,2.6rem);margin-bottom:22px}.beta-hero-amorce{margin-bottom:14px;font-size:clamp(1.1rem,3.8vw,1.4rem)}.beta-hero .subscriptions-kicker{margin-bottom:20px}.beta-hero .beta-hero-description{font-size:1rem}}
 @media(max-width:520px){.beta-benefices-grille{grid-template-columns:minmax(0,1fr)}.beta-benefice{padding:22px}.beta-presentation .free-link{max-width:100%;box-sizing:border-box;white-space:normal}.beta-offre,.beta-carte{border-radius:20px}}
 @media(max-width:760px){.beta-apercus-grille{grid-template-columns:minmax(0,1fr);gap:18px}.beta-apercu figcaption{padding:20px}.beta-apercu-agrandir{right:8px;bottom:8px;padding:7px 11px}.beta-apercus .beta-titre-section{text-align:left}.beta-apercus .beta-titre-section>p:last-child{margin-left:0}}

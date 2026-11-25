@@ -49,7 +49,7 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='beta-tutoriels.css', v='20261124-tutos') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='beta-presentation.css', v='20261125-apercus') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='beta-presentation.css', v='20261125-accroche-large') }}">
 <div class="subscriptions-page"><main class="subscriptions-wrap">
 {% set lien_inscription_beta = url_for('abonnement_client.mon_abonnement', _anchor='souscription') if connecte else url_for('espace_personnel.inscription', suivant='/mon-espace/abonnement') %}
 {% set lien_connexion_beta = url_for('espace_personnel.connexion', suivant='/mon-espace/abonnement') %}
