@@ -782,3 +782,15 @@ class BilanJournal30Jours(db.Model):
     erreur = Column(Text)
     date_creation = Column(DateTime(timezone=True), default=utcnow, nullable=False)
     date_generation = Column(DateTime(timezone=True))
+
+
+class NotificationAdminLue(db.Model):
+    """État de lecture privé, sans modifier les comptes ou leurs paiements."""
+    __tablename__ = "notifications_admin_lues"
+    __table_args__ = (
+        CheckConstraint("nature IN ('compte_cree', 'paiement_confirme')", name="ck_notification_admin_nature"),
+    )
+    administratrice_id = Column(Integer, primary_key=True)
+    nature = Column(String(24), primary_key=True)
+    source_id = Column(String(100), primary_key=True)
+    lue_le = Column(DateTime(timezone=True), nullable=False, default=utcnow)

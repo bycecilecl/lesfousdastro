@@ -1,0 +1,9 @@
+.notifications-actions{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;margin:16px 0}
+.notifications-actions form{margin:0}.notifications-actions p{margin:0}
+.notifications-liste{display:grid;gap:18px;margin-top:24px}
+.notification{padding:22px;border:1px solid #d4e3e6;border-radius:16px;overflow-wrap:anywhere;min-width:0}
+.notification--nouvelle{background:#f0faf8;border-left:4px solid #008b8b}
+.notification-entete{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.notification-entete h2{margin:0;font-size:1.2rem}
+.notification-etat{padding:4px 10px;border-radius:16px;background:#d8efeb;color:#146267;font-size:.8rem;font-weight:700}
+@media(max-width:600px){.notification{padding:16px}.notifications-actions{align-items:flex-start;flex-direction:column}.notifications-actions .essai-bouton{max-width:100%;box-sizing:border-box;white-space:normal}}

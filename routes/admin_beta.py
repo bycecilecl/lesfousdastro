@@ -1,7 +1,7 @@
 """Invitations, inscriptions et paiements de la bêta, sans envoi ni génération."""
 from datetime import datetime, timezone
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, url_for
 from sqlalchemy import and_, case, inspect, or_
 
 from extensions import db
@@ -9,7 +9,7 @@ from models.espace_personnel import (
     AbonnementEspace, CommandeAbonnementEspace, InscriptionMailsBeta, InvitationOffreBeta, UtilisateurEspace,
 )
 from utils.acces_abonnement import FORMULES_ABONNEMENT, STATUTS_ACTIFS, acces_abonnement
-from utils.auth_espace import administratrice_connectee, verifier_csrf_espace
+from utils.auth_espace import administratrice_connectee, utilisateur_connecte, verifier_csrf_espace
 from utils.invitations_beta import OFFRE_BETA, autoriser_adresses_beta, stockage_invitations_pret
 from utils.mails_evenements import PARIS, utc
 from utils.souscription_espace import configuration_paiement
@@ -164,3 +164,50 @@ def invitations():
         db.session.rollback()
         flash(str(erreur), 'error')
     return redirect(url_for('admin_beta.index', _anchor='invitations'))
+
+
+@admin_beta_bp.app_context_processor
+def contexte_notifications_admin():
+    if not administratrice_connectee():
+        return {"nombre_notifications_admin": 0}
+    from utils.notifications_admin import nombre_non_lues
+    return {"nombre_notifications_admin": nombre_non_lues(utilisateur_connecte().id)}
+
+
+@admin_beta_bp.route('/notifications')
+def notifications():
+    from utils.notifications_admin import lister, stockage_pret
+    pret = stockage_pret()
+    non_lues = request.args.get("filtre") == "non_lues"
+    lignes, nombre, page, pages = [], 0, 1, 1
+    if pret:
+        lignes, nombre, page, pages = lister(utilisateur_connecte().id,
+            page=request.args.get("page", 1, type=int) or 1, non_lues=non_lues)
+    return render_template("admin/notifications.html", pret=pret, notifications=lignes,
+        nombre=nombre, page=page, pages=pages, non_lues=non_lues,
+        statuts_paiement=STATUTS_PAIEMENT, utc=utc, paris=PARIS)
+
+
+@admin_beta_bp.route('/notifications/compteur')
+def compteur_notifications():
+    from utils.notifications_admin import nombre_non_lues
+    return jsonify(non_lues=nombre_non_lues(utilisateur_connecte().id))
+
+
+@admin_beta_bp.route('/notifications/lire', methods=['POST'])
+def lire_notification():
+    from utils.notifications_admin import marquer_lues, stockage_pret
+    if not stockage_pret():
+        abort(503)
+    marquer_lues(utilisateur_connecte().id, nature=request.form.get("nature", ""),
+                 source_id=request.form.get("source_id", ""))
+    return redirect(url_for("admin_beta.notifications"))
+
+
+@admin_beta_bp.route('/notifications/tout-lire', methods=['POST'])
+def lire_notifications():
+    from utils.notifications_admin import marquer_lues, stockage_pret
+    if not stockage_pret():
+        abort(503)
+    marquer_lues(utilisateur_connecte().id)
+    return redirect(url_for("admin_beta.notifications"))

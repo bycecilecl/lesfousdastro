@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Mes notifications | Les Fous d’Astro{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='essais-mails.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin-notifications.css', v='20261125') }}">
+{% include 'espace_personnel/_navigation.html' %}
+<main class="essai-shell">
+  <header class="essai-entete"><p>ADMINISTRATION</p><h1>Mes notifications</h1>
+    <p>Les créations de comptes et les paiements confirmés, visibles uniquement dans ton espace administratrice.</p>
+  </header>
+  {% for categorie, message in get_flashed_messages(with_categories=true) %}<p class="essai-message" role="status">{{ message }}</p>{% endfor %}
+  <section class="essai-carte">
+    {% if not pret %}<p>Les notifications seront disponibles après la mise à jour de l’espace.</p>{% else %}
+    <div class="notifications-actions">
+      <p><strong>{{ nombre_notifications_admin }} non lue{% if nombre_notifications_admin != 1 %}s{% endif %}</strong></p>
+      <a href="{{ url_for('admin_beta.notifications', filtre='toutes' if non_lues else 'non_lues') }}">{{ 'Voir tout l’historique' if non_lues else 'Voir seulement les non lues' }}</a>
+      {% if nombre_notifications_admin %}<form method="post" action="{{ url_for('admin_beta.lire_notifications') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+        <button class="essai-bouton" type="submit">Tout marquer comme lu</button>
+      </form>{% endif %}
+    </div>
+    <p class="essai-aide">Le compteur s’actualise chaque minute quand ton espace est ouvert. Les anciens événements restent consultables avec leur date. Les paiements fictifs PayPal sont exclus. Aucun e-mail n’est envoyé par ces notifications.</p>
+    <div class="notifications-liste">
+      {% for notification in notifications %}
+      <article class="notification{% if not notification.lue_le %} notification--nouvelle{% endif %}">
+        <div class="notification-entete"><h2>{{ 'Compte créé' if notification.nature == 'compte_cree' else 'Paiement confirmé' }}</h2>
+          {% if not notification.lue_le %}<span class="notification-etat">Non lue</span>{% endif %}
+        </div>
+        <p><strong>{{ notification.prenom or 'Sans prénom' }}</strong><br>{{ notification.email or 'Sans adresse e-mail' }}</p>
+        <p class="essai-aide">{{ utc(notification.date_evenement).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }} · heure de Paris</p>
+        {% if notification.nature == 'paiement_confirme' %}
+        <p><strong>{{ '%.2f'|format(notification.montant_centimes/100) }} {{ notification.devise }}</strong> · {{ 'Trois mois + Révolution Solaire' if notification.montant_centimes == 7400 else ('Trois mois d’espace abonné' if notification.montant_centimes == 3500 else 'Offre enregistrée') }}<br>État actuel : {{ statuts_paiement.get(notification.statut_paiement, notification.statut_paiement) }}</p>
+        {% else %}<p class="essai-aide">Un compte créé ne signifie pas qu’un abonnement a été payé.</p>{% endif %}
+        <div class="notifications-actions">
+          <a href="{{ url_for('admin_beta.comptes', q=notification.email or notification.prenom) }}">Voir le compte →</a>
+          {% if notification.nature == 'paiement_confirme' %}<a href="{{ url_for('admin_beta.index', _anchor='paiements') }}">Voir les paiements →</a>{% endif %}
+          {% if not notification.lue_le %}<form method="post" action="{{ url_for('admin_beta.lire_notification') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_espace() }}">
+            <input type="hidden" name="nature" value="{{ notification.nature }}">
+            <input type="hidden" name="source_id" value="{{ notification.source_id }}">
+            <button class="essai-bouton" type="submit">Marquer comme lue</button>
+          </form>{% endif %}
+        </div>
+      </article>
+      {% else %}<p>{{ 'Aucune notification non lue.' if non_lues else 'Aucune inscription ni aucun paiement à afficher.' }}</p>{% endfor %}
+    </div>
+    {% if pages > 1 %}<nav class="notifications-actions" aria-label="Pages des notifications">
+      {% if page > 1 %}<a href="{{ url_for('admin_beta.notifications', page=page-1, filtre='non_lues' if non_lues else 'toutes') }}">← Plus récentes</a>{% endif %}
+      <span>Page {{ page }} sur {{ pages }}</span>
+      {% if page < pages %}<a href="{{ url_for('admin_beta.notifications', page=page+1, filtre='non_lues' if non_lues else 'toutes') }}">Plus anciennes →</a>{% endif %}
+    </nav>{% endif %}
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

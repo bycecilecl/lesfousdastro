@@ -47,6 +47,7 @@ NOUVELLES_TABLES = (
     'commandes_abonnements_espace',
     'revolutions_solaires_pack_beta',
     'bilans_journal_30_jours',
+    'notifications_admin_lues',
     'profils_communaute',
     'publications_communaute',
     'commentaires_communaute',
@@ -123,6 +124,7 @@ def main():
                 connexion.execute(text(f'ALTER TABLE "{table}" ADD COLUMN "{nom}" {definition}'))
             # Imports de modèles seuls : aucun import de main, de routes ou d'IA.
             from models.espace_personnel import (
+                NotificationAdminLue,
                 BilanJournal30Jours,
                 AnalyseLunaison, DecodageObservationMecanisme, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
                 CarteLunaison,
@@ -140,6 +142,7 @@ def main():
                 SignalementCommunaute,
             )
             modeles = {m.__tablename__: m.__table__ for m in (
+                NotificationAdminLue,
                 BilanJournal30Jours,
                 AnalyseLunaison, DecodageObservationMecanisme, EnjeuAnnuel, LienMotDePasseEspace, LimiteAccesEspace,
                 CarteLunaison,

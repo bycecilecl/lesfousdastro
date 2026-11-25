@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='espace-navigation.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='espace-navigation.css', v='20261125-notifications') }}">
 {% set rubrique = request.endpoint %}
 {% set rubriques_detail = {
   'espace_personnel.fiche': 'espace_personnel.journal',
@@ -21,9 +21,12 @@
 } %}
 {% set rubrique = rubriques_detail.get(rubrique, rubrique) %}
 <details class="espace-navigation" open>
-  <summary>Mon espace <span aria-hidden="true">☰</span></summary>
+  <summary>Mon espace <span>{% if outils_mails_admin %}<span class="espace-notifications-badge" data-notifications-count {% if not nombre_notifications_admin %}hidden{% endif %} aria-label="{{ nombre_notifications_admin }} notifications non lues">{{ nombre_notifications_admin }}</span> {% endif %}<span aria-hidden="true">☰</span></span></summary>
   <nav class="espace-navigation-panel" aria-label="Navigation de mon espace">
     <a class="espace-navigation-brand" href="{{ url_for('espace_personnel.accueil') }}"><span aria-hidden="true">☾</span> Mon espace astral</a>
+    {% if outils_mails_admin %}
+      <a class="espace-navigation-link{% if rubrique == 'admin_beta.notifications' %} is-current{% endif %}" href="{{ url_for('admin_beta.notifications') }}" data-notifications-url="{{ url_for('admin_beta.compteur_notifications') }}"{% if rubrique == 'admin_beta.notifications' %} aria-current="page"{% endif %}>Notifications <span class="espace-notifications-badge" data-notifications-count {% if not nombre_notifications_admin %}hidden{% endif %} aria-label="{{ nombre_notifications_admin }} notifications non lues">{{ nombre_notifications_admin }}</span></a>
+    {% endif %}
     <p class="espace-navigation-label">Mon exploration</p>
     {% for endpoint, libelle in [
       ('espace_personnel.accueil', 'Accueil'),
@@ -92,5 +95,27 @@
   const adapter = () => { menu.open = bureau.matches; };
   adapter();
   bureau.addEventListener('change', adapter);
+  const notifications = menu.querySelector('[data-notifications-url]');
+  if (notifications) {
+    let enCours = false;
+    const actualiser = async () => {
+      if (document.hidden || enCours) return;
+      enCours = true;
+      try {
+        const reponse = await fetch(notifications.dataset.notificationsUrl, {credentials:'same-origin', cache:'no-store'});
+        if (!reponse.ok) return;
+        const donnees = await reponse.json();
+        if (!Number.isSafeInteger(donnees.non_lues) || donnees.non_lues < 0) return;
+        menu.querySelectorAll('[data-notifications-count]').forEach(compteur => {
+          compteur.textContent = donnees.non_lues;
+          compteur.hidden = donnees.non_lues === 0;
+          compteur.setAttribute('aria-label', donnees.non_lues + ' notifications non lues');
+        });
+      } catch (_) { /* La navigation reste utilisable si la connexion est interrompue. */ }
+      finally { enCours = false; }
+    };
+    window.setInterval(actualiser, 60000);
+    document.addEventListener('visibilitychange', actualiser);
+  }
 })();
 </script>
