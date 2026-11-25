@@ -1,0 +1,43 @@
+.beta-presentation{--beta-encre:#183f53;--beta-secondaire:#526b76}
+.beta-presentation h2,.beta-presentation h3{color:var(--beta-encre);line-height:1.25}
+.beta-presentation p{line-height:1.75}
+.beta-presentation .free-link{background:linear-gradient(45deg,#087f86,#1f628e);color:white}
+.beta-presentation .section-kicker{margin:0 0 12px;color:#008484;font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.beta-offre,.beta-carte{background:#fffdf9;border:1px solid #ffffffb3;border-radius:26px;box-shadow:0 18px 42px #103b4b1c}
+.beta-offre{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,1fr);gap:0;overflow:hidden}
+.beta-offre-mails{padding:clamp(26px,4vw,44px)}
+.beta-offre h2{font-size:clamp(1.65rem,3.5vw,2.3rem);margin:0 0 18px}
+.beta-offre-mails>p{color:var(--beta-secondaire);margin:14px 0}
+.beta-rendez-vous{display:grid;gap:18px;list-style:none;margin:26px 0;padding:0}
+.beta-rendez-vous li{padding-left:18px;border-left:3px solid #b4dcda;color:var(--beta-secondaire);line-height:1.6}
+.beta-rendez-vous strong{display:block;color:#1f628e;font-size:1.08rem;margin-bottom:3px}
+.beta-offre-mails .beta-repere{margin-top:26px;font-size:.94rem}
+.beta-offre-prix{padding:clamp(26px,4vw,40px);display:flex;flex-direction:column;justify-content:center;background:#edf7f4;border-left:1px solid #d5e7e3;text-align:center;color:var(--beta-encre);min-width:0}
+.beta-offre-prix .beta-prix{margin:8px 0 0;font-size:clamp(3.4rem,7vw,4.5rem);font-weight:850;line-height:1.1;color:#1f628e}
+.beta-offre-prix .beta-duree{margin:8px 0;font-size:1.25rem;font-weight:700}
+.beta-offre-prix .free-link{display:block;margin-top:16px;padding:15px 18px;line-height:1.4;white-space:normal}
+.beta-prix-note{font-size:.85rem;color:var(--beta-secondaire);margin:18px 0 0}
+.beta-deja-compte{display:inline-block;margin-top:18px;color:#1f628e;font-size:.88rem;text-underline-offset:3px}
+.beta-benefices{margin-top:42px}
+.beta-titre-section{margin:0 0 22px;color:white;text-align:center}
+.beta-titre-section .section-kicker,.beta-titre-section h2{color:white}
+.beta-titre-section h2{font-size:clamp(1.65rem,3vw,2.1rem);margin:0}
+.beta-benefices-grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.beta-benefice{background:#fffffff5;padding:25px 22px;border:1px solid #ffffffb3;border-radius:20px;min-width:0}
+.beta-benefice h3{margin:0 0 14px;font-size:1.17rem}
+.beta-benefice p{margin:0;color:var(--beta-secondaire);font-size:.95rem}
+.beta-note-edition{margin:20px auto 0;max-width:780px;text-align:center;color:#fff;font-size:.94rem}
+.beta-carte{padding:clamp(24px,4vw,40px);margin-top:28px;color:var(--beta-secondaire)}
+.beta-carte h2{font-size:clamp(1.5rem,3vw,1.9rem);margin:0 0 18px}
+.beta-carte p{margin:14px 0}.beta-carte a:not(.free-link){color:#1f628e;text-underline-offset:3px}
+.beta-option-rs{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,.5fr);gap:30px;align-items:center}
+.beta-pack-prix{display:grid;gap:12px;padding:24px;border-radius:18px;background:#f0f5f7;color:#1f628e;text-align:center}
+.beta-pack-prix strong{font-size:1.8rem;line-height:1.2}.beta-pack-prix small{color:var(--beta-secondaire);line-height:1.5}
+.beta-questions details{border-top:1px solid #d9e6e6;padding:0 2px}
+.beta-questions summary{padding:18px 22px 18px 0;cursor:pointer;color:var(--beta-encre);font-weight:700;line-height:1.5}
+.beta-questions details p{margin:0 0 20px}
+.beta-presentation .beta-derniere-action{margin-top:24px;margin-bottom:0}
+.beta-presentation a:focus-visible,.beta-presentation summary:focus-visible{outline:3px solid #087f86;outline-offset:4px}
+@media(max-width:960px){.beta-benefices-grille{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.beta-offre,.beta-option-rs{grid-template-columns:minmax(0,1fr)}.beta-offre-prix{grid-row:1;border-left:0;border-bottom:1px solid #d5e7e3}.beta-offre-mails{grid-row:2}.beta-offre-mails,.beta-offre-prix{padding:26px 22px}.beta-option-rs{gap:16px}.beta-presentation .subscriptions-hero{margin-bottom:30px}.beta-presentation .subscriptions-hero h1{font-size:clamp(2.1rem,8vw,3.1rem);line-height:1.1}}
+@media(max-width:520px){.beta-benefices-grille{grid-template-columns:minmax(0,1fr)}.beta-benefice{padding:22px}.beta-presentation .free-link{max-width:100%;box-sizing:border-box;white-space:normal}.beta-offre,.beta-carte{border-radius:20px}}

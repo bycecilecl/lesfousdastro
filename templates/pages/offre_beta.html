@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}L’espace abonné · Trois mois pour tester | Les Fous d'Astro{% endblock %}
-{% block meta_description %}Offre bêta des Fous d’Astro, réservée aux adresses invitées par Cécile.{% endblock %}
+{% block title %}Ton espace astral · 3 mois pour 35 € | Les Fous d'Astro{% endblock %}
+{% block meta_description %}Tes rendez-vous astrologiques personnalisés par mail, ton calendrier, ton journal et ta communauté. 35 € pour trois mois, sans renouvellement automatique.{% endblock %}
 
 {% block extra_css %}
 :root { --navy:#1f628e; --navy-dark:#123f5d; --teal:#00a8a8; --mist:#eafafa; --pink:#d3b1c2; --ink:#243943; }
@@ -49,59 +49,16 @@ body { min-height:100vh; background:linear-gradient(145deg,#164f78 0%,#00a8a8 48
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='beta-tutoriels.css', v='20261124-tutos') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='beta-presentation.css', v='20261125') }}">
 <div class="subscriptions-page"><main class="subscriptions-wrap">
-<header class="subscriptions-hero">
-<span class="subscriptions-kicker">L’espace abonné · sur invitation</span>
-<h1>Viens tester l’espace abonné avec moi !</h1>
-<p>Un espace pour écrire ce que tu vis, comprendre tes mécanismes, et faire des liens avec ton thème astral.</p>
-</header>
-<section class="plan plan--premium" aria-labelledby="offre-lancement">
-<p class="beta-intro">Si tu lis cette page, c’est que tu as répondu à mes mails pour tester cet espace pendant 3 mois et que tu es OK pour me faire tes retours afin que cet espace devienne un espace qui t’aide, t’accompagne et surtout te donne envie d’y revenir.</p>
-<p class="plan-label">Trois mois à partir de l’activation de ton abonnement</p>
-<h2 id="offre-lancement">Trois mois pour explorer ton espace</h2>
-<p class="plan-price">35 € <span>au total pour les trois mois</span></p>
-<p class="plan-summary">Un paiement unique, sans renouvellement automatique. Cette première période est réservée uniquement aux premiers invités.</p>
-<p class="beta-inscription-cta"><a class="free-link" href="#comment-participer">Ça me dit, comment je participe ?</a></p>
-<h2>Ce que tu vas pouvoir utiliser</h2>
-<ul class="plan-list">
-<li><strong>Ton calendrier astrologique personnel.</strong> Tu retrouves les transits qui touchent ton thème, leur signification et les domaines concernés. En cliquant sur une date, tu peux noter ce que tu traverses à ce moment-là.</li>
-<li><strong>Ton journal de bord.</strong> Tu écris ce que tu veux : tes pensées, une situation, tes ressentis ou une semaine en famille. Tu peux noter une journée ou une période, avec un début, une fin ou « toujours en cours ». Perlimpinpin.</li>
-<li><strong>Ton labo et tes mécanismes.</strong> Tu te rends compte que tu dis oui alors que tu aimerais dire non ? Tu peux relier plusieurs situations à ce fonctionnement, puis aller plus loin : tes émotions, tes réactions, la croyance derrière, la source et ce que tu aimerais tester autrement.</li>
-<li><strong>Tes analyses et ton profil astral.</strong> Tu retrouves les rapports que tu as déjà et tu peux explorer ce qui te parle. Ton thème natal sert de socle, of course. Tu peux aussi actualiser ta situation : travail, relations, projets… Parce que ta vie bouge, n’est-ce pas.</li>
-<li><strong>La communauté</strong>, avec « Nos partages » et le tchat pour échanger sur tes expériences, tes questions et tes prises de conscience.</li>
-</ul>
-<h2>Et les mails ?</h2>
-<p class="beta-intro">Tu recevras les mails directement dans ta boîte : <strong>ta Révolution Lunaire</strong> pour ton nouveau cycle personnel, <strong>la Nouvelle Lune</strong> et <strong>la Pleine Lune</strong> pour comprendre ce qu’elles viennent mobiliser dans ton thème. Les rendez-vous suivent les cycles, donc le nombre de mails peut varier selon le mois.</p>
-<p class="beta-intro"><strong>J’étudie et rédige moi-même les analyses collectives des lunaisons.</strong> L’application, avec l’aide de l’IA, les croise ensuite avec ton thème natal pour construire ta lecture personnelle. Pour la RL, la lecture est générée à partir de sa carte et de ton thème natal. Ta Révolution Solaire, lorsqu’elle est enregistrée, apporte le fil de l’année.</p>
-<p class="beta-intro">Si tu l’autorises, tes notes des trente derniers jours peuvent nourrir un passage à la fin du mail. Tu peux aussi garder ton journal pour toi : le choix t’appartient, et tu peux le modifier dans ton profil.</p>
-<p class="beta-intro">Tous les mails envoyés restent dans <strong>Mes mails</strong>. Et si quelque chose te parle, un bouton te permet d’aller écrire dans ton journal à partir de cette analyse. Tu retrouves ensuite tes notes reliées au mail.</p>
-</section>
-<section class="free-space beta-section" aria-labelledby="option-revolution-solaire">
-<div><p class="section-kicker">En option</p><h2 id="option-revolution-solaire">Tu veux aussi ta Révolution Solaire ?</h2>
-<p>Tu peux ajouter un rapport de Révolution Solaire à <strong>39 €</strong>. Le pack avec les trois mois d’espace abonné revient alors à <strong>74 € au total</strong> : 35 € pour l’espace + 39 € pour le rapport.</p>
-<p class="beta-intro">Tu choisis ensuite l’année et le lieu du retour solaire, puis tu demandes la génération de ton rapport. Tu le retrouveras dans Mes analyses et dans tes années.</p>
-<p>Cette option est facultative. Si tu as déjà ta RS, tu peux utiliser ton analyse existante dans l’espace.</p>
-</div></section>
-<section class="free-space beta-section" aria-labelledby="retours">
-<div><p class="section-kicker">Pourquoi une bêta ?</p><h2 id="retours">J’ai besoin de tes retours, pour de vrai</h2>
-<p>L’espace est encore en phase de test.</p>
-<p>Certaines choses pourront évoluer, être ajoutées et tu rencontreras peut-être des bugs.</p>
-<p>Le but, c’est de l’utiliser dans ta vraie vie pour voir ce qui fonctionne et ce qui mérite d’être revu.</p>
-<p class="beta-intro">Dis-moi ce qui t’aide, ce que tu ne comprends pas, ce qui manque ou ce qui te saoule.</p>
-<p>Est-ce que tu retrouves facilement tes notes ?<br>Est-ce que les mails te parlent ?<br>Est-ce qu’une rubrique te semble inutile ?</p>
-<p><strong>Sois cash pistache !</strong></p><br>
-<p>Une rubrique <strong>Ton feedback</strong> est prévue directement dans l’espace.</p>
-<p><strong>Seule moi, Cécile, peux consulter tes retours.</strong> Tu peux aussi directement m'envoyer un mail (lesfousdastro@gmail.com).</p>
-<p>Utilise l’espace à ton rythme : dis-moi aussi ce que tu n’as pas eu envie d’utiliser, ça m’intéresse. Tout m’intéresse.</p>
-<p>Je veux vraiment que cet espace soit comme ta super pote à la compote.</p>
-</div></section>
+{% set lien_inscription_beta = url_for('abonnement_client.mon_abonnement', _anchor='souscription') if connecte else url_for('espace_personnel.inscription', suivant='/mon-espace/abonnement') %}
+{% set lien_connexion_beta = url_for('espace_personnel.connexion', suivant='/mon-espace/abonnement') %}
+{% include 'pages/_presentation_abonnements_beta.html' %}
 <section class="free-space beta-section" aria-labelledby="comment-participer">
-<div><p class="section-kicker">Comment ça se passe ?</p><h2 id="comment-participer">Tu découvres l’offre, puis tu commences</h2>
-<ol><li><strong>Ton compte.</strong> Tu crées ton compte et ton mot de passe, ou tu te connectes avec l’adresse e-mail à laquelle je t’ai invitée.</li>
-<li><strong>Tes informations.</strong> Tu renseignes ta date, ton heure et ton lieu de naissance, puis la ville de tes cycles.</li>
-<li><strong>Ton choix pour le journal.</strong> Tu indiques si tu autorises son utilisation dans les mails.</li>
-<li><strong>Ton paiement.</strong> Dans « Mon abonnement », choisis les trois mois seuls à 35 €, ou le pack avec une Révolution Solaire à 74 €. Après les informations ci-dessus, accepte les conditions de vente puis règle une seule fois le montant choisi avec le bouton PayPal.</li>
-<li><strong>Ton espace.</strong> Après confirmation du paiement, ton inscription est enregistrée pour les trois mois. Tu retrouves tes prochains rendez-vous dans « Mon abonnement » et les mails déjà envoyés dans « Mes mails ».</li></ol>
+<div><p class="section-kicker">Tu nous rejoins ?</p><h2 id="comment-participer">Ton inscription, simplement</h2>
+<ol><li><strong>Crée ton compte.</strong> Utilise l’adresse e-mail de ton invitation et choisis ton mot de passe. Si tu as déjà un compte, connecte-toi avec cette adresse.</li>
+<li><strong>Prépare ton profil.</strong> Renseigne ta naissance, la ville de tes cycles et ton choix pour l’utilisation du journal dans tes mails.</li>
+<li><strong>Choisis ton offre et règle une seule fois.</strong> Dans « Mon abonnement », sélectionne les trois mois à 35 €, ou le pack avec une Révolution Solaire à 74 €, puis accepte les conditions de vente et paie avec PayPal. Après confirmation, ton espace est activé et tes prochains rendez-vous sont indiqués.</li></ol>
 <p class="beta-intro">Tes <strong>trois mois commencent à l’activation de ton abonnement</strong>, après paiement confirmé et informations complétées. Tes dates exactes seront affichées dans « Mon abonnement ». À la fin, aucun nouveau prélèvement : ton compte gratuit, ton journal et tes archives restent accessibles.</p>
 <p class="beta-intro">Cette première offre est réservée aux personnes invitées. Les futurs abonnements seront présentés sur <a href="{{ url_for('pages_bp.abonnements') }}">la page des abonnements</a>, après les retours de la bêta.</p>
 <div class="beta-actions">

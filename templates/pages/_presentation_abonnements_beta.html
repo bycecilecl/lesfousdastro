@@ -1,0 +1,80 @@
+<div class="beta-presentation">
+  <header class="subscriptions-hero">
+    <span class="subscriptions-kicker">Les Fous d’Astro · accès privilégié</span>
+    <h1>Et si ton thème astral t’accompagnait au quotidien ?</h1>
+    <p>Comprends ce que tu traverses, explore tes mécanismes et découvre ce que les cycles astrologiques viennent éveiller en toi.</p>
+  </header>
+
+  <section class="beta-offre" aria-labelledby="offre-lancement">
+    <div class="beta-offre-mails">
+      <p class="section-kicker">Tes rendez-vous astrologiques personnalisés</p>
+      <h2 id="offre-lancement">Ton ciel, directement dans ta boîte mail</h2>
+      <p>Ta Révolution Lunaire, les Nouvelles Lunes et les Pleines Lunes : des lectures personnalisées selon ton thème natal, pour faire des liens avec ce que tu vis.</p>
+      <ul class="beta-rendez-vous">
+        <li><strong>Ta Révolution Lunaire</strong><span>Pour découvrir les pistes de ton nouveau cycle personnel.</span></li>
+        <li><strong>Chaque Nouvelle Lune</strong><span>Pour explorer ce qu’elle vient mobiliser dans ton thème.</span></li>
+        <li><strong>Chaque Pleine Lune</strong><span>Pour mettre en mots ce qui résonne avec ta propre vie.</span></li>
+      </ul>
+      <p class="beta-repere">Tu reçois tes mails, tu lis ce qui te parle et tu utilises ton espace à ton rythme. Tu n’as pas besoin de tenir un journal pour en profiter.</p>
+    </div>
+    <aside class="beta-offre-prix" aria-label="Prix de l’accompagnement">
+      <p class="section-kicker">Ton accompagnement astrologique</p>
+      <p class="beta-prix">35 €</p>
+      <p class="beta-duree">pour 3 mois</p>
+      <p>Révolution Lunaire, Nouvelles et Pleines Lunes : tes lectures personnalisées par mail.</p>
+      <p>Un paiement unique.<br><strong>Sans renouvellement automatique.</strong></p>
+      <a class="free-link" href="{{ lien_inscription_beta }}" target="_blank" rel="noopener">Je rejoins l’espace · 35 €<span class="sr-only"> (nouvel onglet)</span></a>
+      <p class="beta-prix-note">Tes trois mois commencent à l’activation de ton abonnement. Cette première édition bêta est réservée aux personnes invitées.</p>
+      {% if not connecte %}<a class="beta-deja-compte" href="{{ lien_connexion_beta }}" target="_blank" rel="noopener">J’ai déjà un compte : me connecter<span class="sr-only"> (nouvel onglet)</span></a>{% endif %}
+    </aside>
+  </section>
+
+  <section class="beta-benefices" aria-labelledby="accompagnement-inclus">
+    <div class="beta-titre-section"><p class="section-kicker">Et entre deux rendez-vous ?</p><h2 id="accompagnement-inclus">Ton espace pour faire des liens</h2></div>
+    <div class="beta-benefices-grille">
+      <article class="beta-benefice"><h3>Ton calendrier astrologique</h3><p>Retrouve les transits qui touchent ton thème, leur signification et les périodes concernées. Clique sur une date pour noter ce que tu traverses.</p></article>
+      <article class="beta-benefice"><h3>Ton journal personnel</h3><p>Dépose tes pensées, tes émotions ou une situation qui te travaille. Une journée, une période, quelques lignes : tu écris quand tu en as envie.</p></article>
+      <article class="beta-benefice"><h3>Ton labo de connaissance de soi</h3><p>Tu dis oui alors que tu aimerais dire non ? Explore tes réactions, tes croyances et les situations qui se répètent, puis ce que tu aimerais essayer autrement.</p></article>
+      <article class="beta-benefice"><h3>Ta communauté astrologique</h3><p>Avec « Nos partages » et le tchat, échange sur tes expériences, tes questions et tes prises de conscience avec les autres membres.</p></article>
+    </div>
+    <p class="beta-note-edition">En rejoignant cette première édition bêta, tu bénéficies du tarif de lancement et tu peux participer à l’évolution de l’espace avec tes retours.</p>
+  </section>
+
+  <section class="beta-carte" aria-labelledby="ton-rythme">
+    <p class="section-kicker">Un moment pour toi</p><h2 id="ton-rythme">Tu y reviens quand tu veux, à ton rythme</h2>
+    <p>Entre le boulot, les responsabilités, la famille, les enfants, la vie sociale et tout le tralala, on a parfois du mal à se poser. <em>(Enfin ça dépend qui, moi ça fait dix ans que j’ai les fesses sur ma chaise à m’étudier ahah.)</em> Le but de cet espace est de simplifier la connaissance de soi et les prises de conscience, grâce à l’astrologie. Tu peux y déposer ce que tu vis, revenir dessus et voir ce qui se répète, ce qui change et ce que tu comprends petit à petit. Tu as ton propre espace, accessible avec ton adresse e-mail et ton mot de passe. Tu y reviens quand tu veux, à ton rythme.</p>
+  </section>
+
+  <section class="beta-carte" aria-labelledby="tes-lectures">
+    <p class="section-kicker">L’astrologie, avec ta vie au milieu</p><h2 id="tes-lectures">Comment tes lectures sont-elles personnalisées ?</h2>
+    <p><strong>J’étudie et rédige moi-même les analyses collectives des Nouvelles et Pleines Lunes.</strong> L’application, avec l’aide de l’IA, les croise avec ton thème natal pour construire ta lecture personnelle. Ta Révolution Lunaire est, elle aussi, interprétée à partir de sa carte et de ton natal.</p>
+    <p>Ta Révolution Solaire, lorsqu’elle est enregistrée dans ton espace, peut apporter le fil de ton année. Et si tu l’autorises, tes notes récentes du journal nourrissent un passage à la fin du mail. Tu peux aussi garder tes notes en dehors des mails : ce choix t’appartient.</p>
+    <p>Tous les messages envoyés restent dans <strong>« Mes mails »</strong>. Un bouton te permet d’aller noter ce qui résonne dans ton journal. Les interprétations collectives se retrouvent aussi dans <strong>« Les lunaisons »</strong> et depuis leur date dans le calendrier.</p>
+  </section>
+
+  <section class="beta-carte beta-option-rs" aria-labelledby="option-revolution-solaire">
+    <div><p class="section-kicker">Si tu en as envie</p><h2 id="option-revolution-solaire">Tu veux aussi ta Révolution Solaire ?</h2>
+      <p>Ajoute un rapport de Révolution Solaire pour <strong>39 € supplémentaires</strong>. Tu choisiras l’année et le lieu du retour solaire, puis tu pourras demander sa génération dans « Mon abonnement ». Ton rapport sera conservé dans « Mes analyses » et « Mes années ».</p>
+      <p>Cette option est facultative. Si tu possèdes déjà ta RS des Fous d’Astro, tu peux l’importer dans ton espace.</p>
+    </div>
+    <div class="beta-pack-prix"><strong>74 € au total</strong><span>3 mois d’espace abonné + une RS</span><small>35 € pour l’espace + 39 € pour le rapport</small></div>
+  </section>
+
+  <section class="beta-carte beta-questions" aria-labelledby="tes-questions">
+    <p class="section-kicker">Avant de te lancer</p><h2 id="tes-questions">Les petites questions pratiques</h2>
+    <details><summary>Dois-je déjà avoir acheté mon thème natal ?</summary><p>Non. Ton thème est calculé avec ta date, ton heure et ton lieu de naissance lorsque tu complètes ton profil. Tu n’as pas besoin d’acheter un rapport natal pour profiter de cet accompagnement.</p></details>
+    <details><summary>Combien de mails vais-je recevoir ?</summary><p>En général, 2 à 3 rendez-vous par mois, selon les dates des cycles : ta Révolution Lunaire, la Nouvelle Lune et la Pleine Lune. Le calendrier suit les événements astrologiques ; le nombre peut donc varier d’un mois à l’autre.</p></details>
+    <details><summary>Puis-je en profiter sans écrire dans le journal ?</summary><p>Oui. Tu peux recevoir tes lectures, consulter ton calendrier et participer à la communauté sans tenir de journal. Si tu écris, tu choisis si tes notes peuvent être utilisées dans tes mails. Avec au moins cinq notes sur une période de 30 jours, tu peux aussi demander un bilan privé de ton journal dans « Mon suivi ».</p></details>
+    <details><summary>Que vais-je retrouver après mon inscription ?</summary><p>Une fois ton paiement confirmé et tes informations complétées, ton abonnement est activé. Tu accèdes à ton calendrier personnel, ton journal, ton labo et la communauté. Tes prochains rendez-vous sont indiqués dans « Mon abonnement » ; tes mails arrivent ensuite au rythme des prochaines échéances.</p></details>
+    <details><summary>Les rapports astrologiques complets sont-ils inclus ?</summary><p>L’abonnement comprend les rendez-vous personnalisés par mail et l’accès à l’espace. Tu peux y retrouver ou importer les rapports des Fous d’Astro que tu possèdes déjà. Les nouveaux rapports complets sont des achats séparés ; la Révolution Solaire est proposée en option dans le pack à 74 €.</p></details>
+    <details><summary>Que se passe-t-il au bout des trois mois ?</summary><p>Il n’y a aucun renouvellement automatique ni nouveau prélèvement. Les fonctions et mails de l’abonnement s’arrêtent à la fin de ta période. Tu conserves ton compte gratuit, ton journal et tes archives.</p></details>
+  </section>
+
+  <section class="beta-carte" aria-labelledby="retours">
+    <p class="section-kicker">Cette première édition, avec toi</p><h2 id="retours">Tes retours m’aident à faire évoluer l’espace</h2>
+    <p>Cette première édition est une bêta : l’espace va continuer à évoluer pendant ces trois mois. Utilise ce qui te plaît, dans ta vraie vie, et dis-moi ce qui t’aide, ce qui te manque ou ce qui te saoule. Si tu rencontres un bug ou quelque chose de compliqué, tu peux aussi me le signaler.</p>
+    <p>Une rubrique <strong>« Ton feedback »</strong> est prévue dans l’espace. <strong>Seule moi, Cécile, peux consulter tes retours.</strong> Tu peux aussi m’écrire à <a href="mailto:lesfousdastro@gmail.com">lesfousdastro@gmail.com</a>.</p>
+    <p><strong>Sois cash pistache !</strong> Je veux que cet espace devienne ta super pote à la compote.</p>
+    <p class="beta-derniere-action"><a class="free-link" href="{{ lien_inscription_beta }}" target="_blank" rel="noopener">Je rejoins mon espace personnel<span class="sr-only"> (nouvel onglet)</span></a></p>
+  </section>
+</div>
