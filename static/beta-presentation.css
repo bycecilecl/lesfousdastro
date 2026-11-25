@@ -15,6 +15,7 @@
 .beta-offre-prix{padding:clamp(26px,4vw,40px);display:flex;flex-direction:column;justify-content:center;background:#edf7f4;border-left:1px solid #d5e7e3;text-align:center;color:var(--beta-encre);min-width:0}
 .beta-offre-prix .beta-prix{margin:8px 0 0;font-size:clamp(3.4rem,7vw,4.5rem);font-weight:850;line-height:1.1;color:#1f628e}
 .beta-offre-prix .beta-duree{margin:8px 0;font-size:1.25rem;font-weight:700}
+.beta-offre-prix .beta-prix-mois{margin:4px 0 12px;font-size:.88rem;color:var(--beta-secondaire)}
 .beta-offre-prix .free-link{display:block;margin-top:16px;padding:15px 18px;line-height:1.4;white-space:normal}
 .beta-prix-note{font-size:.85rem;color:var(--beta-secondaire);margin:18px 0 0}
 .beta-deja-compte{display:inline-block;margin-top:18px;color:#1f628e;font-size:.88rem;text-underline-offset:3px}
@@ -26,6 +27,20 @@
 .beta-benefice{background:#fffffff5;padding:25px 22px;border:1px solid #ffffffb3;border-radius:20px;min-width:0}
 .beta-benefice h3{margin:0 0 14px;font-size:1.17rem}
 .beta-benefice p{margin:0;color:var(--beta-secondaire);font-size:.95rem}
+.beta-benefice p+p{margin-top:14px}
+.beta-anciens-rapports{margin:22px 0 0;padding:20px 24px;border-radius:18px;background:#fffffff5;color:var(--beta-secondaire)}
+.beta-anciens-rapports strong{color:var(--beta-encre)}
+.beta-apercus{margin-top:42px}
+.beta-apercus .beta-titre-section>p:last-child{max-width:730px;margin:16px auto 0;color:#fff}
+.beta-apercus-grille{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.beta-apercu{margin:0;min-width:0;overflow:hidden;border:1px solid #d3e4e7;border-radius:22px;background:#fffdf9;box-shadow:0 18px 42px #103b4b1c}
+.beta-apercu--calendrier{grid-column:1/-1}
+.beta-apercu>a{position:relative;display:block;background:#edf7f4;border-bottom:1px solid #d3e4e7}
+.beta-apercu img{display:block;width:100%;max-width:100%;height:auto}
+.beta-apercu-agrandir{position:absolute;right:12px;bottom:12px;padding:8px 13px;border-radius:999px;background:#fff;color:#1f628e;font-size:.85rem;font-weight:750;box-shadow:0 2px 12px #103b4b33}
+.beta-apercu figcaption{padding:22px 24px}
+.beta-apercu h3{margin:0 0 10px;font-size:1.2rem}
+.beta-apercu figcaption p{margin:0;color:var(--beta-secondaire);font-size:.95rem}
 .beta-note-edition{margin:20px auto 0;max-width:780px;text-align:center;color:#fff;font-size:.94rem}
 .beta-carte{padding:clamp(24px,4vw,40px);margin-top:28px;color:var(--beta-secondaire)}
 .beta-carte h2{font-size:clamp(1.5rem,3vw,1.9rem);margin:0 0 18px}
@@ -41,3 +56,4 @@
 @media(max-width:960px){.beta-benefices-grille{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.beta-offre,.beta-option-rs{grid-template-columns:minmax(0,1fr)}.beta-offre-prix{grid-row:1;border-left:0;border-bottom:1px solid #d5e7e3}.beta-offre-mails{grid-row:2}.beta-offre-mails,.beta-offre-prix{padding:26px 22px}.beta-option-rs{gap:16px}.beta-presentation .subscriptions-hero{margin-bottom:30px}.beta-presentation .subscriptions-hero h1{font-size:clamp(2.1rem,8vw,3.1rem);line-height:1.1}}
 @media(max-width:520px){.beta-benefices-grille{grid-template-columns:minmax(0,1fr)}.beta-benefice{padding:22px}.beta-presentation .free-link{max-width:100%;box-sizing:border-box;white-space:normal}.beta-offre,.beta-carte{border-radius:20px}}
+@media(max-width:760px){.beta-apercus-grille{grid-template-columns:minmax(0,1fr);gap:18px}.beta-apercu figcaption{padding:20px}.beta-apercu-agrandir{right:8px;bottom:8px;padding:7px 11px}.beta-apercus .beta-titre-section{text-align:left}.beta-apercus .beta-titre-section>p:last-child{margin-left:0}}

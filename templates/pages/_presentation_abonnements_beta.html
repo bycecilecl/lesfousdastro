@@ -1,8 +1,8 @@
 <div class="beta-presentation">
   <header class="subscriptions-hero">
     <span class="subscriptions-kicker">Les Fous d’Astro · accès privilégié</span>
-    <h1>Et si ton thème astral t’accompagnait au quotidien ?</h1>
-    <p>Comprends ce que tu traverses, explore tes mécanismes et découvre ce que les cycles astrologiques viennent éveiller en toi.</p>
+    <h1>Oublie l’horoscope de magazine : voici ton vrai ciel, appliqué à ta vraie vie.</h1>
+    <p>Nouvelles Lunes, Pleines Lunes, Révolution Lunaire et transits perso dans ta boîte mail et ton espace dédié. De l’astrologie concrète pour comprendre ce qui se joue chez toi (et arrêter de tout mettre sur le dos de Mercure rétrograde).</p>
   </header>
 
   <section class="beta-offre" aria-labelledby="offre-lancement">
@@ -21,6 +21,7 @@
       <p class="section-kicker">Ton accompagnement astrologique</p>
       <p class="beta-prix">35 €</p>
       <p class="beta-duree">pour 3 mois</p>
+      <p class="beta-prix-mois">Soit moins de 12 € par mois, réglés en une seule fois.</p>
       <p>Révolution Lunaire, Nouvelles et Pleines Lunes : tes lectures personnalisées par mail.</p>
       <p>Un paiement unique.<br><strong>Sans renouvellement automatique.</strong></p>
       <a class="free-link" href="{{ lien_inscription_beta }}" target="_blank" rel="noopener">Je rejoins l’espace · 35 €<span class="sr-only"> (nouvel onglet)</span></a>
@@ -29,15 +30,17 @@
     </aside>
   </section>
 
+  {% include 'pages/_apercus_abonnements_beta.html' %}
+
   <section class="beta-benefices" aria-labelledby="accompagnement-inclus">
     <div class="beta-titre-section"><p class="section-kicker">Et entre deux rendez-vous ?</p><h2 id="accompagnement-inclus">Ton espace pour faire des liens</h2></div>
     <div class="beta-benefices-grille">
       <article class="beta-benefice"><h3>Ton calendrier astrologique</h3><p>Retrouve les transits qui touchent ton thème, leur signification et les périodes concernées. Clique sur une date pour noter ce que tu traverses.</p></article>
-      <article class="beta-benefice"><h3>Ton journal personnel</h3><p>Dépose tes pensées, tes émotions ou une situation qui te travaille. Une journée, une période, quelques lignes : tu écris quand tu en as envie.</p></article>
+      <article class="beta-benefice"><h3>Ton journal personnel</h3><p>Dépose tes pensées, tes émotions ou une situation qui te travaille. Une journée, une période, quelques lignes : tu écris quand tu en as envie.</p><p><strong>Et pour prendre du recul :</strong> avec au moins cinq notes sur une période de 30 jours, tu peux demander un bilan privé de ton journal dans « Mon suivi ».</p></article>
       <article class="beta-benefice"><h3>Ton labo de connaissance de soi</h3><p>Tu dis oui alors que tu aimerais dire non ? Explore tes réactions, tes croyances et les situations qui se répètent, puis ce que tu aimerais essayer autrement.</p></article>
       <article class="beta-benefice"><h3>Ta communauté astrologique</h3><p>Avec « Nos partages » et le tchat, échange sur tes expériences, tes questions et tes prises de conscience avec les autres membres.</p></article>
     </div>
-    <p><strong>Tu as déjà acheté des rapports des Fous d’Astro ?</strong> Tu peux importer tes PDF dans ton espace pour les lire et les explorer. Les anciens rapports reçus par mail ne sont pas transférés automatiquement à la création du compte.</p>
+    <p class="beta-anciens-rapports"><strong>Tu as déjà acheté des rapports des Fous d’Astro ?</strong> Tu peux importer tes PDF dans ton espace pour les lire et les explorer. Les anciens rapports reçus par mail ne sont pas transférés automatiquement à la création du compte.</p>
     <p class="beta-note-edition">En rejoignant cette première édition bêta, tu bénéficies du tarif de lancement et tu peux participer à l’évolution de l’espace avec tes retours.</p>
   </section>
 

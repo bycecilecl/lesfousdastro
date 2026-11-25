@@ -1,0 +1,31 @@
+<section class="beta-apercus" aria-labelledby="apercus-espace">
+  <div class="beta-titre-section">
+    <p class="section-kicker">Je te montre l’intérieur</p>
+    <h2 id="apercus-espace">Ton espace, en images</h2>
+    <p>Le calendrier, le labo et les cycles lunaires : voici des exemples tirés de mon espace. Clique sur une capture pour l’agrandir.</p>
+  </div>
+  <div class="beta-apercus-grille">
+    <figure class="beta-apercu beta-apercu--calendrier">
+      <a href="{{ url_for('static', filename='images/beta/apercu-calendrier.webp') }}" target="_blank" rel="noopener" aria-label="Agrandir la capture du calendrier astrologique (nouvel onglet)">
+        <img src="{{ url_for('static', filename='images/beta/apercu-calendrier.webp') }}" alt="Calendrier personnel avec les transits, le climat de fond, les cycles lunaires et le détail de la journée sélectionnée." width="3570" height="1902" loading="lazy" decoding="async">
+        <span class="beta-apercu-agrandir" aria-hidden="true">Agrandir ↗</span>
+      </a>
+      <figcaption><h3>Ton calendrier astrologique</h3><p>Repère les passages qui touchent ton thème et ouvre une journée pour lire les détails ou noter ce que tu vis.</p></figcaption>
+    </figure>
+    <figure class="beta-apercu">
+      <a href="{{ url_for('static', filename='images/beta/apercu-labo.webp') }}" target="_blank" rel="noopener" aria-label="Agrandir la capture du labo de conscience (nouvel onglet)">
+        <img src="{{ url_for('static', filename='images/beta/apercu-labo.webp') }}" alt="Labo de conscience avec des mécanismes issus d’analyses, leurs pistes d’exploration et le suivi des observations." width="3576" height="1870" loading="lazy" decoding="async">
+        <span class="beta-apercu-agrandir" aria-hidden="true">Agrandir ↗</span>
+      </a>
+      <figcaption><h3>Ton labo de conscience</h3><p>Explore les mécanismes qui te parlent et confronte les pistes de tes analyses à tes propres expériences.</p></figcaption>
+    </figure>
+    <figure class="beta-apercu">
+      <a href="{{ url_for('static', filename='images/beta/apercu-cycles-lunaires.webp') }}" target="_blank" rel="noopener" aria-label="Agrandir la capture des cycles lunaires (nouvel onglet)">
+        <img src="{{ url_for('static', filename='images/beta/apercu-cycles-lunaires.webp') }}" alt="Historique des cycles lunaires, avec un accès au cycle en cours et aux lectures des cycles précédents." width="3560" height="1902" loading="lazy" decoding="async">
+        <span class="beta-apercu-agrandir" aria-hidden="true">Agrandir ↗</span>
+      </a>
+      <figcaption><h3>Tes cycles lunaires</h3><p>Retrouve les lectures de tes cycles et reviens sur ce qui s’est manifesté dans ta vie au fil des mois.</p></figcaption>
+    </figure>
+  </div>
+  <p class="beta-note-edition">Ces captures montrent mon profil à titre d’exemple. Tes contenus dépendent de tes données et des rapports que tu as ajoutés à ton espace.</p>
+</section>
