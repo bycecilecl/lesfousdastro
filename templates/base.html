@@ -170,28 +170,13 @@
         {% block extra_css %}{% endblock %}
     </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='identite-astrale.css', v='20261125-pancarte-petite') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='navigation-principale.css', v='20261126') }}">
+    <script src="{{ url_for('static', filename='navigation-principale.js', v='20261126') }}" defer></script>
 </head>
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PN5STD34" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-    <nav class="navbar">
-        <div class="navbar__inner">
-            <a class="navbar__brand" href="/">Les Fous d'Astro</a>
-            <button class="navbar__toggle" aria-label="Menu" aria-expanded="false">☰</button>
-            <ul class="navbar__links">
-                <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Analyses 💫</a></li>
-                <li><a href="{{ url_for('pages_bp.analyses') }}" class="{% if request.path == url_for('pages_bp.analyses') %}active{% endif %}">Guide des Analyses</a></li>
-                <li><a href="{{ url_for('pages_bp.abonnements') }}" class="{% if request.path == url_for('pages_bp.abonnements') %}active{% endif %}">Abonnements</a></li>
-                <li><a href="{{ url_for('espace_personnel.accueil') }}" class="{% if request.path.startswith('/mon-espace') %}active{% endif %}"{% if request.path.startswith('/mon-espace') %} aria-current="page"{% endif %}>Mon espace</a></li>
-                <li><a href="{{ url_for('blog.blog_index') }}" class="{% if request.path.startswith('/blog') %}active{% endif %}">Blog</a></li>
-                <li><a href="{{ url_for('blog.bd_index') }}" class="{% if request.path.startswith('/bd') %}active{% endif %}">BD</a></li>
-                <li><a href="{{ url_for('site_bp.temoignages') }}" class="{% if request.path == url_for('site_bp.temoignages') %}active{% endif %}">Vos retours</a></li>
-                <li><a href="{{ url_for('pages_bp.prestations') }}" class="{% if request.path == url_for('pages_bp.prestations') %}active{% endif %}">Prestations</a></li>
-                <li><a href="{{ url_for('pages_bp.contact') }}" class="{% if request.path == url_for('pages_bp.contact') %}active{% endif %}">Contact</a></li>
-                <li><a href="https://bycecilecl.com" target="_blank" rel="noopener" aria-label="Le Journal de Cécile">Le Journal</a></li>
-            </ul>
-        </div>
-    </nav>
+    {% include 'partials/navigation_principale.html' %}
 
     <main>
         {% block content %}{% endblock %}
@@ -220,18 +205,7 @@
     <noscript><div class="statcounter"><a href="https://statcounter.com/" target="_blank">
         <img class="statcounter" src="https://c.statcounter.com/12490079/0/a231e1c7/1/" alt="Web Analytics" referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggle = document.querySelector('.navbar__toggle');
-            if (toggle) {
-                toggle.addEventListener('click', function () {
-                    document.body.classList.toggle('nav-open');
-                    const isOpen = document.body.classList.contains('nav-open');
-                    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                });
-            }
-        });
-    </script>
+
 
     {% block scripts %}{% endblock %}
 

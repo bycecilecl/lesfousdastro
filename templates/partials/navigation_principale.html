@@ -1,0 +1,35 @@
+{% set chemin = request.path %}
+{% set analyses_actives = chemin == '/' or chemin.startswith('/analyses') %}
+{% set decouverte_active = chemin.startswith('/blog') or chemin.startswith('/bd') or chemin.startswith('/temoignages') %}
+<nav class="navbar navbar--compact" aria-label="Navigation principale">
+  <div class="navbar__inner">
+    <a class="navbar__brand" href="/">Les Fous d’Astro</a>
+    <button class="navbar__toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navigation-principale-liens">☰</button>
+    <ul class="navbar__links" id="navigation-principale-liens">
+      <li>
+        <details class="navbar__submenu">
+          <summary class="navbar__trigger{% if analyses_actives %} active{% endif %}">Analyses <span aria-hidden="true">⌄</span></summary>
+          <ul class="navbar__dropdown">
+            <li><a href="/"{% if chemin == '/' %} aria-current="page"{% endif %}>Découvrir les analyses</a></li>
+            <li><a href="/analyses"{% if chemin == '/analyses' %} aria-current="page"{% endif %}>Guide des analyses</a></li>
+          </ul>
+        </details>
+      </li>
+      <li><a href="/abonnements"{% if chemin.startswith('/abonnements') %} class="active" aria-current="page"{% endif %}>Abonnements</a></li>
+      <li><a href="/prestations"{% if chemin == '/prestations' %} class="active" aria-current="page"{% endif %}>Consultations</a></li>
+      <li>
+        <details class="navbar__submenu">
+          <summary class="navbar__trigger{% if decouverte_active %} active{% endif %}">Découvrir <span aria-hidden="true">⌄</span></summary>
+          <ul class="navbar__dropdown">
+            <li><a href="/blog"{% if chemin.startswith('/blog') %} aria-current="page"{% endif %}>Le blog</a></li>
+            <li><a href="/bd"{% if chemin.startswith('/bd') %} aria-current="page"{% endif %}>La BD des planètes</a></li>
+            <li><a href="/temoignages"{% if chemin.startswith('/temoignages') %} aria-current="page"{% endif %}>Vos retours</a></li>
+            <li><a href="https://bycecilecl.com" target="_blank" rel="noopener" aria-label="Le Journal de Cécile (nouvel onglet)">Le Journal de Cécile</a></li>
+          </ul>
+        </details>
+      </li>
+      <li><a class="navbar__espace{% if chemin.startswith('/mon-espace') %} active{% endif %}" href="/mon-espace/"{% if chemin.startswith('/mon-espace') %} aria-current="page"{% endif %}>Mon espace</a></li>
+      <li><a href="/contact"{% if chemin == '/contact' %} class="active" aria-current="page"{% endif %}>Contact</a></li>
+    </ul>
+  </div>
+</nav>
