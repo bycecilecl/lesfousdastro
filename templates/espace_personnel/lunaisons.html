@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static',filename='lunaisons-espace.css',v='20261123-cartes-centrees') }}">
 {% include 'espace_personnel/_navigation.html' %}
 <main class="lunaisons-shell">
-  <header class="lunaisons-entete"><h1>Les lunaisons</h1><p>Les cartes et les lectures collectives de Cécile pour les Nouvelles et Pleines Lunes. Dans tes mails, tu retrouves aussi leur lecture personnalisée avec ton thème.</p></header>
+  <header class="lunaisons-entete"><h1 class="astral-titre astral-titre--clair">Les <em class="astral-accent">lunaisons</em></h1><p>Les cartes et les lectures collectives de Cécile pour les Nouvelles et Pleines Lunes. Dans tes mails, tu retrouves aussi leur lecture personnalisée avec ton thème.</p></header>
   <div class="lunaisons-grille">
     {% for lunaison in lunaisons %}
     <article class="lunaison-carte">

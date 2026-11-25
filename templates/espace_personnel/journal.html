@@ -7,7 +7,7 @@
 {% include "espace_personnel/_navigation.html" %}
 <div class="journal-shell" data-journal-mode="{{ 'modifier' if mode_modification else ('lecture' if entree_ouverte else 'nouveau') }}">
     <header class="journal-header">
-        <div><h1>Mon journal</h1><p>Une page pour écrire. Tes entrées pour retrouver le fil.</p></div>
+        <div><h1 class="astral-titre astral-titre--clair">Mon <em class="astral-accent">journal</em></h1><p>Une page pour écrire. Tes entrées pour retrouver le fil.</p></div>
         <div class="journal-header-actions"><a href="{{ url_for('espace_personnel.calendrier', mois=date_du_jour[:7]) }}">Mon calendrier</a><a class="journal-new" href="{{ url_for('espace_personnel.journal') }}#page-journal">+ Nouvelle entrée</a></div>
     </header>
     {% with messages = get_flashed_messages(with_categories=true) %}{% for categorie,message in messages %}<p class="journal-flash {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}

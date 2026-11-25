@@ -53,7 +53,7 @@
 {% include 'espace_personnel/_navigation.html' %}
 <main class="profil-shell">
   <a class="profil-retour" href="{{ url_for('espace_personnel.accueil') }}">← Retour à mon espace</a>
-  <header class="profil-entete"><p class="profil-kicker">Mes repères personnels</p><h1>Mon profil astral</h1><p>Retrouve tes données de naissance, le lieu de tes cycles et les repères que tu choisis de partager.</p></header>
+  <header class="profil-entete"><p class="profil-kicker">Mes repères personnels</p><h1 class="astral-titre astral-titre--clair">Mon <em class="astral-accent">profil astral</em></h1><p>Retrouve tes données de naissance, le lieu de tes cycles et les repères que tu choisis de partager.</p></header>
   {% if request.args.get('parcours') == 'abonnement' %}<section class="profil-carte"><p>Enregistre tes informations pour continuer ton inscription.</p><a class="profil-lien" href="{{ url_for('abonnement_client.mon_abonnement') }}">← Revenir à mon inscription</a></section>{% endif %}
   <section class="profil-carte">
     <h2>Mes données de naissance</h2>

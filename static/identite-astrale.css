@@ -1,0 +1,9 @@
+/* Touches typographiques communes ; uniquement sur les titres marqués. */
+.astral-titre{--astral-or:#8a5b19;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-weight:700;line-height:1.18;letter-spacing:-.025em;text-wrap:balance}
+.astral-titre--clair{--astral-or:#ffe4b2}
+.astral-titre .astral-accent{color:var(--astral-or);font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;letter-spacing:-.02em}
+.astral-surtitre{display:inline-block;color:#f7deb2;font-size:.8rem;font-weight:600;letter-spacing:.12em;line-height:1.6;text-transform:uppercase}
+.accueil-marque{margin:0 auto 18px;max-width:900px;font-size:clamp(2.15rem,5vw,3.6rem)}
+.accueil-marque>[aria-hidden]{font-size:.45em;vertical-align:middle;color:#f7deb2}
+.header-tagline.accueil-promesse{max-width:850px;font-size:clamp(1.45rem,3vw,2.2rem);font-weight:600;line-height:1.4}
+@media(max-width:600px){.astral-surtitre{font-size:.72rem;letter-spacing:.08em}.accueil-marque{font-size:clamp(1.95rem,7.5vw,2.6rem)}.header-tagline.accueil-promesse{font-size:clamp(1.35rem,5.5vw,1.8rem)}}

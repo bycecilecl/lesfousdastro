@@ -6,7 +6,7 @@ body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Seg
 {% block content %}
 {% include 'espace_personnel/_navigation.html' %}
 <main class="installation">
-<header><p>MON ESPACE ASTRAL</p><h1>Mon abonnement</h1><p>Ton profil, tes choix et tes rendez-vous : tout est ici.</p></header>
+<header><p>MON ESPACE ASTRAL</p><h1 class="astral-titre astral-titre--clair">Mon <em class="astral-accent">abonnement</em></h1><p>Ton profil, tes choix et tes rendez-vous : tout est ici.</p></header>
 {% with messages=get_flashed_messages(with_categories=true) %}{% for categorie,message in messages %}<p class="message {{ categorie }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
 {% if commande and commande.statut == 'active' %}<section><h2>Ton inscription est confirmée</h2><p>Ton paiement unique de {{ choix_commande.prix }} € est enregistré{% if commande.sandbox %} <strong>en mode d’essai, sans paiement réel</strong>{% endif %}.</p>{% include 'espace_personnel/partials/periode_abonnement.html' %}<p>Aucun renouvellement automatique. Tu gardes ensuite ton espace gratuit et tes archives.</p><a class="bouton" href="{{ url_for('espace_personnel.accueil') }}">Entrer dans mon espace</a></section>
 {% elif inscription and inscription.actif %}<section><h2>Ton inscription est enregistrée</h2><p>Cécile a activé ton inscription pour cette période. Aucun nouveau paiement n’est nécessaire depuis cette page.</p>{% include 'espace_personnel/partials/periode_abonnement.html' %}</section>{% endif %}

@@ -16,7 +16,7 @@
 <main class="suivi-shell">
     <section class="suivi-card">
         <a href="{{ url_for('espace_personnel.accompagnement') }}">← Mon accompagnement</a>
-        <h1>Mon suivi</h1>
+        <h1 class="astral-titre">Mon <em class="astral-accent">suivi</em></h1>
         <p>Un bilan tous les 30 jours pour retrouver les sujets qui reviennent, les prises de conscience et les changements réellement notés dans ton journal. Tes bilans restent dans cet historique, mois après mois.</p>
         {% for categorie, message in get_flashed_messages(with_categories=true) %}<p class="suivi-flash" role="status">{{ message }}</p>{% endfor %}
         {% if bilan %}
