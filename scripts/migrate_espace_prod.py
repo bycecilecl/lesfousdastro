@@ -19,6 +19,7 @@ COLONNES = {
         "mot_de_passe_hash": "VARCHAR(512)",
         "version_auth": "INTEGER NOT NULL DEFAULT 0",
         "mot_de_passe_modifie_le": "TIMESTAMP WITH TIME ZONE",
+        "derniere_connexion_le": "TIMESTAMP WITH TIME ZONE",
         "autoriser_journal_mails": "BOOLEAN NOT NULL DEFAULT FALSE",
         "journal_mails_choix_le": "TIMESTAMP WITH TIME ZONE",
         "avatar_personnage": "VARCHAR(20)",

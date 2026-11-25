@@ -10,7 +10,7 @@ import secrets
 from urllib.parse import urlsplit
 
 from flask import abort, current_app, request, session, url_for
-from sqlalchemy import case, select
+from sqlalchemy import case, or_, select, update
 from sqlalchemy.dialects.postgresql import insert as insert_postgresql
 from sqlalchemy.dialects.sqlite import insert as insert_sqlite
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -138,11 +138,21 @@ def utilisateur_connecte():
     return utilisateur
 
 
-def ouvrir_session_espace(utilisateur, *, permanent=True):
+def ouvrir_session_espace(utilisateur, *, permanent=True, enregistrer_connexion=True):
+    maintenant = utcnow()
+    if enregistrer_connexion:
+        # Mise à jour seulement après authentification, jamais lors d'une simple lecture.
+        db.session.execute(update(UtilisateurEspace).where(
+            UtilisateurEspace.id == utilisateur.id,
+            UtilisateurEspace.actif == 1,
+            or_(UtilisateurEspace.derniere_connexion_le.is_(None),
+                UtilisateurEspace.derniere_connexion_le < maintenant),
+        ).values(derniere_connexion_le=maintenant).execution_options(synchronize_session=False))
+        db.session.commit()
     session.clear()
     session["utilisateur_espace_id"] = utilisateur.id
     session["version_auth_espace"] = utilisateur.version_auth
-    session["espace_connecte_le"] = utcnow().isoformat()
+    session["espace_connecte_le"] = maintenant.isoformat()
     session.permanent = permanent
 
 

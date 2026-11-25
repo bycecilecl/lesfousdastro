@@ -8,6 +8,8 @@
 .comptes-caption{padding:14px 16px;text-align:left;color:#62777e}
 .comptes-table th,.comptes-table td{padding:16px;vertical-align:top;border-top:1px solid #d4e3e6;overflow-wrap:anywhere}
 .comptes-table .comptes-inscription{min-width:8rem;white-space:nowrap;overflow-wrap:normal}
+.comptes-table .comptes-connexion{min-width:10rem;overflow-wrap:normal}
+.comptes-table .comptes-connexion span,.comptes-table .comptes-connexion small{white-space:nowrap}
 .comptes-table thead th{background:#edf6f6;color:#1f628e}
 .comptes-table tbody th{font-weight:400;min-width:180px}
 .comptes-table tbody tr:nth-child(even){background:#f5f9f9}

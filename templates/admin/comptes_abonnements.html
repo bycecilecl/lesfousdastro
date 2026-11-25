@@ -2,7 +2,7 @@
 {% block title %}Comptes et abonnements | Les Fous d’Astro{% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='essais-mails.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='admin-comptes.css', v='20261124-mobile') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin-comptes.css', v='20261125-connexion') }}">
 {% include 'espace_personnel/_navigation.html' %}
 <main class="essai-shell">
   <header class="essai-entete">
@@ -29,7 +29,7 @@
     <div class="comptes-table-scroll" role="region" aria-label="Comptes enregistrés et abonnements" tabindex="0">
       <table class="comptes-table">
         <caption class="comptes-caption">Comptes classés du plus récent au plus ancien. Dates et heures de Paris.</caption>
-        <thead><tr><th scope="col">Compte</th><th scope="col">Formule enregistrée</th><th scope="col">Accès actuel</th><th scope="col">Statut de l’abonnement</th><th scope="col">Période</th><th scope="col" class="comptes-inscription">Inscription</th></tr></thead>
+        <thead><tr><th scope="col">Compte</th><th scope="col">Formule enregistrée</th><th scope="col">Accès actuel</th><th scope="col">Statut de l’abonnement</th><th scope="col">Période</th><th scope="col" class="comptes-inscription">Inscription</th><th scope="col" class="comptes-connexion">Dernière connexion</th></tr></thead>
         <tbody>
         {% for compte in comptes %}
           <tr>
@@ -39,6 +39,7 @@
             <td>{{ 'Administrateur' if compte.administratrice else compte.etat }}</td>
             <td>{% if compte.debut %}<span>Du {{ utc(compte.debut).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }}</span>{% endif %}{% if compte.fin %}<span>Au {{ utc(compte.fin).astimezone(paris).strftime('%d/%m/%Y à %H h %M') }}</span>{% elif compte.debut %}<span>Sans date de fin</span>{% else %}—{% endif %}</td>
             <td class="comptes-inscription">{{ utc(compte.creation).astimezone(paris).strftime('%d/%m/%Y') if compte.creation else '—' }}</td>
+            <td class="comptes-connexion">{% if compte.derniere_connexion %}<time datetime="{{ utc(compte.derniere_connexion).isoformat() }}"><span>{{ utc(compte.derniere_connexion).astimezone(paris).strftime('%d/%m/%Y') }}</span><small>{{ utc(compte.derniere_connexion).astimezone(paris).strftime('à %H h %M') }}</small></time>{% else %}<span>Non enregistrée</span>{% endif %}</td>
           </tr>
         {% endfor %}
         </tbody>
@@ -52,6 +53,7 @@
       {% if page < pages %}<a href="{{ url_for('admin_beta.comptes', page=page+1, q=recherche, formule=filtre) }}">Suivants →</a>{% endif %}
     </nav>
     {% endif %}
+    <p class="essai-aide">La dernière connexion correspond à une authentification réussie. Les dates antérieures à la mise en place de ce suivi ne sont pas disponibles. Une session conservée ne change pas cette date.</p>
     <p class="essai-aide">50 comptes par page. Les invitations sans compte créé sont dans <a href="{{ url_for('admin_beta.index', _anchor='invitations') }}">Bêta-testeurs</a>.</p>
   </section>
 </main>

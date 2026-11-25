@@ -28,6 +28,7 @@ class UtilisateurEspace(db.Model):
     mot_de_passe_hash = Column(String(512), nullable=True)
     version_auth = Column(Integer, nullable=False, default=0, server_default="0")
     mot_de_passe_modifie_le = Column(DateTime(timezone=True), nullable=True)
+    derniere_connexion_le = Column(DateTime(timezone=True), nullable=True)
     autoriser_journal_mails = Column(Boolean, nullable=False, default=False, server_default="0")
     journal_mails_choix_le = Column(DateTime(timezone=True), nullable=True)
     avatar_personnage = Column(String(20), nullable=True)

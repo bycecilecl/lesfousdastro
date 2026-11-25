@@ -60,7 +60,7 @@ def comptes():
     requete = db.session.query(
         UtilisateurEspace.id, UtilisateurEspace.prenom, UtilisateurEspace.email,
         UtilisateurEspace.actif, UtilisateurEspace.est_administratrice,
-        UtilisateurEspace.date_creation, AbonnementEspace,
+        UtilisateurEspace.date_creation, UtilisateurEspace.derniere_connexion_le, AbonnementEspace,
     ).select_from(UtilisateurEspace).outerjoin(
         AbonnementEspace, AbonnementEspace.utilisateur_id == UtilisateurEspace.id)
     total = requete.count()
@@ -91,7 +91,7 @@ def comptes():
     lignes = requete.order_by(UtilisateurEspace.date_creation.desc(), UtilisateurEspace.id.desc()).offset(
         (page - 1) * 50).limit(50).all()
     comptes_affiches = []
-    for identifiant, prenom, email, actif, admin, creation, abonnement in lignes:
+    for identifiant, prenom, email, actif, admin, creation, derniere_connexion, abonnement in lignes:
         droits = acces_abonnement(abonnement, maintenant)
         etat = 'Gratuit'
         if abonnement:
@@ -108,6 +108,7 @@ def comptes():
         comptes_affiches.append({
             'id': identifiant, 'prenom': prenom, 'email': email, 'actif': actif == 1,
             'administratrice': admin, 'creation': creation,
+            'derniere_connexion': derniere_connexion,
             'formule': FORMULES_ABONNEMENT.get(abonnement.formule, {}).get('libelle', 'Formule inconnue')
                 if abonnement else 'Espace gratuit',
             'acces': droits['libelle'] if actif == 1 else 'Aucun accès · compte désactivé',
