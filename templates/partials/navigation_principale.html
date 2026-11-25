@@ -8,7 +8,7 @@
     <ul class="navbar__links" id="navigation-principale-liens">
       <li>
         <details class="navbar__submenu">
-          <summary class="navbar__trigger{% if analyses_actives %} active{% endif %}">Analyses <span aria-hidden="true">⌄</span></summary>
+          <summary class="navbar__trigger{% if analyses_actives %} active{% endif %}">Analyses 💫 <span aria-hidden="true">⌄</span></summary>
           <ul class="navbar__dropdown">
             <li><a href="/"{% if chemin == '/' %} aria-current="page"{% endif %}>Découvrir les analyses</a></li>
             <li><a href="/analyses"{% if chemin == '/analyses' %} aria-current="page"{% endif %}>Guide des analyses</a></li>
@@ -21,15 +21,15 @@
         <details class="navbar__submenu">
           <summary class="navbar__trigger{% if decouverte_active %} active{% endif %}">Découvrir <span aria-hidden="true">⌄</span></summary>
           <ul class="navbar__dropdown">
-            <li><a href="/blog"{% if chemin.startswith('/blog') %} aria-current="page"{% endif %}>Le blog</a></li>
-            <li><a href="/bd"{% if chemin.startswith('/bd') %} aria-current="page"{% endif %}>La BD des planètes</a></li>
+            <li><a href="/blog"{% if chemin.startswith('/blog') %} aria-current="page"{% endif %}>Blog</a></li>
+            <li><a href="/bd"{% if chemin.startswith('/bd') %} aria-current="page"{% endif %}>L’Astro en BD</a></li>
             <li><a href="/temoignages"{% if chemin.startswith('/temoignages') %} aria-current="page"{% endif %}>Vos retours</a></li>
             <li><a href="https://bycecilecl.com" target="_blank" rel="noopener" aria-label="Le Journal de Cécile (nouvel onglet)">Le Journal de Cécile</a></li>
           </ul>
         </details>
       </li>
-      <li><a class="navbar__espace{% if chemin.startswith('/mon-espace') %} active{% endif %}" href="/mon-espace/"{% if chemin.startswith('/mon-espace') %} aria-current="page"{% endif %}>Mon espace</a></li>
       <li><a href="/contact"{% if chemin == '/contact' %} class="active" aria-current="page"{% endif %}>Contact</a></li>
+      <li><a class="navbar__espace{% if chemin.startswith('/mon-espace') %} active{% endif %}" href="/mon-espace/"{% if chemin.startswith('/mon-espace') %} aria-current="page"{% endif %}>Mon espace</a></li>
     </ul>
   </div>
 </nav>

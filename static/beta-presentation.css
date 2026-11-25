@@ -1,5 +1,7 @@
 .beta-presentation{--beta-encre:#183f53;--beta-secondaire:#526b76}
 .subscriptions-hero.beta-hero{width:100%;max-width:1060px;margin:0 auto 48px;padding:4px 0 8px;text-align:center}
+.beta-hero .badge-d-wrap{margin-bottom:20px}
+.beta-hero .beta-hero-edition{margin:0 auto 24px;color:#e1f0f2;font-size:.75rem;font-weight:600;line-height:1.5;letter-spacing:.12em;text-transform:uppercase}
 .beta-hero .subscriptions-kicker{margin-bottom:24px;font-size:.73rem;letter-spacing:.12em}
 .beta-hero .beta-hero-title{margin:0 0 26px;font-size:clamp(2.1rem,4.2vw,3.6rem);font-weight:750;line-height:1.16;letter-spacing:-.025em}
 .beta-hero-amorce{display:block;margin-bottom:16px;font-size:clamp(1.15rem,2.1vw,1.65rem);font-weight:500;line-height:1.45;letter-spacing:0;color:#e6f4f5}
