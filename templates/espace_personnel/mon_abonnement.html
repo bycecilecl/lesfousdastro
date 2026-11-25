@@ -46,6 +46,7 @@ body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Seg
 {% if offre.paiement.sandbox %}<p class="message"><strong>Essai local du parcours : paiement fictif PayPal Sandbox.</strong></p>{% endif %}
 <label><input id="conditions" type="checkbox">J’accepte les <a href="{{ url_for('legal_bp.conditions_utilisation') }}" target="_blank" rel="noopener">conditions d’utilisation</a> et le paiement unique de <span id="prix-paiement">{{ choix_commande.prix if choix_commande else '35' }}</span> € pour l’offre choisie.</label>
 <div id="paypal-boutons"></div><p id="paiement-message" role="status" aria-live="polite"></p>
+{% include 'espace_personnel/partials/paiement_pleine_page.html' %}
 {% endif %}</section>{% endif %}
 <section><h2>Mes prochains rendez-vous</h2>
 {% if prochains %}<ul>{% for mail in prochains %}<li><strong>{{ natures[mail.nature] }}</strong> · mail prévu le {{ utc(mail.date_prevue).astimezone(fuseau).strftime('%d.%m.%Y à %H:%M') }}</li>{% endfor %}</ul><small>Heures de {{ profil.ville_cycles }}. Le mail arrive après sa préparation.</small>
@@ -53,32 +54,4 @@ body{background:linear-gradient(135deg,#1f628e,#00a8a8,#c0f0f7);font-family:'Seg
 <p>RL : premier 9 h après le retour lunaire. Nouvelle/Pleine Lune : veille à 9 h, selon le fuseau du lieu de tes cycles.</p>
 <a href="{{ url_for('abonnement_client.mes_mails') }}">Retrouver mes mails reçus →</a></section>
 </main>{% endblock %}
-{% block scripts %}
-{% if invite_beta and stockage_pret and offre.paiement.ouvert and natal and ville and choix_journal and not termine and not (inscription and inscription.actif) and (not commande or commande.statut in ['prete','modification_incertaine']) %}
-<script src="https://www.paypal.com/sdk/js?client-id={{ offre.paiement.client_id|urlencode }}&amp;currency=EUR&amp;intent=capture&amp;components=buttons"></script>
-<script>
-(() => {
-const message=document.getElementById('paiement-message'), conditions=document.getElementById('conditions');
-const formules={{ offre.formules|tojson }}, optionRs=document.getElementById('option-rs'), selection=()=>optionRs.checked?'espace_et_rs':'espace_seul';
-let paiementPrepare=null;
-const verrouiller=valeur=>{optionRs.disabled=valeur;conditions.disabled=valeur;};
-optionRs.addEventListener('change',()=>{document.getElementById('prix-paiement').textContent=formules[selection()].prix;conditions.checked=false;conditions.dispatchEvent(new Event('change'));});
-const appeler=async (url, valeurs={})=>{const corps=new URLSearchParams({...valeurs,csrf_token:{{ csrf_espace()|tojson }}});const reponse=await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:corps});let donnees;try{donnees=await reponse.json();}catch{throw new Error('La confirmation est indisponible. Vérifie ton abonnement avant de recommencer.');}if(!reponse.ok)throw new Error(donnees.error||'Le paiement n’a pas abouti.');return donnees;};
-if(!window.paypal){message.textContent='Le bouton de paiement n’a pas pu être chargé. Recharge la page.';return;}
-paypal.Buttons({onInit(data,actions){actions.disable();conditions.addEventListener('change',()=>conditions.checked?actions.enable():actions.disable());},
-createOrder:async()=>{
-  const choix=selection();paiementPrepare=null;verrouiller(true);message.textContent='Préparation du paiement…';
-  const r=await appeler({{ url_for('abonnement_client.creer')|tojson }},{conditions:conditions.checked?'oui':'non',formule:choix});
-  if(r.formule!==choix)throw new Error('L’option a changé dans une autre fenêtre. Recharge la page avant de payer.');
-  paiementPrepare={id:r.id,formule:choix};return r.id;
-},
-onApprove:async data=>{
-  if(!paiementPrepare||paiementPrepare.id!==data.orderID)throw new Error('Recharge la page pour confirmer ton option avant de payer.');
-  message.textContent='Confirmation de ton paiement…';
-  const r=await appeler({{ url_for('abonnement_client.capturer')|tojson }},{orderID:data.orderID,formule:paiementPrepare.formule});window.location.assign(r.redirect);
-},
-onCancel(){paiementPrepare=null;verrouiller(false);message.textContent='Paiement interrompu. Tu peux modifier l’option RS avant de recommencer.';},
-onError(erreur){paiementPrepare=null;verrouiller(false);message.textContent=erreur.message||'Vérifie ton paiement depuis Mon abonnement avant de recommencer.';}
-}).render('#paypal-boutons');
-})();
-</script>{% endif %}{% endblock %}
+{% block scripts %}{% include 'espace_personnel/partials/paiement_beta_scripts.html' %}{% endblock %}

@@ -1,0 +1,45 @@
+
+{% if invite_beta and stockage_pret and offre.paiement.ouvert and natal and ville and choix_journal and not termine and not (inscription and inscription.actif) and (not commande or commande.statut in ['prete','modification_incertaine']) %}
+<script src="https://www.paypal.com/sdk/js?client-id={{ offre.paiement.client_id|urlencode }}&amp;currency=EUR&amp;intent=capture&amp;components=buttons"></script>
+<script>
+(() => {
+const message=document.getElementById('paiement-message'), conditions=document.getElementById('conditions');
+const formules={{ offre.formules|tojson }}, optionRs=document.getElementById('option-rs'), selection=()=>optionRs.checked?'espace_et_rs':'espace_seul';
+const page=document.getElementById('paiement-pleine-page'), boutonPage=document.getElementById('ouvrir-paypal-page');
+let paiementPrepare=null, occupe=false, actionsPaypal=null;
+const actualiser=()=>{boutonPage.disabled=occupe||!conditions.checked;if(actionsPaypal){occupe||!conditions.checked?actionsPaypal.disable():actionsPaypal.enable();}};
+const verrouiller=valeur=>{occupe=valeur;optionRs.disabled=valeur;conditions.disabled=valeur;actualiser();};
+conditions.addEventListener('change',actualiser);
+optionRs.addEventListener('change',()=>{document.getElementById('prix-paiement').textContent=formules[selection()].prix;document.getElementById('prix-paypal-page').textContent=formules[selection()].prix;conditions.checked=false;conditions.dispatchEvent(new Event('change'));});
+const appeler=async (url, valeurs={})=>{const corps=new URLSearchParams({...valeurs,csrf_token:{{ csrf_espace()|tojson }}});const reponse=await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:corps});let donnees;try{donnees=await reponse.json();}catch{throw new Error('La confirmation est indisponible. Vérifie ton abonnement avant de recommencer.');}if(!reponse.ok)throw new Error(donnees.error||'Le paiement n’a pas abouti.');return donnees;};
+page.hidden=false;
+boutonPage.addEventListener('click',async()=>{
+  if(occupe||!conditions.checked)return;
+  const choix=selection();paiementPrepare=null;verrouiller(true);message.textContent='Ouverture de PayPal…';
+  try{
+    const r=await appeler({{ url_for('abonnement_client.creer')|tojson }},{conditions:'oui',formule:choix,presentation:'page'});
+    if(r.formule!==choix||!r.redirect)throw new Error('L’option a changé. Recharge la page avant de payer.');
+    const cible=new URL(r.redirect), hote={{ ('www.sandbox.paypal.com' if offre.paiement.sandbox else 'www.paypal.com')|tojson }};
+    if(cible.protocol!=='https:'||cible.host!==hote)throw new Error('La page PayPal n’a pas pu être vérifiée.');
+    window.location.assign(cible.href);
+  }catch(erreur){verrouiller(false);message.textContent=erreur.message||'Vérifie ton abonnement avant de recommencer.';}
+});
+// Sur mobile, pas de petite fenêtre. Le bouton reste aussi disponible sur ordinateur.
+if(window.matchMedia('(max-width: 767px), (pointer: coarse)').matches||!window.paypal){document.getElementById('paypal-boutons').hidden=true;actualiser();return;}
+paypal.Buttons({onInit(data,actions){actionsPaypal=actions;actualiser();},
+createOrder:async()=>{
+  const choix=selection();paiementPrepare=null;verrouiller(true);message.textContent='Préparation du paiement…';
+  const r=await appeler({{ url_for('abonnement_client.creer')|tojson }},{conditions:conditions.checked?'oui':'non',formule:choix});
+  if(r.formule!==choix)throw new Error('L’option a changé dans une autre fenêtre. Recharge la page avant de payer.');
+  paiementPrepare={id:r.id,formule:choix};return r.id;
+},
+onApprove:async data=>{
+  if(!paiementPrepare||paiementPrepare.id!==data.orderID)throw new Error('Recharge la page pour confirmer ton option avant de payer.');
+  message.textContent='Confirmation de ton paiement…';
+  const r=await appeler({{ url_for('abonnement_client.capturer')|tojson }},{orderID:data.orderID,formule:paiementPrepare.formule});window.location.assign(r.redirect);
+},
+onCancel(){paiementPrepare=null;verrouiller(false);message.textContent='Paiement interrompu. Tu peux modifier l’option RS avant de recommencer.';},
+onError(erreur){paiementPrepare=null;verrouiller(false);message.textContent=erreur.message||'Vérifie ton paiement depuis Mon abonnement avant de recommencer.';}
+}).render('#paypal-boutons');
+})();
+</script>{% endif %}

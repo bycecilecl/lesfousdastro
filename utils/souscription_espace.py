@@ -107,7 +107,7 @@ def _modifier_commande(commande, selection, config):
     try:
         resultat = _requete(config, "GET", chemin)
         unites = resultat.get("purchase_units") or []
-        if (resultat.get("id") != identifiant or resultat.get("status") not in {"CREATED", "APPROVED"}
+        if (resultat.get("id") != identifiant or resultat.get("status") not in {"CREATED", "APPROVED", "PAYER_ACTION_REQUIRED"}
                 or len(unites) != 1 or unites[0].get("reference_id") != commande.id
                 or unites[0].get("custom_id") != commande.id or unites[0].get("payments")):
             raise ValueError("Cette commande ne peut plus être modifiée.")
@@ -120,7 +120,7 @@ def _modifier_commande(commande, selection, config):
         ])
         resultat = _requete(config, "GET", chemin)
         unites = resultat.get("purchase_units") or []
-        if (resultat.get("id") != identifiant or resultat.get("status") not in {"CREATED", "APPROVED"}
+        if (resultat.get("id") != identifiant or resultat.get("status") not in {"CREATED", "APPROVED", "PAYER_ACTION_REQUIRED"}
                 or len(unites) != 1 or unites[0].get("reference_id") != commande.id
                 or unites[0].get("custom_id") != commande.id or unites[0].get("payments")
                 or (unites[0].get("amount") or {}).get("currency_code") != "EUR"

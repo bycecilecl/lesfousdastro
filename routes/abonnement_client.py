@@ -21,7 +21,8 @@ def proteger():
     if request.endpoint == "abonnement_client.notification_paypal":
         return None  # Signature du fournisseur vérifiée par cette route.
     if utilisateur_connecte() is None:
-        return redirect(url_for("espace_personnel.connexion", suivant="/mon-espace/abonnement"))
+        suivant = request.full_path.rstrip("?") if request.endpoint == "abonnement_client.retour_paypal" else "/mon-espace/abonnement"
+        return redirect(url_for("espace_personnel.connexion", suivant=suivant))
     if request.method == "POST":
         verifier_csrf_espace()
 
@@ -99,6 +100,10 @@ def creer():
         from utils.souscription_espace import creer_commande
         commande = creer_commande(utilisateur_connecte(), request.form.get("conditions") == "oui",
                                  request.form.get("formule", "espace_seul"))
+        if request.form.get("presentation") == "page":
+            from utils.paiement_redirection import preparer_redirection
+            return jsonify(id=commande.fournisseur_commande_id, formule=formule_commande(commande)["code"],
+                           redirect=preparer_redirection(commande))
         return jsonify(id=commande.fournisseur_commande_id, formule=formule_commande(commande)["code"])
     except ValueError as erreur:
         db.session.rollback()
@@ -106,6 +111,59 @@ def creer():
     except Exception:
         db.session.rollback()
         return jsonify(error="La préparation n’a pas abouti. Vérifie ton abonnement avant de recommencer."), 503
+
+
+def _commande_retour_paypal(etat, identifiant):
+    from utils.paiement_redirection import lire_retour
+    utilisateur = utilisateur_connecte()
+    donnees = lire_retour(etat, utilisateur.id)
+    if not identifiant or identifiant != donnees["paypal"]:
+        raise ValueError("La référence du retour PayPal ne correspond pas au paiement préparé.")
+    commande = CommandeAbonnementEspace.query.filter_by(id=donnees["commande"], utilisateur_id=utilisateur.id,
+        offre=OFFRE, sandbox=configuration_paiement()["sandbox"], fournisseur_commande_id=identifiant).first()
+    if commande is None or commande.montant_centimes != donnees["montant"]:
+        raise ValueError("La commande ou son option a changé. Vérifie ton paiement depuis Mon abonnement.")
+    return commande, donnees["montant"]
+
+
+@abonnement_client_bp.route("/abonnement/paypal/retour")
+def retour_paypal():
+    # GET ne capture rien : un POST de même origine et protégé par CSRF suit le retour.
+    if not _stockage_pret():
+        abort(409)
+    etat, identifiant = request.args.get("etat", ""), request.args.get("token", "")
+    try:
+        _commande_retour_paypal(etat, identifiant)
+    except ValueError as erreur:
+        flash(str(erreur), "error")
+        return redirect(url_for("abonnement_client.mon_abonnement"))
+    reponse = Response(render_template("espace_personnel/retour_paypal.html", etat=etat, identifiant=identifiant))
+    reponse.headers["Referrer-Policy"] = "no-referrer"
+    return reponse
+
+
+@abonnement_client_bp.route("/abonnement/paypal/confirmer-retour", methods=["POST"])
+def confirmer_retour_paypal():
+    if not _stockage_pret():
+        abort(409)
+    try:
+        commande, montant = _commande_retour_paypal(request.form.get("etat", ""), request.form.get("orderID", ""))
+        from utils.souscription_espace import verifier_ou_capturer
+        verifier_ou_capturer(commande, capturer=True, montant_attendu=montant)
+        flash("Ton paiement est confirmé et enregistré.", "success")
+    except ValueError as erreur:
+        db.session.rollback()
+        flash(str(erreur), "error")
+    except Exception:
+        db.session.rollback()
+        flash("La confirmation reste à vérifier. Depuis Mon abonnement, utilise « Vérifier mon paiement » ; ne paie pas une seconde fois.", "error")
+    return redirect(url_for("abonnement_client.mon_abonnement"))
+
+
+@abonnement_client_bp.route("/abonnement/paypal/annulation")
+def annuler_paypal():
+    flash("Tu as quitté PayPal. Aucun nouveau paiement n’est lancé. Si tu as validé le règlement, utilise « Vérifier mon paiement ».", "success")
+    return redirect(url_for("abonnement_client.mon_abonnement"))
 
 
 @abonnement_client_bp.route("/abonnement/paypal/capturer", methods=["POST"])
