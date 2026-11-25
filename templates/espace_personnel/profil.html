@@ -42,6 +42,7 @@
 {% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='avatars.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='profil-villes.css', v='20261125') }}">
 {% set valeur_prenom = saisie.get('prenom') if saisie is not none else (profil.prenom if profil else utilisateur.prenom) %}
 {% set valeur_date = saisie.get('date_naissance') if saisie is not none else (profil.date_naissance.isoformat() if profil else '') %}
 {% set valeur_heure = saisie.get('heure_naissance') if saisie is not none else (profil.heure_naissance.strftime('%H:%M') if profil else '') %}
@@ -66,11 +67,11 @@
       <div class="profil-champ large"><label for="prenom">Prénom</label><input id="prenom" name="prenom" value="{{ valeur_prenom }}" maxlength="100" required></div>
       <div class="profil-champ"><label for="date_naissance">Date de naissance</label><input id="date_naissance" name="date_naissance" type="date" value="{{ valeur_date }}" required></div>
       <div class="profil-champ"><label for="heure_naissance">Heure de naissance</label><input id="heure_naissance" name="heure_naissance" type="time" value="{{ valeur_heure }}" required></div>
-      <div class="profil-champ large"><label for="ville_naissance">Ville de naissance</label><input id="ville_naissance" name="ville_naissance" list="suggestions-lieux-profil" autocomplete="off" value="{{ valeur_ville }}" placeholder="Commence à écrire, puis choisis une suggestion" required><datalist id="suggestions-lieux-profil"></datalist></div>
+      <div class="profil-champ large"><label for="ville_naissance">Ville de naissance</label><input id="ville_naissance" name="ville_naissance" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions-lieux-profil" aria-describedby="lieu-statut" autocomplete="off" spellcheck="false" value="{{ valeur_ville }}" placeholder="Écris ta ville, puis clique sur un résultat" required><ul id="suggestions-lieux-profil" class="profil-lieux-suggestions" role="listbox" aria-label="Villes de naissance proposées" hidden></ul></div>
       <input id="latitude" name="latitude" type="hidden" value="{{ valeur_lat }}">
       <input id="longitude" name="longitude" type="hidden" value="{{ valeur_lon }}">
       <input id="fuseau_horaire" name="fuseau_horaire" type="hidden" value="{{ valeur_fuseau }}">
-      <p class="profil-aide" id="lieu-statut">Choisis une ville dans la liste : ses coordonnées et son fuseau seront ajoutés automatiquement.</p>
+      <p class="profil-aide" id="lieu-statut" role="status" aria-live="polite">Choisis une ville dans la liste : ses coordonnées et son fuseau seront ajoutés automatiquement.</p>
       <button class="profil-submit" type="submit">{{ 'Mettre à jour mon profil' if profil else 'Créer mon profil astral' }}</button>
     </form>
     <a class="profil-lien" href="{{ url_for('espace_personnel.ciel_natal', parcours=request.args.get('parcours')) if request.args.get('parcours') in ['abonnement', 'abonnement-beta'] else url_for('espace_personnel.ciel_natal') }}">Voir mon ciel natal et ma carte →</a>
@@ -81,11 +82,11 @@
     <p>Ce lieu sert aux prochains cycles. Il ne change pas ton thème natal.</p>
     <form method="post" class="profil-form" action="{{ url_for('espace_personnel.modifier_ville_cycles', parcours='abonnement') if request.args.get('parcours') == 'abonnement' else url_for('espace_personnel.modifier_ville_cycles') }}">
       <input type="hidden" name="profil_csrf" value="{{ session.get('espace_profil_csrf', '') }}">
-      <div class="profil-champ large"><label for="ville_cycles">Ville de mes cycles</label><input id="ville_cycles" name="ville_cycles" list="suggestions-lieux-cycles" autocomplete="off" value="{{ profil.ville_cycles or '' }}" required><datalist id="suggestions-lieux-cycles"></datalist></div>
+      <div class="profil-champ large"><label for="ville_cycles">Ville de mes cycles</label><input id="ville_cycles" name="ville_cycles" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions-lieux-cycles" aria-describedby="cycles-statut" autocomplete="off" spellcheck="false" value="{{ profil.ville_cycles or '' }}" placeholder="Écris ta ville, puis clique sur un résultat" required><ul id="suggestions-lieux-cycles" class="profil-lieux-suggestions" role="listbox" aria-label="Villes des cycles proposées" hidden></ul></div>
       <input id="latitude_cycles" name="latitude_cycles" type="hidden" value="{{ profil.latitude_cycles if profil.latitude_cycles is not none else '' }}">
       <input id="longitude_cycles" name="longitude_cycles" type="hidden" value="{{ profil.longitude_cycles if profil.longitude_cycles is not none else '' }}">
       <input id="fuseau_cycles" name="fuseau_cycles" type="hidden" value="{{ profil.fuseau_cycles or '' }}">
-      <p class="profil-aide" id="cycles-statut">Choisis une suggestion pour enregistrer les coordonnées et le fuseau.</p>
+      <p class="profil-aide" id="cycles-statut" role="status" aria-live="polite">Choisis une suggestion pour enregistrer les coordonnées et le fuseau.</p>
       <button class="profil-submit" type="submit">Enregistrer la ville de mes cycles</button>
     </form>
   </section>
@@ -176,91 +177,5 @@
 </main>
 {% endblock %}
 {% block scripts %}
-<script>
-(() => {
-  const ville = document.getElementById('ville_naissance');
-  const suggestions = document.getElementById('suggestions-lieux-profil');
-  const latitude = document.getElementById('latitude');
-  const longitude = document.getElementById('longitude');
-  const fuseau = document.getElementById('fuseau_horaire');
-  const statut = document.getElementById('lieu-statut');
-  let resultats = [];
-  let attente;
-  function choisirVille() {
-    const lieu = resultats.find(item => item.label === ville.value);
-    if (!lieu) return;
-    latitude.value = lieu.lat;
-    longitude.value = lieu.lon;
-    fuseau.value = lieu.tzid || '';
-    statut.textContent = lieu.tzid ? `Coordonnées trouvées · ${lieu.tzid}` : 'Fuseau indisponible pour cette ville.';
-  }
-  ville.addEventListener('input', () => {
-    latitude.value = '';
-    longitude.value = '';
-    fuseau.value = '';
-    clearTimeout(attente);
-    const recherche = ville.value.trim();
-    if (recherche.length < 2) return;
-    attente = setTimeout(async () => {
-      try {
-        const reponse = await fetch(`/api/geocode?q=${encodeURIComponent(recherche)}`);
-        if (!reponse.ok) throw new Error('geocode');
-        const donnees = await reponse.json();
-        resultats = donnees.results || [];
-        suggestions.replaceChildren(...resultats.map(item => {
-          const option = document.createElement('option');
-          option.value = item.label;
-          return option;
-        }));
-      } catch (_) {
-        statut.textContent = 'La recherche de ville est momentanément indisponible.';
-      }
-    }, 250);
-  });
-  ville.addEventListener('change', choisirVille);
-  ville.addEventListener('blur', choisirVille);
-  const villeCycles = document.getElementById('ville_cycles');
-  if (!villeCycles) return;
-  const suggestionsCycles = document.getElementById('suggestions-lieux-cycles');
-  const latitudeCycles = document.getElementById('latitude_cycles');
-  const longitudeCycles = document.getElementById('longitude_cycles');
-  const fuseauCycles = document.getElementById('fuseau_cycles');
-  const statutCycles = document.getElementById('cycles-statut');
-  let resultatsCycles = [];
-  let attenteCycles;
-  function choisirVilleCycles() {
-    const lieu = resultatsCycles.find(item => item.label === villeCycles.value);
-    if (!lieu) return;
-    latitudeCycles.value = lieu.lat;
-    longitudeCycles.value = lieu.lon;
-    fuseauCycles.value = lieu.tzid || '';
-    statutCycles.textContent = lieu.tzid ? `Coordonnées trouvées · ${lieu.tzid}` : 'Fuseau indisponible pour cette ville.';
-  }
-  villeCycles.addEventListener('input', () => {
-    latitudeCycles.value = '';
-    longitudeCycles.value = '';
-    fuseauCycles.value = '';
-    clearTimeout(attenteCycles);
-    const recherche = villeCycles.value.trim();
-    if (recherche.length < 2) return;
-    attenteCycles = setTimeout(async () => {
-      try {
-        const reponse = await fetch(`/api/geocode?q=${encodeURIComponent(recherche)}`);
-        if (!reponse.ok) throw new Error('geocode');
-        const donnees = await reponse.json();
-        resultatsCycles = donnees.results || [];
-        suggestionsCycles.replaceChildren(...resultatsCycles.map(item => {
-          const option = document.createElement('option');
-          option.value = item.label;
-          return option;
-        }));
-      } catch (_) {
-        statutCycles.textContent = 'La recherche de ville est momentanément indisponible.';
-      }
-    }, 250);
-  });
-  villeCycles.addEventListener('change', choisirVilleCycles);
-  villeCycles.addEventListener('blur', choisirVilleCycles);
-})();
-</script>
+<script src="{{ url_for('static', filename='profil-villes.js', v='20261125') }}" defer></script>
 {% endblock %}

@@ -1,0 +1,4 @@
+.profil-lieux-suggestions{list-style:none;margin:0;padding:5px;border:1px solid #a6cdd0;border-radius:12px;background:white;max-height:260px;overflow-y:auto;box-shadow:0 8px 20px #123f5d12}
+.profil-lieux-suggestions[hidden]{display:none}
+.profil-lieux-suggestions [role="option"]{padding:12px 14px;margin:0;border-radius:8px;min-height:44px;box-sizing:border-box;cursor:pointer;color:#183f53;font:inherit;line-height:1.5;overflow-wrap:anywhere;touch-action:pan-y}
+.profil-lieux-suggestions [role="option"]:hover,.profil-lieux-suggestions [aria-selected="true"]{background:#e4f5f3;color:#125963;outline:2px solid #168e91;outline-offset:-2px}
