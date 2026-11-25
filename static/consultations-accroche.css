@@ -1,0 +1,11 @@
+.prestations-hero .prestations-intro{max-width:1060px;margin:0 auto;text-align:center}
+.prestations-intro .badge-d-wrap{margin:0 0 30px}
+.prestations-intro .prestations-bandeau{display:inline-block;box-sizing:border-box;max-width:100%;padding:.6rem 1.5rem;border:1px solid #ecd3a1;border-radius:13px;background:#fffdf8;color:#1f628e;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:clamp(1.5rem,3.3vw,2.3rem);font-weight:750;line-height:1.25;letter-spacing:-.025em;transform:rotate(-1.2deg);box-shadow:6px 7px 0 #104c6680,0 14px 32px #0f344329}
+.prestations-hero .prestations-accroche{position:static;display:block;max-width:1060px;width:auto;height:auto;margin:0 auto 24px;padding:0;overflow:visible;clip:auto;white-space:normal;border:0;color:#fff;font-size:clamp(1.85rem,3.6vw,2.75rem);font-weight:650;line-height:1.2;text-wrap:balance}
+.prestations-accroche__amorce{display:block;margin:0 auto 18px;max-width:900px;color:#e3f1f4;font-size:clamp(1.1rem,1.9vw,1.5rem);font-weight:400;letter-spacing:0;line-height:1.6}
+.prestations-accroche__question{display:block}
+.prestations-hero .prestations-intro__description{max-width:780px;margin:0 auto;color:#e6f3f6;font-size:clamp(1rem,1.4vw,1.1rem);line-height:1.8;opacity:1;text-wrap:pretty}
+.prestations-intro .prestations-hero__cta{display:inline-block;max-width:100%;box-sizing:border-box;margin-top:28px;padding:13px 23px;border:1px solid #ecd3a1;border-radius:999px;background:#fffdf8;color:#144a6b;font-size:1rem;font-weight:700;line-height:1.5;text-decoration:none;box-shadow:0 8px 24px #10425b24}
+.prestations-intro .prestations-hero__cta:hover{text-decoration:underline;text-underline-offset:3px}
+.prestations-intro .prestations-hero__cta:focus-visible{outline:3px solid #ffe4b2;outline-offset:5px}
+@media(max-width:600px){.prestations-hero .prestations-accroche{font-size:clamp(1.75rem,6.4vw,2.25rem)}.prestations-intro .badge-d-wrap{margin-bottom:26px}.prestations-intro .prestations-bandeau{padding:.6rem 1.15rem;border-radius:11px;box-shadow:4px 5px 0 #104c6680,0 10px 24px #0f344321}.prestations-accroche__amorce{font-size:1.05rem;margin-bottom:16px}.prestations-intro .prestations-hero__cta{margin-top:24px}}

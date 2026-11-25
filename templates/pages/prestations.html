@@ -566,17 +566,13 @@ body {
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='consultations-accroche.css', v='20261125-bandeau') }}">
 <div class="stars" id="stars"></div>
 
 <div class="prestations-page">
 
     <section class="prestations-hero">
-        <div class="badge-d-wrap">
-            <div class="badge-d">Consultations</div>
-        </div>
-        <h1>Tu as une vie qui semble te convenir sur le papier, mais tu continues de te sentir vide ?</h1>
-        <p>Grâce à ton thème astral, je t'accompagne pour comprendre ce décalage, reconnaître ce dont tu as besoin et explorer ce que tu souhaites changer.</p>
-        <a class="prestations-hero__cta" href="#accompagnement">Voir l'accompagnement</a>
+        {% include 'pages/_accroche_consultations.html' %}
     </section>
 
     <section class="prestations-about">
