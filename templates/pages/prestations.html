@@ -81,29 +81,40 @@ body {
 
 /* Qui suis-je */
 .prestations-about {
-    background: white;
-    border-left: 4px solid var(--teal);
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-    padding: 32px 36px;
-    margin-bottom: 40px;
-    text-align: center;
+    background: #fffdf9;
+    border-left: 3px solid #c6a36a;
+    border-radius: 18px;
+    box-shadow: 0 12px 32px rgba(16, 59, 75, .12);
+    padding: 26px 30px;
+    margin-bottom: 36px;
+    text-align: left;
 }
 .prestations-about p {
-    color: #3a3a3a;
-    font-size: 1.22rem;
-    line-height: 1.8;
-    margin-bottom: 14px;
+    max-width: 900px;
+    margin: 0 auto 12px;
+    color: #46535b;
+    font-size: 1.02rem;
+    line-height: 1.65;
 }
-
+.prestations-about p:last-of-type { margin-bottom: 0; }
 .prestations-about__link {
-    display: inline-block;
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 16px auto 0;
     color: var(--navy);
     font-weight: 600;
     text-decoration: none;
-    font-size: 1.12rem;
+    text-underline-offset: 3px;
+    font-size: .95rem;
+    line-height: 1.5;
 }
 .prestations-about__link:hover { text-decoration: underline; }
+.prestations-about__link:focus-visible { outline: 2px solid #9e742e; outline-offset: 4px; }
+@media (max-width: 600px) {
+    .prestations-about { padding: 22px 20px; }
+    .prestations-about p { font-size: 1rem; }
+}
 
 .prestations-grid {
     display: flex;
