@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "partials/prix_analyse.html" import prix_analyse with context %}
 
 {% block title %}Guide des Analyses Astrologiques | Les Fous d'Astro{% endblock %}
 
@@ -248,6 +249,7 @@ body {
 <div class="stars" id="stars"></div>
 
 <div class="main-content">
+{% include "partials/promotion_analyses.html" %}
     <section class="hero-section">
         <div class="badge-d-wrap">
             <div class="badge-d">✦ Guide des Analyses ✦</div>
@@ -324,7 +326,7 @@ body {
         <div class="analysis-icon">
             <img src="/static/icons/point-astral-ga.webp" alt="" width="400" height="400">
         </div>
-        <h3 class="section-subtitle">✨ Point Astral Essentiel — 25€</h3>
+        <h3 class="section-subtitle">✨ Point Astral Essentiel — {{ prix_analyse("flash_astral") }}</h3>
         <p>Une analyse personnalisée de 4 à 6 pages qui met en lumière les grandes dynamiques de ton thème natal.</p>
         <p>Contrairement à un rapport astrologique classique qui décrit les placements un par un, Point Astral est construit autour de grandes questions : qui es-tu ? Comment fonctionnes-tu émotionnellement ? Quelles sont les fondations qui t'ont construit ? Quels sont les grands axes qui façonnent ta personnalité ?</p>
         <p>Chaque partie croise plusieurs éléments de ton thème afin de t'offrir une lecture cohérente, fluide et facile à comprendre.</p>
@@ -354,7 +356,7 @@ body {
         <div class="analysis-icon">
             <img src="/static/icons/point-astral-ga.webp" alt="" width="400" height="400">
         </div>
-        <h3 class="section-subtitle">🌳 Point Astral – Racines familiales — 42€</h3>
+        <h3 class="section-subtitle">🌳 Point Astral – Racines familiales — {{ prix_analyse("point_astral_famille") }}</h3>
         <p>Le Point Astral – Racines familiales reprend les grandes dynamiques explorées dans le Point Astral Essentiel, dans une version plus approfondie et centrée sur tes fondations émotionnelles et familiales.</p>
         <p>Il explore ton identité, ton monde intérieur, tes grands axes de vie, puis va plus loin dans l’analyse de ton enfance, de ton foyer intérieur, des pôles mère et père, de ta place dans la famille et des schémas transmis qui influencent encore ta vie.</p>
         <p>Cette analyse ne prétend pas raconter objectivement tes parents ni reconstituer ton histoire. Elle croise les indicateurs familiaux de ton thème pour explorer l’empreinte psychologique laissée par ton environnement de construction et la manière dont tu as pu le vivre.</p>
@@ -385,7 +387,7 @@ body {
         <div class="analysis-icon">
             <img src="/static/icons/forces-defis-ga.webp" alt="" width="400" height="400">
         </div>
-        <h3 class="section-subtitle">🎯 Mes Potentiels &amp; Défis — 15€</h3>
+        <h3 class="section-subtitle">🎯 Mes Potentiels &amp; Défis — {{ prix_analyse("forces_defis") }}</h3>
         <p>Une lecture ciblée des ressources sur lesquelles tu peux t'appuyer et des tensions qui demandent davantage de conscience, d'ajustement ou de travail intérieur.</p>
         <p>Le rapport ne passe pas ton thème en revue comme un inventaire. Il hiérarchise les configurations les plus significatives, les replace dans leurs signes et leurs maisons, puis les relie pour faire ressortir les dynamiques qui structurent réellement ton fonctionnement.</p>
 
@@ -412,7 +414,7 @@ body {
          <div class="analysis-icon">
             <img src="/static/icons/profil-amoureux-ga.webp" alt="" width="400" height="400">
         </div>
-        <h3 class="section-subtitle">💕 Mon Profil Amoureux — 25€</h3>
+        <h3 class="section-subtitle">💕 Mon Profil Amoureux — {{ prix_analyse("profil_amoureux") }}</h3>
         <p>Une analyse personnalisée de 5 pages qui explore ta manière d'aimer, ce qui t'attire chez l'autre, ta dynamique de couple et ton rapport à l'intimité.</p>
         <p>Plutôt que de lister des placements isolés, Mon Profil Amoureux croise plusieurs éléments de ton thème (Vénus, Mars, Soleil, Lune, Maison 7, Maison 8, Junon, Chiron...) pour comprendre les schémas qui reviennent : pourquoi tu es attirée par certains profils, comment tu fonctionnes une fois en couple, ce qui se joue dans ton rapport à l'intimité.</p>
 
@@ -439,7 +441,7 @@ body {
         <div class="analysis-icon">
             <img src="/static/icons/analyse-karmique-ga.webp" alt="" width="400" height="400">
         </div>
-        <h3 class="section-subtitle">🔮 Analyse Karmique — 69€</h3>
+        <h3 class="section-subtitle">🔮 Analyse Karmique — {{ prix_analyse("analyse_karmique") }}</h3>
         <p>L'analyse la plus profonde de la gamme : une exploration de 12 pages des schémas que tu rejoues sans t'en rendre compte — mémoires anciennes, blessures actives, dynamiques inconscientes.</p>
         <p>Contrairement aux autres analyses centrées sur qui tu es, Analyse Karmique s'intéresse à ce qui se répète : les nœuds lunaires, les maisons 4/8/12, les rétrogrades, Chiron, la Lune Noire, les interceptions. Chaque module éclaire une facette différente du même fil conducteur, pour t'aider à sortir des automatismes plutôt que de les subir.</p>
 
@@ -464,7 +466,7 @@ body {
 
         <a href="/static/pdfs/Analyse_Karmique_Britney_2026-04-30_15-42.pdf" target="_blank" rel="noopener" class="point-astral-sample">📄 Voir l'Analyse Karmique de Britney Spears'</a>
 
-        <h3 class="section-subtitle">⚡ Point Transits — 19€</h3>
+        <h3 class="section-subtitle">⚡ Point Transits — {{ prix_analyse("flash_transits") }}</h3>
         <p>Une lecture approfondie des dynamiques astrologiques qui traversent une période précise de ta vie. Tu peux explorer le ciel actuel, une période passée ou une date future de ton choix.</p>
         <p>Le rapport met en relation les mouvements des planètes avec ton thème natal : les planètes et angles touchés, les maisons activées et les configurations importantes sont croisés pour faire ressortir le climat dominant, ses manifestations possibles et son évolution au fil des semaines.</p>
 
@@ -489,10 +491,10 @@ body {
 
         <a href="/static/pdfs/Flash_Transits_Britney_Spears_2008-02-01_2026-09-04_16-13-44.pdf" target="_blank" rel="noopener" class="point-astral-sample">📄 Voir le Point Transits de Britney Spears — février 2008</a>
 
-        <h3 class="section-subtitle" id="revolution-solaire">☀️ Ma Révolution Solaire — {{ rs_price_label }}€</h3>
+        <h3 class="section-subtitle" id="revolution-solaire">☀️ Ma Révolution Solaire — {{ prix_analyse("revolution_solaire") }}</h3>
         <p>Chaque anniversaire ouvre un nouveau thème annuel. Ce rapport étudie d'abord ta révolution solaire, puis ses liens avec ton thème natal et les périodes où les transits peuvent en réveiller les grands thèmes.</p>
         <p>Tu pourras choisir l'année étudiée et le lieu de ton retour solaire. Un formulaire facultatif te permettra aussi de donner quelques repères sur ce que tu vis pour contextualiser la lecture.</p>
-        <p><strong>Ma Révolution Solaire est disponible à {{ rs_price_label }}€.</strong> Choisis l’année et le lieu de ton retour solaire pour commander ton rapport.</p>
+        <p><strong>Ma Révolution Solaire est disponible à {{ prix_analyse("revolution_solaire") }}.</strong> Choisis l’année et le lieu de ton retour solaire pour commander ton rapport.</p>
         {% if rs_weekend_offer %}
         <p><strong>Les 17 et 18 octobre : la Révolution Solaire à 42 €, ou le duo Révolution Solaire + Forces et Défis à 50 €.</strong> <a href="/#offres-rs-weekend">Choisir mon offre</a></p>
         {% endif %}

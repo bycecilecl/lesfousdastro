@@ -8,6 +8,13 @@ import requests
 
 pages_bp = Blueprint("pages_bp", __name__)
 
+@pages_bp.app_context_processor
+def injecter_promotion_analyses():
+    from config.products import load_products
+    from config.analysis_promotion import promotion_context
+    return promotion_context(load_products())
+
+
 def verifier_turnstile():
     token = request.form.get("cf-turnstile-response", "").strip()
     secret = os.getenv("TURNSTILE_SECRET_KEY", "").strip()

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "partials/prix_analyse.html" import prix_analyse with context %}
 
 {% block title %}Les Fous d'Astro | Analyses astrologiques personnalisées{% endblock %}
 
@@ -848,6 +849,7 @@ input[type="time"]:focus, input[type="email"]:focus {
 {% include "_sandbox_banner.html" %}
 <div class="stars" id="stars"></div>
 <div class="container">
+{% include "partials/promotion_analyses.html" %}
     <div class="header">
         <img src="{{ url_for('static', filename='images/logo_les_fous_dastro.webp') }}" alt="Les Fous d'Astro" class="logo">
         <div class="badge-d-wrap">
@@ -980,13 +982,13 @@ input[type="time"]:focus, input[type="email"]:focus {
                   <div class="points-astraux-group">
                     <h4 class="points-astraux-title">🔮 Points Astraux</h4>
                     <div class="points-astraux-grid">
-                      <div class="option-card coral" id="flash_astral" onclick="addToCart('flash_astral', 'Point Astral Essentiel', 25, this)">
+                      <div class="option-card coral" id="flash_astral" onclick="addToCart('flash_astral', 'Point Astral Essentiel', {{ analysis_prices['flash_astral']|tojson }}, this)">
                         <span class="icon">
                             <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
                         </span>
                         <h4>Point Astral Essentiel</h4>
                         <p>Les grandes dynamiques de ton thème natal sur 4 à 6 pages</p>
-                        <div class="price">25€</div>
+                        <div class="price">{{ prix_analyse("flash_astral") }}</div>
                         <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                         <span class="status coral">Clique pour sélectionner</span>
                         <div class="card-tooltip">
@@ -997,13 +999,13 @@ input[type="time"]:focus, input[type="email"]:focus {
                         </div>
                     </div>
 
-                      <div class="option-card coral" onclick="addToCart('point_astral_famille', 'Point Astral Racines familiales', 42, this)">
+                      <div class="option-card coral" onclick="addToCart('point_astral_famille', 'Point Astral Racines familiales', {{ analysis_prices['point_astral_famille']|tojson }}, this)">
                         <span class="icon">
                             <img src="/static/icons/point-astral-icon.webp" alt="" width="48" height="48">
                         </span>
                         <h4>Point Astral Racines familiales</h4>
                         <p>Le Point Astral Essentiel en version approfondie, enrichi d’une analyse de ton enfance, de tes racines et de tes dynamiques parentales.</p>
-                        <div class="price">42€</div>
+                        <div class="price">{{ prix_analyse("point_astral_famille") }}</div>
                         <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                         <span class="status coral">Clique pour sélectionner</span>
                         <div class="card-tooltip">
@@ -1018,11 +1020,11 @@ input[type="time"]:focus, input[type="email"]:focus {
                     </div>
                   </div>
 
-                    <div class="option-card featured" onclick="addToCart('forces_defis', 'Mes Potentiels et Défis', 15, this)">
+                    <div class="option-card featured" onclick="addToCart('forces_defis', 'Mes Potentiels et Défis', {{ analysis_prices['forces_defis']|tojson }}, this)">
                         <span class="icon"><img src="/static/icons/forces-defis-icon.webp" alt="" width="120" height="120"></span>
                         <h4>Mes Potentiels et Défis</h4>
                         <p>Découvre tes forces cachées et les obstacles à transformer</p>
-                        <div class="price">15€</div>
+                        <div class="price">{{ prix_analyse("forces_defis") }}</div>
                         <span class="status featured">Clique pour sélectionner</span>
                         <div class="card-tooltip">
                             <strong>Ce que tu reçois</strong>
@@ -1034,11 +1036,11 @@ input[type="time"]:focus, input[type="email"]:focus {
 
                     <input type="hidden" id="product_key" name="product_key" value="flash_astral">
 
-                  <div class="option-card pink" onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', 25, this)">
+                  <div class="option-card pink" onclick="addToCart('profil_amoureux', 'Mon Profil Amoureux', {{ analysis_prices['profil_amoureux']|tojson }}, this)">
                         <span class="icon"><img src="/static/icons/profil-amoureux-icon.webp" alt="" width="120" height="120"></span>
                         <h4>Mon Profil Amoureux</h4>
                         <p>Comprends par qui tu es attiré(e), comment tu fonctionnes en couple, et ce qui se joue dans ton rapport à l'intimité.</p>
-                        <div class="price">25€</div>
+                        <div class="price">{{ prix_analyse("profil_amoureux") }}</div>
                         <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                         <span class="status available">Clique pour sélectionner</span>
                         <div class="card-tooltip">
@@ -1049,11 +1051,11 @@ input[type="time"]:focus, input[type="email"]:focus {
                         </div>
                     </div>
 
-                   <div class="option-card purple" onclick="addToCart('analyse_karmique', 'Analyse Karmique', 69, this)">
+                   <div class="option-card purple" onclick="addToCart('analyse_karmique', 'Analyse Karmique', {{ analysis_prices['analyse_karmique']|tojson }}, this)">
                         <span class="icon"><img src="/static/icons/analyse-karmique-icon.webp" alt="" width="120" height="120"></span>
                         <h4>Analyse Karmique</h4>
                         <p>Explore tes blessures, schémas inconscients et mémoires profondes</p>
-                        <div class="price">69€</div>
+                        <div class="price">{{ prix_analyse("analyse_karmique") }}</div>
                         <div class="clarif-eligible-badge">✉️ Option 3 questions disponible</div>
                         <span class="status available">Clique pour sélectionner</span>
                         <div class="card-tooltip">
@@ -1078,7 +1080,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <p>Découvre les dynamiques astrologiques qui traversent ta période actuelle, ou explore une date passée ou future.</p>
                         </div>
                         <div class="transits-price">
-                            19€
+                            {{ prix_analyse("flash_transits") }}
                             <span class="transits-cta">Choisir ma date</span>
                         </div>
                         <div class="card-tooltip">
@@ -1101,7 +1103,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                             <a class="rs-more" href="/analyses#revolution-solaire" onclick="event.stopPropagation()">Découvrir ce que contient le rapport</a>
                         </div>
                         <div class="transits-price">
-                            {{ rs_price_label }}€
+                            {{ prix_analyse("revolution_solaire") }}
                             <span class="transits-cta">{% if rs_sales_open %}Choisir mon année{% else %}Disponible à partir du 9 octobre{% endif %}</span>
                         </div>
                     </article>
@@ -1115,23 +1117,23 @@ input[type="time"]:focus, input[type="email"]:focus {
                     <div class="packs-grid">
 
                         <div class="pack-card essence-special" onclick="selectPack('essence')" style="border:2px solid #FFD700;">
-                            <div class="pack-badge">ÉCONOMISE 16€</div>
+                            <div class="pack-badge">ÉCONOMISE {{ pack_saving_labels["pack_essence"] }} €</div>
                             <div class="pack-title">✨ Pack Essence</div>
                             <div class="pack-content">✓ Point Astral Essentiel<br>✓ Potentiels &amp; Défis<br>✓ Profil Amoureux</div>
                             <span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">65€</span><br><span class="pack-price-value">49€</span></div></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">{{ pack_total_labels["pack_essence"] }} €</span><br><span class="pack-price-value">{{ analysis_price_labels["pack_essence"] }} €</span></div></div>
                         </div>
                         <div class="pack-card" onclick="selectPack('origines')">
-                            <div class="pack-badge" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">ÉCONOMISE 28€</div>
+                            <div class="pack-badge" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);">ÉCONOMISE {{ pack_saving_labels["pack_origines"] }} €</div>
                             <div class="pack-title">🌑 Pack Origines</div>
                             <div class="pack-content">✓ Point Astral Racines familiales : comprendre d’où tu viens<br>✓ Analyse Karmique : pourquoi tu es comme ça<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">111€</span><br><span class="pack-price-value">83€</span></div></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">{{ pack_total_labels["pack_origines"] }} €</span><br><span class="pack-price-value">{{ analysis_price_labels["pack_origines"] }} €</span></div></div>
                         </div>
                         <div class="pack-card" onclick="selectPack('integral')" style="border:2px solid rgba(192,240,247,0.5);">
-                            <div class="pack-badge" style="background:linear-gradient(135deg,#00a8a8,#1f628e);">ÉCONOMISE 42€</div>
+                            <div class="pack-badge" style="background:linear-gradient(135deg,#00a8a8,#1f628e);">ÉCONOMISE {{ pack_saving_labels["pack_integral"] }} €</div>
                             <div class="pack-title">🌟 Pack Intégral</div>
                             <div class="pack-content">✓ Point Astral Racines familiales<br>✓ Analyse Karmique<br>✓ Profil Amoureux<br>✓ Potentiels &amp; Défis<br><span style="font-size:0.85rem;opacity:0.8;margin-top:8px;display:block;">✉️ Option 3 questions disponible</span></div>
-                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">151€</span><br><span class="pack-price-value">109€</span></div></div>
+                            <div class="pack-price"><div><span style="text-decoration:line-through;color:rgba(255,255,255,0.5);font-size:1rem;">{{ pack_total_labels["pack_integral"] }} €</span><br><span class="pack-price-value">{{ analysis_price_labels["pack_integral"] }} €</span></div></div>
                         </div>
                     </div>
                 </div>
@@ -1223,7 +1225,7 @@ input[type="time"]:focus, input[type="email"]:focus {
             </div>
         </div>
         <div class="analysis-actions">
-            <button class="explore-btn" onclick="choosePointAstralFromFreeAnalysis()">✨ Point Astral Essentiel à 25 €</button>
+            <button class="explore-btn" onclick="choosePointAstralFromFreeAnalysis()">✨ Point Astral Essentiel à {{ analysis_price_labels["flash_astral"] }} €</button>
             <button class="explore-btn" onclick="postponeFreeAnalysis()">Plus tard</button>
         </div>
     </div>
@@ -1328,6 +1330,7 @@ input[type="time"]:focus, input[type="email"]:focus {
     let freeAnalysisId = null;
     let offerFeedbackPending = false;
     let paypalRendered = false;
+    const formatEuro = amount => Number(amount).toLocaleString('fr-FR', {maximumFractionDigits: 2}) + ' €';
     let cart = [];
     let selectedPack = null;
     let psychologyTimer = null;
@@ -1451,7 +1454,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         const card = pendingTransitCard;
         document.getElementById('transitDateModal').style.display = 'none';
         pendingTransitCard = null;
-        addToCart('flash_transits', 'Point Transits', 19, card, {
+        addToCart('flash_transits', 'Point Transits', {{ analysis_prices['flash_transits']|tojson }}, card, {
             transitDateMode: custom ? 'custom' : 'today',
             transitDate: custom ? dateInput.value : ''
         });
@@ -1780,10 +1783,10 @@ input[type="time"]:focus, input[type="email"]:focus {
             return;
         }
         if (!cart.some(item => item.id === 'flash_astral')) {
-            addToCart('flash_astral', 'Point Astral Essentiel', 25, pointAstralCard);
+            addToCart('flash_astral', 'Point Astral Essentiel', {{ analysis_prices['flash_astral']|tojson }}, pointAstralCard);
         }
         removeFromCart('gratuite');
-        showNotification('Point Astral Essentiel ajouté : 25 €', 'success');
+        showNotification('Point Astral Essentiel ajouté : {{ analysis_price_labels["flash_astral"] }} €', 'success');
         proceedToPayment();
     }
 
@@ -1834,7 +1837,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         if (selectedPack) {
             const packDiv = document.createElement('div');
             packDiv.className = 'cart-item';
-            packDiv.innerHTML = `<div><strong>${selectedPack.name}</strong></div><span>${selectedPack.price}€<span class="remove-item" onclick="removePackFromCart()">✕</span></span>`;
+            packDiv.innerHTML = `<div><strong>${selectedPack.name}</strong></div><span>${formatEuro(selectedPack.price)}<span class="remove-item" onclick="removePackFromCart()">✕</span></span>`;
             cartItems.appendChild(packDiv);
             total = selectedPack.price;
         } else {
@@ -1843,7 +1846,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                 itemDiv.className = 'cart-item';
                 const transitPeriod = formatTransitPeriod(item);
                 const retourSolaire = formatRevolutionSolaire(item);
-                itemDiv.innerHTML = `<span>${item.name}${transitPeriod ? `<small style="display:block;color:#666;">Date explorée : ${transitPeriod}</small>` : ''}${retourSolaire ? `<small style="display:block;color:#666;">${retourSolaire}</small>` : ''}</span><span>${item.price === 0 ? 'Gratuit' : item.price + '€'}<span class="remove-item" onclick="removeFromCart('${item.id}')">✕</span></span>`;
+                itemDiv.innerHTML = `<span>${item.name}${transitPeriod ? `<small style="display:block;color:#666;">Date explorée : ${transitPeriod}</small>` : ''}${retourSolaire ? `<small style="display:block;color:#666;">${retourSolaire}</small>` : ''}</span><span>${item.price === 0 ? 'Gratuit' : formatEuro(item.price)}<span class="remove-item" onclick="removeFromCart('${item.id}')">✕</span></span>`;
                 cartItems.appendChild(itemDiv);
                 total += item.price;
             });
@@ -1875,7 +1878,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         const totalDiv = document.createElement('div');
         totalDiv.className = 'cart-item';
         totalDiv.style.fontWeight = '700';
-        totalDiv.innerHTML = `<span>Total</span><span>${total}€</span>`;
+        totalDiv.innerHTML = `<span>Total</span><span>${formatEuro(total)}</span>`;
         cartItems.appendChild(totalDiv);
         updateSubmitButtonText();
     }
@@ -1899,9 +1902,9 @@ input[type="time"]:focus, input[type="email"]:focus {
             showNotification('Retire d’abord la Révolution solaire pour choisir un pack.', 'warning'); return;
         }
         const packs = {
-            origines: { id: 'pack_origines', name: '🌑 Pack Origines', price: 83, analyses: ['point_astral_famille', 'analyse_karmique'] },
-            essence: { id: 'pack_essence', name: '✨ Pack Essence', price: 49, analyses: ['flash_astral', 'forces_defis', 'profil_amoureux'] },
-            integral: { id: 'pack_integral', name: '🌟 Pack Intégral', price: 109, analyses: ['point_astral_famille', 'analyse_karmique', 'profil_amoureux', 'forces_defis'] }
+            origines: { id: 'pack_origines', name: '🌑 Pack Origines', price: {{ analysis_prices['pack_origines']|tojson }}, analyses: ['point_astral_famille', 'analyse_karmique'] },
+            essence: { id: 'pack_essence', name: '✨ Pack Essence', price: {{ analysis_prices['pack_essence']|tojson }}, analyses: ['flash_astral', 'forces_defis', 'profil_amoureux'] },
+            integral: { id: 'pack_integral', name: '🌟 Pack Intégral', price: {{ analysis_prices['pack_integral']|tojson }}, analyses: ['point_astral_famille', 'analyse_karmique', 'profil_amoureux', 'forces_defis'] }
         };
         const pack = packs[packId];
         if (!pack) return;
@@ -1911,7 +1914,7 @@ input[type="time"]:focus, input[type="email"]:focus {
         selectedPack = pack;
         document.querySelectorAll('.pack-card').forEach(c => c.classList.remove('selected'));
         event.currentTarget.classList.add('selected');
-        showNotification(`✅ ${pack.name} sélectionné : ${pack.price}€`, 'success');
+        showNotification(`✅ ${pack.name} sélectionné : ${formatEuro(pack.price)}`, 'success');
         updateCartDisplay();
         setTimeout(() => {
             const cartSection = document.getElementById('cartSection');
@@ -1977,10 +1980,10 @@ input[type="time"]:focus, input[type="email"]:focus {
         let total = 0;
 
         if (orderData.type === 'pack') {
-            itemsHtml = `<div class="payment-item"><span>${orderData.items[0].name}</span><span>${orderData.items[0].price}€</span></div>`;
+            itemsHtml = `<div class="payment-item"><span>${orderData.items[0].name}</span><span>${formatEuro(orderData.items[0].price)}</span></div>`;
             total = orderData.items[0].price;
         } else {
-            orderData.items.forEach(item => { itemsHtml += `<div class="payment-item"><span>${item.name}</span><span>${item.price}€</span></div>`; total += item.price; });
+            orderData.items.forEach(item => { itemsHtml += `<div class="payment-item"><span>${item.name}</span><span>${formatEuro(item.price)}</span></div>`; total += item.price; });
         }
 
         content.innerHTML = `
@@ -1996,7 +1999,7 @@ input[type="time"]:focus, input[type="email"]:focus {
                     ${itemsHtml}
                     ${orderData.items.some(item => item.id === 'flash_transits') ? `<p style="margin:10px 0 0;color:#5f43b2;"><strong>Date explorée :</strong> ${formatTransitPeriod(orderData.items.find(item => item.id === 'flash_transits'))}</p>` : ''}
                     ${orderData.items.some(item => rsProducts.includes(item.id)) ? `<p style="margin:10px 0 0;color:#b85b0b;"><strong>Retour solaire :</strong> ${orderData.userInfo.anneeRs} à ${orderData.userInfo.lieuRs}</p>` : ''}
-                    <div class="payment-total"><span><strong>Total :</strong></span><span><strong>${total}€</strong></span></div>
+                    <div class="payment-total"><span><strong>Total :</strong></span><span><strong>${formatEuro(total)}</strong></span></div>
                 </div>
             </div>`;
 

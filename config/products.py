@@ -1,5 +1,6 @@
  # config/products.py
 import os
+from config.analysis_promotion import apply_analysis_promotion
 from config.revolution_solaire_launch import offre_weekend_active, ventes_ouvertes
 
 PACK_RS_FORCES_DEFIS = "pack_rs_forces_defis"
@@ -141,7 +142,7 @@ def get_product(key):
         return None
     if key == "revolution_solaire" and offre_weekend_active():
         return {**product, "price_cents": 4200}
-    return product
+    return apply_analysis_promotion(key, product)
 
 
 def presentation_offre_rs():

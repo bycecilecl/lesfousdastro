@@ -1,0 +1,16 @@
+{% if analysis_promo_active %}
+<aside aria-label="Offre sur les analyses" style="position:relative;z-index:1;max-width:1100px;margin:20px auto;padding:20px;border:2px solid #d4af37;border-radius:16px;background:#153f5c;color:#fff;text-align:center;font-size:1rem;line-height:1.6;box-sizing:border-box;">
+    <strong style="display:block;font-size:1.3rem;color:#ffe19b;">−20 % sur toutes les analyses à l’unité</strong>
+    Jusqu’au dimanche 29 novembre 2026 à 23 h 59, heure de Paris.<br>
+    Remise automatique. Hors packs, option 3 questions et abonnements.
+</aside>
+<script>
+// Actualise les prix d'une page restée ouverte lorsque l'offre se termine.
+(() => {
+    const end = Date.now() + {{ analysis_promo_remaining_ms|tojson }};
+    const refresh = () => { if (Date.now() >= end) window.location.reload(); };
+    setTimeout(refresh, {{ analysis_promo_remaining_ms|tojson }} + 100);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+})();
+</script>
+{% endif %}
